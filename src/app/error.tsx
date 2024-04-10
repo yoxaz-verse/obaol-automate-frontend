@@ -32,7 +32,7 @@ export default function Error({
             <Card className={cardWrapper()}>
                 <CardBody className={cardBodyWrapper()}>
                     <h1 className={headingWrapper()}>Oops!</h1>
-                    <h2 className={subHeadingWrapper()}>404 - Page Not Found</h2>
+                    <h2 className={subHeadingWrapper()}>404 - Something went wrong</h2>
                     <p className="text-left w-3/4">{errorCardData}</p>
                     <Button onPress={() => reset()} className={`${buttonWrapper()} mt-4`}>Reload</Button>
                 </CardBody>

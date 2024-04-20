@@ -11,7 +11,7 @@ const statusColorMap: Record<string, ChipProps["color"]>  = {
 
 // type User = typeof users[0];
 
-export default function CommonTable({TableData,columns,viewProjectDetails}:TableProps) {
+export default function CommonTable({TableData,columns,viewProjectDetails,verifyActivity}:TableProps) {
     type User = typeof TableData[0];
   const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
     const cellValue = user[columnKey as keyof User];
@@ -43,7 +43,7 @@ export default function CommonTable({TableData,columns,viewProjectDetails}:Table
       case "actions":
         if(user.actions==='Verify'){
           return <div className="flex w-full">
-            <button className="w-[70px] h-[30px] bg-[#3EADEB] rounded-2xl text-white mx-1">Verify</button>
+            <button className="w-[70px] h-[30px] bg-[#3EADEB] rounded-2xl text-white mx-1"  onClick={()=>verifyActivity?verifyActivity(user):null} >Verify</button>
             <button onClick={()=>viewProjectDetails?viewProjectDetails(user):null} className="w-[70px] h-[30px] rounded-2xl flex items-center justify-center bg-[#ECEAEA] border-1 border-[#E6DFDF] text-[#646464]">View <FiEye className="ml-2"/></button>
           </div>
         }

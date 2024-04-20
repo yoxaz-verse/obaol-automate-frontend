@@ -39,6 +39,7 @@ export interface authenticationProps {
       TableData: TableDataInterface[];
       columns: Column[];
       viewProjectDetails?:(data:any)=>void;
+      verifyActivity?:(data:any)=>void;
     }
     export interface Column {
       name: string;
@@ -66,6 +67,21 @@ export interface authenticationProps {
         statusOptions:statusOptions[]
        }
     }
+    export interface ActivityDetailCardProps{
+      data:{
+       projectName:string;
+       projectManager:{
+         name:string,
+         role:string,
+         avatar:string,
+       }
+       actualdate:string,
+       forecastdate:string,
+       targetdate:string,
+       description:string;
+       statusOptions:statusOptions[]
+      }
+   }
     export interface statusOptions{
       key:string;
       text:string;

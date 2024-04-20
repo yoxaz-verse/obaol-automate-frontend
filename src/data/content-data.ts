@@ -211,4 +211,21 @@ export const errorCardData =
           { "key": "paused", "text": "Paused", "color": "text-yellow-500" }
         ]
     }
+    export const activityDetailCard={
+      "projectName": "Activity 1",
+      "projectManager": {
+        "name": "Junior Garcia",
+        "role": "Software Engineer",
+        "avatar": "https://i.pravatar.cc/150?u=a042581f4e29026024d"
+      },
+      "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem recusandae distinctio soluta quia sapiente pariatur molestiae laudantium ducimus deserunt impedit? Modi iure in unde, explicabo autem cumque voluptatibus sint consectetur.",
+      "actualdate":"2021-09-10",
+      "forecastdate":'2021-09-20',
+      "targetdate":'2021-09-30',
+      "statusOptions": [
+        { "key": "complete", "text": "Completed", "color": "text-green-600" },
+        { "key": "incomplete", "text": "Incomplete", "color": "text-red-500" },
+        { "key": "paused", "text": "Paused", "color": "text-yellow-500" }
+      ]
+  }
     export {columns, tableData};

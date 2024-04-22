@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import { FiUser, FiInbox, FiSettings, FiMessageCircle, FiFileText, FiUsers, FiLogOut } from 'react-icons/fi';
-import { RiAdminFill } from "react-icons/ri";
-import Cookies from 'js-cookie';
+import { FiInbox, FiSettings, FiUsers } from 'react-icons/fi';
 import { MdDashboard } from "react-icons/md";
-import { GrUserManager } from "react-icons/gr";
 import { RiBuildingLine } from "react-icons/ri";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
-import { CiMenuBurger } from 'react-icons/ci';
 import { sidebarProps } from '@/data/interface-data';
 const Sidebar = ({tabChange}:sidebarProps) => {
   const [selectedOption, setSelectedOption] = useState('Dashboard');
@@ -15,12 +10,8 @@ const Sidebar = ({tabChange}:sidebarProps) => {
     { name: 'Dashboard', icon: <MdDashboard />, color: selectedOption === 'Dashboard' ? 'text-blue-600' : 'text-[#8E8E93]' },
     { name: 'Projects', icon: <FiUsers />, color: selectedOption === 'Projects' ? 'text-blue-600' : 'text-[#8E8E93]' },
     { name: 'Activity', icon: <FiInbox />, color: selectedOption === 'Activity' ? 'text-blue-600' : 'text-[#8E8E93]' },
-    { name: 'Analytics', icon: <FiSettings />, color: selectedOption === 'Analytics' ? 'text-blue-600' : 'text-[#8E8E93]' },
-    { name: 'Workers', icon: <FiMessageCircle />, color: selectedOption === 'Workers' ? 'text-blue-600' : 'text-[#8E8E93]' } ,
-    { name: 'Customers', icon: <FiFileText />, color: selectedOption === 'Customers' ? 'text-blue-600' : 'text-[#8E8E93]' } ,
-    { name: 'Manager', icon: <GrUserManager />, color: selectedOption === 'Manager' ? 'text-blue-600' : 'text-[#8E8E93]' } ,
-    { name: 'Services', icon: < RiBuildingLine/>, color: selectedOption === 'Services' ? 'text-blue-600' : 'text-[#8E8E93]' } ,
-    { name: 'Admins', icon: <RiAdminFill />, color: selectedOption === 'Admins' ? 'text-blue-600' : 'text-[#8E8E93]' } ,
+    { name: 'Users', icon: <FiSettings />, color: selectedOption === 'Analytics' ? 'text-blue-600' : 'text-[#8E8E93]' },
+    { name: 'Services', icon: <RiBuildingLine />, color: selectedOption === 'Services' ? 'text-blue-600' : 'text-[#8E8E93]' },
 ].filter(option => option !== null);
 const handleOptionClick = (option: string) => {
   setSelectedOption(option);

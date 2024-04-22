@@ -1,11 +1,10 @@
 import { Avatar, Card, Modal, ModalContent, Select, SelectItem } from '@nextui-org/react'
 import React from 'react'
-import { FiEdit } from 'react-icons/fi'
 
 const VerifyActivityModal = ({open,close,activity}:{open:boolean,close:()=>void,activity:any}) => {
   return (
-    <Modal isOpen={open} onClose={()=>close} className='' size='lg'>
-        <ModalContent className='pt-5'>
+    <Modal isOpen={open} onClose={close} className='' size='lg'>
+        <ModalContent className='pt-6'>
             <div className='text-lg font-medium pl-4'>Verify Activity</div>
         <div className='flex flex-col p-5 border-none'>
     <div className='flex justify-between w-full items-center pb-4'>

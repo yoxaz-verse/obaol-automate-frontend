@@ -2,7 +2,7 @@ import axios from "axios";
 import { currentUserToken } from "./localStorageKeys";
 import Cookies from "js-cookie";
 
-export const baseUrlExport = "https://dev.yoxaz.com";
+export const baseUrlExport = "http://localhost:5000/api/v1";
 
 const instance = axios.create({
   baseURL: baseUrlExport,
@@ -17,7 +17,7 @@ const instance = axios.create({
 // Add an interceptor to set the Authorization header before each request
 instance.interceptors.request.use(
   (config) => {
-    const currentUser = Cookies.get("currentUserToken");
+    const currentUser = localStorage.getItem("currentUserToken");
     const token = currentUser;
     // token = localStorage.getItem(currentUser as string)
     if (token) {

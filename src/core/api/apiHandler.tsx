@@ -9,6 +9,7 @@ export const getData = async (url: string, params: any) => {
 
 // create a post request to the API
 export const postData = async (url: string, params: any, data: any) => {
+  console.log(url, params, data);
 
   return await instance.post(url, data, { params });
 };

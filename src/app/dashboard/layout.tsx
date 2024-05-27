@@ -12,23 +12,21 @@ export default function DashboardLayout({
 }) {
     const [currentTab, setCurrentTab] = useState('Dashboard');
     const searchParams = useSearchParams()
-  const search = searchParams.get('role')
+    const search = searchParams.get('role')
     function TabChange(tabName: string) {
         setCurrentTab(tabName);
     }
 
     return (
         <section className="w-full h-full flex">
-            <div className="w-1/5 h-screen hidden lg:block">
-                <Sidebar tabChange={TabChange} />
+            <div className="w-1/6 h-screen hidden lg:block">
+                <Sidebar />
             </div>
-            <div className="w-full md:w-4/5 lg:h-screen overflow-auto">
-            <TopBar username={search?search:'user'} TabChange={TabChange}/>
+            <div className="w-full md:w-4/5 lg:h-screen ">
 
-                <div className="h-full w-full">
-                    {children}
-                    {tabUtil(currentTab,search?search:'superadmin')}
-                </div>
+                {children}
+
+
             </div>
         </section>
     );

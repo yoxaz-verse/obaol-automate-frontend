@@ -9,9 +9,9 @@ import "react-toastify/dist/ReactToastify.css";
 export default function DashboardPage() {
   const searchParams = useSearchParams()
   const search = searchParams.get('role')
-    return (
-        <>
-        
-      </>
-    );
+  return (
+    <>
+
+    </>
+  );
 }

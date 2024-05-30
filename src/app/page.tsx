@@ -6,23 +6,48 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
-  // automatci value change from 0 to 100 in 5 seconds , gradually
-  const [finalDestination, setFinalDestination] = useState("");
-  const [value, setValue] = useState(0);
-  const [loadingComplete, setLoadingComplete] = useState(false);
+  const [finalDestination, setFinalDestination] = useState<string>('');
+  const [value, setValue] = useState<number>(0);
+  const [loadingComplete, setLoadingComplete] = useState<boolean>(false);
 
   useEffect(() => {
     const token = localStorage.getItem("currentUserToken");
     const rememberMeTimeStr = localStorage.getItem("rememberMeTime");
     const rememberMeTime = rememberMeTimeStr ? JSON.parse(rememberMeTimeStr) : null;
 
-    if (!token || (rememberMeTime && rememberMeTime < new Date().getTime())) {
+    console.log("rememberMeTime:", rememberMeTime);
+    console.log("token:", token);
+
+    // Step 1: Check for token
+    if (!token) {
+      console.log("No token found");
+      setValue(10);
       setFinalDestination("Redirecting to login page...");
       setLoadingComplete(true);
+      router.push("/auth");
+      setValue(100);
       return;
+    } else {
+      setValue(10); // Increment to 10% if token exists
     }
 
+    // Step 2: Check for remember me time
+    if (rememberMeTime && rememberMeTime < new Date().getTime()) {
+      console.log("Remember me time expired");
+      setValue(30);
+      setFinalDestination("Redirecting to login page...");
+      setLoadingComplete(true);
+      router.push("/auth");
+      return;
+    } else {
+      setValue(30); // Increment to 30% if remember me time is valid
+    }
+
+    // Step 3: Validate the token with the server
     if (token) {
+      console.log("Token found, fetching user data");
+      setValue(50); // Increment to 50% before starting the fetch call
+
       fetch("http://localhost:5000/api/v1/check-user", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -32,41 +57,26 @@ export default function Home() {
           if (!res.ok) {
             throw new Error("Failed to fetch user data");
           }
+          setValue(70); // Increment to 70% after successfully fetching data
           return res.json();
         })
         .then((data) => {
+          console.log("User data fetched:", data);
           setFinalDestination("Redirecting to dashboard...");
           setLoadingComplete(true);
-          console.log(data);
-
-          router.push(`/dashboard/${data.data.user.Role.roleName.toLowerCase()}`);
+          setValue(100); // Increment to 100% on successful validation
+          router.push(ROUTES.DASHBOARD);
         })
         .catch((error) => {
+          console.log("Error fetching user data");
           console.error(error);
           setFinalDestination("Redirecting to login page...");
           setLoadingComplete(true);
+          setValue(100); // Increment to 100% on error as well
           router.push("/auth");
         });
     }
-
-    const interval = setInterval(() => {
-      setValue((prev) => {
-        const newValue = prev + 1;
-
-        if (newValue >= 100) {
-          clearInterval(interval);
-          if (!loadingComplete) {
-            setFinalDestination("Redirecting to login page...");
-            router.push("/auth");
-          }
-        }
-
-        return newValue;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [router, loadingComplete]);
+  }, [router]);
   return (
     <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-[#F6F8FB]">
       <Card className="w-[240px] h-[240px] border-none bg-gradient-to-br from-blue-500 to-fuchsia-500">

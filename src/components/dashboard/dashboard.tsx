@@ -3,8 +3,7 @@ import DashboardTilesComponent from "./dashboard-tiles-component";
 import DashboardCharts from "./dashboard-charts";
 import DashboardTile from "./dashboard-tile";
 
-const Dashboard = ({ role }: { role: string }) => {
-  console.log(role === "superadmin");
+const Dashboard = () => {
   return (
     <div className="w-full">
       <DashboardTilesComponent />
@@ -14,9 +13,8 @@ const Dashboard = ({ role }: { role: string }) => {
         </div>
         <div className="flex flex-col lg:w-[23%] lg:pt-12">
           <div className="flex flex-col">
-            {(role === 'superadmin' || role === 'customer' || role === 'admin')
-              && (
-                <DashboardTile type="add new" />)}
+            
+                <DashboardTile type="add new" />
           </div>
           <div className="flex flex-col">
             <div className="text-[#5F5F5F] font-medium pt-5">

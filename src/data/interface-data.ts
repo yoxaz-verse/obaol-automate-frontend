@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface authenticationProps {
   isAuthenticated?: boolean;
 }
@@ -24,21 +26,27 @@ export interface sidebarProps {
   tabChange: (tabname: string) => void;
 }
 export interface TableDataInterface {
-  id: number;
-  name: string;
-  role?: string;
-  avatar: string;
-  email: string;
+  createdAt?: string;
+  _id?: string;
+  name?: string;
+  Role?: {
+    roleName?: string
+  },
+  avatar?: string;
+  email?: string;
   team?: string;
   age?: string;
-  status: string;
+  status?: string;
   actions?: string;
 }
 export interface TableProps {
-  TableData: TableDataInterface[];
+  TableData: any[];
   columns: Column[];
   viewProjectDetails?: (data: any) => void;
   verifyActivity?: (data: any) => void;
+  deleteModal?: (data: any) => ReactNode;
+  viewModal?: (data: any) => ReactNode,
+  isLoading?: boolean;
 }
 export interface Column {
   name: string;

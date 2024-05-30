@@ -1,17 +1,30 @@
-"use client"
-import TopBar from "@/components/dashboard/TopBar";
-import DashboardTile from "@/components/dashboard/dashboard-tile";
-import DashboardTilesComponent from "@/components/dashboard/dashboard-tiles-component";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import "react-toastify/dist/ReactToastify.css";
+"use client";
+import TopBar from '@/components/dashboard/TopBar';
+import Dashboard from '@/components/dashboard/dashboard';
+import { getData } from '@/core/api/apiHandler';
+import { authRoutes } from '@/core/api/apiRoutes';
+import { tabUtil } from '@/utils/utils'
+import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react'
 
-export default function DashboardPage() {
-  const searchParams = useSearchParams()
-  const search = searchParams.get('role')
+function Page() {
+  const userData = useQuery({
+    queryKey: ['userData'],
+    queryFn: async () => {
+      return await getData(authRoutes.checkUser, {})
+    }
+  })
+  console.log(userData.data?.data?.data?.user?.Role?.roleName);
+
+  const [currentTab, setCurrentTab] = useState('Dashboard');
+  function TabChange(tabName: string) {
+    setCurrentTab(tabName);
+  }
   return (
-    <>
-
-    </>
-  );
+    <div>
+      <Dashboard  />
+    </div>
+  )
 }
+
+export default Page

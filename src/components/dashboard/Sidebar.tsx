@@ -3,7 +3,7 @@ import { FiInbox, FiSettings, FiUsers } from 'react-icons/fi';
 import { MdDashboard } from "react-icons/md";
 import { RiBuildingLine } from "react-icons/ri";
 import { sidebarProps } from '@/data/interface-data';
-const Sidebar = () => {
+const Sidebar = ({ tabChange }: sidebarProps) => {
   const [selectedOption, setSelectedOption] = useState('Dashboard');
   const [isSuperAdmin, setIsSuperAdmin] = useState(true);
   const sidebarOptions = [
@@ -16,6 +16,7 @@ const Sidebar = () => {
   const handleOptionClick = (option: string) => {
     setSelectedOption(option);
     console.log(option);
+    tabChange(option);
   }
   return (
     <>

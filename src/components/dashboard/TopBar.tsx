@@ -7,9 +7,11 @@ import { GrNotification, GrSearch, GrUserManager } from 'react-icons/gr'
 import { MdDashboard } from 'react-icons/md'
 import { RiAdminFill, RiBuildingLine } from 'react-icons/ri'
 import UnderDevelopment from '../hashed/under-development'
+import { useRouter } from 'next/navigation'
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const [selectedOption, setSelectedOption] = useState('Dashboard');
+  const router = useRouter();
   const [isSuperAdmin, setIsSuperAdmin] = useState(true);
   const sidebarOptions = [
     { name: 'Dashboard', icon: <MdDashboard />, color: selectedOption === 'Dashboard' ? 'text-blue-600' : '' },
@@ -78,11 +80,10 @@ const TopBar = ({ username, role }: TopbarProps) => {
               as="button"
               avatarProps={{
                 isBordered: true,
-                src: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
               }}
               className="transition-transform"
-              description={username}
-              name={role}
+              description={role}
+              name={username}
             />
           </DropdownTrigger>
           <DropdownMenu aria-label="User Actions" variant="flat">
@@ -90,7 +91,10 @@ const TopBar = ({ username, role }: TopbarProps) => {
               <p className="font-bold">Signed in as</p>
               <p className="font-bold">{username}</p>
             </DropdownItem>
-            <DropdownItem key="logout" color="danger">
+            <DropdownItem key="logout" color="danger" onClick={() => {
+              localStorage.removeItem('currentUserToken');
+              router.push('/auth');
+            }}>
               Log Out
             </DropdownItem>
           </DropdownMenu>

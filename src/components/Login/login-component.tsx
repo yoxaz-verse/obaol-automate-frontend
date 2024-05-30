@@ -25,8 +25,6 @@ const LoginComponent = ({ url }: adminLogin) => {
     onSuccess: (data) => {
       // Cookies.set("currentUserToken", data.data.data.token);
       // Cookies.set("SuperAdmin",data.data.data.admin.isSuperAdmin)
-      console.log(data.data);
-      alert("Login Successful");
       localStorage.setItem("currentUserToken", data.data.token)
       if (remberMe) {
         // set time to 10days
@@ -40,7 +38,7 @@ const LoginComponent = ({ url }: adminLogin) => {
       });
 
       // redirect();
-      router.push(ROUTES.DASHBOARD + data.data.role.roleName.toLowerCase());
+      router.push(ROUTES.DASHBOARD);
     },
     onError: (error: any) => {
 

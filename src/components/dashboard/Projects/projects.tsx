@@ -11,7 +11,7 @@ import NewLocationForm from "./new-location";
 import LocationViewModal from "@/components/Modals/location-view";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
-import { locationRoutes } from "@/core/api/apiRoutes";
+import { locationRoutes, statusRoutes, subStatusRoutes, userRoutes } from "@/core/api/apiRoutes";
 import CommonDeleteModal from "@/components/Modals/Common-delete-modal";
 
 const Projects = ({ role }: { role: string }) => {
@@ -28,6 +28,8 @@ const Projects = ({ role }: { role: string }) => {
       return await getData(locationRoutes.getAll, {})
     },
   });
+
+  
 
 
 

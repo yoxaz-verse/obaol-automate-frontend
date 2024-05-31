@@ -51,19 +51,5 @@ export const tabUtil = (tab: string, user: string) => {
   else if (tab === 'Users') {
     return <Users role={user} />;
   }
-  else if (tab === 'Workers') {
-    return <>Welcome to Workers Page</>;
-  }
-  else if (tab === 'Customers') {
-    return <>Welcome to Customers Page</>;
-  }
-  else if (tab === 'Manager') {
-    return <>Welcome to Manager Page</>;
-  }
-  else if (tab === 'Services') {
-    return <>Welcome to Services Page</>;
-  }
-  else if (tab === 'Admins') {
-    return <>Welcome to Admins Page</>;
-  }
+
 }

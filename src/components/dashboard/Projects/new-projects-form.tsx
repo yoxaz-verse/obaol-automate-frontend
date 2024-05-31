@@ -1,17 +1,24 @@
 "use client"
 import { queryClient } from '@/app/provider'
 import { getData, postData, postMultipart } from '@/core/api/apiHandler'
-import { locationRoutes, userRoutes, subStatusRoutes } from '@/core/api/apiRoutes'
 import { showToastMessage } from '@/utils/utils'
 import { Card, CardBody, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { authRoutes, locationRoutes, projectRoutes, statusRoutes, subStatusRoutes, userRoutes } from "@/core/api/apiRoutes";
 
 const NewProjectsForm = () => {
 
   const [imageURL, setImageURL] = React.useState('/upload_image.jpg' as string)
   const [locationImage, setLocationImage] = React.useState<any>()
+  const [choosenLocation, setChoosenLocation] = React.useState<any>()
+  const [choosenStatus, setChoosenStatus] = React.useState<any>()
+  const [generatedCustomId, setGeneratedCustomId] = React.useState<any>()
+
+
+
+
   const locationData = useQuery({
     queryKey: ['locationData'],
     queryFn: async () => {
@@ -19,11 +26,18 @@ const NewProjectsForm = () => {
     },
   });
 
+  const userData = useQuery({
+    queryKey: ['userData'],
+    queryFn: async () => {
+      return await getData(authRoutes.checkUser, {})
+    },
+  });
+
   // statusData
   const statusData = useQuery({
     queryKey: ['statusData'],
     queryFn: async () => {
-      return await getData(locationRoutes.getAll, {})
+      return await getData(statusRoutes.getAll, {})
     },
   });
 
@@ -31,7 +45,7 @@ const NewProjectsForm = () => {
   const subStatusData = useQuery({
     queryKey: ['subStatusData'],
     queryFn: async () => {
-      return await getData(subStatusRo, {})
+      return await getData(subStatusRoutes.getAll, {})
     },
   });
 
@@ -44,31 +58,31 @@ const NewProjectsForm = () => {
     }
     reader.readAsDataURL(file)
   }
+
   const userByRoleDataCustomer = useQuery({
     queryKey: ['userByRoleData', "Customer"],
     queryFn: async () => {
       return await getData(userRoutes.getByRole + "Customer", {})
     }
   })
-  const [statusId, setstatusId] = useState(null);
   const userByRoleDataManager = useQuery({
     queryKey: ['userByRoleData', "Manager"],
     queryFn: async () => {
       return await getData(userRoutes.getByRole + "Manager", {})
     }
   })
-  const addLocation = useMutation({
+  const projectAddMutation = useMutation({
     mutationFn: async (data: any) => {
-      return postMultipart(locationRoutes.getAll, {}, data)
+      return postMultipart(projectRoutes.create, {}, data)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['locationData']
+        queryKey: ['projectData']
       })
-      alert('Location Created Successfully')
+      alert('Project Created Successfully')
       showToastMessage({
         type: "success",
-        message: "Location Created Successfully",
+        message: "Project Created Successfully",
         position: "top-right",
       });
     },
@@ -91,41 +105,46 @@ const NewProjectsForm = () => {
 
     // fetch according the name attribute
     const data = {
-      name: (inputs[0] as HTMLInputElement).value,
+      title: (inputs[0] as HTMLInputElement).value,
       description: (inputs[1] as HTMLInputElement).value,
-      url: (inputs[2] as HTMLInputElement).value,
-      nation: (inputs[3] as HTMLInputElement).value,
-      city: (inputs[4] as HTMLInputElement).value,
-      lat: (inputs[5] as HTMLInputElement).value,
-      long: (inputs[6] as HTMLInputElement).value,
-      codes: (inputs[7] as HTMLInputElement).value,
-      region: (inputs[8] as HTMLInputElement).value,
-      province: (inputs[9] as HTMLInputElement).value,
-      owner: (inputs[10] as HTMLInputElement).value,
-      managerId: (inputs[11] as HTMLInputElement).value,
-      customerId: (inputs[12] as HTMLInputElement).value,
+      budget: (inputs[2] as HTMLInputElement).value,
+      location: (inputs[3] as HTMLInputElement).value,
+      customId: (inputs[4] as HTMLInputElement).value,
+      status: (inputs[5] as HTMLInputElement).value,
+      subStatus: (inputs[6] as HTMLInputElement).value,
+      managerId: (inputs[7] as HTMLInputElement).value,
+      customerId: (inputs[8] as HTMLInputElement).value,
+      adminId: (inputs[9] as HTMLInputElement).value
     }
 
     const formData = new FormData();
-    formData.append('name', data.name)
+    formData.append('title', data.title)
     formData.append('description', data.description)
-    formData.append('url', data.url)
-    formData.append('nation', data.nation)
-    formData.append('city', data.city)
-    formData.append('lat', data.lat)
-    formData.append('long', data.long)
-    formData.append('codes', data.codes)
-    formData.append('region', data.region)
-    formData.append('province', data.province)
-    formData.append('owner', data.owner)
+    formData.append('budget', data.budget)
+    formData.append('Location', data.location)
+    formData.append('customId', data.customId)
+    formData.append('status', data.status)
+    formData.append('subStatus', data.subStatus)
     formData.append('managerId', data.managerId)
     formData.append('customerId', data.customerId)
     formData.append('image', locationImage)
+    formData.append('adminId', data.adminId)
 
-    addLocation.mutate(formData)
+    projectAddMutation.mutate(formData)
     setImageURL('/upload_image.jpg')
     setLocationImage(null)
   }
+
+  useEffect(() => {
+    if (choosenLocation) {
+
+      const location = locationData.data?.data.data.find((data: any) => data._id === choosenLocation)
+      if (location) {
+
+        setGeneratedCustomId(location.name)
+      }
+    }
+  }, [choosenLocation, locationData])
   return (
 
     <Card>
@@ -157,39 +176,55 @@ const NewProjectsForm = () => {
                 variant='underlined'
                 name="location"
                 placeholder='Assign Location'
+                onChange={(e) => setChoosenLocation(e.target.value)}
               >
                 {
-                  userByRoleDataManager.data?.data.data.map((data: any) => {
+                  locationData.data?.data.data.map((data: any) => {
                     return <SelectItem key={data._id}>{data.name}</SelectItem>
                   })
                 }
               </Select>
+              {/* readOnly Input */}
+              <Input
+                placeholder="CustomId"
+                className='w-full m-2'
+                variant='underlined'
+                name='customId'
+                value={generatedCustomId}
+              />
               <Select
                 className='w-full m-2'
                 variant='underlined'
                 name="status"
                 placeholder='Assign Status'
+                onChange={(e) => {
+                  alert(e.target.value)
+                  setChoosenStatus(e.target.value)
+                }}
               >
                 {
-                  userByRoleDataManager.data?.data.data.map((data: any) => {
-                    return <SelectItem key={data._id}>{data.name}</SelectItem>
+                  statusData.data?.data.data.map((data: any) => {
+                    return <SelectItem key={data._id}>{data.title}</SelectItem>
                   })
                 }
               </Select>
-              {statusId && (
-                <Select
-                  className='w-full m-2'
-                  variant='underlined'
-                  name="status"
-                  placeholder='Assign Sub Status'
-                >
-                  {
-                    userByRoleDataManager.data?.data.data.map((data: any) => {
-                      return <SelectItem key={data._id}>{data.name}</SelectItem>
-                    })
-                  }
-                </Select>
-              )}
+
+              <Select
+                className='w-full m-2'
+                variant='underlined'
+                name="status"
+                placeholder='Assign Sub Status'
+                disabled={!choosenStatus}
+              >
+                {
+                  subStatusData.data?.data.data.filter(
+                    (data: any) => data.status === choosenStatus
+                  ).map((data: any) => {
+                    return <SelectItem key={data._id}>{data.title}</SelectItem>
+                  })
+                }
+              </Select>
+
               <Select
                 className='w-full m-2'
                 variant='underlined'
@@ -214,6 +249,8 @@ const NewProjectsForm = () => {
                   })
                 }
               </Select>
+              {/* hiddenInput */}
+              <input type='hidden' name='admin' value={userData.data?.data?.data?.user?._id} />
               <div className='w-full flex items-center justify-center my-3'><button className='w-[150px] bg-[#3EADEB] rounded-3xl text-white p-3' type='submit'>Create</button></div>
             </form>
           </div>

@@ -151,7 +151,7 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody items={items} isLoading={isLoading} loadingContent={<Spinner color="secondary" label="Loading..." />} >
+      <TableBody items={items}>
         {(items: any) => (
           <TableRow key={items._id}>
             {(columnKey) => <TableCell><>{renderCell(items, columnKey)}</></TableCell>}

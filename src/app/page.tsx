@@ -17,8 +17,6 @@ export default function Home() {
 
     console.log("rememberMeTime:", rememberMeTime);
     console.log("token:", token);
-
-    // Step 1: Check for token
     if (!token) {
       console.log("No token found");
       setValue(10);
@@ -28,10 +26,10 @@ export default function Home() {
       setValue(100);
       return;
     } else {
-      setValue(10); // Increment to 10% if token exists
+      setValue(10);
     }
 
-    // Step 2: Check for remember me time
+
     if (rememberMeTime && rememberMeTime < new Date().getTime()) {
       console.log("Remember me time expired");
       setValue(30);
@@ -40,13 +38,13 @@ export default function Home() {
       router.push("/auth");
       return;
     } else {
-      setValue(30); // Increment to 30% if remember me time is valid
+      setValue(30);
     }
 
-    // Step 3: Validate the token with the server
+
     if (token) {
       console.log("Token found, fetching user data");
-      setValue(50); // Increment to 50% before starting the fetch call
+      setValue(50);
 
       fetch("http://localhost:5000/api/v1/check-user", {
         headers: {
@@ -57,14 +55,13 @@ export default function Home() {
           if (!res.ok) {
             throw new Error("Failed to fetch user data");
           }
-          setValue(70); // Increment to 70% after successfully fetching data
-          return res.json();
+          setValue(70); return res.json();
         })
         .then((data) => {
           console.log("User data fetched:", data);
           setFinalDestination("Redirecting to dashboard...");
           setLoadingComplete(true);
-          setValue(100); // Increment to 100% on successful validation
+          setValue(100);
           router.push(ROUTES.DASHBOARD);
         })
         .catch((error) => {
@@ -72,7 +69,7 @@ export default function Home() {
           console.error(error);
           setFinalDestination("Redirecting to login page...");
           setLoadingComplete(true);
-          setValue(100); // Increment to 100% on error as well
+          setValue(100);
           router.push("/auth");
         });
     }
@@ -102,7 +99,6 @@ export default function Home() {
             variant="bordered"
           >
             {
-              // for every 10 value, we show a different message
               value < 10
                 ? "Starting..."
                 : value < 20

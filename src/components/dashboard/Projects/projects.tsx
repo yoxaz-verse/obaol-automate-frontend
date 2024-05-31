@@ -22,9 +22,6 @@ const Projects = ({ role }: { role: string }) => {
     setProject(data);
   }
 
-  // Corrected initialization of data as an empty array
-  const [data, setData] = useState([]);
-
   const locationData = useQuery({
     queryKey: ['locationData'],
     queryFn: async () => {

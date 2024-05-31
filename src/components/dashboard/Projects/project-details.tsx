@@ -8,25 +8,25 @@ import ManagerActivityDetailsComponent from './manager-activity-details'
 import WorkerAnalyticsComponent from './worker-analytics';
 import AddNewActivityModal from './add-new-activity-modal';
 
-const ProjectDetails = ({data}:ProjectDetailProps) => {
+const ProjectDetails = ({ data }: ProjectDetailProps) => {
   return (
     <>
-    <div className='w-full flex flex-col'>
-      <ProjectDetailProgressComponent/>
-      <ProjectDetailComponent/>
-      <div className='w-full justify-between flex pt-10 pb-2 items-center'>
-      <div className='font-bold text-xl '>Activities List</div>
-      <AddNewActivityModal/>
-      </div>
-      <div className='mb-4'>
-      <CommonTable
-          TableData={tableData}
-          columns={columns}
-        />
+      <div className='w-full flex flex-col'>
+        <ProjectDetailProgressComponent />
+        <ProjectDetailComponent />
+        <div className='w-full justify-between flex pt-10 pb-2 items-center'>
+          <div className='font-bold text-xl '>Activities List</div>
+          <AddNewActivityModal />
         </div>
-        <ManagerActivityDetailsComponent/>
-        <WorkerAnalyticsComponent/>
-    </div>
+        <div className='mb-4'>
+          <CommonTable
+            TableData={tableData}
+            columns={columns}
+          />
+        </div>
+        <ManagerActivityDetailsComponent />
+        <WorkerAnalyticsComponent />
+      </div>
     </>
   )
 }

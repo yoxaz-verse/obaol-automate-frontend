@@ -2,7 +2,7 @@ import axios from "axios";
 import { currentUserToken } from "./localStorageKeys";
 import Cookies from "js-cookie";
 
-export const baseUrlExport = "https://activity-tracking-backend-m5o1.onrender.com/api/v1";
+export const baseUrlExport = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const instance = axios.create({
   baseURL: baseUrlExport,

@@ -15,6 +15,7 @@ const nextConfig = {
                 pathname: '/upload/**',
             }
         ],
+        domains: ['localhost', 'activity-tracking-backend-m5o1.onrender.com'],
     },
 };
 

@@ -30,9 +30,9 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
         );
       case "image":
         return (
-          <div className="flex items-center justify-center">
+          <div className="">
             <Image src={
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload/${user.imageId.imageName}`
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload/${user?.imageId?.imageName}`
             } alt="image" width={100} height={100} className="w-[50px] h-[50px] rounded-full" />
           </div>
         );

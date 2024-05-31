@@ -17,6 +17,7 @@ const LoginComponent = ({ url }: adminLogin) => {
   const [remberMe, setRemberMe] = useState(false);
   const isInvalidEmail = useEmailValidation(email);
   const toggleVisibility = () => setIsVisible(!isVisible);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const loginAdmin = useMutation({
     mutationFn: (data: any) => {
@@ -39,14 +40,17 @@ const LoginComponent = ({ url }: adminLogin) => {
 
       // redirect();
       router.push(ROUTES.DASHBOARD);
+      setIsLoading(false);
     },
     onError: (error: any) => {
+      setIsLoading(false);
 
       showToastMessage({ type: 'error', message: error.response.data.message, position: 'top-right' })
     },
   });
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
     const data = {
       email: email,
       password: e.currentTarget.password.value,
@@ -117,8 +121,10 @@ const LoginComponent = ({ url }: adminLogin) => {
           className="text-white w-full mt-4 flex justify-center rounded bg-[#117DF9] py-2"
           color="primary"
           type="submit"
+          disabled={isLoading}
+          isLoading={isLoading}
         >
-          Log In
+          {isLoading ? 'Loading...' : 'Login'}
         </Button>
       </form>
       <div className="flex justify-evenly w-11/12 items-center py-3">

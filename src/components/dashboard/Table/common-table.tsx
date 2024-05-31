@@ -4,6 +4,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, 
 import { FiCheck, FiDelete, FiEdit, FiEye } from "react-icons/fi"; import { TableProps } from "@/data/interface-data";
 import { TiInputChecked } from "react-icons/ti";
 import Image from "next/image";
+import { locationRoutes } from "@/core/api/apiRoutes";
 const statusColorMap: Record<string, ChipProps["color"]> = {
   active: "success",
   paused: "danger",
@@ -12,7 +13,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 
 // type User = typeof users[0];
 
-export default function CommonTable({ TableData, columns, viewProjectDetails, verifyActivity, viewModal, deleteModal, isLoading = true }: TableProps) {
+export default function CommonTable({ TableData, columns, viewProjectDetails, verifyActivity, viewModal, deleteModal, deleteData, isLoading = true }: TableProps) {
   type User = typeof TableData[0];
   const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
     const cellValue = user[columnKey as keyof User];
@@ -99,7 +100,14 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
             <Tooltip color="danger" content="Delete user">
               <span className="text-lg text-danger cursor-pointer active:opacity-50">
                 {
-                  deleteModal ? deleteModal(user) : null
+                  deleteModal ? deleteModal({
+                    _id: user._id,
+                    type: deleteData?.type,
+                    name: user.name ?? user._id,
+                    endpoint: deleteData?.endpoint,
+                    key: deleteData?.key
+
+                  }) : null
                 }
               </span>
             </Tooltip>
@@ -109,7 +117,7 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
       default:
         return cellValue;
     }
-  }, [deleteModal, verifyActivity, viewModal, viewProjectDetails]);
+  }, [deleteData?.endpoint, deleteData?.key, deleteData?.type, deleteModal, verifyActivity, viewModal, viewProjectDetails]);
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 4;
 

@@ -12,6 +12,7 @@ import LocationViewModal from "@/components/Modals/location-view";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { locationRoutes } from "@/core/api/apiRoutes";
+import CommonDeleteModal from "@/components/Modals/Common-delete-modal";
 
 const Projects = ({ role }: { role: string }) => {
   const [projectdetails, setProjectDetails] = useState(false);
@@ -31,23 +32,8 @@ const Projects = ({ role }: { role: string }) => {
     },
   });
 
-  const [transformedArr, setTransformedArr] = useState([]);
 
-  useEffect(() => {
-    if (locationData.data?.data?.data) {
-      const transformedData = locationData.data.data.data.map((obj: any) => {
-        const newObj = {};
-        Object.entries(obj).forEach(([key, value]) => {
-          console.log(key, value);
-        });
-        return newObj;
-      });
-      if (JSON.stringify(transformedData) !== JSON.stringify(transformedArr)) {
-        setTransformedArr(transformedData);
-      }
-    }
-  }, [locationData, transformedArr]);
-  console.log(transformedArr);
+
   const locationColumns = [
     { name: "NAME", uid: "name" },
     { name: "IMAGE", uid: "image" },
@@ -84,11 +70,17 @@ const Projects = ({ role }: { role: string }) => {
                 isLoading={locationData.isLoading}
                 columns={locationColumns}
                 viewModal={(data: any) => {
-                  setData(data);
                   return <LocationViewModal data={data} />
                 }}
+                deleteData={
+                  {
+                    endpoint: locationRoutes.delete,
+                    key: ["locationData"],
+                    type: "location"
+                  }
+                }
                 deleteModal={(data: any) => {
-                  return <></>
+                  return <CommonDeleteModal data={data} />
                 }}
               />
               {(role === "Super_Admin" || role === "Admin") && (

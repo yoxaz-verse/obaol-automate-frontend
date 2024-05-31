@@ -1,3 +1,4 @@
+import { deleteData } from "@/core/api/apiHandler";
 import { ReactNode } from "react";
 
 export interface authenticationProps {
@@ -47,6 +48,11 @@ export interface TableProps {
   deleteModal?: (data: any) => ReactNode;
   viewModal?: (data: any) => ReactNode,
   isLoading?: boolean;
+  deleteData?: {
+    endpoint: string;
+    key: any[];
+    type: string;
+  }
 }
 export interface Column {
   name: string;

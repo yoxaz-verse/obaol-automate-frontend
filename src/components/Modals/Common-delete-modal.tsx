@@ -8,33 +8,36 @@ import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 
 type field = {
-        name :string,
-        value : string,
+  name: string,
+  value: string,
 }
 
 interface CommonDeleteModalProps {
-  _id: string,
-  type : string,
-  name: string,
-  role: string,
-  endpoint : string,
-  fields : any,
+  data: {
+    _id: string,
+    type: string,
+    name: string,
+    role: string,
+    endpoint: string,
+    key: any[],
+  }
 }
 
 export default function CommonDeleteModal(props: CommonDeleteModalProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const deleteUser = useMutation({
+  const deleteMuation = useMutation({
     mutationFn: async (data: any) => {
-      return deleteData(props.endpoint + data._id, {})
+      return deleteData(props.data.endpoint + data._id, {})
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['userByRoleData', props.role]
+        queryKey: props.data.key
       }
       )
+      alert(`${props.data.type} Deleted Successfully`)
       showToastMessage({
         type: "success",
-        message: "User Deleted Successfully",
+        message: `${props.data.type} Deleted Successfully`,
         position: "top-right",
       });
     },
@@ -55,12 +58,12 @@ export default function CommonDeleteModal(props: CommonDeleteModalProps) {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Delete {props.type}</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Delete {props.data.type}</ModalHeader>
               <ModalBody>
                 <p>Are you sure you want to delete </p>
-                {props.fields.map((field : any,key:any) => (
-                  <h3 key={key} className="font-bold">{field.label}</h3>
-                ))}
+                {
+                  props.data.name
+                }
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" variant="light" onPress={onClose}>
@@ -73,7 +76,7 @@ export default function CommonDeleteModal(props: CommonDeleteModalProps) {
                   color="danger"
                 >
                   <Button color="danger" onDoubleClick={() => {
-                    deleteUser.mutate({ _id: props._id })
+                    deleteMuation.mutate({ _id: props.data._id })
                     onClose()
                   }}>
                     Delete

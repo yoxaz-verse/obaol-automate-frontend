@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import CommonTable from "../Table/common-table";
 import { columns, tableData } from "@/data/content-data";
@@ -34,19 +35,19 @@ const Projects = ({ role }: { role: string }) => {
 
   useEffect(() => {
     if (locationData.data?.data?.data) {
-      const transformedData = locationData.data.data.data.map((obj : any) => {
+      const transformedData = locationData.data.data.data.map((obj: any) => {
         const newObj = {};
         Object.entries(obj).forEach(([key, value]) => {
           console.log(key, value);
         });
-
         return newObj;
       });
-
-      setTransformedArr(transformedData);
+      if (JSON.stringify(transformedData) !== JSON.stringify(transformedArr)) {
+        setTransformedArr(transformedData);
+      }
     }
-  }, [locationData]);
-
+  }, [locationData, transformedArr]);
+  console.log(transformedArr);
   const locationColumns = [
     { name: "NAME", uid: "name" },
     { name: "IMAGE", uid: "image" },
@@ -86,7 +87,7 @@ const Projects = ({ role }: { role: string }) => {
                   setData(data);
                   return <LocationViewModal data={data} />
                 }}
-                deleteModal={(data : any) => {
+                deleteModal={(data: any) => {
                   return <></>
                 }}
               />

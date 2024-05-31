@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CommonTable from "../Table/common-table";
 import { columns, tableData } from "@/data/content-data";
 import NewProjectsForm from "./new-projects-form";
@@ -13,7 +12,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { locationRoutes } from "@/core/api/apiRoutes";
 
-
 const Projects = ({ role }: { role: string }) => {
   const [projectdetails, setProjectDetails] = useState(false);
   const [project, setProject] = useState({ id: '123' });
@@ -22,12 +20,32 @@ const Projects = ({ role }: { role: string }) => {
     setProject(data);
   }
 
+  // Corrected initialization of data as an empty array
+  const [data, setData] = useState([]);
+
   const locationData = useQuery({
     queryKey: ['locationData'],
     queryFn: async () => {
       return await getData(locationRoutes.getAll, {})
+    },
+  });
+
+  const [transformedArr, setTransformedArr] = useState([]);
+
+  useEffect(() => {
+    if (locationData.data?.data?.data) {
+      const transformedData = locationData.data.data.data.map((obj : any) => {
+        const newObj = {};
+        Object.entries(obj).forEach(([key, value]) => {
+          console.log(key, value);
+        });
+
+        return newObj;
+      });
+
+      setTransformedArr(transformedData);
     }
-  })
+  }, [locationData]);
 
   const locationColumns = [
     { name: "NAME", uid: "name" },
@@ -65,7 +83,11 @@ const Projects = ({ role }: { role: string }) => {
                 isLoading={locationData.isLoading}
                 columns={locationColumns}
                 viewModal={(data: any) => {
+                  setData(data);
                   return <LocationViewModal data={data} />
+                }}
+                deleteModal={(data : any) => {
+                  return <></>
                 }}
               />
               {(role === "Super_Admin" || role === "Admin") && (

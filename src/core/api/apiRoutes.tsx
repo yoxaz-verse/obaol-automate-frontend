@@ -1,3 +1,5 @@
+import { count } from "console";
+
 export const accountRoutes = {
    superadminlogin: '/superadmin/login',
    adminlogin: '/admin/login',
@@ -13,6 +15,7 @@ const location = "/location";
 const status = "/status";
 const project = "/project";
 const subStatus = "/subStatus";
+const activity = "/activity";
 
 export const authRoutes = {
    login: `${user}/login`,
@@ -43,7 +46,15 @@ export const subStatusRoutes = {
 }
 
 export const projectRoutes = {
-   getAll: `${project}`,
+   getAll: `${project}/`,
    create: `${project}/create`,
    delete: `${project}/isDeleted/`,
+   count: `${project}/count`,
+}
+
+export const activityRoutes = {
+   getAll: `${activity}/`,
+   getByProject: `${activity}/projects/`,
+   create: `${activity}/create/`,
+   delete: `${activity}/isDeleted/`,
 }

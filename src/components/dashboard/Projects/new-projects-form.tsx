@@ -26,13 +26,6 @@ const NewProjectsForm = () => {
     },
   });
 
-  const userData = useQuery({
-    queryKey: ['userData'],
-    queryFn: async () => {
-      return await getData(authRoutes.checkUser, {})
-    },
-  });
-
   // statusData
   const statusData = useQuery({
     queryKey: ['statusData'],
@@ -51,7 +44,7 @@ const NewProjectsForm = () => {
 
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0]
-    setLocationImage(file)
+    setLocationImage(e.target.files)
     const reader = new FileReader()
     reader.onloadend = () => {
       setImageURL(reader.result as string)
@@ -114,7 +107,7 @@ const NewProjectsForm = () => {
       subStatus: (inputs[6] as HTMLInputElement).value,
       managerId: (inputs[7] as HTMLInputElement).value,
       customerId: (inputs[8] as HTMLInputElement).value,
-      adminId: (inputs[9] as HTMLInputElement).value
+
     }
 
     const formData = new FormData();
@@ -127,8 +120,8 @@ const NewProjectsForm = () => {
     formData.append('subStatus', data.subStatus)
     formData.append('managerId', data.managerId)
     formData.append('customerId', data.customerId)
-    formData.append('image', locationImage)
-    formData.append('adminId', data.adminId)
+    formData.append('images', locationImage)
+
 
     projectAddMutation.mutate(formData)
     setImageURL('/upload_image.jpg')
@@ -198,7 +191,6 @@ const NewProjectsForm = () => {
                 name="status"
                 placeholder='Assign Status'
                 onChange={(e) => {
-                  alert(e.target.value)
                   setChoosenStatus(e.target.value)
                 }}
               >
@@ -250,7 +242,7 @@ const NewProjectsForm = () => {
                 }
               </Select>
               {/* hiddenInput */}
-              <input type='hidden' name='admin' value={userData.data?.data?.data?.user?._id} />
+
               <div className='w-full flex items-center justify-center my-3'><button className='w-[150px] bg-[#3EADEB] rounded-3xl text-white p-3' type='submit'>Create</button></div>
             </form>
           </div>
@@ -267,7 +259,7 @@ const NewProjectsForm = () => {
                   maxHeight: '100%',
                 }} />
               </label>
-              <input onChange={handleImageUpload} type='file' id="location_upload" className='hidden' />
+              <input onChange={handleImageUpload} type='file' multiple id="location_upload" className='hidden' />
             </div>
           </div>
         </div>

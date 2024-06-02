@@ -6,7 +6,7 @@ import ActivityDetailCard from './activity-card'
 const ActivityDetailComponent = () => {
   return (
     <div>
-        <div className='font-bold text-xl pt-10 pb-2 my-3'>Activity Details</div>
+
         <div className='flex flex-col lg:flex-row lg:justify-between'>
             <div className='lg:w-[49%]'><ActivityDetailCard data={activityDetailCard}/></div>
             <div className='lg:w-[49%] mt-4 lg:mt-0'>

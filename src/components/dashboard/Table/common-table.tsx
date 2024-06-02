@@ -1,10 +1,9 @@
 import React from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, ChipProps, getKeyValue, Pagination, Spinner } from "@nextui-org/react";
-// import {columns, users} from "./data";
-import { FiCheck, FiDelete, FiEdit, FiEye } from "react-icons/fi"; import { TableProps } from "@/data/interface-data";
+import { FiDelete, FiEdit, FiEye } from "react-icons/fi"; import { TableProps } from "@/data/interface-data";
 import { TiInputChecked } from "react-icons/ti";
 import Image from "next/image";
-import { locationRoutes } from "@/core/api/apiRoutes";
+import { redirect } from "next/dist/server/api-utils";
 const statusColorMap: Record<string, ChipProps["color"]> = {
   active: "success",
   paused: "danger",
@@ -13,7 +12,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 
 // type User = typeof users[0];
 
-export default function CommonTable({ TableData, columns, viewProjectDetails, verifyActivity, viewModal, deleteModal, deleteData, isLoading = true }: TableProps) {
+export default function CommonTable({ TableData, columns, viewProjectDetails, verifyActivity, redirect, viewModal, deleteModal, deleteData, isLoading = true }: TableProps) {
   type User = typeof TableData[0];
   const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
     const cellValue = user[columnKey as keyof User];
@@ -28,6 +27,20 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
           >
             {user.email}
           </User>
+        );
+
+      case "title":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize">{cellValue as string}</p>
+          </div>
+        );
+
+      case "adminId":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize">{cellValue as string}</p>
+          </div>
         );
       case "image":
         return (
@@ -90,20 +103,29 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
       case "actions2":
         return (
           <div className="relative flex items-center gap-2">
-            <Tooltip content="Details">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                {
-                  viewModal ? viewModal(user) : null
-                }
-              </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete user">
+
+            {
+              redirect ? <Tooltip content="View">
+                <span onClick={() => {
+                  redirect(user)
+                }} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  <FiEye />
+                </span>
+              </Tooltip> : <Tooltip content="Details">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  {
+                    viewModal ? viewModal(user) : ''
+                  }
+                </span>
+              </Tooltip>
+            }
+            <Tooltip color="danger" content={`Delete ${deleteData?.type}`}>
               <span className="text-lg text-danger cursor-pointer active:opacity-50">
                 {
                   deleteModal ? deleteModal({
                     _id: user._id,
                     type: deleteData?.type,
-                    name: user.name ?? user._id,
+                    name: user.name ?? user.title ?? user._id,
                     endpoint: deleteData?.endpoint,
                     key: deleteData?.key
 
@@ -117,7 +139,7 @@ export default function CommonTable({ TableData, columns, viewProjectDetails, ve
       default:
         return cellValue;
     }
-  }, [deleteData?.endpoint, deleteData?.key, deleteData?.type, deleteModal, verifyActivity, viewModal, viewProjectDetails]);
+  }, [deleteData?.endpoint, deleteData?.key, deleteData?.type, deleteModal, redirect, verifyActivity, viewModal, viewProjectDetails]);
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 4;
 

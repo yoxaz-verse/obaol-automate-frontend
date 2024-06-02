@@ -47,6 +47,7 @@ export interface TableProps {
   verifyActivity?: (data: any) => void;
   deleteModal?: (data: any) => ReactNode;
   viewModal?: (data: any) => ReactNode,
+  redirect?: (data: any) => void;
   isLoading?: boolean;
   deleteData?: {
     endpoint: string;
@@ -59,9 +60,9 @@ export interface Column {
   uid: string;
 }
 export interface ProjectDetailProps {
-  data: {
-    id: string;
-  }
+  id: string;
+  role: string;
+  setProjectDetail: (data: any) => void;
 }
 export interface ProjectDetailProgressProps {
   heading: string;

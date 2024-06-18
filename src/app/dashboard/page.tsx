@@ -17,12 +17,10 @@ function Page() {
   console.log(userData.data?.data?.data?.user?.Role?.roleName);
 
   const [currentTab, setCurrentTab] = useState('Dashboard');
-  function TabChange(tabName: string) {
-    setCurrentTab(tabName);
-  }
+
   return (
     <div>
-      <Dashboard  />
+      <Dashboard />
     </div>
   )
 }

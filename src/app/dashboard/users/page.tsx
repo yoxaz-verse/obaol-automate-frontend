@@ -1,21 +1,23 @@
+"use client";
 import React, { useState } from "react";
-import CommonTable from "../Table/common-table";
+import CommonTable from "@/components/dashboard/Table/common-table";
 import { Button, Tab, Tabs } from "@nextui-org/react";
-import AddUsers from "./add-users";
+import AddUsers from "@/components/dashboard/Users/add-users";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { userRoutes } from "@/core/api/apiRoutes";
 import UserDetailsModal from "@/components/Modals/user-details";
 import UserDeleteModal from "@/components/Modals/user-delete";
+import { NextPage } from "next";
 
-const UsersComponent = ({ role }: { role: string }) => {
+const UsersComponent: NextPage = () => {
   function viewActivityDetails(data: any) {
     console.log(data);
     setNewActivity(true);
   }
   const [viewactivity, setNewActivity] = useState(false);
   const [verifyactivity, setVerifyActivity] = useState(false);
-  const [activitydata, setActivityData] = useState();
+
   function verifyActivity(data: any) {
     console.log(data);
     setVerifyActivity(true);

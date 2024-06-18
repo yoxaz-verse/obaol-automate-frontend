@@ -8,44 +8,43 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function DashboardLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    const [currentTab, setCurrentTab] = useState('Dashboard');
-    function TabChange(tabName: string) {
-        setCurrentTab(tabName);
+  const [currentTab, setCurrentTab] = useState('Dashboard');
+  function TabChange(tabName: string) {
+    console.log(tabName);
+    setCurrentTab(tabName);
+  }
+
+  const userData = useQuery({
+    queryKey: ['userData'],
+    queryFn: async () => {
+      return await getData(authRoutes.checkUser, {})
     }
+  })
 
-    const userData = useQuery({
-        queryKey: ['userData'],
-        queryFn: async () => {
-            return await getData(authRoutes.checkUser, {})
-        }
-    })
+  return (
+    <section className="w-full h-full flex">
+      <div className="w-1/6 h-screen hidden lg:block">
+        <Sidebar />
+      </div>
+      <div className="w-full md:w-4/5 lg:h-screen ">
+        <div>
+          <TopBar username={
+            userData.data?.data?.data?.user?.name
+          }
+            role={userData.data?.data?.data?.user?.Role?.roleName}
+          />
 
-    return (
-        <section className="w-full h-full flex">
-            <div className="w-1/6 h-screen hidden lg:block">
-                <Sidebar tabChange={TabChange} />
-            </div>
-            <div className="w-full md:w-4/5 lg:h-screen ">
-                <div>
-                    <TopBar username={
-                        userData.data?.data?.data?.user?.name
-                    }
-                        role={userData.data?.data?.data?.user?.Role?.roleName}
-                    />
+          <div className="h-full w-full">
+            {children}
 
-                    <div className="h-full w-full">
-                        {
-                            tabUtil(currentTab, userData.data?.data?.data?.user?.Role?.roleName)
-                        }
+          </div>
 
-                    </div>
-
-                </div>
-            </div>
-        </section>
-    );
+        </div>
+      </div>
+    </section>
+  );
 }

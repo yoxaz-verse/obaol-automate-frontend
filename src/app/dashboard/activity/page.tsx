@@ -1,12 +1,14 @@
+"use client";
 import React, { useState } from 'react'
-import ActivityDetailProgressComponent from './activity-detail-progress-component'
-import CommonTable from '../Table/common-table'
+import ActivityDetailProgressComponent from '@/components/dashboard/Activity/activity-detail-progress-component'
+import CommonTable from '@/components/dashboard/Table/common-table'
 import { activityColumns, activityDetailCard, activityTableData, columns, tableData } from '@/data/content-data'
-import AddNewActivityModal from '../Projects/add-new-activity-modal'
-import ActivityDetailComponent from './acitivty-detail-component'
-import VerifyActivityModal from './verify-activity-modal'
+import AddNewActivityModal from '@/components/dashboard/Projects/add-new-activity-modal'
+import ActivityDetailComponent from "@/components/dashboard/Activity/acitivty-detail-component"
+import VerifyActivityModal from '@/components/dashboard/Activity/verify-activity-modal'
+import { NextPage } from 'next';
 
-const Activity = ({ role }: { role: string }) => {
+const Activity: NextPage = () => {
   function viewActivityDetails(data: any) {
     console.log(data)
     setNewActivity(true)

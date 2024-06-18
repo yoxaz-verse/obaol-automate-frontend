@@ -7,15 +7,16 @@ import AddNewActivityModal from '@/components/dashboard/Projects/add-new-activit
 import ActivityDetailComponent from "@/components/dashboard/Activity/acitivty-detail-component"
 import VerifyActivityModal from '@/components/dashboard/Activity/verify-activity-modal'
 import { NextPage } from 'next';
+import { useRouter } from "next/navigation";
 
 const Activity: NextPage = () => {
+
+  const router = useRouter();
   function viewActivityDetails(data: any) {
-    console.log(data)
-    setNewActivity(true)
+    console.log(data);
+    router.push(`/dashboard/activity/${data.id}`);
   }
-  const [viewactivity, setNewActivity] = useState(false);
   const [verifyactivity, setVerifyActivity] = useState(false);
-  const [activitydata, setActivityData] = useState();
   function verifyActivity(data: any) {
     console.log(data)
     setVerifyActivity(true)
@@ -23,11 +24,10 @@ const Activity: NextPage = () => {
   return (
     <>
       <div className="flex items-center justify-center">
-        {!viewactivity ? <div className="w-[95%]">
+        <div className="w-[95%]">
           <ActivityDetailProgressComponent />
           <div className='flex justify-between w-full pt-5 pb-2'>
             <div className="py-2 text-lg font-medium">Activities List</div>
-            {/* <AddNewActivityModal/> */}
           </div>
           <CommonTable
             TableData={activityTableData}
@@ -35,24 +35,7 @@ const Activity: NextPage = () => {
             viewProjectDetails={viewActivityDetails}
             verifyActivity={verifyActivity}
           />
-        </div> :
-          <div className="w-[95%]">
-            <div className='flex flex-col gap-5'>
-
-              <ActivityDetailProgressComponent />
-              <ActivityDetailComponent />
-            </div>
-            <div className='my-4'>
-              <div className="py-2 text-lg font-medium">Activities List</div>
-              <CommonTable
-                TableData={activityTableData}
-                columns={activityColumns}
-                viewProjectDetails={viewActivityDetails}
-                verifyActivity={verifyActivity}
-              />
-            </div>
-          </div>
-        }
+        </div>
       </div>
       <VerifyActivityModal open={verifyactivity} close={() => setVerifyActivity(false)} activity={activityDetailCard} />
     </>

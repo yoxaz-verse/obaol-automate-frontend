@@ -37,12 +37,9 @@ export default function DashboardLayout({
           }
             role={userData.data?.data?.data?.user?.Role?.roleName}
           />
-
           <div className="h-full w-full">
             {children}
-
           </div>
-
         </div>
       </div>
     </section>

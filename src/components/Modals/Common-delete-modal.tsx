@@ -13,6 +13,8 @@ type field = {
 }
 
 interface CommonDeleteModalProps {
+  onOpenChange: () => any;
+  isOpen: boolean;
   data: {
     _id: string,
     type: string,
@@ -23,21 +25,20 @@ interface CommonDeleteModalProps {
   }
 }
 
-export default function CommonDeleteModal(props: CommonDeleteModalProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+export default function CommonDeleteModal({ data, onOpenChange, isOpen }: CommonDeleteModalProps) {
   const deleteMuation = useMutation({
     mutationFn: async (data: any) => {
-      return deleteData(props.data.endpoint + data._id, {})
+      return deleteData(data.endpoint + data._id, {})
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: props.data.key
+        queryKey: data.key
       }
       )
-      alert(`${props.data.type} Deleted Successfully`)
+      alert(`${data.type} Deleted Successfully`)
       showToastMessage({
         type: "success",
-        message: `${props.data.type} Deleted Successfully`,
+        message: `${data.type} Deleted Successfully`,
         position: "top-right",
       });
     },
@@ -53,16 +54,15 @@ export default function CommonDeleteModal(props: CommonDeleteModalProps) {
   })
   return (
     <>
-      <FiDelete onClick={onOpen} />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Delete {props.data.type}</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Delete {data.type}</ModalHeader>
               <ModalBody>
                 <p>Are you sure you want to delete </p>
                 {
-                  props.data.name
+                  data.name
                 }
               </ModalBody>
               <ModalFooter>
@@ -76,7 +76,7 @@ export default function CommonDeleteModal(props: CommonDeleteModalProps) {
                   color="danger"
                 >
                   <Button color="danger" onDoubleClick={() => {
-                    deleteMuation.mutate({ _id: props.data._id })
+                    deleteMuation.mutate({ _id: data._id })
                     onClose()
                   }}>
                     Delete

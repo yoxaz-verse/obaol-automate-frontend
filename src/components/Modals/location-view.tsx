@@ -3,6 +3,8 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDi
 import { FiEye } from "react-icons/fi";
 import Image from "next/image";
 interface UserDeleteModalProps {
+  isOpen: boolean,
+  onOpenChange: () => any;
   data: {
     _id: string,
     name: string,
@@ -13,20 +15,16 @@ interface UserDeleteModalProps {
   }
 }
 export default function LocationViewModal(props: UserDeleteModalProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
-      <FiEye onClick={onOpen} />
-      <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal size="2xl" isOpen={props.isOpen} onOpenChange={props.onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="">Location Details</ModalHeader>
-              <ModalBody >
+              <ModalHeader className="text-secondary">Location Details</ModalHeader>
+              <ModalBody>
                 <div className="flex justify-evenly w-full">
-
-
                   <div className="max-w-[500px] grid grid-cols-2 gap-5">
                     <div className="font-bold text-lg">Id:</div>
                     <div className=" text-lg">{props.data?._id}</div>

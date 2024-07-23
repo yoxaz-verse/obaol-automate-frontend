@@ -5,7 +5,7 @@ import { getData } from '@/core/api/apiHandler';
 import { authRoutes } from '@/core/api/apiRoutes';
 import { tabUtil } from '@/utils/utils'
 import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react'
+import React from 'react'
 
 function Page() {
   const userData = useQuery({
@@ -16,12 +16,12 @@ function Page() {
   })
   console.log(userData.data?.data?.data?.user?.Role?.roleName);
 
-  const [currentTab, setCurrentTab] = useState('Dashboard');
+
 
   return (
-    <div>
+    <>
       <Dashboard />
-    </div>
+    </>
   )
 }
 

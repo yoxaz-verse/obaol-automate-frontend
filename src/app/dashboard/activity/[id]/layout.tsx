@@ -5,6 +5,8 @@ import { activityColumns } from "@/data/content-data";
 import CommonTable from "@/components/dashboard/Table/common-table";
 import { activityTableData } from "@/data/content-data";
 import { useRouter } from "next/navigation";
+import { Spacer, Tab, Tabs } from "@nextui-org/react";
+import Title, { SubTitle } from "@/components/titles";
 
 export default function ActivityIdLayout({
   children,
@@ -22,6 +24,7 @@ export default function ActivityIdLayout({
     console.log(data)
     setVerifyActivity(true)
   }
+  const tabs = ["Status 1", "Status 2", "Status 3", "Status 4"];
   return (
     <>
       <div className="w-[95%] p-8">
@@ -29,15 +32,30 @@ export default function ActivityIdLayout({
           <ActivityDetailProgressComponent />
           {children}
         </div>
-        <div className='my-4'>
-          <div className="py-2 text-lg font-medium">Activities List</div>
-          <CommonTable
-            TableData={activityTableData}
-            columns={activityColumns}
-            viewProjectDetails={viewActivityDetails}
-            verifyActivity={verifyActivity}
-          />
-        </div>
+        <Spacer y={4} />
+        <>
+          <Title title="Activity Details" />
+          <Tabs aria-label="Options" color="secondary" variant="bordered">
+            {tabs.map((t: any) => {
+              return <Tab key={t}
+                title={
+                  <div className="flex items-center space-x-2">
+                    <span>{t}</span>
+                  </div>
+                }>
+                <>
+                  <SubTitle title={t} />
+                  <CommonTable
+                    TableData={activityTableData}
+                    columns={activityColumns}
+                    viewProjectDetails={viewActivityDetails}
+                    verifyActivity={verifyActivity}
+                  />
+                </>
+              </Tab>
+            })}
+          </Tabs>
+        </>
       </div>
     </>
   )

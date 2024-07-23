@@ -242,7 +242,7 @@ export default function CustomTable({
     }
   }, []);
 
-  const pages = data.totalPages;
+  const pages = data?.totalPages || 1;
   return (
     <Table
       aria-label="Example table with custom cells"

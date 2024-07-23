@@ -92,15 +92,15 @@ const ProjectModal: React.FC<EditModalProps> = ({ onOpenChange, isOpen, data }) 
         <ModalHeader className="flex flex-col gap-1">Edit Project</ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit} className="w-full flex flex-col justify-evenly h-full items-center">
-            <Input placeholder="Title" className="w-full" variant="underlined" name="title" value={data.title} />
-            <Textarea placeholder="Description" className="w-full" variant="underlined" name="description" value={data.description} />
-            <Input placeholder="Budget" name="budget" className="w-full" variant="underlined" value={data.budget} />
+            <Input placeholder="Title" className="w-full" variant="underlined" name="title" value={data?.title} />
+            <Textarea placeholder="Description" className="w-full" variant="underlined" name="description" value={data?.description} />
+            <Input placeholder="Budget" name="budget" className="w-full" variant="underlined" value={data?.budget} />
 
             <Select
               className="w-full"
               variant="underlined"
               name="location"
-              selectedKeys={[data.location]}
+              selectedKeys={[data?.location]}
               placeholder="Assign Location"
               onChange={(e) => setChoosenLocation(e.target.value)}
             >
@@ -115,7 +115,7 @@ const ProjectModal: React.FC<EditModalProps> = ({ onOpenChange, isOpen, data }) 
               className="w-full"
               variant="underlined"
               name="status"
-              value={data.status}
+              value={data?.status}
               placeholder="Assign Status"
               onChange={(e) => setChoosenStatus(e.target.value)}
             >

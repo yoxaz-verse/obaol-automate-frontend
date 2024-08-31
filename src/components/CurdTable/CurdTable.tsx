@@ -4,7 +4,6 @@ import CustomTable from "../New Table";
 import { Spacer } from "@nextui-org/react";
 import Title, { SubTitle } from "../titles";
 
-
 interface ICurdTableProps {
   title: string;
   api: string;
@@ -18,7 +17,7 @@ interface ICurdTableProps {
   page: number;
   setPage: (page: number) => void;
   limit: number;
-  AddModal: React.ReactNode
+  AddModal: React.ReactNode;
 }
 
 function CurdTable(props: ICurdTableProps) {

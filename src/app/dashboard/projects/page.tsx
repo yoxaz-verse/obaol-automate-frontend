@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { getData } from "../../../core/api/apiHandler";
-import { authRoutes, locationRoutes, projectRoutes } from "../../../core/api/apiRoutes";
+import {
+  authRoutes,
+  locationRoutes,
+  projectRoutes,
+} from "../../../core/api/apiRoutes";
 import CurdTable from "../../../components/CurdTable/CurdTable";
 import ManagerActivityDetailsComponent from "@/components/dashboard/Projects/manager-activity-details";
 import NewProjectsCharts from "@/components/dashboard/Projects/new-projects-charts";
@@ -18,26 +22,25 @@ import CommonDeleteModal from "@/components/Modals/Common-delete-modal";
 import EditLocation from "@/components/Modals/edit-location";
 import EditProject from "@/components/Modals/edit-project";
 
-
 const Projects: NextPage = () => {
   const [projectdetails, setProjectDetails] = useState(false);
-  const [project, setProject] = useState({ id: '123' });
+  const [project, setProject] = useState({ id: "123" });
   function viewProjectDetails(data: any) {
     setProjectDetails(true);
     setProject(data);
   }
   const [role, setRole] = useState<any>();
   const locationData = useQuery({
-    queryKey: ['locationData'],
+    queryKey: ["locationData"],
     queryFn: async () => {
-      return await getData(locationRoutes.getAll, {})
+      return await getData(locationRoutes.getAll, {});
     },
   });
   const { data: userData, isFetched: afterFetching } = useQuery({
-    queryKey: ['userData'],
+    queryKey: ["userData"],
     queryFn: async () => {
-      return await getData(authRoutes.checkUser, {})
-    }
+      return await getData(authRoutes.checkUser, {});
+    },
   });
 
   useEffect(() => {
@@ -45,23 +48,21 @@ const Projects: NextPage = () => {
       console.log(userData?.data?.user?.Role?.roleName);
       setRole(userData?.data?.data?.user?.Role?.roleName);
     }
-  }, [afterFetching, userData])
+  }, [afterFetching, userData]);
 
   const projectData = useQuery({
-    queryKey: ['projectData'],
+    queryKey: ["projectData"],
     queryFn: async () => {
-      return await getData(projectRoutes.getAll, {})
+      return await getData(projectRoutes.getAll, {});
     },
   });
 
-
-  const [projectId, setProjectId] = useState("")
-
+  const [projectId, setProjectId] = useState("");
 
   const locationColumns = [
     { name: "NAME", uid: "name", type: "text" },
     { name: "IMAGE", uid: "image", text: "image" },
-    { name: "ACTIONS", uid: "actions", },
+    { name: "ACTIONS", uid: "actions" },
   ];
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const projectColumns = [
@@ -69,11 +70,31 @@ const Projects: NextPage = () => {
     { name: "STATUS", uid: "status", type: "text" },
     { name: "ACTIONS", uid: "actions", type: "actions" },
   ];
-  const { isOpen: isOpenLocation, onOpen: onOpenLocation, onOpenChange: onOpenChangeLocation } = useDisclosure();
-  const { isOpen: isOpenDeleteProject, onOpen: onOpenDeleteProject, onOpenChange: onOpenChangeDeleteProject } = useDisclosure();
-  const { isOpen: isOpenDeleteLocation, onOpen: onOpenDeleteLocation, onOpenChange: onOpenChangeDeleteLocation } = useDisclosure();
-  const { isOpen: isOpenEditLocation, onOpen: onOpenEditLocation, onOpenChange: onOpenChangeEditLocation } = useDisclosure();
-  const { isOpen: isOpenEditProject, onOpen: onOpenEditProject, onOpenChange: onOpenChangeEditProject } = useDisclosure();
+  const {
+    isOpen: isOpenLocation,
+    onOpen: onOpenLocation,
+    onOpenChange: onOpenChangeLocation,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDeleteProject,
+    onOpen: onOpenDeleteProject,
+    onOpenChange: onOpenChangeDeleteProject,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDeleteLocation,
+    onOpen: onOpenDeleteLocation,
+    onOpenChange: onOpenChangeDeleteLocation,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEditLocation,
+    onOpen: onOpenEditLocation,
+    onOpenChange: onOpenChangeEditLocation,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEditProject,
+    onOpen: onOpenEditProject,
+    onOpenChange: onOpenChangeEditProject,
+  } = useDisclosure();
 
   const superAdminProjectColumns = [
     { name: "NAME", uid: "title", type: "text" },
@@ -85,67 +106,97 @@ const Projects: NextPage = () => {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState(1);
   const handleView = (data: any) => {
-    setData(data)
+    setData(data);
     onOpen();
-  }
+  };
   const handleEditLocation = (data: any) => {
     alert("Edit");
     setData(data);
     onOpenEditLocation();
-  }
+  };
   const handleEditProject = (data: any) => {
     setData(data);
     onOpenEditProject();
-  }
+  };
   const handleViewLocation = (data: any) => {
-    setData(data)
+    setData(data);
     onOpenLocation();
-  }
+  };
   const handleDeleteLocation = (data: any) => {
-    setData(data)
+    setData(data);
     onOpenDeleteLocation();
-  }
+  };
   const handleDeleteProject = (data: any) => {
-    setData(data)
+    setData(data);
     onOpenDeleteProject();
-  }
+  };
 
-
-  const tabs = ["Status 1", "Status 2", "Status 3"]
+  const tabs = ["Status 1", "Status 2", "Status 3"];
   return (
     <div className="flex items-center justify-center">
-      {!projectdetails ?
+      {!projectdetails ? (
         <div className="w-full p-[1rem]">
           <Title title="Projects" />
           <Tabs aria-label="Options" color="secondary" variant="bordered">
             {tabs.map((t: any) => {
-              return <Tab
-                key={t}
-                title={
-                  <div className="flex items-center space-x-2">
-                    <span>{t}</span>
-                  </div>
-                }
-              >
-                <>
-                  <CurdTable
-                    setPage={(page) => setPage(page)}
-                    api={projectRoutes.getAll}
-                    limit={limit}
-                    page={page}
-                    title={t}
-                    columns={ROLE === "Admin" ? superAdminProjectColumns : projectColumns}
-                    onOpenCreate={() => { }}
-                    onOpenEdit={(data: any) => handleEditProject(data)} onOpenView={(data: any) => handleViewLocation(data)} onOpenDelete={(data: any) => handleDeleteProject(data)} queryKey={["project"]} AddModal={<ProjectModal />} />
-                </>
-              </Tab>
+              return (
+                <Tab
+                  key={t}
+                  title={
+                    <div className="flex items-center space-x-2">
+                      <span>{t}</span>
+                    </div>
+                  }
+                >
+                  <>
+                    <CurdTable
+                      setPage={(page) => setPage(page)}
+                      api={projectRoutes.getAll}
+                      limit={limit}
+                      page={page}
+                      title={t}
+                      columns={
+                        ROLE === "Admin"
+                          ? superAdminProjectColumns
+                          : projectColumns
+                      }
+                      onOpenCreate={() => {}}
+                      onOpenEdit={(data: any) => handleEditProject(data)}
+                      onOpenView={(data: any) => handleViewLocation(data)}
+                      onOpenDelete={(data: any) => handleDeleteProject(data)}
+                      queryKey={["project"]}
+                      AddModal={<ProjectModal />}
+                    />
+                  </>
+                </Tab>
+              );
             })}
           </Tabs>
-          <LocationViewModal isOpen={isOpenLocation} onOpenChange={onOpenChangeLocation} data={data} />
-          <CommonDeleteModal data={data} isOpen={isOpenDeleteProject} onOpenChange={onOpenChangeDeleteProject} />
-          <EditLocation data={data} isOpen={isOpenEditLocation} onOpenChange={onOpenChangeEditLocation} />
-          <EditProject data={data} isOpen={isOpenEditProject} onOpenChange={onOpenChangeEditProject} />
-          <CommonDeleteModal data={data} isOpen={isOpenDeleteLocation} onOpenChange={onOpenChangeDeleteLocation} />
+          <LocationViewModal
+            isOpen={isOpenLocation}
+            onOpenChange={onOpenChangeLocation}
+            data={data}
+          />
+          <CommonDeleteModal
+            data={data}
+            isOpen={isOpenDeleteProject}
+            onOpenChange={onOpenChangeDeleteProject}
+          />
+          <EditLocation
+            data={data}
+            isOpen={isOpenEditLocation}
+            onOpenChange={onOpenChangeEditLocation}
+          />
+          <EditProject
+            data={data}
+            isOpen={isOpenEditProject}
+            onOpenChange={onOpenChangeEditProject}
+          />
+          <CommonDeleteModal
+            data={data}
+            isOpen={isOpenDeleteLocation}
+            onOpenChange={onOpenChangeDeleteLocation}
+          />
           <CurdTable
             setPage={(page) => setPage(page)}
             api={locationRoutes.getAll}
@@ -153,8 +204,13 @@ const Projects: NextPage = () => {
             page={page}
             title="Location"
             columns={locationColumns}
-            onOpenCreate={() => { }}
-            onOpenEdit={(data: any) => handleEditLocation(data)} onOpenView={(data: any) => handleViewLocation(data)} onOpenDelete={(data: any) => handleDeleteLocation(data)} queryKey={["location"]} AddModal={<NewLocationForm />} />
+            onOpenCreate={() => {}}
+            onOpenEdit={(data: any) => handleEditLocation(data)}
+            onOpenView={(data: any) => handleViewLocation(data)}
+            onOpenDelete={(data: any) => handleDeleteLocation(data)}
+            queryKey={["location"]}
+            AddModal={<NewLocationForm />}
+          />
 
           <NewProjectsCharts />
           {role === "Super_Admin" && (
@@ -162,17 +218,18 @@ const Projects: NextPage = () => {
               <ManagerActivityDetailsComponent />
             </>
           )}
-        </div> :
+        </div>
+      ) : (
         <div className="w-[95%]">
-          <ProjectDetails id={
-            projectId
-          } role={role}
+          <ProjectDetails
+            id={projectId}
+            role={role}
             setProjectDetail={(value) => setProjectDetails(value)}
           />
         </div>
-      }
+      )}
       <div></div>
-    </div >
+    </div>
   );
 };
 

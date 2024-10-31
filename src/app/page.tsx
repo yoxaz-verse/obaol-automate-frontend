@@ -1,79 +1,35 @@
-"use client"
+"use client";
+import AuthContext from "@/context/AuthContext";
 import { ROUTES } from "@/core/routes";
-import { Card, CardBody, CardFooter, Chip, CircularProgress } from "@nextui-org/react";
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  Chip,
+  CircularProgress,
+} from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
-  const [finalDestination, setFinalDestination] = useState<string>('');
+  const [finalDestination, setFinalDestination] = useState<string>("");
   const [value, setValue] = useState<number>(0);
-  const [loadingComplete, setLoadingComplete] = useState<boolean>(false);
+
+  const { isAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
-    const token = localStorage.getItem("currentUserToken");
-    const rememberMeTimeStr = localStorage.getItem("rememberMeTime");
-    const rememberMeTime = rememberMeTimeStr ? JSON.parse(rememberMeTimeStr) : null;
+    // Since AuthContext checks auth status on mount, we need to wait for it
+    const checkAuthentication = () => {
+      if (isAuthenticated) {
+        router.push("/dashboard");
+      } else {
+        router.push("/auth");
+      }
+    };
 
-    console.log("rememberMeTime:", rememberMeTime);
-    console.log("token:", token);
-    if (!token) {
-      console.log("No token found");
-      setValue(10);
-      setFinalDestination("Redirecting to login page...");
-      setLoadingComplete(true);
-      router.push("/auth");
-      setValue(100);
-      return;
-    } else {
-      setValue(10);
-    }
-
-
-    if (rememberMeTime && rememberMeTime < new Date().getTime()) {
-      console.log("Remember me time expired");
-      setValue(30);
-      setFinalDestination("Redirecting to login page...");
-      setLoadingComplete(true);
-      router.push("/auth");
-      return;
-    } else {
-      setValue(30);
-    }
-
-
-    if (token) {
-      console.log("Token found, fetching user data");
-      setValue(50);
-
-      fetch("http://localhost:5000/api/v1/check-user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to fetch user data");
-          }
-          setValue(70); return res.json();
-        })
-        .then((data) => {
-          console.log("User data fetched:", data);
-          setFinalDestination("Redirecting to dashboard...");
-          setLoadingComplete(true);
-          setValue(100);
-          router.push(ROUTES.DASHBOARD);
-        })
-        .catch((error) => {
-          console.log("Error fetching user data");
-          console.error(error);
-          setFinalDestination("Redirecting to login page...");
-          setLoadingComplete(true);
-          setValue(100);
-          router.push("/auth");
-        });
-    }
-  }, [router]);
+    checkAuthentication();
+  }, [isAuthenticated, router]);
   return (
     <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-[#F6F8FB]">
       <Card className="w-[240px] h-[240px] border-none bg-gradient-to-br from-blue-500 to-fuchsia-500">
@@ -98,30 +54,27 @@ export default function Home() {
             }}
             variant="bordered"
           >
-            {
-              value < 10
-                ? "Starting..."
-                : value < 20
-                  ? "Loading..."
-                  : value < 30
-                    ? "Almost there..."
-                    : value < 40
-                      ? "Halfway there..."
-                      : value < 50
-                        ? "Halfway there..."
-                        : value < 60
-                          ? "More than halfway there..."
-                          : value < 70
-                            ? "Almost done..."
-                            : value < 80
-                              ? "Finishing up..."
-                              : value < 90
-                                ? "Almost there..."
-                                : value < 100
-                                  ? "Finishing up..."
-                                  : finalDestination
-
-            }
+            {value < 10
+              ? "Starting..."
+              : value < 20
+              ? "Loading..."
+              : value < 30
+              ? "Almost there..."
+              : value < 40
+              ? "Halfway there..."
+              : value < 50
+              ? "Halfway there..."
+              : value < 60
+              ? "More than halfway there..."
+              : value < 70
+              ? "Almost done..."
+              : value < 80
+              ? "Finishing up..."
+              : value < 90
+              ? "Almost there..."
+              : value < 100
+              ? "Finishing up..."
+              : finalDestination}
           </Chip>
         </CardFooter>
       </Card>

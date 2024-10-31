@@ -16,9 +16,6 @@ const NewProjectsForm = () => {
   const [choosenStatus, setChoosenStatus] = React.useState<any>()
   const [generatedCustomId, setGeneratedCustomId] = React.useState<any>()
 
-
-
-
   const locationData = useQuery({
     queryKey: ['locationData'],
     queryFn: async () => {

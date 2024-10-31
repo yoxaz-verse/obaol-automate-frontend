@@ -1,10 +1,9 @@
 export const ROUTES = {
     // AUTH
-    LOGIN: "/login",
-  
+    LOGIN: "/login",  
     // DASHBOARD
     DASHBOARD: "/dashboard/",
     // DASHBOARD: "/",
-   
+ 
   };
   

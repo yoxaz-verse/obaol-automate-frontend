@@ -1,114 +1,38 @@
+// pages/users.tsx
 "use client";
 import React, { useState } from "react";
-import CommonTable from "@/components/dashboard/Table/common-table";
-import { Button, Tab, Tabs } from "@nextui-org/react";
-import AddUsers from "@/components/dashboard/Users/add-users";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
-import { adminRoutes, userRoutes } from "@/core/api/apiRoutes";
-import UserDetailsModal from "@/components/Modals/user-details";
-import UserDeleteModal from "@/components/Modals/user-delete";
-import { NextPage } from "next";
+import { Tabs, Tab } from "@nextui-org/react";
+import UserTabContent from "@/components/dashboard/Users/user-tab-content";
 
-const UsersComponent: NextPage = () => {
-  function viewActivityDetails(data: any) {
-    console.log(data);
-    setNewActivity(true);
-  }
-  const [viewactivity, setNewActivity] = useState(false);
-  const [verifyactivity, setVerifyActivity] = useState(false);
+export default function Page() {
+  const [currentTable, setCurrentTable] = useState("manager"); // Default role set to 'manager'
 
-  function verifyActivity(data: any) {
-    console.log(data);
-    setVerifyActivity(true);
-  }
-  const [currentRole, setCurrentRole] = useState("admin");
-
-  const userByRoleData = useQuery({
-    queryKey: [`${currentRole}`],
-    queryFn: async () => {
-      return await getData(`${currentRole}`, {});
-    },
-  });
-
-  console.log(userByRoleData);
-
-  const columns = [
-    { name: "NAME", uid: "name" },
-    { name: "EMAIL", uid: "email" },
-    { name: "CREATED AT", uid: "createdAt" },
-    { name: "ACTIONS", uid: "actions2" },
+  const tables = [
+    { key: "manager", title: "Managers" },
+    { key: "admin", title: "Admins" },
+    { key: "customer", title: "Customers" },
+    { key: "worker", title: "Workers" },
   ];
-  const roles = [
-    {
-      key: "admin",
-      title: "Admins",
-    },
-    {
-      key: "customer",
-      title: "Customers",
-    },
-    {
-      key: "manager",
-      title: "Managers",
-    },
-    {
-      key: "worker",
-      title: "Workers",
-    },
-  ];
+
   return (
-    <div>
-      <div className="flex items-center justify-center">
-        <div className="w-[95%]">
-          <div className="my-4">
-            <div className="py-2 text-lg font-medium"></div>
-            <div className="flex w-full items-end justify-end">
-              <AddUsers currentRole={currentRole} />
-            </div>
-            <Tabs
-              aria-label="Options"
-              onSelectionChange={(e) => {
-                setCurrentRole(e as string);
-              }}
-            >
-              {roles.map((data: any) => {
-                return (
-                  <Tab
-                    key={data.key}
-                    title={data.title}
-                    onClick={() => {
-                      setCurrentRole(data.key);
-                    }}
-                  >
-                    <CommonTable
-                      TableData={
-                        userByRoleData.data ? userByRoleData.data.data.data : []
-                      }
-                      columns={columns}
-                      isLoading={userByRoleData.isLoading}
-                      viewModal={(data: any) => {
-                        return <UserDetailsModal data={data} />;
-                      }}
-                      deleteModal={(data: any) => {
-                        return (
-                          <UserDeleteModal
-                            _id={data._id || ""}
-                            name={data.name || ""}
-                            role={data?.Role?.roleName || ""}
-                          />
-                        );
-                      }}
-                    />
-                  </Tab>
-                );
-              })}
-            </Tabs>
-          </div>
+    <div className="flex items-center justify-center">
+      <div className="w-[95%]">
+        <div className="my-4">
+          {/* Tabs for selecting between different roles */}
+          <Tabs
+            aria-label="User Types"
+            selectedKey={currentTable}
+            onSelectionChange={(key) => setCurrentTable(key as string)}
+          >
+            {tables.map((table) => (
+              <Tab key={table.key} title={table.title}>
+                {/* Render UserTabContent for the current table */}
+                <UserTabContent currentTable={table.key} />
+              </Tab>
+            ))}
+          </Tabs>
         </div>
       </div>
     </div>
   );
-};
-
-export default UsersComponent;
+}

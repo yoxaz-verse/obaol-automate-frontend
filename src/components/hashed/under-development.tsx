@@ -1,19 +1,22 @@
-import React from 'react';
+import React from "react";
 
 interface UnderDevelopmentProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 function UnderDevelopment({ children }: UnderDevelopmentProps) {
-    return (
-        <div className='relative inline-block'>
-            {children}
-            <div className='absolute top-0 left-0 w-full h-full z-50' style={{ filter: 'grayscale(100%)' }}>
-                <div className='absolute top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50'></div>
-                <div className='absolute top-0 left-0 w-full h-full bg-pattern'></div>
-            </div>
-        </div>
-    );
+  return (
+    <div className="relative inline-block   bg-opacity-50 opacity-10">
+      {children}
+      <div
+        className="absolute top-0 left-0 w-full h-full z-50"
+        // style={{ filter: "grayscale(100%)" }}
+      >
+        <div className="absolute top-0 left-0 w-full h-full "></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-pattern"></div>
+      </div>
+    </div>
+  );
 }
 
 export default UnderDevelopment;

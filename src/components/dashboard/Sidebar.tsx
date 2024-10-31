@@ -1,63 +1,115 @@
-import React, { useState, useEffect } from 'react';
-import { FiInbox, FiSettings, FiUsers } from 'react-icons/fi';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+  FiFileText,
+  FiInbox,
+  FiMessageCircle,
+  FiSettings,
+  FiUsers,
+  FiTrendingUp,
+} from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
 import { RiBuildingLine } from "react-icons/ri";
-import { useRouter } from 'next/navigation'
-
+import { useRouter, usePathname } from "next/navigation";
 
 const Sidebar = () => {
-  const [selectedOption, setSelectedOption] = useState<any>('dashboard');
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const sidebarOptions = [
-    { name: 'Dashboard', icon: <MdDashboard />, color: selectedOption === 'dashboard' ? 'text-blue-600' : 'text-[#8E8E93]', link: "/dashboard" },
-    { name: 'Projects', icon: <FiUsers />, color: selectedOption === 'projects' ? 'text-blue-600' : 'text-[#8E8E93]', link: "/projects" },
-    { name: 'Activity', icon: <FiInbox />, color: selectedOption === 'activity' ? 'text-blue-600' : 'text-[#8E8E93]', link: "/activity" },
-    { name: 'Users', icon: <FiSettings />, color: selectedOption === 'analytics' ? 'text-blue-600' : 'text-[#8E8E93]', link: "/users" },
-    { name: 'Services', icon: <RiBuildingLine />, color: selectedOption === 'services' ? 'text-blue-600' : 'text-[#8E8E93]', link: "/users" },
-  ].filter(option => option !== null);
-  const routes = useRouter();
+  const [selectedOption, setSelectedOption] = useState<string>("dashboard");
 
   useEffect(() => {
+    // Extract the current section from the pathname
+    // For example, '/dashboard/projects' -> 'projects'
+    const pathSegments = pathname.split("/").filter(Boolean);
+    let currentOption = "dashboard"; // Default option
 
-    if (window.location.href.split("/").length === 3) {
-      setSelectedOption(window.location.href.split("/")[3]);
+    if (pathSegments[0] === "dashboard") {
+      currentOption = pathSegments[1] || "dashboard";
     } else {
-      setSelectedOption(window.location.href.split("/")[4]);
+      currentOption = pathSegments[0];
     }
-  });
-  const handleOptionClick = (option: string) => {
-    const name: any = sidebarOptions.filter((op) => {
-      return op.link === option
-    });
-    console.log(option);
-    setSelectedOption(name[0].name);
-    if (option === '/dashboard') {
-      routes.push('/dashboard');
-    } else {
-      routes.push(`/dashboard/${option}`);
-    }
-  }
-  console.log(selectedOption?.toLowerCase());
+
+    setSelectedOption(currentOption.toLowerCase());
+  }, [pathname]);
+
+  const sidebarOptions = [
+    {
+      name: "Dashboard",
+      icon: <MdDashboard />,
+      link: "/dashboard",
+    },
+    {
+      name: "Projects",
+      icon: <RiBuildingLine />,
+      link: "/dashboard/projects",
+    },
+    {
+      name: "Activity",
+      icon: <FiTrendingUp />,
+      link: "/dashboard/activity",
+    },
+    {
+      name: "Users",
+      icon: <FiUsers />,
+      link: "/dashboard/users",
+    },
+    {
+      name: "Essentials",
+      icon: <FiFileText />,
+      link: "/dashboard/essentials",
+    },
+    {
+      name: "Time Sheet",
+      icon: <FiMessageCircle />,
+      link: "/dashboard/timesheet",
+    },
+  ];
+
+  const handleOptionClick = (optionLink: string, optionName: string) => {
+    setSelectedOption(optionName.toLowerCase());
+    router.push(optionLink);
+  };
+
   return (
-    <>
-      <div className='flex fixed flex-col justify-between w-1/6 h-full'>
-        <div className='bg-white p-2 sm:p-4 rounded-lg shadow-lg justify-evenly h-full hidden md:block'>
-          <div className='flex py-[50px] justify-center items-center'>LOGO</div>
-          {sidebarOptions.map((option, index) => (
-            <div
-              key={index}
-              onClick={() => handleOptionClick(option?.link ? option.link : 'dashboard')}
-              className={`p-4 cursor-pointer ${selectedOption?.toLowerCase() === option?.name.toLowerCase() ? 'bg-blue-200' : 'text-[#8E8E93]'} rounded font-medium`}
-            >
-              <div className='flex items-center gap-5 text-xs xl:text-base'>
-                <span className={`${option?.color}`}>{option?.icon}</span>
-                <span className={`${selectedOption === option?.name ? 'text-blue-600' : 'text-black'}`}>{option?.name}</span>
-              </div>
+    <div className="flex fixed flex-col justify-between w-1/6 h-full">
+      <div className="bg-white p-2 sm:p-4 rounded-lg shadow-lg justify-evenly h-full hidden md:block">
+        <div className="flex py-[50px] justify-center items-center">LOGO</div>
+        {sidebarOptions.map((option, index) => (
+          <div
+            key={index}
+            onClick={() => handleOptionClick(option.link, option.name)}
+            className={`p-4 cursor-pointer rounded font-medium ${
+              selectedOption === option.name.toLowerCase()
+                ? "bg-blue-200"
+                : "text-[#8E8E93]"
+            }`}
+          >
+            <div className="flex items-center gap-5 text-xs xl:text-base">
+              <span
+                className={`${
+                  selectedOption === option.name.toLowerCase()
+                    ? "text-blue-600"
+                    : "text-[#8E8E93]"
+                }`}
+              >
+                {option.icon}
+              </span>
+              <span
+                className={`${
+                  selectedOption === option.name.toLowerCase()
+                    ? "text-blue-600"
+                    : "text-black"
+                }`}
+              >
+                {option.name}
+              </span>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -384,7 +384,7 @@ export const initialTableConfig: Record<
       key: "image",
       inForm: true,
       inTable: false,
-      // accept: "image/*",
+      accept: "image/*",
     },
     {
       label: "Description",
@@ -393,6 +393,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
     },
+
     {
       label: "Location Type",
       type: "select",

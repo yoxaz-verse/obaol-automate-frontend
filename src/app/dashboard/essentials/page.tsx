@@ -3,9 +3,9 @@
 
 import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
-import { getData } from "@/core/api/apiHandler";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
+import LocationTabContent from "@/components/dashboard/Location/location-tab-content";
 
 export default function Essentials() {
   const [locationTab, setLocationTab] = React.useState("locationType");
@@ -25,6 +25,7 @@ export default function Essentials() {
   ];
 
   const locationTabs = [
+    { key: "location", title: "Location" },
     { key: "locationManager", title: "Location Managers" },
     { key: "locationType", title: "Location Types" },
   ];
@@ -46,6 +47,10 @@ export default function Essentials() {
           >
             {locationTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
+                {tab.key === "location" && (
+                  // <LocationTabContent currentType="all" />
+                  <EssentialTabContent essentialName="location" />
+                )}
                 {tab.key === "locationType" && (
                   <EssentialTabContent essentialName="locationType" />
                 )}
@@ -74,9 +79,6 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Service Company" />{" "}
-          <EssentialTabContent essentialName="serviceCompany" />{" "}
-          <Spacer y={4} />
           <Title title="Project" />{" "}
           <Tabs
             aria-label="Project Tabs"
@@ -94,6 +96,9 @@ export default function Essentials() {
               </Tab>
             ))}
           </Tabs>
+          <Spacer y={4} />
+          <Title title="Service Company" />{" "}
+          <EssentialTabContent essentialName="serviceCompany" />
         </div>
       </div>
     </div>

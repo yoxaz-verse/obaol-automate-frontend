@@ -11,6 +11,8 @@ import {
   SelectItem,
   ModalBody,
   Chip,
+  DatePicker,
+  Switch,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
@@ -194,13 +196,17 @@ const AddModal: React.FC<AddModalProps> = ({
         }
       }
 
-      // Prepare the complete form data
-      const completeFormData = {
+      let completeFormData = {
         ...formData,
-        fileId, // Include the uploaded file's ID
-        fileURL, // Include the uploaded file's URL (optional, based on backend design)
       };
 
+      // Prepare the complete form data
+      if (fileId || fileURL)
+        completeFormData = {
+          ...formData,
+          fileId, // Include the uploaded file's ID
+          fileURL, // Include the uploaded file's URL (optional, based on backend design)
+        };
       // Proceed with form submission
       addItem.mutate(completeFormData);
     } catch (error: any) {
@@ -225,29 +231,31 @@ const AddModal: React.FC<AddModalProps> = ({
       [name]: value,
     }));
   };
-
+  const handleDateChange = (key: string, date: any) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [key]: date instanceof Date ? date : new Date(date), // Example transformation
+    }));
+  };
+  const handleBooleanChange = (key: string, checked: boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [key]: checked,
+    }));
+  };
   const handleSelectionChange = (fieldKey: string, value: Set<Key>) => {
     const valueArray = Array.from(value).map(String);
     setFormData((prevData) => ({
       ...prevData,
       [fieldKey]: valueArray,
     }));
-    if (fieldKey === "locationManagers") {
-      setSelectedManagers(valueArray);
-    } else if (fieldKey === "locationType") {
-      setSelectedTypes(valueArray);
-    }
   };
 
   const handleChipClose = (itemToRemove: string, fieldKey: string) => {
-    let updatedItems: any = [];
-    if (fieldKey === "locationManagers") {
-      updatedItems = selectedManagers.filter((item) => item !== itemToRemove);
-      setSelectedManagers(updatedItems);
-    } else if (fieldKey === "locationType") {
-      updatedItems = selectedTypes.filter((item) => item !== itemToRemove);
-      setSelectedTypes(updatedItems);
-    }
+    const updatedItems = (formData[fieldKey] || []).filter(
+      (item: string) => item !== itemToRemove
+    );
+
     setFormData((prevData) => ({
       ...prevData,
       [fieldKey]: updatedItems,
@@ -267,6 +275,27 @@ const AddModal: React.FC<AddModalProps> = ({
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
+        );
+      case "date":
+        return (
+          <DatePicker
+            name={field.key}
+            labelPlacement="outside"
+            label={field.label}
+            className="max-w-[284px]"
+            defaultValue={formData[field.key] || null} // Set the initial date if it exists in formData
+            onChange={(date) => handleDateChange(field.key, date)} // Use handleDateChange to update state
+          />
+        );
+      case "boolean":
+        return (
+          <Switch
+            name={field.key}
+            defaultSelected={formData[field.key] || false}
+            onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
+          >
+            {field.label}
+          </Switch>
         );
 
       case "select":
@@ -310,16 +339,12 @@ const AddModal: React.FC<AddModalProps> = ({
                 placeholder={field.label}
                 className="py-2 border rounded-md w-full"
                 selectionMode="multiple"
-                selectedKeys={
-                  field.key === "locationManagers"
-                    ? new Set(selectedManagers)
-                    : new Set(selectedTypes)
-                }
+                selectedKeys={new Set(formData[field.key] || [])}
                 onSelectionChange={(keys) =>
                   handleSelectionChange(field.key, keys as Set<Key>)
                 }
               >
-                {field.values?.map((option: any) => (
+                {field.values.map((option) => (
                   <SelectItem
                     key={String(option.key)}
                     value={String(option.key)}
@@ -329,19 +354,18 @@ const AddModal: React.FC<AddModalProps> = ({
                 ))}
               </Select>
               <div className="flex gap-2 mt-2 flex-wrap">
-                {(field.key === "locationManagers"
-                  ? selectedManagers
-                  : selectedTypes
-                ).map((item, index) => (
-                  <Chip
-                    key={index}
-                    onClose={() => handleChipClose(item, field.key)}
-                    variant="flat"
-                  >
-                    {field.values?.find((option) => option.key === item)
-                      ?.value || item}
-                  </Chip>
-                ))}
+                {(formData[field.key] || []).map(
+                  (item: string, index: number) => (
+                    <Chip
+                      key={index}
+                      onClose={() => handleChipClose(item, field.key)}
+                      variant="flat"
+                    >
+                      {field?.values?.find((option) => option.key === item)
+                        ?.value || item}
+                    </Chip>
+                  )
+                )}
               </div>
             </>
           );
@@ -387,18 +411,20 @@ const AddModal: React.FC<AddModalProps> = ({
       </button>
       <Modal isOpen={open} onClose={closeModal} size="lg">
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
+          <ModalHeader className="flex flex-col ">
             Add New {currentTable}
           </ModalHeader>
           <ModalBody>
             <form onSubmit={handleSubmit}>
-              {formFields
-                .filter((field) => field.inForm)
-                .map((field, index) => (
-                  <div key={index} className="mb-4">
-                    {renderFormField(field)}
-                  </div>
-                ))}
+              <div className="flex flex-col   h-[80vh]  overflow-auto">
+                {formFields
+                  .filter((field) => field.inForm)
+                  .map((field, index) => (
+                    <div key={index} className="mb-4 ">
+                      {renderFormField(field)}
+                    </div>
+                  ))}
+              </div>
               <div className="flex justify-end w-full mt-4">
                 <button
                   className="w-[100px] bg-[#3EADEB] rounded-3xl text-white h-[38px] text-sm"

@@ -15,7 +15,7 @@ const BASE_PATHS = {
   ACTIVITY: "/activity",
   ACTIVITY_TYPE: "/activityType",
   ACTIVITY_STATUS: "/activityStatus",
-  PROJECT: "/project",
+  PROJECT: "/projects",
   PROJECT_TYPE: "/projectType",
   PROJECT_STATUS: "/projectStatus",
   CUSTOMER: "/customer",

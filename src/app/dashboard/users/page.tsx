@@ -8,7 +8,8 @@ export default function Page() {
   const [currentTable, setCurrentTable] = useState("manager"); // Default role set to 'manager'
 
   const tables = [
-    { key: "manager", title: "Managers" },
+    { key: "activityManager", title: "Activity Managers" },
+    { key: "projectManager", title: "Project Managers" },
     { key: "admin", title: "Admins" },
     { key: "customer", title: "Customers" },
     { key: "worker", title: "Workers" },

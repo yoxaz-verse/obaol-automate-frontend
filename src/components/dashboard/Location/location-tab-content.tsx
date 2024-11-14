@@ -24,7 +24,7 @@ const LocationTabContent: React.FC<LocationTabContentProps> = ({
 }) => {
   const queryKey = ["locations", currentType];
   const refetchData = () => {
-    queryClient.invalidateQueries(queryKey);
+    queryClient.invalidateQueries();
   };
 
   // Fetch LocationManagers for the select field

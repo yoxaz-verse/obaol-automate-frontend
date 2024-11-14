@@ -1,5 +1,6 @@
 import { getData } from "@/core/api/apiHandler";
 import {
+  activityManagerRoutes,
   activityRoutes,
   activityStatusRoutes,
   activityTypeRoutes,
@@ -8,7 +9,7 @@ import {
   locationManagerRoutes,
   locationRoutes,
   locationTypeRoutes,
-  managerRoutes,
+  projectManagerRoutes,
   projectRoutes,
   projectStatusRoutes,
   projectTypeRoutes,
@@ -45,7 +46,12 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
   if (currentTable === "manager") {
     columns.push({ name: "ADMIN", uid: "adminName" });
   } else if (currentTable === "worker") {
-    columns.push({ name: "MANAGER", uid: "managerName" });
+    columns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
+  } else if (
+    currentTable === "projectManager" ||
+    currentTable === "activityManager"
+  ) {
+    columns.push({ name: "ADMIN", uid: "admin" });
   }
   // Add conditions for 'customer' if needed
 
@@ -54,7 +60,8 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
 export const apiRoutesByRole: Record<string, string> = {
   admin: adminRoutes.getAll,
-  manager: managerRoutes.getAll,
+  activityManager: activityManagerRoutes.getAll,
+  projectManager: projectManagerRoutes.getAll,
   customer: customerRoutes.getAll,
   worker: workerRoutes.getAll,
   location: locationRoutes.getAll,
@@ -117,7 +124,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-  manager: [
+  projectManager: [
     { label: "Name", type: "text", key: "name", inForm: true, inTable: true },
     {
       label: "Email",
@@ -133,15 +140,47 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
     },
+
     {
-      label: "Profile Picture",
-      type: "file",
-      key: "fileURL",
-      // accept: "image/*", // Accept only image files
-      // multiple: false, // Single file upload
+      label: "Admin",
+      type: "select",
+      key: "admin",
+      values: [], // We'll populate this dynamically
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  activityManager: [
+    { label: "Name", type: "text", key: "name", inForm: true, inTable: true },
+    {
+      label: "Email",
+      type: "email",
+      key: "email",
       inForm: true,
       inTable: true,
     },
+    {
+      label: "Password",
+      type: "password",
+      key: "password",
+      inForm: true,
+      inTable: false,
+    },
+
     {
       label: "Admin",
       type: "select",
@@ -237,7 +276,7 @@ export const initialTableConfig: Record<
       key: "serviceCompany",
       values: [], // We'll populate this dynamically
       inForm: true,
-      inTable: false,
+      inTable: true,
     },
     {
       label: "Created At",

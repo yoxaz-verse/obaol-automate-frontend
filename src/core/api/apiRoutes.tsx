@@ -7,7 +7,8 @@
 const BASE_PATHS = {
   USER: "/user",
   ADMIN: "/admin",
-  MANAGER: "/manager",
+  ACTIVITY_MANAGER: "/activityManager",
+  PROJECT_MANAGER: "/projectManager",
   LOCATION_MANAGER: "/locationManager",
   LOCATION: "/location",
   SERVICE_COMPANY: "/serviceCompany",
@@ -54,7 +55,12 @@ const addCustomRoutes = (
 // Define resource-specific routes using the CRUD generator
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
-export const managerRoutes = createCRUDRoutes(BASE_PATHS.MANAGER);
+export const activityManagerRoutes = createCRUDRoutes(
+  BASE_PATHS.ACTIVITY_MANAGER
+);
+export const projectManagerRoutes = createCRUDRoutes(
+  BASE_PATHS.PROJECT_MANAGER
+);
 export const locationManagerRoutes = createCRUDRoutes(
   BASE_PATHS.LOCATION_MANAGER
 );
@@ -137,7 +143,6 @@ export const apiRoutes = {
   account: accountRoutes,
   user: userRoutes,
   admin: adminRoutes,
-  manager: managerRoutes,
   locationManager: locationManagerRoutes,
   location: locationRoutes,
   serviceCompany: serviceCompanyRoutes,

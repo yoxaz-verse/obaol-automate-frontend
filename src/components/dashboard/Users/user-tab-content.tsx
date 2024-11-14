@@ -2,7 +2,6 @@
 import React from "react";
 import {
   adminRoutes,
-  managerRoutes,
   customerRoutes,
   workerRoutes,
   serviceCompanyRoutes,
@@ -42,7 +41,8 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   } = useQuery({
     queryKey: ["adminData"],
     queryFn: () => getData(adminRoutes.getAll),
-    enabled: currentTable === "manager", // Only fetch when currentTable is 'manager'
+    enabled:
+      currentTable === "activityManager" || currentTable === "projectManager", // Only fetch when currentTable is 'manager'
   });
 
   // Extract admin data
@@ -67,11 +67,16 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
         limit={100}
       >
         {(data: any) => {
+          console.log(data);
+
           const fetchedData = data?.data || [];
           // Generate formFields with updated values
           let formFields = tableConfig[currentTable];
           // Populate related field values dynamically
-          if (currentTable === "manager") {
+          if (
+            currentTable === "activityManager" ||
+            currentTable === "projectManager"
+          ) {
             // Use adminData to populate 'Admin' select options
             const relatedValues = adminData.map((admin: any) => ({
               key: String(admin._id),
@@ -99,13 +104,17 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
             );
           }
           // Handle other user types similarly if needed
+          console.log(fetchedData);
 
           const tableData = fetchedData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
-            if (currentTable === "manager") {
+            if (
+              currentTable === "activityManager" ||
+              currentTable === "projectManager"
+            ) {
               return {
                 ...rest,
-                adminName: item.admin ? item.admin.name : "N/A",
+                admin: item.admin ? item.admin.name : "N/A",
               };
             } else if (currentTable === "worker") {
               return {
@@ -119,6 +128,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
 
             return rest;
           });
+          console.log(tableData);
 
           return (
             <>

@@ -1,3 +1,4 @@
+"use client";
 import { getData } from "@/core/api/apiHandler";
 import {
   activityManagerRoutes,
@@ -14,29 +15,19 @@ import {
   projectStatusRoutes,
   projectTypeRoutes,
   serviceCompanyRoutes,
+  timeSheetRoutes,
   workerRoutes,
 } from "@/core/api/apiRoutes";
 import { useQuery } from "@tanstack/react-query";
 
-export const useSelectValues = () => {
-  const { data: locationTypeResponse, isLoading: isLocationTypeLoading } =
-    useQuery({
-      queryKey: ["LocationType"],
-      queryFn: () => getData(locationTypeRoutes.getAll),
-    });
-
-  const locationTypes = locationTypeResponse?.data?.data.data;
-
-  return {
-    locationTypes,
-    isLoading: isLocationTypeLoading,
-  };
-};
-
 // Helper function to generate columns based on the current table
 export const generateColumns = (currentTable: string, tableConfig: any) => {
-  const columns = tableConfig[currentTable]
-    .filter((field: any) => field.inTable && field.type !== "select") // Exclude select fields
+  // Filter out the "Actions" column initially
+  const nonActionColumns = tableConfig[currentTable]
+    .filter(
+      (field: any) =>
+        field.inTable && field.type !== "select" && field.key !== "actions2"
+    )
     .map((field: any) => ({
       name: field.label.toUpperCase(),
       uid: field.key,
@@ -44,18 +35,54 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
   // Dynamically add related columns based on the current table
   if (currentTable === "manager") {
-    columns.push({ name: "ADMIN", uid: "adminName" });
+    nonActionColumns.push({ name: "ADMIN", uid: "adminName" });
   } else if (currentTable === "worker") {
-    columns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
+    nonActionColumns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
+  } else if (currentTable === "locationManager") {
+    nonActionColumns.push({ name: "LOCATION", uid: "managedLocation" });
+  } else if (currentTable === "location") {
+    nonActionColumns.push({ name: "LOCATION TYPE", uid: "type" });
+  } else if (currentTable === "projects") {
+    nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
+    nonActionColumns.push({
+      name: "Project Manager",
+      uid: "projectManagerName",
+    });
+    nonActionColumns.push({ name: "Customer", uid: "customerName" });
+    nonActionColumns.push({ name: "ProjectStatus", uid: "projectStatus" });
+    nonActionColumns.push({ name: "Project Type", uid: "projectType" });
+    nonActionColumns.push({ name: "Location", uid: "location" });
+  } else if (currentTable === "activity") {
+    nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
+    nonActionColumns.push({
+      name: "Project Manager",
+      uid: "projectManagerName",
+    });
+    nonActionColumns.push({ name: "Customer", uid: "customerName" });
+    nonActionColumns.push({ name: "ProjectStatus", uid: "projectStatus" });
+    nonActionColumns.push({ name: "Project Type", uid: "projectType" });
+    nonActionColumns.push({ name: "Location", uid: "location" });
   } else if (
     currentTable === "projectManager" ||
     currentTable === "activityManager"
   ) {
-    columns.push({ name: "ADMIN", uid: "admin" });
+    nonActionColumns.push({ name: "ADMIN", uid: "admin" });
   }
-  // Add conditions for 'customer' if needed
 
-  return columns;
+  // Find the "Actions" column separately
+  const actionsColumn = tableConfig[currentTable].find(
+    (field: any) => field.type === "action" && field.inTable
+  );
+
+  // Append the "Actions" column at the end
+  if (actionsColumn) {
+    nonActionColumns.push({
+      name: actionsColumn.label.toUpperCase(),
+      uid: actionsColumn.key,
+    });
+  }
+
+  return nonActionColumns;
 };
 
 export const apiRoutesByRole: Record<string, string> = {
@@ -70,10 +97,11 @@ export const apiRoutesByRole: Record<string, string> = {
   projectType: projectTypeRoutes.getAll,
   serviceCompany: serviceCompanyRoutes.getAll,
   projectStatus: projectStatusRoutes.getAll,
-  project: projectRoutes.getAll,
+  projects: projectRoutes.getAll,
   activity: activityRoutes.getAll,
   activityType: activityTypeRoutes.getAll,
   activityStatus: activityStatusRoutes.getAll,
+  timeSheet: timeSheetRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -90,6 +118,9 @@ export const initialTableConfig: Record<
       | "image"
       | "action"
       | "email"
+      | "date"
+      | "number"
+      | "time"
       | "password"; // Define specific types
     key: string;
     inForm: boolean;
@@ -362,6 +393,13 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
+      label: "Owner",
+      type: "text",
+      key: "owner",
+      inForm: true,
+      inTable: true,
+    },
+    {
       label: "Address",
       type: "text",
       key: "address",
@@ -432,11 +470,10 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
     },
-
     {
       label: "Location Type",
       type: "select",
-      key: "type",
+      key: "locationType",
       values: [],
       inForm: true,
       inTable: false,
@@ -484,6 +521,14 @@ export const initialTableConfig: Record<
       label: "Name",
       type: "text",
       key: "name",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Location",
+      type: "select",
+      key: "location",
+      values: [],
       inForm: true,
       inTable: true,
     },
@@ -543,9 +588,9 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
-      label: "Manager",
+      label: "Project Manager",
       type: "select",
-      key: "manager",
+      key: "projectManager",
       values: [],
       inForm: true,
       inTable: true,
@@ -569,6 +614,14 @@ export const initialTableConfig: Record<
       label: "Project Type",
       type: "select",
       key: "type",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Location",
+      type: "select",
+      key: "location",
       values: [],
       inForm: true,
       inTable: true,
@@ -694,6 +747,14 @@ export const initialTableConfig: Record<
       label: "Customer",
       type: "select",
       key: "customer",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Activity Manager",
+      type: "select",
+      key: "activityManager",
       values: [],
       inForm: true,
       inTable: true,
@@ -939,4 +1000,73 @@ export const initialTableConfig: Record<
     },
   ],
   // TimeSheet
+  timeSheet: [
+    {
+      label: "Activity",
+      type: "select",
+      key: "activity",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Customer",
+      type: "select",
+      key: "customer",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Activity Manager",
+      type: "select",
+      key: "activityManager",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Workers",
+      type: "select",
+      key: "worker",
+      values: [],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Start Time",
+      type: "time",
+      key: "startTime",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "End Time",
+      type: "time",
+      key: "endTime",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Rejection Reason",
+      type: "textarea",
+      key: "rejectionReason",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
 };

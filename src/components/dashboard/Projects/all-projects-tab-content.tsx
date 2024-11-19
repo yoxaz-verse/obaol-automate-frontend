@@ -1,14 +1,15 @@
 // components/dashboard/Projects/project-tab-content.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import {
   adminRoutes,
-  managerRoutes,
   customerRoutes,
   projectRoutes,
   projectStatusRoutes,
   projectTypeRoutes,
+  projectManagerRoutes,
+  locationRoutes,
 } from "@/core/api/apiRoutes";
 import QueryComponent from "@/components/queryComponent";
 import { useQuery } from "@tanstack/react-query"; // Import useQuery
@@ -18,8 +19,13 @@ import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../Table/common-table";
 import DeleteModal from "@/components/Modals/delete";
 import DetailsModal from "@/components/Modals/details";
-import { generateColumns, initialTableConfig } from "@/utils/tableValues";
+import {
+  apiRoutesByRole,
+  generateColumns,
+  initialTableConfig,
+} from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
+import AuthContext from "@/context/AuthContext";
 
 interface ProjectTabContentProps {
   currentTable: string;
@@ -40,11 +46,6 @@ interface FormField {
   accept?: string;
   multiple?: boolean;
 }
-
-// Mapping roles to their API endpoints
-const apiRoutesByRole: Record<string, string> = {
-  projects: projectRoutes.getAll,
-};
 
 // const ProjectTabContents: React.FC<ProjectTabContentProps> = ({
 //   currentTable,
@@ -248,55 +249,40 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
+  const { user } = useContext(AuthContext); // Get current user from context
 
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
 
   // Fetch related data for dropdowns
-  const {
-    data: customersResponse,
-    isLoading: isCustomersLoading,
-    isError: isCustomersError,
-  } = useQuery({
+  const { data: customersResponse } = useQuery({
     queryKey: ["customers"],
     queryFn: () => getData(customerRoutes.getAll),
   });
 
-  const {
-    data: adminsResponse,
-    isLoading: isAdminsLoading,
-    isError: isAdminsError,
-  } = useQuery({
+  const { data: adminsResponse } = useQuery({
     queryKey: ["admins"],
     queryFn: () => getData(adminRoutes.getAll),
   });
 
-  const {
-    data: managersResponse,
-    isLoading: isManagersLoading,
-    isError: isManagersError,
-  } = useQuery({
-    queryKey: ["managers"],
-    queryFn: () => getData(managerRoutes.getAll),
+  const { data: managersResponse } = useQuery({
+    queryKey: ["projectManager"],
+    queryFn: () => getData(projectManagerRoutes.getAll),
   });
 
-  const {
-    data: projectStatusesResponse,
-    isLoading: isProjectStatusesLoading,
-    isError: isProjectStatusesError,
-  } = useQuery({
+  const { data: projectStatusesResponse } = useQuery({
     queryKey: ["projectStatuses"],
     queryFn: () => getData(projectStatusRoutes.getAll),
   });
 
-  const {
-    data: projectTypeResponse,
-    isLoading: isProjectTypeLoading,
-    isError: isProjectTypeError,
-  } = useQuery({
+  const { data: projectTypeResponse } = useQuery({
     queryKey: ["projectType"],
     queryFn: () => getData(projectTypeRoutes.getAll),
+  });
+  const { data: locationResponse } = useQuery({
+    queryKey: ["location"],
+    queryFn: () => getData(locationRoutes.getAll),
   });
 
   console.log(customersResponse);
@@ -306,6 +292,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   const managers = managersResponse?.data?.data.data;
   const projectStatuses = projectStatusesResponse?.data?.data.data;
   const projectType = projectTypeResponse?.data?.data.data;
+  const location = locationResponse?.data?.data.data;
 
   return (
     <>
@@ -313,6 +300,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
       managers &&
       projectStatuses &&
       projectType &&
+      location &&
       // isAdminsLoading &&
       admins ? (
         <QueryComponent
@@ -347,7 +335,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
               value: manager.name,
             }));
             formFields = formFields.map((field: any) =>
-              field.key === "manager"
+              field.key === "projectManager"
                 ? { ...field, values: managerValues }
                 : field
             );
@@ -373,18 +361,30 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
                 : field
             );
 
+            const locationValues = location.map((location: any) => ({
+              key: String(location._id),
+              value: location.name,
+            }));
+
+            formFields = formFields.map((field: any) =>
+              field.key === "location"
+                ? { ...field, values: locationValues }
+                : field
+            );
+
             const tableData = fetchedData.map((item: any) => {
               const { isDeleted, isActive, password, __v, ...rest } = item;
               if (currentTable === "projects") {
                 return {
                   ...rest,
                   adminName: item.admin ? item.admin.name : "N/A",
-                  managerName: item.manager ? item.manager.name : "N/A",
-                  customerName: item.customer ? item.customer.name : "N/A",
-                  projectStatus: item.projectStatus
-                    ? item.projectStatus
+                  projectManagerName: item.projectManager
+                    ? item.projectManager.name
                     : "N/A",
-                  projectType: item.projectType ? item.projectType : "N/A",
+                  customerName: item.customer ? item.customer.name : "N/A",
+                  projectStatus: item.status.name ? item.status.name : "N/A",
+                  projectType: item.type.name ? item.type.name : "N/A",
+                  location: item.location.name ? item.location.name : "N/A",
                 };
                 // Handle other user types similarly if needed
               }
@@ -394,12 +394,14 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
             return (
               <>
                 {/* AddModal for adding new entries */}
-                <AddModal
-                  currentTable={currentTable}
-                  formFields={formFields} // Pass the updated formFields
-                  apiEndpoint={apiRoutesByRole[currentTable]}
-                  refetchData={refetchData}
-                />
+                {user?.role === "Admin" && (
+                  <AddModal
+                    currentTable={currentTable}
+                    formFields={formFields} // Pass the updated formFields
+                    apiEndpoint={apiRoutesByRole[currentTable]}
+                    refetchData={refetchData}
+                  />
+                )}
                 <Spacer y={5} />
                 {tableData.length > 0 ? (
                   <CommonTable

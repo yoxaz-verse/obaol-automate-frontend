@@ -13,6 +13,7 @@ import {
   Chip,
   DatePicker,
   Switch,
+  TimeInput,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
@@ -297,6 +298,8 @@ const AddModal: React.FC<AddModalProps> = ({
             {field.label}
           </Switch>
         );
+      case "time":
+        return <TimeInput name={field.key} label={field.label} />;
 
       case "select":
         if (field.values)

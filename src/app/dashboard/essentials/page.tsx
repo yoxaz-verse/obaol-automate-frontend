@@ -5,7 +5,6 @@ import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
-import LocationTabContent from "@/components/dashboard/Location/location-tab-content";
 
 export default function Essentials() {
   const [locationTab, setLocationTab] = React.useState("locationType");
@@ -38,28 +37,6 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Spacer y={4} />
-          <Title title="Location" />
-          <Tabs
-            aria-label="Location Tabs"
-            selectedKey={locationTab}
-            onSelectionChange={(key) => setLocationTab(key as string)}
-          >
-            {locationTabs.map((tab) => (
-              <Tab key={tab.key} title={tab.title}>
-                {tab.key === "location" && (
-                  // <LocationTabContent currentType="all" />
-                  <EssentialTabContent essentialName="location" />
-                )}
-                {tab.key === "locationType" && (
-                  <EssentialTabContent essentialName="locationType" />
-                )}
-                {tab.key === "locationManager" && (
-                  <EssentialTabContent essentialName="locationManager" />
-                )}
-              </Tab>
-            ))}
-          </Tabs>
           <Spacer y={4} />
           <Title title="Activity" />{" "}
           <Tabs
@@ -99,6 +76,28 @@ export default function Essentials() {
           <Spacer y={4} />
           <Title title="Service Company" />{" "}
           <EssentialTabContent essentialName="serviceCompany" />
+          <Spacer y={4} />
+          <Title title="Location" />
+          <Tabs
+            aria-label="Location Tabs"
+            selectedKey={locationTab}
+            onSelectionChange={(key) => setLocationTab(key as string)}
+          >
+            {locationTabs.map((tab) => (
+              <Tab key={tab.key} title={tab.title}>
+                {tab.key === "location" && (
+                  // <LocationTabContent currentType="all" />
+                  <EssentialTabContent essentialName="location" />
+                )}
+                {tab.key === "locationType" && (
+                  <EssentialTabContent essentialName="locationType" />
+                )}
+                {tab.key === "locationManager" && (
+                  <EssentialTabContent essentialName="locationManager" />
+                )}
+              </Tab>
+            ))}
+          </Tabs>{" "}
         </div>
       </div>
     </div>

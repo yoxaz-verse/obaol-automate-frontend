@@ -1,11 +1,6 @@
 "use client";
 import React from "react";
-import {
-  adminRoutes,
-  customerRoutes,
-  workerRoutes,
-  serviceCompanyRoutes,
-} from "@/core/api/apiRoutes";
+import { adminRoutes, serviceCompanyRoutes } from "@/core/api/apiRoutes";
 import QueryComponent from "@/components/queryComponent";
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../Table/common-table";

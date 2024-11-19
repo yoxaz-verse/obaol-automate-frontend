@@ -25,7 +25,7 @@ const LoginComponent = () => {
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
 
-  const roles = ["Manager", "Admin", "Customer", "Worker"];
+  const roles = ["ActivityManager","ProjectManager", "Admin", "Customer", "Worker"];
   const [role, setRole] = useState("Admin");
   const router = useRouter();
   const { isAuthenticated, loading, login } = useContext(AuthContext);
@@ -122,7 +122,10 @@ const LoginComponent = () => {
               isVisible ? (
                 <IoEye onClick={toggleVisibility} className="cursor-pointer" />
               ) : (
-                <IoEyeOff onClick={toggleVisibility} className="cursor-pointer" />
+                <IoEyeOff
+                  onClick={toggleVisibility}
+                  className="cursor-pointer"
+                />
               )
             }
             type={isVisible ? "text" : "password"}

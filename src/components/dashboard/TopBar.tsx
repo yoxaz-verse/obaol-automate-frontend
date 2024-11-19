@@ -1,3 +1,5 @@
+"use client";
+
 import { TopbarProps } from "@/data/interface-data";
 import {
   Avatar,
@@ -5,131 +7,95 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Input,
   User,
 } from "@nextui-org/react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { CiMenuBurger } from "react-icons/ci";
-import {
-  FiFileText,
-  FiInbox,
-  FiMessageCircle,
-  FiSettings,
-  FiUsers,
-} from "react-icons/fi";
-import { GrNotification, GrSearch, GrUserManager } from "react-icons/gr";
 import { MdDashboard } from "react-icons/md";
-import { RiAdminFill, RiBuildingLine } from "react-icons/ri";
-import UnderDevelopment from "../hashed/under-development";
+import { FiFileText, FiInbox, FiMessageCircle } from "react-icons/fi";
+import { RiBuildingLine, RiAdminFill } from "react-icons/ri";
+import { GrNotification } from "react-icons/gr";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { link } from "fs";
+import AuthContext from "@/context/AuthContext";
+import { routeRoles } from "@/app/dashboard/layout";
 
 const TopBar = ({ username, role }: TopbarProps) => {
-  const [selectedOption, setSelectedOption] = useState("");
+  const { logout } = useContext(AuthContext);
   const router = useRouter();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(true);
+
   const sidebarOptions = [
     {
       name: "Dashboard",
       icon: <MdDashboard />,
-      color: selectedOption === "Dashboard" ? "text-blue-600" : "",
       link: "/dashboard",
     },
     {
       name: "Projects",
       icon: <FiFileText />,
-      color: selectedOption === "Projects" ? "text-blue-600" : "",
       link: "/dashboard/projects",
     },
     {
       name: "Activity",
       icon: <FiInbox />,
-      color: selectedOption === "Activity" ? "text-blue-600" : "",
       link: "/dashboard/activity",
     },
     {
       name: "Essentials",
       icon: <RiBuildingLine />,
-      color: selectedOption === "Analytics" ? "text-blue-600" : "",
       link: "/dashboard/essentials",
     },
-    // {
-    //   name: "Workers",
-    //   icon: <FiMessageCircle />,
-    //   color: selectedOption === "Workers" ? "text-blue-600" : "",
-    //   link: "/dashboard/users",
-    // },
     {
-      name: "Time sheet",
-      icon: <FiFileText />,
-      color: selectedOption === "Customers" ? "text-blue-600" : "",
+      name: "Time Sheet",
+      icon: <FiMessageCircle />,
       link: "/dashboard/timesheet",
     },
-    // {
-    //   name: "Manager",
-    //   icon: <GrUserManager />,
-    //   color: selectedOption === "Manager" ? "text-blue-600" : "",
-    //   link: "/dashboard/users",
-    // },
-    // {
-    //   name: "Services",
-    //   icon: <RiBuildingLine />,
-    //   color: selectedOption === "Services" ? "text-blue-600" : "",
-    //   link: "/dashboard/users",
-    // },
     {
       name: "Users",
       icon: <RiAdminFill />,
-      color: selectedOption === "Admins" ? "text-blue-600" : "",
       link: "/dashboard/users",
     },
-  ].filter((option) => option !== null);
-  const handleOptionClick = (option: string) => {
-    setSelectedOption(option);
-    console.log(option);
-  };
+  ];
+
+  // Filter options based on the user's role
+  const filteredOptions = sidebarOptions.filter((option) => {
+    const allowedRoles = routeRoles[option.link] || [];
+    return allowedRoles.includes(role);
+  });
+
   return (
-    <div className="flex justify-between p-5">
+    <div className="flex justify-between p-5 bg-gray-100 shadow-md">
+      {/* Menu for small screens */}
       <Dropdown className="items-center justify-center h-full flex xl:hidden">
         <DropdownTrigger>
-          <div className="w-4 h-4 p-3  border-slate-300 md:hidden">
-            <CiMenuBurger />
+          <div className="w-6 h-6 flex items-center justify-center xl:hidden">
+            <CiMenuBurger size={24} />
           </div>
         </DropdownTrigger>
         <DropdownMenu
-          aria-label="Static Actions"
+          aria-label="Sidebar Options"
           disallowEmptySelection
           selectionMode="single"
-          selectedKeys={selectedOption}
         >
-          {sidebarOptions.map((option, index) => (
-            <DropdownItem
-              key={option?.name}
-              className={`${
-                selectedOption === option?.name && "bg-[#e7f1fe] font-bold"
-              }`}
-            >
-              <Link
-                href={option.link}
-                key="new"
-                className={`${
-                  option?.name === "Logout" && option?.color
-                } flex flex-row w-full items-center`}
-                onClick={() =>
-                  handleOptionClick(option?.name ? option.name : "Dashboard")
-                }
-              >
-                <div className={`mr-2 ${option?.color}`}>{option?.icon}</div>
-                <div>{option?.name}</div>
+          {filteredOptions.map((option) => (
+            <DropdownItem key={option.name}>
+              <Link href={option.link}>
+                <div className="flex items-center gap-2">
+                  {option.icon}
+                  {option.name}
+                </div>
               </Link>
             </DropdownItem>
           ))}
         </DropdownMenu>
       </Dropdown>
-      <div className="p-5 hidden md:block">
-        <div className="text-sm md:text-xl font-medium ">{role} Panel</div>
-        <div className="text-xs sm:text-md ">
+
+      {/* Title Section */}
+      <div className="hidden md:block">
+        <div className="text-lg font-bold">
+          {role.charAt(0).toUpperCase() + role.slice(1)} Panel
+        </div>
+        <div className="text-sm">
           {new Date().getHours() < 12
             ? "Good Morning"
             : new Date().getHours() < 18
@@ -137,67 +103,48 @@ const TopBar = ({ username, role }: TopbarProps) => {
             : "Good Evening"}
         </div>
       </div>
-      <div className="flex items-center justify-center gap-5 ">
-        {/* <Input
-          type="text"
-          label="Search"
-          color="primary"
-          className="lg:w-[500px] h-10  b "
-          // color="primary"
-          endContent={
-            <UnderDevelopment>
-              <GrSearch className="text-xl text-default-400 pointer-events-none flex-shrink-0" />
-            </UnderDevelopment>
-          }
-        /> */}
-        <UnderDevelopment>
-          <Dropdown placement="bottom-start">
-            <DropdownTrigger>
-              <div className="h-6 flex items-center justify-center px-1">
-                <GrNotification className="text-xl" />
-              </div>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="User Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2">
-                <p className="font-bold">Signed in as</p>
-                <p className="font-bold">{username}</p>
-              </DropdownItem>
-              <DropdownItem
-                key="logout"
-                color="danger"
-                onClick={() => {
-                  localStorage.removeItem("currentUserToken");
-                  router.push("/auth");
-                }}
-              >
-                Log Out
-              </DropdownItem>
-            </DropdownMenu>{" "}
-          </Dropdown>
-        </UnderDevelopment>
+
+      {/* User and Notifications Section */}
+      <div className="flex items-center gap-5">
         <Dropdown placement="bottom-start">
+          <DropdownTrigger>
+            <div className="h-6 flex items-center justify-center px-1">
+              <GrNotification className="text-xl" />
+            </div>
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Notifications">
+            <DropdownItem key="profile">No new notifications</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+
+        <Dropdown placement="bottom-end">
           <DropdownTrigger>
             <User
               as="button"
               avatarProps={{
                 isBordered: true,
+                color: "primary",
               }}
-              className="transition-transform"
-              description={role}
               name={username}
+              description={role}
             />
           </DropdownTrigger>
-          <DropdownMenu aria-label="User Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-bold">Signed in as</p>
-              <p className="font-bold">{username}</p>
+          <DropdownMenu aria-label="User Actions">
+            <DropdownItem key="profile">
+              <div>
+                Signed in as <strong>{username}</strong>
+              </div>
             </DropdownItem>
             <DropdownItem
               key="logout"
               color="danger"
-              onClick={() => {
-                localStorage.removeItem("currentUserToken");
-                router.push("/auth");
+              onClick={async () => {
+                try {
+                  await logout(); // Call logout from AuthContext
+                  router.push("/auth");
+                } catch (err) {
+                  console.error("Logout failed:", err);
+                }
               }}
             >
               Log Out

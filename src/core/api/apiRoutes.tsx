@@ -19,6 +19,7 @@ const BASE_PATHS = {
   PROJECT: "/projects",
   PROJECT_TYPE: "/projectType",
   PROJECT_STATUS: "/projectStatus",
+  TIME_SHEET: "/timeSheet",
   CUSTOMER: "/customer",
   WORKER: "/worker",
   STATUS: "/status",
@@ -72,6 +73,12 @@ export const locationRoutes = addCustomRoutes(
 );
 export const serviceCompanyRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.SERVICE_COMPANY),
+  {
+    // If you have other custom routes for serviceCompany, add them here
+  }
+);
+export const timeSheetRoutes = addCustomRoutes(
+  createCRUDRoutes(BASE_PATHS.TIME_SHEET),
   {
     // If you have other custom routes for serviceCompany, add them here
   }
@@ -157,4 +164,5 @@ export const apiRoutes = {
   project: projectRoutes,
   activity: activityRoutes,
   activityStatus: activityStatusRoutes,
+  timeSheet: timeSheetRoutes,
 };

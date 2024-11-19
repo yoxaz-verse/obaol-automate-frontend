@@ -4,7 +4,6 @@
 import React, { useMemo } from "react";
 import {
   adminRoutes,
-  managerRoutes,
   customerRoutes,
   projectRoutes,
   projectStatusRoutes,
@@ -66,7 +65,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
     isError: isProjectsError,
   } = useQuery({
     queryKey: ["projects"],
-    queryFn: () => getData(apiRoutesByRole["project"]),
+    queryFn: () => getData(apiRoutesByRole["projects"]),
   });
 
   // Fetch related data for dropdowns
@@ -89,12 +88,12 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   });
 
   const {
-    data: managersResponse,
+    data: activityManagersResponse,
     isLoading: isManagersLoading,
     isError: isManagersError,
   } = useQuery({
-    queryKey: ["managers"],
-    queryFn: () => getData(apiRoutesByRole["manager"]),
+    queryKey: ["activityManager"],
+    queryFn: () => getData(apiRoutesByRole["activityManager"]),
   });
 
   const {
@@ -129,7 +128,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   const customers = customersResponse?.data.data.data;
   const workers = workersResponse?.data.data.data;
   const admins = adminsResponse?.data?.data.data;
-  const managers = managersResponse?.data?.data.data;
+  const activityManagers = activityManagersResponse?.data?.data.data;
   const activityStatuses = activityStatusesResponse?.data?.data.data;
   const activityType = activityTypeResponse?.data?.data.data;
   const projects = projectsResponse?.data?.data.data;
@@ -137,11 +136,11 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   return (
     <>
       {customers &&
-      managers &&
+      activityManagers &&
       activityStatuses &&
       activityType &&
       workers &&
-      // isAdminsLoading &&
+      projects && // isAdminsLoading &&
       admins ? (
         <QueryComponent
           api={apiRoutesByRole[currentTable]}
@@ -193,13 +192,15 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
               field.key === "admin" ? { ...field, values: adminValues } : field
             );
             //Manager
-            const managerValues = managers.map((manager: any) => ({
-              key: String(manager._id),
-              value: manager.name,
-            }));
+            const activityManagersValues = activityManagers.map(
+              (activityManagers: any) => ({
+                key: String(activityManagers._id),
+                value: activityManagers.name,
+              })
+            );
             formFields = formFields.map((field: any) =>
-              field.key === "manager"
-                ? { ...field, values: managerValues }
+              field.key === "activityManager"
+                ? { ...field, values: activityManagersValues }
                 : field
             );
             //Activity Status

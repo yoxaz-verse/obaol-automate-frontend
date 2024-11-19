@@ -1,6 +1,5 @@
 "use client";
 import LoginComponent from "@/components/Login/login-component";
-import { accountRoutes, authRoutes } from "@/core/api/apiRoutes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

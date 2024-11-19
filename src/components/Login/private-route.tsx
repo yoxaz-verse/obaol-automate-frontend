@@ -1,23 +1,31 @@
-// src/components/PrivateRoute.tsx
-
-"use client";
-
-import { useContext, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect } from "react";
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useContext(AuthContext);
+const PrivateRoute = ({
+  children,
+  allowedRoles = [], // Specify roles that can access this route
+}: {
+  children: React.ReactNode;
+  allowedRoles?: string[]; // Array of allowed roles
+}) => {
+  const { isAuthenticated, loading, user } = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/auth");
+    if (!loading) {
+      if (!isAuthenticated) {
+        router.push("/auth"); // Redirect if not authenticated
+      } else if (
+        allowedRoles.length > 0 &&
+        !allowedRoles.includes(user?.role || "")
+      ) {
+        router.push("/403"); // Redirect to a "Forbidden" page if the role is unauthorized
+      }
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, user, allowedRoles, router]);
 
   if (loading) {
-    // Show a loading indicator while checking authentication
     return (
       <div className="flex h-screen justify-center items-center">
         <p>Loading...</p>
@@ -25,12 +33,13 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!isAuthenticated) {
-    // If not authenticated, do not render children (redirect will happen)
-    return null;
+  if (
+    !isAuthenticated ||
+    (allowedRoles.length > 0 && !allowedRoles.includes(user?.role || ""))
+  ) {
+    return null; // Prevent rendering protected content
   }
 
-  // If authenticated, render the protected content
   return <>{children}</>;
 };
 

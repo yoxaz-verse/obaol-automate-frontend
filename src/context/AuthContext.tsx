@@ -78,13 +78,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // Function to handle logout
   const logout = async () => {
     try {
-      await postData("/logout", {});
+      // Clear authentication state
       setAuth({
         isAuthenticated: false,
         user: null,
         loading: false,
       });
-      router.push("/auth"); // Redirect after logout
+
+      // Remove the token from localStorage
+      localStorage.removeItem("currentUserToken");
+
+      // Redirect to the login page or another route
+      router.push("/auth");
     } catch (error) {
       console.error("Logout error:", error);
     }

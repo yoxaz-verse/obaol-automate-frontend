@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   FiFileText,
   FiInbox,
@@ -12,28 +12,16 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { RiBuildingLine } from "react-icons/ri";
 import { useRouter, usePathname } from "next/navigation";
+import AuthContext from "@/context/AuthContext";
+import { routeRoles } from "@/app/dashboard/layout";
 
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
-
+  const { user } = useContext(AuthContext); // Get current user from context
   const [selectedOption, setSelectedOption] = useState<string>("dashboard");
 
-  useEffect(() => {
-    // Extract the current section from the pathname
-    // For example, '/dashboard/projects' -> 'projects'
-    const pathSegments = pathname.split("/").filter(Boolean);
-    let currentOption = "dashboard"; // Default option
-
-    if (pathSegments[0] === "dashboard") {
-      currentOption = pathSegments[1] || "dashboard";
-    } else {
-      currentOption = pathSegments[0];
-    }
-
-    setSelectedOption(currentOption.toLowerCase());
-  }, [pathname]);
-
+  // Sidebar options with links and icons
   const sidebarOptions = [
     {
       name: "Dashboard",
@@ -67,6 +55,25 @@ const Sidebar = () => {
     },
   ];
 
+  useEffect(() => {
+    const pathSegments = pathname.split("/").filter(Boolean);
+    let currentOption = "dashboard"; // Default option
+
+    if (pathSegments[0] === "dashboard") {
+      currentOption = pathSegments[1] || "dashboard";
+    } else {
+      currentOption = pathSegments[0];
+    }
+
+    setSelectedOption(currentOption.toLowerCase());
+  }, [pathname]);
+
+  // Filter sidebar options based on user role and route roles
+  const filteredOptions = sidebarOptions.filter((option) => {
+    const allowedRoles = routeRoles[option.link] || [];
+    return user?.role ? allowedRoles.includes(user.role) : false;
+  });
+
   const handleOptionClick = (optionLink: string, optionName: string) => {
     setSelectedOption(optionName.toLowerCase());
     router.push(optionLink);
@@ -76,7 +83,7 @@ const Sidebar = () => {
     <div className="flex fixed flex-col justify-between w-1/6 h-full">
       <div className="bg-white p-2 sm:p-4 rounded-lg shadow-lg justify-evenly h-full hidden md:block">
         <div className="flex py-[50px] justify-center items-center">LOGO</div>
-        {sidebarOptions.map((option, index) => (
+        {filteredOptions.map((option, index) => (
           <div
             key={index}
             onClick={() => handleOptionClick(option.link, option.name)}

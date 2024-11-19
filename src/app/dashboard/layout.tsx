@@ -1,21 +1,43 @@
 "use client";
 
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import AuthContext from "@/context/AuthContext"; // Adjust the import path as necessary
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import Template from "../template";
 import PrivateRoute from "@/components/Login/private-route";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
-import { authRoutes } from "@/core/api/apiRoutes";
+import { usePathname } from "next/navigation";
 
+export const routeRoles: { [key: string]: string[] } = {
+  "/dashboard": [
+    "Admin",
+    "Customer",
+    "ActivityManager",
+    "ProjectManager",
+    "Worker",
+  ],
+  "/dashboard/projects": [
+    "Admin",
+    "Customer",
+    "ActivityManager",
+    "ProjectManager",
+    "Worker",
+  ],
+  "/dashboard/essentials": ["Admin"],
+  "/dashboard/activity": ["Admin"],
+  "/dashboard/users": ["Admin"],
+};
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname(); // Gets the current URL pathname
+
+  const allowedRoles = routeRoles[pathname] || [];
+
   const { user, isAuthenticated, loading } = useContext(AuthContext);
+  console.log(allowedRoles);
 
   // Example: Fetch data based on user role
   // Replace 'YOUR_API_ENDPOINT' with the actual endpoint
@@ -40,7 +62,7 @@ export default function DashboardLayout({
 
   return (
     <section className="w-full h-full flex">
-      <PrivateRoute>
+      <PrivateRoute allowedRoles={allowedRoles}>
         <div className="w-1/6 h-screen hidden lg:block">
           <Sidebar />
         </div>

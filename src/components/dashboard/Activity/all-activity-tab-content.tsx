@@ -1,7 +1,7 @@
 // components/dashboard/Projects/project-tab-content.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import {
   adminRoutes,
   customerRoutes,
@@ -27,6 +27,7 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
+import AuthContext from "@/context/AuthContext";
 
 interface ActivityTabContentProps {
   currentTable: string;
@@ -53,6 +54,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
+  const { user } = useContext(AuthContext); // Get current user from context
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -69,56 +71,32 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   });
 
   // Fetch related data for dropdowns
-  const {
-    data: customersResponse,
-    isLoading: isCustomersLoading,
-    isError: isCustomersError,
-  } = useQuery({
+  const { data: customersResponse } = useQuery({
     queryKey: ["customers"],
     queryFn: () => getData(apiRoutesByRole["customer"]),
   });
 
-  const {
-    data: adminsResponse,
-    isLoading: isAdminsLoading,
-    isError: isAdminsError,
-  } = useQuery({
+  const { data: adminsResponse } = useQuery({
     queryKey: ["admins"],
     queryFn: () => getData(apiRoutesByRole["admin"]),
   });
 
-  const {
-    data: activityManagersResponse,
-    isLoading: isManagersLoading,
-    isError: isManagersError,
-  } = useQuery({
+  const { data: activityManagersResponse } = useQuery({
     queryKey: ["activityManager"],
     queryFn: () => getData(apiRoutesByRole["activityManager"]),
   });
 
-  const {
-    data: activityStatusesResponse,
-    isLoading: isActivityStatusesLoading,
-    isError: isActivityStatusesError,
-  } = useQuery({
+  const { data: activityStatusesResponse } = useQuery({
     queryKey: ["ActivityStatuses"],
     queryFn: () => getData(apiRoutesByRole["activityStatus"]),
   });
 
-  const {
-    data: activityTypeResponse,
-    isLoading: isActivityTypeLoading,
-    isError: isActivityTypeError,
-  } = useQuery({
+  const { data: activityTypeResponse } = useQuery({
     queryKey: ["ActivityType"],
     queryFn: () => getData(apiRoutesByRole["activityType"]),
   });
 
-  const {
-    data: workersResponse,
-    isLoading: isworkerLoading,
-    isError: isworkerError,
-  } = useQuery({
+  const { data: workersResponse } = useQuery({
     queryKey: ["workerType"],
     queryFn: () => getData(apiRoutesByRole["worker"]),
   });

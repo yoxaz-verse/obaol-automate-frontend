@@ -48,7 +48,8 @@ export const tabUtil = (tab: string, user: string) => {
     return <Projects role={user} />;
   } else if (tab === "Activity") {
     return <Activity role={user} />;
-  } else if (tab === "Users") {
-    return <Users role={user} />;
-  }
+  } 
+  // else if (tab === "Users") {
+    // return <Users role={user} />;
+  // }
 };

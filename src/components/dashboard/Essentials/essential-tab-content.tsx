@@ -20,26 +20,22 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
 
   const columns = generateColumns(essentialName, tableConfig);
-  const { data: locationTypeResponse, isLoading: isLocationTypeLoading } =
-    useQuery({
-      queryKey: ["LocationType"],
-      queryFn: () => getData(locationTypeRoutes.getAll),
-      enabled: essentialName === "location",
-    });
-  const { data: locationResponse, isLoading: isLocationLoading } = useQuery({
+  const { data: locationTypeResponse } = useQuery({
+    queryKey: ["LocationType"],
+    queryFn: () => getData(locationTypeRoutes.getAll),
+    enabled: essentialName === "location",
+  });
+  const { data: locationResponse } = useQuery({
     queryKey: ["Location"],
     queryFn: () => getData(locationRoutes.getAll),
     enabled: essentialName === "locationManager",
   });
 
   const locationTypeValue = locationTypeResponse?.data?.data.data;
-  console.log(locationTypeValue);
 
   const locationValue = locationResponse?.data?.data.data;
-  console.log(locationValue);
 
   const queryKey = [essentialName];
-  const [refetchFlag, setRefetchFlag] = useState(false);
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -66,7 +62,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
               // }));
               let formFields = tableConfig[essentialName];
 
-              if (essentialName === "location") {
+              if (essentialName === "location" && locationTypeValue) {
                 const locationTypeValues = locationTypeValue.map(
                   (locationType: any) => ({
                     key: String(locationType._id),
@@ -79,7 +75,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     : field
                 );
               }
-              if (essentialName === "locationManager") {
+              if (essentialName === "locationManager" && locationValue) {
                 const locationValues = locationValue.map(
                   (locationManager: any) => ({
                     key: String(locationManager._id),

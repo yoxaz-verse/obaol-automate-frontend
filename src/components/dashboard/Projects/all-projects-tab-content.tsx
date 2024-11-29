@@ -26,6 +26,8 @@ import {
 } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 import AuthContext from "@/context/AuthContext";
+import { FiEye } from "react-icons/fi";
+import Link from "next/link";
 
 interface ProjectTabContentProps {
   currentTable: string;
@@ -285,7 +287,6 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
     queryFn: () => getData(locationRoutes.getAll),
   });
 
-  console.log(customersResponse);
   // Extract data or set as empty arrays
   const customers = customersResponse?.data.data.data;
   const admins = adminsResponse?.data?.data.data;
@@ -382,9 +383,9 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
                     ? item.projectManager.name
                     : "N/A",
                   customerName: item.customer ? item.customer.name : "N/A",
-                  projectStatus: item.status.name ? item.status.name : "N/A",
-                  projectType: item.type.name ? item.type.name : "N/A",
-                  location: item.location.name ? item.location.name : "N/A",
+                  projectStatus: item.status ? item.status.name : "N/A",
+                  projectType: item.type ? item.type.name : "N/A",
+                  location: item.location ? item.location.name : "N/A",
                 };
                 // Handle other user types similarly if needed
               }
@@ -408,16 +409,22 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
                     TableData={tableData}
                     columns={columns}
                     isLoading={false}
-                    viewModal={(item: any) => <DetailsModal data={item} />}
-                    editModal={(item: any) => (
-                      <EditModal
-                        initialData={item}
-                        currentTable={currentTable}
-                        formFields={tableConfig[currentTable]}
-                        apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
-                        refetchData={refetchData}
-                      />
+                    viewModal={(item: any) => (
+                      <div>
+                        <Link href={`/dashboard/projects/${item._id}`}>
+                          <FiEye className="cursor-pointer" />
+                        </Link>
+                      </div>
                     )}
+                    // editModal={(item: any) => (
+                    //   <EditModal
+                    //     initialData={item}
+                    //     currentTable={currentTable}
+                    //     formFields={tableConfig[currentTable]}
+                    //     apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
+                    //     refetchData={refetchData}
+                    //   />
+                    // )}
                     deleteModal={(item: any) => (
                       <DeleteModal
                         _id={item._id}
@@ -436,7 +443,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
           }}
         </QueryComponent>
       ) : (
-        "Loading"
+        "Projects Loading"
       )}{" "}
     </>
   );

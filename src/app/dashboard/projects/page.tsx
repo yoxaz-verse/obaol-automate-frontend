@@ -241,6 +241,7 @@
 import React from "react";
 import { Tabs, Tab } from "@nextui-org/react";
 import ProjectTabContent from "@/components/dashboard/Projects/all-projects-tab-content";
+import NewProjectsCharts from "@/components/dashboard/Projects/new-projects-charts";
 
 export default function ProjectsPage() {
   const [currentTable, setCurrentTable] = React.useState("projects"); // Default tab
@@ -253,6 +254,7 @@ export default function ProjectsPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-6xl">
+        <NewProjectsCharts />
         <div className="my-4">
           <Tabs
             aria-label="Project Tabs"

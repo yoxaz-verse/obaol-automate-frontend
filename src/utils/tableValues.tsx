@@ -562,7 +562,7 @@ export const initialTableConfig: Record<
       type: "textarea",
       key: "description",
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Custom ID",
@@ -585,7 +585,7 @@ export const initialTableConfig: Record<
       key: "admin",
       values: [],
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Project Manager",
@@ -593,7 +593,7 @@ export const initialTableConfig: Record<
       key: "projectManager",
       values: [],
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Assignment Date ",
@@ -631,14 +631,14 @@ export const initialTableConfig: Record<
       type: "textarea",
       key: "task",
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Order Number",
       type: "number",
       key: "orderNumber",
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
 
     {
@@ -654,7 +654,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "createdAt",
       inForm: false,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Actions",

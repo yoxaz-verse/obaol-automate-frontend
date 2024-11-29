@@ -4,6 +4,7 @@ import React from "react";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Spinner } from "@nextui-org/react";
 
 interface QueryComponentProps<T> {
   api: string;
@@ -31,7 +32,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     toast.loading(`Fetching API for ${queryKey}`, {
       position: "top-right",
     });
-    return <div>Query Loading...</div>;
+    return <Spinner label="Loading..." color="primary" labelColor="primary" />;
   }
 
   if (isError) {

@@ -7,6 +7,8 @@ import TopBar from "@/components/dashboard/TopBar";
 import Template from "../template";
 import PrivateRoute from "@/components/Login/private-route";
 import { usePathname } from "next/navigation";
+import { Spacer } from "@nextui-org/react";
+import { getAllowedRoles } from "@/utils/roleHelpers";
 
 export const routeRoles: { [key: string]: string[] } = {
   "/dashboard": [
@@ -34,10 +36,9 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname(); // Gets the current URL pathname
 
-  const allowedRoles = routeRoles[pathname] || [];
+  const allowedRoles = getAllowedRoles(pathname); // Dynamically determine allowed roles
 
   const { user, isAuthenticated, loading } = useContext(AuthContext);
-  console.log(allowedRoles);
 
   // Example: Fetch data based on user role
   // Replace 'YOUR_API_ENDPOINT' with the actual endpoint
@@ -75,7 +76,7 @@ export default function DashboardLayout({
                 role={user.role} // Assuming user.role is a string
               />
             )}
-
+            <Spacer y={2} />
             <div className="h-full w-full">
               {/* Optionally, handle role-specific loading or error */}
               {/* {roleDataLoading && <p>Loading role-specific data...</p>} */}

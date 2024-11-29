@@ -287,14 +287,14 @@
 
 // export default Projects;
 
-
 // pages/projects.tsx
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { Tabs, Tab } from "@nextui-org/react";
 import ProjectTabContent from "@/components/dashboard/Projects/all-projects-tab-content";
 import ActivityTabContent from "@/components/dashboard/Activity/all-activity-tab-content";
+import AuthContext from "@/context/AuthContext";
 
 export default function ProjectsPage() {
   const [currentTable, setCurrentTable] = React.useState("projects"); // Default tab

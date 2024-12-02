@@ -35,26 +35,13 @@ export default function CommonTable({
   isLoading = false,
 }: TableProps) {
   type UserData = (typeof TableData)[0];
+  console.log(TableData);
 
   const renderCell = React.useCallback(
     (item: UserData, columnKey: React.Key) => {
       const cellValue = item[columnKey as keyof UserData];
 
       switch (columnKey) {
-        case "name":
-        case "email":
-        case "adminName":
-        case "managerName":
-        case "createdAt":
-        case "address":
-        case "city":
-        case "province":
-        case "region":
-        case "nation":
-        case "locationTypeName":
-        case "locationManagerNames":
-          return <p>{cellValue}</p>;
-
         case "fileURL":
           // Use fileURL if available, otherwise construct from cellValue
           const imageURL = item.fileURL
@@ -74,6 +61,18 @@ export default function CommonTable({
               />
             </>
           );
+        // case "worker":
+        //   // If the column is "workers", loop through the workers array and display their names
+        //   if (Array.isArray(cellValue)) {
+        //     return (
+        //       <div>
+        //         {cellValue.map((worker: { name: string }, index: number) => (
+        //           <p key={index}>{worker.name}</p>
+        //         ))}
+        //       </div>
+        //     );
+        //   }
+        //   return <p>No workers</p>; // Default if no workers are present
 
         case "actions2":
           return (

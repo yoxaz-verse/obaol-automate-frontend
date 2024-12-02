@@ -43,7 +43,7 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
   } else if (currentTable === "location") {
     nonActionColumns.push({ name: "LOCATION TYPE", uid: "type" });
   } else if (currentTable === "projects") {
-    nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
+    // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
       name: "Project Manager",
       uid: "projectManagerName",
@@ -53,7 +53,7 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
     nonActionColumns.push({ name: "Project Type", uid: "projectType" });
     nonActionColumns.push({ name: "Location", uid: "location" });
   } else if (currentTable === "activity") {
-    nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
+    // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
       name: "Project Manager",
       uid: "projectManagerName",
@@ -732,7 +732,7 @@ export const initialTableConfig: Record<
       type: "textarea",
       key: "description",
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
 
     {
@@ -765,7 +765,7 @@ export const initialTableConfig: Record<
       key: "worker",
       values: [],
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Status",
@@ -779,7 +779,6 @@ export const initialTableConfig: Record<
       label: "Forecast Date",
       type: "date",
       key: "forecastDate",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -787,23 +786,20 @@ export const initialTableConfig: Record<
       label: "Actual Date",
       type: "date",
       key: "actualDate",
-      values: [],
       inForm: true,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Target Operation Date",
       type: "date",
       key: "targetOperationDate",
-      values: [],
       inForm: true,
       inTable: true,
     },
     {
-      label: "Target Finance Date",
+      label: "Target Finance  Date",
       type: "date",
       key: "targetFinanceDate",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -812,7 +808,6 @@ export const initialTableConfig: Record<
       label: "Updated By Model",
       type: "text",
       key: "updatedByModel",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -820,7 +815,6 @@ export const initialTableConfig: Record<
       label: "Hours Spent",
       type: "number",
       key: "hoursSpent",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -828,7 +822,6 @@ export const initialTableConfig: Record<
       label: "Work Complete Status",
       type: "boolean",
       key: "workCompleteStatus",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -836,7 +829,6 @@ export const initialTableConfig: Record<
       label: "Customer Status",
       type: "boolean",
       key: "customerStatus",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -844,7 +836,6 @@ export const initialTableConfig: Record<
       label: "Submitted",
       type: "boolean",
       key: "isSubmitted",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -852,7 +843,6 @@ export const initialTableConfig: Record<
       label: "Accepted",
       type: "boolean",
       key: "isAccepted",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -860,7 +850,6 @@ export const initialTableConfig: Record<
       label: "Rejected",
       type: "boolean",
       key: "isRejected",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -868,7 +857,6 @@ export const initialTableConfig: Record<
       label: "Rejection Reason",
       type: "boolean",
       key: "rejectionReason",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -876,7 +864,6 @@ export const initialTableConfig: Record<
       label: "Pending",
       type: "boolean",
       key: "isPending",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -884,7 +871,6 @@ export const initialTableConfig: Record<
       label: "Hold",
       type: "boolean",
       key: "isOnHold",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -892,7 +878,6 @@ export const initialTableConfig: Record<
       label: "Activity Type",
       type: "select",
       key: "type",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -910,20 +895,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inTable: true,
     },
-    {
-      label: "Forecast Date",
-      type: "date",
-      key: "forecastDate",
-      inForm: false,
-      inTable: true,
-    },
-    {
-      label: "Target Finance Date",
-      type: "date",
-      key: "targetFinanceDate",
-      inForm: false,
-      inTable: true,
-    },
+
     {
       label: "Created At",
       type: "text",
@@ -1006,22 +978,13 @@ export const initialTableConfig: Record<
       type: "select",
       key: "activity",
       values: [],
-      inForm: true,
+      inForm: false,
       inTable: true,
     },
     {
-      label: "Customer",
-      type: "select",
-      key: "customer",
-      values: [],
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Activity Manager",
-      type: "select",
-      key: "activityManager",
-      values: [],
+      label: "Note",
+      type: "textarea",
+      key: "note",
       inForm: true,
       inTable: true,
     },
@@ -1030,6 +993,13 @@ export const initialTableConfig: Record<
       type: "select",
       key: "worker",
       values: [],
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Date",
+      type: "date",
+      key: "date",
       inForm: true,
       inTable: true,
     },
@@ -1054,13 +1024,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inTable: true,
     },
-    {
-      label: "Rejection Reason",
-      type: "textarea",
-      key: "rejectionReason",
-      inForm: true,
-      inTable: true,
-    },
+
     {
       label: "Actions",
       type: "action",

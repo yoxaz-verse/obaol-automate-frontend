@@ -33,6 +33,7 @@ interface AddModalProps {
   formFields: FormField[];
   apiEndpoint: string;
   refetchData: () => void;
+  additionalVariable?: Record<string, any>; // Dynamic additional parameters
 }
 
 export interface FormField {
@@ -51,6 +52,7 @@ const AddModal: React.FC<AddModalProps> = ({
   formFields,
   apiEndpoint,
   refetchData,
+  additionalVariable,
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -208,8 +210,17 @@ const AddModal: React.FC<AddModalProps> = ({
           fileId, // Include the uploaded file's ID
           fileURL, // Include the uploaded file's URL (optional, based on backend design)
         };
+
+      let uploadFormData = completeFormData;
+
+      if (additionalVariable) {
+        uploadFormData = {
+          ...completeFormData,
+          ...additionalVariable,
+        };
+      }
       // Proceed with form submission
-      addItem.mutate(completeFormData);
+      addItem.mutate(uploadFormData);
     } catch (error: any) {
       console.error("Submission error:", error);
       showToastMessage({
@@ -249,6 +260,12 @@ const AddModal: React.FC<AddModalProps> = ({
     setFormData((prevData) => ({
       ...prevData,
       [fieldKey]: valueArray,
+    }));
+  };
+  const handleTimeChange = (key: string, time: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: time,
     }));
   };
 
@@ -299,7 +316,15 @@ const AddModal: React.FC<AddModalProps> = ({
           </Switch>
         );
       case "time":
-        return <TimeInput name={field.key} label={field.label} />;
+        return (
+          <TimeInput
+            name={field.key}
+            label={field.label}
+            hourCycle={24}
+            value={formData[field.key]} // Controlled state
+            onChange={(time) => handleTimeChange(field.key, time)} // Update handler
+          />
+        );
 
       case "select":
         if (field.values)

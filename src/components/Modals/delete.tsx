@@ -28,7 +28,6 @@ export default function DeleteModal({
   _id,
   name,
   deleteApiEndpoint,
-  refetchData,
   useBody = false,
 }: DeleteModalProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -44,7 +43,7 @@ export default function DeleteModal({
         message: `Deleted successfully`,
         position: "top-right",
       });
-      onOpenChange(false);
+      onOpenChange();
       setLoading(false);
     },
     onError: (error: any) => {

@@ -28,6 +28,7 @@ import EditModal from "@/components/CurdTable/edit-model";
 import AuthContext from "@/context/AuthContext";
 import { FiEye } from "react-icons/fi";
 import Link from "next/link";
+import AddProject from "./add-projects";
 
 interface ProjectTabContentProps {
   currentTable: string;
@@ -257,195 +258,85 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
     // Implement refetch logic if necessary
   };
 
-  // Fetch related data for dropdowns
-  const { data: customersResponse } = useQuery({
-    queryKey: ["customers"],
-    queryFn: () => getData(customerRoutes.getAll),
-  });
-
-  const { data: adminsResponse } = useQuery({
-    queryKey: ["admins"],
-    queryFn: () => getData(adminRoutes.getAll),
-  });
-
-  const { data: managersResponse } = useQuery({
-    queryKey: ["projectManager"],
-    queryFn: () => getData(projectManagerRoutes.getAll),
-  });
-
-  const { data: projectStatusesResponse } = useQuery({
-    queryKey: ["projectStatuses"],
-    queryFn: () => getData(projectStatusRoutes.getAll),
-  });
-
-  const { data: projectTypeResponse } = useQuery({
-    queryKey: ["projectType"],
-    queryFn: () => getData(projectTypeRoutes.getAll),
-  });
-  const { data: locationResponse } = useQuery({
-    queryKey: ["location"],
-    queryFn: () => getData(locationRoutes.getAll),
-  });
-
-  // Extract data or set as empty arrays
-  const customers = customersResponse?.data.data.data;
-  const admins = adminsResponse?.data?.data.data;
-  const managers = managersResponse?.data?.data.data;
-  const projectStatuses = projectStatusesResponse?.data?.data.data;
-  const projectType = projectTypeResponse?.data?.data.data;
-  const location = locationResponse?.data?.data.data;
-
   return (
-    <>
-      {customers &&
-      managers &&
-      projectStatuses &&
-      projectType &&
-      location &&
-      // isAdminsLoading &&
-      admins ? (
-        <QueryComponent
-          api={apiRoutesByRole[currentTable]}
-          queryKey={[currentTable, apiRoutesByRole[currentTable]]}
-          page={1}
-          limit={100}
-        >
-          {(data: any) => {
-            const fetchedData = data?.data || [];
-            // Generate formFields with updated values
-            let formFields = tableConfig[currentTable];
-            // Populate related field values dynamically
-            const customerValues = customers.map((admin: any) => ({
-              key: String(admin._id),
-              value: admin.name,
-            }));
-            formFields = formFields.map((field: any) =>
-              field.key === "customer"
-                ? { ...field, values: customerValues }
-                : field
-            );
-            const adminValues = admins.map((admin: any) => ({
-              key: String(admin._id),
-              value: admin.name,
-            }));
-            formFields = formFields.map((field: any) =>
-              field.key === "admin" ? { ...field, values: adminValues } : field
-            );
-            const managerValues = managers.map((manager: any) => ({
-              key: String(manager._id),
-              value: manager.name,
-            }));
-            formFields = formFields.map((field: any) =>
-              field.key === "projectManager"
-                ? { ...field, values: managerValues }
-                : field
-            );
-            const projectStatusValues = projectStatuses.map((status: any) => ({
-              key: String(status._id),
-              value: status.name,
-            }));
+    <QueryComponent
+      api={apiRoutesByRole[currentTable]}
+      queryKey={[currentTable, apiRoutesByRole[currentTable]]}
+      page={1}
+      limit={100}
+    >
+      {(data: any) => {
+        const fetchedData = data?.data || [];
 
-            formFields = formFields.map((field: any) =>
-              field.key === "status"
-                ? { ...field, values: projectStatusValues }
-                : field
-            );
+        const tableData = fetchedData.map((item: any) => {
+          const { isDeleted, isActive, password, __v, ...rest } = item;
+          if (currentTable === "projects") {
+            return {
+              ...rest,
+              // adminName: item.admin ? item.admin.name : "N/A",
+              projectManagerName: item.projectManager
+                ? item.projectManager.name
+                : "N/A",
+              customerName: item.customer ? item.customer.name : "N/A",
+              projectStatus: item.status ? item.status.name : "N/A",
+              projectType: item.type ? item.type.name : "N/A",
+              location: item.location ? item.location.name : "N/A",
+            };
+            // Handle other user types similarly if needed
+          }
+          return rest;
+        });
 
-            const projectTypeValues = projectType.map((type: any) => ({
-              key: String(type._id),
-              value: type.name,
-            }));
-
-            formFields = formFields.map((field: any) =>
-              field.key === "type"
-                ? { ...field, values: projectTypeValues }
-                : field
-            );
-
-            const locationValues = location.map((location: any) => ({
-              key: String(location._id),
-              value: location.name,
-            }));
-
-            formFields = formFields.map((field: any) =>
-              field.key === "location"
-                ? { ...field, values: locationValues }
-                : field
-            );
-
-            const tableData = fetchedData.map((item: any) => {
-              const { isDeleted, isActive, password, __v, ...rest } = item;
-              if (currentTable === "projects") {
-                return {
-                  ...rest,
-                  adminName: item.admin ? item.admin.name : "N/A",
-                  projectManagerName: item.projectManager
-                    ? item.projectManager.name
-                    : "N/A",
-                  customerName: item.customer ? item.customer.name : "N/A",
-                  projectStatus: item.status ? item.status.name : "N/A",
-                  projectType: item.type ? item.type.name : "N/A",
-                  location: item.location ? item.location.name : "N/A",
-                };
-                // Handle other user types similarly if needed
-              }
-              return rest;
-            });
-
-            return (
-              <>
-                {/* AddModal for adding new entries */}
-                {user?.role === "Admin" && (
-                  <AddModal
-                    currentTable={currentTable}
-                    formFields={formFields} // Pass the updated formFields
-                    apiEndpoint={apiRoutesByRole[currentTable]}
+        return (
+          <>
+            {/* AddModal for adding new entries */}
+            {user?.role === "Admin" && (
+              <AddProject
+                currentTable={currentTable}
+                formFields={tableConfig[currentTable]} // Pass the updated formFields
+                apiEndpoint={apiRoutesByRole[currentTable]}
+                refetchData={refetchData}
+              />
+            )}
+            <Spacer y={5} />
+            {tableData.length > 0 ? (
+              <CommonTable
+                TableData={tableData}
+                columns={columns}
+                isLoading={false}
+                viewModal={(item: any) => (
+                  <div>
+                    <Link href={`/dashboard/projects/${item._id}`}>
+                      <FiEye className="cursor-pointer" />
+                    </Link>
+                  </div>
+                )}
+                // editModal={(item: any) => (
+                //   <EditModal
+                //     initialData={item}
+                //     currentTable={currentTable}
+                //     formFields={tableConfig[currentTable]}
+                //     apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
+                //     refetchData={refetchData}
+                //   />
+                // )}
+                deleteModal={(item: any) => (
+                  <DeleteModal
+                    _id={item._id}
+                    name={item.name}
+                    deleteApiEndpoint={apiRoutesByRole[currentTable]}
                     refetchData={refetchData}
+                    useBody={true}
                   />
                 )}
-                <Spacer y={5} />
-                {tableData.length > 0 ? (
-                  <CommonTable
-                    TableData={tableData}
-                    columns={columns}
-                    isLoading={false}
-                    viewModal={(item: any) => (
-                      <div>
-                        <Link href={`/dashboard/projects/${item._id}`}>
-                          <FiEye className="cursor-pointer" />
-                        </Link>
-                      </div>
-                    )}
-                    // editModal={(item: any) => (
-                    //   <EditModal
-                    //     initialData={item}
-                    //     currentTable={currentTable}
-                    //     formFields={tableConfig[currentTable]}
-                    //     apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
-                    //     refetchData={refetchData}
-                    //   />
-                    // )}
-                    deleteModal={(item: any) => (
-                      <DeleteModal
-                        _id={item._id}
-                        name={item.name}
-                        deleteApiEndpoint={apiRoutesByRole[currentTable]}
-                        refetchData={refetchData}
-                        useBody={true}
-                      />
-                    )}
-                  />
-                ) : (
-                  <div>No data available</div>
-                )}
-              </>
-            );
-          }}
-        </QueryComponent>
-      ) : (
-        "Projects Loading"
-      )}{" "}
-    </>
+              />
+            ) : (
+              <div>No data available</div>
+            )}
+          </>
+        );
+      }}
+    </QueryComponent>
   );
 };
 export default ProjectTabContent;

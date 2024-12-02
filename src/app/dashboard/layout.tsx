@@ -40,27 +40,6 @@ export default function DashboardLayout({
 
   const { user, isAuthenticated, loading } = useContext(AuthContext);
 
-  // Example: Fetch data based on user role
-  // Replace 'YOUR_API_ENDPOINT' with the actual endpoint
-  // const {
-  //   data: roleData,
-  //   isLoading: roleDataLoading,
-  //   error: roleDataError,
-  // } = useQuery(
-  //   ["roleData", user?.role],
-  //   () => {
-  //     if (user?.role) {
-  //       // Define your API endpoint based on the role
-  //       const endpoint = authRoutes.getRoleSpecificData(user.role);
-  //       return getData(endpoint);
-  //     }
-  //     return Promise.resolve(null);
-  //   }
-  //   // {
-  //   //   enabled: !!user?.role, // Only run if user.role is available
-  //   // }
-  // );
-
   return (
     <section className="w-full h-full flex">
       <PrivateRoute allowedRoles={allowedRoles}>

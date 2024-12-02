@@ -34,7 +34,7 @@ export default function ActivityIdLayout({
         </div>
         <Spacer y={4} />
         <>
-          <Title title="Activity Details" />
+          {/* <Title title="Activity Details" />
           <Tabs aria-label="Options" color="secondary" variant="bordered">
             {tabs.map((t: any) => {
               return <Tab key={t}
@@ -54,7 +54,7 @@ export default function ActivityIdLayout({
                 </>
               </Tab>
             })}
-          </Tabs>
+          </Tabs> */}
         </>
       </div>
     </>

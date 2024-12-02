@@ -14,7 +14,6 @@ export const getData = async (url: string, params: any = {}) => {
 
 // POST request to the API
 export const postData = async (url: string, data: any, params: any = {}) => {
-  console.log(data);
 
   try {
     const headers: any = {

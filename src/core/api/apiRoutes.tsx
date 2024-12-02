@@ -39,8 +39,6 @@ export const accountRoutes = {
 // Helper function to generate standard CRUD routes
 const createCRUDRoutes = (basePath: string) => ({
   getAll: `${basePath}`,
-  create: `${basePath}/create`,
-  update: `${basePath}/update`,
   delete: `${basePath}`,
 });
 
@@ -138,12 +136,13 @@ export const projectRoutes = addCustomRoutes(
 );
 
 // Define activity routes with additional custom endpoints
-export const activityRoutes = addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.ACTIVITY),
-  {
-    getByProject: `${BASE_PATHS.ACTIVITY}/projects`,
-  }
-);
+export const activityRoutes =
+  // addCustomRoutes(
+  createCRUDRoutes(BASE_PATHS.ACTIVITY);
+// {
+//   getByProject: `${BASE_PATHS.ACTIVITY}/projects`,
+// }
+// );
 
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {

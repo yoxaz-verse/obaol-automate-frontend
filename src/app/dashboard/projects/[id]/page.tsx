@@ -1,14 +1,9 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
 import { NextPage } from "next";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import ProjectDetails from "@/components/dashboard/Projects/project-details";
 import { Tab, Tabs, useDisclosure } from "@nextui-org/react";
-import CommonDeleteModal from "@/components/Modals/Common-delete-modal";
-import EditProject from "@/components/Modals/edit-project";
-import { getData } from "@/core/api/apiHandler";
-import { locationRoutes, projectRoutes } from "@/core/api/apiRoutes";
 import { usePathname } from "next/navigation";
 
 const Projects: NextPage = () => {

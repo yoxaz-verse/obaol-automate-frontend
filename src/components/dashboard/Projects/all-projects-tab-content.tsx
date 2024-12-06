@@ -1,37 +1,24 @@
 // components/dashboard/Projects/project-tab-content.tsx
 "use client";
 
-import React, { useContext, useMemo } from "react";
-import {
-  adminRoutes,
-  customerRoutes,
-  projectRoutes,
-  projectStatusRoutes,
-  projectTypeRoutes,
-  projectManagerRoutes,
-  locationRoutes,
-} from "@/core/api/apiRoutes";
+import React from "react";
 import QueryComponent from "@/components/queryComponent";
-import { useQuery } from "@tanstack/react-query"; // Import useQuery
-import { getData } from "@/core/api/apiHandler"; // Import getData function
 import { Spacer } from "@nextui-org/react";
-import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../Table/common-table";
 import DeleteModal from "@/components/Modals/delete";
-import DetailsModal from "@/components/Modals/details";
 import {
   apiRoutesByRole,
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import EditModal from "@/components/CurdTable/edit-model";
-import AuthContext from "@/context/AuthContext";
 import { FiEye } from "react-icons/fi";
 import Link from "next/link";
-import AddProject from "./add-projects";
 
 interface ProjectTabContentProps {
+  selectedTab?: string;
   currentTable: string;
+  tableConfig: any;
+  user: any;
 }
 
 interface Option {
@@ -248,11 +235,12 @@ interface FormField {
 // };
 
 const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
+  selectedTab,
   currentTable,
+  tableConfig,
+  user,
 }) => {
-  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
-  const { user } = useContext(AuthContext); // Get current user from context
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -264,6 +252,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
       queryKey={[currentTable, apiRoutesByRole[currentTable]]}
       page={1}
       limit={100}
+      additionalParams={{ status: selectedTab }}
     >
       {(data: any) => {
         const fetchedData = data?.data || [];
@@ -289,15 +278,6 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
 
         return (
           <>
-            {/* AddModal for adding new entries */}
-            {user?.role === "Admin" && (
-              <AddProject
-                currentTable={currentTable}
-                formFields={tableConfig[currentTable]} // Pass the updated formFields
-                apiEndpoint={apiRoutesByRole[currentTable]}
-                refetchData={refetchData}
-              />
-            )}
             <Spacer y={5} />
             {tableData.length > 0 ? (
               <CommonTable

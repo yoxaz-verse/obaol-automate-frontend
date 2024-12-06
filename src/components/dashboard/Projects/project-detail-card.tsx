@@ -77,7 +77,7 @@ const ProjectDetailCard = ({ data }: { data: any }) => {
                 {"Live Status"}
               </div>
               <div className="font-medium">
-                {data?.status?.name ?? "Manager Name"}
+                {data?.status?.name ?? "Status"}
               </div>
               {/* <Select className="w-full" placeholder="Status">
                 <SelectItem key={1}>Status 1</SelectItem>

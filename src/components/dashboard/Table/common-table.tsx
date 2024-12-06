@@ -13,13 +13,12 @@ import {
   Pagination,
   Spinner,
 } from "@nextui-org/react";
-import { FiDelete, FiEdit, FiEye } from "react-icons/fi";
 import Image from "next/image";
 import { baseUrl } from "@/core/api/axiosInstance";
 
 interface TableProps {
-  TableData: any[];
-  columns: { name: string; uid: string }[];
+  TableData?: any[]; // Optional, with a default fallback
+  columns: { name: string; uid: string; type?: string }[];
   viewModal?: (item: any) => React.ReactNode;
   deleteModal?: (item: any) => React.ReactNode;
   editModal?: (item: any) => React.ReactNode;
@@ -27,7 +26,7 @@ interface TableProps {
 }
 
 export default function CommonTable({
-  TableData,
+  TableData = [], // Default value as an empty array
   columns,
   viewModal,
   deleteModal,
@@ -35,46 +34,80 @@ export default function CommonTable({
   isLoading = false,
 }: TableProps) {
   type UserData = (typeof TableData)[0];
-  console.log(TableData);
-
   const renderCell = React.useCallback(
     (item: UserData, columnKey: React.Key) => {
-      const cellValue = item[columnKey as keyof UserData];
+      const column = (columns || []).find((col) => col.uid === columnKey); // Fallback to empty array
+      if (!column) {
+        return <span>Column not found</span>; // Handle case when column is not found
+      }
 
-      switch (columnKey) {
-        case "fileURL":
-          // Use fileURL if available, otherwise construct from cellValue
-          const imageURL = item.fileURL
-            ? item.fileURL
-            : `${baseUrl}/${cellValue}`;
-          return (
-            <>
+      const cellValue = item[columnKey as keyof UserData];
+      const columnType = column?.type;
+
+      switch (columnType) {
+        case "date":
+          if (cellValue) {
+            const date = new Date(cellValue);
+            return date.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long", // Ensures two-digit month
+              day: "2-digit", // Ensures two-digit day
+            });
+          }
+          return "N/A";
+
+        case "time":
+          if (cellValue) {
+            const time = new Date(cellValue);
+            // Format the time in 12-hour format (AM/PM)
+            return time.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true, // Ensures 12-hour format (AM/PM)
+            });
+          }
+          return "N/A";
+
+        case "dateTime":
+          if (cellValue) {
+            const dateTime = new Date(cellValue);
+
+            const dateFormatted = dateTime.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+
+            const timeFormatted = dateTime.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
+
+            // Combine date and time
+            return `${dateFormatted} ${timeFormatted}`;
+          }
+          return "N/A";
+
+        case "file":
+          if (cellValue) {
+            const imageURL = item.fileURL || `${baseUrl}/${cellValue}`;
+            return (
               <Image
-                src={imageURL} // Removed the conditional appending of .jpg
+                src={imageURL}
                 alt={item.name}
                 width={1000}
                 height={1000}
                 style={{ objectFit: "cover" }}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/fallback.jpg"; // Optional: Fallback image
+                  (e.target as HTMLImageElement).src = "/fallback.jpg";
                 }}
               />
-            </>
-          );
-        // case "worker":
-        //   // If the column is "workers", loop through the workers array and display their names
-        //   if (Array.isArray(cellValue)) {
-        //     return (
-        //       <div>
-        //         {cellValue.map((worker: { name: string }, index: number) => (
-        //           <p key={index}>{worker.name}</p>
-        //         ))}
-        //       </div>
-        //     );
-        //   }
-        //   return <p>No workers</p>; // Default if no workers are present
+            );
+          }
+          return <span>No Image</span>;
 
-        case "actions2":
+        case "action":
           return (
             <div className="relative flex items-center gap-2">
               {viewModal && (
@@ -85,7 +118,7 @@ export default function CommonTable({
                 </Tooltip>
               )}
               {editModal && (
-                <Tooltip content="edit">
+                <Tooltip content="Edit">
                   <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                     {editModal(item)}
                   </span>
@@ -102,21 +135,21 @@ export default function CommonTable({
           );
 
         default:
-          return cellValue;
+          return cellValue || "N/A";
       }
     },
-    [viewModal, deleteModal, editModal]
+    [viewModal, deleteModal, editModal, columns] // Ensure columns is included in the dependency array
   );
 
-  // Pagination logic (optional)
+  // Pagination logic
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 10;
-  const pages = Math.ceil(TableData.length / rowsPerPage);
+  const pages = Math.ceil((TableData?.length || 0) / rowsPerPage);
 
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return TableData.slice(start, end);
+    return TableData ? TableData.slice(start, end) : [];
   }, [page, TableData]);
 
   if (isLoading) {
@@ -132,7 +165,7 @@ export default function CommonTable({
             isCompact
             showControls
             showShadow
-            color="secondary"
+            color="primary"
             page={page}
             total={pages}
             onChange={(page) => setPage(page)}

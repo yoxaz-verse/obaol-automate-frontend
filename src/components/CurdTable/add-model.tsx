@@ -26,7 +26,7 @@ import { Dashboard } from "@uppy/react";
 
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
-import instance, { baseUrl } from "@/core/api/axiosInstance";
+import { baseUrl } from "@/core/api/axiosInstance";
 
 interface AddModalProps {
   currentTable: string;
@@ -444,7 +444,7 @@ const AddModal: React.FC<AddModalProps> = ({
           </ModalHeader>
           <ModalBody>
             <form onSubmit={handleSubmit}>
-              <div className="flex flex-col   h-[80vh]  overflow-auto">
+              <div className="flex flex-col   max-h-[80vh]  overflow-auto">
                 {formFields
                   .filter((field) => field.inForm)
                   .map((field, index) => (

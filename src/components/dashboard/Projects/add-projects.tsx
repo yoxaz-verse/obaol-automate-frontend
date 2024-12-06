@@ -57,10 +57,9 @@ function AddProject({
     queryFn: () => getData(locationRoutes.getAll),
   });
 
-  console.log(adminsResponse);
-
   // Extract data or set as empty arrays
   const customers = customersResponse?.data.data.data;
+  console.log(formFields);
   const admins = adminsResponse?.data?.data.data;
   const managers = managersResponse?.data?.data.data;
   const projectStatuses = projectStatusesResponse?.data?.data.data;

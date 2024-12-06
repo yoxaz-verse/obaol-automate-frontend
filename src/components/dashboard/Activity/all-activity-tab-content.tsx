@@ -17,8 +17,11 @@ import { FiEye } from "react-icons/fi";
 import AddActivity from "./add-activity";
 
 interface ActivityTabContentProps {
+  selectedTab?: string;
   currentTable: string;
   projectId?: string;
+  tableConfig: any;
+  user: any;
 }
 
 interface Option {
@@ -38,12 +41,13 @@ interface FormField {
 }
 
 const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
+  selectedTab,
   currentTable,
   projectId,
+  tableConfig,
+  user,
 }) => {
-  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
-  const { user } = useContext(AuthContext); // Get current user from context
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -55,22 +59,23 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
       queryKey={[currentTable, apiRoutesByRole[currentTable]]}
       page={1}
       limit={100}
-      additionalParams={{ projectId }}
+      additionalParams={{ projectId, status: selectedTab }}
     >
       {(data: any) => {
         const fetchedData = data?.data || [];
 
         const tableData = fetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
+
           if (currentTable === "activity") {
             return {
               ...rest,
-              projectName: item.project ? item.project.name : "N/A",
-              adminName: item.admin ? item.admin.name : "N/A",
-              managerName: item.manager ? item.manager.name : "N/A",
+              activityManagerName: item.activityManager
+                ? item.activityManager.name
+                : "N/A",
               customerName: item.customer ? item.customer.name : "N/A",
-              projectStatus: item.projectStatus ? item.projectStatus : "N/A",
-              projectType: item.projectType ? item.projectType : "N/A",
+              activityStatus: item.status ? item.status.name : "N/A",
+              activityType: item.type ? item.type.name : "N/A",
             };
             // Handle other user types similarly if needed
           }
@@ -80,13 +85,6 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
 
         return (
           <>
-            {/* AddModal for adding new entries */}
-            <AddActivity
-              currentTable={currentTable}
-              formFields={tableConfig[currentTable]} // Pass the updated formFields
-              apiEndpoint={apiRoutesByRole[currentTable]}
-              refetchData={refetchData}
-            />
             <Spacer y={5} />
             {tableData.length > 0 ? (
               <CommonTable

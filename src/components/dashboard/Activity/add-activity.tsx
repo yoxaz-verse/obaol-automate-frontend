@@ -18,6 +18,8 @@ type AddActivityProps = {
   apiEndpoint: string;
   refetchData: () => void;
   params?: string;
+
+  additionalVariable?: Record<string, any>; // Dynamic additional parameters
 };
 
 function AddActivity({
@@ -26,33 +28,17 @@ function AddActivity({
   apiEndpoint,
   refetchData,
   params,
+  additionalVariable,
 }: AddActivityProps) {
-  // Fetch related data for dropdowns
-  const { data: projectsResponse } = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => getData(apiRoutesByRole["projects"]),
-  });
-
-  // Fetch related data for dropdowns
-  const { data: customersResponse } = useQuery({
-    queryKey: ["customers"],
-    queryFn: () => getData(apiRoutesByRole["customer"]),
-  });
-
-  const { data: adminsResponse } = useQuery({
-    queryKey: ["admins"],
-    queryFn: () => getData(apiRoutesByRole["admin"]),
-  });
-
   const { data: activityManagersResponse } = useQuery({
     queryKey: ["activityManager"],
     queryFn: () => getData(apiRoutesByRole["activityManager"]),
   });
 
-  const { data: activityStatusesResponse } = useQuery({
-    queryKey: ["ActivityStatuses"],
-    queryFn: () => getData(apiRoutesByRole["activityStatus"]),
-  });
+  // const { data: activityStatusesResponse } = useQuery({
+  //   queryKey: ["ActivityStatuses"],
+  //   queryFn: () => getData(apiRoutesByRole["activityStatus"]),
+  // });
 
   const { data: activityTypeResponse } = useQuery({
     queryKey: ["ActivityType"],
@@ -65,37 +51,12 @@ function AddActivity({
   });
 
   // Extract data or set as empty arrays
-  const customers = customersResponse?.data.data.data;
   const workers = workersResponse?.data.data.data;
-  const admins = adminsResponse?.data?.data.data;
   const activityManagers = activityManagersResponse?.data?.data.data;
-  const activityStatuses = activityStatusesResponse?.data?.data.data;
+  // const activityStatuses = activityStatusesResponse?.data?.data.data;
   const activityType = activityTypeResponse?.data?.data.data;
-  const projects = projectsResponse?.data?.data.data;
 
   // Populate related field values dynamically
-
-  //Project
-  if (projects) {
-    const projectValues = projects.map((project: any) => ({
-      key: String(project._id),
-      value: project.title,
-    }));
-    formFields = formFields.map((field: any) =>
-      field.key === "project" ? { ...field, values: projectValues } : field
-    );
-  }
-
-  //Customer
-  if (customers) {
-    const customerValues = customers.map((customer: any) => ({
-      key: String(customer._id),
-      value: customer.name,
-    }));
-    formFields = formFields.map((field: any) =>
-      field.key === "customer" ? { ...field, values: customerValues } : field
-    );
-  }
 
   //Worker
   if (workers) {
@@ -108,20 +69,7 @@ function AddActivity({
     );
   }
 
-  //Admin
-
-  if (admins) {
-    const adminValues = admins.map((admin: any) => ({
-      key: String(admin._id),
-      value: admin.name,
-    }));
-    formFields = formFields.map((field: any) =>
-      field.key === "admin" ? { ...field, values: adminValues } : field
-    );
-  }
-
   //Manager
-
   if (activityManagers) {
     const activityManagersValues = activityManagers.map(
       (activityManagers: any) => ({
@@ -136,19 +84,19 @@ function AddActivity({
     );
   }
 
-  //Activity Status
-  if (activityStatuses) {
-    const activityStatusValues = activityStatuses.map((status: any) => ({
-      key: String(status._id),
-      value: status.name,
-    }));
+  // //Activity Status
+  // if (activityStatuses) {
+  //   const activityStatusValues = activityStatuses.map((status: any) => ({
+  //     key: String(status._id),
+  //     value: status.name,
+  //   }));
 
-    formFields = formFields.map((field: any) =>
-      field.key === "status"
-        ? { ...field, values: activityStatusValues }
-        : field
-    );
-  }
+  //   formFields = formFields.map((field: any) =>
+  //     field.key === "status"
+  //       ? { ...field, values: activityStatusValues }
+  //       : field
+  //   );
+  // }
 
   //Activity Type
   if (activityType) {
@@ -164,18 +112,13 @@ function AddActivity({
 
   return (
     <div>
-      {customers &&
-      activityManagers &&
-      activityStatuses &&
-      activityType &&
-      workers &&
-      projects && // isAdminsLoading &&
-      admins ? (
+      {activityManagers && activityType && workers ? ( // isAdminsLoading &&
         <AddModal
           currentTable={currentTable}
           formFields={formFields} // Pass the updated formFields
           apiEndpoint={apiEndpoint}
           refetchData={refetchData}
+          additionalVariable={additionalVariable}
         />
       ) : (
         "Allocating Add Model"

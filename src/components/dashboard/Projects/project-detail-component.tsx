@@ -4,8 +4,6 @@ import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { projectDetailCard } from "@/data/content-data";
 
 const ProjectDetailComponent = ({ data }: { data: any }) => {
-  console.log(data);
-
   return (
     <div>
       <div className="flex flex-col lg:flex-row lg:justify-between">
@@ -20,7 +18,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
             <Card className="w-full lg:w-1/2 mb-6 py-2 mt-4 lg:mt-0">
               <CardBody className="flex flex-col">
                 <div className="text-sm font-medium">{"Project Type"}</div>
-                <div>{data.type.name ?? "Custom Id"}</div>
+                <div>{data.type?.name ?? "Custom Id"}</div>
               </CardBody>
             </Card>
           </div>

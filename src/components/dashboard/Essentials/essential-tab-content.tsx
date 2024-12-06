@@ -103,9 +103,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                 if (essentialName === "locationManager") {
                   return {
                     ...rest,
-                    managedLocation: item.location.name
-                      ? item.location.name
-                      : "N/A",
+                    managedLocation: item.location ? item.location.name : "N/A",
                   };
                   // Handle other user types similarly if needed
                 }

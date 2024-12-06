@@ -1,5 +1,4 @@
 "use client";
-import { getData } from "@/core/api/apiHandler";
 import {
   activityManagerRoutes,
   activityRoutes,
@@ -18,7 +17,6 @@ import {
   timeSheetRoutes,
   workerRoutes,
 } from "@/core/api/apiRoutes";
-import { useQuery } from "@tanstack/react-query";
 
 // Helper function to generate columns based on the current table
 export const generateColumns = (currentTable: string, tableConfig: any) => {
@@ -31,12 +29,10 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
     .map((field: any) => ({
       name: field.label.toUpperCase(),
       uid: field.key,
+      type: field.type,
     }));
 
-  // Dynamically add related columns based on the current table
-  if (currentTable === "manager") {
-    nonActionColumns.push({ name: "ADMIN", uid: "adminName" });
-  } else if (currentTable === "worker") {
+  if (currentTable === "worker") {
     nonActionColumns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
   } else if (currentTable === "locationManager") {
     nonActionColumns.push({ name: "LOCATION", uid: "managedLocation" });
@@ -55,13 +51,11 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
   } else if (currentTable === "activity") {
     // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
-      name: "Project Manager",
-      uid: "projectManagerName",
+      name: "Activity Manager",
+      uid: "activityManagerName",
     });
-    nonActionColumns.push({ name: "Customer", uid: "customerName" });
-    nonActionColumns.push({ name: "ProjectStatus", uid: "projectStatus" });
-    nonActionColumns.push({ name: "Project Type", uid: "projectType" });
-    nonActionColumns.push({ name: "Location", uid: "location" });
+    nonActionColumns.push({ name: "Activity Status", uid: "activityStatus" });
+    nonActionColumns.push({ name: "Activity Type", uid: "activityType" });
   } else if (
     currentTable === "projectManager" ||
     currentTable === "activityManager"
@@ -79,6 +73,7 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
     nonActionColumns.push({
       name: actionsColumn.label.toUpperCase(),
       uid: actionsColumn.key,
+      type: actionsColumn.type,
     });
   }
 
@@ -121,6 +116,8 @@ export const initialTableConfig: Record<
       | "date"
       | "number"
       | "time"
+      | "link"
+      | "dateTime"
       | "password"; // Define specific types
     key: string;
     inForm: boolean;
@@ -142,7 +139,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -182,7 +179,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -222,7 +219,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -259,7 +256,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -311,7 +308,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -324,19 +321,11 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   serviceCompany: [
     {
       label: "Name",
       type: "text",
       key: "name",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Owner",
-      type: "text",
-      key: "owner",
       inForm: true,
       inTable: true,
     },
@@ -356,10 +345,10 @@ export const initialTableConfig: Record<
     },
     {
       label: "Map URL",
-      type: "text",
+      type: "link",
       key: "map",
       inForm: true,
-      inTable: false,
+      inTable: true,
     },
     {
       label: "Website URL",
@@ -379,6 +368,13 @@ export const initialTableConfig: Record<
       label: "Actions",
       type: "action",
       key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
       inForm: false,
       inTable: true,
     },
@@ -459,7 +455,7 @@ export const initialTableConfig: Record<
       label: "Image",
       type: "file",
       key: "image",
-      inForm: true,
+      inForm: false,
       inTable: false,
       accept: "image/*",
     },
@@ -478,6 +474,21 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
     },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
   ],
   locationType: [
     {
@@ -487,14 +498,14 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
+
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
-    },
-    // {
+    }, // {
     //   label: "Active",
     //   type: "checkbox",
     //   key: "isActive",
@@ -532,9 +543,10 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
+
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -579,14 +591,14 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
-    {
-      label: "Admin",
-      type: "select",
-      key: "admin",
-      values: [],
-      inForm: true,
-      inTable: false,
-    },
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
     {
       label: "Project Manager",
       type: "select",
@@ -602,14 +614,14 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
-    {
-      label: "Status",
-      type: "select",
-      key: "status",
-      values: [],
-      inForm: true,
-      inTable: true,
-    },
+    // {
+    //   label: "Status",
+    //   type: "select",
+    //   key: "status",
+    //   values: [],
+    //   inForm: true,
+    //   inTable: true,
+    // },
     {
       label: "Project Type",
       type: "select",
@@ -672,9 +684,10 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
+
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -704,7 +717,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -740,17 +753,10 @@ export const initialTableConfig: Record<
       type: "select",
       key: "project",
       values: [],
-      inForm: true,
-      inTable: true,
+      inForm: false,
+      inTable: false,
     },
-    {
-      label: "Customer",
-      type: "select",
-      key: "customer",
-      values: [],
-      inForm: true,
-      inTable: true,
-    },
+
     {
       label: "Activity Manager",
       type: "select",
@@ -772,7 +778,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "status",
       values: [],
-      inForm: true,
+      inForm: false,
       inTable: true,
     },
     {
@@ -786,7 +792,7 @@ export const initialTableConfig: Record<
       label: "Actual Date",
       type: "date",
       key: "actualDate",
-      inForm: true,
+      inForm: false,
       inTable: false,
     },
     {
@@ -800,108 +806,46 @@ export const initialTableConfig: Record<
       label: "Target Finance  Date",
       type: "date",
       key: "targetFinanceDate",
-      inForm: true,
-      inTable: true,
+      inForm: false,
+      inTable: false,
     },
 
     {
-      label: "Updated By Model",
+      label: "Updated By ",
       type: "text",
-      key: "updatedByModel",
-      inForm: true,
+      key: "updatedBy",
+      inForm: false,
       inTable: true,
     },
     {
       label: "Hours Spent",
       type: "number",
       key: "hoursSpent",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Work Complete Status",
-      type: "boolean",
-      key: "workCompleteStatus",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Customer Status",
-      type: "boolean",
-      key: "customerStatus",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Submitted",
-      type: "boolean",
-      key: "isSubmitted",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Accepted",
-      type: "boolean",
-      key: "isAccepted",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Rejected",
-      type: "boolean",
-      key: "isRejected",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Rejection Reason",
-      type: "boolean",
-      key: "rejectionReason",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Pending",
-      type: "boolean",
-      key: "isPending",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Hold",
-      type: "boolean",
-      key: "isOnHold",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Activity Type",
-      type: "select",
-      key: "type",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Task",
-      type: "textarea",
-      key: "task",
-      inForm: false,
-      inTable: true,
-    },
-    {
-      label: "Order Number",
-      type: "text",
-      key: "orderNumber",
       inForm: false,
       inTable: true,
     },
 
     {
+      label: "Rejection Reason",
+      type: "textarea",
+      key: "rejectionReason",
+      inForm: false,
+      inTable: false,
+    },
+
+    {
+      label: "Activity Type",
+      type: "select",
+      key: "type",
+      inForm: true,
+      inTable: false,
+    },
+    {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Actions",
@@ -919,9 +863,10 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
+
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -951,7 +896,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
@@ -1019,10 +964,17 @@ export const initialTableConfig: Record<
     },
     {
       label: "Created At",
-      type: "text",
+      type: "dateTime",
       key: "createdAt",
       inForm: false,
       inTable: true,
+    },
+    {
+      label: "Updated At",
+      type: "dateTime",
+      key: "updatedAt",
+      inForm: false,
+      inTable: false,
     },
 
     {

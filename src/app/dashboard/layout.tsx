@@ -26,7 +26,7 @@ export const routeRoles: { [key: string]: string[] } = {
     "Worker",
   ],
   "/dashboard/essentials": ["Admin"],
-  "/dashboard/activity": ["Admin"],
+  "/dashboard/activity": [],
   "/dashboard/users": ["Admin"],
 };
 export default function DashboardLayout({

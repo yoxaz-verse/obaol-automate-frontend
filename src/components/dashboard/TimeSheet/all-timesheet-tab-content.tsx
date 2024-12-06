@@ -3,26 +3,23 @@
 
 import React, { useContext, useMemo } from "react";
 import QueryComponent from "@/components/queryComponent";
-import { useQuery } from "@tanstack/react-query"; // Import useQuery
-import { getData } from "@/core/api/apiHandler"; // Import getData function
 import { Spacer } from "@nextui-org/react";
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../Table/common-table";
 import DeleteModal from "@/components/Modals/delete";
-import DetailsModal from "@/components/Modals/details";
 import {
   apiRoutesByRole,
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import EditModal from "@/components/CurdTable/edit-model";
 import AuthContext from "@/context/AuthContext";
-import Link from "next/link";
-import { FiEye } from "react-icons/fi";
+import DetailsModal from "@/components/Modals/details";
+import StatusUpdate from "@/components/CurdTable/status-update";
 
 interface TimeSheetTabContentProps {
   currentTable: string;
   activityId?: string;
+  isMode?: string | null;
 }
 
 interface Option {
@@ -40,10 +37,17 @@ interface FormField {
   accept?: string;
   multiple?: boolean;
 }
-
+const tabs = [
+  { key: "isPending", label: "Pending" },
+  { key: "isAccepted", label: "Accepted" },
+  { key: "isResubmitted", label: "Resubmitted" },
+  { key: "isRejected", label: "Rejected" },
+  // Add more tabs if needed, e.g., "Archived Projects"
+];
 const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
   currentTable = "timeSheet",
   activityId,
+  isMode,
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
@@ -61,7 +65,7 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
           queryKey={[currentTable, apiRoutesByRole[currentTable]]}
           page={1}
           limit={100}
-          additionalParams={{ activityId }}
+          additionalParams={{ activityId, isMode }}
         >
           {(data: any) => {
             const fetchedData = data?.data || [];
@@ -70,17 +74,9 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
 
             const tableData = fetchedData.map((item: any) => {
               const { isDeleted, isActive, password, __v, ...rest } = item;
-              if (currentTable === "activity") {
+              if (currentTable === "timeSheet") {
                 return {
                   ...rest,
-                  projectName: item.project ? item.project.name : "N/A",
-                  adminName: item.admin ? item.admin.name : "N/A",
-                  managerName: item.manager ? item.manager.name : "N/A",
-                  customerName: item.customer ? item.customer.name : "N/A",
-                  projectStatus: item.projectStatus
-                    ? item.projectStatus
-                    : "N/A",
-                  projectType: item.projectType ? item.projectType : "N/A",
                 };
                 // Handle other user types similarly if needed
               }
@@ -89,27 +85,15 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
 
             return (
               <>
-                {/* AddModal for adding new entries */}
-                <AddModal
-                  currentTable={currentTable}
-                  formFields={formFields} // Pass the updated formFields
-                  apiEndpoint={`${apiRoutesByRole[currentTable]}`}
-                  refetchData={refetchData}
-                  additionalVariable={{ activity: activityId }}
-                />
                 <Spacer y={5} />
                 {tableData.length > 0 ? (
                   <CommonTable
                     TableData={tableData}
                     columns={columns}
                     isLoading={false}
-                    viewModal={(item: any) => (
-                      <div>
-                        <Link href={`/dashboard/activity/${item._id}`}>
-                          <FiEye className="cursor-pointer" />
-                        </Link>
-                      </div>
-                    )}
+                    // viewModal={(item: any) => (
+                    //   <DetailsModal columns={columns} data={item} />
+                    // )}
                     // editModal={(item: any) => (
                     //   <EditModal
                     //     initialData={item}
@@ -119,6 +103,16 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
                     //     refetchData={refetchData}
                     //   />
                     // )}
+                    viewModal={(item: any) => (
+                      <StatusUpdate
+                        currentEntity="Time Sheet"
+                        statusOptions={tabs}
+                        apiEndpoint={apiRoutesByRole[currentTable]}
+                        recordId={item}
+                        currentStatus={"isPending"}
+                        refetchData={refetchData}
+                      />
+                    )}
                     deleteModal={(item: any) => (
                       <DeleteModal
                         _id={item._id}

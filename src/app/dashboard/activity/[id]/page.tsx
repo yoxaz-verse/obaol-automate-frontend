@@ -7,16 +7,26 @@ import { Tab, Tabs } from "@nextui-org/tabs";
 import TimeSheetTabContent from "@/components/dashboard/TimeSheet/all-timesheet-tab-content";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
+import AddModal from "@/components/CurdTable/add-model";
+import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
+import { Spacer } from "@nextui-org/react";
+const refetchData = () => {
+  // Implement refetch logic if necessary
+};
 const ViewActivityById: NextPage = () => {
-  const [currentTable, setCurrentTable] = useState("timeSheet"); // Default tab
+  const [currentTable, setCurrentTable] = useState(""); // Default tab
   const tabs = [
-    { key: "timeSheet", title: "Time Sheet" },
-    { key: "another", title: "Another" },
+    { key: "", title: "All" },
+    { key: "isPending", title: "Pending" },
+    { key: "isAccepted", title: "Accepted" },
+    { key: "isResubmitted", title: "Resubmitted" },
+    { key: "isRejected", title: "Rejected" },
     // Add more tabs if needed, e.g., "Archived Projects"
   ];
   const pathname = usePathname().split("/").pop()?.toString() || ""; // Gets the current URL pathname
   const activityId = pathname || ""; // Replace with dynamic ID if available
+  const current = "timeSheet";
+  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
 
   return (
     <>
@@ -40,6 +50,14 @@ const ViewActivityById: NextPage = () => {
         </div>
       </div>
       <div className="my-4">
+        <AddModal
+          currentTable={current}
+          formFields={tableConfig[current]} // Pass the updated formFields
+          apiEndpoint={`${apiRoutesByRole[current]}`}
+          refetchData={refetchData}
+          additionalVariable={{ activity: activityId }}
+        />{" "}
+        <Spacer y={6} />
         <Tabs
           aria-label="TimeSheet Tabs"
           selectedKey={currentTable}
@@ -48,8 +66,9 @@ const ViewActivityById: NextPage = () => {
           {tabs.map((tab) => (
             <Tab key={tab.key} title={tab.title}>
               <TimeSheetTabContent
-                currentTable={"timeSheet"}
+                currentTable={current}
                 activityId={activityId}
+                isMode={tab.key}
               />
             </Tab>
           ))}

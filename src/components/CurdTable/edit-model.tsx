@@ -26,6 +26,7 @@ import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import Image from "next/image";
 import { FormField } from "./add-model"; // Ensure the path is correct
+import { TbEdit } from "react-icons/tb";
 
 // Define the structure of the response from the upload endpoint
 interface UploadResponse {
@@ -436,12 +437,14 @@ const EditModal: React.FC<EditModalProps> = ({
   return (
     <>
       {/* Edit Button */}
-      <button
+      {/* <button
         className="w-[100px] bg-yellow-500 rounded-3xl text-white h-[38px] text-sm"
         onClick={openModal}
       >
         Edit
-      </button>
+      </button> */}
+
+      <TbEdit onClick={openModal} className="hover:text-purple-600" />
 
       {/* Edit Modal */}
       {initialData && (

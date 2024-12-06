@@ -63,7 +63,10 @@ export default function DeleteModal({
 
   return (
     <>
-      <FiDelete onClick={onOpen} />
+      <FiDelete
+        onClick={onOpen}
+        className=" text-gray-300 hover:text-red-600"
+      />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
         <ModalContent>
           {(onClose) => (

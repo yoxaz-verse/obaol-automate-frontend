@@ -62,8 +62,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
         limit={100}
       >
         {(data: any) => {
-          console.log(data);
-
           const fetchedData = data?.data || [];
           // Generate formFields with updated values
           let formFields = tableConfig[currentTable];
@@ -99,7 +97,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
             );
           }
           // Handle other user types similarly if needed
-          console.log(fetchedData);
 
           const tableData = fetchedData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -123,7 +120,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
 
             return rest;
           });
-          console.log(tableData);
 
           return (
             <>

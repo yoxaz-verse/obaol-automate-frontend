@@ -99,9 +99,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log("Checking authentication status...");
         const response = await getData("/verify-token");
-        console.log("Auth check response status:", response.status);
 
         if (response && response.data.success) {
           setAuth({

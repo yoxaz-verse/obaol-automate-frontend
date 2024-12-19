@@ -11,7 +11,7 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import AuthContext from "@/context/AuthContext";
+import AuthContext, { User } from "@/context/AuthContext";
 import Link from "next/link";
 import { FiEye } from "react-icons/fi";
 import AddActivity from "./add-activity";
@@ -25,7 +25,7 @@ interface ActivityTabContentProps {
   currentTable: string;
   projectId?: string;
   tableConfig: any;
-  user: any;
+  user?: User | null;
 }
 
 interface Option {
@@ -127,13 +127,49 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                 // )}
 
                 otherModal={(item: any) => {
+                  console.log(statusOptions);
+
+                  const currentStatus = item.status
+                    ? {
+                        key: item.status._id, // Use the status ID as the key
+                        label: item.status.name, // Use the status name as the label
+                      }
+                    : {
+                        key: "Unknown",
+                        label: "Unknown",
+                      };
+
+                  // Dynamically filter status options based on user roles
+                  const filteredStatusOptions = statusOptions.filter(
+                    (tab: any) => {
+                      if (user?.role === "Customer") {
+                        // Exclude "Approved" and "Rejected" for Workers
+                        return tab.key === "6751760121b483f14e02b7fa";
+                      }
+                      if (
+                        user?.role === "Admin" ||
+                        user?.role === "ProjectManager"
+                      ) {
+                        // Exclude "Approved" and "Rejected" for Workers
+                        return (
+                          tab.key === "6751760121b483f14e02b7fa" ||
+                          tab.key === "6751778921b483f14e02b83a" ||
+                          tab.key === "6751778921b483f14e02b83a" ||
+                          tab.key === "6751781121b483f14e02b840" ||
+                          tab.key === "6751781e21b483f14e02b842" ||
+                          tab.key === "6751777221b483f14e02b838"
+                        );
+                      }
+                      return true; // Allow all statuses for other roles
+                    }
+                  );
                   return (
                     <StatusUpdate
                       currentEntity="Activity"
-                      statusOptions={statusOptions}
+                      statusOptions={filteredStatusOptions}
                       apiEndpoint={apiRoutesByRole[currentTable]}
                       recordId={item._id}
-                      currentStatus={item.status._id}
+                      currentStatus={currentStatus}
                       refetchData={refetchData}
                     />
                   );

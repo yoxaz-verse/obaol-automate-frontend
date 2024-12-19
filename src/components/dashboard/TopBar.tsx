@@ -2,19 +2,17 @@
 
 import { TopbarProps } from "@/data/interface-data";
 import {
-  Avatar,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
   User,
 } from "@nextui-org/react";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { CiMenuBurger } from "react-icons/ci";
 import { MdDashboard } from "react-icons/md";
 import { FiFileText, FiInbox, FiMessageCircle } from "react-icons/fi";
 import { RiBuildingLine, RiAdminFill } from "react-icons/ri";
-import { GrNotification } from "react-icons/gr";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
@@ -106,7 +104,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
 
       {/* User and Notifications Section */}
       <div className="flex items-center gap-5">
-        <Dropdown placement="bottom-start">
+        {/* <Dropdown placement="bottom-start">
           <DropdownTrigger>
             <div className="h-6 flex items-center justify-center px-1">
               <GrNotification className="text-xl" />
@@ -115,7 +113,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
           <DropdownMenu aria-label="Notifications">
             <DropdownItem key="profile">No new notifications</DropdownItem>
           </DropdownMenu>
-        </Dropdown>
+        </Dropdown> */}
 
         <Dropdown placement="bottom-end">
           <DropdownTrigger>

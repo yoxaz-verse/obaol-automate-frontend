@@ -12,7 +12,7 @@ interface AuthState {
   loading: boolean;
 }
 
-interface User {
+export interface User {
   id: string;
   email: string;
   role: string;

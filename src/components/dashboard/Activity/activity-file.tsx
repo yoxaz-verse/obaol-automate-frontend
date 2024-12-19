@@ -23,12 +23,17 @@ import { baseUrl } from "@/core/api/axiosInstance";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import QueryComponent from "@/components/queryComponent";
 import Image from "next/image";
+import { User } from "@/context/AuthContext";
 
 interface ActivityFileCardProps {
   activityId: string;
+  user: User | null;
 }
 
-const ActivityFileCard: React.FC<ActivityFileCardProps> = ({ activityId }) => {
+const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
+  user,
+  activityId,
+}) => {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -207,7 +212,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({ activityId }) => {
                                 </div>
 
                                 {/* Status Dropdown */}
-                                <select
+                                {/* <select
                                   value={status}
                                   onChange={(e) =>
                                     updateStatusMutation.mutate({
@@ -220,7 +225,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({ activityId }) => {
                                   <option value="Submitted">Submitted</option>
                                   <option value="Approved">Approved</option>
                                   <option value="Rejected">Rejected</option>
-                                </select>
+                                </select> */}
 
                                 {/* Download and Delete Buttons */}
                                 <div className="flex space-x-2">
@@ -229,15 +234,17 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({ activityId }) => {
                                       Download
                                     </Button>
                                   </a>
-                                  <Button
-                                    color="danger"
-                                    size="sm"
-                                    onClick={() =>
-                                      deleteMutation.mutate(file._id)
-                                    }
-                                  >
-                                    Delete
-                                  </Button>
+                                  {user?.role === "Admin" && (
+                                    <Button
+                                      color="danger"
+                                      size="sm"
+                                      onClick={() =>
+                                        deleteMutation.mutate(file._id)
+                                      }
+                                    >
+                                      Delete
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             );

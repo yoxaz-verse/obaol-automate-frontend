@@ -6,15 +6,17 @@ import { activityRoutes } from "@/core/api/apiRoutes";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import TimeSheetTabContent from "@/components/dashboard/TimeSheet/all-timesheet-tab-content";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import { Card, Spacer } from "@nextui-org/react";
 import ActivityFileCard from "@/components/dashboard/Activity/activity-file";
+import AuthContext from "@/context/AuthContext";
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
 const ViewActivityById: NextPage = () => {
+  const { user } = useContext(AuthContext);
   const [currentTable, setCurrentTable] = useState(""); // Default tab
   const tabs = [
     { key: "", title: "All" },
@@ -60,6 +62,7 @@ const ViewActivityById: NextPage = () => {
       </QueryComponent>{" "}
       <ActivityFileCard
         activityId={activityId}
+        user={user}
         // apiEndpoint={apiRoutesByRole["activityFile"]}
       />
       <div className="my-4">
@@ -82,6 +85,7 @@ const ViewActivityById: NextPage = () => {
                 currentTable={current}
                 activityId={activityId}
                 isMode={tab.key}
+                user={user}
               />
             </Tab>
           ))}

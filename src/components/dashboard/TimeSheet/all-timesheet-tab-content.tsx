@@ -12,7 +12,7 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import AuthContext from "@/context/AuthContext";
+import { User } from "@/context/AuthContext";
 import DetailsModal from "@/components/CurdTable/details";
 import StatusUpdate from "@/components/CurdTable/status-update";
 
@@ -20,6 +20,7 @@ interface TimeSheetTabContentProps {
   currentTable: string;
   activityId?: string;
   isMode?: string | null;
+  user?: User | null;
 }
 
 interface Option {
@@ -48,10 +49,10 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
   currentTable = "timeSheet",
   activityId,
   isMode,
+  user,
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
-  const { user } = useContext(AuthContext); // Get current user from context
 
   return (
     <>
@@ -103,18 +104,32 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
                     // )}
                     otherModal={(item: any) => {
                       // Determine the current status dynamically
-                      const currentStatus =
-                        tabs.find((tab) => item[tab.key])?.key || "Unknown";
+                      const currentStatus = tabs.find(
+                        (tab) => item[tab.key]
+                      ) || { key: "Unknown", label: "Unknown" };
+
+                      // Dynamically filter status options based on user roles
+                      const filteredStatusOptions = tabs.filter((tab) => {
+                        if (user?.role === "Worker") {
+                          // Exclude "Approved" and "Rejected" for Workers
+                          return (
+                            tab.key !== "isAccepted" && tab.key !== "isRejected"
+                          );
+                        }
+                        return true; // Allow all statuses for other roles
+                      });
 
                       return (
-                        <StatusUpdate
-                          currentEntity="Time Sheet"
-                          statusOptions={tabs}
-                          apiEndpoint={apiRoutesByRole[currentTable]}
-                          recordId={item._id}
-                          currentStatus={currentStatus}
-                          refetchData={refetchData}
-                        />
+                        user?.role != "Customer" && (
+                          <StatusUpdate
+                            currentEntity="Time Sheet"
+                            statusOptions={filteredStatusOptions}
+                            apiEndpoint={apiRoutesByRole[currentTable]}
+                            recordId={item._id}
+                            currentStatus={currentStatus}
+                            refetchData={refetchData}
+                          />
+                        )
                       );
                     }}
                     deleteModal={(item: any) => (

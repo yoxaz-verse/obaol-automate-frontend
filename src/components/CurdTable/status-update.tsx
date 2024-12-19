@@ -12,7 +12,10 @@ interface StatusUpdateProps {
   statusOptions: { key: string; label: string }[]; // E.g., [{ key: "pending", label: "Pending" }, ...]
   apiEndpoint: string; // API endpoint for status update
   recordId: string; // Unique ID for the entity
-  currentStatus: string; // Current status of the entity
+  currentStatus: {
+    key: string;
+    label: string;
+  }; // Current status of the entity
   refetchData: () => void; // Callback to refresh the data
 }
 
@@ -24,7 +27,9 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
   currentStatus,
   refetchData,
 }) => {
-  const [selectedStatus, setSelectedStatus] = useState<string>(currentStatus);
+  const [selectedStatus, setSelectedStatus] = useState<string>(
+    currentStatus.key
+  );
   const [loading, setLoading] = useState(false);
 
   const updateStatus = useMutation({
@@ -52,7 +57,7 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
   });
 
   const handleSubmit = () => {
-    if (selectedStatus !== currentStatus) {
+    if (selectedStatus !== currentStatus.key) {
       setLoading(true);
       updateStatus.mutate();
     } else {
@@ -68,6 +73,7 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
     <div className="flex items-center gap-4">
       <Select
         className="w-[120px]"
+        label={currentStatus.label}
         selectedKeys={new Set([selectedStatus])}
         onSelectionChange={(keys) =>
           setSelectedStatus(String(Array.from(keys)[0]))
@@ -79,14 +85,16 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
           </SelectItem>
         ))}
       </Select>
-      <Button
-        color="primary"
-        onClick={handleSubmit}
-        isLoading={loading}
-        disabled={loading}
-      >
-        {loading ? "Updating..." : "Update"}
-      </Button>
+      {selectedStatus !== currentStatus.key && (
+        <Button
+          color="primary"
+          onClick={handleSubmit}
+          isLoading={loading}
+          disabled={loading}
+        >
+          {loading ? "Updating..." : "Update"}
+        </Button>
+      )}
     </div>
   );
 };

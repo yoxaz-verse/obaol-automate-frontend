@@ -5,15 +5,15 @@ import React, { useContext, useMemo } from "react";
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
 import AddModal from "@/components/CurdTable/add-model";
-import CommonTable from "../Table/common-table";
-import DeleteModal from "@/components/Modals/delete";
+import CommonTable from "../../CurdTable/common-table";
+import DeleteModal from "@/components/CurdTable/delete";
 import {
   apiRoutesByRole,
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
-import DetailsModal from "@/components/Modals/details";
+import DetailsModal from "@/components/CurdTable/details";
 import StatusUpdate from "@/components/CurdTable/status-update";
 
 interface TimeSheetTabContentProps {
@@ -53,10 +53,6 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
   const columns = generateColumns(currentTable, tableConfig);
   const { user } = useContext(AuthContext); // Get current user from context
 
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
-
   return (
     <>
       {
@@ -67,10 +63,12 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
           limit={100}
           additionalParams={{ activityId, isMode }}
         >
-          {(data: any) => {
+          {(data: any, refetch) => {
             const fetchedData = data?.data || [];
             // Generate formFields with updated values
-            let formFields = tableConfig[currentTable];
+            const refetchData = () => {
+              refetch?.(); // Safely call refetch if it's available
+            };
 
             const tableData = fetchedData.map((item: any) => {
               const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -103,16 +101,22 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
                     //     refetchData={refetchData}
                     //   />
                     // )}
-                    viewModal={(item: any) => (
-                      <StatusUpdate
-                        currentEntity="Time Sheet"
-                        statusOptions={tabs}
-                        apiEndpoint={apiRoutesByRole[currentTable]}
-                        recordId={item}
-                        currentStatus={"isPending"}
-                        refetchData={refetchData}
-                      />
-                    )}
+                    otherModal={(item: any) => {
+                      // Determine the current status dynamically
+                      const currentStatus =
+                        tabs.find((tab) => item[tab.key])?.key || "Unknown";
+
+                      return (
+                        <StatusUpdate
+                          currentEntity="Time Sheet"
+                          statusOptions={tabs}
+                          apiEndpoint={apiRoutesByRole[currentTable]}
+                          recordId={item._id}
+                          currentStatus={currentStatus}
+                          refetchData={refetchData}
+                        />
+                      );
+                    }}
                     deleteModal={(item: any) => (
                       <DeleteModal
                         _id={item._id}

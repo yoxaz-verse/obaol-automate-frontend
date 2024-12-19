@@ -92,7 +92,6 @@ const AddModal: React.FC<AddModalProps> = ({
       uppyInstance.destroy(); // Properly clean up the Uppy instance
     };
   }, [apiEndpoint]);
-
   const openModal = () => setOpen(true);
   const closeModal = () => {
     setOpen(false);

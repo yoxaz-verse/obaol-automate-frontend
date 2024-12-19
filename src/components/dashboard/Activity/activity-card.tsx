@@ -1,12 +1,6 @@
 import { ActivityDetailCardProps } from "@/data/interface-data";
-import {
-  Avatar,
-  AvatarGroup,
-  Card,
-  CardHeader,
-  Select,
-  SelectItem,
-} from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
+import Link from "next/link";
 import React from "react";
 import { FiEdit } from "react-icons/fi";
 const ActivityDetailCard = ({ data }: any) => {
@@ -15,8 +9,17 @@ const ActivityDetailCard = ({ data }: any) => {
       {/* {data && ( */}
       <Card className="flex flex-col p-9">
         <div className="flex justify-between w-full items-center pb-4">
-          <div className="text-[#3EADEB] text-lg font-medium">
-            Project - {data.project && data?.project.title}
+          <div>
+            <Link
+              href={`/dashboard/projects/${data.project._id}`}
+              className="hover:text-[#3EADEB] opacity-50 hover:opacity-100 text-sm font-medium cursor-pointer"
+            >
+              ⬅️ project
+            </Link>
+
+            <div className="text-[#3EADEB] text-lg font-medium">
+              Project - {data.project && data?.project.title}
+            </div>
           </div>
           <FiEdit />
         </div>

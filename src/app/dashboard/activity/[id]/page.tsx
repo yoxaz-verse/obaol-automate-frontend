@@ -9,7 +9,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
-import { Spacer } from "@nextui-org/react";
+import { Card, Spacer } from "@nextui-org/react";
+import ActivityFileCard from "@/components/dashboard/Activity/activity-file";
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
@@ -30,25 +31,37 @@ const ViewActivityById: NextPage = () => {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row lg:justify-between">
-        <div className="lg:w-[49%]">
-          <QueryComponent
-            api={`${activityRoutes.getAll}/${activityId}`} // API endpoint to fetch activity details
-            queryKey={["activityDetailData", activityId]}
-          >
-            {(data) => <ActivityDetailCard data={data} />}
-          </QueryComponent>
-        </div>
+      <QueryComponent
+        api={`${apiRoutesByRole["activity"]}/${activityId}`} // API endpoint to fetch activity details
+        queryKey={["activityDetailData", activityId]}
+      >
+        {(data: any) => (
+          <section>
+            <div className="flex flex-col lg:flex-row lg:justify-between">
+              <div className="lg:w-[49%]">
+                <ActivityDetailCard data={data} />
+              </div>
 
-        <div className="lg:w-[49%] mt-4 lg:mt-0">
-          <div className="w-full h-[400px] lg:h-full">
-            <iframe
-              src="https://www.google.com/maps/embed/v1/place?q=Door+No:730+E+Abg+Tower+Mundakayam+P.O,+near+South+Indian+Bank,+Kerala+686513&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
-              className="w-full h-full"
-            ></iframe>
-          </div>
-        </div>
-      </div>
+              <div className="lg:w-[49%] mt-4 lg:mt-0">
+                <div className="w-full h-[400px] lg:h-full">
+                  <iframe
+                    src={
+                      data?.project.location.map ||
+                      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6139551.5283225225!2d12.712159999999988!3d41.290850000000006!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12d4fe82448dd203%3A0xe22cf55c24635e6f!2sItaly!5e0!3m2!1sen!2sin!4v1733584106237!5m2!1sen!2sin"
+                    }
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            </div>
+            <Spacer y={10} />
+          </section>
+        )}
+      </QueryComponent>{" "}
+      <ActivityFileCard
+        activityId={activityId}
+        // apiEndpoint={apiRoutesByRole["activityFile"]}
+      />
       <div className="my-4">
         <AddModal
           currentTable={current}

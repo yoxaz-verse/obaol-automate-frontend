@@ -7,9 +7,9 @@ import QueryComponent from "@/components/queryComponent";
 import { projectTypeRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { queryClient } from "@/app/provider";
-import UserDeleteModal from "@/components/Modals/delete";
+import UserDeleteModal from "@/components/CurdTable/delete";
 import AddModal from "@/components/CurdTable/add-model";
-import CommonTable from "../Table/common-table";
+import CommonTable from "../../CurdTable/common-table";
 import { Spacer } from "@nextui-org/react";
 
 const ProjectTypeTabContent: React.FC = () => {

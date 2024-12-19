@@ -8,7 +8,7 @@ import { Spinner } from "@nextui-org/react";
 interface QueryComponentProps<T> {
   api: string;
   queryKey: string[];
-  children: (data: T) => React.ReactNode;
+  children: (data: T, refetch?: () => void) => React.ReactNode; // Added refetch as a parameter
   page?: number; // Optional for paginated data
   limit?: number; // Optional for paginated data
   search?: string | null;
@@ -27,7 +27,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     ...(additionalParams || {}), // Include additional dynamic params
   };
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey,
     queryFn: () => getData(api, params),
   });
@@ -53,7 +53,11 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
   // Pass the correct data structure to children based on the presence of `page`
   const responseData = page ? data?.data?.data : data?.data;
 
-  return <div>{children && children(responseData as T)}</div>;
+  return (
+    <div>
+      {children && children(responseData as T, refetch)} {/* Pass refetch */}
+    </div>
+  );
 }
 
 export default QueryComponent;

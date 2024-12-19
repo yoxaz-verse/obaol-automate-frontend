@@ -1,5 +1,6 @@
 "use client";
 import {
+  activityFileRoutes,
   activityManagerRoutes,
   activityRoutes,
   activityStatusRoutes,
@@ -97,6 +98,7 @@ export const apiRoutesByRole: Record<string, string> = {
   activityType: activityTypeRoutes.getAll,
   activityStatus: activityStatusRoutes.getAll,
   timeSheet: timeSheetRoutes.getAll,
+  activityFile: activityFileRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -933,11 +935,17 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
+    // {
+    //   label: "Created By",
+    //   type: "text",
+    //   key: "createdBy",
+    //   inForm: false,
+    //   inTable: true,
+    // },
     {
-      label: "Workers",
-      type: "select",
-      key: "worker",
-      values: [],
+      label: "Role",
+      type: "text",
+      key: "createdByRole",
       inForm: false,
       inTable: true,
     },

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import CommonTable from "../Table/common-table";
+import CommonTable from "../../CurdTable/common-table";
 import { columns, tableData } from "@/data/content-data";
 import NewProjectsForm from "./new-projects-form";
 import NewProjectsCharts from "./new-projects-charts";
@@ -11,34 +11,38 @@ import NewLocationForm from "./new-location";
 import LocationViewModal from "@/components/Modals/location-view";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
-import { locationRoutes, projectRoutes, statusRoutes, subStatusRoutes, userRoutes } from "@/core/api/apiRoutes";
+import {
+  locationRoutes,
+  projectRoutes,
+  statusRoutes,
+  subStatusRoutes,
+  userRoutes,
+} from "@/core/api/apiRoutes";
 import CommonDeleteModal from "@/components/Modals/Common-delete-modal";
 
 const Projects = ({ role }: { role: string }) => {
   const [projectdetails, setProjectDetails] = useState(false);
-  const [project, setProject] = useState({ id: '123' });
+  const [project, setProject] = useState({ id: "123" });
   function viewProjectDetails(data: any) {
     setProjectDetails(true);
     setProject(data);
   }
 
   const locationData = useQuery({
-    queryKey: ['locationData'],
+    queryKey: ["locationData"],
     queryFn: async () => {
-      return await getData(locationRoutes.getAll, {})
+      return await getData(locationRoutes.getAll, {});
     },
   });
 
   const projectData = useQuery({
-    queryKey: ['projectData'],
+    queryKey: ["projectData"],
     queryFn: async () => {
-      return await getData(projectRoutes.getAll, {})
+      return await getData(projectRoutes.getAll, {});
     },
   });
 
-
-  const [projectId, setProjectId] = useState("")
-
+  const [projectId, setProjectId] = useState("");
 
   const locationColumns = [
     { name: "NAME", uid: "name" },
@@ -63,36 +67,32 @@ const Projects = ({ role }: { role: string }) => {
 
   return (
     <div className="flex items-center justify-center">
-      {!projectdetails ?
+      {!projectdetails ? (
         <div className="w-[95%]">
-
           <Tabs aria-label="Options">
             <Tab key="project" title="Projects">
-
               <CommonTable
-                TableData={
-                  projectData.data?.data?.data || []
-                }
+                TableData={projectData.data?.data?.data || []}
                 isLoading={projectData.isLoading}
                 columns={
-                  role === "Super_Admin" ? superAdminProjectColumns : projectColumns
+                  role === "Super_Admin"
+                    ? superAdminProjectColumns
+                    : projectColumns
                 }
                 viewModal={(data: any) => {
-                  return <LocationViewModal data={data} />
+                  return <LocationViewModal data={data} />;
                 }}
                 redirect={(data: any) => {
-                  setProjectId(data._id)
-                  setProjectDetails(true)
+                  setProjectId(data._id);
+                  setProjectDetails(true);
                 }}
-                deleteData={
-                  {
-                    endpoint: projectRoutes.delete,
-                    key: ["projectData"],
-                    type: "project"
-                  }
-                }
+                deleteData={{
+                  endpoint: projectRoutes.delete,
+                  key: ["projectData"],
+                  type: "project",
+                }}
                 deleteModal={(data: any) => {
-                  return <CommonDeleteModal data={data} />
+                  return <CommonDeleteModal data={data} />;
                 }}
               />
               {(role === "Super_Admin" || role === "Admin") && (
@@ -106,23 +106,19 @@ const Projects = ({ role }: { role: string }) => {
             </Tab>
             <Tab key="location" title="Locations">
               <CommonTable
-                TableData={
-                  locationData.data?.data?.data || []
-                }
+                TableData={locationData.data?.data?.data || []}
                 isLoading={locationData.isLoading}
                 columns={locationColumns}
                 viewModal={(data: any) => {
-                  return <LocationViewModal data={data} />
+                  return <LocationViewModal data={data} />;
                 }}
-                deleteData={
-                  {
-                    endpoint: locationRoutes.delete,
-                    key: ["locationData"],
-                    type: "location"
-                  }
-                }
+                deleteData={{
+                  endpoint: locationRoutes.delete,
+                  key: ["locationData"],
+                  type: "location",
+                }}
                 deleteModal={(data: any) => {
-                  return <CommonDeleteModal data={data} />
+                  return <CommonDeleteModal data={data} />;
                 }}
               />
               {(role === "Super_Admin" || role === "Admin") && (
@@ -142,15 +138,16 @@ const Projects = ({ role }: { role: string }) => {
               <ManagerActivityDetailsComponent />
             </>
           )}
-        </div> :
+        </div>
+      ) : (
         <div className="w-[95%]">
-          <ProjectDetails id={
-            projectId
-          } role={role}
+          <ProjectDetails
+            id={projectId}
+            role={role}
             setProjectDetail={(value) => setProjectDetails(value)}
           />
         </div>
-      }
+      )}
       <div></div>
     </div>
   );

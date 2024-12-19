@@ -27,19 +27,17 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<string>(currentStatus);
   const [loading, setLoading] = useState(false);
 
-  // Mutation to update the status
   const updateStatus = useMutation({
     mutationFn: async () =>
       patchData(`${apiEndpoint}/${recordId}`, { status: selectedStatus }, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries( );
       showToastMessage({
         type: "success",
         message: `${currentEntity} status updated successfully`,
         position: "top-right",
       });
       setLoading(false);
-      refetchData(); // Refresh the parent data
+      refetchData(); // Call the refetch function passed down
     },
     onError: (error: any) => {
       showToastMessage({
@@ -53,12 +51,6 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
     },
   });
 
-  // Handle status change
-  const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
-  };
-
-  // Submit the status update
   const handleSubmit = () => {
     if (selectedStatus !== currentStatus) {
       setLoading(true);
@@ -74,13 +66,11 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
 
   return (
     <div className="flex items-center gap-4">
-      {/* Status Dropdown */}
       <Select
-        // label={`Update ${currentEntity} Status`}
         className="w-[120px]"
         selectedKeys={new Set([selectedStatus])}
         onSelectionChange={(keys) =>
-          handleStatusChange(String(Array.from(keys)[0]))
+          setSelectedStatus(String(Array.from(keys)[0]))
         }
       >
         {statusOptions.map((option) => (
@@ -89,8 +79,6 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
           </SelectItem>
         ))}
       </Select>
-
-      {/* Submit Button */}
       <Button
         color="primary"
         onClick={handleSubmit}

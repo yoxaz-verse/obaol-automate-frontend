@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import ActivityDetailProgressComponent from "./activity-detail-progress-component";
-import CommonTable from "../Table/common-table";
+import CommonTable from "../../CurdTable/common-table";
 import {
   activityColumns,
   activityDetailCard,

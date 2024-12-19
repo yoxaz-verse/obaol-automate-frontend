@@ -16,6 +16,7 @@ const BASE_PATHS = {
   ACTIVITY: "/activity",
   ACTIVITY_TYPE: "/activityType",
   ACTIVITY_STATUS: "/activityStatus",
+  ACTIVITY_FILE: "/activityFile",
   PROJECT: "/projects",
   PROJECT_TYPE: "/projectType",
   PROJECT_STATUS: "/projectStatus",
@@ -57,6 +58,7 @@ export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
 export const activityManagerRoutes = createCRUDRoutes(
   BASE_PATHS.ACTIVITY_MANAGER
 );
+export const activityFileRoutes = createCRUDRoutes(BASE_PATHS.ACTIVITY_FILE);
 export const projectManagerRoutes = createCRUDRoutes(
   BASE_PATHS.PROJECT_MANAGER
 );
@@ -154,6 +156,7 @@ export const apiRoutes = {
   serviceCompany: serviceCompanyRoutes,
   locationType: locationTypeRoutes,
   activityType: activityTypeRoutes,
+  activityFile: activityFileRoutes,
   projectType: projectTypeRoutes,
   projectStatus: projectStatusRoutes,
   customer: customerRoutes,

@@ -3,9 +3,9 @@
 import React from "react";
 import QueryComponent from "@/components/queryComponent";
 import { locationManagerRoutes, managerRoutes } from "@/core/api/apiRoutes";
-import UserDeleteModal from "@/components/Modals/delete";
+import UserDeleteModal from "@/components/CurdTable/delete";
 import AddModal from "@/components/CurdTable/add-model";
-import CommonTable from "../Table/common-table";
+import CommonTable from "../../CurdTable/common-table";
 import { Spacer } from "@nextui-org/react";
 
 const LocationManagerTabContent: React.FC = () => {

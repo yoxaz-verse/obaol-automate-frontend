@@ -4,8 +4,8 @@ import React, { useContext, useMemo } from "react";
 
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
-import CommonTable from "../Table/common-table";
-import DeleteModal from "@/components/Modals/delete";
+import CommonTable from "../../CurdTable/common-table";
+import DeleteModal from "@/components/CurdTable/delete";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -15,6 +15,10 @@ import AuthContext from "@/context/AuthContext";
 import Link from "next/link";
 import { FiEye } from "react-icons/fi";
 import AddActivity from "./add-activity";
+import StatusUpdate from "@/components/CurdTable/status-update";
+import { getData } from "@/core/api/apiHandler";
+import { useQuery } from "@tanstack/react-query";
+import { activityStatusRoutes } from "@/core/api/apiRoutes";
 
 interface ActivityTabContentProps {
   selectedTab?: string;
@@ -48,10 +52,21 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   user,
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
+  // Fetch available activity statuses
+  const { data: statusData, isLoading: statusLoading } = useQuery({
+    queryKey: ["activityStatuses"],
+    queryFn: () => getData(activityStatusRoutes.getAll),
+  });
 
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
+  const statusOptions = useMemo(() => {
+    if (statusData?.data.data.data) {
+      return statusData.data.data.data.map((status: any) => ({
+        key: status._id,
+        label: status.name,
+      }));
+    }
+    return [];
+  }, [statusData]);
 
   return (
     <QueryComponent
@@ -61,8 +76,11 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
       limit={100}
       additionalParams={{ projectId, status: selectedTab }}
     >
-      {(data: any) => {
+      {(data: any, refetch) => {
         const fetchedData = data?.data || [];
+        const refetchData = () => {
+          refetch?.(); // Trigger refetch when needed
+        };
 
         const tableData = fetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -107,6 +125,19 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                 //     refetchData={refetchData}
                 //   />
                 // )}
+
+                otherModal={(item: any) => {
+                  return (
+                    <StatusUpdate
+                      currentEntity="Activity"
+                      statusOptions={statusOptions}
+                      apiEndpoint={apiRoutesByRole[currentTable]}
+                      recordId={item._id}
+                      currentStatus={item.status._id}
+                      refetchData={refetchData}
+                    />
+                  );
+                }}
                 deleteModal={(item: any) => (
                   <DeleteModal
                     _id={item._id}

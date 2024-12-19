@@ -22,6 +22,7 @@ interface TableProps {
   viewModal?: (item: any) => React.ReactNode;
   deleteModal?: (item: any) => React.ReactNode;
   editModal?: (item: any) => React.ReactNode;
+  otherModal?: (item: any) => React.ReactNode;
   isLoading?: boolean;
 }
 
@@ -31,6 +32,7 @@ export default function CommonTable({
   viewModal,
   deleteModal,
   editModal,
+  otherModal,
   isLoading = false,
 }: TableProps) {
   type UserData = (typeof TableData)[0];
@@ -124,6 +126,13 @@ export default function CommonTable({
                   </span>
                 </Tooltip>
               )}
+              {otherModal && (
+                <Tooltip content="">
+                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    {otherModal(item)}
+                  </span>
+                </Tooltip>
+              )}{" "}
               {deleteModal && (
                 <Tooltip color="danger" content="Delete">
                   <span className="text-lg text-danger cursor-pointer active:opacity-50">

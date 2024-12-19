@@ -4,8 +4,8 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { FiEdit } from "react-icons/fi";
 import QueryComponent from "@/components/queryComponent";
-import CommonTable from "../Table/common-table";
-import UserDeleteModal from "@/components/Modals/delete";
+import CommonTable from "../../CurdTable/common-table";
+import UserDeleteModal from "@/components/CurdTable/delete";
 
 interface Project {
   _id: string;

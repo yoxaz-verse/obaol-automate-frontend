@@ -4,6 +4,8 @@ import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { projectDetailCard } from "@/data/content-data";
 
 const ProjectDetailComponent = ({ data }: { data: any }) => {
+  console.log(data);
+
   return (
     <div>
       <div className="flex flex-col lg:flex-row lg:justify-between">
@@ -24,7 +26,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
           </div>
           <div className="w-full h-[400px] lg:h-[300px] rounded-lg">
             <iframe
-              src="https://www.google.com/maps/embed/v1/place?q=Door+No:730+E+Abg+Tower+Mundakayam+P.O,+near+South+Indian+Bank,+Kerala+686513&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+              src={data.location.map}
               className="w-full h-full rounded-lg"
             ></iframe>
           </div>

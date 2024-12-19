@@ -1,11 +1,11 @@
 // components/dashboard/Projects/project-tab-content.tsx
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
-import CommonTable from "../Table/common-table";
-import DeleteModal from "@/components/Modals/delete";
+import CommonTable from "../../CurdTable/common-table";
+import DeleteModal from "@/components/CurdTable/delete";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -13,6 +13,10 @@ import {
 } from "@/utils/tableValues";
 import { FiEye } from "react-icons/fi";
 import Link from "next/link";
+import { getData } from "@/core/api/apiHandler";
+import { projectStatusRoutes } from "@/core/api/apiRoutes";
+import { useQuery } from "@tanstack/react-query";
+import StatusUpdate from "@/components/CurdTable/status-update";
 
 interface ProjectTabContentProps {
   selectedTab?: string;
@@ -37,203 +41,6 @@ interface FormField {
   multiple?: boolean;
 }
 
-// const ProjectTabContents: React.FC<ProjectTabContentProps> = ({
-//   currentTable,
-// }) => {
-//   const tableConfig = { initialTableConfig }; // Create a copy to avoid mutations
-
-//   // Fetch related data for dropdowns
-//   const {
-//     data: customersResponse,
-//     isLoading: isCustomersLoading,
-//     isError: isCustomersError,
-//   } = useQuery({
-//     queryKey: ["customers"],
-//     queryFn: () => getData(customerRoutes.getAll),
-//   });
-
-//   const {
-//     data: adminsResponse,
-//     isLoading: isAdminsLoading,
-//     isError: isAdminsError,
-//   } = useQuery({
-//     queryKey: ["admins"],
-//     queryFn: () => getData(adminRoutes.getAll),
-//   });
-
-//   const {
-//     data: managersResponse,
-//     isLoading: isManagersLoading,
-//     isError: isManagersError,
-//   } = useQuery({
-//     queryKey: ["managers"],
-//     queryFn: () => getData(managerRoutes.getAll),
-//   });
-
-//   const {
-//     data: projectStatusesResponse,
-//     isLoading: isProjectStatusesLoading,
-//     isError: isProjectStatusesError,
-//   } = useQuery({
-//     queryKey: ["projectStatuses"],
-//     queryFn: () => getData(projectStatusRoutes.getAll),
-//   });
-
-//   // Extract data or set as empty arrays
-//   const customers = customersResponse?.data?.data.data;
-//   const admins = adminsResponse?.data?.data.data;
-//   const managers = managersResponse?.data?.data.data;
-//   const projectStatuses = projectStatusesResponse?.data?.data.data;
-
-//   // Populate dropdowns
-//   useMemo(() => {
-//     if (currentTable === "projects" && projectStatuses) {
-//       tableConfig[currentTable] = tableConfig[currentTable].map((field) => {
-//         if (field.key === "customer" && admins) {
-//           return {
-//             ...field,
-//             values: customers.map((customer: any) => ({
-//               key: customer._id,
-//               value: customer.name,
-//             })),
-//           };
-//         }
-//         if (field.key === "admin" && admins) {
-//           console.log(admins);
-
-//           return {
-//             ...field,
-//             values: admins.map((admin: any) => ({
-//               key: admin._id,
-//               value: admin.name,
-//             })),
-//           };
-//         }
-//         if (field.key === "manager" && managers) {
-//           return {
-//             ...field,
-//             values: managers.map((manager: any) => ({
-//               key: manager._id,
-//               value: manager.name,
-//             })),
-//           };
-//         }
-//         if (field.key === "status") {
-//           return {
-//             ...field,
-//             values: projectStatuses.map((status: any) => ({
-//               key: status._id,
-//               value: status.name,
-//             })),
-//           };
-//         }
-//         return field;
-//       });
-//     }
-//   }, [currentTable, customers, admins, managers, projectStatuses, tableConfig]);
-
-//   const columns = useMemo(() => {
-//     return tableConfig[currentTable]
-//       .filter((field) => field.inTable && field.type !== "select")
-//       .map((field) => ({
-//         name: field.label.toUpperCase(),
-//         uid: field.key,
-//       }))
-//       .concat(
-//         currentTable === "projects"
-//           ? [
-//               { name: "CUSTOMER", uid: "customerName" },
-//               { name: "ADMIN", uid: "adminName" },
-//               { name: "MANAGER", uid: "managerName" },
-//               { name: "STATUS", uid: "statusName" },
-//             ]
-//           : []
-//       );
-//   }, [currentTable, tableConfig]);
-
-//   // Handle refetching data if necessary
-//   const refetchData = () => {
-//     // Implement refetch logic if necessary
-//   };
-
-//   // Check if any related data is loading or has errors
-//   const isRelatedDataLoading =
-//     isCustomersLoading ||
-//     isAdminsLoading ||
-//     isManagersLoading ||
-//     isProjectStatusesLoading;
-
-//   const isRelatedDataError =
-//     isCustomersError ||
-//     isAdminsError ||
-//     isManagersError ||
-//     isProjectStatusesError;
-
-//   if (isRelatedDataLoading) {
-//     return <div>Loading related data...</div>;
-//   }
-
-//   if (isRelatedDataError) {
-//     return <div>Failed to load related data.</div>;
-//   }
-
-//   return (
-//     <>
-//       <AddModal
-//         currentTable={currentTable}
-//         formFields={tableConfig[currentTable]}
-//         apiEndpoint={apiRoutesByRole[currentTable]}
-//         refetchData={refetchData}
-//       />
-//       <Spacer y={2} />
-//       <QueryComponent
-//         api={apiRoutesByRole[currentTable]}
-//         queryKey={[currentTable, apiRoutesByRole[currentTable]]}
-//         page={1}
-//         limit={100}
-//       >
-//         {(data: any) => {
-//           const fetchedData = data?.data || [];
-
-//           const tableData = fetchedData.map((item: any) => {
-//             const { isDeleted, isActive, __v, ...rest } = item;
-
-//             return {
-//               ...rest,
-//               customerName: item.customer ? item.customer.name : "N/A",
-//               adminName: item.admin ? item.admin.name : "N/A",
-//               managerName: item.manager ? item.manager.name : "N/A",
-//               statusName: item.status ? item.status.name : "N/A",
-//             };
-//           });
-
-//           return (
-//             <>
-//               {tableData.length > 0 ? (
-//                 <CommonTable
-//                   TableData={tableData}
-//                   columns={columns}
-//                   viewModal={(item: any) => <DetailsModal data={item} />}
-//                   deleteModal={(item: any) => (
-//                     <DeleteModal
-//                       _id={item._id}
-//                       name={item.title}
-//                       deleteApiEndpoint={projectRoutes.delete}
-//                       refetchData={refetchData}
-//                     />
-//                   )}
-//                 />
-//               ) : (
-//                 <div>No data available</div>
-//               )}
-//             </>
-//           );
-//         }}
-//       </QueryComponent>
-//     </>
-//   );
-// };
-
 const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   selectedTab,
   currentTable,
@@ -242,9 +49,20 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
 
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
+  const { data: statusData, isLoading: statusLoading } = useQuery({
+    queryKey: ["projectStatuses"],
+    queryFn: () => getData(projectStatusRoutes.getAll),
+  });
+
+  const statusOptions = useMemo(() => {
+    if (statusData?.data.data.data) {
+      return statusData.data.data.data.map((status: any) => ({
+        key: status._id,
+        label: status.name,
+      }));
+    }
+    return [];
+  }, [statusData]);
 
   return (
     <QueryComponent
@@ -254,9 +72,11 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
       limit={100}
       additionalParams={{ status: selectedTab }}
     >
-      {(data: any) => {
+      {(data: any, refetch) => {
         const fetchedData = data?.data || [];
-
+        const refetchData = () => {
+          refetch?.(); // Safely call refetch if it's available
+        };
         const tableData = fetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
           if (currentTable === "projects") {
@@ -300,6 +120,18 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
                 //     refetchData={refetchData}
                 //   />
                 // )}
+                //  otherModal={(item: any) => {
+                //   return (
+                //     <StatusUpdate
+                //       currentEntity="Activity"
+                //       statusOptions={statusOptions}
+                //       apiEndpoint={apiRoutesByRole[currentTable]}
+                //       recordId={item._id}
+                //       currentStatus={item.status._id}
+                //       refetchData={refetchData}
+                //     />
+                //   );
+                // }}
                 deleteModal={(item: any) => (
                   <DeleteModal
                     _id={item._id}

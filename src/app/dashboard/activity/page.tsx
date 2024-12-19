@@ -315,7 +315,7 @@ export default function ProjectsPage() {
           >
             {tabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
-                <ActivityTabContent currentTable={tab.key} />
+                {/* <ActivityTabContent currentTable={tab.key} /> */}
               </Tab>
             ))}
           </Tabs>

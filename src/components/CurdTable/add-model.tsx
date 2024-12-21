@@ -41,6 +41,7 @@ export interface FormField {
   type: string; // e.g., "text", "email", "select", "multiselect", "file", "textarea"
   key: string;
   inForm: boolean;
+  inEdit?: boolean;
   inTable: boolean;
   values?: { key: string; value: string }[]; // For select and multiselect
   accept?: string; // For file inputs (e.g., "image/*")
@@ -159,7 +160,6 @@ const AddModal: React.FC<AddModalProps> = ({
           message: "File uploaded passing to formData",
           position: "top-right",
         });
-        console.log("Uppy upload result:", uploadResult);
 
         if (uploadResult?.failed && uploadResult.failed.length > 0) {
           // Handle upload failures

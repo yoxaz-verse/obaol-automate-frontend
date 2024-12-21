@@ -124,6 +124,7 @@ export const initialTableConfig: Record<
     key: string;
     inForm: boolean;
     inTable: boolean;
+    inEdit?: boolean;
     values?: { key: string; value: string }[];
     accept?: string;
     required?: boolean;
@@ -570,13 +571,21 @@ export const initialTableConfig: Record<
   ],
   // Project
   projects: [
-    { label: "Title", type: "text", key: "title", inForm: true, inTable: true },
+    {
+      label: "Title",
+      type: "text",
+      key: "title",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
     {
       label: "Description",
       type: "textarea",
       key: "description",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Custom ID",
@@ -592,6 +601,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     // {
     //   label: "Admin",
@@ -608,6 +618,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Assignment Date ",
@@ -615,6 +626,7 @@ export const initialTableConfig: Record<
       key: "assignmentDate",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     // {
     //   label: "Status",
@@ -631,6 +643,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Location",
@@ -639,6 +652,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Task",
@@ -646,6 +660,7 @@ export const initialTableConfig: Record<
       key: "task",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Order Number",
@@ -653,6 +668,7 @@ export const initialTableConfig: Record<
       key: "orderNumber",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
 
     {
@@ -741,13 +757,21 @@ export const initialTableConfig: Record<
   ],
   // Activity
   activity: [
-    { label: "Title", type: "text", key: "title", inForm: true, inTable: true },
+    {
+      label: "Title",
+      type: "text",
+      key: "title",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
     {
       label: "Description",
       type: "textarea",
       key: "description",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
 
     {
@@ -757,6 +781,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: false,
       inTable: false,
+      inEdit: false,
     },
 
     {
@@ -766,6 +791,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Workers",
@@ -774,6 +800,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Status",
@@ -781,7 +808,8 @@ export const initialTableConfig: Record<
       key: "status",
       values: [],
       inForm: false,
-      inTable: true,
+      inTable: false,
+      inEdit: false,
     },
     {
       label: "Forecast Date",
@@ -789,6 +817,7 @@ export const initialTableConfig: Record<
       key: "forecastDate",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Actual Date",
@@ -796,6 +825,7 @@ export const initialTableConfig: Record<
       key: "actualDate",
       inForm: false,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Target Operation Date",
@@ -803,6 +833,7 @@ export const initialTableConfig: Record<
       key: "targetOperationDate",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Target Finance  Date",
@@ -810,6 +841,7 @@ export const initialTableConfig: Record<
       key: "targetFinanceDate",
       inForm: false,
       inTable: false,
+      inEdit: true,
     },
 
     {
@@ -818,6 +850,7 @@ export const initialTableConfig: Record<
       key: "updatedBy",
       inForm: false,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Hours Spent",
@@ -825,6 +858,7 @@ export const initialTableConfig: Record<
       key: "hoursSpent",
       inForm: false,
       inTable: true,
+      // inEdit: true,
     },
 
     {

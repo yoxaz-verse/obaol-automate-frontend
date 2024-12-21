@@ -37,6 +37,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [comments, setComments] = useState("");
   const limit = 10;
   const queryClient = useQueryClient();
 
@@ -128,6 +129,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
 
     const formData = new FormData();
     formData.append("activityId", activityId); // Add required activity ID
+    formData.append("comments", comments); // Add required activity ID
 
     // Add files to FormData
     files.forEach((file) => {
@@ -161,14 +163,16 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
               // Group files by status
               const groupedFiles: Record<string, any[]> = data.files.reduce(
                 (acc: Record<string, any[]>, fileWrapper: any) => {
+                  // fileWrapper.append("comments", data.comments);
                   const status = fileWrapper.status || "Unknown";
                   if (!acc[status]) acc[status] = [];
-                  acc[status].push(fileWrapper.file);
+                  acc[status].push(fileWrapper);
                   return acc;
                 },
                 {}
               );
 
+              console.log("groupedFiles", groupedFiles);
               return (
                 <>
                   {Object.entries(groupedFiles).map(
@@ -179,16 +183,16 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                         </h2>
                         <div className="border p-2 rounded-lg">
                           {files.map((file) => {
-                            const fileUrl = `http://localhost:5001${file.url}`;
+                            const fileUrl = `http://localhost:5001${file.file.url}`;
 
                             return (
                               <div
-                                key={file._id}
+                                key={file.file._id}
                                 className="flex justify-between items-center border-b p-2"
                               >
                                 {/* File Details */}
-                                <div className="flex items-center space-x-4">
-                                  {file.mimeType.startsWith("image/") ? (
+                                <div className="flex items-center justify-between space-x-4">
+                                  {file.file.mimeType.startsWith("image/") ? (
                                     <Image
                                       src={fileUrl}
                                       width={100}
@@ -201,13 +205,13 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                                       href={fileUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-blue-500 underline"
+                                      className="hover:text-blue-500 "
                                     >
-                                      {file.fileName}
+                                      File Format
                                     </a>
                                   )}
-                                  <div className="text-sm text-gray-500">
-                                    {file.fileName}
+                                  <div className="text-sm text-center  text-gray-500">
+                                    {file.comments}
                                   </div>
                                 </div>
 
@@ -229,7 +233,10 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
 
                                 {/* Download and Delete Buttons */}
                                 <div className="flex space-x-2">
-                                  <a href={fileUrl} download={file.fileName}>
+                                  <a
+                                    href={fileUrl}
+                                    download={file.file.fileName}
+                                  >
                                     <Button color="success" size="sm">
                                       Download
                                     </Button>
@@ -239,7 +246,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                                       color="danger"
                                       size="sm"
                                       onClick={() =>
-                                        deleteMutation.mutate(file._id)
+                                        deleteMutation.mutate(file.file._id)
                                       }
                                     >
                                       Delete
@@ -277,6 +284,13 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                 proudlyDisplayPoweredByUppy={false}
               />
             )}
+            <textarea
+              name={"comments"}
+              required
+              placeholder={"Comments"}
+              onChange={(e) => setComments(e.target.value)}
+              className="py-2 border rounded-md w-full"
+            />{" "}
           </ModalBody>
           <ModalFooter>
             <Button color="primary" type="submit" onClick={handleUpload}>

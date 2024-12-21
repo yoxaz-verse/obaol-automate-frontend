@@ -142,12 +142,12 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                   // Dynamically filter status options based on user roles
                   const filteredStatusOptions = statusOptions.filter(
                     (tab: any) => {
-                      if (user?.role === "Customer") {
+                      if (user?.role === "Worker") {
                         // Exclude "Approved" and "Rejected" for Workers
                         return tab.key === "6751760121b483f14e02b7fa";
                       }
                       if (
-                        user?.role === "Admin" ||
+                        // user?.role === "Admin" ||
                         user?.role === "ProjectManager"
                       ) {
                         // Exclude "Approved" and "Rejected" for Workers
@@ -160,18 +160,31 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                           tab.key === "6751777221b483f14e02b838"
                         );
                       }
-                      return true; // Allow all statuses for other roles
+                      if (user?.role === "ActivityManager") {
+                        // Exclude "Approved" and "Rejected" for Workers
+                        return (
+                          tab.key === "6751760121b483f14e02b7fa" ||
+                          tab.key === "6751778921b483f14e02b83a" ||
+                          tab.key === "6751778921b483f14e02b83a" ||
+                          tab.key === "6751781121b483f14e02b840"
+                        );
+                      }
+                      return false; // Allow all statuses for other roles
                     }
                   );
+                  console.log(filteredStatusOptions);
+                  
                   return (
-                    <StatusUpdate
-                      currentEntity="Activity"
-                      statusOptions={filteredStatusOptions}
-                      apiEndpoint={apiRoutesByRole[currentTable]}
-                      recordId={item._id}
-                      currentStatus={currentStatus}
-                      refetchData={refetchData}
-                    />
+                    filteredStatusOptions && (
+                      <StatusUpdate
+                        currentEntity="Activity"
+                        statusOptions={filteredStatusOptions}
+                        apiEndpoint={apiRoutesByRole[currentTable]}
+                        recordId={item._id}
+                        currentStatus={currentStatus}
+                        refetchData={refetchData}
+                      />
+                    )
                   );
                 }}
                 deleteModal={(item: any) => (

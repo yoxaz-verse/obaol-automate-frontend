@@ -2,7 +2,6 @@
 import { NextPage } from "next";
 import ActivityDetailCard from "@/components/dashboard/Activity/activity-card";
 import QueryComponent from "@/components/queryComponent";
-import { activityRoutes } from "@/core/api/apiRoutes";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import TimeSheetTabContent from "@/components/dashboard/TimeSheet/all-timesheet-tab-content";
 import { usePathname } from "next/navigation";
@@ -12,6 +11,7 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import { Card, Spacer } from "@nextui-org/react";
 import ActivityFileCard from "@/components/dashboard/Activity/activity-file";
 import AuthContext from "@/context/AuthContext";
+import EditActivityCard from "@/components/dashboard/Activity/activity-edit-card";
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
@@ -42,6 +42,15 @@ const ViewActivityById: NextPage = () => {
             <div className="flex flex-col lg:flex-row lg:justify-between">
               <div className="lg:w-[49%]">
                 <ActivityDetailCard data={data} />
+                {user?.role === "Admin" && (
+                  <EditActivityCard
+                    currentTable={"activity"}
+                    formFields={tableConfig["activity"]}
+                    apiEndpoint={`${apiRoutesByRole["activity"]}/${activityId}`}
+                    refetchData={refetchData}
+                    initialValues={data}
+                  />
+                )}
               </div>
 
               <div className="lg:w-[49%] mt-4 lg:mt-0">

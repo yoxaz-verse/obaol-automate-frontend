@@ -127,11 +127,9 @@ export default function CommonTable({
                 </Tooltip>
               )}
               {otherModal && (
-                <Tooltip content="">
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    {otherModal(item)}
-                  </span>
-                </Tooltip>
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  {otherModal(item)}
+                </span>
               )}{" "}
               {deleteModal && (
                 <Tooltip color="danger" content="Delete">
@@ -147,7 +145,7 @@ export default function CommonTable({
           return cellValue || "N/A";
       }
     },
-    [viewModal, deleteModal, editModal, columns] // Ensure columns is included in the dependency array
+    [viewModal, deleteModal, editModal, columns, otherModal ] // Ensure columns is included in the dependency array
   );
 
   // Pagination logic

@@ -12,6 +12,9 @@ import {
   Chip,
   Button,
   ModalFooter,
+  DatePicker,
+  Switch,
+  TimeInput,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { patchData, putData } from "@/core/api/apiHandler"; // Ensure putData is correctly implemented
@@ -39,7 +42,7 @@ interface EditModalProps {
   formFields: FormField[];
   apiEndpoint: string;
   refetchData: () => void;
-  initialData: Record<string, any>; // Existing data to populate the form
+  initialData: any; // Existing data to populate the form
 }
 
 const EditModal: React.FC<EditModalProps> = ({
@@ -290,8 +293,64 @@ const EditModal: React.FC<EditModalProps> = ({
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   // Helper function to render form fields based on type
+  const handleDateChange = (key: string, date: any) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [key]: date instanceof Date ? date : new Date(date), // Example transformation
+    }));
+  };
+  const handleBooleanChange = (key: string, checked: boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [key]: checked,
+    }));
+  };
+
+  const handleTimeChange = (key: string, time: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: time,
+    }));
+  };
+
   const renderFormField = (field: FormField) => {
+    if (!field.inEdit) return null;
     switch (field.type) {
+      case "date":
+        return (
+          <DatePicker
+            name={field.key}
+            labelPlacement="outside"
+            label={field.label}
+            className="max-w-[284px]"
+            // defaultValue={formData[field.key] || null} // Set the initial date if it exists in formData
+            // defaultValue={
+            //   formData[field.key] &&
+            //   new Date(formData[field.key]).toISOString().split("T")[0]
+            // }
+            // onChange={(date) => handleDateChange(field.key, date)} // Use handleDateChange to update state
+          />
+        );
+      case "boolean":
+        return (
+          <Switch
+            name={field.key}
+            // defaultSelected={formData[field.key] || false}
+            onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
+          >
+            {field.label}
+          </Switch>
+        );
+      case "time":
+        return (
+          <TimeInput
+            name={field.key}
+            label={field.label}
+            hourCycle={24}
+            // value={formData[field.key]} // Controlled state
+            onChange={(time) => handleTimeChange(field.key, time)} // Update handler
+          />
+        );
       case "textarea":
         return (
           <textarea
@@ -437,14 +496,13 @@ const EditModal: React.FC<EditModalProps> = ({
   return (
     <>
       {/* Edit Button */}
-      {/* <button
-        className="w-[100px] bg-yellow-500 rounded-3xl text-white h-[38px] text-sm"
+      <button
+        className="flex items-center justify-center gap-2 w-[100px] bg-yellow-600 rounded-xl text-white h-[38px] text-sm"
         onClick={openModal}
       >
         Edit
-      </button> */}
-
-      <TbEdit onClick={openModal} className="hover:text-purple-600" />
+        <TbEdit className="hover:text-yellow-300" />
+      </button>
 
       {/* Edit Modal */}
       {initialData && (

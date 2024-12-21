@@ -18,6 +18,7 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
+import EditProject from "./project-edit-card";
 
 const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const [currentTable, setCurrentTable] = useState<string>("");
@@ -59,6 +60,14 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                 <ProjectDetailProgressComponent data={data} />
                 <Spacer y={2} />
                 <ProjectDetailComponent data={data} />
+                <Spacer y={2} />
+                <EditProject
+                  currentTable={"projects"}
+                  formFields={tableConfig["projects"]}
+                  apiEndpoint={`${apiRoutesByRole["projects"]}/${id}`}
+                  refetchData={refetchData}
+                  initialValues={data}
+                />{" "}
               </>
             </>
           )}
@@ -94,7 +103,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
               selectedKey={currentTable || activityStatuses[0]._id} // Default to the first tab if none selected
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
-              <Tab key={null} title="All">
+              <Tab key={0} title="All">
                 <ActivityTabContent
                   currentTable={current}
                   tableConfig={tableConfig}
@@ -103,7 +112,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                 />
               </Tab>{" "}
               {activityStatuses.map((status: { _id: string; name: string }) => (
-                <Tab key={status._id} title={status.name}>
+                <Tab key={status._id + 1} title={status.name}>
                   <ActivityTabContent
                     selectedTab={status._id}
                     currentTable={current}

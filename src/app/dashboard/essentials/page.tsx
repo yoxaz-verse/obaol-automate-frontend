@@ -5,6 +5,8 @@ import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
+import BulkAdd from "@/components/CurdTable/bulk-add";
+import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
   const [locationTab, setLocationTab] = React.useState("locationType");
@@ -32,6 +34,9 @@ export default function Essentials() {
   // Optionally, add dynamic tabs based on fetched data
   // For example, if ProjectStatus or ActivityStatus have sub-categories
   // For simplicity, we'll stick to static tabs in this example
+  const refetchData = () => {
+    // Implement refetch logic if necessary
+  };
 
   return (
     <div className="flex items-center justify-center">
@@ -87,7 +92,14 @@ export default function Essentials() {
               <Tab key={tab.key} title={tab.title}>
                 {tab.key === "location" && (
                   // <LocationTabContent currentType="all" />
-                  <EssentialTabContent essentialName="location" />
+                  <>
+                    <BulkAdd
+                      apiEndpoint={`${locationRoutes.getAll}/bulk`}
+                      refetchData={refetchData} // Function to refetch activities list
+                      currentTable={"Locations"}
+                    />
+                    <EssentialTabContent essentialName="location" />
+                  </>
                 )}
                 {tab.key === "locationType" && (
                   <EssentialTabContent essentialName="locationType" />

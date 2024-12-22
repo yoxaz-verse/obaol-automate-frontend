@@ -14,7 +14,12 @@ import {
 } from "@/utils/tableValues";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
-import { locationRoutes, locationTypeRoutes } from "@/core/api/apiRoutes";
+import {
+  locationManagerRoutes,
+  locationRoutes,
+  locationTypeRoutes,
+} from "@/core/api/apiRoutes";
+import DetailsModal from "@/components/CurdTable/details";
 
 const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
@@ -25,15 +30,15 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
     queryFn: () => getData(locationTypeRoutes.getAll),
     enabled: essentialName === "location",
   });
-  const { data: locationResponse } = useQuery({
-    queryKey: ["Location"],
-    queryFn: () => getData(locationRoutes.getAll),
-    enabled: essentialName === "locationManager",
+  const { data: locationManagerResponse } = useQuery({
+    queryKey: ["LocationManager"],
+    queryFn: () => getData(locationManagerRoutes.getAll),
+    enabled: essentialName === "location",
   });
 
   const locationTypeValue = locationTypeResponse?.data?.data.data;
 
-  const locationValue = locationResponse?.data?.data.data;
+  const locationManagerValue = locationManagerResponse?.data?.data.data;
 
   const queryKey = [essentialName];
 
@@ -74,17 +79,15 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     ? { ...field, values: locationTypeValues }
                     : field
                 );
-              }
-              if (essentialName === "locationManager" && locationValue) {
-                const locationValues = locationValue.map(
+                const locationManagerValues = locationManagerValue.map(
                   (locationManager: any) => ({
                     key: String(locationManager._id),
                     value: locationManager.name,
                   })
                 );
                 formFields = formFields.map((field: any) =>
-                  field.key === "location"
-                    ? { ...field, values: locationValues }
+                  field.key === "locationManager"
+                    ? { ...field, values: locationManagerValues }
                     : field
                 );
               }
@@ -94,19 +97,22 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                 if (essentialName === "location") {
                   return {
                     ...rest,
-                    type: item.locationType.name
+                    locationType: item.locationType.name
                       ? item.locationType.name
                       : "N/A",
+                    locationManager: item.locationManager
+                      ? item.locationManager.map(
+                          (loc: { code: string; name: string }) => ({
+                            code: loc.code,
+                            name: loc.name,
+                          })
+                        )
+                      : "N/A", // Handle locationManager formatting
                   };
                   // Handle other user types similarly if needed
                 }
-                if (essentialName === "locationManager") {
-                  return {
-                    ...rest,
-                    managedLocation: item.location ? item.location.name : "N/A",
-                  };
-                  // Handle other user types similarly if needed
-                }
+                // Handle other user types similarly if needed
+
                 return rest;
               });
               return (
@@ -122,10 +128,10 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     TableData={tableData}
                     columns={columns}
                     isLoading={false}
-                    // viewModal={(item: any) => (
-                    //   // Implement view modal if needed
-                    //   // <div>ddd</div>
-                    // )}
+                    viewModal={(item: any) => (
+                      // Implement view modal if needed
+                      <DetailsModal data={item} columns={columns} />
+                    )}
                     deleteModal={(item: any) => (
                       <UserDeleteModal
                         _id={item._id}

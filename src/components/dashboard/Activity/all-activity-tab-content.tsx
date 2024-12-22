@@ -127,8 +127,6 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                 // )}
 
                 otherModal={(item: any) => {
-                  console.log(statusOptions);
-
                   const currentStatus = item.status
                     ? {
                         key: item.status._id, // Use the status ID as the key
@@ -147,7 +145,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         return tab.key === "6751760121b483f14e02b7fa";
                       }
                       if (
-                        // user?.role === "Admin" ||
+                        user?.role === "Admin" ||
                         user?.role === "ProjectManager"
                       ) {
                         // Exclude "Approved" and "Rejected" for Workers
@@ -172,8 +170,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                       return false; // Allow all statuses for other roles
                     }
                   );
-                  console.log(filteredStatusOptions);
-                  
+
                   return (
                     filteredStatusOptions && (
                       <StatusUpdate

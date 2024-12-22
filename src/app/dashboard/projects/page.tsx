@@ -11,6 +11,7 @@ import { projectStatusRoutes } from "@/core/api/apiRoutes";
 import AddProject from "@/components/dashboard/Projects/add-projects";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
+import BulkAdd from "@/components/CurdTable/bulk-add";
 
 const refetchData = () => {
   // Implement refetch logic if necessary
@@ -32,7 +33,16 @@ export default function ProjectsPage() {
   return (
     <div className="flex  justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-6xl">
-        <NewProjectsCharts />
+        {/* <NewProjectsCharts /> */}
+        <Spacer y={5} />{" "}
+        {user?.role === "Admin" && (
+          <BulkAdd
+            apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
+            refetchData={refetchData} // Function to refetch activities list
+            currentTable={"Activities"}
+          />
+        )}{" "}
+        <Spacer y={2} />{" "}
         <div className="my-4">
           {/* AddModal for adding new entries */}
           {user?.role === "Admin" && (
@@ -43,7 +53,6 @@ export default function ProjectsPage() {
               refetchData={refetchData}
             />
           )}{" "}
-          <Spacer y={2} />
           {isLoading ? (
             <p>
               {" "}

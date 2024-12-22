@@ -430,12 +430,14 @@ const AddModal: React.FC<AddModalProps> = ({
 
   return (
     <>
-      <button
-        className="w-[120px] bg-[#3EADEB] rounded-3xl text-white h-[45px] text-sm"
-        onClick={openModal}
-      >
-        Add
-      </button>
+      <div className="flex justify-end">
+        <button
+          className="w-[120px] bg-[#3EADEB] rounded-3xl text-white h-[45px] text-sm"
+          onClick={openModal}
+        >
+          Add
+        </button>
+      </div>
       <Modal isOpen={open} onClose={closeModal} size="lg">
         <ModalContent>
           <ModalHeader className="flex flex-col ">

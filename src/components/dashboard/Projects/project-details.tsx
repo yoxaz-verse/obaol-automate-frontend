@@ -19,6 +19,7 @@ import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import EditProject from "./project-edit-card";
+import BulkAdd from "@/components/CurdTable/bulk-add";
 
 const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const [currentTable, setCurrentTable] = useState<string>("");
@@ -52,12 +53,12 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
         {/* Wrap Project Details Query */}
         <QueryComponent
           api={`${projectRoutes.getAll}/${id}`}
-          queryKey={["projectDetailsData YO Yo", id]}
+          queryKey={["projectDetailsData", id]}
         >
           {(data) => (
             <>
               <>
-                <ProjectDetailProgressComponent data={data} />
+                {/* <ProjectDetailProgressComponent data={data} /> */}
                 <Spacer y={2} />
                 <ProjectDetailComponent data={data} />
                 <Spacer y={2} />
@@ -77,7 +78,13 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
           <div className="font-bold text-xl">Activities List</div>
           {/* <AddNewActivityModal id={id} /> */}
         </div>
-
+        <Spacer y={2} />
+        <BulkAdd
+          apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
+          refetchData={refetchData} // Function to refetch activities list
+          currentTable={"Activities"}
+        />
+        <Spacer y={5} />
         <div className="my-4">
           {/* AddModal for adding new entries */}
           <AddActivity

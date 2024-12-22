@@ -4,8 +4,6 @@ import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { projectDetailCard } from "@/data/content-data";
 
 const ProjectDetailComponent = ({ data }: { data: any }) => {
-  console.log(data);
-
   return (
     <div>
       <div className="flex flex-col lg:flex-row lg:justify-between">
@@ -33,7 +31,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
           <Card className=" border-1 flex justify-center items-center text-[#454545] my-2">
             <div className="flex justify-between w-[90%] mt-4 mb-8">
               <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Actual Date</div>
+                <div className="text-sm font-medium">Assignment Date</div>
                 <div className="text-xs pt-2">
                   {" "}
                   {new Date(data?.assignmentDate).toLocaleDateString("en-US", {
@@ -44,7 +42,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
                 </div>
               </div>
               <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Forecast Date</div>
+                <div className="text-sm font-medium">Scheda Radio Date</div>
                 <div className="text-xs pt-2">
                   {" "}
                   {new Date(data?.schedaRadioDate).toLocaleDateString("en-US", {

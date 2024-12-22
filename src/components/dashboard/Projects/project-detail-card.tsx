@@ -1,15 +1,10 @@
-import { ProjectDetailCardProps } from "@/data/interface-data";
 import {
-  Avatar,
-  AvatarGroup,
   Card,
   CardBody,
   CardHeader,
-  Select,
-  SelectItem,
+
 } from "@nextui-org/react";
 import React from "react";
-import { FiEdit } from "react-icons/fi";
 
 const ProjectDetailCard = ({ data }: { data: any }) => {
   return (
@@ -19,7 +14,7 @@ const ProjectDetailCard = ({ data }: { data: any }) => {
           {data.title ?? "Title"}
         </div>
         <div>
-          <FiEdit />
+          {/* <FiEdit /> */}
         </div>
       </div>
       <div>
@@ -44,7 +39,7 @@ const ProjectDetailCard = ({ data }: { data: any }) => {
             <CardHeader className="flex w-full">
               <div className="font-medium">Manager</div>
               <div className="pl-2">
-                <FiEdit />
+                {/* <FiEdit /> */}
               </div>
             </CardHeader>
             <CardBody className="flex flex-row ">

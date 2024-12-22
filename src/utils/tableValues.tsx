@@ -390,6 +390,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Owner",
@@ -397,6 +398,7 @@ export const initialTableConfig: Record<
       key: "owner",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Address",
@@ -404,6 +406,16 @@ export const initialTableConfig: Record<
       key: "address",
       inForm: true,
       inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Location Manager",
+      type: "multiselect",
+      key: "locationManager",
+      values: [],
+      inForm: true,
+      inTable: false,
+      inEdit: true,
     },
     {
       label: "City",
@@ -411,6 +423,7 @@ export const initialTableConfig: Record<
       key: "city",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Province",
@@ -418,6 +431,7 @@ export const initialTableConfig: Record<
       key: "province",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Region",
@@ -425,6 +439,7 @@ export const initialTableConfig: Record<
       key: "region",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Nation",
@@ -432,19 +447,20 @@ export const initialTableConfig: Record<
       key: "nation",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Latitude",
       type: "text",
       key: "latitude",
-      inForm: true,
+      inForm: false,
       inTable: false,
     },
     {
       label: "Longitude",
       type: "text",
       key: "longitude",
-      inForm: true,
+      inForm: false,
       inTable: false,
     },
     {
@@ -468,6 +484,7 @@ export const initialTableConfig: Record<
       key: "description",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
     {
       label: "Location Type",
@@ -535,14 +552,6 @@ export const initialTableConfig: Record<
       label: "Name",
       type: "text",
       key: "name",
-      inForm: true,
-      inTable: true,
-    },
-    {
-      label: "Location",
-      type: "select",
-      key: "location",
-      values: [],
       inForm: true,
       inTable: true,
     },
@@ -628,14 +637,14 @@ export const initialTableConfig: Record<
       inTable: true,
       inEdit: true,
     },
-    // {
-    //   label: "Status",
-    //   type: "select",
-    //   key: "status",
-    //   values: [],
-    //   inForm: true,
-    //   inTable: true,
-    // },
+    {
+      label: "Status",
+      type: "select",
+      key: "status",
+      values: [],
+      inForm: false,
+      inTable: false,
+    },
     {
       label: "Project Type",
       type: "select",
@@ -850,7 +859,7 @@ export const initialTableConfig: Record<
       key: "updatedBy",
       inForm: false,
       inTable: true,
-      inEdit: true,
+      inEdit: false,
     },
     {
       label: "Hours Spent",

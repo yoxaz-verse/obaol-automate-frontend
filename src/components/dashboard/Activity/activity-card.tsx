@@ -2,7 +2,6 @@ import { ActivityDetailCardProps } from "@/data/interface-data";
 import { Card } from "@nextui-org/react";
 import Link from "next/link";
 import React from "react";
-import { FiEdit } from "react-icons/fi";
 const ActivityDetailCard = ({ data }: any) => {
   return (
     <div>
@@ -21,7 +20,7 @@ const ActivityDetailCard = ({ data }: any) => {
               Project - {data.project && data?.project.title}
             </div>
           </div>
-          <FiEdit />
+          {/* <FiEdit /> */}
         </div>
         <div className=" justify-between w-full items-center pb-4">
           <div className=" text-2xl font-medium">{data?.title}</div>
@@ -45,64 +44,77 @@ const ActivityDetailCard = ({ data }: any) => {
           <div className=" text-md  pb-8">Status: {data?.status?.name}</div>
           <Card className="bg-[#F8F8F8] border-1 border-[#E9E9E9] flex justify-center items-center text-[#454545]">
             <div className="flex justify-between w-[90%] mt-4 mb-8">
-              <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Actual Date</div>
-                <div className="text-xs pt-2">
-                  {new Date(data?.actualDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+              {data.actualDate && (
+                <div className="flex flex-col w-[50%]">
+                  <>
+                    {" "}
+                    <div className="text-sm font-medium">Actual Date</div>
+                    <div className="text-xs pt-2">
+                      {new Date(data?.actualDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </div>
+                  </>
                 </div>
-              </div>
-              <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Forecast Date</div>
-                <div className="text-xs pt-2">
-                  {" "}
-                  {new Date(data?.forecastDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+              )}
+              {data.forecastDate && (
+                <div className="flex flex-col w-[50%]">
+                  <div className="text-sm font-medium">Forecast Date</div>
+                  <div className="text-xs pt-2">
+                    {" "}
+                    {new Date(data?.forecastDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             {/* Render status and sub status */}
             <div className="flex justify-between pt-5 pb-10 w-[90%]">
-              <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Target Finance Date</div>
-                <div className="text-xs pt-2">
-                  {new Date(data?.targetFinanceDate).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
+              {data.targetFinanceDate && (
+                <div className="flex flex-col w-[50%]">
+                  <div className="text-sm font-medium">Target Finance Date</div>
+                  <div className="text-xs pt-2">
+                    {new Date(data?.targetFinanceDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="w-[50%]">
-                <div className="text-sm font-medium">Target Operation Date</div>
-                <div className="text-xs pt-2">
-                  {new Date(data?.targetOperationDate).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
+              )}
+              {data.targetOperationDate && (
+                <div className="w-[50%]">
+                  <div className="text-sm font-medium">
+                    Target Operation Date
+                  </div>
+                  <div className="text-xs pt-2">
+                    {new Date(data?.targetOperationDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </div>
+                  {data.statusOptions?.map((d: any) => {
+                    return (
+                      <h1 className={`${d.color}`} key={d.key}>
+                        {" "}
+                        {d.key}
+                      </h1>
+                    );
+                  })}
                 </div>
-                {data.statusOptions?.map((d: any) => {
-                  return (
-                    <h1 className={`${d.color}`} key={d.key}>
-                      {" "}
-                      {d.key}
-                    </h1>
-                  );
-                })}
-              </div>
+              )}
               {/*<Select placeholder='Status'>
               {data.statusOptions.map((option: any) => {
                 return <SelectItem key={option.key} className={option.color}>

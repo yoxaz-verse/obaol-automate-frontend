@@ -314,7 +314,7 @@ const EditModal: React.FC<EditModalProps> = ({
   };
 
   const renderFormField = (field: FormField) => {
-    if (!field.inEdit) return null;
+    // if (!field.inEdit) return null;
     switch (field.type) {
       case "date":
         return (
@@ -514,7 +514,7 @@ const EditModal: React.FC<EditModalProps> = ({
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
-                  .filter((field) => field.inForm)
+                  .filter((field) => field.inEdit)
                   .map((field, index) => (
                     <div key={index} className="mb-4">
                       {renderFormField(field)}

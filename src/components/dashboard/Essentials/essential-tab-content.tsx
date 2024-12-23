@@ -16,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import {
   locationManagerRoutes,
-  locationRoutes,
   locationTypeRoutes,
 } from "@/core/api/apiRoutes";
 import DetailsModal from "@/components/CurdTable/details";

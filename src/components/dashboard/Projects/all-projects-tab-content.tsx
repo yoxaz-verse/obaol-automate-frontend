@@ -23,6 +23,7 @@ interface ProjectTabContentProps {
   currentTable: string;
   tableConfig: any;
   user: any;
+  selectedLocation?: string | null; // Add selectedLocation
 }
 
 interface Option {
@@ -46,6 +47,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   currentTable,
   tableConfig,
   user,
+  selectedLocation,
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
 
@@ -70,7 +72,10 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
       queryKey={[currentTable, apiRoutesByRole[currentTable]]}
       page={1}
       limit={100}
-      additionalParams={{ status: selectedTab }}
+      additionalParams={{
+        status: selectedTab,
+        location: selectedLocation,
+      }}
     >
       {(data: any, refetch) => {
         const fetchedData = data?.data || [];

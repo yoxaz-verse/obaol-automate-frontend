@@ -12,6 +12,7 @@ import { Card, Spacer } from "@nextui-org/react";
 import ActivityFileCard from "@/components/dashboard/Activity/activity-file";
 import AuthContext from "@/context/AuthContext";
 import EditActivityCard from "@/components/dashboard/Activity/activity-edit-card";
+import LocationDetailComponent from "@/components/dashboard/Location/location-detail-component";
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
@@ -55,13 +56,7 @@ const ViewActivityById: NextPage = () => {
 
               <div className="lg:w-[49%] mt-4 lg:mt-0">
                 <div className="w-full h-[400px] lg:h-full">
-                  <iframe
-                    src={
-                      data?.project.location.map ||
-                      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6139551.5283225225!2d12.712159999999988!3d41.290850000000006!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12d4fe82448dd203%3A0xe22cf55c24635e6f!2sItaly!5e0!3m2!1sen!2sin!4v1733584106237!5m2!1sen!2sin"
-                    }
-                    className="w-full h-full"
-                  />
+                  <LocationDetailComponent data={data.project} />
                 </div>
               </div>
             </div>

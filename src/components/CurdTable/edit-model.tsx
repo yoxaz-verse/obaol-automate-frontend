@@ -30,6 +30,7 @@ import "@uppy/dashboard/dist/style.css";
 import Image from "next/image";
 import { FormField } from "./add-model"; // Ensure the path is correct
 import { TbEdit } from "react-icons/tb";
+import { parseDate, toCalendarDate } from "@internationalized/date";
 
 // Define the structure of the response from the upload endpoint
 interface UploadResponse {
@@ -317,18 +318,21 @@ const EditModal: React.FC<EditModalProps> = ({
     // if (!field.inEdit) return null;
     switch (field.type) {
       case "date":
+        const parsedDate =
+          formData[field.key] && !isNaN(new Date(formData[field.key]).getTime())
+            ? parseDate(
+                new Date(formData[field.key]).toISOString().split("T")[0]
+              ) // Converts to YYYY-MM-DD
+            : undefined;
+
         return (
           <DatePicker
             name={field.key}
             labelPlacement="outside"
             label={field.label}
             className="max-w-[284px]"
-            value={
-              formData[field.key] &&
-              !isNaN(new Date(formData[field.key]).getTime()) &&
-              new Date(formData[field.key])
-            }
-            onChange={(date) => handleDateChange(field.key, date)} // Update formData with the selected date
+            defaultValue={parsedDate}
+            onChange={(date) => handleDateChange(field.key, date)}
           />
         );
 
@@ -343,13 +347,20 @@ const EditModal: React.FC<EditModalProps> = ({
           </Switch>
         );
       case "time":
+        const parsedTime =
+          formData[field.key] &&
+          new Date(formData[field.key]).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }); // e.g., "14:30" for 24-hour format
+
         return (
           <TimeInput
             name={field.key}
             label={field.label}
-            hourCycle={24}
-            // value={formData[field.key]} // Controlled state
-            onChange={(time) => handleTimeChange(field.key, time)} // Update handler
+            hourCycle={24} // Use 24-hour format
+            value={parsedTime || ""} // Pass time in "HH:mm" format
+            onChange={(time) => handleTimeChange(field.key, time)} // Handle updates
           />
         );
       case "textarea":

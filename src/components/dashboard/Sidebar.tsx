@@ -13,7 +13,7 @@ import { MdDashboard } from "react-icons/md";
 import { RiBuildingLine } from "react-icons/ri";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
-import { routeRoles } from "@/app/dashboard/layout";
+import { routeRoles } from "@/utils/roleHelpers";
 
 const Sidebar = () => {
   const router = useRouter();

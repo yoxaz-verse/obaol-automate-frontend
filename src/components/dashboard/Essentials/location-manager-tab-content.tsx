@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import QueryComponent from "@/components/queryComponent";
-import { locationManagerRoutes, managerRoutes } from "@/core/api/apiRoutes";
+import { locationManagerRoutes } from "@/core/api/apiRoutes";
 import UserDeleteModal from "@/components/CurdTable/delete";
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../../CurdTable/common-table";

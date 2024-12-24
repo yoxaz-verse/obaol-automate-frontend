@@ -4,7 +4,6 @@
 import React, { useContext, useMemo } from "react";
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
-import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../../CurdTable/common-table";
 import DeleteModal from "@/components/CurdTable/delete";
 import {
@@ -13,7 +12,6 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import { User } from "@/context/AuthContext";
-import DetailsModal from "@/components/CurdTable/details";
 import StatusUpdate from "@/components/CurdTable/status-update";
 
 interface TimeSheetTabContentProps {

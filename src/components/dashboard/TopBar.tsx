@@ -16,7 +16,7 @@ import { RiBuildingLine, RiAdminFill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
-import { routeRoles } from "@/app/dashboard/layout";
+import { routeRoles } from "@/utils/roleHelpers";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);

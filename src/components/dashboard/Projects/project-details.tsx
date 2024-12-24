@@ -20,6 +20,7 @@ import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import EditProject from "./project-edit-card";
 import BulkAdd from "@/components/CurdTable/bulk-add";
+import LocationDetailComponent from "../Location/location-detail-component";
 
 const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const [currentTable, setCurrentTable] = useState<string>("");
@@ -60,8 +61,10 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
               <>
                 {/* <ProjectDetailProgressComponent data={data} /> */}
                 <Spacer y={2} />
-                <ProjectDetailComponent data={data} />
-                <Spacer y={2} />
+                <div className="lg:flex w-full justify-between gap-2">
+                  <ProjectDetailComponent data={data} />
+                  <LocationDetailComponent data={data} />
+                </div>{" "}
                 <EditProject
                   currentTable={"projects"}
                   formFields={tableConfig["projects"]}

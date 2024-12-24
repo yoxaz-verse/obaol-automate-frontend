@@ -5,9 +5,9 @@ import { projectDetailCard } from "@/data/content-data";
 
 const ProjectDetailComponent = ({ data }: { data: any }) => {
   return (
-    <div>
+    <div className="w-full ">
       <div className="flex flex-col lg:flex-row lg:justify-between">
-        <div className="lg:w-[49%] mb-2">
+        <div className="w-full mb-2">
           <div className="sm:flex gap-2 ">
             <Card className="w-full lg:w-1/2 mb-6 py-2 mt-4 lg:mt-0">
               <CardBody className="flex flex-col">
@@ -22,12 +22,9 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
               </CardBody>
             </Card>
           </div>
-          <div className="w-full h-[400px] lg:h-[300px] rounded-lg">
-            <iframe
-              src={data.location.map}
-              className="w-full h-full rounded-lg"
-            ></iframe>
-          </div>
+
+          <ProjectDetailCard data={data} />
+
           <Card className=" border-1 flex justify-center items-center text-[#454545] my-2">
             <div className="flex justify-between w-[90%] mt-4 mb-8">
               <div className="flex flex-col w-[50%]">
@@ -57,9 +54,6 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
             {/* <div className="flex justify-between pt-5 pb-10 w-[90%]"></div> */}
           </Card>
         </div>{" "}
-        <div className="lg:w-[49%]">
-          <ProjectDetailCard data={data} />
-        </div>
       </div>
     </div>
   );

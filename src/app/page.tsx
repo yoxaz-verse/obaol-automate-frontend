@@ -1,6 +1,5 @@
 "use client";
 import AuthContext from "@/context/AuthContext";
-import { ROUTES } from "@/core/routes";
 import {
   Card,
   CardBody,

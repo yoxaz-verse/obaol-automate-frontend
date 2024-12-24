@@ -296,7 +296,7 @@ const EditModal: React.FC<EditModalProps> = ({
   const handleDateChange = (key: string, date: any) => {
     setFormData((prevData) => ({
       ...prevData,
-      [key]: date instanceof Date ? date : new Date(date), // Example transformation
+      [key]: date, // Store as ISO string for compatibility
     }));
   };
   const handleBooleanChange = (key: string, checked: boolean) => {
@@ -323,14 +323,15 @@ const EditModal: React.FC<EditModalProps> = ({
             labelPlacement="outside"
             label={field.label}
             className="max-w-[284px]"
-            // defaultValue={formData[field.key] || null} // Set the initial date if it exists in formData
-            // defaultValue={
-            //   formData[field.key] &&
-            //   new Date(formData[field.key]).toISOString().split("T")[0]
-            // }
-            // onChange={(date) => handleDateChange(field.key, date)} // Use handleDateChange to update state
+            value={
+              formData[field.key] &&
+              !isNaN(new Date(formData[field.key]).getTime()) &&
+              new Date(formData[field.key])
+            }
+            onChange={(date) => handleDateChange(field.key, date)} // Update formData with the selected date
           />
         );
+
       case "boolean":
         return (
           <Switch

@@ -1,7 +1,7 @@
 // components/dashboard/Projects/project-tab-content.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
 import CommonTable from "../../CurdTable/common-table";
@@ -55,7 +55,6 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
     queryKey: ["projectStatuses"],
     queryFn: () => getData(projectStatusRoutes.getAll),
   });
-
   const statusOptions = useMemo(() => {
     if (statusData?.data.data.data) {
       return statusData.data.data.data.map((status: any) => ({
@@ -69,7 +68,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   return (
     <QueryComponent
       api={apiRoutesByRole[currentTable]}
-      queryKey={[currentTable, apiRoutesByRole[currentTable]]}
+      queryKey={[currentTable, selectedLocation, apiRoutesByRole[currentTable]]}
       page={1}
       limit={100}
       additionalParams={{

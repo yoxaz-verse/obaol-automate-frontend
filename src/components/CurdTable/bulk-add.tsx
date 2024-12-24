@@ -1,6 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Input, Spacer } from "@nextui-org/react";
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  Input,
+  Spacer,
+} from "@nextui-org/react";
 import { postData } from "@/core/api/apiHandler";
 import * as XLSX from "xlsx";
 
@@ -67,19 +73,26 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
   };
 
   return (
-    <div className="justify-between items-center">
-      <h5>Bulk Add {currentTable}</h5>
-      <Spacer y={1} />
-      <Input
-        type="file"
-        accept=".csv, .xlsx, .xls"
-        onChange={handleFileChange}
-        className="w-max"
-      />
-      <Spacer y={1} />
-      <Button onClick={handleUpload} disabled={!file}>
-        Process & Upload File
-      </Button>
+    <div className="justify-between items-center w-max">
+      <Accordion variant="splitted">
+        <AccordionItem
+          key="1"
+          aria-label="Accordion 1"
+          title={`Bulk Add ${currentTable}`}
+        >
+          <Spacer y={1} />
+          <Input
+            type="file"
+            accept=".csv, .xlsx, .xls"
+            onChange={handleFileChange}
+            className="w-[250px]"
+          />
+          <Spacer y={1} />
+          <Button onClick={handleUpload} disabled={!file}>
+            Process & Upload File
+          </Button>{" "}
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }

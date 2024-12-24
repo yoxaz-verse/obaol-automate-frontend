@@ -7,7 +7,7 @@ import { Spinner } from "@nextui-org/react";
 
 interface QueryComponentProps<T> {
   api: string;
-  queryKey: string[];
+  queryKey: any[];
   children: (data: T, refetch?: () => void) => React.ReactNode; // Added refetch as a parameter
   page?: number; // Optional for paginated data
   limit?: number; // Optional for paginated data

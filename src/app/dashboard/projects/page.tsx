@@ -1,15 +1,15 @@
+"use client";
+
 import React, { useContext, useState, useEffect } from "react";
 import {
   Tabs,
   Tab,
-  user,
   Spinner,
   Spacer,
   Select,
   SelectItem,
 } from "@nextui-org/react";
 import ProjectTabContent from "@/components/dashboard/Projects/all-projects-tab-content";
-import NewProjectsCharts from "@/components/dashboard/Projects/new-projects-charts";
 import { useQuery } from "@tanstack/react-query"; // Assuming react-query is being used
 import { getData } from "@/core/api/apiHandler";
 import { projectStatusRoutes, locationRoutes } from "@/core/api/apiRoutes"; // Include location API route
@@ -53,7 +53,7 @@ export default function ProjectsPage() {
           <BulkAdd
             apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
             refetchData={refetchData}
-            currentTable={"Activities"}
+            currentTable={"Projects"}
           />
         )}
         <Spacer y={2} />
@@ -77,9 +77,12 @@ export default function ProjectsPage() {
                 selectedKeys={
                   selectedLocation ? new Set([selectedLocation]) : new Set()
                 }
-                onSelectionChange={(keys) =>
-                  setSelectedLocation(Array.from(keys)[0])
-                }
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0]; // Ensure a single selection
+                  if (typeof selectedKey === "string") {
+                    setSelectedLocation(selectedKey); // Updates `selectedLocation`
+                  }
+                }}
               >
                 {locations.map((location: { _id: string; name: string }) => (
                   <SelectItem key={location._id} value={location._id}>
@@ -91,8 +94,7 @@ export default function ProjectsPage() {
               <Spinner label="Loading locations" />
             )}
           </div>
-
-          {isStatusesLoading ? (
+          {isStatusesLoading && isLocationsLoading ? (
             <Spinner
               label={`Loading ${current}`}
               color="default"

@@ -10,25 +10,25 @@ import { usePathname } from "next/navigation";
 import { Spacer } from "@nextui-org/react";
 import { getAllowedRoles } from "@/utils/roleHelpers";
 
-export const routeRoles: { [key: string]: string[] } = {
-  "/dashboard": [
-    "Admin",
-    "Customer",
-    "ActivityManager",
-    "ProjectManager",
-    "Worker",
-  ],
-  "/dashboard/projects": [
-    "Admin",
-    "Customer",
-    "ActivityManager",
-    "ProjectManager",
-    "Worker",
-  ],
-  "/dashboard/essentials": ["Admin"],
-  "/dashboard/activity": [],
-  "/dashboard/users": ["Admin"],
-};
+// export const routeRoles: { [key: string]: string[] } = {
+//   "/dashboard": [
+//     "Admin",
+//     "Customer",
+//     "ActivityManager",
+//     "ProjectManager",
+//     "Worker",
+//   ],
+//   "/dashboard/projects": [
+//     "Admin",
+//     "Customer",
+//     "ActivityManager",
+//     "ProjectManager",
+//     "Worker",
+//   ],
+//   "/dashboard/essentials": ["Admin"],
+//   "/dashboard/activity": [],
+//   "/dashboard/users": ["Admin"],
+// };
 export default function DashboardLayout({
   children,
 }: {
@@ -38,7 +38,7 @@ export default function DashboardLayout({
 
   const allowedRoles = getAllowedRoles(pathname); // Dynamically determine allowed roles
 
-  const { user, isAuthenticated, loading } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   return (
     <section className="w-full h-full flex">

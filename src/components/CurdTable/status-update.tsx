@@ -4,20 +4,9 @@ import React, { useState } from "react";
 import { Select, SelectItem, Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { patchData } from "@/core/api/apiHandler";
-import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
+import { StatusUpdateProps } from "@/data/interface-data";
 
-interface StatusUpdateProps {
-  currentEntity: string; // E.g., "Project", "Activity", "Timesheet"
-  statusOptions: { key: string; label: string }[]; // E.g., [{ key: "pending", label: "Pending" }, ...]
-  apiEndpoint: string; // API endpoint for status update
-  recordId: string; // Unique ID for the entity
-  currentStatus: {
-    key: string;
-    label: string;
-  }; // Current status of the entity
-  refetchData: () => void; // Callback to refresh the data
-}
 
 const StatusUpdate: React.FC<StatusUpdateProps> = ({
   currentEntity,

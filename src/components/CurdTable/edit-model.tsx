@@ -28,23 +28,9 @@ import { Dashboard } from "@uppy/react";
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import Image from "next/image";
-import { FormField } from "./add-model"; // Ensure the path is correct
 import { TbEdit } from "react-icons/tb";
 import { parseDate, toCalendarDate } from "@internationalized/date";
-
-// Define the structure of the response from the upload endpoint
-interface UploadResponse {
-  fileIds: string[];
-  fileURLs: string[];
-}
-
-interface EditModalProps {
-  currentTable: string;
-  formFields: FormField[];
-  apiEndpoint: string;
-  refetchData: () => void;
-  initialData: any; // Existing data to populate the form
-}
+import { EditModalProps, FormField } from "@/data/interface-data";
 
 const EditModal: React.FC<EditModalProps> = ({
   currentTable,

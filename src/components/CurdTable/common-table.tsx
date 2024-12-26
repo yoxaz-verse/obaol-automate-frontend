@@ -15,16 +15,7 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { baseUrl } from "@/core/api/axiosInstance";
-
-interface TableProps {
-  TableData?: any[]; // Optional, with a default fallback
-  columns: { name: string; uid: string; type?: string }[];
-  viewModal?: (item: any) => React.ReactNode;
-  deleteModal?: (item: any) => React.ReactNode;
-  editModal?: (item: any) => React.ReactNode;
-  otherModal?: (item: any) => React.ReactNode;
-  isLoading?: boolean;
-}
+import { TableProps } from "@/data/interface-data";
 
 export default function CommonTable({
   TableData = [], // Default value as an empty array
@@ -145,7 +136,7 @@ export default function CommonTable({
           return cellValue || "N/A";
       }
     },
-    [viewModal, deleteModal, editModal, columns, otherModal ] // Ensure columns is included in the dependency array
+    [viewModal, deleteModal, editModal, columns, otherModal] // Ensure columns is included in the dependency array
   );
 
   // Pagination logic

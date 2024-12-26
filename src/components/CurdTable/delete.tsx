@@ -15,14 +15,9 @@ import { useMutation } from "@tanstack/react-query";
 import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
+import { DeleteModalProps } from "@/data/interface-data";
 
-interface DeleteModalProps {
-  _id: string;
-  name: string;
-  deleteApiEndpoint: string;
-  refetchData: () => void;
-  useBody?: boolean;
-}
+
 
 export default function DeleteModal({
   _id,

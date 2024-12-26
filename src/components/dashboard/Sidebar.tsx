@@ -14,6 +14,7 @@ import { RiBuildingLine } from "react-icons/ri";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
+import { sidebarOptions } from "@/utils/utils";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -21,39 +22,7 @@ const Sidebar = () => {
   const { user } = useContext(AuthContext); // Get current user from context
   const [selectedOption, setSelectedOption] = useState<string>("dashboard");
 
-  // Sidebar options with links and icons
-  const sidebarOptions = [
-    {
-      name: "Dashboard",
-      icon: <MdDashboard />,
-      link: "/dashboard",
-    },
-    {
-      name: "Projects",
-      icon: <RiBuildingLine />,
-      link: "/dashboard/projects",
-    },
-    {
-      name: "Activity",
-      icon: <FiTrendingUp />,
-      link: "/dashboard/activity",
-    },
-    {
-      name: "Users",
-      icon: <FiUsers />,
-      link: "/dashboard/users",
-    },
-    {
-      name: "Essentials",
-      icon: <FiFileText />,
-      link: "/dashboard/essentials",
-    },
-    {
-      name: "Time Sheet",
-      icon: <FiMessageCircle />,
-      link: "/dashboard/timesheet",
-    },
-  ];
+
 
   useEffect(() => {
     const pathSegments = pathname.split("/").filter(Boolean);

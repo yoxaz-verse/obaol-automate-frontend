@@ -67,28 +67,32 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
               let formFields = tableConfig[essentialName];
 
               if (essentialName === "location" && locationTypeValue) {
-                const locationTypeValues = locationTypeValue.map(
-                  (locationType: any) => ({
-                    key: String(locationType._id),
-                    value: locationType.name,
-                  })
-                );
-                formFields = formFields.map((field: any) =>
-                  field.key === "locationType"
-                    ? { ...field, values: locationTypeValues }
-                    : field
-                );
-                const locationManagerValues = locationManagerValue.map(
-                  (locationManager: any) => ({
-                    key: String(locationManager._id),
-                    value: locationManager.name,
-                  })
-                );
-                formFields = formFields.map((field: any) =>
-                  field.key === "locationManager"
-                    ? { ...field, values: locationManagerValues }
-                    : field
-                );
+                if (locationTypeValue) {
+                  const locationTypeValues = locationTypeValue.map(
+                    (locationType: any) => ({
+                      key: String(locationType._id),
+                      value: locationType.name,
+                    })
+                  );
+                  formFields = formFields.map((field: any) =>
+                    field.key === "locationType"
+                      ? { ...field, values: locationTypeValues }
+                      : field
+                  );
+                }
+                if (locationManagerValue) {
+                  const locationManagerValues = locationManagerValue.map(
+                    (locationManager: any) => ({
+                      key: String(locationManager._id),
+                      value: locationManager.name,
+                    })
+                  );
+                  formFields = formFields.map((field: any) =>
+                    field.key === "locationManager"
+                      ? { ...field, values: locationManagerValues }
+                      : field
+                  );
+                }
               }
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;

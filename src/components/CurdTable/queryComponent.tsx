@@ -4,16 +4,8 @@ import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Spinner } from "@nextui-org/react";
+import { QueryComponentProps } from "@/data/interface-data";
 
-interface QueryComponentProps<T> {
-  api: string;
-  queryKey: string[];
-  children: (data: T, refetch?: () => void) => React.ReactNode; // Added refetch as a parameter
-  page?: number; // Optional for paginated data
-  limit?: number; // Optional for paginated data
-  search?: string | null;
-  additionalParams?: Record<string, any>; // Dynamic additional parameters
-}
 
 function QueryComponent<T>(props: QueryComponentProps<T>) {
   const { api, queryKey, children, page, limit, search, additionalParams } =

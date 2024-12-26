@@ -2,6 +2,9 @@ import { useMemo } from "react";
 import { emailRegex } from "./regex";
 import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
+import { FiFileText, FiUsers } from "react-icons/fi";
+import { RiBuildingLine } from "react-icons/ri";
+import { MdDashboard } from "react-icons/md";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -51,3 +54,26 @@ export const showToastMessage = ({
 //     // return <Users role={user} />;
 //   // }
 // };
+
+export const sidebarOptions = [
+  {
+    name: "Dashboard",
+    icon: <MdDashboard />,
+    link: "/dashboard",
+  },
+  {
+    name: "Projects",
+    icon: <RiBuildingLine />,
+    link: "/dashboard/projects",
+  },
+  {
+    name: "Users",
+    icon: <FiUsers />,
+    link: "/dashboard/users",
+  },
+  {
+    name: "Essentials",
+    icon: <FiFileText />,
+    link: "/dashboard/essentials",
+  },
+];

@@ -10,50 +10,16 @@ import {
 } from "@nextui-org/react";
 import React, { useContext } from "react";
 import { CiMenuBurger } from "react-icons/ci";
-import { MdDashboard } from "react-icons/md";
-import { FiFileText, FiInbox, FiMessageCircle } from "react-icons/fi";
-import { RiBuildingLine, RiAdminFill } from "react-icons/ri";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
+import { sidebarOptions } from "@/utils/utils";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
   const router = useRouter();
-
-  const sidebarOptions = [
-    {
-      name: "Dashboard",
-      icon: <MdDashboard />,
-      link: "/dashboard",
-    },
-    {
-      name: "Projects",
-      icon: <FiFileText />,
-      link: "/dashboard/projects",
-    },
-    {
-      name: "Activity",
-      icon: <FiInbox />,
-      link: "/dashboard/activity",
-    },
-    {
-      name: "Essentials",
-      icon: <RiBuildingLine />,
-      link: "/dashboard/essentials",
-    },
-    {
-      name: "Time Sheet",
-      icon: <FiMessageCircle />,
-      link: "/dashboard/timesheet",
-    },
-    {
-      name: "Users",
-      icon: <RiAdminFill />,
-      link: "/dashboard/users",
-    },
-  ];
 
   // Filter options based on the user's role
   const filteredOptions = sidebarOptions.filter((option) => {

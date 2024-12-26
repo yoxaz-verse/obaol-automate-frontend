@@ -9,12 +9,7 @@ import {
 } from "@nextui-org/react";
 import { postData } from "@/core/api/apiHandler";
 import * as XLSX from "xlsx";
-
-type BulkAddProps = {
-  apiEndpoint: string; // Endpoint to upload the JSON data
-  refetchData: () => void; // Function to refresh data after successful upload
-  currentTable: string;
-};
+import { BulkAddProps } from "@/data/interface-data";
 
 function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
   const [file, setFile] = useState<File | null>(null);

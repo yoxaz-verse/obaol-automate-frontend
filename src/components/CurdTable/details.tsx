@@ -11,11 +11,8 @@ import {
 } from "@nextui-org/react";
 import { FiEye } from "react-icons/fi";
 import Image from "next/image";
+import { DetailsModalProps } from "@/data/interface-data";
 
-interface DetailsModalProps {
-  data: Record<string, any>; // Use a generic record to handle dynamic fields
-  columns: { name: string; uid: string; type?: string }[]; // Add column metadata to handle type
-}
 
 export default function DetailsModal({
   data,

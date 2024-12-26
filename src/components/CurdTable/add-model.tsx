@@ -27,26 +27,8 @@ import { Dashboard } from "@uppy/react";
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import { baseUrl } from "@/core/api/axiosInstance";
+import { AddModalProps } from "@/data/interface-data";
 
-interface AddModalProps {
-  currentTable: string;
-  formFields: FormField[];
-  apiEndpoint: string;
-  refetchData: () => void;
-  additionalVariable?: Record<string, any>; // Dynamic additional parameters
-}
-
-export interface FormField {
-  label: string;
-  type: string; // e.g., "text", "email", "select", "multiselect", "file", "textarea"
-  key: string;
-  inForm: boolean;
-  inEdit?: boolean;
-  inTable: boolean;
-  values?: { key: string; value: string }[]; // For select and multiselect
-  accept?: string; // For file inputs (e.g., "image/*")
-  multiple?: boolean; // For file inputs
-}
 
 const AddModal: React.FC<AddModalProps> = ({
   currentTable,

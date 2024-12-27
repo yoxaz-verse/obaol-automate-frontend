@@ -4,9 +4,9 @@ import { projectDetailCard } from "@/data/content-data";
 
 const LocationDetailComponent = ({ data }: { data: any }) => {
   return (
-    <div className="w-full">
-      <div className="flex w-full ">
-        <div className="w-full mb-2 ">
+    <div className="w-full h-full">
+      <div className="flex w-full h-full ">
+        <div className="w-full mb-2  ">
           <div className="sm:flex w-full gap-2 ">
             <Card className="w-1/3 lg:w-1/3 mb-6 py-2 mt-4 lg:mt-0">
               <CardBody className="flex flex-col">
@@ -21,10 +21,10 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
               </CardBody>
             </Card>
           </div>
-          <div className="w-full h-[400px] lg:h-[375px] rounded-lg">
+          <div className="w-full  rounded-lg">
             <iframe
               src={data.location.map}
-              className="w-full h-full rounded-lg"
+              className="w-full h-[400px] lg:h-[375px] rounded-lg"
             ></iframe>
           </div>
           <Card className=" border-1 flex justify-center items-center text-[#454545] my-2">

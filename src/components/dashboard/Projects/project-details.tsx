@@ -65,6 +65,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                   <ProjectDetailComponent data={data} />
                   <LocationDetailComponent data={data} />
                 </div>{" "}
+               
                 <EditProject
                   currentTable={"projects"}
                   formFields={tableConfig["projects"]}

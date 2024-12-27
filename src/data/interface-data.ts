@@ -100,11 +100,12 @@ export interface statusOptions {
 }
 
 export interface EditModalProps {
+  _id: string;
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;
   refetchData: () => void;
-  initialData: any; // Existing data to populate the form
+  initialData?: any; // Existing data to populate the form
 }
 
 export interface QueryComponentProps<T> {
@@ -131,6 +132,7 @@ export interface StatusUpdateProps {
 export interface DeleteModalProps {
   _id: string;
   name: string;
+  queryKey?: string[];
   deleteApiEndpoint: string;
   refetchData: () => void;
   useBody?: boolean;
@@ -159,7 +161,7 @@ export interface AddModalProps {
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;
-  refetchData: () => void;
+  refetchData?: () => void;
   additionalVariable?: Record<string, any>; // Dynamic additional parameters
 }
 

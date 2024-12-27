@@ -141,10 +141,11 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   )}
                   editModal={(item: any) => (
                     <EditModal
+                      _id={item._id}
                       initialData={item}
                       currentTable={currentTable}
-                      formFields={tableConfig[currentTable]}
-                      apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
+                      formFields={formFields}
+                      apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
                       refetchData={refetchData}
                     />
                   )}

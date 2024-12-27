@@ -15,9 +15,10 @@ import {
   DatePicker,
   Switch,
   TimeInput,
+  Spinner,
 } from "@nextui-org/react";
-import { useMutation } from "@tanstack/react-query";
-import { patchData, putData } from "@/core/api/apiHandler"; // Ensure putData is correctly implemented
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getData, patchData, putData } from "@/core/api/apiHandler"; // Ensure putData is correctly implemented
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { Key } from "react";
@@ -33,16 +34,28 @@ import { parseDate, toCalendarDate } from "@internationalized/date";
 import { EditModalProps, FormField } from "@/data/interface-data";
 
 const EditModal: React.FC<EditModalProps> = ({
+  _id,
   currentTable,
   formFields,
   apiEndpoint,
   refetchData,
-  initialData,
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const uppyRef = useRef<Uppy | null>(null);
+
+  // Fetch admin data when currentTable is 'manager'
+  const {
+    data: fetchedData,
+    // isLoading: isAdminLoading,
+    // isError: isAdminError,
+  } = useQuery({
+    queryKey: [apiEndpoint],
+    queryFn: () => getData(`${apiEndpoint}/${_id}`),
+    enabled: open,
+    refetchOnWindowFocus: false,
+  });
 
   // Helper function to construct image URLs from file IDs
   const getImageUrl = (fileID: string): string => {
@@ -87,32 +100,28 @@ const EditModal: React.FC<EditModalProps> = ({
 
   // Initialize formData with initialData
   useEffect(() => {
+    if (!fetchedData) return;
+    const initialData = fetchedData?.data;
     const updatedFormData: Record<string, any> = { ...initialData };
 
     formFields.forEach((field) => {
+      // Skip filling specific fields like "password"
+      if (field.key === "password") return;
       if (field.type === "select" && initialData[field.key]) {
-        if (
-          typeof initialData[field.key] === "object" &&
-          initialData[field.key]?._id
-        ) {
-          // Set the field to the ID
-          updatedFormData[field.key] = initialData[field.key]._id;
-        } else if (typeof initialData[field.key] === "string") {
-          // Field is already an ID or string
-          updatedFormData[field.key] = initialData[field.key];
-        }
-      } else if (field.type === "multiselect" && initialData[field.key]) {
-        if (Array.isArray(initialData[field.key])) {
-          // Map objects to IDs if necessary
-          updatedFormData[field.key] = initialData[field.key].map((item: any) =>
-            item._id ? item._id : item
-          );
-        }
+        updatedFormData[field.key] =
+          initialData[field.key]._id || initialData[field.key];
+      } else if (
+        field.type === "multiselect" &&
+        Array.isArray(initialData[field.key])
+      ) {
+        updatedFormData[field.key] = initialData[field.key].map(
+          (item: any) => item._id || item
+        );
       }
     });
 
     setFormData(updatedFormData);
-  }, [initialData, formFields]);
+  }, [fetchedData, formFields]);
 
   const openModal = () => setOpen(true);
   const closeModal = () => {
@@ -125,7 +134,8 @@ const EditModal: React.FC<EditModalProps> = ({
 
   // Mutation to handle data update
   const editItem = useMutation({
-    mutationFn: async (data: any) => patchData(apiEndpoint, data, {}),
+    mutationFn: async (data: any) =>
+      patchData(`${apiEndpoint}/${_id}`, data, {}),
     onSuccess: () => {
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
@@ -153,81 +163,82 @@ const EditModal: React.FC<EditModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log(formData);
 
     try {
-      const hasFileInput = formFields.some(
-        (field) => field.type === "file" || field.type === "image"
-      );
+      // const hasFileInput = formFields.some(
+      //   (field) => field.type === "file" || field.type === "image"
+      // );
 
-      let fileId: string | null = null;
-      let fileURL: string | null = null;
+      // let fileId: string | null = null;
+      // let fileURL: string | null = null;
 
-      if (
-        hasFileInput &&
-        uppyRef.current &&
-        uppyRef.current.getFiles().length > 0
-      ) {
-        // Define the entities array based on the current form context
-        const entities = [
-          { entity: "projects", entityId: "projectId123" }, // Replace with actual IDs or pass as props
-          { entity: "activities", entityId: "activityId456" },
-          { entity: "timesheets", entityId: "timesheetId789" },
-        ];
+      // if (
+      //   hasFileInput &&
+      //   uppyRef.current &&
+      //   uppyRef.current.getFiles().length > 0
+      // ) {
+      //   // Define the entities array based on the current form context
+      //   const entities = [
+      //     { entity: "projects", entityId: "projectId123" }, // Replace with actual IDs or pass as props
+      //     { entity: "activities", entityId: "activityId456" },
+      //     { entity: "timesheets", entityId: "timesheetId789" },
+      //   ];
 
-        // Attach form data as meta data, including the entities array
-        uppyRef.current.setMeta({
-          ...formData,
-          entities: JSON.stringify(entities), // Serialize the array
-        });
+      //   // Attach form data as meta data, including the entities array
+      //   uppyRef.current.setMeta({
+      //     ...formData,
+      //     entities: JSON.stringify(entities), // Serialize the array
+      //   });
 
-        // Initiate the upload
-        const uploadResult = await uppyRef.current.upload();
-        console.log("Uppy upload result:", uploadResult);
+      //   // Initiate the upload
+      //   const uploadResult = await uppyRef.current.upload();
+      //   console.log("Uppy upload result:", uploadResult);
 
-        if (uploadResult?.failed && uploadResult.failed.length > 0) {
-          // Handle upload failures
-          showToastMessage({
-            type: "error",
-            message: "File upload failed",
-            position: "top-right",
-          });
-          setLoading(false);
-          return;
-        }
+      //   if (uploadResult?.failed && uploadResult.failed.length > 0) {
+      //     // Handle upload failures
+      //     showToastMessage({
+      //       type: "error",
+      //       message: "File upload failed",
+      //       position: "top-right",
+      //     });
+      //     setLoading(false);
+      //     return;
+      //   }
 
-        // Extract the file ID and construct the file URL
-        const uploadedFile =
-          uploadResult?.successful && uploadResult.successful[0];
+      //   // Extract the file ID and construct the file URL
+      //   const uploadedFile =
+      //     uploadResult?.successful && uploadResult.successful[0];
 
-        if (
-          uploadedFile &&
-          uploadedFile.response &&
-          uploadedFile.response.body
-        ) {
-          const responseBody = uploadedFile.response.body as any;
-          fileId = responseBody.fileIds[0];
-          fileURL = responseBody.fileURLs[0]
-            ? responseBody.fileURLs[0]
-            : getImageUrl(responseBody.fileIds[0]); // Fallback to constructed URL
-        }
+      //   if (
+      //     uploadedFile &&
+      //     uploadedFile.response &&
+      //     uploadedFile.response.body
+      //   ) {
+      //     const responseBody = uploadedFile.response.body as any;
+      //     fileId = responseBody.fileIds[0];
+      //     fileURL = responseBody.fileURLs[0]
+      //       ? responseBody.fileURLs[0]
+      //       : getImageUrl(responseBody.fileIds[0]); // Fallback to constructed URL
+      //   }
 
-        if (!fileId || !fileURL) {
-          // Handle missing fileId or fileURL
-          showToastMessage({
-            type: "error",
-            message: "Failed to retrieve uploaded file details",
-            position: "top-right",
-          });
-          setLoading(false);
-          return;
-        }
-      }
+      //   if (!fileId || !fileURL) {
+      //     // Handle missing fileId or fileURL
+      //     showToastMessage({
+      //       type: "error",
+      //       message: "Failed to retrieve uploaded file details",
+      //       position: "top-right",
+      //     });
+      //     setLoading(false);
+      //     return;
+      //   }
+      // }
 
-      // Prepare the complete form data
+      // // Prepare the complete form data
       const completeFormData = {
         ...formData,
-        fileId: fileId || initialData.fileId, // Preserve existing fileId if no new file uploaded
-        fileURL: fileURL || initialData.fileURL, // Preserve existing fileURL if no new file uploaded
+        // fileId: fileId || fetchedData?.data.fileId, // Preserve existing fileId if no new file uploaded
+        // fileURL: fileURL || fetchedData?.data.fileURL, // Preserve existing fileURL if no new file uploaded
       };
 
       // Proceed with form submission
@@ -301,15 +312,11 @@ const EditModal: React.FC<EditModalProps> = ({
   };
 
   const renderFormField = (field: FormField) => {
-    // if (!field.inEdit) return null;
     switch (field.type) {
       case "date":
-        const parsedDate =
-          formData[field.key] && !isNaN(new Date(formData[field.key]).getTime())
-            ? parseDate(
-                new Date(formData[field.key]).toISOString().split("T")[0]
-              ) // Converts to YYYY-MM-DD
-            : undefined;
+        const parsedDate = formData[field.key]
+          ? parseDate(new Date(formData[field.key]).toISOString().split("T")[0])
+          : undefined;
 
         return (
           <DatePicker
@@ -317,8 +324,13 @@ const EditModal: React.FC<EditModalProps> = ({
             labelPlacement="outside"
             label={field.label}
             className="max-w-[284px]"
-            defaultValue={parsedDate}
-            onChange={(date) => handleDateChange(field.key, date)}
+            value={parsedDate} // Use `value` instead of `defaultValue`
+            onChange={(date) =>
+              handleDateChange(
+                field.key,
+                date.toString() // Convert DatePicker value to ISO string or another standard format
+              )
+            }
           />
         );
 
@@ -353,7 +365,6 @@ const EditModal: React.FC<EditModalProps> = ({
         return (
           <textarea
             name={field.key}
-            required
             placeholder={field.label}
             className="py-2 border rounded-md w-full"
             value={formData[field.key] || ""}
@@ -366,7 +377,6 @@ const EditModal: React.FC<EditModalProps> = ({
           return (
             <Select
               name={field.key}
-              required
               label={`Select ${field.label}`}
               placeholder={field.label}
               className="py-2 border rounded-md w-full"
@@ -481,10 +491,11 @@ const EditModal: React.FC<EditModalProps> = ({
           <Input
             name={field.key}
             type={field.type}
-            required
             placeholder={field.label}
             className="py-2"
-            value={formData[field.key] || ""}
+            defaultValue={
+              field.key !== "password" ? formData[field.key] || "" : ""
+            }
             onChange={handleInputChange}
           />
         );
@@ -503,12 +514,13 @@ const EditModal: React.FC<EditModalProps> = ({
       </button>
 
       {/* Edit Modal */}
-      {initialData && (
-        <Modal isOpen={open} onClose={closeModal} size="lg">
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">
-              Edit {capitalize(currentTable)}
-            </ModalHeader>
+      <Modal isOpen={open} onClose={closeModal} size="lg">
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            Edit {capitalize(currentTable)}
+          </ModalHeader>
+
+          {fetchedData && formData != null ? (
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
@@ -530,10 +542,12 @@ const EditModal: React.FC<EditModalProps> = ({
                 </div>
               </form>
             </ModalBody>
-            <ModalFooter></ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
+          ) : (
+            <Spinner />
+          )}
+          <ModalFooter></ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

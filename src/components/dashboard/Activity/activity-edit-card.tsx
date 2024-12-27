@@ -85,14 +85,21 @@ function EditActivity({
       <Spacer y={2} />
       {activityManagers && activityType && workers ? (
         <EditModal
+          _id={initialValues._id}
           currentTable={currentTable}
-          formFields={formFields} // Pass updated formFields with dropdown options
-          apiEndpoint={apiEndpoint}
+          formFields={formFields}
+          apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
           refetchData={refetchData}
-          initialData={initialValues} // Pre-fill the modal with initial values
-          // additionalVariable={additionalVariable}
         />
       ) : (
+        //     <EditModal
+        //   currentTable={currentTable}
+        //   formFields={formFields} // Pass updated formFields with dropdown options
+        //   apiEndpoint={apiEndpoint}
+        //   refetchData={refetchData}
+        //   initialData={initialValues} // Pre-fill the modal with initial values
+        //   // additionalVariable={additionalVariable}
+        // />
         "Loading Edit Modal..."
       )}
       <Spacer y={5} />

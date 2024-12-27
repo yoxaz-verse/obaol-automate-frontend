@@ -134,6 +134,7 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
                       <DeleteModal
                         _id={item._id}
                         name={item.name}
+                        queryKey={[currentTable, apiRoutesByRole[currentTable]]}
                         deleteApiEndpoint={apiRoutesByRole[currentTable]}
                         refetchData={refetchData}
                         useBody={true}

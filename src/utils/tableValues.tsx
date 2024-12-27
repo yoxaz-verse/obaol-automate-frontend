@@ -109,6 +109,7 @@ export const initialTableConfig: Record<
       | "text"
       | "select"
       | "multiselect"
+      | "multiselectValue"
       | "file"
       | "textarea"
       | "boolean"
@@ -141,6 +142,14 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
+      label: "Password",
+      type: "password",
+      key: "password",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
       label: "Created At",
       type: "dateTime",
       key: "createdAt",
@@ -170,6 +179,7 @@ export const initialTableConfig: Record<
       key: "password",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
 
     {
@@ -177,6 +187,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "admin",
       values: [], // We'll populate this dynamically
+      inEdit: true,
       inForm: true,
       inTable: false,
     },
@@ -210,6 +221,7 @@ export const initialTableConfig: Record<
       key: "password",
       inForm: true,
       inTable: false,
+      inEdit: true,
     },
 
     {
@@ -217,6 +229,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "admin",
       values: [], // We'll populate this dynamically
+      inEdit: true,
       inForm: true,
       inTable: false,
     },
@@ -255,6 +268,7 @@ export const initialTableConfig: Record<
       type: "password",
       key: "password",
       inForm: true,
+      inEdit: true,
       inTable: false,
     },
     {
@@ -285,6 +299,7 @@ export const initialTableConfig: Record<
       type: "password",
       key: "password",
       inForm: true,
+      inEdit: true,
       inTable: false,
     },
     {
@@ -308,6 +323,7 @@ export const initialTableConfig: Record<
       values: [], // We'll populate this dynamically
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Created At",
@@ -410,7 +426,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Location Manager",
-      type: "multiselect",
+      type: "multiselectValue",
       key: "locationManager",
       values: [],
       inForm: true,
@@ -421,6 +437,14 @@ export const initialTableConfig: Record<
       label: "City",
       type: "text",
       key: "city",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Street",
+      type: "text",
+      key: "street",
       inForm: true,
       inTable: true,
       inEdit: true,
@@ -441,6 +465,7 @@ export const initialTableConfig: Record<
       inTable: true,
       inEdit: true,
     },
+
     {
       label: "Nation",
       type: "text",
@@ -454,14 +479,16 @@ export const initialTableConfig: Record<
       type: "text",
       key: "latitude",
       inForm: false,
-      inTable: false,
+      inTable: true,
+      inEdit: true,
     },
     {
       label: "Longitude",
       type: "text",
       key: "longitude",
       inForm: false,
-      inTable: false,
+      inTable: true,
+      inEdit: true,
     },
     {
       label: "Map",
@@ -584,9 +611,8 @@ export const initialTableConfig: Record<
       label: "Title",
       type: "text",
       key: "title",
-      inForm: true,
+      inForm: false,
       inTable: true,
-      inEdit: true,
     },
     {
       label: "Description",
@@ -673,7 +699,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Order Number",
-      type: "number",
+      type: "text",
       key: "orderNumber",
       inForm: true,
       inTable: false,
@@ -685,6 +711,7 @@ export const initialTableConfig: Record<
       type: "date",
       key: "schedaRadioDate",
       inForm: true,
+      inEdit: true,
       inTable: true,
     },
 

@@ -19,22 +19,21 @@ import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
-import { Key } from "react";
+// import { Key } from "react";
 import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
 import { Dashboard } from "@uppy/react";
+import { Key } from "@react-types/shared";
 
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import { baseUrl } from "@/core/api/axiosInstance";
-import { AddModalProps } from "@/data/interface-data";
-
+import { AddModalProps, FormField } from "@/data/interface-data";
 
 const AddModal: React.FC<AddModalProps> = ({
   currentTable,
   formFields,
   apiEndpoint,
-  refetchData,
   additionalVariable,
 }) => {
   const [open, setOpen] = useState(false);
@@ -261,6 +260,82 @@ const AddModal: React.FC<AddModalProps> = ({
     }));
   };
 
+  const handleMultiselectValueChange = (
+    fieldKey: string,
+    selectedKeys: Set<Key>,
+    updatedValues?: { [key: string]: string }
+  ) => {
+    const currentSelections = Array.from(selectedKeys).map(String);
+    const customValues = formData[fieldKey]?.customValues || {};
+
+    const newValues = currentSelections.reduce((acc, key) => {
+      acc[key] = updatedValues?.[key] || customValues[key] || ""; // Preserve existing or default to empty
+      return acc;
+    }, {} as { [key: string]: string });
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [fieldKey]: { selectedKeys: currentSelections, customValues: newValues },
+    }));
+  };
+  const renderMultiselectValueField = (field: any) => {
+    const fieldData = formData[field.key] || {
+      selectedKeys: [],
+      customValues: {},
+    };
+    const selectedKeys = new Set(fieldData.selectedKeys || []);
+    const customValues = fieldData.customValues || {};
+
+    return (
+      <>
+        <Select
+          name={field.key}
+          label={`Select ${field.label}`}
+          placeholder={field.label}
+          className="py-2 border rounded-md w-full"
+          selectionMode="multiple"
+          selectedKeys={selectedKeys as unknown as Set<Key>}
+          onSelectionChange={(keys) =>
+            handleMultiselectValueChange(field.key, keys as Set<Key>)
+          }
+        >
+          {field.values &&
+            field.values.map((option: any) => (
+              <SelectItem key={String(option.key)} value={String(option.key)}>
+                {option.value}
+              </SelectItem>
+            ))}
+        </Select>
+
+        <div className="mt-4 space-y-2">
+          {Array.from(selectedKeys).map((key, index) => (
+            <div key={index} className="flex items-center gap-4">
+              <span className="font-medium">
+                {field.values.find((option: any) => option.key === key)
+                  ?.value || key}
+              </span>
+              <Input
+                type="text"
+                placeholder="Enter Code"
+                value={customValues[key as string]}
+                onChange={(e) =>
+                  handleMultiselectValueChange(
+                    field.key,
+                    selectedKeys as Set<Key>,
+                    {
+                      ...customValues,
+                      [key as string]: e.target.value,
+                    }
+                  )
+                }
+              />
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   // Helper function to render form fields based on type
   const renderFormField = (field: FormField) => {
     switch (field.type) {
@@ -268,7 +343,6 @@ const AddModal: React.FC<AddModalProps> = ({
         return (
           <textarea
             name={field.key}
-            required
             placeholder={field.label}
             className="py-2 border rounded-md w-full"
             value={formData[field.key] || ""}
@@ -378,6 +452,8 @@ const AddModal: React.FC<AddModalProps> = ({
               </div>
             </>
           );
+      case "multiselectValue":
+        return renderMultiselectValueField(field);
 
       case "file":
       case "image":

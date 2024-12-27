@@ -55,12 +55,11 @@ const ViewActivityById: NextPage = () => {
               </div>
 
               <div className="lg:w-[49%] mt-4 lg:mt-0">
-                <div className="w-full h-[400px] lg:h-full">
+                <div className="w-full  lg:h-full">
                   <LocationDetailComponent data={data.project} />
                 </div>
               </div>
             </div>
-            <Spacer y={10} />
           </section>
         )}
       </QueryComponent>{" "}
@@ -74,7 +73,6 @@ const ViewActivityById: NextPage = () => {
           currentTable={current}
           formFields={tableConfig[current]} // Pass the updated formFields
           apiEndpoint={`${apiRoutesByRole[current]}`}
-          refetchData={refetchData}
           additionalVariable={{ activity: activityId }}
         />{" "}
         <Spacer y={6} />

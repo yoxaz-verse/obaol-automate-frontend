@@ -17,11 +17,10 @@ import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { DeleteModalProps } from "@/data/interface-data";
 
-
-
 export default function DeleteModal({
   _id,
   name,
+  queryKey,
   deleteApiEndpoint,
   useBody = false,
 }: DeleteModalProps) {
@@ -31,8 +30,11 @@ export default function DeleteModal({
   const deleteItem = useMutation({
     mutationFn: async () =>
       deleteData(`${deleteApiEndpoint}/${_id}`, useBody ? { _id } : undefined),
+
     onSuccess: () => {
-      queryClient.refetchQueries();
+      queryClient.refetchQueries({
+        queryKey,
+      });
       showToastMessage({
         type: "success",
         message: `Deleted successfully`,

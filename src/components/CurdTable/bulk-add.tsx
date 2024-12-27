@@ -20,6 +20,13 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
     setFile(selectedFile || null);
   };
 
+  // Helper function to handle date conversion
+  const convertToDate = (timestamp: number): string => {
+    if (!timestamp) return ""; // If there's no timestamp, return an empty string
+    const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date
+    return date.toISOString(); // Return the date in ISO format (e.g., "2024-12-28T10:30:00.000Z")
+  };
+
   // Handle file parsing and upload
   const handleUpload = async () => {
     if (!file) {
@@ -49,6 +56,18 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
             const worksheet = workbook.Sheets[sheetName];
             jsonData = XLSX.utils.sheet_to_json(worksheet);
           }
+
+          // Process and format date fields
+          jsonData = jsonData.map((item: any) => {
+            // Convert assignmentDate and schedaRadioDate if they are numbers
+            if (item.assignmentDate) {
+              item.assignmentDate = convertToDate(item.assignmentDate);
+            }
+            if (item.schedaRadioDate) {
+              item.schedaRadioDate = convertToDate(item.schedaRadioDate);
+            }
+            return item;
+          });
 
           // Send parsed JSON to the backend
           await postData(apiEndpoint, jsonData);

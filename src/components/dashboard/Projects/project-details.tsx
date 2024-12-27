@@ -5,11 +5,7 @@ import { Button, Spacer, Spinner, Tab, Tabs } from "@nextui-org/react";
 import UnderDevelopment from "@/components/hashed/under-development";
 import ManagerActivityDetailsComponent from "./manager-activity-details";
 import WorkerAnalyticsComponent from "./worker-analytics";
-import {
-  activityRoutes,
-  activityStatusRoutes,
-  projectRoutes,
-} from "@/core/api/apiRoutes";
+import { activityStatusRoutes, projectRoutes } from "@/core/api/apiRoutes";
 import ActivityTabContent from "../Activity/all-activity-tab-content";
 import { ProjectDetailProps } from "@/data/interface-data";
 import QueryComponent from "@/components/queryComponent";
@@ -65,14 +61,15 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                   <ProjectDetailComponent data={data} />
                   <LocationDetailComponent data={data} />
                 </div>{" "}
-               
-                <EditProject
-                  currentTable={"projects"}
-                  formFields={tableConfig["projects"]}
-                  apiEndpoint={`${apiRoutesByRole["projects"]}/${id}`}
-                  refetchData={refetchData}
-                  initialValues={data}
-                />{" "}
+                {user?.role === "Admin" && (
+                  <EditProject
+                    currentTable={"projects"}
+                    formFields={tableConfig["projects"]}
+                    apiEndpoint={`${apiRoutesByRole["projects"]}/${id}`}
+                    refetchData={refetchData}
+                    initialValues={data}
+                  />
+                )}
               </>
             </>
           )}
@@ -83,21 +80,25 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
           {/* <AddNewActivityModal id={id} /> */}
         </div>
         <Spacer y={2} />
-        <BulkAdd
-          apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
-          refetchData={refetchData} // Function to refetch activities list
-          currentTable={"Activities"}
-        />
+        {user?.role === "Admin" && (
+          <BulkAdd
+            apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
+            refetchData={refetchData} // Function to refetch activities list
+            currentTable={"Activities"}
+          />
+        )}
         <Spacer y={5} />
         <div className="my-4">
           {/* AddModal for adding new entries */}
-          <AddActivity
-            currentTable={current}
-            formFields={tableConfig[current]} // Pass the updated formFields
-            apiEndpoint={apiRoutesByRole[current]}
-            refetchData={refetchData}
-            additionalVariable={{ project: id }}
-          />{" "}
+          {user?.role === "Admin" && (
+            <AddActivity
+              currentTable={current}
+              formFields={tableConfig[current]} // Pass the updated formFields
+              apiEndpoint={apiRoutesByRole[current]}
+              refetchData={refetchData}
+              additionalVariable={{ project: id }}
+            />
+          )}{" "}
           <Spacer y={2} />
           {isLoading ? (
             <p>

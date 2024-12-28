@@ -6,10 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - "3000:3000" # Map port 3000 on the host to port 3000 in the container
     environment:
-      NODE_ENV: production
-    command: npm run start
+      NODE_ENV: production # Set the environment to production
+    volumes:
+      - .:/app # Optional, for development to sync files
+      - /app/node_modules # Prevent overwriting node_modules

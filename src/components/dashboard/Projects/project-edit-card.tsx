@@ -27,11 +27,8 @@ type EditProjectProps = {
 function EditProject({
   currentTable,
   formFields,
-  apiEndpoint,
   refetchData,
   initialValues,
-  params,
-  additionalVariable,
 }: EditProjectProps) {
   // Fetch related data for dropdowns
   const { data: customersResponse } = useQuery({

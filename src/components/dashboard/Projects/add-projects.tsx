@@ -1,5 +1,5 @@
 "use client";
-import AddModal, { FormField } from "@/components/CurdTable/add-model";
+import AddModal from "@/components/CurdTable/add-model";
 import { getData } from "@/core/api/apiHandler";
 import {
   adminRoutes,
@@ -9,6 +9,7 @@ import {
   projectStatusRoutes,
   projectTypeRoutes,
 } from "@/core/api/apiRoutes";
+import { FormField } from "@/data/interface-data";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 

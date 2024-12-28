@@ -1,4 +1,3 @@
-import { FormField } from "@/components/CurdTable/add-model";
 import EditModal from "@/components/CurdTable/edit-model"; // Import your EditModal
 import { getData } from "@/core/api/apiHandler";
 import {
@@ -9,6 +8,7 @@ import {
   projectStatusRoutes,
   projectTypeRoutes,
 } from "@/core/api/apiRoutes";
+import { FormField } from "@/data/interface-data";
 import { apiRoutesByRole } from "@/utils/tableValues";
 import { Spacer } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";

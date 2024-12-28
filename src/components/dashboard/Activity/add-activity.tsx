@@ -1,13 +1,7 @@
-import AddModal, { FormField } from "@/components/CurdTable/add-model";
+import AddModal from "@/components/CurdTable/add-model";
 import { getData } from "@/core/api/apiHandler";
-import {
-  adminRoutes,
-  customerRoutes,
-  locationRoutes,
-  projectManagerRoutes,
-  projectStatusRoutes,
-  projectTypeRoutes,
-} from "@/core/api/apiRoutes";
+
+import { FormField } from "@/data/interface-data";
 import { apiRoutesByRole } from "@/utils/tableValues";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";

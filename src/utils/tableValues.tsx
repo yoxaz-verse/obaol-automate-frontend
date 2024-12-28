@@ -35,8 +35,6 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
   if (currentTable === "worker") {
     nonActionColumns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
-  } else if (currentTable === "locationManager") {
-    nonActionColumns.push({ name: "LOCATION", uid: "managedLocation" });
   } else if (currentTable === "location") {
     nonActionColumns.push({ name: "LOCATION TYPE", uid: "type" });
   } else if (currentTable === "projects") {
@@ -146,7 +144,7 @@ export const initialTableConfig: Record<
       type: "password",
       key: "password",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -409,6 +407,15 @@ export const initialTableConfig: Record<
       inEdit: true,
     },
     {
+      label: "Custom ID",
+      type: "text",
+      key: "customId",
+      inForm: false,
+      inTable: true,
+      inEdit: false,
+    },
+
+    {
       label: "Owner",
       type: "text",
       key: "owner",
@@ -537,6 +544,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+
   locationType: [
     {
       label: "Name",
@@ -568,13 +576,6 @@ export const initialTableConfig: Record<
     },
   ],
   locationManager: [
-    {
-      label: "Code",
-      type: "text",
-      key: "code",
-      inForm: true,
-      inTable: true,
-    },
     {
       label: "Name",
       type: "text",
@@ -612,7 +613,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "title",
       inForm: false,
-      inTable: true,
+      inTable: false,
     },
     {
       label: "Description",
@@ -797,9 +798,9 @@ export const initialTableConfig: Record<
       label: "Title",
       type: "text",
       key: "title",
-      inForm: true,
+      inForm: false,
       inTable: true,
-      inEdit: true,
+      inEdit: false,
     },
     {
       label: "Description",

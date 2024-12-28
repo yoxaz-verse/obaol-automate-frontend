@@ -9,6 +9,7 @@ import PrivateRoute from "@/components/Login/private-route";
 import { usePathname } from "next/navigation";
 import { Spacer } from "@nextui-org/react";
 import { getAllowedRoles } from "@/utils/roleHelpers";
+import { ToastContainer } from "react-toastify";
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [

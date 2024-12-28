@@ -1,6 +1,5 @@
 import React from "react";
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
-import { projectDetailCard } from "@/data/content-data";
+import { Card, CardBody } from "@nextui-org/react";
 
 const LocationDetailComponent = ({ data }: { data: any }) => {
   return (
@@ -23,10 +22,25 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
               </Card>
             </div>
             <div className="w-full  rounded-lg">
-              <iframe
-                src={data.location.map}
-                className="w-full h-[400px] lg:h-[375px] rounded-lg"
-              ></iframe>
+              {data.location.longitude && data.location.latitude ? (
+                <iframe
+                  src={
+                    "https://maps.google.com/maps?q=" +
+                    data.location.latitude +
+                    "," +
+                    data.location.latitude +
+                    "&hl=es;z=14&amp;output=embed"
+                  }
+                  className="w-full h-[400px] lg:h-[375px] rounded-lg"
+                ></iframe>
+              ) : (
+                data.location.map && (
+                  <iframe
+                    src={data.location.map}
+                    className="w-full h-[400px] lg:h-[375px] rounded-lg"
+                  ></iframe>
+                )
+              )}
             </div>
             <Card className=" border-1 flex justify-center items-center text-[#454545] my-2">
               <div className="flex justify-between w-[90%] mt-4 mb-8">

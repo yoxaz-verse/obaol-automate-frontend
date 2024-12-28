@@ -18,7 +18,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
-import { showToastMessage } from "@/utils/utils";
 // import { Key } from "react";
 import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
@@ -29,6 +28,8 @@ import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { AddModalProps, FormField } from "@/data/interface-data";
+import { toast } from "react-toastify";
+import { showToastMessage } from "@/utils/utils";
 
 const AddModal: React.FC<AddModalProps> = ({
   currentTable,
@@ -89,12 +90,10 @@ const AddModal: React.FC<AddModalProps> = ({
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
+      console.log("Hi");
 
-      showToastMessage({
-        type: "success",
-        message: `${currentTable} Created Successfully`,
-        position: "top-right",
-      });
+      toast.success("You did it!"); // Displays a success message
+
       closeModal();
       setLoading(false);
     },

@@ -14,7 +14,6 @@ import {
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "../../core/routes";
 import AuthContext from "@/context/AuthContext";
 
 const LoginComponent = () => {

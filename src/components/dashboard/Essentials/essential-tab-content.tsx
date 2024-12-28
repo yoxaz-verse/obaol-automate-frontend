@@ -39,8 +39,6 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
 
   const locationManagerValue = locationManagerResponse?.data?.data.data;
 
-  const queryKey = [essentialName];
-
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
@@ -55,7 +53,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
         <div className="my-4">
           <QueryComponent
             api={apiRoutesByRole[essentialName]}
-            queryKey={queryKey}
+            queryKey={[essentialName, apiRoutesByRole[essentialName]]}
             page={1}
             limit={100}
           >
@@ -100,7 +98,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                 if (essentialName === "location") {
                   return {
                     ...rest,
-                    locationType: item.locationType.name
+                    locationType: item.locationType
                       ? item.locationType.name
                       : "N/A",
                     locationManager: item.locationManager

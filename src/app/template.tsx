@@ -2,6 +2,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { ToastContainer } from "react-toastify";
 
 function Template({ children }: { children: React.ReactNode }) {
   return (

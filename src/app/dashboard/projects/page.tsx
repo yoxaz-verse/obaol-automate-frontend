@@ -84,6 +84,9 @@ export default function ProjectsPage() {
                   }
                 }}
               >
+                <SelectItem key={""} value={undefined}>
+                  All
+                </SelectItem>{" "}
                 {locations.map((location: { _id: string; name: string }) => (
                   <SelectItem key={location._id} value={location._id}>
                     {location.name}

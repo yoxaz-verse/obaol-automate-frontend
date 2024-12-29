@@ -11,20 +11,37 @@ import { postData } from "@/core/api/apiHandler";
 import * as XLSX from "xlsx";
 import { BulkAddProps } from "@/data/interface-data";
 
-function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
+// Helper function to convert DD-MM-YYYY to ISO format
+const convertToIsoFromString = (dateString: string): string => {
+  if (!dateString) return ""; // Return empty string if dateString is invalid
+  const dateRegex = /^\d{2}-\d{2}-\d{4}$/; // Regex to match "DD-MM-YYYY" format
+  if (!dateRegex.test(dateString)) {
+    console.error(`Invalid date format: ${dateString}`);
+    return ""; // Log error and return empty for invalid date
+  }
+  const [day, month, year] = dateString.split("-").map(Number); // Extract day, month, year
+  const date = new Date(year, month - 1, day); // Create Date object
+  return date.toISOString(); // Convert to ISO format
+};
+
+// Helper function to convert Unix timestamp to ISO format
+const convertToDate = (timestamp: number): string => {
+  if (!timestamp) return ""; // Return empty string if timestamp is invalid
+  const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date
+  return date.toISOString(); // Convert to ISO format
+};
+
+const BulkAdd: React.FC<BulkAddProps> = ({
+  apiEndpoint,
+  refetchData,
+  currentTable,
+}) => {
   const [file, setFile] = useState<File | null>(null);
 
   // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     setFile(selectedFile || null);
-  };
-
-  // Helper function to handle date conversion
-  const convertToDate = (timestamp: number): string => {
-    if (!timestamp) return ""; // If there's no timestamp, return an empty string
-    const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date
-    return date.toISOString(); // Return the date in ISO format (e.g., "2024-12-28T10:30:00.000Z")
   };
 
   // Handle file parsing and upload
@@ -59,21 +76,48 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
 
           // Process and format date fields
           jsonData = jsonData.map((item: any) => {
-            // Convert assignmentDate and schedaRadioDate if they are numbers
-            if (item.assignmentDate) {
-              item.assignmentDate = convertToDate(item.assignmentDate);
+            // Handle assignmentDate
+            if (
+              item.assignmentDate &&
+              typeof item.assignmentDate === "string"
+            ) {
+              if (/^\d{2}-\d{2}-\d{4}$/.test(item.assignmentDate)) {
+                item.assignmentDate = convertToIsoFromString(
+                  item.assignmentDate
+                );
+              } else if (/^\d+$/.test(item.assignmentDate)) {
+                item.assignmentDate = convertToDate(
+                  Number(item.assignmentDate)
+                );
+              }
             }
-            if (item.schedaRadioDate) {
-              item.schedaRadioDate = convertToDate(item.schedaRadioDate);
+
+            // Handle schedaRadioDate
+            if (
+              item.schedaRadioDate &&
+              typeof item.schedaRadioDate === "string"
+            ) {
+              if (/^\d{2}-\d{2}-\d{4}$/.test(item.schedaRadioDate)) {
+                item.schedaRadioDate = convertToIsoFromString(
+                  item.schedaRadioDate
+                );
+              } else if (/^\d+$/.test(item.schedaRadioDate)) {
+                item.schedaRadioDate = convertToDate(
+                  Number(item.schedaRadioDate)
+                );
+              }
             }
-            return item;
+
+            return item; // Return the formatted item
           });
 
-          // Send parsed JSON to the backend
+          console.log("Final Data Sent to Backend:", jsonData); // Debug final data
+
+          // Send data to the backend
           await postData(apiEndpoint, jsonData);
           alert("Data uploaded successfully!");
-          setFile(null); // Reset the file input
-          refetchData(); // Refresh the data
+          setFile(null); // Reset file input
+          refetchData(); // Refresh table data
         } catch (error) {
           console.error("Error parsing the file:", error);
           alert(
@@ -83,7 +127,7 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
       }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsBinaryString(file); // Read the file as binary string
   };
 
   return (
@@ -104,11 +148,11 @@ function BulkAdd({ apiEndpoint, refetchData, currentTable }: BulkAddProps) {
           <Spacer y={1} />
           <Button onClick={handleUpload} disabled={!file}>
             Process & Upload File
-          </Button>{" "}
+          </Button>
         </AccordionItem>
       </Accordion>
     </div>
   );
-}
+};
 
 export default BulkAdd;

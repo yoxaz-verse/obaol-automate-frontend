@@ -9,7 +9,7 @@ import BulkAdd from "@/components/CurdTable/bulk-add";
 import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
-  const [locationTab, setLocationTab] = React.useState("locationType");
+  const [locationTab, setLocationTab] = React.useState("location");
   const [activityTab, setActivityTab] = React.useState("activityStatus");
   const [projectTab, setProjectTab] = React.useState("projectStatus");
 
@@ -42,6 +42,34 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
+          <Title title="Location" />
+          <Tabs
+            aria-label="Location Tabs"
+            selectedKey={locationTab}
+            onSelectionChange={(key) => setLocationTab(key as string)}
+          >
+            {locationTabs.map((tab) => (
+              <Tab key={tab.key} title={tab.title}>
+                {tab.key === "location" && (
+                  // <LocationTabContent currentType="all" />
+                  <>
+                    <BulkAdd
+                      apiEndpoint={`${locationRoutes.getAll}/bulk`}
+                      refetchData={refetchData} // Function to refetch activities list
+                      currentTable={"Locations"}
+                    />
+                    <EssentialTabContent essentialName="location" />
+                  </>
+                )}
+                {tab.key === "locationType" && (
+                  <EssentialTabContent essentialName="locationType" />
+                )}
+                {tab.key === "locationManager" && (
+                  <EssentialTabContent essentialName="locationManager" />
+                )}
+              </Tab>
+            ))}
+          </Tabs>{" "}
           <Spacer y={4} />
           <Title title="Activity" />{" "}
           <Tabs
@@ -82,34 +110,6 @@ export default function Essentials() {
           <Title title="Service Company" />{" "}
           <EssentialTabContent essentialName="serviceCompany" />
           <Spacer y={4} />
-          <Title title="Location" />
-          <Tabs
-            aria-label="Location Tabs"
-            selectedKey={locationTab}
-            onSelectionChange={(key) => setLocationTab(key as string)}
-          >
-            {locationTabs.map((tab) => (
-              <Tab key={tab.key} title={tab.title}>
-                {tab.key === "location" && (
-                  // <LocationTabContent currentType="all" />
-                  <>
-                    <BulkAdd
-                      apiEndpoint={`${locationRoutes.getAll}/bulk`}
-                      refetchData={refetchData} // Function to refetch activities list
-                      currentTable={"Locations"}
-                    />
-                    <EssentialTabContent essentialName="location" />
-                  </>
-                )}
-                {tab.key === "locationType" && (
-                  <EssentialTabContent essentialName="locationType" />
-                )}
-                {tab.key === "locationManager" && (
-                  <EssentialTabContent essentialName="locationManager" />
-                )}
-              </Tab>
-            ))}
-          </Tabs>{" "}
         </div>
       </div>
     </div>

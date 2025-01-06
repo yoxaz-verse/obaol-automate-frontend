@@ -31,6 +31,14 @@ const convertToDate = (timestamp: number): string => {
   return date.toISOString(); // Convert to ISO format
 };
 
+// Helper function to convert Excel serial date to ISO format
+const convertExcelDateToIso = (excelDate: number): string => {
+  const excelEpoch = new Date(1899, 11, 30); // Excel epoch starts from Dec 30, 1899
+  const millisecondsPerDay = 24 * 60 * 60 * 1000; // Number of milliseconds in a day
+  const date = new Date(excelEpoch.getTime() + excelDate * millisecondsPerDay);
+  return date.toISOString(); // Convert to ISO format
+};
+
 const BulkAdd: React.FC<BulkAddProps> = ({
   apiEndpoint,
   refetchData,
@@ -66,50 +74,35 @@ const BulkAdd: React.FC<BulkAddProps> = ({
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            // Handle Excel serial numbers
+            jsonData = jsonData.map((item: any) => {
+              Object.keys(item).forEach((key) => {
+                const value = item[key];
+                if (typeof value === "number" && value > 25569) {
+                  item[key] = convertExcelDateToIso(value); // Convert serial number to ISO date
+                }
+              });
+              return item;
+            });
           } else {
             // Parse Excel file
             const workbook = XLSX.read(data, { type: "binary" });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            // Handle Excel serial numbers
+            jsonData = jsonData.map((item: any) => {
+              Object.keys(item).forEach((key) => {
+                const value = item[key];
+                if (typeof value === "number" && value > 25569) {
+                  item[key] = convertExcelDateToIso(value); // Convert serial number to ISO date
+                }
+              });
+              return item;
+            });
           }
-
-          // Process and format date fields
-          jsonData = jsonData.map((item: any) => {
-            // Handle assignmentDate
-            if (
-              item.assignmentDate &&
-              typeof item.assignmentDate === "string"
-            ) {
-              if (/^\d{2}-\d{2}-\d{4}$/.test(item.assignmentDate)) {
-                item.assignmentDate = convertToIsoFromString(
-                  item.assignmentDate
-                );
-              } else if (/^\d+$/.test(item.assignmentDate)) {
-                item.assignmentDate = convertToDate(
-                  Number(item.assignmentDate)
-                );
-              }
-            }
-
-            // Handle schedaRadioDate
-            if (
-              item.schedaRadioDate &&
-              typeof item.schedaRadioDate === "string"
-            ) {
-              if (/^\d{2}-\d{2}-\d{4}$/.test(item.schedaRadioDate)) {
-                item.schedaRadioDate = convertToIsoFromString(
-                  item.schedaRadioDate
-                );
-              } else if (/^\d+$/.test(item.schedaRadioDate)) {
-                item.schedaRadioDate = convertToDate(
-                  Number(item.schedaRadioDate)
-                );
-              }
-            }
-
-            return item; // Return the formatted item
-          });
 
           console.log("Final Data Sent to Backend:", jsonData); // Debug final data
 

@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import {
   Modal,
@@ -8,11 +9,11 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
+  Spacer,
 } from "@nextui-org/react";
 import { FiEye } from "react-icons/fi";
 import Image from "next/image";
 import { DetailsModalProps } from "@/data/interface-data";
-
 
 export default function DetailsModal({
   data,
@@ -43,9 +44,10 @@ export default function DetailsModal({
   const [isFallback, setIsFallback] = useState(false);
 
   // Helper function to format the value based on the column type
-  // Helper function to format the value based on the column type
   const formatValue = (key: string, value: any) => {
     const column = columns.find((col) => col.uid === key);
+    console.log(key, value);
+
     const type = column?.type;
 
     switch (type) {
@@ -123,12 +125,30 @@ export default function DetailsModal({
       case "text":
         return value || "N/A"; // Text field, return the value as-is
 
+      case "multiselectValue":
+        if (key === "locationManager") {
+          console.log(key);
+
+          return (
+            <ul className="list-disc list-inside">
+              {Array.isArray(value) && value.length > 0 ? (
+                value.map((manager, index) => (
+                  <li key={index}>
+                    <strong>Manager Name:</strong>{" "}
+                    {manager.manager?.name || "N/A"} <br />
+                    <strong>Code:</strong> {manager.code || "N/A"}
+                  </li>
+                ))
+              ) : (
+                <p>No Managers Assigned</p>
+              )}
+            </ul>
+          );
+        }
+        return "N/A";
+
       case "select":
         return value ? value : "N/A"; // Select field, return the value or "N/A"
-
-      case "multiselect":
-        // return value && Array.isArray(value) ? value.join(", ") : "N/A"; // Multiselect, join array items as a comma-separated string
-        return "N/A"; // Multiselect, join array items as a comma-separated string
 
       case "file":
         return value ? (
@@ -175,14 +195,20 @@ export default function DetailsModal({
                   // Skip rendering excluded fields
                   if (excludeFields.includes(key)) return null;
 
-                  // Handle nested objects (display them as JSON)
-                  if (typeof data[key] === "object" && data[key] !== null) {
+                  if (Array.isArray(data[key]) && key === "locationManagers") {
                     return (
-                      <div key={key}>
+                      <div key={key} className="mb-4">
                         <strong>{formatLabel(key)}:</strong>
-                        <pre className="whitespace-pre-wrap">
-                          {JSON.stringify(data[key], null, 2)}
-                        </pre>
+                        <div className="list-disc list-inside">
+                          {data[key].map((manager: any, index: number) => (
+                            <div key={index}>
+                              <Spacer y={3} />
+                              <strong>Manager Name:</strong>{" "}
+                              {manager.manager?.name || "N/A"} <br />
+                              <strong>Code:</strong> {manager.code || "N/A"}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     );
                   }

@@ -35,8 +35,6 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
   if (currentTable === "worker") {
     nonActionColumns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
-  } else if (currentTable === "location") {
-    nonActionColumns.push({ name: "LOCATION TYPE", uid: "type" });
   } else if (currentTable === "projects") {
     // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
@@ -399,20 +397,20 @@ export const initialTableConfig: Record<
   // Location
   location: [
     {
-      label: "Name",
-      type: "text",
-      key: "name",
-      inForm: true,
-      inTable: true,
-      inEdit: true,
-    },
-    {
       label: "Custom ID",
       type: "text",
       key: "customId",
       inForm: false,
       inTable: true,
       inEdit: false,
+    },
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
     },
 
     {
@@ -428,7 +426,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "address",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -445,7 +443,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "city",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -453,7 +451,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "street",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -461,7 +459,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "province",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -486,7 +484,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "latitude",
       inForm: false,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -494,7 +492,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "longitude",
       inForm: false,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {
@@ -526,7 +524,7 @@ export const initialTableConfig: Record<
       key: "locationType",
       values: [],
       inForm: true,
-      inTable: false,
+      inTable: true,
     },
     {
       label: "Actions",
@@ -606,6 +604,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+
   // Project
   projects: [
     {

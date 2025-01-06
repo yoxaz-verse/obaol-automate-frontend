@@ -92,23 +92,15 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                   );
                 }
               }
+
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;
 
                 if (essentialName === "location") {
                   return {
                     ...rest,
-                    locationType: item.locationType
-                      ? item.locationType.name
-                      : "N/A",
-                    locationManager: item.locationManager
-                      ? item.locationManager.map(
-                          (loc: { code: string; name: string }) => ({
-                            code: loc.code,
-                            name: loc.name,
-                          })
-                        )
-                      : "N/A", // Handle locationManager formatting
+
+                    locationType: item.locationType.name,
                   };
                   // Handle other user types similarly if needed
                 }

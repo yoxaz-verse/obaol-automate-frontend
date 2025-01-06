@@ -3,7 +3,6 @@ import { NextPage } from "next";
 import React, { useState } from "react";
 
 import ProjectDetails from "@/components/dashboard/Projects/project-details";
-import { Tab, Tabs, useDisclosure } from "@nextui-org/react";
 import { usePathname } from "next/navigation";
 
 const Projects: NextPage = () => {
@@ -13,7 +12,7 @@ const Projects: NextPage = () => {
     setProjectDetails(true);
     setProject(data);
   }
-  const [role, setRole] = useState<any>();
+  const [role] = useState<any>();
   const pathname = usePathname().split("/").pop()?.toString() || ""; // Gets the current URL pathname
 
   return (

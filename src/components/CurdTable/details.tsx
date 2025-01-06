@@ -54,7 +54,7 @@ export default function DetailsModal({
       case "date":
         if (value) {
           const date = new Date(value);
-          return date.toLocaleDateString("en-US", {
+          return date.toLocaleDateString("en-GB", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -65,7 +65,7 @@ export default function DetailsModal({
       case "time":
         if (value) {
           const time = new Date(value);
-          return time.toLocaleTimeString("en-US", {
+          return time.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
@@ -77,12 +77,12 @@ export default function DetailsModal({
       case "dateTime":
         if (value) {
           const dateTime = new Date(value);
-          const dateFormatted = dateTime.toLocaleDateString("en-US", {
+          const dateFormatted = dateTime.toLocaleDateString("en-GB", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
           });
-          const timeFormatted = dateTime.toLocaleTimeString("en-US", {
+          const timeFormatted = dateTime.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
@@ -93,6 +93,22 @@ export default function DetailsModal({
           return `${dateFormatted} ${timeFormatted}`;
         }
         return "N/A";
+      case "week":
+        if (value) {
+          const date = new Date(value as string);
+
+          // Get the ISO week number and year
+          const startOfYear = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+          const days = Math.floor(
+            (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)
+          );
+          const weekNumber = Math.ceil((days + 1) / 7);
+
+          // Return the formatted date as yyyy-ww
+          return `${date.getUTCFullYear()}-${weekNumber
+            .toString()
+            .padStart(2, "0")}`;
+        }
 
       case "number":
         if (value !== undefined && value !== null) {

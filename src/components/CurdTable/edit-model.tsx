@@ -314,6 +314,7 @@ const EditModal: React.FC<EditModalProps> = ({
   const renderFormField = (field: FormField) => {
     switch (field.type) {
       case "date":
+      case "week":
         const parsedDate = formData[field.key]
           ? parseDate(new Date(formData[field.key]).toISOString().split("T")[0])
           : undefined;

@@ -96,6 +96,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
             jsonData = jsonData.map((item: any) => {
               Object.keys(item).forEach((key) => {
                 const value = item[key];
+
                 if (typeof value === "number" && value > 25569) {
                   item[key] = convertExcelDateToIso(value); // Convert serial number to ISO date
                 }
@@ -103,6 +104,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
               return item;
             });
           }
+          console.log("jsonData", jsonData);
 
           console.log("Final Data Sent to Backend:", jsonData); // Debug final data
 

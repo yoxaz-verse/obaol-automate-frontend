@@ -117,7 +117,8 @@ export const initialTableConfig: Record<
       | "time"
       | "link"
       | "dateTime"
-      | "password"; // Define specific types
+      | "password"
+      | "week"; // Define specific types
     key: string;
     inForm: boolean;
     inTable: boolean;
@@ -657,7 +658,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Assignment Date ",
-      type: "date",
+      type: "week",
       key: "assignmentDate",
       inForm: true,
       inTable: true,
@@ -672,7 +673,7 @@ export const initialTableConfig: Record<
       inTable: false,
     },
     {
-      label: "Project Type",
+      label: "Project Task",
       type: "select",
       key: "type",
       values: [],
@@ -708,7 +709,7 @@ export const initialTableConfig: Record<
 
     {
       label: "Scheda Radio Date",
-      type: "date",
+      type: "week",
       key: "schedaRadioDate",
       inForm: true,
       inEdit: true,

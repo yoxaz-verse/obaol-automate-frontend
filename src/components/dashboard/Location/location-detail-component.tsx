@@ -2,6 +2,8 @@ import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
 
 const LocationDetailComponent = ({ data }: { data: any }) => {
+  console.log(data);
+
   return (
     <div className="w-full h-full">
       <div className="flex w-full h-full ">
@@ -24,13 +26,7 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
             <div className="w-full  rounded-lg">
               {data.location.longitude && data.location.latitude ? (
                 <iframe
-                  src={
-                    "https://maps.google.com/maps?q=" +
-                    data.location.latitude +
-                    "," +
-                    data.location.latitude +
-                    "&hl=es;z=14&amp;output=embed"
-                  }
+                  src={`https://maps.google.com/maps?q=${data.location.latitude},${data.location.longitude}&hl=es&z=14&output=embed`}
                   className="w-full h-[400px] lg:h-[375px] rounded-lg"
                 ></iframe>
               ) : (

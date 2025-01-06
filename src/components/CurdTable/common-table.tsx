@@ -41,10 +41,10 @@ export default function CommonTable({
         case "date":
           if (cellValue) {
             const date = new Date(cellValue);
-            return date.toLocaleDateString("en-US", {
+            return date.toLocaleDateString("en-GB", {
               year: "numeric",
-              month: "long", // Ensures two-digit month
               day: "2-digit", // Ensures two-digit day
+              month: "long", // Ensures two-digit month
             });
           }
           return "N/A";
@@ -53,25 +53,41 @@ export default function CommonTable({
           if (cellValue) {
             const time = new Date(cellValue);
             // Format the time in 12-hour format (AM/PM)
-            return time.toLocaleTimeString("en-US", {
+            return time.toLocaleTimeString("en-GB", {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true, // Ensures 12-hour format (AM/PM)
             });
           }
           return "N/A";
+        case "week":
+          if (cellValue) {
+            const date = new Date(cellValue as string);
+
+            // Get the ISO week number and year
+            const startOfYear = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+            const days = Math.floor(
+              (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)
+            );
+            const weekNumber = Math.ceil((days + 1) / 7);
+
+            // Return the formatted date as yyyy-ww
+            return `${date.getUTCFullYear()}-${weekNumber
+              .toString()
+              .padStart(2, "0")}`;
+          }
 
         case "dateTime":
           if (cellValue) {
             const dateTime = new Date(cellValue);
 
-            const dateFormatted = dateTime.toLocaleDateString("en-US", {
+            const dateFormatted = dateTime.toLocaleDateString("en-GB", {
               year: "numeric",
               month: "2-digit",
               day: "2-digit",
             });
 
-            const timeFormatted = dateTime.toLocaleTimeString("en-US", {
+            const timeFormatted = dateTime.toLocaleTimeString("en-GB", {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,

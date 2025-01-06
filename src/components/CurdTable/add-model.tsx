@@ -349,6 +349,7 @@ const AddModal: React.FC<AddModalProps> = ({
           />
         );
       case "date":
+      case "week":
         return (
           <DatePicker
             name={field.key}

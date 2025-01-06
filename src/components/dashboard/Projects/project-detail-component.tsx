@@ -2,6 +2,17 @@ import React from "react";
 import ProjectDetailCard from "./project-detail-card";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { projectDetailCard } from "@/data/content-data";
+const getWeekFormat = (date: Date): string => {
+  // Get the ISO week number and year
+  const startOfYear = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const days = Math.floor(
+    (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)
+  );
+  const weekNumber = Math.ceil((days + 1) / 7);
+
+  // Return the formatted date as yyyy-ww
+  return `${date.getUTCFullYear()}-${weekNumber.toString().padStart(2, "0")}`;
+};
 
 const ProjectDetailComponent = ({ data }: { data: any }) => {
   return (
@@ -17,41 +28,33 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
             </Card>
             <Card className="w-full lg:w-1/2 mb-6 py-2 mt-4 lg:mt-0">
               <CardBody className="flex flex-col">
-                <div className="text-sm font-medium">{"Project Type"}</div>
-                <div>{data.type?.name ?? "Custom Id"}</div>
+                <div className="text-sm font-medium">{"Project Task"}</div>
+                <div>{data.type?.name ?? "Project Task"}</div>
               </CardBody>
             </Card>
           </div>
 
           <ProjectDetailCard data={data} />
 
-          <Card className=" border-1 flex justify-center items-center text-[#454545] my-2">
+          <Card className="border-1 flex justify-center items-center text-[#454545] my-2">
             <div className="flex justify-between w-[90%] mt-4 mb-8">
               <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Assignment Date</div>
+                <div className="text-sm font-medium">Assignment Week</div>
                 <div className="text-xs pt-2">
-                  {" "}
-                  {new Date(data?.assignmentDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {data?.assignmentDate
+                    ? getWeekFormat(new Date(data?.assignmentDate))
+                    : "N/A"}
                 </div>
               </div>
               <div className="flex flex-col w-[50%]">
-                <div className="text-sm font-medium">Scheda Radio Date</div>
+                <div className="text-sm font-medium">Scheda Radio Week</div>
                 <div className="text-xs pt-2">
-                  {" "}
-                  {new Date(data?.schedaRadioDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {data?.schedaRadioDate
+                    ? getWeekFormat(new Date(data?.schedaRadioDate))
+                    : "N/A"}
                 </div>
               </div>
             </div>
-            {/* Render status and sub status */}
-            {/* <div className="flex justify-between pt-5 pb-10 w-[90%]"></div> */}
           </Card>
         </div>{" "}
       </div>

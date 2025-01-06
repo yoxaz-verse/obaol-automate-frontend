@@ -50,7 +50,7 @@ const ActivityDetailCard = ({ data }: any) => {
                     {" "}
                     <div className="text-sm font-medium">Actual Date</div>
                     <div className="text-xs pt-2">
-                      {new Date(data?.actualDate).toLocaleDateString("en-US", {
+                      {new Date(data?.actualDate).toLocaleDateString("en-GB", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -64,7 +64,7 @@ const ActivityDetailCard = ({ data }: any) => {
                   <div className="text-sm font-medium">Forecast Date</div>
                   <div className="text-xs pt-2">
                     {" "}
-                    {new Date(data?.forecastDate).toLocaleDateString("en-US", {
+                    {new Date(data?.forecastDate).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -80,7 +80,7 @@ const ActivityDetailCard = ({ data }: any) => {
                   <div className="text-sm font-medium">Target Finance Date</div>
                   <div className="text-xs pt-2">
                     {new Date(data?.targetFinanceDate).toLocaleDateString(
-                      "en-US",
+                      "en-GB",
                       {
                         year: "numeric",
                         month: "long",
@@ -97,7 +97,7 @@ const ActivityDetailCard = ({ data }: any) => {
                   </div>
                   <div className="text-xs pt-2">
                     {new Date(data?.targetOperationDate).toLocaleDateString(
-                      "en-US",
+                      "en-GB",
                       {
                         year: "numeric",
                         month: "long",

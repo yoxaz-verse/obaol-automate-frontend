@@ -658,7 +658,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Assignment Date ",
-      type: "week",
+      type: "date",
       key: "assignmentDate",
       inForm: true,
       inTable: true,
@@ -709,7 +709,7 @@ export const initialTableConfig: Record<
 
     {
       label: "Scheda Radio Date",
-      type: "week",
+      type: "date",
       key: "schedaRadioDate",
       inForm: true,
       inEdit: true,
@@ -850,7 +850,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Forecast Date",
-      type: "date",
+      type: "week",
       key: "forecastDate",
       inForm: true,
       inTable: true,
@@ -866,7 +866,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Target Operation Date",
-      type: "date",
+      type: "week",
       key: "targetOperationDate",
       inForm: true,
       inTable: true,
@@ -874,7 +874,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Target Finance  Date",
-      type: "date",
+      type: "week",
       key: "targetFinanceDate",
       inForm: false,
       inTable: false,

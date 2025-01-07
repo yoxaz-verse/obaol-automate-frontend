@@ -2,7 +2,7 @@ import React from "react";
 import ProjectDetailCard from "./project-detail-card";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { projectDetailCard } from "@/data/content-data";
-const getWeekFormat = (date: Date): string => {
+export const getWeekFormat = (date: Date): string => {
   // Get the ISO week number and year
   const startOfYear = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   const days = Math.floor(
@@ -41,17 +41,21 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
               <div className="flex flex-col w-[50%]">
                 <div className="text-sm font-medium">Assignment Week</div>
                 <div className="text-xs pt-2">
-                  {data?.assignmentDate
-                    ? getWeekFormat(new Date(data?.assignmentDate))
-                    : "N/A"}
+                  {new Date(data?.assignmentDate).toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </div>
               </div>
               <div className="flex flex-col w-[50%]">
                 <div className="text-sm font-medium">Scheda Radio Week</div>
                 <div className="text-xs pt-2">
-                  {data?.schedaRadioDate
-                    ? getWeekFormat(new Date(data?.schedaRadioDate))
-                    : "N/A"}
+                  {new Date(data?.schedaRadioDate).toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </div>
               </div>
             </div>

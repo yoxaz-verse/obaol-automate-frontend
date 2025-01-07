@@ -2,6 +2,7 @@ import { ActivityDetailCardProps } from "@/data/interface-data";
 import { Card } from "@nextui-org/react";
 import Link from "next/link";
 import React from "react";
+import { getWeekFormat } from "../Projects/project-detail-component";
 const ActivityDetailCard = ({ data }: any) => {
   return (
     <div>
@@ -64,11 +65,9 @@ const ActivityDetailCard = ({ data }: any) => {
                   <div className="text-sm font-medium">Forecast Date</div>
                   <div className="text-xs pt-2">
                     {" "}
-                    {new Date(data?.forecastDate).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {data?.forecastDate
+                      ? getWeekFormat(new Date(data?.forecastDate))
+                      : "N/A"}{" "}
                   </div>
                 </div>
               )}
@@ -79,14 +78,9 @@ const ActivityDetailCard = ({ data }: any) => {
                 <div className="flex flex-col w-[50%]">
                   <div className="text-sm font-medium">Target Finance Date</div>
                   <div className="text-xs pt-2">
-                    {new Date(data?.targetFinanceDate).toLocaleDateString(
-                      "en-GB",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
+                    {data?.targetFinanceDate
+                      ? getWeekFormat(new Date(data?.targetFinanceDate))
+                      : "N/A"}{" "}
                   </div>
                 </div>
               )}
@@ -96,14 +90,9 @@ const ActivityDetailCard = ({ data }: any) => {
                     Target Operation Date
                   </div>
                   <div className="text-xs pt-2">
-                    {new Date(data?.targetOperationDate).toLocaleDateString(
-                      "en-GB",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
+                    {data?.targetOperationDate
+                      ? getWeekFormat(new Date(data?.targetOperationDate))
+                      : "N/A"}{" "}
                   </div>
                   {data.statusOptions?.map((d: any) => {
                     return (

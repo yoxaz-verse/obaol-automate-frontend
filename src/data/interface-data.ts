@@ -138,6 +138,7 @@ export interface DeleteModalProps {
   useBody?: boolean;
 }
 export interface DetailsModalProps {
+  currentTable: string;
   data: Record<string, any>; // Use a generic record to handle dynamic fields
   columns: { name: string; uid: string; type?: string }[]; // Add column metadata to handle type
 }

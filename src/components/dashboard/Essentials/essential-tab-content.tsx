@@ -123,7 +123,11 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     isLoading={false}
                     viewModal={(item: any) => (
                       // Implement view modal if needed
-                      <DetailsModal data={item} columns={columns} />
+                      <DetailsModal
+                        currentTable={essentialName}
+                        data={item}
+                        columns={columns}
+                      />
                     )}
                     deleteModal={(item: any) => (
                       <UserDeleteModal

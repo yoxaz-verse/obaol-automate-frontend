@@ -16,6 +16,7 @@ import Image from "next/image";
 import { DetailsModalProps } from "@/data/interface-data";
 
 export default function DetailsModal({
+  currentTable,
   data,
   columns = [],
 }: DetailsModalProps) {
@@ -31,6 +32,14 @@ export default function DetailsModal({
     "fileURL",
     "fileId",
   ];
+  const toTitleCase = (str: string): string => {
+    return str
+      .replace(/[_-]/g, " ") // Replace underscores or hyphens with spaces
+      .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+      .replace(/^./, (char) => char.toUpperCase()) // Capitalize the first letter
+      .replace(/\s+/g, " ") // Replace multiple spaces with a single space
+      .trim();
+  };
 
   // Helper function to capitalize and space out camelCase or snake_case field names
   const formatLabel = (key: string) => {
@@ -46,7 +55,6 @@ export default function DetailsModal({
   // Helper function to format the value based on the column type
   const formatValue = (key: string, value: any) => {
     const column = columns.find((col) => col.uid === key);
-    console.log(key, value);
 
     const type = column?.type;
 
@@ -198,14 +206,14 @@ export default function DetailsModal({
   return (
     <>
       <FiEye onClick={onOpen} className="cursor-pointer hover:text-green-600" />
-      <Modal size="lg" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                User Details
+                {currentTable && toTitleCase(currentTable)} Details
               </ModalHeader>
-              <ModalBody className="space-y-4">
+              <ModalBody className="space-y-4 overflow-y-auto max-h-[90vh] ">
                 {/* Display User Details */}
                 {Object.keys(data).map((key) => {
                   // Skip rendering excluded fields

@@ -7,7 +7,6 @@ import { patchData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import { StatusUpdateProps } from "@/data/interface-data";
 
-
 const StatusUpdate: React.FC<StatusUpdateProps> = ({
   currentEntity,
   statusOptions,
@@ -17,10 +16,11 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
   refetchData,
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<string>(
-    currentStatus.key
+    currentStatus.label
   );
   const [loading, setLoading] = useState(false);
 
+  // Mutation for updating status
   const updateStatus = useMutation({
     mutationFn: async () =>
       patchData(`${apiEndpoint}/${recordId}`, { status: selectedStatus }, {}),
@@ -45,8 +45,9 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
     },
   });
 
+  // Handle form submission
   const handleSubmit = () => {
-    if (selectedStatus !== currentStatus.key) {
+    if (selectedStatus !== currentStatus.label) {
       setLoading(true);
       updateStatus.mutate();
     } else {
@@ -60,21 +61,30 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
 
   return (
     <div className="flex items-center gap-4">
+      {/* Select Dropdown */}
       <Select
         className="w-[120px]"
-        label={currentStatus.label}
+        label={selectedStatus}
         selectedKeys={new Set([selectedStatus])}
-        onSelectionChange={(keys) =>
-          setSelectedStatus(String(Array.from(keys)[0]))
-        }
+        onSelectionChange={(keys) => {
+          const selectedKey = Array.from(keys)[0];
+          const selectedOption = statusOptions.find(
+            (option) => option.label === selectedKey
+          );
+          if (selectedOption) {
+            setSelectedStatus(selectedOption.label); // Use the label for backend
+          }
+        }}
       >
         {statusOptions.map((option) => (
-          <SelectItem key={option.key} value={option.key}>
+          <SelectItem key={option.label} value={option.label}>
             {option.label}
           </SelectItem>
         ))}
       </Select>
-      {selectedStatus !== currentStatus.key && (
+
+      {/* Update Button */}
+      {selectedStatus !== currentStatus.label && (
         <Button
           color="primary"
           onClick={handleSubmit}

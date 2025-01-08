@@ -352,6 +352,7 @@ const AddModal: React.FC<AddModalProps> = ({
       case "week":
         return (
           <DatePicker
+            showMonthAndYearPickers
             name={field.key}
             labelPlacement="outside"
             label={field.label}

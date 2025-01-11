@@ -1,11 +1,15 @@
 import React, { useContext, useState } from "react";
 import ProjectDetailProgressComponent from "./project-detail-progress-component";
 import ProjectDetailComponent from "./project-detail-component";
-import { Button, Spacer, Spinner, Tab, Tabs } from "@nextui-org/react";
+import { Button, Chip, Spacer, Spinner, Tab, Tabs } from "@nextui-org/react";
 import UnderDevelopment from "@/components/hashed/under-development";
 import ManagerActivityDetailsComponent from "./manager-activity-details";
 import WorkerAnalyticsComponent from "./worker-analytics";
-import { activityStatusRoutes, projectRoutes } from "@/core/api/apiRoutes";
+import {
+  activityRoutes,
+  activityStatusRoutes,
+  projectRoutes,
+} from "@/core/api/apiRoutes";
 import ActivityTabContent from "../Activity/all-activity-tab-content";
 import { ProjectDetailProps } from "@/data/interface-data";
 import QueryComponent from "@/components/queryComponent";
@@ -18,18 +22,61 @@ import EditProject from "./project-edit-card";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import LocationDetailComponent from "../Location/location-detail-component";
 
+const useActivityStatusesWithCounts = (projectId: string) => {
+  // Fetch all activity statuses
+  const { data: activityStatusesResponse, isLoading: isStatusesLoading } =
+    useQuery({
+      queryKey: ["activityStatuses"],
+      queryFn: () => getData(activityStatusRoutes.getAll),
+    });
+
+  // Fetch activity status counts
+  const { data: activityStatusesCountResponse, isLoading: isCountsLoading } =
+    useQuery({
+      queryKey: ["activityStatusesCount", projectId],
+      queryFn: () =>
+        getData(`${activityRoutes.getAll}/count-by-status`, {
+          projectId,
+        }),
+    });
+
+  // Extract and ensure data is always an array
+  const activityStatuses = activityStatusesResponse?.data?.data?.data || [];
+
+  const activityStatusesCount = Object.values(
+    activityStatusesCountResponse?.data.data || {}
+  );
+
+  // Create a mapping of status counts for quick lookup
+  const countMap: Record<string, number> = activityStatusesCount.reduce(
+    (map: Record<string, number>, statusCount: any) => {
+      if (statusCount && statusCount.status) {
+        map[statusCount.status] = statusCount.count;
+      }
+      return map;
+    },
+    {}
+  );
+
+  // Combine statuses with counts by matching names
+  const combinedStatuses = activityStatuses.map((status: any) => ({
+    ...status,
+    count: countMap[status.name] || 0, // Ensure name matches the status from countMap
+  }));
+
+  return {
+    combinedStatuses,
+    isLoading: isStatusesLoading || isCountsLoading,
+  };
+};
+
 const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const [currentTable, setCurrentTable] = useState<string>("");
+  const { combinedStatuses, isLoading } = useActivityStatusesWithCounts(id);
   const current = "activity";
 
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const { user } = useContext(AuthContext); // Get current user from context
-  // Fetch project statuses using react-query
-  const { data: activityStatusesResponse, isLoading } = useQuery({
-    queryKey: ["activityStatuses"],
-    queryFn: () => getData(activityStatusRoutes.getAll),
-  });
-  const activityStatuses = activityStatusesResponse?.data?.data?.data;
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -109,10 +156,10 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                 labelColor="foreground"
               />
             </p>
-          ) : activityStatuses && activityStatuses.length > 0 ? (
+          ) : combinedStatuses && combinedStatuses.length > 0 ? (
             <Tabs
               aria-label="Activity Tabs"
-              selectedKey={currentTable || activityStatuses[0]._id} // Default to the first tab if none selected
+              selectedKey={currentTable || combinedStatuses[0]._id} // Default to the first tab if none selected
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
               <Tab key={0} title="All">
@@ -123,17 +170,33 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                   user={user}
                 />
               </Tab>{" "}
-              {activityStatuses.map((status: { _id: string; name: string }) => (
-                <Tab key={status._id + 1} title={status.name}>
-                  <ActivityTabContent
-                    selectedTab={status._id}
-                    currentTable={current}
-                    tableConfig={tableConfig}
-                    projectId={id}
-                    user={user}
-                  />
-                </Tab>
-              ))}
+              {combinedStatuses.map(
+                (status: { _id: string; name: string; count: string }) => (
+                  <Tab
+                    key={status._id + 1}
+                    title={
+                      <div className="flex items-center space-x-2">
+                        <span>{status.name}</span>
+                        {status.count ? (
+                          <Chip size="sm" color="primary">
+                            {status.count}
+                          </Chip>
+                        ) : (
+                          ""
+                        )}{" "}
+                      </div>
+                    }
+                  >
+                    <ActivityTabContent
+                      selectedTab={status._id}
+                      currentTable={current}
+                      tableConfig={tableConfig}
+                      projectId={id}
+                      user={user}
+                    />
+                  </Tab>
+                )
+              )}
             </Tabs>
           ) : (
             <p>No project statuses found.</p>

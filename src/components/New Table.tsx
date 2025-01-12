@@ -1,19 +1,13 @@
 "use client";
-import React, { Dispatch, SetStateAction, useEffect } from "react";
+import React from "react";
 import {
   Table,
   TableHeader,
   TableColumn,
   TableBody,
-  Spinner,
-  Modal,
-  ModalContent,
-  ModalHeader,
   TableRow,
   TableCell,
-  User,
   Chip,
-  Tooltip,
   ChipProps,
   Pagination,
   Textarea,
@@ -276,7 +270,9 @@ export default function CustomTable({
         {(item: any) => (
           <TableRow key={item._id}>
             {(columnKey) => (
-              <TableCell className="self-center">{renderCell(item, columnKey)}</TableCell>
+              <TableCell className="self-center">
+                {renderCell(item, columnKey)}
+              </TableCell>
             )}
           </TableRow>
         )}

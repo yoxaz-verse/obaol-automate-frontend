@@ -21,31 +21,42 @@ import { useQuery } from "@tanstack/react-query";
 import EditProject from "./project-edit-card";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import LocationDetailComponent from "../Location/location-detail-component";
-
+interface Status {
+  _id: string;
+  status: string;
+  count: number;
+}
 const useActivityStatusesWithCounts = (projectId: string) => {
   // Fetch all activity statuses
-  const { data: activityStatusesResponse, isLoading: isStatusesLoading } =
-    useQuery({
-      queryKey: ["activityStatuses"],
-      queryFn: () => getData(activityStatusRoutes.getAll),
-    });
+  const {
+    data: activityStatusesResponse,
+    isLoading: isStatusesLoading,
+    refetch: refetchStatuses,
+  } = useQuery({
+    queryKey: ["activityStatuses"],
+    queryFn: () => getData(activityStatusRoutes.getAll),
+  });
 
   // Fetch activity status counts
-  const { data: activityStatusesCountResponse, isLoading: isCountsLoading } =
-    useQuery({
-      queryKey: ["activityStatusesCount", projectId],
-      queryFn: () =>
-        getData(`${activityRoutes.getAll}/count-by-status`, {
-          projectId,
-        }),
-    });
+  const {
+    data: activityStatusesCountResponse,
+    isLoading: isCountsLoading,
+    refetch: refetchCounts,
+  } = useQuery({
+    queryKey: ["activityStatusesCount", projectId],
+    queryFn: () =>
+      getData(`${activityRoutes.getAll}/count-by-status`, {
+        projectId,
+      }),
+  });
+  console.log("activityStatusesCountResponse", activityStatusesCountResponse);
 
   // Extract and ensure data is always an array
   const activityStatuses = activityStatusesResponse?.data?.data?.data || [];
-
-  const activityStatusesCount = Object.values(
+  const activityStatusesCount: Status[] = Object.values(
     activityStatusesCountResponse?.data.data || {}
   );
+  console.log("activityStatusesCountResponse", activityStatusesCount);
 
   // Create a mapping of status counts for quick lookup
   const countMap: Record<string, number> = activityStatusesCount.reduce(
@@ -61,26 +72,29 @@ const useActivityStatusesWithCounts = (projectId: string) => {
   // Combine statuses with counts by matching names
   const combinedStatuses = activityStatuses.map((status: any) => ({
     ...status,
-    count: countMap[status.name] || 0, // Ensure name matches the status from countMap
+    count: countMap[status.name] || 0,
   }));
 
   return {
-    combinedStatuses,
+    combinedStatuses: activityStatusesCount,
     isLoading: isStatusesLoading || isCountsLoading,
+    refetchData: () => {
+      refetchStatuses();
+      refetchCounts();
+    },
   };
 };
 
 const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const [currentTable, setCurrentTable] = useState<string>("");
-  const { combinedStatuses, isLoading } = useActivityStatusesWithCounts(id);
+  const { combinedStatuses, isLoading, refetchData } =
+    useActivityStatusesWithCounts(id);
   const current = "activity";
+  console.log(combinedStatuses);
 
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const { user } = useContext(AuthContext); // Get current user from context
 
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
   return (
     <>
       <div className="flex justify-between items-center py-5 ">
@@ -159,54 +173,54 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
           ) : combinedStatuses && combinedStatuses.length > 0 ? (
             <Tabs
               aria-label="Activity Tabs"
-              selectedKey={currentTable || combinedStatuses[0]._id} // Default to the first tab if none selected
+              selectedKey={currentTable || combinedStatuses[0]._id}
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
               <Tab key={0} title="All">
                 <ActivityTabContent
                   currentTable={current}
                   tableConfig={tableConfig}
+                  refetchData={refetchData}
                   projectId={id}
                   user={user}
                 />
               </Tab>{" "}
-              {combinedStatuses.map(
-                (status: { _id: string; name: string; count: string }) => (
-                  <Tab
-                    key={status._id + 1}
-                    title={
-                      <div className="flex items-center space-x-2">
-                        <span>{status.name}</span>
-                        {status.count ? (
-                          <Chip size="sm" color="primary">
-                            {status.count}
-                          </Chip>
-                        ) : (
-                          ""
-                        )}{" "}
-                      </div>
-                    }
-                  >
-                    <ActivityTabContent
-                      selectedTab={status._id}
-                      currentTable={current}
-                      tableConfig={tableConfig}
-                      projectId={id}
-                      user={user}
-                    />
-                  </Tab>
-                )
-              )}
+              {combinedStatuses.map((status: any) => (
+                <Tab
+                  key={status._id + 1}
+                  title={
+                    <div className="flex items-center space-x-2">
+                      <span>{status.status}</span>
+                      {status.count ? (
+                        <Chip size="sm" color="primary">
+                          {status.count}
+                        </Chip>
+                      ) : (
+                        ""
+                      )}{" "}
+                    </div>
+                  }
+                >
+                  <ActivityTabContent
+                    selectedTab={status._id}
+                    currentTable={current}
+                    tableConfig={tableConfig}
+                    refetchData={refetchData}
+                    projectId={id}
+                    user={user}
+                  />
+                </Tab>
+              ))}
             </Tabs>
           ) : (
             <p>No project statuses found.</p>
           )}
         </div>
 
-        <UnderDevelopment>
-          <ManagerActivityDetailsComponent />
-          <WorkerAnalyticsComponent />
-        </UnderDevelopment>
+        {/* <UnderDevelopment> */}
+          {/* <ManagerActivityDetailsComponent /> */}
+          {/* <WorkerAnalyticsComponent /> */}
+        {/* </UnderDevelopment> */}
       </div>
     </>
   );

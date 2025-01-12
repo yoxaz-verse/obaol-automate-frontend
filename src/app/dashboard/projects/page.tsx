@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import {
   Tabs,
   Tab,
@@ -8,11 +8,16 @@ import {
   Spacer,
   Select,
   SelectItem,
+  Chip,
 } from "@nextui-org/react";
 import ProjectTabContent from "@/components/dashboard/Projects/all-projects-tab-content";
-import { useQuery } from "@tanstack/react-query"; // Assuming react-query is being used
-import { getData } from "@/core/api/apiHandler";
-import { projectStatusRoutes, locationRoutes } from "@/core/api/apiRoutes"; // Include location API route
+import { useQuery } from "@tanstack/react-query";
+import { getData, postData } from "@/core/api/apiHandler";
+import {
+  projectStatusRoutes,
+  locationRoutes,
+  projectRoutes,
+} from "@/core/api/apiRoutes";
 import AddProject from "@/components/dashboard/Projects/add-projects";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
@@ -21,28 +26,40 @@ import BulkAdd from "@/components/CurdTable/bulk-add";
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
-
+interface Status {
+  _id: string;
+  status: string;
+  count: number;
+}
 export default function ProjectsPage() {
   const [currentTable, setCurrentTable] = useState<string>("");
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null); // Manage selected location
-  const { user } = useContext(AuthContext); // Get current user from context
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const { user } = useContext(AuthContext);
 
-  // Fetch project statuses using react-query
-  const { data: projectStatusesResponse, isLoading: isStatusesLoading } =
+  // Fetch project counts by status using the count-by-status API
+  const { data: projectCountsResponse, isLoading: isProjectCountsLoading } =
     useQuery({
-      queryKey: ["projectStatuses"],
-      queryFn: () => getData(projectStatusRoutes.getAll),
+      queryKey: ["projectCounts", selectedLocation],
+      queryFn: () =>
+        postData(`${projectRoutes.getAll}/count-by-status`, {
+          location: selectedLocation,
+        }),
     });
+
+  // Convert object to array
+  const projectCounts: Status[] = projectCountsResponse
+    ? Object.values(projectCountsResponse.data.data)
+    : [];
+  console.log(projectCounts);
 
   // Fetch locations using react-query
   const { data: locationsResponse, isLoading: isLocationsLoading } = useQuery({
     queryKey: ["locations"],
-    queryFn: () => getData(locationRoutes.getAll), // Fetch locations
+    queryFn: () => getData(locationRoutes.getAll),
   });
 
-  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
-  const projectStatuses = projectStatusesResponse?.data?.data?.data;
-  const locations = locationsResponse?.data?.data?.data; // Assuming API returns a similar structure
+  const tableConfig = { ...initialTableConfig };
+  const locations = locationsResponse?.data?.data?.data;
   const current = "projects";
 
   return (
@@ -78,15 +95,15 @@ export default function ProjectsPage() {
                   selectedLocation ? new Set([selectedLocation]) : new Set()
                 }
                 onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0]; // Ensure a single selection
+                  const selectedKey = Array.from(keys)[0];
                   if (typeof selectedKey === "string") {
-                    setSelectedLocation(selectedKey); // Updates `selectedLocation`
+                    setSelectedLocation(selectedKey);
                   }
                 }}
               >
                 <SelectItem key={""} value={undefined}>
                   All
-                </SelectItem>{" "}
+                </SelectItem>
                 {locations.map((location: { _id: string; name: string }) => (
                   <SelectItem key={location._id} value={location._id}>
                     {location.name}
@@ -97,16 +114,16 @@ export default function ProjectsPage() {
               <Spinner label="Loading locations" />
             )}
           </div>
-          {isStatusesLoading && isLocationsLoading ? (
+          {isProjectCountsLoading ? (
             <Spinner
               label={`Loading ${current}`}
               color="default"
               labelColor="foreground"
             />
-          ) : projectStatuses && projectStatuses.length > 0 ? (
+          ) : projectCounts && projectCounts.length > 0 ? (
             <Tabs
               aria-label="Project Tabs"
-              selectedKey={currentTable || projectStatuses[0]._id}
+              selectedKey={currentTable || null}
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
               <Tab key={null} title="All">
@@ -114,21 +131,37 @@ export default function ProjectsPage() {
                   currentTable={current}
                   tableConfig={tableConfig}
                   user={user}
-                  selectedLocation={selectedLocation} // Pass location filter to tab content
+                  selectedLocation={selectedLocation}
                 />
               </Tab>
 
-              {projectStatuses.map((status: { _id: string; name: string }) => (
-                <Tab key={status._id} title={status.name}>
-                  <ProjectTabContent
-                    selectedTab={status._id}
-                    currentTable={current}
-                    tableConfig={tableConfig}
-                    user={user}
-                    selectedLocation={selectedLocation} // Pass location filter to tab content
-                  />
-                </Tab>
-              ))}
+              {projectCounts.map(
+                (status: { _id: string; status: string; count: number }) => (
+                  <Tab
+                    key={status._id}
+                    title={
+                      <div className="flex items-center space-x-2">
+                        <span>{status.status}</span>
+                        {status.count ? (
+                          <Chip size="sm" color="primary">
+                            {status.count}
+                          </Chip>
+                        ) : (
+                          ""
+                        )}{" "}
+                      </div>
+                    }
+                  >
+                    <ProjectTabContent
+                      selectedTab={status._id}
+                      currentTable={current}
+                      tableConfig={tableConfig}
+                      user={user}
+                      selectedLocation={selectedLocation}
+                    />
+                  </Tab>
+                )
+              )}
             </Tabs>
           ) : (
             <p>No project statuses found.</p>

@@ -137,7 +137,11 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   columns={columns}
                   isLoading={false}
                   viewModal={(item: any) => (
-                    <DetailsModal columns={columns} data={item} />
+                    <DetailsModal
+                      currentTable={currentTable}
+                      columns={columns}
+                      data={item}
+                    />
                   )}
                   editModal={(item: any) => (
                     <EditModal

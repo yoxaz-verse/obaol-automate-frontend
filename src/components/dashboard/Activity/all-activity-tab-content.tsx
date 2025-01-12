@@ -26,6 +26,7 @@ interface ActivityTabContentProps {
   projectId?: string;
   tableConfig: any;
   user?: User | null;
+  refetchData: () => void; // Callback to refresh the data
 }
 
 interface Option {
@@ -50,8 +51,10 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   projectId,
   tableConfig,
   user,
+  refetchData,
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
+
   // Fetch available activity statuses
   const { data: statusData, isLoading: statusLoading } = useQuery({
     queryKey: ["activityStatuses"],
@@ -78,10 +81,6 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
     >
       {(data: any, refetch) => {
         const fetchedData = data?.data || [];
-        const refetchData = () => {
-          refetch?.(); // Trigger refetch when needed
-        };
-
         const tableData = fetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
 
@@ -95,7 +94,6 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
               activityStatus: item.status ? item.status.name : "N/A",
               activityType: item.type ? item.type.name : "N/A",
             };
-            // Handle other user types similarly if needed
           }
 
           return rest;
@@ -116,42 +114,28 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                     </Link>
                   </div>
                 )}
-                // editModal={(item: any) => (
-                //   <EditModal
-                //     initialData={item}
-                //     currentTable={currentTable}
-                //     formFields={tableConfig[currentTable]}
-                //     apiEndpoint={`${apiRoutesByRole[currentTable]}/${item._id}`} // Assuming API endpoint for update
-                //     refetchData={refetchData}
-                //   />
-                // )}
-
                 otherModal={(item: any) => {
                   const currentStatus = item.status
                     ? {
-                        key: item.status._id, // Use the status ID as the key
-                        label: item.status.name, // Use the status name as the label
+                        key: item.status._id,
+                        label: item.status.name,
                       }
                     : {
                         key: "Unknown",
                         label: "Unknown",
                       };
 
-                  // Dynamically filter status options based on user roles
                   const filteredStatusOptions = statusOptions.filter(
                     (tab: any) => {
                       if (user?.role === "Worker") {
-                        // Exclude "Approved" and "Rejected" for Workers
                         return tab.key === "6751760121b483f14e02b7fa";
                       }
                       if (
                         user?.role === "Admin" ||
                         user?.role === "ProjectManager"
                       ) {
-                        // Exclude "Approved" and "Rejected" for Workers
                         return (
                           tab.key === "6751760121b483f14e02b7fa" ||
-                          tab.key === "6751778921b483f14e02b83a" ||
                           tab.key === "6751778921b483f14e02b83a" ||
                           tab.key === "6751781121b483f14e02b840" ||
                           tab.key === "6751781e21b483f14e02b842" ||
@@ -159,15 +143,13 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         );
                       }
                       if (user?.role === "ActivityManager") {
-                        // Exclude "Approved" and "Rejected" for Workers
                         return (
                           tab.key === "6751760121b483f14e02b7fa" ||
-                          tab.key === "6751778921b483f14e02b83a" ||
                           tab.key === "6751778921b483f14e02b83a" ||
                           tab.key === "6751781121b483f14e02b840"
                         );
                       }
-                      return false; // Allow all statuses for other roles
+                      return false;
                     }
                   );
 
@@ -179,7 +161,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         apiEndpoint={apiRoutesByRole[currentTable]}
                         recordId={item._id}
                         currentStatus={currentStatus}
-                        refetchData={refetchData}
+                        refetchData={refetchData} // ✅ Pass the refetch function here
                       />
                     )
                   );
@@ -189,7 +171,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                     _id={item._id}
                     name={item.name}
                     deleteApiEndpoint={apiRoutesByRole[currentTable]}
-                    refetchData={refetchData}
+                    refetchData={refetchData} // ✅ Pass the refetch function here
                     useBody={true}
                   />
                 )}
@@ -203,4 +185,5 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
     </QueryComponent>
   );
 };
+
 export default ActivityTabContent;

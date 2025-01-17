@@ -16,6 +16,8 @@ export const routeRoles: { [key: string]: string[] } = {
   "/dashboard/essentials": ["Admin"],
   "/dashboard/activity": ["Admin"],
   "/dashboard/users": ["Admin"],
+  "/dashboard/bulk": ["Admin"],
+
   "/project/:projectname": [
     "Admin",
     "Customer",

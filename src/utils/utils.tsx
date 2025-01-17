@@ -3,7 +3,7 @@ import { emailRegex } from "./regex";
 import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiFileText, FiUsers } from "react-icons/fi";
-import { RiBuildingLine } from "react-icons/ri";
+import { RiBuildingLine, RiFileAddLine } from "react-icons/ri";
 import { MdDashboard } from "react-icons/md";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -42,18 +42,6 @@ export const showToastMessage = ({
     });
   }
 };
-// export const tabUtil = (tab: string, user: string) => {
-//   if (tab === "Dashboard") {
-//     return <Dashboard />;
-//   } else if (tab === "Projects") {
-//     return <Projects role={user} />;
-//   } else if (tab === "Activity") {
-//     return <Activity role={user} />;
-//   }
-//   // else if (tab === "Users") {
-//     // return <Users role={user} />;
-//   // }
-// };
 
 export const sidebarOptions = [
   {
@@ -75,5 +63,10 @@ export const sidebarOptions = [
     name: "Essentials",
     icon: <FiFileText />,
     link: "/dashboard/essentials",
+  },
+  {
+    name: "Bulk Add",
+    icon: <RiFileAddLine />,
+    link: "/dashboard/bulk",
   },
 ];

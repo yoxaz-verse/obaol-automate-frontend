@@ -9,7 +9,6 @@ import {
   FiUsers,
   FiTrendingUp,
 } from "react-icons/fi";
-import { MdDashboard } from "react-icons/md";
 import { RiBuildingLine } from "react-icons/ri";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";

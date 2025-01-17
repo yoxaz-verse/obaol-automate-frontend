@@ -523,6 +523,9 @@ const AddModal: React.FC<AddModalProps> = ({
                 </button>
               </div>
             </form>
+            <Chip color="danger" variant="bordered">
+              Enter {}
+            </Chip>
           </ModalBody>
           <ModalFooter></ModalFooter>
         </ModalContent>

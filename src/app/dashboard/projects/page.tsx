@@ -22,15 +22,11 @@ import AddProject from "@/components/dashboard/Projects/add-projects";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
 import BulkAdd from "@/components/CurdTable/bulk-add";
+import { Status } from "@/data/interface-data";
 
 const refetchData = () => {
   // Implement refetch logic if necessary
 };
-interface Status {
-  _id: string;
-  status: string;
-  count: number;
-}
 export default function ProjectsPage() {
   const [currentTable, setCurrentTable] = useState<string>("");
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -50,7 +46,6 @@ export default function ProjectsPage() {
   const projectCounts: Status[] = projectCountsResponse
     ? Object.values(projectCountsResponse.data.data)
     : [];
-  console.log(projectCounts);
 
   // Fetch locations using react-query
   const { data: locationsResponse, isLoading: isLocationsLoading } = useQuery({

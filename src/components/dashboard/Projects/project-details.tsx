@@ -11,7 +11,7 @@ import {
   projectRoutes,
 } from "@/core/api/apiRoutes";
 import ActivityTabContent from "../Activity/all-activity-tab-content";
-import { ProjectDetailProps } from "@/data/interface-data";
+import { ProjectDetailProps, Status } from "@/data/interface-data";
 import QueryComponent from "@/components/queryComponent";
 import AddActivity from "../Activity/add-activity";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
@@ -21,11 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import EditProject from "./project-edit-card";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import LocationDetailComponent from "../Location/location-detail-component";
-interface Status {
-  _id: string;
-  status: string;
-  count: number;
-}
+
 const useActivityStatusesWithCounts = (projectId: string) => {
   // Fetch all activity statuses
   const {
@@ -90,7 +86,6 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const { combinedStatuses, isLoading, refetchData } =
     useActivityStatusesWithCounts(id);
   const current = "activity";
-  console.log(combinedStatuses);
 
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const { user } = useContext(AuthContext); // Get current user from context
@@ -218,8 +213,8 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
         </div>
 
         {/* <UnderDevelopment> */}
-          {/* <ManagerActivityDetailsComponent /> */}
-          {/* <WorkerAnalyticsComponent /> */}
+        {/* <ManagerActivityDetailsComponent /> */}
+        {/* <WorkerAnalyticsComponent /> */}
         {/* </UnderDevelopment> */}
       </div>
     </>

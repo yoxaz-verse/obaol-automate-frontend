@@ -16,7 +16,7 @@ export interface TopbarProps {
 }
 export interface DashboardTileProps {
   heading?: string;
-  data?: string;
+  data?: any;
   type: string;
   stats?: string;
 }
@@ -52,6 +52,13 @@ export interface TableDataInterface {
 //     type: string; // Type of item being deleted (for display purposes)
 //   };
 // }
+
+export interface Status {
+  _id: string;
+  status: string;
+  count: number;
+}
+
 export interface Column {
   name: string;
   uid: string;

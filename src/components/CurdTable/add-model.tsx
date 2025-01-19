@@ -14,6 +14,7 @@ import {
   DatePicker,
   Switch,
   TimeInput,
+  Button,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
@@ -39,6 +40,7 @@ const AddModal: React.FC<AddModalProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [selectedManagers, setSelectedManagers] = useState<string[]>([]);
@@ -110,6 +112,14 @@ const AddModal: React.FC<AddModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const missing = validateFields(formFields, formData);
+    setMissingFields(missing);
+
+    if (missing.length > 0) {
+      // console.log("Missing fields:", missing);
+      setLoading(false);
+      return;
+    }
 
     try {
       const hasFileInput = formFields.some(
@@ -259,6 +269,19 @@ const AddModal: React.FC<AddModalProps> = ({
     }));
   };
 
+  const validateFields = (
+    fields: any[],
+    data: Record<string, any>
+  ): string[] => {
+    const missing: string[] = [];
+    fields.forEach((field) => {
+      if (field.required && (!data[field.key] || data[field.key] === "")) {
+        missing.push(field.label || field.key); // Add missing field's label
+      }
+    });
+    return missing;
+  };
+
   const handleMultiselectValueChange = (
     fieldKey: string,
     selectedKeys: Set<Key>,
@@ -365,7 +388,7 @@ const AddModal: React.FC<AddModalProps> = ({
         return (
           <Switch
             name={field.key}
-            defaultSelected={formData[field.key] || false}
+            defaultSelected={formData[field.key] || true}
             onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
           >
             {field.label}
@@ -514,18 +537,27 @@ const AddModal: React.FC<AddModalProps> = ({
                   ))}
               </div>
               <div className="flex justify-end w-full mt-4">
-                <button
+                <Button
                   className="w-[100px] bg-[#3EADEB] rounded-3xl text-white h-[38px] text-sm"
                   type="submit"
                   disabled={loading}
                 >
                   {loading ? "Adding..." : "Add"}
-                </button>
+                </Button>
               </div>
             </form>
-            <Chip color="danger" variant="bordered">
-              Enter {}
-            </Chip>
+            {missingFields.length > 0 && (
+              <div className="mt-4">
+                <span>Please fill:</span>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {missingFields.map((field, index) => (
+                    <Chip key={index} color="warning" variant="bordered">
+                      {field}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+            )}
           </ModalBody>
           <ModalFooter></ModalFooter>
         </ModalContent>

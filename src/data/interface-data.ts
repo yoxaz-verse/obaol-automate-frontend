@@ -183,4 +183,5 @@ export interface FormField {
   values?: { key: string; value: string }[]; // For select and multiselect
   accept?: string; // For file inputs (e.g., "image/*")
   multiple?: boolean; // For file inputs
+  required?: boolean; // For file inputs
 }

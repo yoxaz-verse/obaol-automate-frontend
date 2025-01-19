@@ -130,13 +130,21 @@ export const initialTableConfig: Record<
 > = {
   // User
   admin: [
-    { label: "Name", type: "text", key: "name", inForm: true, inTable: true },
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
     {
       label: "Email",
       type: "email",
       key: "email",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Password",
@@ -145,6 +153,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
     {
       label: "Created At",
@@ -162,13 +171,21 @@ export const initialTableConfig: Record<
     },
   ],
   projectManager: [
-    { label: "Name", type: "text", key: "name", inForm: true, inTable: true },
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
     {
       label: "Email",
       type: "email",
       key: "email",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Password",
@@ -177,6 +194,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
 
     {
@@ -187,6 +205,7 @@ export const initialTableConfig: Record<
       inEdit: true,
       inForm: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Created At",
@@ -204,13 +223,21 @@ export const initialTableConfig: Record<
     },
   ],
   activityManager: [
-    { label: "Name", type: "text", key: "name", inForm: true, inTable: true },
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
     {
       label: "Email",
       type: "email",
       key: "email",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Password",
@@ -219,6 +246,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
 
     {
@@ -229,6 +257,7 @@ export const initialTableConfig: Record<
       inEdit: true,
       inForm: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Created At",
@@ -252,6 +281,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Email",
@@ -259,6 +289,7 @@ export const initialTableConfig: Record<
       key: "email",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Password",
@@ -267,6 +298,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inEdit: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Created At",
@@ -290,6 +322,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Password",
@@ -298,6 +331,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inEdit: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Email",
@@ -305,6 +339,7 @@ export const initialTableConfig: Record<
       key: "email",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Skill",
@@ -321,6 +356,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
     {
       label: "Created At",
@@ -344,6 +380,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Address",
@@ -412,6 +449,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
 
     {
@@ -438,6 +476,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
     {
       label: "City",
@@ -526,6 +565,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Actions",
@@ -551,6 +591,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
 
     {
@@ -581,6 +622,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
 
     {
@@ -638,6 +680,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
     // {
     //   label: "Admin",
@@ -655,6 +698,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
     {
       label: "Assignment Date ",
@@ -680,6 +724,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
     {
       label: "Location",
@@ -689,6 +734,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
     {
       label: "Task",
@@ -738,6 +784,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
 
     {
@@ -769,6 +816,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Created At",
@@ -792,6 +840,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+
   // Activity
   activity: [
     {
@@ -829,6 +878,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+      required: true,
     },
     {
       label: "Workers",
@@ -912,6 +962,15 @@ export const initialTableConfig: Record<
       key: "type",
       inForm: true,
       inTable: false,
+      required: true,
+    },
+
+    {
+      label: "Allow TimeSheets",
+      type: "boolean",
+      key: "allowTimesheets",
+      inForm: true,
+      inTable: false,
     },
     {
       label: "Created At",
@@ -928,6 +987,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+
   activityStatus: [
     {
       label: "Name",
@@ -935,6 +995,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
 
     {
@@ -966,6 +1027,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Created At",
@@ -1026,6 +1088,7 @@ export const initialTableConfig: Record<
       key: "date",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Start Time",
@@ -1033,6 +1096,7 @@ export const initialTableConfig: Record<
       key: "startTime",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "End Time",
@@ -1040,6 +1104,7 @@ export const initialTableConfig: Record<
       key: "endTime",
       inForm: true,
       inTable: true,
+      required: true,
     },
     {
       label: "Created At",

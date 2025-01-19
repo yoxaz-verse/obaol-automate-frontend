@@ -57,7 +57,6 @@ function EditProject({
 
   // Extract data or set as empty arrays
   const customers = customersResponse?.data.data.data;
-  console.log(formFields);
   const managers = managersResponse?.data?.data.data;
   const projectStatuses = projectStatusesResponse?.data?.data.data;
   const projectType = projectTypeResponse?.data?.data.data;

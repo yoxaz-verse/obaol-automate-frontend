@@ -68,8 +68,11 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
         label: status.name,
       }));
     }
+
     return [];
   }, [statusData]);
+  console.log("statusOptions");
+  console.log(statusOptions);
 
   return (
     <QueryComponent
@@ -125,31 +128,31 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         label: "Unknown",
                       };
 
+                  const roleStatusMap: Record<string, string[]> = {
+                    Worker: ["Submitted"],
+                    Admin: [
+                      "Submitted",
+                      "Rejected",
+                      "Suspended",
+                      "Blocked",
+                      "Approved",
+                    ],
+                    ProjectManager: [
+                      "Submitted",
+                      "Rejected",
+                      "Suspended",
+                      "Blocked",
+                      "Approved",
+                    ],
+                    ActivityManager: ["Submitted", "Rejected", "Suspended"],
+                  };
+
                   const filteredStatusOptions = statusOptions.filter(
                     (tab: any) => {
-                      if (user?.role === "Worker") {
-                        return tab.key === "6751760121b483f14e02b7fa";
+                      if (user?.role) {
+                        return roleStatusMap[user.role]?.includes(tab.label);
                       }
-                      if (
-                        user?.role === "Admin" ||
-                        user?.role === "ProjectManager"
-                      ) {
-                        return (
-                          tab.key === "6751760121b483f14e02b7fa" ||
-                          tab.key === "6751778921b483f14e02b83a" ||
-                          tab.key === "6751781121b483f14e02b840" ||
-                          tab.key === "6751781e21b483f14e02b842" ||
-                          tab.key === "6751777221b483f14e02b838"
-                        );
-                      }
-                      if (user?.role === "ActivityManager") {
-                        return (
-                          tab.key === "6751760121b483f14e02b7fa" ||
-                          tab.key === "6751778921b483f14e02b83a" ||
-                          tab.key === "6751781121b483f14e02b840"
-                        );
-                      }
-                      return false;
+                      return false; // Default behavior if user or role is undefined
                     }
                   );
 

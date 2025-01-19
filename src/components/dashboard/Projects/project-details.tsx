@@ -45,14 +45,12 @@ const useActivityStatusesWithCounts = (projectId: string) => {
         projectId,
       }),
   });
-  console.log("activityStatusesCountResponse", activityStatusesCountResponse);
 
   // Extract and ensure data is always an array
   const activityStatuses = activityStatusesResponse?.data?.data?.data || [];
   const activityStatusesCount: Status[] = Object.values(
     activityStatusesCountResponse?.data.data || {}
   );
-  console.log("activityStatusesCountResponse", activityStatusesCount);
 
   // Create a mapping of status counts for quick lookup
   const countMap: Record<string, number> = activityStatusesCount.reduce(

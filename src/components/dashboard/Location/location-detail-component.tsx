@@ -2,8 +2,6 @@ import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
 
 const LocationDetailComponent = ({ data }: { data: any }) => {
-  console.log(data);
-
   return (
     <div className="w-full h-full">
       <div className="flex w-full h-full ">

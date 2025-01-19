@@ -8,29 +8,11 @@ import {
   Spacer,
   Spinner,
 } from "@nextui-org/react";
-import { postData } from "@/core/api/apiHandler";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postData } from "@/core/api/apiHandler"; // Your API handler
 import * as XLSX from "xlsx";
 import { BulkAddProps } from "@/data/interface-data";
-
-// Helper function to convert DD-MM-YYYY to ISO format
-const convertToIsoFromString = (dateString: string): string => {
-  if (!dateString) return "";
-  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-  if (!dateRegex.test(dateString)) {
-    console.error(`Invalid date format: ${dateString}`);
-    return "";
-  }
-  const [day, month, year] = dateString.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.toISOString();
-};
-
-// Helper function to convert Unix timestamp to ISO format
-const convertToDate = (timestamp: number): string => {
-  if (!timestamp) return "";
-  const date = new Date(timestamp * 1000);
-  return date.toISOString();
-};
+import { toast } from "react-toastify"; // Assuming you're using toast for success/error messages
 
 // Helper function to convert Excel serial date to ISO format
 const convertExcelDateToIso = (excelDate: number): string => {
@@ -46,11 +28,55 @@ const BulkAdd: React.FC<BulkAddProps> = ({
   currentTable,
 }) => {
   const [file, setFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Loading state
   const [statusMessage, setStatusMessage] = useState<string | null>(null); // Status message
   const [statusType, setStatusType] = useState<"success" | "error" | null>(
     null
   ); // Status type
+  const [isLoading, setLoading] = useState(false); // Loading state
+
+  const queryClient = useQueryClient();
+
+  const addItem = useMutation({
+    mutationFn: async (data: any) => postData(apiEndpoint, data, {}),
+    onSuccess: () => {
+      // Refetch data after successful upload
+      queryClient.refetchQueries({
+        queryKey: [currentTable, apiEndpoint],
+      });
+      console.log("Data uploaded successfully!");
+      setStatusMessage("Data uploaded successfully!"); // Success toast
+      setStatusType("success");
+      setLoading(false);
+      setFile(null);
+      refetchData(); // Refetch data from parent component (if necessary)
+    },
+    onError: (error: any) => {
+      // Handle error scenario
+      setStatusType("error");
+
+      const errorMessage = error.response?.data?.message || "An error occurred";
+
+      let detailedErrorMessage = errorMessage;
+
+      if (
+        error.response?.data?.invalidRows &&
+        Array.isArray(error.response?.data?.invalidRows)
+      ) {
+        // Format the invalid rows message to show issues
+        const invalidRows = error.response.data.invalidRows
+          .map((item: { row: number; issues: string[] }) => {
+            return `Row ${item.row}: ${item.issues.join(", ")}`;
+          })
+          .join("\n");
+
+        detailedErrorMessage += `\n\nInvalid Rows:\n${invalidRows}`;
+      }
+
+      // Set the formatted error message
+      setStatusMessage(detailedErrorMessage);
+      setLoading(false);
+    },
+  });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -64,9 +90,9 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       return;
     }
 
-    setIsLoading(true);
     setStatusMessage(null);
     setStatusType(null); // Clear previous status
+    setLoading(true); // Set loading state
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -108,22 +134,17 @@ const BulkAdd: React.FC<BulkAddProps> = ({
               return item;
             });
           }
-          console.log("jsonData", jsonData);
-          console.log("Final Data Sent to Backend:", jsonData);
 
-          await postData(apiEndpoint, jsonData);
-          setStatusMessage("Data uploaded successfully!");
-          setStatusType("success");
-          setFile(null);
-          refetchData();
+          console.log("jsonData", jsonData);
+          // Call the mutate function with the prepared data
+          addItem.mutate(jsonData);
         } catch (error) {
           console.error("Error parsing the file:", error);
           setStatusMessage(
             "Failed to process the file. Please check the format and try again."
           );
           setStatusType("error");
-        } finally {
-          setIsLoading(false);
+          setLoading(false);
         }
       }
     };
@@ -158,6 +179,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
           </Button>
           {statusMessage && (
             <div
+              className="flex flex-wrap  max-w-[300px] sm:max-w-[500px] md:max-w-[800px] lg:max-w-[1000px]"
               style={{
                 color: statusType === "success" ? "green" : "red",
                 marginTop: "10px",

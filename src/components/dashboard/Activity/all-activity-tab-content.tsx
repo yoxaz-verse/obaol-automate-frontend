@@ -19,6 +19,7 @@ import StatusUpdate from "@/components/CurdTable/status-update";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import { activityStatusRoutes } from "@/core/api/apiRoutes";
+import useFilteredStatusOptions from "@/utils/roleActivityStatus";
 
 interface ActivityTabContentProps {
   selectedTab?: string;
@@ -54,25 +55,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   refetchData,
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
-
-  // Fetch available activity statuses
-  const { data: statusData, isLoading: statusLoading } = useQuery({
-    queryKey: ["activityStatuses"],
-    queryFn: () => getData(activityStatusRoutes.getAll),
-  });
-
-  const statusOptions = useMemo(() => {
-    if (statusData?.data.data.data) {
-      return statusData.data.data.data.map((status: any) => ({
-        key: status._id,
-        label: status.name,
-      }));
-    }
-
-    return [];
-  }, [statusData]);
-  console.log("statusOptions");
-  console.log(statusOptions);
+  const filteredStatusOptions = useFilteredStatusOptions();
 
   return (
     <QueryComponent
@@ -127,34 +110,6 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         key: "Unknown",
                         label: "Unknown",
                       };
-
-                  const roleStatusMap: Record<string, string[]> = {
-                    Worker: ["Submitted"],
-                    Admin: [
-                      "Submitted",
-                      "Rejected",
-                      "Suspended",
-                      "Blocked",
-                      "Approved",
-                    ],
-                    ProjectManager: [
-                      "Submitted",
-                      "Rejected",
-                      "Suspended",
-                      "Blocked",
-                      "Approved",
-                    ],
-                    ActivityManager: ["Submitted", "Rejected", "Suspended"],
-                  };
-
-                  const filteredStatusOptions = statusOptions.filter(
-                    (tab: any) => {
-                      if (user?.role) {
-                        return roleStatusMap[user.role]?.includes(tab.label);
-                      }
-                      return false; // Default behavior if user or role is undefined
-                    }
-                  );
 
                   return (
                     filteredStatusOptions && (

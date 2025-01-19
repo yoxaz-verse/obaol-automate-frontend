@@ -82,7 +82,6 @@ function EditActivity({
 
   return (
     <div>
-      <Spacer y={2} />
       {activityManagers && activityType && workers ? (
         <EditModal
           _id={initialValues._id}
@@ -102,7 +101,6 @@ function EditActivity({
         // />
         "Loading Edit Modal..."
       )}
-      <Spacer y={5} />
     </div>
   );
 }

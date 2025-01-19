@@ -1,3 +1,5 @@
+
+
 export const routeRoles: { [key: string]: string[] } = {
   "/dashboard": [
     "Admin",
@@ -36,3 +38,10 @@ export const getAllowedRoles = (pathname: string): string[] => {
   });
   return routeRoles[dynamicRoute || ""] || [];
 };
+
+
+
+
+
+
+

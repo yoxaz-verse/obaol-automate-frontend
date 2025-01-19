@@ -140,7 +140,7 @@ const EditModal: React.FC<EditModalProps> = ({
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
-
+      refetchData();
       showToastMessage({
         type: "success",
         message: `${capitalize(currentTable)} Updated Successfully`,
@@ -163,7 +163,6 @@ const EditModal: React.FC<EditModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    console.log(formData);
 
     try {
       // const hasFileInput = formFields.some(

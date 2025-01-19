@@ -6,6 +6,7 @@ import {
   Button,
   Input,
   Spacer,
+  Spinner,
 } from "@nextui-org/react";
 import { postData } from "@/core/api/apiHandler";
 import * as XLSX from "xlsx";
@@ -13,30 +14,30 @@ import { BulkAddProps } from "@/data/interface-data";
 
 // Helper function to convert DD-MM-YYYY to ISO format
 const convertToIsoFromString = (dateString: string): string => {
-  if (!dateString) return ""; // Return empty string if dateString is invalid
-  const dateRegex = /^\d{2}-\d{2}-\d{4}$/; // Regex to match "DD-MM-YYYY" format
+  if (!dateString) return "";
+  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
   if (!dateRegex.test(dateString)) {
     console.error(`Invalid date format: ${dateString}`);
-    return ""; // Log error and return empty for invalid date
+    return "";
   }
-  const [day, month, year] = dateString.split("-").map(Number); // Extract day, month, year
-  const date = new Date(year, month - 1, day); // Create Date object
-  return date.toISOString(); // Convert to ISO format
+  const [day, month, year] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toISOString();
 };
 
 // Helper function to convert Unix timestamp to ISO format
 const convertToDate = (timestamp: number): string => {
-  if (!timestamp) return ""; // Return empty string if timestamp is invalid
-  const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date
-  return date.toISOString(); // Convert to ISO format
+  if (!timestamp) return "";
+  const date = new Date(timestamp * 1000);
+  return date.toISOString();
 };
 
 // Helper function to convert Excel serial date to ISO format
 const convertExcelDateToIso = (excelDate: number): string => {
-  const excelEpoch = new Date(1899, 11, 30); // Excel epoch starts from Dec 30, 1899
-  const millisecondsPerDay = 24 * 60 * 60 * 1000; // Number of milliseconds in a day
+  const excelEpoch = new Date(1899, 11, 30);
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
   const date = new Date(excelEpoch.getTime() + excelDate * millisecondsPerDay);
-  return date.toISOString(); // Convert to ISO format
+  return date.toISOString();
 };
 
 const BulkAdd: React.FC<BulkAddProps> = ({
@@ -45,19 +46,27 @@ const BulkAdd: React.FC<BulkAddProps> = ({
   currentTable,
 }) => {
   const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [statusMessage, setStatusMessage] = useState<string | null>(null); // Status message
+  const [statusType, setStatusType] = useState<"success" | "error" | null>(
+    null
+  ); // Status type
 
-  // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     setFile(selectedFile || null);
   };
 
-  // Handle file parsing and upload
   const handleUpload = async () => {
     if (!file) {
-      alert("Please select a file before uploading.");
+      setStatusMessage("Please select a file before uploading.");
+      setStatusType("error");
       return;
     }
+
+    setIsLoading(true);
+    setStatusMessage(null);
+    setStatusType(null); // Clear previous status
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -67,7 +76,6 @@ const BulkAdd: React.FC<BulkAddProps> = ({
           let jsonData;
 
           if (file.type === "text/csv") {
-            // Parse CSV file
             const csvString =
               typeof data === "string" ? data : new TextDecoder().decode(data);
             const workbook = XLSX.read(csvString, { type: "string" });
@@ -75,54 +83,52 @@ const BulkAdd: React.FC<BulkAddProps> = ({
             const worksheet = workbook.Sheets[sheetName];
             jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-            // Handle Excel serial numbers
             jsonData = jsonData.map((item: any) => {
               Object.keys(item).forEach((key) => {
                 const value = item[key];
                 if (typeof value === "number" && value > 25569) {
-                  item[key] = convertExcelDateToIso(value); // Convert serial number to ISO date
+                  item[key] = convertExcelDateToIso(value);
                 }
               });
               return item;
             });
           } else {
-            // Parse Excel file
             const workbook = XLSX.read(data, { type: "binary" });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-            // Handle Excel serial numbers
             jsonData = jsonData.map((item: any) => {
               Object.keys(item).forEach((key) => {
                 const value = item[key];
-
                 if (typeof value === "number" && value > 25569) {
-                  item[key] = convertExcelDateToIso(value); // Convert serial number to ISO date
+                  item[key] = convertExcelDateToIso(value);
                 }
               });
               return item;
             });
           }
           console.log("jsonData", jsonData);
+          console.log("Final Data Sent to Backend:", jsonData);
 
-          console.log("Final Data Sent to Backend:", jsonData); // Debug final data
-
-          // Send data to the backend
           await postData(apiEndpoint, jsonData);
-          alert("Data uploaded successfully!");
-          setFile(null); // Reset file input
-          refetchData(); // Refresh table data
+          setStatusMessage("Data uploaded successfully!");
+          setStatusType("success");
+          setFile(null);
+          refetchData();
         } catch (error) {
           console.error("Error parsing the file:", error);
-          alert(
+          setStatusMessage(
             "Failed to process the file. Please check the format and try again."
           );
+          setStatusType("error");
+        } finally {
+          setIsLoading(false);
         }
       }
     };
 
-    reader.readAsBinaryString(file); // Read the file as binary string
+    reader.readAsBinaryString(file);
   };
 
   return (
@@ -141,9 +147,32 @@ const BulkAdd: React.FC<BulkAddProps> = ({
             className="w-[250px]"
           />
           <Spacer y={1} />
-          <Button onClick={handleUpload} disabled={!file}>
-            Process & Upload File
+          <Button onClick={handleUpload} disabled={!file || isLoading}>
+            {isLoading ? (
+              <>
+                <Spinner size="sm" /> Processing...
+              </>
+            ) : (
+              "Process & Upload File"
+            )}
           </Button>
+          {statusMessage && (
+            <div
+              style={{
+                color: statusType === "success" ? "green" : "red",
+                marginTop: "10px",
+                border: `1px solid ${
+                  statusType === "success" ? "green" : "red"
+                }`,
+                padding: "10px",
+                borderRadius: "5px",
+                backgroundColor:
+                  statusType === "success" ? "#d4fdd4" : "#ffd6d6",
+              }}
+            >
+              {statusMessage}
+            </div>
+          )}
         </AccordionItem>
       </Accordion>
     </div>

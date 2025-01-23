@@ -96,7 +96,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
     uppyInstance.current = new Uppy({
       restrictions: {
         maxNumberOfFiles: 10,
-        allowedFileTypes: ["image/*", "application/pdf"],
+        // allowedFileTypes: ["image/*", "application/pdf"],
       },
       autoProceed: false,
       debug: true,

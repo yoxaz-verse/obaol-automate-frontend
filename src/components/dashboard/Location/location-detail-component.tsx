@@ -52,6 +52,9 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
               {/* Render status and sub status */}
               {/* <div className="flex justify-between pt-5 pb-10 w-[90%]"></div> */}
             </Card>
+            {data.location.locationManagers && (
+              <LocationManagerList managers={data.location.locationManagers} />
+            )}
           </div>
         )}
       </div>
@@ -60,3 +63,23 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
 };
 
 export default LocationDetailComponent;
+
+const LocationManagerList = ({ managers }: { managers: any[] }) => {
+  return (
+    <div className="mt-4">
+      {/* <div className="text-sm font-medium mb-2">Location Managers</div> */}
+      <div className="flex gap-2">
+        {managers.map((manager, index) => (
+          <Card key={manager._id} className="mb-2 py-2">
+            <CardBody className="flex flex-col">
+              <div className="text-xs">Manager</div>
+              <div className="text-sm font-medium ">{manager.manager.name}</div>
+              <div className="text-xs mt-2">Code</div>
+              <div className="text-sm font-medium ">{manager.code}</div>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};

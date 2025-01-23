@@ -4,34 +4,11 @@
 import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
 import Title from "@/components/titles";
-import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import { locationRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole } from "@/utils/tableValues";
 
 export default function Essentials() {
-  const [locationTab, setLocationTab] = React.useState("location");
-  const [activityTab, setActivityTab] = React.useState("activityStatus");
-  const [projectTab, setProjectTab] = React.useState("projectStatus");
-
-  // Define static tabs
-  const projectTabs = [
-    { key: "projectStatus", title: "Project Status" },
-    { key: "projectType", title: "Project Types" },
-  ];
-
-  // Define static tabs
-  const activityTabs = [
-    { key: "activityStatus", title: "Activity Status" },
-    { key: "activityType", title: "Activity Types" },
-  ];
-
-  const locationTabs = [
-    { key: "location", title: "Location" },
-    { key: "locationManager", title: "Location Managers" },
-    { key: "locationType", title: "Location Types" },
-  ];
-
   // Optionally, add dynamic tabs based on fetched data
   // For example, if ProjectStatus or ActivityStatus have sub-categories
   // For simplicity, we'll stick to static tabs in this example

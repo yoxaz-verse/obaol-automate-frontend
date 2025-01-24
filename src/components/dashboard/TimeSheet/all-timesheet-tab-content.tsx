@@ -56,7 +56,11 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
     <>
       {
         <QueryComponent
-          api={apiRoutesByRole[currentTable]}
+          api={
+            activityId
+              ? apiRoutesByRole[currentTable]
+              : `${apiRoutesByRole[currentTable]}/home`
+          }
           queryKey={[currentTable, apiRoutesByRole[currentTable]]}
           page={1}
           limit={100}

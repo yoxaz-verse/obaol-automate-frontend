@@ -172,7 +172,6 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                 {}
               );
 
-              console.log("groupedFiles", groupedFiles);
               return (
                 <>
                   {Object.entries(groupedFiles).map(

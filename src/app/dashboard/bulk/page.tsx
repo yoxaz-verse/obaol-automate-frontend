@@ -9,9 +9,7 @@ import { locationRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole } from "@/utils/tableValues";
 
 export default function Essentials() {
-  // Optionally, add dynamic tabs based on fetched data
-  // For example, if ProjectStatus or ActivityStatus have sub-categories
-  // For simplicity, we'll stick to static tabs in this example
+
   const refetchData = () => {
     // Implement refetch logic if necessary
   };

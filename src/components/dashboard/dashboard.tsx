@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import DashboardTilesComponent from "./dashboard-tiles-component";
 import DashboardCharts from "./dashboard-charts";
 import DashboardTile from "./dashboard-tile";
@@ -10,7 +10,8 @@ import { Status } from "@/data/interface-data";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { routeRoles } from "@/utils/roleHelpers";
-import { Spacer } from "@nextui-org/react";
+import { Spacer, Tab, Tabs } from "@nextui-org/react";
+import TimeSheetTabContent from "./TimeSheet/all-timesheet-tab-content";
 
 const Dashboard: NextPage = () => {
   // Fetch project counts by status using the count-by-status API
@@ -19,7 +20,18 @@ const Dashboard: NextPage = () => {
     queryFn: () => postData(`${projectRoutes.getAll}/count-by-status`, {}),
   });
 
-  // Convert object to array
+  const [currentTable, setCurrentTable] = useState(""); // Default tab
+  const tabs = [
+    { key: "", title: "All" },
+    { key: "isPending", title: "Pending" },
+    { key: "isAccepted", title: "Accepted" },
+    { key: "isResubmitted", title: "Resubmitted" },
+    { key: "isRejected", title: "Rejected" },
+    // Add more tabs if needed, e.g., "Archived Projects"
+  ]; // Convert object to array
+
+  const current = "timeSheet";
+
   const projectCounts: Status[] = projectCountsResponse
     ? Object.values(projectCountsResponse.data.data)
     : [];
@@ -54,11 +66,30 @@ const Dashboard: NextPage = () => {
       const allowedRoles = routeRoles[option.link] || [];
       return allowedRoles.includes(user.role);
     });
-  console.log(filteredOptions);
 
   return (
     <div className="w-full">
       <DashboardTilesComponent projectCounts={projectCounts} />
+      <div className="px-4 py-5 ">
+        {(user?.role === "ActivityManager" || user?.role === "Worker") && (
+          <Tabs
+            aria-label="TimeSheet Tabs"
+            selectedKey={currentTable}
+            onSelectionChange={(key) => setCurrentTable(key as string)}
+          >
+            {tabs.map((tab) => (
+              <Tab key={tab.key} title={tab.title}>
+                <TimeSheetTabContent
+                  currentTable={current}
+                  isMode={tab.key}
+                  user={user}
+                />
+              </Tab>
+            ))}
+          </Tabs>
+        )}
+      </div>
+
       <div className="flex px-4 py-5 justify-between w-full flex-col lg:flex-row">
         <div className="lg:w-[70%] grid grid-cols-2 gap-5">
           {filteredOptions?.map((option, index) =>
@@ -71,6 +102,7 @@ const Dashboard: NextPage = () => {
           )}
           {/* <DashboardCharts /> */}
         </div>
+
         <div className="flex flex-col lg:w-[23%] lg:pt-12">
           <div className="flex flex-col"></div>
           <div className="flex flex-col">

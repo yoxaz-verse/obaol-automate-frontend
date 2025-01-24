@@ -14,14 +14,13 @@ import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
+import Image from "next/image";
 
 const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useContext(AuthContext); // Get current user from context
   const [selectedOption, setSelectedOption] = useState<string>("dashboard");
-
-
 
   useEffect(() => {
     const pathSegments = pathname.split("/").filter(Boolean);
@@ -50,7 +49,9 @@ const Sidebar = () => {
   return (
     <div className="flex fixed flex-col justify-between w-1/6 h-full">
       <div className="bg-white p-2 sm:p-4 rounded-lg shadow-lg justify-evenly h-full hidden md:block">
-        <div className="flex py-[50px] justify-center items-center">LOGO</div>
+        <div className="flex py-[50px] justify-center items-center">
+          <Image src={"/logo.jpg"} width={100} height={100} alt="MG Project" />
+        </div>
         {filteredOptions.map((option, index) => (
           <div
             key={index}

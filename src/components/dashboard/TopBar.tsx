@@ -16,6 +16,7 @@ import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
+import Image from "next/image";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
@@ -30,30 +31,32 @@ const TopBar = ({ username, role }: TopbarProps) => {
   return (
     <div className="flex justify-between p-5 bg-gray-100 shadow-md">
       {/* Menu for small screens */}
-      <Dropdown className="items-center justify-center h-full flex xl:hidden">
-        <DropdownTrigger>
-          <div className="w-6 h-6 flex items-center justify-center xl:hidden">
-            <CiMenuBurger size={24} />
-          </div>
-        </DropdownTrigger>
-        <DropdownMenu
-          aria-label="Sidebar Options"
-          disallowEmptySelection
-          selectionMode="single"
-        >
-          {filteredOptions.map((option) => (
-            <DropdownItem key={option.name}>
-              <Link href={option.link}>
-                <div className="flex items-center gap-2">
-                  {option.icon}
-                  {option.name}
-                </div>
-              </Link>
-            </DropdownItem>
-          ))}
-        </DropdownMenu>
-      </Dropdown>
-
+      <div className="flex gap-5 xl:hidden">
+        <Dropdown className="items-center justify-center h-full flex ">
+          <DropdownTrigger>
+            <div className="w-6  h-10 flex items-center justify-center xl:hidden">
+              <CiMenuBurger size={24} />
+            </div>
+          </DropdownTrigger>
+          <DropdownMenu
+            aria-label="Sidebar Options"
+            disallowEmptySelection
+            selectionMode="single"
+          >
+            {filteredOptions.map((option) => (
+              <DropdownItem key={option.name}>
+                <Link href={option.link}>
+                  <div className="flex items-center gap-2">
+                    {option.icon}
+                    {option.name}
+                  </div>
+                </Link>
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
+        <Image src={"/logo.jpg"} width={50} height={30} alt="MG Project" />
+      </div>
       {/* Title Section */}
       <div className="hidden md:block">
         <div className="text-lg font-bold">

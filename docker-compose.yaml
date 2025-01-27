@@ -12,3 +12,23 @@ services:
     volumes:
       - .:/app # Optional, for development to sync files
       - /app/node_modules # Prevent overwriting node_modules
+    labels:
+      caddy: "${DOMAIN_NAME}" # The domain to route traffic to
+      caddy.reverse_proxy: "{{upstreams 3000}}" # Forward traffic to port 3000 of the web service
+
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"   # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile # Caddy configuration file
+      - caddy_data:/data # Persist Caddy data
+      - caddy_config:/config # Persist Caddy configuration
+    environment:
+      - DOMAIN_NAME=example.com # Replace with your domain
+
+volumes:
+  caddy_data:
+  caddy_config:

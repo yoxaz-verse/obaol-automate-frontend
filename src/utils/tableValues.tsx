@@ -119,6 +119,14 @@ export const initialTableConfig: Record<
       | "dateTime"
       | "password"
       | "week"; // Define specific types
+
+    filterType?:
+      | "text"
+      | "select"
+      | "multiselect"
+      | "boolean"
+      | "date"
+      | "range";
     key: string;
     inForm: boolean;
     inTable: boolean;
@@ -669,6 +677,7 @@ export const initialTableConfig: Record<
       label: "Custom ID",
       type: "text",
       key: "customId",
+      filterType: "text",
       inForm: false,
       inTable: true,
     },
@@ -676,6 +685,7 @@ export const initialTableConfig: Record<
       label: "Customer",
       type: "select",
       key: "customer",
+      filterType: "select",
       values: [],
       inForm: true,
       inTable: true,
@@ -693,6 +703,7 @@ export const initialTableConfig: Record<
     {
       label: "Project Manager",
       type: "select",
+      filterType: "select",
       key: "projectManager",
       values: [],
       inForm: true,
@@ -704,6 +715,8 @@ export const initialTableConfig: Record<
       label: "Assignment Date ",
       type: "date",
       key: "assignmentDate",
+      filterType: "date",
+
       inForm: true,
       inTable: true,
       inEdit: true,
@@ -729,6 +742,7 @@ export const initialTableConfig: Record<
     {
       label: "Location",
       type: "select",
+      filterType: "multiselect",
       key: "location",
       values: [],
       inForm: true,
@@ -757,6 +771,7 @@ export const initialTableConfig: Record<
       label: "Scheda Radio Date",
       type: "date",
       key: "schedaRadioDate",
+      filterType: "date",
       inForm: true,
       inEdit: true,
       inTable: true,
@@ -847,6 +862,7 @@ export const initialTableConfig: Record<
       label: "Title",
       type: "text",
       key: "title",
+      filterType: "text",
       inForm: false,
       inTable: true,
       inEdit: false,
@@ -855,6 +871,7 @@ export const initialTableConfig: Record<
       label: "Description",
       type: "textarea",
       key: "description",
+
       inForm: true,
       inTable: false,
       inEdit: true,
@@ -864,6 +881,7 @@ export const initialTableConfig: Record<
       label: "Project",
       type: "select",
       key: "project",
+      filterType: "multiselect",
       values: [],
       inForm: false,
       inTable: false,
@@ -874,6 +892,7 @@ export const initialTableConfig: Record<
       label: "Activity Manager",
       type: "select",
       key: "activityManager",
+      filterType: "multiselect",
       values: [],
       inForm: true,
       inTable: true,
@@ -884,6 +903,7 @@ export const initialTableConfig: Record<
       label: "Workers",
       type: "multiselect",
       key: "worker",
+      filterType: "multiselect",
       values: [],
       inForm: true,
       inTable: false,
@@ -902,6 +922,7 @@ export const initialTableConfig: Record<
       label: "Forecast Date",
       type: "week",
       key: "forecastDate",
+      filterType: "date",
       inForm: true,
       inTable: true,
       inEdit: true,
@@ -910,6 +931,7 @@ export const initialTableConfig: Record<
       label: "Actual Date",
       type: "date",
       key: "actualDate",
+      filterType: "date",
       inForm: false,
       inTable: false,
       inEdit: true,
@@ -918,6 +940,7 @@ export const initialTableConfig: Record<
       label: "Target Operation Date",
       type: "week",
       key: "targetOperationDate",
+      filterType: "date",
       inForm: true,
       inTable: true,
       inEdit: true,
@@ -926,6 +949,7 @@ export const initialTableConfig: Record<
       label: "Target Finance  Date",
       type: "week",
       key: "targetFinanceDate",
+      filterType: "date",
       inForm: false,
       inTable: false,
       inEdit: true,

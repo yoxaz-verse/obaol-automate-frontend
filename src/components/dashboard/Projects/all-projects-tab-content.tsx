@@ -23,7 +23,7 @@ interface ProjectTabContentProps {
   currentTable: string;
   tableConfig: any;
   user: any;
-  selectedLocation?: string | null; // Add selectedLocation
+  additionalParams?: Record<string, any>; // Accept additional filters
 }
 
 interface Option {
@@ -31,23 +31,12 @@ interface Option {
   value: string;
 }
 
-interface FormField {
-  label: string;
-  type: string;
-  key: string;
-  inForm: boolean;
-  inTable: boolean;
-  values?: Option[];
-  accept?: string;
-  multiple?: boolean;
-}
-
 const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   selectedTab,
   currentTable,
   tableConfig,
   user,
-  selectedLocation,
+  additionalParams = {},
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
 
@@ -68,12 +57,17 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   return (
     <QueryComponent
       api={apiRoutesByRole[currentTable]}
-      queryKey={[currentTable, selectedLocation, apiRoutesByRole[currentTable]]}
+      queryKey={[
+        currentTable,
+        selectedTab,
+        additionalParams,
+        apiRoutesByRole[currentTable],
+      ]}
       page={1}
       limit={100}
       additionalParams={{
+        ...additionalParams,
         status: selectedTab,
-        location: selectedLocation,
       }}
     >
       {(data: any, refetch) => {

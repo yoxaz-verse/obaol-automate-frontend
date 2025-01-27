@@ -176,6 +176,7 @@ export interface AddModalProps {
 export interface FormField {
   label: string;
   type: string; // e.g., "text", "email", "select", "multiselect", "file", "textarea"
+  filterType?: string;
   key: string;
   inForm: boolean;
   inEdit?: boolean;

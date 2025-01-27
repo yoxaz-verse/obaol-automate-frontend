@@ -206,7 +206,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
               ))}
             </Tabs>
           ) : (
-            <p>No project statuses found.</p>
+            <p>No Activity</p>
           )}
         </div>
 

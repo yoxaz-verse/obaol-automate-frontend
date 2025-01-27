@@ -12,50 +12,48 @@ import {
 } from "@nextui-org/react";
 import ProjectTabContent from "@/components/dashboard/Projects/all-projects-tab-content";
 import { useQuery } from "@tanstack/react-query";
-import { getData, postData } from "@/core/api/apiHandler";
-import {
-  projectStatusRoutes,
-  locationRoutes,
-  projectRoutes,
-} from "@/core/api/apiRoutes";
+import { postData } from "@/core/api/apiHandler";
+import { projectRoutes } from "@/core/api/apiRoutes";
 import AddProject from "@/components/dashboard/Projects/add-projects";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import { Status } from "@/data/interface-data";
 
-const refetchData = () => {
-  // Implement refetch logic if necessary
-};
 export default function ProjectsPage() {
-  const [currentTable, setCurrentTable] = useState<string>("");
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [currentTable, setCurrentTable] = useState<string>(""); // For tabs
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const { user } = useContext(AuthContext);
 
   // Fetch project counts by status using the count-by-status API
   const { data: projectCountsResponse, isLoading: isProjectCountsLoading } =
     useQuery({
-      queryKey: ["projectCounts", selectedLocation],
-      queryFn: () =>
-        postData(`${projectRoutes.getAll}/count-by-status`, {
-          location: selectedLocation,
-        }),
+      queryKey: ["projectCounts", filters], // Include filters in queryKey
+      queryFn: async () => {
+        console.log("Fetching project counts with filters:", filters); // Debugging filters
+        const response = await postData(
+          `${projectRoutes.getAll}/count-by-status`,
+          {
+            filters, // Pass filters to the API
+          }
+        );
+        return response;
+      },
+      staleTime: 5000, // Optional: Cache for 5 seconds
     });
 
-  // Convert object to array
+  // Convert object to array for easier rendering
   const projectCounts: Status[] = projectCountsResponse
-    ? Object.values(projectCountsResponse.data.data)
+    ? Object.values(projectCountsResponse?.data?.data || [])
     : [];
 
-  // Fetch locations using react-query
-  const { data: locationsResponse, isLoading: isLocationsLoading } = useQuery({
-    queryKey: ["locations"],
-    queryFn: () => getData(locationRoutes.getAll),
-  });
-
   const tableConfig = { ...initialTableConfig };
-  const locations = locationsResponse?.data?.data?.data;
   const current = "projects";
+
+  // Update filters from AddProject
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+  };
 
   return (
     <div className="flex justify-center min-h-screen bg-gray-100 p-4">
@@ -64,7 +62,7 @@ export default function ProjectsPage() {
         {user?.role === "Admin" && (
           <BulkAdd
             apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
-            refetchData={refetchData}
+            refetchData={() => {}} // Placeholder for refetch logic if needed
             currentTable={"Projects"}
           />
         )}
@@ -75,40 +73,10 @@ export default function ProjectsPage() {
               currentTable={current}
               formFields={tableConfig[current]}
               apiEndpoint={apiRoutesByRole[current]}
-              refetchData={refetchData}
+              refetchData={() => {}} // Placeholder for refetch logic if needed
+              onFiltersUpdate={handleFiltersUpdate} // Pass callback to AddProject
             />
           )}
-          <div className="my-4 flex justify-end">
-            {/* Location Filter */}
-            {!isLocationsLoading && locations ? (
-              <Select
-                name="location"
-                label="Filter by Location"
-                placeholder="Select Location"
-                className="py-2 border rounded-md w-full max-w-sm"
-                selectedKeys={
-                  selectedLocation ? new Set([selectedLocation]) : new Set()
-                }
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0];
-                  if (typeof selectedKey === "string") {
-                    setSelectedLocation(selectedKey);
-                  }
-                }}
-              >
-                <SelectItem key={""} value={undefined}>
-                  All
-                </SelectItem>
-                {locations.map((location: { _id: string; name: string }) => (
-                  <SelectItem key={location._id} value={location._id}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </Select>
-            ) : (
-              <Spinner label="Loading locations" />
-            )}
-          </div>
           {isProjectCountsLoading ? (
             <Spinner
               label={`Loading ${current}`}
@@ -126,7 +94,7 @@ export default function ProjectsPage() {
                   currentTable={current}
                   tableConfig={tableConfig}
                   user={user}
-                  selectedLocation={selectedLocation}
+                  additionalParams={filters} // Pass filters to ProjectTabContent
                 />
               </Tab>
 
@@ -137,13 +105,14 @@ export default function ProjectsPage() {
                     title={
                       <div className="flex items-center space-x-2">
                         <span>{status.status}</span>
-                        {status.count ? (
+                        {status.count > 0 &&
+                        Object.keys(filters).length === 0 ? (
                           <Chip size="sm" color="primary">
                             {status.count}
                           </Chip>
                         ) : (
                           ""
-                        )}{" "}
+                        )}
                       </div>
                     }
                   >
@@ -152,7 +121,7 @@ export default function ProjectsPage() {
                       currentTable={current}
                       tableConfig={tableConfig}
                       user={user}
-                      selectedLocation={selectedLocation}
+                      additionalParams={filters} // Pass filters to ProjectTabContent
                     />
                   </Tab>
                 )

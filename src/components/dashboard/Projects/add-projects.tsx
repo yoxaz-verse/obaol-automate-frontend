@@ -1,5 +1,6 @@
 "use client";
 import AddModal from "@/components/CurdTable/add-model";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import { getData } from "@/core/api/apiHandler";
 import {
   adminRoutes,
@@ -14,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
 type AddProjectProps = {
+  onFiltersUpdate: (filters: Record<string, any>) => void; // Add callback prop
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;
@@ -26,6 +28,7 @@ function AddProject({
   formFields,
   apiEndpoint,
   refetchData,
+  onFiltersUpdate,
   params,
 }: AddProjectProps) {
   // Fetch related data for dropdowns
@@ -60,7 +63,6 @@ function AddProject({
 
   // Extract data or set as empty arrays
   const customers = customersResponse?.data.data.data;
-  console.log(formFields);
   const admins = adminsResponse?.data?.data.data;
   const managers = managersResponse?.data?.data.data;
   const projectStatuses = projectStatusesResponse?.data?.data.data;
@@ -125,6 +127,8 @@ function AddProject({
       field.key === "location" ? { ...field, values: locationValues } : field
     );
   }
+  console.log(formFields);
+
   return (
     <div>
       {customers &&
@@ -133,12 +137,20 @@ function AddProject({
       projectType &&
       location && //
       admins ? (
-        <AddModal
-          currentTable={currentTable}
-          formFields={formFields} // Pass the updated formFields
-          apiEndpoint={apiEndpoint}
-          refetchData={refetchData}
-        />
+        <div className="flex items-center justify-between gap-3">
+          {" "}
+          <AddModal
+            currentTable={currentTable}
+            formFields={formFields} // Pass the updated formFields
+            apiEndpoint={apiEndpoint}
+            refetchData={refetchData}
+          />
+          <DynamicFilter
+            currentTable={currentTable}
+            formFields={formFields}
+            onApply={onFiltersUpdate} // Pass the callback to DynamicFilter
+          />
+        </div>
       ) : (
         "Allocating Add Model"
       )}{" "}

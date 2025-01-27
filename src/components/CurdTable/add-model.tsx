@@ -41,10 +41,7 @@ const AddModal: React.FC<AddModalProps> = ({
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
-
   const [loading, setLoading] = useState(false);
-  const [selectedManagers, setSelectedManagers] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [uppy, setUppy] = useState<Uppy | null>(null);
 
   useEffect(() => {
@@ -81,8 +78,6 @@ const AddModal: React.FC<AddModalProps> = ({
   const closeModal = () => {
     setOpen(false);
     setFormData({});
-    setSelectedManagers([]);
-    setSelectedTypes([]);
     uppy?.clear(); // Reset Uppy instance
   };
 

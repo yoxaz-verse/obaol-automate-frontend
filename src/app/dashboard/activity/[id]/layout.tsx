@@ -13,17 +13,6 @@ export default function ActivityIdLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  function viewActivityDetails(data: any) {
-    console.log(data);
-    router.push(`/dashboard/activity/${data.id}`);
-  }
-  const [verifyactivity, setVerifyActivity] = useState(false);
-  function verifyActivity(data: any) {
-    console.log(data);
-    setVerifyActivity(true);
-  }
-  const tabs = ["Status 1", "Status 2", "Status 3", "Status 4"];
   return (
     <>
       <div className="w-[95%] p-8">

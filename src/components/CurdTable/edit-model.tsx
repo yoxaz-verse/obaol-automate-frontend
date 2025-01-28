@@ -455,7 +455,7 @@ const EditModal: React.FC<EditModalProps> = ({
                 uppy={uppyRef.current}
                 hideUploadButton
                 proudlyDisplayPoweredByUppy={false}
-                note="Only image and document files are allowed."
+                note="Only image and document files are allowed." //Translate
               />
             )}
             {/* Display existing image or file */}
@@ -470,7 +470,7 @@ const EditModal: React.FC<EditModalProps> = ({
                     rel="noopener noreferrer"
                     className="text-blue-500 underline"
                   >
-                    View PDF
+                    View PDF {/* Translate */}
                   </a>
                 ) : typeof formData[field.key] === "string" ? (
                   <Image
@@ -509,7 +509,7 @@ const EditModal: React.FC<EditModalProps> = ({
         className="flex items-center justify-center gap-2 w-[100px] bg-yellow-600 rounded-xl text-white h-[38px] text-sm"
         onClick={openModal}
       >
-        Edit
+        Edit{/* Translate */}
         <TbEdit className="hover:text-yellow-300" />
       </button>
 
@@ -517,7 +517,8 @@ const EditModal: React.FC<EditModalProps> = ({
       <Modal isOpen={open} onClose={closeModal} size="lg">
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
-            Edit {capitalize(currentTable)}
+            Edit {/* Translate */}
+            {/* {capitalize(currentTable)} */}
           </ModalHeader>
 
           {fetchedData && formData != null ? (

@@ -31,7 +31,7 @@ export default function CommonTable({
     (item: UserData, columnKey: React.Key) => {
       const column = (columns || []).find((col) => col.uid === columnKey); // Fallback to empty array
       if (!column) {
-        return <span>Column not found</span>; // Handle case when column is not found
+        return <span>Column not found</span>; //Translate // Handle case when column is not found
       }
 
       const cellValue = item[columnKey as keyof UserData];
@@ -114,7 +114,7 @@ export default function CommonTable({
               />
             );
           }
-          return <span>No Image</span>;
+          return <span>No Image</span>; //Translate
 
         case "action":
           return (
@@ -149,7 +149,7 @@ export default function CommonTable({
           );
 
         default:
-          return cellValue || "N/A";
+          return cellValue || "N/A"; //Translate
       }
     },
     [viewModal, deleteModal, editModal, columns, otherModal] // Ensure columns is included in the dependency array
@@ -172,7 +172,7 @@ export default function CommonTable({
 
   return (
     <Table
-      aria-label="Table with custom actions"
+      aria-label="Table with custom actions" //Translate
       bottomContent={
         <div className="flex w-full justify-center">
           <Pagination

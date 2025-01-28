@@ -9,7 +9,6 @@ import { locationRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole } from "@/utils/tableValues";
 
 export default function Essentials() {
-
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
@@ -18,25 +17,25 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Title title="Project" />{" "}
+          <Title title="Project" /> {/* Translate */}
           <BulkAdd
             apiEndpoint={`${apiRoutesByRole["projects"]}/bulk`}
             refetchData={refetchData}
-            currentTable={"Projects"}
+            currentTable={"Projects"} // Translate
           />
           <Spacer y={12} />
           <Title title="Activity" />
           <BulkAdd
             apiEndpoint={`${apiRoutesByRole["activity"]}/bulk`}
             refetchData={refetchData}
-            currentTable={"Activities"}
+            currentTable={"Activities"} // Translate
           />{" "}
           <Spacer y={12} />
           <Title title="Location" />
           <BulkAdd
             apiEndpoint={`${locationRoutes.getAll}/bulk`}
             refetchData={refetchData} // Function to refetch activities list
-            currentTable={"Locations"}
+            currentTable={"Locations"} // Translate
           />
           <Spacer y={12} />
         </div>

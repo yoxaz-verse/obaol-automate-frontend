@@ -40,6 +40,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
             <div className="flex justify-between w-[90%] mt-4 mb-8">
               <div className="flex flex-col w-[50%]">
                 <div className="text-sm font-medium">Assignment Week</div>
+                {/* Translate */}
                 <div className="text-xs pt-2">
                   {new Date(data?.assignmentDate).toLocaleDateString("en-GB", {
                     year: "numeric",
@@ -50,6 +51,7 @@ const ProjectDetailComponent = ({ data }: { data: any }) => {
               </div>
               <div className="flex flex-col w-[50%]">
                 <div className="text-sm font-medium">Scheda Radio Week</div>
+                {/* Translate */}
                 <div className="text-xs pt-2">
                   {new Date(data?.schedaRadioDate).toLocaleDateString("en-GB", {
                     year: "numeric",

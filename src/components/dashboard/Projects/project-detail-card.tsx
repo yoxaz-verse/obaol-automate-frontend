@@ -25,6 +25,7 @@ const ProjectDetailCard = ({ data }: { data: any }) => {
               {data?.customer?.name ?? "Customer Name"}
             </div>
             <div className="text-[#A1A1AA] text-sm">Customer</div>
+            {/* Translate */}
           </div>
         </div>
         <div className="text-[#A1A1AA] text-sm pt-4 ">{"Description"}</div>
@@ -39,6 +40,7 @@ const ProjectDetailCard = ({ data }: { data: any }) => {
             <CardBody>
               {/* <Avatar alt="avatar" size="sm" /> */}
               <div className=" text-sm">Project Manager</div>
+              {/* Translate */}
               <Spacer y={1} />
               <div className="pl-2">{/* <FiEdit /> */}</div>{" "}
               <div className="flex flex-col ">

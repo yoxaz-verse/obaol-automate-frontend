@@ -45,27 +45,27 @@ export const showToastMessage = ({
 
 export const sidebarOptions = [
   {
-    name: "Dashboard",
+    name: "Dashboard", //Translate
     icon: <MdDashboard />,
     link: "/dashboard",
   },
   {
-    name: "Projects",
+    name: "Projects", //Translate
     icon: <RiBuildingLine />,
     link: "/dashboard/projects",
   },
   {
-    name: "Users",
+    name: "Users", //Translate
     icon: <FiUsers />,
     link: "/dashboard/users",
   },
   {
-    name: "Essentials",
+    name: "Essentials", //Translate
     icon: <FiFileText />,
     link: "/dashboard/essentials",
   },
   {
-    name: "Bulk Add",
+    name: "Bulk Add", //Translate
     icon: <RiFileAddLine />,
     link: "/dashboard/bulk",
   },

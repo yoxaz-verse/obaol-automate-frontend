@@ -146,7 +146,7 @@ const TimeSheetTabContent: React.FC<TimeSheetTabContentProps> = ({
                     )}
                   />
                 ) : (
-                  <div>No data available</div>
+                  <div>No data available</div> //Translates
                 )}
               </>
             );

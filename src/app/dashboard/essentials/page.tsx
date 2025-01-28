@@ -21,14 +21,14 @@ export default function Essentials() {
 
   // Define static tabs
   const activityTabs = [
-    { key: "activityStatus", title: "Activity Status" },
-    { key: "activityType", title: "Activity Types" },
+    { key: "activityStatus", title: "Activity Status" }, // Translate Title
+    { key: "activityType", title: "Activity Types" }, // Translate Title
   ];
 
   const locationTabs = [
-    { key: "location", title: "Location" },
-    { key: "locationManager", title: "Location Managers" },
-    { key: "locationType", title: "Location Types" },
+    { key: "location", title: "Location" }, // Translate Title
+    { key: "locationManager", title: "Location Managers" }, // Translate Title
+    { key: "locationType", title: "Location Types" }, // Translate Title
   ];
 
   // Optionally, add dynamic tabs based on fetched data
@@ -42,9 +42,9 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Title title="Location" />
+          <Title title="Location" /> {/* Translate */}
           <Tabs
-            aria-label="Location Tabs"
+            aria-label="Location Tabs" // Translate
             selectedKey={locationTab}
             onSelectionChange={(key) => setLocationTab(key as string)}
           >
@@ -56,7 +56,7 @@ export default function Essentials() {
                     <BulkAdd
                       apiEndpoint={`${locationRoutes.getAll}/bulk`}
                       refetchData={refetchData} // Function to refetch activities list
-                      currentTable={"Locations"}
+                      currentTable={"Locations"} // Translate
                     />
                     <EssentialTabContent essentialName="location" />
                   </>
@@ -89,9 +89,9 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Project" />{" "}
+          <Title title="Project" /> {/* Translate */}
           <Tabs
-            aria-label="Project Tabs"
+            aria-label="Project Tabs" // Translate
             selectedKey={projectTab}
             onSelectionChange={(key) => setProjectTab(key as string)}
           >
@@ -107,7 +107,7 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Service Company" />{" "}
+          <Title title="Service Company" /> {/* Translate */}
           <EssentialTabContent essentialName="serviceCompany" />
           <Spacer y={4} />
         </div>

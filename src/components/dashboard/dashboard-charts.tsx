@@ -8,12 +8,14 @@ const DashboardCharts = () => {
     <div className="w-full">
       <div>
         <div className="text-xl font-semibold py-3">Heading</div>
+        {/* Translate */}
         <div className="py-5">
           <Card className="p-2">
             <GrowthTypeChart />
           </Card>
         </div>
         <div className="text-xl font-semibold py-3">Heading</div>
+        {/* Translate */}
 
         <div>
           <Card className="p-2">

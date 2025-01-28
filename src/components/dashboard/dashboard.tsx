@@ -23,10 +23,10 @@ const Dashboard: NextPage = () => {
   const [currentTable, setCurrentTable] = useState(""); // Default tab
   const tabs = [
     { key: "", title: "All" },
-    { key: "isPending", title: "Pending" },
-    { key: "isAccepted", title: "Accepted" },
-    { key: "isResubmitted", title: "Resubmitted" },
-    { key: "isRejected", title: "Rejected" },
+    { key: "isPending", title: "Pending" }, // Translate Title
+    { key: "isAccepted", title: "Accepted" }, // Translate Title
+    { key: "isResubmitted", title: "Resubmitted" }, // Translate Title
+    { key: "isRejected", title: "Rejected" }, // Translate Title
     // Add more tabs if needed, e.g., "Archived Projects"
   ]; // Convert object to array
 
@@ -73,7 +73,7 @@ const Dashboard: NextPage = () => {
       <div className="px-4 py-5 ">
         {(user?.role === "ActivityManager" || user?.role === "Worker") && (
           <Tabs
-            aria-label="TimeSheet Tabs"
+            aria-label="TimeSheet Tabs" // Translate
             selectedKey={currentTable}
             onSelectionChange={(key) => setCurrentTable(key as string)}
           >
@@ -107,19 +107,19 @@ const Dashboard: NextPage = () => {
           <div className="flex flex-col"></div>
           <div className="flex flex-col">
             <div className="text-[#5F5F5F] font-medium pt-5">
-              Recent Projects
+              Recent Projects{/* Translate */}
             </div>
             <div className="pb-5">
               <DashboardTile
                 type="percentage charts"
                 stats={openPercentage}
-                heading="Open Projects"
+                heading="Open Projects" // Translate
               />
             </div>
             <DashboardTile
               type="percentage charts"
               stats={closedPercentage}
-              heading="Closed Projects"
+              heading="Closed Projects" // Translate
             />{" "}
           </div>
         </div>

@@ -24,11 +24,11 @@ const ViewActivityById: NextPage = () => {
   const { user } = useContext(AuthContext);
   const [currentTable, setCurrentTable] = useState(""); // Default tab
   const tabs = [
-    { key: "", title: "All" },
-    { key: "isPending", title: "Pending" },
-    { key: "isAccepted", title: "Accepted" },
-    { key: "isResubmitted", title: "Resubmitted" },
-    { key: "isRejected", title: "Rejected" },
+    { key: "", title: "All" }, // Translate Title
+    { key: "isPending", title: "Pending" }, // Translate Title
+    { key: "isAccepted", title: "Accepted" }, // Translate Title
+    { key: "isResubmitted", title: "Resubmitted" }, // Translate Title
+    { key: "isRejected", title: "Rejected" }, // Translate Title
     // Add more tabs if needed, e.g., "Archived Projects"
   ];
 
@@ -60,7 +60,7 @@ const ViewActivityById: NextPage = () => {
                   <Card className="flex ">
                     <CardBody className=" flex-row justify-evenly items-center">
                       <div className="flex items-center gap-2">
-                        Edit:{" "}
+                        Edit: {/* Translate */}
                         <EditActivityCard
                           currentTable={"activity"}
                           formFields={tableConfig["activity"]}
@@ -70,10 +70,10 @@ const ViewActivityById: NextPage = () => {
                         />
                       </div>{" "}
                       <div className="flex items-center gap-2">
-                        Status:{" "}
+                        Status: {/* Translate */}
                         {filteredStatusOptions && (
                           <StatusUpdate
-                            currentEntity="Activity"
+                            currentEntity="Activity" // Translate
                             statusOptions={filteredStatusOptions}
                             apiEndpoint={apiRoutesByRole["activity"]}
                             recordId={data._id}

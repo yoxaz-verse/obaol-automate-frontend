@@ -53,7 +53,7 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
     } else {
       showToastMessage({
         type: "info",
-        message: `No changes made to ${currentEntity} status`,
+        message: `No changes made to ${currentEntity} status`, //Translate
         position: "top-right",
       });
     }
@@ -91,7 +91,7 @@ const StatusUpdate: React.FC<StatusUpdateProps> = ({
           isLoading={loading}
           disabled={loading}
         >
-          {loading ? "Updating..." : "Update"}
+          {loading ? "Updating..." : "Update"} {/* Translate */}
         </Button>
       )}
     </div>

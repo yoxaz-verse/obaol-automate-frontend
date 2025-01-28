@@ -145,7 +145,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
       <Card>
         <div className="flex justify-between w-full p-4">
           <Button color="primary" onClick={openModal}>
-            Add Files
+            Add Files{/* Translate */}
           </Button>
         </div>
         <CardBody className="w-full">
@@ -157,6 +157,9 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
           >
             {(data: any) => {
               if (!data || !data.files) return <div>No files found.</div>;
+              {
+                /* Translate */
+              }
 
               setTotalPages(data?.totalPages || 1);
 
@@ -178,7 +181,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                     ([status, files]: [string, any[]]) => (
                       <div key={status} className="my-4">
                         <h2 className="text-lg font-semibold text-gray-700 capitalize">
-                          {status} Files
+                          {status} Files{/* Translate */}
                         </h2>
                         <div className="border p-2 rounded-lg">
                           {files.map((file) => {
@@ -206,7 +209,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                                       rel="noopener noreferrer"
                                       className="hover:text-blue-500 "
                                     >
-                                      File Format
+                                      File Format{/* Translate */}
                                     </a>
                                   )}
                                   <div className="text-sm text-center  text-gray-500">
@@ -237,7 +240,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                                     download={file.file.fileName}
                                   >
                                     <Button color="success" size="sm">
-                                      Download
+                                      Download {/* Translate */}
                                     </Button>
                                   </a>
                                   {user?.role === "Admin" && (
@@ -248,7 +251,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
                                         deleteMutation.mutate(file.file._id)
                                       }
                                     >
-                                      Delete
+                                      Delete {/* Translate */}
                                     </Button>
                                   )}
                                 </div>
@@ -274,7 +277,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
 
       <Modal isOpen={open} onClose={() => setOpen(false)}>
         <ModalContent>
-          <ModalHeader>Upload Files</ModalHeader>
+          <ModalHeader>Upload Files</ModalHeader> {/* Translate */}
           <ModalBody>
             {uppyInstance.current && (
               <Dashboard
@@ -293,7 +296,7 @@ const ActivityFileCard: React.FC<ActivityFileCardProps> = ({
           </ModalBody>
           <ModalFooter>
             <Button color="primary" type="submit" onClick={handleUpload}>
-              Done
+              Done {/* Translate */}
             </Button>
           </ModalFooter>
         </ModalContent>

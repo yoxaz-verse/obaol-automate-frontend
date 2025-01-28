@@ -69,19 +69,20 @@ export default function DeleteModal({
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Delete Confirmation
+                Delete Confirmation{/* Translate */}
               </ModalHeader>
               <ModalBody>Are you sure you want to delete {name}?</ModalBody>
+              {/* Translate */}
               <ModalFooter>
                 <Button
                   color="danger"
                   onPress={handleDelete}
                   isLoading={loading}
                 >
-                  Delete
+                  Delete{/* Translate */}
                 </Button>
                 <Button color="primary" variant="light" onPress={onClose}>
-                  Cancel
+                  Cancel {/* Translate */}
                 </Button>
               </ModalFooter>
             </>

@@ -518,7 +518,7 @@ const AddModal: React.FC<AddModalProps> = ({
       <Modal isOpen={open} onClose={closeModal} size="lg">
         <ModalContent>
           <ModalHeader className="flex flex-col ">
-            Add New {currentTable}
+            Add New {currentTable} {/* Translate */}
           </ModalHeader>
           <ModalBody>
             <form onSubmit={handleSubmit}>
@@ -544,6 +544,7 @@ const AddModal: React.FC<AddModalProps> = ({
             {missingFields.length > 0 && (
               <div className="mt-4">
                 <span>Please fill:</span>
+                {/* Translate */}
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {missingFields.map((field, index) => (
                     <Chip key={index} color="warning" variant="bordered">

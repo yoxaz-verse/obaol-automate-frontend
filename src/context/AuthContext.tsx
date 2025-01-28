@@ -64,9 +64,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           // Redirection handled in LoginComponent
         } else {
           throw new Error("Failed to retrieve user data");
+          {
+            /* Translate */
+          }
         }
       } else {
         throw new Error(response.data.message || "Login failed");
+        {
+          /* Translate */
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -117,6 +123,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         }
       } catch (error) {
         console.error("Auth check error:", error);
+        {
+          /* Translate */
+        }
+
         setAuth({
           isAuthenticated: false,
           user: null,

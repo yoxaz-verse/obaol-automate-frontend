@@ -152,7 +152,7 @@ function AddProject({
           />
         </div>
       ) : (
-        "Allocating Add Model"
+        "Allocating Add Model" //Translate
       )}{" "}
     </div>
   );

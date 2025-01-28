@@ -36,7 +36,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     toast.loading(`Fetching API for ${queryKey.join(", ")}`, {
       position: "top-right",
     });
-    return <Spinner label="Loading..." color="primary" labelColor="primary" />;
+    return <Spinner label="Loading..." color="primary" labelColor="primary" />; //Translate
   }
 
   if (isError) {

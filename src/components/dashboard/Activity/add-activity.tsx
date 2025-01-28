@@ -115,7 +115,7 @@ function AddActivity({
           additionalVariable={additionalVariable}
         />
       ) : (
-        "Allocating Add Model"
+        "Allocating Add Model" //Translate
       )}{" "}
     </div>
   );

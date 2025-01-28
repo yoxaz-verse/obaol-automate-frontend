@@ -212,6 +212,7 @@ export default function DetailsModal({
             <>
               <ModalHeader className="flex flex-col gap-1">
                 {currentTable && toTitleCase(currentTable)} Details
+                {/* Translate */}
               </ModalHeader>
               <ModalBody className="space-y-4 overflow-y-auto max-h-[90vh] ">
                 {/* Display User Details */}
@@ -227,9 +228,10 @@ export default function DetailsModal({
                           {data[key].map((manager: any, index: number) => (
                             <div key={index}>
                               <Spacer y={3} />
-                              <strong>Manager Name:</strong>{" "}
+                              <strong>Manager Name:</strong> {/* Translate */}
                               {manager.manager?.name || "N/A"} <br />
                               <strong>Code:</strong> {manager.code || "N/A"}
+                              {/* Translate */}
                             </div>
                           ))}
                         </div>
@@ -247,7 +249,7 @@ export default function DetailsModal({
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" variant="light" onPress={onClose}>
-                  Close
+                  Close{/* Translate */}
                 </Button>
               </ModalFooter>
             </>

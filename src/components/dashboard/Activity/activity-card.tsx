@@ -42,7 +42,9 @@ const ActivityDetailCard = ({ data }: any) => {
             {data.description}
           </div>
           <div className=" text-md pt-4 ">Type: {data?.type?.name}</div>
+          {/* Translate */}
           <div className=" text-md  pb-8">Status: {data?.status?.name}</div>
+          {/* Translate */}
           <Card className="bg-[#F8F8F8] border-1 border-[#E9E9E9] flex justify-center items-center text-[#454545]">
             <div className="flex justify-between w-[90%] mt-4 mb-8">
               {data.actualDate && (
@@ -50,6 +52,7 @@ const ActivityDetailCard = ({ data }: any) => {
                   <>
                     {" "}
                     <div className="text-sm font-medium">Actual Date</div>
+                    {/* Translate */}
                     <div className="text-xs pt-2">
                       {new Date(data?.actualDate).toLocaleDateString("en-GB", {
                         year: "numeric",
@@ -63,6 +66,7 @@ const ActivityDetailCard = ({ data }: any) => {
               {data.forecastDate && (
                 <div className="flex flex-col w-[50%]">
                   <div className="text-sm font-medium">Forecast Date</div>
+                  {/* Translate */}
                   <div className="text-xs pt-2">
                     {" "}
                     {data?.forecastDate
@@ -77,6 +81,8 @@ const ActivityDetailCard = ({ data }: any) => {
               {data.targetFinanceDate && (
                 <div className="flex flex-col w-[50%]">
                   <div className="text-sm font-medium">Target Finance Date</div>
+                  {/* Translate */}
+                  {/* Translate */}
                   <div className="text-xs pt-2">
                     {data?.targetFinanceDate
                       ? getWeekFormat(new Date(data?.targetFinanceDate))
@@ -87,7 +93,7 @@ const ActivityDetailCard = ({ data }: any) => {
               {data.targetOperationDate && (
                 <div className="w-[50%]">
                   <div className="text-sm font-medium">
-                    Target Operation Date
+                    Target Operation Date{/* Translate */}
                   </div>
                   <div className="text-xs pt-2">
                     {data?.targetOperationDate

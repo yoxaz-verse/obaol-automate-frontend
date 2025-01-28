@@ -63,7 +63,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         value.start &&
         !value.end
       ) {
-        alert(`${key} has an invalid date range.`);
+        alert(`${key} has an invalid date range.`); // Translate
         return false;
       }
     }
@@ -98,7 +98,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
 
     if (isValidFilters()) {
       onApply(payload); // Send filters to parent
-      console.log("Payload to Send:", payload);
+      console.log("Payload to Send:", payload); // Translate
     }
   };
 
@@ -111,7 +111,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <Input
             type="text"
-            placeholder={`Search by ${label}`}
+            placeholder={`Search by ${label}`} // Translate
             value={filters[key] || ""}
             onChange={(e) => handleFilterChange(key, e.target.value)}
           />
@@ -120,7 +120,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <Select
             label={label}
-            placeholder={`Select ${label}`}
+            placeholder={`Select ${label}`} // Translate
             selectedKeys={filters[key] ? new Set([filters[key]]) : new Set()}
             onSelectionChange={(keys) => {
               const selectedKey = Array.from(keys)[0];
@@ -138,7 +138,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <Select
             label={label}
-            placeholder={`Select ${label}`}
+            placeholder={`Select ${label}`} // Translate
             selectionMode="multiple"
             selectedKeys={filters[key] ? new Set(filters[key]) : new Set()}
             onSelectionChange={(keys) =>
@@ -231,7 +231,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                {capitalize(currentTable)} Filter
+                {capitalize(currentTable)} Filter{/* Translate */}
               </ModalHeader>
               <ModalBody>
                 {formFields.map((field) => (
@@ -242,7 +242,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Close
+                  Close{/* Translate */}
                 </Button>
                 <Button
                   color="primary"
@@ -251,7 +251,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                     onClose();
                   }}
                 >
-                  Apply
+                  Apply{/* Translate */}
                 </Button>
               </ModalFooter>
             </>

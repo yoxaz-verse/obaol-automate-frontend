@@ -37,11 +37,13 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
             <CardHeader className="font-medium text-black flex items-center gap-2 text-[20px]">
               {data.icon}
               View {data.name}
+              {/* Translate */}
             </CardHeader>
             <Link href={data.link || "#"}>
               <CardBody className="rounded-xl border-1 hover:text-white hover:bg-primary duration-300 border-primary my-3 h-16 flex justify-center w-full items-center">
                 <div className="text-xs text-center">
                   Tap to View {data.name}
+                  {/* Translate */}
                 </div>
               </CardBody>
             </Link>
@@ -82,6 +84,7 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
               <div className="text-start w-full font-medium">{heading}</div>
               <div className="flex justify-between w-full">
                 <div className="">Statistics</div>
+                {/* Translate */}
                 <div className="text-green-500">{stats}</div>
               </div>
             </CardHeader>

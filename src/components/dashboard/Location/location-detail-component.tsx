@@ -40,6 +40,7 @@ const LocationDetailComponent = ({ data }: { data: any }) => {
               <div className="flex justify-between w-[90%] mt-4 mb-8">
                 <div className="flex flex-col w-[50%]">
                   <div className="text-sm font-medium">Location</div>
+                  {/* Translate */}
                   <div className="text-xs pt-2">
                     {" "}
                     {data.location.city && data.location.city}

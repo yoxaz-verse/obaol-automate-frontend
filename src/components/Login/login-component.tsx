@@ -24,7 +24,13 @@ const LoginComponent = () => {
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
 
-  const roles = ["ActivityManager","ProjectManager", "Admin", "Customer", "Worker"];
+  const roles = [
+    "ActivityManager",
+    "ProjectManager",
+    "Admin",
+    "Customer",
+    "Worker",
+  ];
   const [role, setRole] = useState("Admin");
   const router = useRouter();
   const { isAuthenticated, loading, login } = useContext(AuthContext);
@@ -63,7 +69,7 @@ const LoginComponent = () => {
         setIsLoading(false);
         showToastMessage({
           type: "error",
-          message: error.response?.data?.message || "Login failed",
+          message: error.response?.data?.message || "Login failed", //Translate
           position: "top-right",
         });
       }
@@ -94,10 +100,12 @@ const LoginComponent = () => {
       >
         <div>
           <h3 className="text-xl lg:text-2xl py-2 font-bold text-center">
-            Login with your work email
+            Login with your work email{/* Translate */}
           </h3>
           <h3 className="text-sm py-2 text-[#788BA5]">
             Use your work email to log in to your team workspace.
+            {/* Translate */}
+            {/* Translate */}
           </h3>
         </div>
         <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>

@@ -60,14 +60,15 @@ const TopBar = ({ username, role }: TopbarProps) => {
       {/* Title Section */}
       <div className="hidden md:block">
         <div className="text-lg font-bold">
-          {role.charAt(0).toUpperCase() + role.slice(1)} Panel
+          {role.charAt(0).toUpperCase() + role.slice(1)} Panel{/* Translate */}
         </div>
         <div className="text-sm">
           {new Date().getHours() < 12
-            ? "Good Morning"
+            ? "Good Morning" //Translate
             : new Date().getHours() < 18
-            ? "Good Afternoon"
+            ? "Good Afternoon" //Translate
             : "Good Evening"}
+          {/* Translate */}
         </div>
       </div>
 
@@ -100,6 +101,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
             <DropdownItem key="profile">
               <div>
                 Signed in as <strong>{username}</strong>
+                {/* Translate */}
               </div>
             </DropdownItem>
             <DropdownItem
@@ -114,7 +116,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
                 }
               }}
             >
-              Log Out
+              Log Out{/* Translate */}
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>

@@ -135,7 +135,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                 )}
               />
             ) : (
-              <div>No data available</div>
+              <div>No data available</div> // Translate
             )}
           </>
         );

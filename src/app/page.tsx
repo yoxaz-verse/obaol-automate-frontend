@@ -75,6 +75,7 @@ export default function Home() {
               ? "Finishing up..."
               : finalDestination}
           </Chip>
+          {/* Translate */}
         </CardFooter>
       </Card>
     </div>

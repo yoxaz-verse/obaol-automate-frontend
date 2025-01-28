@@ -18,7 +18,7 @@ const DashboardTilesComponent = ({
 
   // Map data to dashboard tiles
   const dashboardTilesData = [
-    { title: "Total Projects", data: totalProjects || 0 },
+    { title: "Total Projects", data: totalProjects || 0 }, //Translate
     ...projectCounts.map((project: any) => ({
       title: project.status,
       data: project.count,

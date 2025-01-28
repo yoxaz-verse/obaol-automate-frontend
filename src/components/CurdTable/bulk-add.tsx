@@ -43,8 +43,8 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
-      console.log("Data uploaded successfully!");
-      setStatusMessage("Data uploaded successfully!"); // Success toast
+      console.log("Data uploaded successfully!"); //Translate
+      setStatusMessage("Data uploaded successfully!"); // Success toast //Translate
       setStatusType("success");
       setLoading(false);
       setFile(null);
@@ -54,7 +54,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       // Handle error scenario
       setStatusType("error");
 
-      const errorMessage = error.response?.data?.message || "An error occurred";
+      const errorMessage = error.response?.data?.message || "An error occurred"; //Translate
 
       let detailedErrorMessage = errorMessage;
 
@@ -85,8 +85,8 @@ const BulkAdd: React.FC<BulkAddProps> = ({
 
   const handleUpload = async () => {
     if (!file) {
-      setStatusMessage("Please select a file before uploading.");
-      setStatusType("error");
+      setStatusMessage("Please select a file before uploading."); //Translate
+      setStatusType("error"); //Translate
       return;
     }
 
@@ -139,11 +139,11 @@ const BulkAdd: React.FC<BulkAddProps> = ({
           // Call the mutate function with the prepared data
           addItem.mutate(jsonData);
         } catch (error) {
-          console.error("Error parsing the file:", error);
+          console.error("Error parsing the file:", error); //Translate
           setStatusMessage(
-            "Failed to process the file. Please check the format and try again."
+            "Failed to process the file. Please check the format and try again." //Translate
           );
-          setStatusType("error");
+          setStatusType("error"); //Translate
           setLoading(false);
         }
       }
@@ -157,8 +157,8 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       <Accordion variant="splitted">
         <AccordionItem
           key="1"
-          aria-label="Accordion 1"
-          title={`Bulk Add ${currentTable}`}
+          aria-label="Bulk Add" //Translate
+          title={`Bulk Add ${currentTable}`} //Translate
         >
           <Spacer y={1} />
           <Input
@@ -171,10 +171,10 @@ const BulkAdd: React.FC<BulkAddProps> = ({
           <Button onClick={handleUpload} disabled={!file || isLoading}>
             {isLoading ? (
               <>
-                <Spinner size="sm" /> Processing...
+                <Spinner size="sm" /> Processing...{/* Translate */}
               </>
             ) : (
-              "Process & Upload File"
+              "Process & Upload File" //Translate
             )}
           </Button>
           {statusMessage && (

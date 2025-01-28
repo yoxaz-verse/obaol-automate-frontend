@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Spinner } from "@nextui-org/react";
 import { QueryComponentProps } from "@/data/interface-data";
 
-
 function QueryComponent<T>(props: QueryComponentProps<T>) {
   const { api, queryKey, children, page, limit, search, additionalParams } =
     props;
@@ -36,6 +35,9 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
       position: "top-right",
     });
     return <div>Query Failed...</div>;
+    {
+      /* Translate */
+    }
   }
 
   toast.success("Data fetched successfully.", {

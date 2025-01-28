@@ -99,7 +99,7 @@ function EditActivity({
         //   initialData={initialValues} // Pre-fill the modal with initial values
         //   // additionalVariable={additionalVariable}
         // />
-        "Loading Edit Modal..."
+        "Loading Edit Modal..." //Translate
       )}
     </div>
   );

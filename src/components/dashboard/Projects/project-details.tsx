@@ -92,6 +92,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
     <>
       <div className="flex justify-between items-center py-5 ">
         <div className="text-lg font-bold">Project Details</div>
+        {/* Translate */}
         {/* <Button
           className="cursor-pointer"
           color="secondary"
@@ -131,6 +132,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
 
         <div className="w-full justify-between flex pt-10 pb-2 items-center">
           <div className="font-bold text-xl">Activities List</div>
+          {/* Translate */}
           {/* <AddNewActivityModal id={id} /> */}
         </div>
         <Spacer y={2} />
@@ -158,7 +160,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
             <p>
               {" "}
               <Spinner
-                label={`loading ${current} `}
+                label={`loading ${current} `} // Translate
                 color="default"
                 labelColor="foreground"
               />
@@ -206,7 +208,7 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
               ))}
             </Tabs>
           ) : (
-            <p>No Activity</p>
+            <p>No Activity</p> // Translate
           )}
         </div>
 

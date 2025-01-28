@@ -28,7 +28,7 @@ const PrivateRoute = ({
   if (loading) {
     return (
       <div className="flex h-screen justify-center items-center">
-        <p>Loading...</p>
+        <p>Loading...</p> {/* Translate */}
       </div>
     );
   }

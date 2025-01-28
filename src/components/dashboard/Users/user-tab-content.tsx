@@ -164,7 +164,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   )}
                 />
               ) : (
-                <div>No data available</div>
+                <div>No data available</div> // Translate
               )}
             </>
           );

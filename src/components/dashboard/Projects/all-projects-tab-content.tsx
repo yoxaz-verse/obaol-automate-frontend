@@ -16,7 +16,6 @@ import Link from "next/link";
 import { getData } from "@/core/api/apiHandler";
 import { projectStatusRoutes } from "@/core/api/apiRoutes";
 import { useQuery } from "@tanstack/react-query";
-import StatusUpdate from "@/components/CurdTable/status-update";
 
 interface ProjectTabContentProps {
   selectedTab?: string;
@@ -141,7 +140,7 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
                 )}
               />
             ) : (
-              <div>No data available</div>
+              <div>No data available</div> // Translate
             )}
           </>
         );

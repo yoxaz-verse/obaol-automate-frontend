@@ -63,7 +63,7 @@ export default function ProjectsPage() {
           <BulkAdd
             apiEndpoint={`${apiRoutesByRole[current]}/bulk`}
             refetchData={() => {}} // Placeholder for refetch logic if needed
-            currentTable={"Projects"}
+            currentTable={"Projects"} // Translate
           />
         )}
         <Spacer y={2} />
@@ -79,13 +79,13 @@ export default function ProjectsPage() {
           )}
           {isProjectCountsLoading ? (
             <Spinner
-              label={`Loading ${current}`}
+              label={`Loading ${current}`} // Translate
               color="default"
               labelColor="foreground"
             />
           ) : projectCounts && projectCounts.length > 0 ? (
             <Tabs
-              aria-label="Project Tabs"
+              aria-label="Project Tabs" // Translate
               selectedKey={currentTable || null}
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
@@ -128,7 +128,7 @@ export default function ProjectsPage() {
               )}
             </Tabs>
           ) : (
-            <p>No project statuses found.</p>
+            <p>No project statuses found.</p> // Translate
           )}
         </div>
       </div>

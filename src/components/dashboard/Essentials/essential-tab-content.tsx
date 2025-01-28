@@ -111,7 +111,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
               return (
                 <>
                   <AddModal
-                    currentTable={essentialName}
+                    currentTable={""}
                     formFields={formFields}
                     apiEndpoint={apiRoutesByRole[essentialName]}
                     refetchData={refetchData}
@@ -124,7 +124,7 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     viewModal={(item: any) => (
                       // Implement view modal if needed
                       <DetailsModal
-                        currentTable={essentialName}
+                        currentTable={""}
                         data={item}
                         columns={columns}
                       />

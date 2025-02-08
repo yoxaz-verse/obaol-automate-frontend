@@ -34,12 +34,11 @@ const ProjectTabContent: React.FC<ProjectTabContentProps> = ({
   selectedTab,
   currentTable,
   tableConfig,
-  user,
   additionalParams = {},
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
 
-  const { data: statusData, isLoading: statusLoading } = useQuery({
+  const { data: statusData } = useQuery({
     queryKey: ["projectStatuses"],
     queryFn: () => getData(projectStatusRoutes.getAll),
   });

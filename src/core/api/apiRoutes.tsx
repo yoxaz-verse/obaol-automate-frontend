@@ -24,6 +24,7 @@ const BASE_PATHS = {
   CUSTOMER: "/customer",
   WORKER: "/worker",
   STATUS: "/status",
+  STATUS_HISTORY: "/statusHistory",
   SUB_STATUS: "/subStatus",
 };
 
@@ -55,6 +56,7 @@ const addCustomRoutes = (
 // Define resource-specific routes using the CRUD generator
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
+export const statusHistoryRoutes = createCRUDRoutes(BASE_PATHS.STATUS_HISTORY);
 export const activityManagerRoutes = createCRUDRoutes(
   BASE_PATHS.ACTIVITY_MANAGER
 );
@@ -167,4 +169,5 @@ export const apiRoutes = {
   activity: activityRoutes,
   activityStatus: activityStatusRoutes,
   timeSheet: timeSheetRoutes,
+  statusHistory: statusHistoryRoutes,
 };

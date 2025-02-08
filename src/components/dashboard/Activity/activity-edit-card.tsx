@@ -80,13 +80,16 @@ function EditActivity({
     );
   }
 
+  console.log("formFields");
+  console.log(formFields);
+
   return (
     <div>
       {activityManagers && activityType && workers ? (
         <EditModal
           _id={initialValues._id}
           currentTable={currentTable}
-          formFields={formFields}
+          formFields={formFields.filter((field) => field.key !== "status")} // ✅ Remove status field
           apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
           refetchData={refetchData}
         />

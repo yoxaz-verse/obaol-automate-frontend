@@ -19,9 +19,11 @@ import {
   locationTypeRoutes,
 } from "@/core/api/apiRoutes";
 import DetailsModal from "@/components/CurdTable/details";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 
 const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
+  const [filters, setFilters] = React.useState<Record<string, any>>({}); // Dynamic filters
 
   const columns = generateColumns(essentialName, tableConfig);
   const { data: locationTypeResponse } = useQuery({
@@ -42,56 +44,74 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
-
+  // Update filters from AddProject
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+    console.log(updatedFilters);
+  };
   // Form fields for add/edit modal
 
   // Define columns for the data table
+  let formFields = tableConfig[essentialName];
 
+  if (essentialName === "location" && locationTypeValue) {
+    if (locationTypeValue) {
+      const locationTypeValues = locationTypeValue.map((locationType: any) => ({
+        key: String(locationType._id),
+        value: locationType.name,
+      }));
+      formFields = formFields.map((field: any) =>
+        field.key === "locationType"
+          ? { ...field, values: locationTypeValues }
+          : field
+      );
+    }
+    if (locationManagerValue) {
+      const locationManagerValues = locationManagerValue.map(
+        (locationManager: any) => ({
+          key: String(locationManager._id),
+          value: locationManager.name,
+        })
+      );
+      formFields = formFields.map((field: any) =>
+        field.key === "locationManager"
+          ? { ...field, values: locationManagerValues }
+          : field
+      );
+    }
+  }
   return (
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
+          <div className="flex items-center justify-between  gap-3">
+            {}{" "}
+            <AddModal
+              currentTable={""}
+              formFields={formFields}
+              apiEndpoint={apiRoutesByRole[essentialName]}
+              refetchData={refetchData}
+            />
+            {essentialName === "location" && (
+              <DynamicFilter
+                currentTable={essentialName}
+                formFields={formFields}
+                onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+              />
+            )}
+          </div>{" "}
           <QueryComponent
             api={apiRoutesByRole[essentialName]}
-            queryKey={[essentialName, apiRoutesByRole[essentialName]]}
+            queryKey={[essentialName, apiRoutesByRole[essentialName], filters]}
             page={1}
             limit={100}
+            additionalParams={filters}
           >
             {(data: any) => {
               const fetchedData = data?.data || [];
               // const tableData = fetchedData.map((item: any) => ({
               //   ...item,
               // }));
-              let formFields = tableConfig[essentialName];
-
-              if (essentialName === "location" && locationTypeValue) {
-                if (locationTypeValue) {
-                  const locationTypeValues = locationTypeValue.map(
-                    (locationType: any) => ({
-                      key: String(locationType._id),
-                      value: locationType.name,
-                    })
-                  );
-                  formFields = formFields.map((field: any) =>
-                    field.key === "locationType"
-                      ? { ...field, values: locationTypeValues }
-                      : field
-                  );
-                }
-                if (locationManagerValue) {
-                  const locationManagerValues = locationManagerValue.map(
-                    (locationManager: any) => ({
-                      key: String(locationManager._id),
-                      value: locationManager.name,
-                    })
-                  );
-                  formFields = formFields.map((field: any) =>
-                    field.key === "locationManager"
-                      ? { ...field, values: locationManagerValues }
-                      : field
-                  );
-                }
-              }
 
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -110,12 +130,6 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
               });
               return (
                 <>
-                  <AddModal
-                    currentTable={""}
-                    formFields={formFields}
-                    apiEndpoint={apiRoutesByRole[essentialName]}
-                    refetchData={refetchData}
-                  />
                   <Spacer y={5} />
                   <CommonTable
                     TableData={tableData}

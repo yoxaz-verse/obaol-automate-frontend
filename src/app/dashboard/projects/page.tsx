@@ -68,15 +68,14 @@ export default function ProjectsPage() {
         )}
         <Spacer y={2} />
         <div className="my-4">
-          {user?.role === "Admin" && (
             <AddProject
               currentTable={current}
               formFields={tableConfig[current]}
               apiEndpoint={apiRoutesByRole[current]}
               refetchData={() => {}} // Placeholder for refetch logic if needed
+              role={user?.role}
               onFiltersUpdate={handleFiltersUpdate} // Pass callback to AddProject
             />
-          )}
           {isProjectCountsLoading ? (
             <Spinner
               label={`Loading ${current}`} // Translate

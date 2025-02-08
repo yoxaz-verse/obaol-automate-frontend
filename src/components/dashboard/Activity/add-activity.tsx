@@ -1,4 +1,5 @@
 import AddModal from "@/components/CurdTable/add-model";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import { getData } from "@/core/api/apiHandler";
 
 import { FormField } from "@/data/interface-data";
@@ -12,15 +13,18 @@ type AddActivityProps = {
   apiEndpoint: string;
   refetchData: () => void;
   params?: string;
-
+  onFiltersUpdate: (filters: Record<string, any>) => void; // Add callback prop
   additionalVariable?: Record<string, any>; // Dynamic additional parameters
+  role?: string;
 };
 
 function AddActivity({
+  role,
   currentTable,
   formFields,
   apiEndpoint,
   refetchData,
+  onFiltersUpdate,
   params,
   additionalVariable,
 }: AddActivityProps) {
@@ -107,13 +111,22 @@ function AddActivity({
   return (
     <div>
       {activityManagers && activityType && workers ? ( // isAdminsLoading &&
-        <AddModal
-          currentTable={currentTable}
-          formFields={formFields} // Pass the updated formFields
-          apiEndpoint={apiEndpoint}
-          refetchData={refetchData}
-          additionalVariable={additionalVariable}
-        />
+        <div className="flex items-center justify-between  gap-3">
+          {role === "Admin" && (
+            <AddModal
+              currentTable={currentTable}
+              formFields={formFields} // Pass the updated formFields
+              apiEndpoint={apiEndpoint}
+              refetchData={refetchData}
+              additionalVariable={additionalVariable}
+            />
+          )}
+          <DynamicFilter
+            currentTable={currentTable}
+            formFields={formFields}
+            onApply={onFiltersUpdate} // Pass the callback to DynamicFilter
+          />
+        </div>
       ) : (
         "Allocating Add Model" //Translate
       )}{" "}

@@ -21,9 +21,11 @@ type AddProjectProps = {
   apiEndpoint: string;
   refetchData: () => void;
   params?: string;
+  role?: string;
 };
 
 function AddProject({
+  role,
   currentTable,
   formFields,
   apiEndpoint,
@@ -137,14 +139,16 @@ function AddProject({
       projectType &&
       location && //
       admins ? (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between  gap-3">
           {" "}
-          <AddModal
-            currentTable={currentTable}
-            formFields={formFields} // Pass the updated formFields
-            apiEndpoint={apiEndpoint}
-            refetchData={refetchData}
-          />
+          {role === "Admin" && (
+            <AddModal
+              currentTable={currentTable}
+              formFields={formFields} // Pass the updated formFields
+              apiEndpoint={apiEndpoint}
+              refetchData={refetchData}
+            />
+          )}
           <DynamicFilter
             currentTable={currentTable}
             formFields={formFields}

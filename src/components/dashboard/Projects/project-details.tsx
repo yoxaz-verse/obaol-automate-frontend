@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import EditProject from "./project-edit-card";
 import BulkAdd from "@/components/CurdTable/bulk-add";
 import LocationDetailComponent from "../Location/location-detail-component";
+import StatusHistoryTabContent from "@/components/StatusHistory/statusHistory";
 
 const useActivityStatusesWithCounts = (projectId: string) => {
   // Fetch all activity statuses
@@ -70,7 +71,7 @@ const useActivityStatusesWithCounts = (projectId: string) => {
   }));
 
   return {
-    combinedStatuses: activityStatusesCount,
+    combinedStatuses: combinedStatuses,
     isLoading: isStatusesLoading || isCountsLoading,
     refetchData: () => {
       refetchStatuses();
@@ -84,9 +85,16 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const { combinedStatuses, isLoading, refetchData } =
     useActivityStatusesWithCounts(id);
   const current = "activity";
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
 
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const { user } = useContext(AuthContext); // Get current user from context
+  // Update filters from AddProject
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+  };
+  console.log("combinedStatuses");
+  console.log(combinedStatuses);
 
   return (
     <>
@@ -153,22 +161,24 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
               apiEndpoint={apiRoutesByRole[current]}
               refetchData={refetchData}
               additionalVariable={{ project: id }}
+              role={user?.role}
+              onFiltersUpdate={handleFiltersUpdate} // Pass callback to AddProject
             />
           )}{" "}
           <Spacer y={2} />
           {isLoading ? (
-            <p>
+            <div>
               {" "}
               <Spinner
                 label={`loading ${current} `} // Translate
                 color="default"
                 labelColor="foreground"
               />
-            </p>
-          ) : combinedStatuses && combinedStatuses.length > 0 ? (
+            </div>
+          ) : combinedStatuses ? (
             <Tabs
               aria-label="Activity Tabs"
-              selectedKey={currentTable || combinedStatuses[0]._id}
+              // selectedKey={currentTable || combinedStatuses[0]._id}
               onSelectionChange={(key) => setCurrentTable(key as string)}
             >
               <Tab key={0} title="All">
@@ -178,39 +188,46 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
                   refetchData={refetchData}
                   projectId={id}
                   user={user}
+                  additionalParams={filters} // Pass filters to ProjectTabContent
                 />
               </Tab>{" "}
-              {combinedStatuses.map((status: any) => (
-                <Tab
-                  key={status._id + 1}
-                  title={
-                    <div className="flex items-center space-x-2">
-                      <span>{status.status}</span>
-                      {status.count ? (
-                        <Chip size="sm" color="primary">
-                          {status.count}
-                        </Chip>
-                      ) : (
-                        ""
-                      )}{" "}
-                    </div>
-                  }
-                >
-                  <ActivityTabContent
-                    selectedTab={status._id}
-                    currentTable={current}
-                    tableConfig={tableConfig}
-                    refetchData={refetchData}
-                    projectId={id}
-                    user={user}
-                  />
-                </Tab>
-              ))}
+              {combinedStatuses &&
+                combinedStatuses.length > 0 &&
+                combinedStatuses.map(
+                  (status: any) =>
+                    status.count && (
+                      <Tab
+                        key={status._id + 1}
+                        title={
+                          <div className="flex items-center space-x-2">
+                            <span>{status.name}</span>
+                            {status.count ? (
+                              <Chip size="sm" color="primary">
+                                {status.count}
+                              </Chip>
+                            ) : (
+                              ""
+                            )}{" "}
+                          </div>
+                        }
+                      >
+                        <ActivityTabContent
+                          selectedTab={status._id}
+                          currentTable={current}
+                          tableConfig={tableConfig}
+                          refetchData={refetchData}
+                          projectId={id}
+                          user={user}
+                        />
+                      </Tab>
+                    )
+                )}
             </Tabs>
           ) : (
             <p>No Activity</p> // Translate
           )}
         </div>
+        <StatusHistoryTabContent entityId={id} entityType="Project" />
 
         {/* <UnderDevelopment> */}
         {/* <ManagerActivityDetailsComponent /> */}

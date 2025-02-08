@@ -6,19 +6,11 @@ import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
 import CommonTable from "../../CurdTable/common-table";
 import DeleteModal from "@/components/CurdTable/delete";
-import {
-  apiRoutesByRole,
-  generateColumns,
-  initialTableConfig,
-} from "@/utils/tableValues";
-import AuthContext, { User } from "@/context/AuthContext";
+import { apiRoutesByRole, generateColumns } from "@/utils/tableValues";
+import { User } from "@/context/AuthContext";
 import Link from "next/link";
 import { FiEye } from "react-icons/fi";
-import AddActivity from "./add-activity";
 import StatusUpdate from "@/components/CurdTable/status-update";
-import { getData } from "@/core/api/apiHandler";
-import { useQuery } from "@tanstack/react-query";
-import { activityStatusRoutes } from "@/core/api/apiRoutes";
 import useFilteredStatusOptions from "@/utils/roleActivityStatus";
 
 interface ActivityTabContentProps {
@@ -28,6 +20,7 @@ interface ActivityTabContentProps {
   tableConfig: any;
   user?: User | null;
   refetchData: () => void; // Callback to refresh the data
+  additionalParams?: Record<string, any>; // Accept additional filters
 }
 
 interface Option {
@@ -53,6 +46,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   tableConfig,
   user,
   refetchData,
+  additionalParams,
 }) => {
   const columns = generateColumns(currentTable, tableConfig);
   const filteredStatusOptions = useFilteredStatusOptions();
@@ -60,12 +54,17 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
   return (
     <QueryComponent
       api={apiRoutesByRole[currentTable]}
-      queryKey={[currentTable, apiRoutesByRole[currentTable]]}
+      queryKey={[
+        currentTable,
+        additionalParams,
+        filteredStatusOptions,
+        apiRoutesByRole[currentTable],
+      ]}
       page={1}
       limit={100}
-      additionalParams={{ projectId, status: selectedTab }}
+      additionalParams={{ ...additionalParams, projectId, status: selectedTab }}
     >
-      {(data: any, refetch) => {
+      {(data: any, refetchData) => {
         const fetchedData = data?.data || [];
         const tableData = fetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -119,7 +118,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                         apiEndpoint={apiRoutesByRole[currentTable]}
                         recordId={item._id}
                         currentStatus={currentStatus}
-                        refetchData={refetchData} // ✅ Pass the refetch function here
+                        refetchData={refetchData ?? (() => {})} // ✅ Ensures refetchData is always a function
                       />
                     )
                   );
@@ -129,7 +128,7 @@ const ActivityTabContent: React.FC<ActivityTabContentProps> = ({
                     _id={item._id}
                     name={item.name}
                     deleteApiEndpoint={apiRoutesByRole[currentTable]}
-                    refetchData={refetchData} // ✅ Pass the refetch function here
+                    refetchData={refetchData ?? (() => {})} // ✅ Ensures refetchData is always a function
                     useBody={true}
                   />
                 )}

@@ -45,17 +45,42 @@ const StatusHistoryTabContent: React.FC<StatusHistoryTabContentProps> = ({
   });
 
   const tableData = useMemo(() => {
+    const formatChangedFields = (changedFields: any[]) => {
+      return changedFields
+        .filter(
+          (field) =>
+            JSON.stringify(field.oldValue) !== JSON.stringify(field.newValue) &&
+            field.field !== "updatedAt" &&
+            field.field !== "createdAt"
+        )
+        .map(
+          (field: any) =>
+            `${toTitleCase(field.field)} changed from '${field.oldValue}' to '${
+              field.newValue
+            }'`
+        )
+        .join(", ");
+    };
+
+    // Helper function to convert string to Title Case
+    const toTitleCase = (str: string) => {
+      return str.replace(/\w\S*/g, (txt) => {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+    };
     if (historyData?.data?.data) {
       return historyData.data.data.map((history: any, index: number) => ({
         id: history._id || `history-${index}`, // Ensure unique key
         changeType: history.changeType,
         previousStatus: history.previousStatus || "N/A",
         newStatus: history.newStatus || "N/A",
-        changedBy: history.changedBy?.name || "Unknown",
+        changedBy: history.changedBy,
+        changedFields: formatChangedFields(history.changedFields), // Format changed fields into a readable string
         changedRole: history.changedRole || "N/A",
         changedAt: formatDateTime(history.changedAt), // Format date
       }));
     }
+
     return [];
   }, [historyData]);
 

@@ -20,6 +20,7 @@ import {
 } from "@/core/api/apiRoutes";
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import StatusHistoryTabContent from "@/components/StatusHistory/statusHistory";
 
 const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
@@ -137,11 +138,14 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                     isLoading={false}
                     viewModal={(item: any) => (
                       // Implement view modal if needed
-                      <DetailsModal
-                        currentTable={""}
-                        data={item}
-                        columns={columns}
-                      />
+                      <>
+                        <DetailsModal
+                          currentTable={""}
+                          data={item}
+                          columns={columns}
+                        />
+                  
+                      </>
                     )}
                     deleteModal={(item: any) => (
                       <UserDeleteModal

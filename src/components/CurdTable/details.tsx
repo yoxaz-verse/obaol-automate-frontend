@@ -14,6 +14,7 @@ import {
 import { FiEye } from "react-icons/fi";
 import Image from "next/image";
 import { DetailsModalProps } from "@/data/interface-data";
+import StatusHistoryTabContent from "../StatusHistory/statusHistory";
 
 export default function DetailsModal({
   currentTable,
@@ -246,6 +247,10 @@ export default function DetailsModal({
                     </p>
                   );
                 })}
+                <StatusHistoryTabContent
+                  entityId={data._id}
+                  entityType="Location"
+                />{" "}
               </ModalBody>
               <ModalFooter>
                 <Button color="primary" variant="light" onPress={onClose}>

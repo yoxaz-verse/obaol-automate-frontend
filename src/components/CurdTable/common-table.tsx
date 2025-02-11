@@ -17,7 +17,7 @@ import Image from "next/image";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
 
-export default function CommonTable({
+export default function  CommonTable({
   TableData = [], // Default value as an empty array
   columns,
   viewModal,

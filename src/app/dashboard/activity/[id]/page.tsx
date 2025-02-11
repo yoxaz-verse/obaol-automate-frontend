@@ -18,6 +18,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { activityStatusRoutes } from "@/core/api/apiRoutes";
 import StatusUpdate from "@/components/CurdTable/status-update";
 import useFilteredStatusOptions from "@/utils/roleActivityStatus";
+import StatusHistoryTabContent from "@/components/StatusHistory/statusHistory";
 
 const ViewActivityById: NextPage = () => {
   const filteredStatusOptions = useFilteredStatusOptions();
@@ -129,6 +130,7 @@ const ViewActivityById: NextPage = () => {
           ))}
         </Tabs>
       </div>
+      <StatusHistoryTabContent entityId={activityId} entityType="Activity" />
     </>
   );
 };

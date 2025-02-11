@@ -81,7 +81,7 @@ export default function Essentials() {
               <Tab key={tab.key} title={tab.title}>
                 {tab.key === "activityStatus" && (
                   <EssentialTabContent essentialName="activityStatus" />
-                )}
+                  )}
                 {tab.key === "activityType" && (
                   <EssentialTabContent essentialName="activityType" />
                 )}

@@ -603,7 +603,6 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   locationType: [
     {
       label: "Name",
@@ -667,7 +666,6 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   // Project
   projects: [
     {
@@ -867,7 +865,6 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   // Activity
   activity: [
     {
@@ -1022,7 +1019,6 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   activityStatus: [
     {
       label: "Name",
@@ -1164,25 +1160,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-
   statusHistory: [
-    {
-      label: "Changed By",
-      type: "text",
-      key: "changedBy",
-      filterType: "text",
-      inForm: false,
-      inTable: true,
-      inEdit: false,
-    },
-    {
-      label: "Changed Type",
-      type: "text",
-      key: "changeType",
-      inForm: false,
-      inTable: true,
-      inEdit: false,
-    },
     {
       label: "Changed Role",
       type: "text",
@@ -1191,12 +1169,18 @@ export const initialTableConfig: Record<
       inTable: true,
       inEdit: false,
     },
-
     {
       label: "New Status",
       type: "text",
       key: "newStatus",
-      filterType: "text",
+      inForm: false,
+      inTable: true,
+      inEdit: false,
+    },
+    {
+      label: "Changed By",
+      type: "text",
+      key: "changedBy",
       inForm: false,
       inTable: true,
       inEdit: false,
@@ -1205,7 +1189,6 @@ export const initialTableConfig: Record<
       label: "Change Type",
       type: "text",
       key: "changeType",
-      filterType: "text",
       inForm: false,
       inTable: true,
       inEdit: false,
@@ -1215,15 +1198,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "changedFields",
       inForm: false,
-      inTable: false,
-      inEdit: false,
-    },
-    {
-      label: "Action",
-      type: "text",
-      key: "action",
-      inForm: false,
-      inTable: false,
+      inTable: true,
       inEdit: false,
     },
     {

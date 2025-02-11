@@ -93,8 +93,6 @@ const ProjectDetails = ({ id, role, setProjectDetail }: ProjectDetailProps) => {
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
-  console.log("combinedStatuses");
-  console.log(combinedStatuses);
 
   return (
     <>

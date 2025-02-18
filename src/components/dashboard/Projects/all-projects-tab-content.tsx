@@ -6,11 +6,7 @@ import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
 import CommonTable from "../../CurdTable/common-table";
 import DeleteModal from "@/components/CurdTable/delete";
-import {
-  apiRoutesByRole,
-  generateColumns,
-  initialTableConfig,
-} from "@/utils/tableValues";
+import { apiRoutesByRole, generateColumns } from "@/utils/tableValues";
 import { FiEye } from "react-icons/fi";
 import Link from "next/link";
 import { getData } from "@/core/api/apiHandler";

@@ -7,14 +7,19 @@ import {
   AutocompleteItem,
   Button,
   Checkbox,
+  Divider,
   Input,
   Spacer,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
+import Image from "next/image";
 
-const LoginComponent = () => {
+interface ILoginProps {
+  role: string;
+}
+const LoginComponent = ({ role }: ILoginProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // Add password state
@@ -25,13 +30,12 @@ const LoginComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
-    "ActivityManager",
-    "ProjectManager",
+    "Associate",
+    // "ProjectManager",
     "Admin",
     "Customer",
     "Worker",
   ];
-  const [role, setRole] = useState("Customer");
   const router = useRouter();
   const { isAuthenticated, loading, login } = useContext(AuthContext);
 
@@ -77,7 +81,6 @@ const LoginComponent = () => {
       // Redirect handled by useEffect when isAuthenticated updates
     } catch (error: any) {
       setIsLoading(false);
-      console.error("Login error:", error);
 
       // Extract error message from API response
       const apiErrorMessage =
@@ -105,20 +108,35 @@ const LoginComponent = () => {
   return (
     <>
       <div
-        className="py-10 lg:py-20 flex flex-col justify-evenly items-center rounded-3xl px-12 lg:px-24"
-        style={{ border: "1px solid #788BA5" }}
+        className="py-10 z-50 lg:py-20  flex flex-col justify-evenly items-center  bg-[#F6F8FB] rounded-xl px-12 lg:px-24"
+        // style={{ border: "1px dotted orange" }}
       >
-        <div>
-          <h3 className="text-xl lg:text-2xl py-2 font-bold text-center">
-            Login with your work email
+        <div className="flex flex-col w-full items-center">
+          <div className="bg-black w-full flex flex-col  items-center">
+            <Image
+              src={"/logo.png"}
+              width={1000}
+              height={1000}
+              alt="Obaol"
+              className="w-[100px]  rounded-md   "
+            />{" "}
+            <div className="bg-[#F6F8FB] h-[2px] w-full" />
+            <div className="bg-warning-400 h-[2px] w-full" />
+          </div>
+
+          <h3 className="text-xl lg:text-xl py-2 font-bold ">
+            <span className="text-warning-400">{role} </span> Login
           </h3>
-          <h3 className="text-sm py-2 text-[#788BA5]">
-            Use your work email to log in to your team workspace.
-          </h3>
+
+          {/* <h3 className="text-sm py-2 text-[#788BA5]">
+            Use your {role} credentials
+          </h3> */}
         </div>
+        <Spacer y={2} />
         <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
           <Input
             value={email}
+            className="w-[300px]"
             type="text"
             variant="underlined"
             isInvalid={!isInvalidEmail}
@@ -129,9 +147,9 @@ const LoginComponent = () => {
           />
           <Input
             value={password}
+            className="w-[300px] pb-1"
             variant="underlined"
             placeholder="Password"
-            className="pb-3"
             id="password"
             required
             endContent={
@@ -148,7 +166,7 @@ const LoginComponent = () => {
             onValueChange={setPassword}
           />
 
-          <Autocomplete
+          {/* <Autocomplete
             label="Select your role"
             defaultSelectedKey={role}
             variant="underlined"
@@ -164,7 +182,7 @@ const LoginComponent = () => {
                 {role}
               </AutocompleteItem>
             ))}
-          </Autocomplete>
+          </Autocomplete> */}
 
           <div className="flex justify-between items-center">
             <Checkbox
@@ -185,10 +203,10 @@ const LoginComponent = () => {
             <p className="text-red-500 text-sm text-center">{errorMessage}</p>
           )}
 
-          <Spacer y={4} />
+          <Spacer y={2} />
           <Button
-            className="text-white w-full flex justify-center rounded bg-[#117DF9] py-2"
-            color="primary"
+            className="text-white w-full flex justify-center rounded  py-2"
+            color="warning"
             type="submit"
             disabled={isLoading}
             isLoading={isLoading}

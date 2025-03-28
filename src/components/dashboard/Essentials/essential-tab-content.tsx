@@ -1,4 +1,3 @@
-// components/ServiceCompany/ServiceCompanyTabContent.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 
@@ -16,16 +15,22 @@ import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import {
   locationManagerRoutes,
+  locationRoutes,
   locationTypeRoutes,
 } from "@/core/api/apiRoutes";
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
-import StatusHistoryTabContent from "@/components/StatusHistory/statusHistory";
 
-const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
+const EssentialTabContent = ({
+  essentialName,
+  filter,
+}: {
+  essentialName: string;
+  filter?: any;
+}) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const [filters, setFilters] = React.useState<Record<string, any>>({}); // Dynamic filters
-
+  if (filter) setFilters(filter);
   const columns = generateColumns(essentialName, tableConfig);
   const { data: locationTypeResponse } = useQuery({
     queryKey: ["LocationType"],
@@ -37,10 +42,16 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
     queryFn: () => getData(locationManagerRoutes.getAll),
     enabled: essentialName === "location",
   });
+  const { data: locationResponse } = useQuery({
+    queryKey: ["Location"],
+    queryFn: () => getData(locationRoutes.getAll),
+    enabled: essentialName === "associateCompany",
+  });
 
   const locationTypeValue = locationTypeResponse?.data?.data.data;
 
   const locationManagerValue = locationManagerResponse?.data?.data.data;
+  const locationValue = locationResponse?.data?.data.data;
 
   const refetchData = () => {
     // Implement refetch logic if necessary
@@ -80,6 +91,16 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
           : field
       );
     }
+  }
+
+  if (essentialName === "associateCompany" && locationValue) {
+    const locationValues = locationValue.map((location: any) => ({
+      key: String(location._id),
+      value: location.name,
+    }));
+    formFields = formFields.map((field: any) =>
+      field.key === "location" ? { ...field, values: locationValues } : field
+    );
   }
   return (
     <div className="flex items-center justify-center">
@@ -144,7 +165,6 @@ const EssentialTabContent = ({ essentialName }: { essentialName: string }) => {
                           data={item}
                           columns={columns}
                         />
-                  
                       </>
                     )}
                     deleteModal={(item: any) => (

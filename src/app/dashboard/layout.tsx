@@ -42,12 +42,12 @@ export default function DashboardLayout({
   const { user } = useContext(AuthContext);
 
   return (
-    <section className="w-full h-full flex">
+    <section className="w-full h-full flex overflow-hidden">
       <PrivateRoute allowedRoles={allowedRoles}>
-        <div className="w-1/6 h-screen hidden xl:block">
+        {/* <div className="w-1/6 h-screen hidden xl:block">
           <Sidebar />
-        </div>
-        <div className="w-full xl:w-5/6 lg:h-screen ">
+        </div> */}
+        <div className="w-full  lg:h-screen overflow-hidden  ">
           <div>
             {/* Check if user data is available before rendering TopBar */}
             {user && (
@@ -57,7 +57,7 @@ export default function DashboardLayout({
               />
             )}
             <Spacer y={2} />
-            <div className="max-h-[90vh] w-full overflow-y-auto">
+            <div className="max-h-[84vh] w-full overflow-y-auto">
               {/* Optionally, handle role-specific loading or error */}
               {/* {roleDataLoading && <p>Loading role-specific data...</p>} */}
               {/* {roleDataError && <p>Error loading role-specific data</p>} */}

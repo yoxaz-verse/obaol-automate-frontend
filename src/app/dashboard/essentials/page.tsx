@@ -71,9 +71,9 @@ export default function Essentials() {
             ))}
           </Tabs>{" "}
           <Spacer y={4} />
-          <Title title="Activity" />{" "}
+          <Title title="Process Status" />{" "}
           <Tabs
-            aria-label="Activity Tabs"
+            aria-label="Process Tabs"
             selectedKey={activityTab}
             onSelectionChange={(key) => setActivityTab(key as string)}
           >
@@ -81,7 +81,7 @@ export default function Essentials() {
               <Tab key={tab.key} title={tab.title}>
                 {tab.key === "activityStatus" && (
                   <EssentialTabContent essentialName="activityStatus" />
-                  )}
+                )}
                 {tab.key === "activityType" && (
                   <EssentialTabContent essentialName="activityType" />
                 )}
@@ -89,9 +89,9 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Project" /> {/* Translate */}
+          <Title title="Designation" /> {/* Translate */}
           <Tabs
-            aria-label="Project Tabs" // Translate
+            aria-label="Designation Tabs" // Translate
             selectedKey={projectTab}
             onSelectionChange={(key) => setProjectTab(key as string)}
           >
@@ -107,8 +107,8 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Service Company" /> {/* Translate */}
-          <EssentialTabContent essentialName="serviceCompany" />
+          <Title title="Associate Company" /> {/* Translate */}
+          <EssentialTabContent essentialName="associateCompany" />
           <Spacer y={4} />
         </div>
       </div>

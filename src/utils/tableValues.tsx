@@ -1,21 +1,30 @@
 "use client";
 import {
   activityFileRoutes,
-  activityManagerRoutes,
   activityRoutes,
   activityStatusRoutes,
   activityTypeRoutes,
   adminRoutes,
+  associateCompanyRoutes,
+  associateRoutes,
+  categoryRoutes,
   customerRoutes,
+  displayedRateRoutes,
+  enquiryRoutes,
+  inventoryManagerRoutes,
   locationManagerRoutes,
   locationRoutes,
   locationTypeRoutes,
+  productRoutes,
+  productVariantRoutes,
   projectManagerRoutes,
   projectRoutes,
   projectStatusRoutes,
   projectTypeRoutes,
   serviceCompanyRoutes,
+  subCategoryRoutes,
   timeSheetRoutes,
+  variantRateRoutes,
   workerRoutes,
 } from "@/core/api/apiRoutes";
 
@@ -53,6 +62,9 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
     });
     nonActionColumns.push({ name: "Activity Status", uid: "activityStatus" });
     nonActionColumns.push({ name: "Activity Type", uid: "activityType" });
+  } else if (currentTable === "variantRate") {
+    nonActionColumns.push({ name: "Associate", uid: "associate" });
+    nonActionColumns.push({ name: "Product", uid: "productVariant" });
   } else if (
     currentTable === "projectManager" ||
     currentTable === "activityManager"
@@ -79,7 +91,7 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
 export const apiRoutesByRole: Record<string, string> = {
   admin: adminRoutes.getAll,
-  activityManager: activityManagerRoutes.getAll,
+  inventoryManager: inventoryManagerRoutes.getAll,
   projectManager: projectManagerRoutes.getAll,
   customer: customerRoutes.getAll,
   worker: workerRoutes.getAll,
@@ -95,6 +107,15 @@ export const apiRoutesByRole: Record<string, string> = {
   activityStatus: activityStatusRoutes.getAll,
   timeSheet: timeSheetRoutes.getAll,
   activityFile: activityFileRoutes.getAll,
+  associateCompany: associateCompanyRoutes.getAll,
+  associate: associateRoutes.getAll,
+  category: categoryRoutes.getAll,
+  subCategory: subCategoryRoutes.getAll,
+  product: productRoutes.getAll,
+  productVariant: productVariantRoutes.getAll,
+  variantRate: variantRateRoutes.getAll,
+  displayedRate: displayedRateRoutes.getAll,
+  enquiry: enquiryRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -230,7 +251,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
-  activityManager: [
+  inventoryManager: [
     {
       label: "Name",
       type: "text",
@@ -308,6 +329,130 @@ export const initialTableConfig: Record<
       inTable: false,
       required: true,
     },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  associate: [
+    {
+      label: "Associate Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Email",
+      type: "email",
+      key: "email",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Phone",
+      type: "number",
+      key: "phone",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Phone Secondary",
+      type: "number",
+      key: "phoneSecondary",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Associate Company",
+      type: "select",
+      key: "associateCompany",
+      values: [],
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Password",
+      type: "password",
+      key: "password",
+      inForm: true,
+      inEdit: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  associateCompany: [
+    {
+      label: "Company Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Email",
+      type: "email",
+      key: "email",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Phone",
+      type: "number",
+      key: "phone",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Location",
+      type: "select",
+      key: "location",
+      values: [],
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Phone Secondary",
+      type: "number",
+      key: "phoneSecondary",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+
     {
       label: "Created At",
       type: "dateTime",
@@ -666,6 +811,332 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+  // Category
+  category: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
+    {
+      label: "Inventory Manager",
+      type: "select",
+      filterType: "select",
+      key: "inventoryManager",
+      values: [],
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+      required: true,
+    },
+
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Sub Category
+  subCategory: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
+    {
+      label: "Category",
+      type: "select",
+      filterType: "select",
+      key: "category",
+      values: [],
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+      required: true,
+    },
+
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Product
+  product: [
+    {
+      label: "Product Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
+    {
+      label: "Sub Category",
+      type: "select",
+      filterType: "select",
+      key: "subCategory",
+      values: [],
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+      required: true,
+    },
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Product Variant
+  productVariant: [
+    {
+      label: "Variant Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Available",
+      type: "boolean",
+      key: "isAvailable",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Created By",
+      type: "text",
+      key: "createdBy",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: true,
+      inTable: false,
+      inEdit: true,
+    },
+    // {
+    //   label: "Admin",
+    //   type: "select",
+    //   key: "admin",
+    //   values: [],
+    //   inForm: false,
+    //   inTable: false,
+    // },
+    {
+      label: "Product",
+      type: "select",
+      filterType: "select",
+      key: "product",
+      values: [],
+      inForm: false,
+      inTable: false,
+      inEdit: true,
+    },
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Product Variant Rate
+  variantRate: [
+    {
+      label: "Rate",
+      type: "number",
+      key: "rate",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Product Variant",
+      type: "select",
+      filterType: "select",
+      key: "productVariant",
+      values: [],
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Associate Name",
+      type: "select",
+      filterType: "select",
+      key: "associate",
+      values: [],
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+      required: true,
+    },
+
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Created At",
+      type: "date",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Product Variant Rate
+  displayedRate: [
+    {
+      label: "Product ",
+      type: "text",
+      key: "product",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Product Variant",
+      type: "text",
+      key: "productVariant",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Rate",
+      type: "number",
+      key: "rate",
+      inForm: true,
+      inTable: true,
+    },
+    // {
+    //   label: "Actions",
+    //   type: "action",
+    //   key: "actions2",
+    //   inForm: false,
+    //   inTable: true,
+    // },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+
   // Project
   projects: [
     {
@@ -787,6 +1258,104 @@ export const initialTableConfig: Record<
       inTable: true,
     },
 
+    {
+      label: "Created At",
+      type: "text",
+      key: "createdAt",
+      inForm: false,
+      inTable: false,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  // Project
+  enquiry: [
+    {
+      label: "Customer Name",
+      type: "text",
+      key: "name",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+      required: true,
+    },
+    {
+      label: "Phone Number",
+      type: "number",
+      key: "phoneNumber",
+      filterType: "text",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Specifications",
+      type: "textarea",
+      key: "specification",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    // {
+    //   label: "Customer name",
+    //   type: "text",
+    //   key: "name",
+    //   filterType: "select",
+    //   values: [],
+    //   inForm: true,
+    //   inTable: true,
+    //   inEdit: true,
+    //   required: true,
+    // },
+
+    {
+      label: "Mediator Associate",
+      type: "text",
+      key: "mediatorAssociate",
+      filterType: "select",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+      required: true,
+    },
+    {
+      label: "Product Associate",
+      type: "text",
+      key: "productAssociate",
+      filterType: "select",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+      required: true,
+    },
+    {
+      label: "Product Variant",
+      type: "text",
+      key: "productVariant",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
+    // {
+    //   label: "Variant Rate| Commission",
+    //   type: "text",
+    //   key: "variantRate",
+    //   inForm: false,
+    //   inTable: true,
+    //   inEdit: true,
+    // },
+    // {
+    //   label: "Displayed Rate | Commission",
+    //   type: "text",
+    //   key: "displayedRate",
+    //   inForm: false,
+    //   inTable: true,
+    //   inEdit: true,
+    // },
     {
       label: "Created At",
       type: "text",
@@ -1210,3 +1779,18 @@ export const initialTableConfig: Record<
     },
   ],
 };
+
+/**
+ * Basic interface for an Enquiry (example)
+ */
+interface IEnquiry {
+  _id: string;
+  phoneNumber: string;
+  name: string;
+  variantRate: string; // or object ID
+  displayRate?: string | null;
+  productVariant: string;
+  mediatorAssociate?: string | null;
+  realAssociate: string;
+  createdAt?: string;
+}

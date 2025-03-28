@@ -1,6 +1,10 @@
 "use client";
 import React from "react";
-import { adminRoutes, serviceCompanyRoutes } from "@/core/api/apiRoutes";
+import {
+  adminRoutes,
+  associateCompanyRoutes,
+  serviceCompanyRoutes,
+} from "@/core/api/apiRoutes";
 import QueryComponent from "@/components/queryComponent";
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../../CurdTable/common-table";
@@ -37,21 +41,21 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
     queryKey: ["adminData"],
     queryFn: () => getData(adminRoutes.getAll),
     enabled:
-      currentTable === "activityManager" || currentTable === "projectManager", // Only fetch when currentTable is 'manager'
+      currentTable === "inventoryManager" || currentTable === "projectManager", // Only fetch when currentTable is 'manager'
   });
 
   // Extract admin data
   const adminData = adminResponse?.data.data.data || [];
 
   // Fetch admin data when currentTable is 'serviceCompany'
-  const { data: serviceCompanyResponse } = useQuery({
-    queryKey: ["serviceCompany"],
-    queryFn: () => getData(serviceCompanyRoutes.getAll),
-    enabled: currentTable === "worker", // Only fetch when currentTable is 'serviceCompany'
+  const { data: associateCompanyResponse } = useQuery({
+    queryKey: ["associateCompany"],
+    queryFn: () => getData(associateCompanyRoutes.getAll),
+    enabled: currentTable === "associate", // Only fetch when currentTable is 'associateCompany'
   });
 
-  // Extract serviceCompany data
-  const serviceCompanyData = serviceCompanyResponse?.data.data.data || [];
+  // Extract associateCompany data
+  const associateCompanyData = associateCompanyResponse?.data.data.data || [];
 
   return (
     <>
@@ -67,7 +71,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           let formFields = tableConfig[currentTable];
           // Populate related field values dynamically
           if (
-            currentTable === "activityManager" ||
+            currentTable === "inventoryManager" ||
             currentTable === "projectManager"
           ) {
             // Use adminData to populate 'Admin' select options
@@ -81,17 +85,17 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 ? { ...field, values: relatedValues }
                 : field
             );
-          } else if (currentTable === "worker") {
+          } else if (currentTable === "associate") {
             // You can similarly fetch manager data and populate 'Manager' select options
-            const relatedValues = serviceCompanyData.map(
-              (serviceCompany: any) => ({
-                key: String(serviceCompany._id),
-                value: serviceCompany.name,
+            const relatedValues = associateCompanyData.map(
+              (associateCompany: any) => ({
+                key: String(associateCompany._id),
+                value: associateCompany.name,
               })
             );
             // Update formFields with relatedValues
             formFields = formFields.map((field: any) =>
-              field.key === "serviceCompany"
+              field.key === "associateCompany"
                 ? { ...field, values: relatedValues }
                 : field
             );
@@ -101,7 +105,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           const tableData = fetchedData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
             if (
-              currentTable === "activityManager" ||
+              currentTable === "inventoryManager" ||
               currentTable === "projectManager"
             ) {
               return {
@@ -111,8 +115,8 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
             } else if (currentTable === "worker") {
               return {
                 ...rest,
-                serviceCompany: item.serviceCompany
-                  ? item.serviceCompany.name
+                associateCompany: item.associateCompany
+                  ? item.associateCompany.name
                   : "N/A",
               };
             }

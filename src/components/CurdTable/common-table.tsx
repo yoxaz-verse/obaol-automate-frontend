@@ -17,7 +17,7 @@ import Image from "next/image";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
 
-export default function  CommonTable({
+export default function CommonTable({
   TableData = [], // Default value as an empty array
   columns,
   viewModal,
@@ -48,6 +48,11 @@ export default function  CommonTable({
             });
           }
           return "N/A";
+        case "boolean":
+          if (cellValue) {
+            return cellValue ? "Yes" : "No";
+          }
+          return "No";
 
         case "time":
           if (cellValue) {
@@ -179,7 +184,7 @@ export default function  CommonTable({
             isCompact
             showControls
             showShadow
-            color="primary"
+            color="warning"
             page={page}
             total={pages}
             onChange={(page) => setPage(page)}

@@ -48,7 +48,7 @@ function AddProject({
     queryKey: ["projectManager"],
     queryFn: () => getData(projectManagerRoutes.getAll),
   });
-
+  
   const { data: projectStatusesResponse } = useQuery({
     queryKey: ["projectStatuses"],
     queryFn: () => getData(projectStatusRoutes.getAll),

@@ -7,7 +7,7 @@
 const BASE_PATHS = {
   USER: "/user",
   ADMIN: "/admin",
-  ACTIVITY_MANAGER: "/activityManager",
+  INVENTORY_MANAGER: "/inventoryManager",
   PROJECT_MANAGER: "/projectManager",
   LOCATION_MANAGER: "/locationManager",
   LOCATION: "/location",
@@ -26,6 +26,15 @@ const BASE_PATHS = {
   STATUS: "/status",
   STATUS_HISTORY: "/statusHistory",
   SUB_STATUS: "/subStatus",
+  ASSOCIATE: "/associate",
+  ASSOCIATE_COMPANY: "/associateCompany",
+  CATEGORY: "/category",
+  SUB_CATEGORY: "/subCategory",
+  PRODUCT: "/product",
+  PRODUCT_VARIANT: "/productVariant",
+  VARIANT_RATE: "/variantRate",
+  DISPLAYED_RATE: "/displayedRate",
+  ENQUIRY: "/enquiry",
 };
 
 // Define account-related routes separately
@@ -57,8 +66,8 @@ const addCustomRoutes = (
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
 export const statusHistoryRoutes = createCRUDRoutes(BASE_PATHS.STATUS_HISTORY);
-export const activityManagerRoutes = createCRUDRoutes(
-  BASE_PATHS.ACTIVITY_MANAGER
+export const inventoryManagerRoutes = createCRUDRoutes(
+  BASE_PATHS.INVENTORY_MANAGER
 );
 export const activityFileRoutes = createCRUDRoutes(BASE_PATHS.ACTIVITY_FILE);
 export const projectManagerRoutes = createCRUDRoutes(
@@ -148,6 +157,26 @@ export const activityRoutes =
 // }
 // );
 
+export const associateRoutes = createCRUDRoutes(BASE_PATHS.ASSOCIATE);
+export const associateCompanyRoutes = createCRUDRoutes(
+  BASE_PATHS.ASSOCIATE_COMPANY
+);
+export const categoryRoutes = createCRUDRoutes(BASE_PATHS.CATEGORY);
+export const subCategoryRoutes = createCRUDRoutes(BASE_PATHS.SUB_CATEGORY);
+export const productRoutes = createCRUDRoutes(BASE_PATHS.PRODUCT);
+export const productVariantRoutes = createCRUDRoutes(
+  BASE_PATHS.PRODUCT_VARIANT
+);
+
+export const variantRateRoutes = addCustomRoutes(
+  createCRUDRoutes(BASE_PATHS.VARIANT_RATE),
+  {
+    count: `${BASE_PATHS.VARIANT_RATE}/associateCompany`,
+  }
+);
+export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
+export const enquiryRoutes = createCRUDRoutes(BASE_PATHS.ENQUIRY);
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   account: accountRoutes,
@@ -170,4 +199,14 @@ export const apiRoutes = {
   activityStatus: activityStatusRoutes,
   timeSheet: timeSheetRoutes,
   statusHistory: statusHistoryRoutes,
+  associate: associateRoutes,
+  associateCompany: associateCompanyRoutes,
+  category: categoryRoutes,
+  subCategory: subCategoryRoutes,
+  product: productRoutes,
+  productVariant: productVariantRoutes,
+  variantRate: variantRateRoutes,
+  displayedRate: displayedRateRoutes,
+  inventoryManager: inventoryManagerRoutes,
+  enquiry: enquiryRoutes,
 };

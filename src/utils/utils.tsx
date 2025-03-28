@@ -65,8 +65,28 @@ export const sidebarOptions = [
     link: "/dashboard/essentials",
   },
   {
-    name: "Bulk Add", //Translate
-    icon: <RiFileAddLine />,
-    link: "/dashboard/bulk",
+    name: "Product", //Translate
+    icon: <FiFileText />,
+    link: "/dashboard/product",
   },
+  {
+    name: "Catalog", //Translate
+    icon: <RiFileAddLine />,
+    link: "/dashboard/catalog",
+  },
+  {
+    name: "Live Rates", //Translate
+    icon: <RiFileAddLine />,
+    link: "/dashboard/rates",
+  },
+  {
+    name: "Enquires", //Translate
+    icon: <RiFileAddLine />,
+    link: "/dashboard/enquires",
+  },
+  // {
+  //   name: "Bulk Add", //Translate
+  //   icon: <RiFileAddLine />,
+  //   link: "/dashboard/bulk",
+  // },
 ];

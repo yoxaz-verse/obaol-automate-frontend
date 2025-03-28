@@ -29,12 +29,12 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="flex justify-between p-5 bg-gray-100 shadow-md">
+    <div className="flex justify-between p-5 bg-black border-orange-400 border-b-4 text-white shadow-sm">
       {/* Menu for small screens */}
-      <div className="flex gap-5 xl:hidden">
+      <div className="flex gap-5 items-center justify-center ">
         <Dropdown className="items-center justify-center h-full flex ">
           <DropdownTrigger>
-            <div className="w-6  h-10 flex items-center justify-center xl:hidden">
+            <div className="w-6  h-10 flex items-center justify-center ">
               <CiMenuBurger size={24} />
             </div>
           </DropdownTrigger>
@@ -55,23 +55,29 @@ const TopBar = ({ username, role }: TopbarProps) => {
             ))}
           </DropdownMenu>
         </Dropdown>
-        <Image src={"/logo.jpg"} width={50} height={30} alt="MG Project" />
+        <div className="hidden md:block">
+          <div className="text-lg font-bold">
+            {role.charAt(0).toUpperCase() + role.slice(1)} Panel
+            {/* Translate */}
+          </div>
+          <div className="text-sm">
+            {new Date().getHours() < 12
+              ? "Good Morning" //Translate
+              : new Date().getHours() < 18
+              ? "Good Afternoon" //Translate
+              : "Good Evening"}
+            {/* Translate */}
+          </div>
+        </div>
       </div>
       {/* Title Section */}
-      <div className="hidden md:block">
-        <div className="text-lg font-bold">
-          {role.charAt(0).toUpperCase() + role.slice(1)} Panel{/* Translate */}
-        </div>
-        <div className="text-sm">
-          {new Date().getHours() < 12
-            ? "Good Morning" //Translate
-            : new Date().getHours() < 18
-            ? "Good Afternoon" //Translate
-            : "Good Evening"}
-          {/* Translate */}
-        </div>
-      </div>
-
+      <Image
+        src={"/logo.png"}
+        width={70}
+        height={50}
+        alt="Obaol"
+        className="w-max"
+      />
       {/* User and Notifications Section */}
       <div className="flex items-center gap-5">
         {/* <Dropdown placement="bottom-start">
@@ -91,7 +97,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
               as="button"
               avatarProps={{
                 isBordered: true,
-                color: "primary",
+                color: "warning",
               }}
               name={username}
               description={role}

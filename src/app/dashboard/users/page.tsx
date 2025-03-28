@@ -8,11 +8,11 @@ export default function Page() {
   const [currentTable, setCurrentTable] = useState("manager"); // Default role set to 'manager'
 
   const tables = [
-    { key: "activityManager", title: "Activity Managers" }, // Translate Title
-    { key: "projectManager", title: "Project Managers" },// Translate Title
-    { key: "admin", title: "Admins" },// Translate Title
-    { key: "customer", title: "Customers" },// Translate Title
-    { key: "worker", title: "Workers" },// Translate Title
+    { key: "inventoryManager", title: "Inventory Managers" }, // Translate Title
+    { key: "associate", title: "Associates" }, // Translate Title
+    { key: "admin", title: "Admins" }, // Translate Title
+    { key: "customer", title: "Customers" }, // Translate Title
+    // { key: "worker", title: "Staff" },// Translate Title
   ];
 
   return (
@@ -21,7 +21,7 @@ export default function Page() {
         <div className="my-4">
           {/* Tabs for selecting between different roles */}
           <Tabs
-            aria-label="User Types"// Translate
+            aria-label="User Types" // Translate
             selectedKey={currentTable}
             onSelectionChange={(key) => setCurrentTable(key as string)}
           >

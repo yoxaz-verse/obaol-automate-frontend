@@ -1,32 +1,27 @@
-
-
 export const routeRoles: { [key: string]: string[] } = {
-  "/dashboard": [
-    "Admin",
-    "Customer",
-    "ActivityManager",
-    "ProjectManager",
-    "Worker",
-  ],
+  "/dashboard": ["Admin", "Customer", "Associate", "ProjectManager", "Worker"],
   "/dashboard/projects": [
     "Admin",
     "Customer",
-    "ActivityManager",
+    "Associate",
     "ProjectManager",
     "Worker",
   ],
   "/dashboard/essentials": ["Admin"],
-  "/dashboard/activity": ["Admin"],
   "/dashboard/users": ["Admin"],
-  "/dashboard/bulk": ["Admin"],
+  // "/dashboard/bulk": ["Admin"],
 
-  "/project/:projectname": [
+  "/dashboard/product": [
     "Admin",
     "Customer",
-    "ActivityManager",
+    "Associate",
     "ProjectManager",
     "Worker",
   ],
+
+  "/dashboard/catalog": ["Admin", "Associate"],
+  "/dashboard/enquires": ["Admin", "Associate"],
+  "/dashboard/rates": ["Admin"],
 };
 
 export const getAllowedRoles = (pathname: string): string[] => {
@@ -38,10 +33,3 @@ export const getAllowedRoles = (pathname: string): string[] => {
   });
   return routeRoles[dynamicRoute || ""] || [];
 };
-
-
-
-
-
-
-

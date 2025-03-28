@@ -87,7 +87,6 @@ const AddModal: React.FC<AddModalProps> = ({
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
-      console.log("Hi");
 
       toast.success("You did it!"); // Displays a success message
 
@@ -383,7 +382,7 @@ const AddModal: React.FC<AddModalProps> = ({
         return (
           <Switch
             name={field.key}
-            defaultSelected={formData[field.key] || true}
+            defaultSelected={formData[field.key] || false}
             onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
           >
             {field.label}
@@ -509,7 +508,7 @@ const AddModal: React.FC<AddModalProps> = ({
     <>
       <div className="flex justify-end">
         <button
-          className="w-[120px] bg-[#3EADEB] rounded-3xl text-white h-[45px] text-sm"
+          className="w-[120px] bg-warning-400 rounded-lg text-white h-[35px] text-sm"
           onClick={openModal}
         >
           Add

@@ -117,7 +117,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
         className="py-10 z-50 lg:py-20  flex flex-col justify-evenly items-center  bg-[#F6F8FB] rounded-xl px-12 lg:px-24 overflow-hidden"
         // style={{ border: "1px dotted orange" }}
       >
-        <div className="flex flex-col w-full items-center">
+        <div className="flex flex-col w-full items-center overflow-hidden">
           <div className="bg-black w-full flex flex-col  items-center">
             <Image
               src={"/logo.png"}

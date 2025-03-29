@@ -3,7 +3,10 @@
 import axios from "axios";
 
 export const baseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001/api/v1/web";
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  // || "http://localhost:5001/api/v1/web"
+  // ||"backend.obaol.com"
+  "https://obaol-backend.up.railway.app";
 
 const instance = axios.create({
   baseURL: baseUrl,

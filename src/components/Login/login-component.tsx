@@ -114,7 +114,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
   return (
     <>
       <div
-        className="py-10 z-50 lg:py-20  flex flex-col justify-evenly items-center  bg-[#F6F8FB] rounded-xl px-12 lg:px-24"
+        className="py-10 z-50 lg:py-20  flex flex-col justify-evenly items-center  bg-[#F6F8FB] rounded-xl px-12 lg:px-24 overflow-hidden"
         // style={{ border: "1px dotted orange" }}
       >
         <div className="flex flex-col w-full items-center">

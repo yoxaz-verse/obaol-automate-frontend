@@ -90,7 +90,9 @@ const SelectModal: React.FC<SelectModalProps> = ({
     displayedRateRecord = arr.find(
       (dr: any) =>
         (dr.variantRate && dr.variantRate._id === variantRate._id) ||
-        (dr.variantRate && dr.variantRate._id === variantRate.variantRate._id)
+        (dr.variantRate &&
+          variantRate.variantRate &&
+          dr.variantRate._id === variantRate.variantRate._id)
     );
     newRecordNeeded = !displayedRateRecord; // if not found => we'll POST
   }

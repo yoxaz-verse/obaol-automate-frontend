@@ -104,8 +104,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
     >
       {(variantRateData: any) => {
         // If we have associates, populate the "associate" field values for AddModal
-        console.log(variantResponse?.data.data.data);
-        console.log(variantRateData.data);
 
         let variantRateFormFields = tableConfig[rate];
         if (associateValue) {
@@ -146,7 +144,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
           } else {
             // displayedRate
             console.log(item);
-
+            
             return {
               ...rest,
               rate: item.variantRate?.rate,
@@ -156,7 +154,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
             };
           }
         });
-        console.log(tableData);
         return (
           <>
             {!displayOnly && rate === "variantRate" && (
@@ -483,21 +480,26 @@ function mergeVariantAndDisplayedOnce(
   // 2) For each variantRate item, see if there's a displayedRate match
   const merged = variantRates.map((vr) => {
     const match = displayedMap.get(vr._id);
+    console.log(match);
+
     if (match) {
       // Found a displayedRate referencing the same variantRate
       // a) attach the entire match
       const mergedItem = {
         ...vr,
-        displayedRate: match,
+        // displayedRate: match,
       };
 
       // b) Remove from map so we don't reuse this displayedRate for another VR
-      displayedMap.delete(vr._id);
+      // displayedMap.delete(vr._id);
 
       return mergedItem;
     } else {
+      console.log(vr);
+
+      if (vr.selected === true) return vr;
+
       // no displayedRate match for this variantRate
-      return vr;
     }
   });
 

@@ -99,8 +99,14 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen justify-center items-center">
-        <p>Loading...</p>
+      <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-[#F6F8FB]">
+        <Image
+          src={"/logo.png"}
+          width={300}
+          height={300}
+          alt="Obaol"
+          className="w-max rounded-md"
+        />
       </div>
     );
   }

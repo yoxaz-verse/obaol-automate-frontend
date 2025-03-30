@@ -127,6 +127,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
         } else {
           variantRateFetchedData = variantRateData?.data || [];
         }
+
+        console.log("variantRateData");
+        console.log(variantRateData);
+
         // Transform the rows if needed
         const tableData = variantRateFetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -144,7 +148,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
           } else {
             // displayedRate
             console.log(item);
-            
+
             return {
               ...rest,
               rate: item.variantRate?.rate,
@@ -463,12 +467,16 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
  *
  * Returns a new array of objects from the first array,
  * each possibly augmented with a `.displayedRate` property from the second array.
+ *
+ * Only returns items if either:
+ *  - they have a displayedRate match, OR
+ *  - they are `selected = true`.
  */
 function mergeVariantAndDisplayedOnce(
   variantRates: any[],
   displayedRates: any[]
 ) {
-  // 1) Create a map of variantRate._id => displayedRate object
+  // 1) Create a map of variantRate._id => the entire displayedRate object
   const displayedMap = new Map<string, any>();
   for (const dr of displayedRates) {
     const drVariantId = dr.variantRate?._id;
@@ -477,31 +485,28 @@ function mergeVariantAndDisplayedOnce(
     }
   }
 
-  // 2) For each variantRate item, see if there's a displayedRate match
+  // 2) For each variantRate item, check for displayedRate match
   const merged = variantRates.map((vr) => {
     const match = displayedMap.get(vr._id);
-    console.log(match);
 
     if (match) {
       // Found a displayedRate referencing the same variantRate
-      // a) attach the entire match
-      const mergedItem = {
+      // Example: attach match in "displayedRate" field
+      return {
         ...vr,
-        // displayedRate: match,
+        displayedRate: match,
       };
-
-      // b) Remove from map so we don't reuse this displayedRate for another VR
-      // displayedMap.delete(vr._id);
-
-      return mergedItem;
     } else {
-      console.log(vr);
-
-      if (vr.selected === true) return vr;
-
-      // no displayedRate match for this variantRate
+      // No displayedRate match for this variantRate
+      // Keep it only if `selected === true`
+      if (vr.selected === true) {
+        return vr;
+      }
+      // Otherwise return undefined => will be filtered out below
+      return undefined;
     }
   });
 
-  return merged;
+  // 3) Filter out any undefined or null
+  return merged.filter(Boolean);
 }

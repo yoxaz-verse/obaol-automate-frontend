@@ -177,7 +177,10 @@ export default function CommonTable({
 
   return (
     <Table
-      aria-label="Table with custom actions" //Translate
+      isVirtualized
+      isStriped
+      isCompact
+      color="warning"
       bottomContent={
         <div className="flex w-full justify-center">
           <Pagination

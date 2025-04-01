@@ -70,6 +70,7 @@ export default function EnquiryPage() {
         2) We fetch the Enquiries list and display them in a CommonTable (or similar).
            We'll use a <QueryComponent> or you can do a direct custom fetch approach.
        */}
+
       <QueryComponent
         api={apiRoutesByRole["enquiry"]} // e.g. "/api/enquiries"
         queryKey={["enquiry"]}
@@ -82,6 +83,140 @@ export default function EnquiryPage() {
           const enquiriesData = enquiryResponse?.data || [];
           // Transform the rows if needed
           console.log(enquiriesData);
+          const DDdata = [
+            {
+              _id: "67e2e8f3e1ed9d497293ee6e",
+              phoneNumber: "452312",
+              name: "Jacob",
+              variantRate: {
+                _id: "67d7f7963a643f0618596309",
+                rate: 2121,
+                selected: true,
+                productVariant: "67d7f0903a643f06185961e1",
+                associate: "67d7f77f3a643f06185962e1",
+                isLive: true,
+                createdAt: "2025-03-17T10:21:10.123Z",
+                __v: 0,
+                commission: 11,
+              },
+              displayRate: null,
+              productVariant: {
+                _id: "67d7f0903a643f06185961e1",
+                name: "Cardamom 8mm",
+                description: "A Quality",
+                isAvailable: true,
+                isLive: true,
+                product: "67d7f0433a643f06185961da",
+                createdAt: "2025-03-17T09:51:12.176Z",
+                __v: 0,
+              },
+              mediatorAssociate: null,
+              productAssociate: {
+                _id: "67d7ef493a643f061859617e",
+                name: "Athi K Ani",
+                email: "athi@obaol.com",
+                phone: "2313132231",
+                phoneSecondary: "7306096942",
+                associateCompany: "67d7ef183a643f0618596150",
+                password:
+                  "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
+                role: "Associate",
+                createdAt: "2025-03-17T09:45:45.769Z",
+                updatedAt: "2025-03-17T09:45:45.769Z",
+                __v: 0,
+              },
+              createdAt: "2025-03-25T17:33:39.552Z",
+              __v: 0,
+            },
+            {
+              _id: "67e2e929e1ed9d497293eeaf",
+              phoneNumber: "7306096941",
+              name: "JACOB ALWIN",
+              variantRate: {
+                _id: "67d7f7963a643f0618596309",
+                rate: 2121,
+                selected: true,
+                productVariant: "67d7f0903a643f06185961e1",
+                associate: "67d7f77f3a643f06185962e1",
+                isLive: true,
+                createdAt: "2025-03-17T10:21:10.123Z",
+                __v: 0,
+                commission: 11,
+              },
+              displayRate: null,
+              productVariant: {
+                _id: "67d7f0903a643f06185961e1",
+                name: "Cardamom 8mm",
+                description: "A Quality",
+                isAvailable: true,
+                isLive: true,
+                product: "67d7f0433a643f06185961da",
+                createdAt: "2025-03-17T09:51:12.176Z",
+                __v: 0,
+              },
+              mediatorAssociate: null,
+              productAssociate: {
+                _id: "67d7ef493a643f061859617e",
+                name: "Athi K Ani",
+                email: "athi@obaol.com",
+                phone: "2313132231",
+                phoneSecondary: "7306096942",
+                associateCompany: "67d7ef183a643f0618596150",
+                password:
+                  "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
+                role: "Associate",
+                createdAt: "2025-03-17T09:45:45.769Z",
+                updatedAt: "2025-03-17T09:45:45.769Z",
+                __v: 0,
+              },
+              createdAt: "2025-03-25T17:34:33.201Z",
+              __v: 0,
+            },
+            {
+              _id: "67e2ec96e1ed9d497293efa2",
+              phoneNumber: "7306096941",
+              name: "JJJOom ",
+              variantRate: {
+                _id: "67d7f6f13a643f0618596258",
+                rate: 23450,
+                selected: true,
+                productVariant: "67d7f0903a643f06185961e1",
+                associate: "67d7ef493a643f061859617e",
+                isLive: true,
+                createdAt: "2025-03-17T10:18:25.696Z",
+                __v: 0,
+                commission: 10,
+              },
+              displayRate: null,
+              productVariant: {
+                _id: "67d7f0903a643f06185961e1",
+                name: "Cardamom 8mm",
+                description: "A Quality",
+                isAvailable: true,
+                isLive: true,
+                product: "67d7f0433a643f06185961da",
+                createdAt: "2025-03-17T09:51:12.176Z",
+                __v: 0,
+              },
+              mediatorAssociate: null,
+              productAssociate: {
+                _id: "67d7ef493a643f061859617e",
+                name: "Athi K Ani",
+                email: "athi@obaol.com",
+                phone: "2313132231",
+                phoneSecondary: "7306096942",
+                associateCompany: "67d7ef183a643f0618596150",
+                password:
+                  "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
+                role: "Associate",
+                createdAt: "2025-03-17T09:45:45.769Z",
+                updatedAt: "2025-03-17T09:45:45.769Z",
+                __v: 0,
+              },
+              createdAt: "2025-03-25T17:49:10.573Z",
+              __v: 0,
+            },
+          ];
           const tableData = enquiriesData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
 
@@ -95,8 +230,10 @@ export default function EnquiryPage() {
               // variantRate: item.variantRate.rate + item.variantRate.commission,
               // displayedRate:
               //   item.variantRate.rate + item.variantRate.displayRate.commission,
+              product: item.productVariant.product.name,
               productVariant: item.productVariant.name,
               productAssociate: item.productAssociate.name,
+              associateCompany: item.productAssociate.associateCompany.name,
               mediatorAssociate: item.mediatorAssociate?.name || "N/A",
             };
           });

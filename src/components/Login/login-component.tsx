@@ -36,6 +36,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
     "Customer",
     "Worker",
   ];
+
   const router = useRouter();
   const { isAuthenticated, loading, login } = useContext(AuthContext);
 

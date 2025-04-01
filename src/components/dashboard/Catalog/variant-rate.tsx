@@ -128,9 +128,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
           variantRateFetchedData = variantRateData?.data || [];
         }
 
-        console.log("variantRateData");
-        console.log(variantRateData);
-
         // Transform the rows if needed
         const tableData = variantRateFetchedData.map((item: any) => {
           const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -143,11 +140,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   : "OBAOL",
               associateId: item.associate._id,
               productVariant: item.productVariant.name,
+              product: item.productVariant?.product?.name,
               productVariantId: item.productVariant._id,
             };
           } else {
             // displayedRate
-            console.log(item);
 
             return {
               ...rest,
@@ -462,51 +459,184 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 };
 
 /**
- * Merges `variantRates` with `displayedRates` by matching
- *   firstArrayItem._id === secondArrayItem.variantRate._id
+ * Merges two arrays—one of variantRates and one of displayedRates—by matching
+ * variantRates._id with displayedRate.variantRate._id.
  *
- * Returns a new array of objects from the first array,
- * each possibly augmented with a `.displayedRate` property from the second array.
+ * When a match is found, it merges:
+ *  - The base variantRate (vr)
+ *  - The properties from the nested displayedRate.variantRate (which may override vr)
+ *  - The additional properties from the displayedRate (like commission, selected, etc.)
  *
- * Only returns items if either:
- *  - they have a displayedRate match, OR
- *  - they are `selected = true`.
+ * The nested "variantRate" property is removed so that all keys appear at the top level.
+ * If no displayedRate match is found, the variantRate is only returned if it is selected.
+ *
+ * @param {Array} variantRates - Array of variantRate objects.
+ * @param {Array} displayedRates - Array of displayedRate objects.
+ * @returns {Array} - New array with merged objects.
  */
+
 function mergeVariantAndDisplayedOnce(
   variantRates: any[],
   displayedRates: any[]
 ) {
-  // 1) Create a map of variantRate._id => the entire displayedRate object
-  const displayedMap = new Map<string, any>();
-  for (const dr of displayedRates) {
-    const drVariantId = dr.variantRate?._id;
-    if (drVariantId) {
-      displayedMap.set(drVariantId, dr);
-    }
-  }
+  // 1) Remove displayedRates whose variantRate._id is found in variantRates
+  const variantRateIds = new Set(variantRates.map((vr) => vr._id));
+  console.log(variantRateIds);
 
-  // 2) For each variantRate item, check for displayedRate match
-  const merged = variantRates.map((vr) => {
-    const match = displayedMap.get(vr._id);
+  const filteredDisplayedRates = displayedRates.filter(
+    (dr) => !variantRateIds.has(dr.variantRate?._id)
+  );
+  console.log(filteredDisplayedRates);
 
-    if (match) {
-      // Found a displayedRate referencing the same variantRate
-      // Example: attach match in "displayedRate" field
-      return {
-        ...vr,
-        displayedRate: match,
-      };
-    } else {
-      // No displayedRate match for this variantRate
-      // Keep it only if `selected === true`
-      if (vr.selected === true) {
-        return vr;
-      }
-      // Otherwise return undefined => will be filtered out below
-      return undefined;
-    }
-  });
+  console.log([...variantRates, ...filteredDisplayedRates]);
 
-  // 3) Filter out any undefined or null
-  return merged.filter(Boolean);
+  // 2) Combine remaining displayedRates with variantRates
+  return [...variantRates, ...filteredDisplayedRates];
 }
+/* ============================
+   Example Usage:
+   ============================
+Assume you have two arrays: one for variantRates and one for displayedRates.
+Below are sample objects similar to your provided data.
+*/
+
+[
+  {
+    _id: "67d7f6f13a643f0618596258",
+    rate: 23450,
+    selected: true,
+    productVariant: {
+      _id: "67d7f0903a643f06185961e1",
+      name: "Cardamom 8mm",
+      description: "A Quality",
+      isAvailable: true,
+      isLive: true,
+      product: "67d7f0433a643f06185961da",
+      createdAt: "2025-03-17T09:51:12.176Z",
+      __v: 0,
+    },
+    associate: {
+      _id: "67d7ef493a643f061859617e",
+      name: "Athi K Ani",
+      email: "athi@obaol.com",
+      phone: "2313132231",
+      phoneSecondary: "7306096942",
+      associateCompany: "67d7ef183a643f0618596150",
+      password: "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
+      role: "Associate",
+      createdAt: "2025-03-17T09:45:45.769Z",
+      updatedAt: "2025-03-17T09:45:45.769Z",
+      __v: 0,
+    },
+    isLive: true,
+    createdAt: "2025-03-17T10:18:25.696Z",
+    __v: 0,
+  },
+  {
+    _id: "67d7f7963a643f0618596309",
+    rate: 2121,
+    selected: true,
+    productVariant: {
+      _id: "67d7f0903a643f06185961e1",
+      name: "Cardamom 8mm",
+      description: "A Quality",
+      isAvailable: true,
+      isLive: true,
+      product: "67d7f0433a643f06185961da",
+      createdAt: "2025-03-17T09:51:12.176Z",
+      __v: 0,
+    },
+    associate: {
+      _id: "67d7f77f3a643f06185962e1",
+      name: "patricia",
+      email: "patricia@obaol.com",
+      phone: "2313132231",
+      phoneSecondary: "2313132231",
+      associateCompany: "67d7ef183a643f0618596150",
+      password: "$2a$10$6V5L59kKEozJwKI84fMxH.Aw1nuWU3dmVxlN2ZW2Kr3FJDU8xi8Ey",
+      role: "Associate",
+      createdAt: "2025-03-17T10:20:47.214Z",
+      updatedAt: "2025-03-17T10:20:47.214Z",
+      __v: 0,
+    },
+    isLive: true,
+    createdAt: "2025-03-17T10:21:10.123Z",
+    __v: 0,
+  },
+  {
+    _id: "67d7f7a23a643f0618596313",
+    rate: 2321,
+    selected: false,
+    productVariant: {
+      _id: "67d7f0903a643f06185961e1",
+      name: "Cardamom 8mm",
+      description: "A Quality",
+      isAvailable: true,
+      isLive: true,
+      product: "67d7f0433a643f06185961da",
+      createdAt: "2025-03-17T09:51:12.176Z",
+      __v: 0,
+    },
+    associate: {
+      _id: "67d7f77f3a643f06185962e1",
+      name: "patricia",
+      email: "patricia@obaol.com",
+      phone: "2313132231",
+      phoneSecondary: "2313132231",
+      associateCompany: "67d7ef183a643f0618596150",
+      password: "$2a$10$6V5L59kKEozJwKI84fMxH.Aw1nuWU3dmVxlN2ZW2Kr3FJDU8xi8Ey",
+      role: "Associate",
+      createdAt: "2025-03-17T10:20:47.214Z",
+      updatedAt: "2025-03-17T10:20:47.214Z",
+      __v: 0,
+    },
+    isLive: false,
+    createdAt: "2025-03-17T10:21:22.798Z",
+    __v: 0,
+  },
+  {
+    _id: "67e7e9b46636fac1fae8437c",
+    variantRate: {
+      _id: "67e7a8f7bfe8f3d044efdbaf",
+      rate: 2750,
+      selected: true,
+      productVariant: {
+        _id: "67e7a8c0bfe8f3d044efdb6c",
+        name: "7mm",
+        product: { _id: "67d7f0433a643f06185961da", name: "Cardamom" },
+      },
+      associate: "67e7a86abfe8f3d044efdb20",
+      isLive: true,
+      createdAt: "2025-03-29T08:01:59.242Z",
+      __v: 0,
+      commission: 50,
+    },
+    commission: 43,
+    selected: true,
+    associate: {
+      _id: "67d7ef493a643f061859617e",
+      name: "Athi K Ani",
+      email: "athi@obaol.com",
+      phone: "2313132231",
+      phoneSecondary: "7306096942",
+      associateCompany: "67d7ef183a643f0618596150",
+      password: "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
+      role: "Associate",
+      createdAt: "2025-03-17T09:45:45.769Z",
+      updatedAt: "2025-03-17T09:45:45.769Z",
+      __v: 0,
+    },
+    associateCompany: {
+      _id: "67d7ef183a643f0618596150",
+      name: "OBAOL",
+      email: "exports@obaol.com",
+      phone: "7306096942",
+      location: "67d7eed43a643f061859612b",
+      phoneSecondary: "2313132231",
+      createdAt: "2025-03-17T09:44:56.002Z",
+      updatedAt: "2025-03-17T09:44:56.002Z",
+      __v: 0,
+    },
+    __v: 0,
+  },
+];

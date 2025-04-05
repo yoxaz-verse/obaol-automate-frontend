@@ -4,6 +4,7 @@ import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Spinner } from "@nextui-org/react";
+import Image from "next/image";
 
 interface QueryComponentProps<T> {
   api: string;
@@ -36,7 +37,21 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     toast.loading(`Fetching API for ${queryKey.join(", ")}`, {
       position: "top-right",
     });
-    return <Spinner label="Loading..." color="primary" labelColor="primary" />; //Translate
+    return (
+      <div className="flex h-full py-4 relative w-full m-0 p-0 justify-center items-center flex-col ">
+        <Image
+          src={"/logo.png"}
+          width={200}
+          height={200}
+          alt="Obaol"
+          className="w-max rounded-md"
+        />
+        <b className="text-warning-400">
+          Loading ..
+          <span className="text-black">.</span>
+        </b>
+      </div>
+    ); //Translate
   }
 
   if (isError) {

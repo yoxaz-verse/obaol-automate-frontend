@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Spacer } from "@heroui/react";
 import {
   Button,
+  Card,
+  CardBody,
   Chip,
   Input,
   Modal,
@@ -12,6 +14,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Slider,
   Switch,
   useDisclosure,
 } from "@nextui-org/react";
@@ -28,6 +31,7 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
+import Image from "next/image";
 
 /**
  * Props for your existing VariantRate component
@@ -155,6 +159,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
             };
           }
         });
+        console.log("tableData");
+        console.log(tableData);
+
         return (
           <>
             {!displayOnly && rate === "variantRate" && (
@@ -171,50 +178,137 @@ const VariantRate: React.FC<VariantRateProps> = ({
               />
             )}
             <Spacer y={5} />
-            <CommonTable
-              TableData={tableData}
-              columns={columns}
-              isLoading={false}
-              otherModal={(rowItem: any) => {
-                return (
-                  <div className="flex w-full gap-8 items-end justify-end">
-                    {/* Commission / selection logic */}
-                    {rowItem.associateId !== user?.id ? (
-                      <SelectModal
-                        variantRate={rowItem}
-                        refetchData={refetchData}
-                      />
-                    ) : (
-                      rowItem.associateId === user?.id &&
-                      user?.id !== undefined && <p>Your Rate</p>
-                    )}
-                    {/* LiveToggle if user is Admin or the same associate */}
-                    {user?.role === "Admin" ||
-                    (rowItem.associateId === user?.id &&
-                      user?.id !== undefined) ? (
-                      <LiveToggle
-                        variantRate={rowItem}
-                        refetchData={refetchData}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Chip color="success" variant="dot">
-                          Live
-                        </Chip>
-                        {/* CreateEnquiry if user is Admin or rowItem.associateId != user */}
-                        <CreateEnquiryButton
-                          productVariant={
-                            rowItem.productVariantId ||
-                            rowItem.variantRate.productVariant._id
-                          }
+            <section className="hidden md:block">
+              <CommonTable
+                TableData={tableData}
+                columns={columns}
+                isLoading={false}
+                otherModal={(rowItem: any) => {
+                  return (
+                    <div className="flex w-full gap-8 items-end justify-end">
+                      {/* Commission / selection logic */}
+                      {rowItem.associateId !== user?.id ? (
+                        <SelectModal
                           variantRate={rowItem}
+                          refetchData={refetchData}
                         />
+                      ) : (
+                        rowItem.associateId === user?.id &&
+                        user?.id !== undefined && (
+                          <b className="text-warning-300">Your Rate</b>
+                        )
+                      )}
+                      {/* LiveToggle if user is Admin or the same associate */}
+                      {user?.role === "Admin" ||
+                      (rowItem.associateId === user?.id &&
+                        user?.id !== undefined) ? (
+                        <LiveToggle
+                          variantRate={rowItem}
+                          refetchData={refetchData}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Chip color="success" variant="dot">
+                            Live
+                          </Chip>
+                          {/* CreateEnquiry if user is Admin or rowItem.associateId != user */}
+                          <CreateEnquiryButton
+                            productVariant={
+                              rowItem.productVariantId ||
+                              rowItem.variantRate.productVariant._id
+                            }
+                            variantRate={rowItem}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
+              />
+            </section>
+            <section className="md:hidden block">
+              {tableData.map((item: any, index: number) => (
+                <Card
+                  key={index}
+                  isBlurred
+                  className="border-none bg-background/60 my-2  dark:bg-default-100/50 max-w-full"
+                  shadow="sm"
+                >
+                  <CardBody>
+                    <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
+                      {/* Album Cover (optional)
+        <div className="relative col-span-6 md:col-span-4">
+          <Image
+            alt="Album cover"
+            className="object-cover"
+            height={200}
+            src="https://heroui.com/images/album-cover.png"
+          />
+        </div>
+        */}
+
+                      <div className="flex flex-col col-span-6 md:col-span-8">
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-col gap-0">
+                            <h3 className="font-semibold text-foreground/90">
+                              {item.productName || "Product"}
+                            </h3>
+                            <p className="text-small text-foreground/80">
+                              {item.productVariant || "Product Variant"}
+                            </p>
+                            <h1 className="text-large font-medium mt-2">
+                              {item.rate || "Price"}
+                            </h1>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex w-full gap-8 items-end justify-end">
+                              {user?.role === "Admin" ||
+                              (item.associateId === user?.id &&
+                                user?.id !== undefined) ? (
+                                <LiveToggle
+                                  variantRate={item}
+                                  refetchData={refetchData}
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                  {/* CreateEnquiry if user is Admin or item.associateId != user */}
+                                  <CreateEnquiryButton
+                                    productVariant={
+                                      item.productVariantId ||
+                                      item.variantRate.productVariant._id
+                                    }
+                                    variantRate={item}
+                                  />
+                                  <Chip color="success" variant="dot">
+                                    Live
+                                  </Chip>{" "}
+                                </div>
+                              )}{" "}
+                              {/* LiveToggle if user is Admin or the same associate */}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col mt-3 gap-1">
+                          {/* Commission / selection logic */}
+                          {item.associateId !== user?.id ? (
+                            <SelectModal
+                              variantRate={item}
+                              refetchData={refetchData}
+                            />
+                          ) : (
+                            item.associateId === user?.id &&
+                            user?.id !== undefined && (
+                              <b className="text-warning-300">Your Rate</b>
+                            )
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              }}
-            />
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </section>
           </>
         );
       }}
@@ -493,150 +587,3 @@ function mergeVariantAndDisplayedOnce(
   // 2) Combine remaining displayedRates with variantRates
   return [...variantRates, ...filteredDisplayedRates];
 }
-/* ============================
-   Example Usage:
-   ============================
-Assume you have two arrays: one for variantRates and one for displayedRates.
-Below are sample objects similar to your provided data.
-*/
-
-[
-  {
-    _id: "67d7f6f13a643f0618596258",
-    rate: 23450,
-    selected: true,
-    productVariant: {
-      _id: "67d7f0903a643f06185961e1",
-      name: "Cardamom 8mm",
-      description: "A Quality",
-      isAvailable: true,
-      isLive: true,
-      product: "67d7f0433a643f06185961da",
-      createdAt: "2025-03-17T09:51:12.176Z",
-      __v: 0,
-    },
-    associate: {
-      _id: "67d7ef493a643f061859617e",
-      name: "Athi K Ani",
-      email: "athi@obaol.com",
-      phone: "2313132231",
-      phoneSecondary: "7306096942",
-      associateCompany: "67d7ef183a643f0618596150",
-      password: "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
-      role: "Associate",
-      createdAt: "2025-03-17T09:45:45.769Z",
-      updatedAt: "2025-03-17T09:45:45.769Z",
-      __v: 0,
-    },
-    isLive: true,
-    createdAt: "2025-03-17T10:18:25.696Z",
-    __v: 0,
-  },
-  {
-    _id: "67d7f7963a643f0618596309",
-    rate: 2121,
-    selected: true,
-    productVariant: {
-      _id: "67d7f0903a643f06185961e1",
-      name: "Cardamom 8mm",
-      description: "A Quality",
-      isAvailable: true,
-      isLive: true,
-      product: "67d7f0433a643f06185961da",
-      createdAt: "2025-03-17T09:51:12.176Z",
-      __v: 0,
-    },
-    associate: {
-      _id: "67d7f77f3a643f06185962e1",
-      name: "patricia",
-      email: "patricia@obaol.com",
-      phone: "2313132231",
-      phoneSecondary: "2313132231",
-      associateCompany: "67d7ef183a643f0618596150",
-      password: "$2a$10$6V5L59kKEozJwKI84fMxH.Aw1nuWU3dmVxlN2ZW2Kr3FJDU8xi8Ey",
-      role: "Associate",
-      createdAt: "2025-03-17T10:20:47.214Z",
-      updatedAt: "2025-03-17T10:20:47.214Z",
-      __v: 0,
-    },
-    isLive: true,
-    createdAt: "2025-03-17T10:21:10.123Z",
-    __v: 0,
-  },
-  {
-    _id: "67d7f7a23a643f0618596313",
-    rate: 2321,
-    selected: false,
-    productVariant: {
-      _id: "67d7f0903a643f06185961e1",
-      name: "Cardamom 8mm",
-      description: "A Quality",
-      isAvailable: true,
-      isLive: true,
-      product: "67d7f0433a643f06185961da",
-      createdAt: "2025-03-17T09:51:12.176Z",
-      __v: 0,
-    },
-    associate: {
-      _id: "67d7f77f3a643f06185962e1",
-      name: "patricia",
-      email: "patricia@obaol.com",
-      phone: "2313132231",
-      phoneSecondary: "2313132231",
-      associateCompany: "67d7ef183a643f0618596150",
-      password: "$2a$10$6V5L59kKEozJwKI84fMxH.Aw1nuWU3dmVxlN2ZW2Kr3FJDU8xi8Ey",
-      role: "Associate",
-      createdAt: "2025-03-17T10:20:47.214Z",
-      updatedAt: "2025-03-17T10:20:47.214Z",
-      __v: 0,
-    },
-    isLive: false,
-    createdAt: "2025-03-17T10:21:22.798Z",
-    __v: 0,
-  },
-  {
-    _id: "67e7e9b46636fac1fae8437c",
-    variantRate: {
-      _id: "67e7a8f7bfe8f3d044efdbaf",
-      rate: 2750,
-      selected: true,
-      productVariant: {
-        _id: "67e7a8c0bfe8f3d044efdb6c",
-        name: "7mm",
-        product: { _id: "67d7f0433a643f06185961da", name: "Cardamom" },
-      },
-      associate: "67e7a86abfe8f3d044efdb20",
-      isLive: true,
-      createdAt: "2025-03-29T08:01:59.242Z",
-      __v: 0,
-      commission: 50,
-    },
-    commission: 43,
-    selected: true,
-    associate: {
-      _id: "67d7ef493a643f061859617e",
-      name: "Athi K Ani",
-      email: "athi@obaol.com",
-      phone: "2313132231",
-      phoneSecondary: "7306096942",
-      associateCompany: "67d7ef183a643f0618596150",
-      password: "$2a$10$z2KIfq/x681L3/nXyDuw7uxY0mpkMYTx6yYNdMfRHufXKuNh757Z6",
-      role: "Associate",
-      createdAt: "2025-03-17T09:45:45.769Z",
-      updatedAt: "2025-03-17T09:45:45.769Z",
-      __v: 0,
-    },
-    associateCompany: {
-      _id: "67d7ef183a643f0618596150",
-      name: "OBAOL",
-      email: "exports@obaol.com",
-      phone: "7306096942",
-      location: "67d7eed43a643f061859612b",
-      phoneSecondary: "2313132231",
-      createdAt: "2025-03-17T09:44:56.002Z",
-      updatedAt: "2025-03-17T09:44:56.002Z",
-      __v: 0,
-    },
-    __v: 0,
-  },
-];

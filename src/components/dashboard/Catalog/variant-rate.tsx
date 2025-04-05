@@ -251,7 +251,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         <div className="flex justify-between items-start">
                           <div className="flex flex-col gap-0">
                             <h3 className="font-semibold text-foreground/90">
-                              {item.productName || "Product"}
+                              {item.product || "Product"}
                             </h3>
                             <p className="text-small text-foreground/80">
                               {item.productVariant || "Product Variant"}

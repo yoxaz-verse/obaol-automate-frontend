@@ -2,28 +2,14 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import { Button, Spacer } from "@heroui/react";
-import { initialTableConfig } from "@/utils/tableValues";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
-import { subCategoryRoutes } from "@/core/api/apiRoutes";
+import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import AuthContext from "@/context/AuthContext";
 
 export default function Product() {
-  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
   const [currentTable, setCurrentTable] = useState("selected"); // Default role set to 'manager'
 
-  const tables = [
-    { key: "selected", title: "Selected Products" }, // Translate Title
-    { key: "mine", title: "My Products" }, // Translate Title
-    { key: "selectMore", title: "Add More" }, // Translate Title
-    // { key: "worker", title: "Staff" },// Translate Title
-  ];
   const { user } = useContext(AuthContext);
 
   return (

@@ -131,6 +131,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         } else {
           variantRateFetchedData = variantRateData?.data || [];
         }
+        console.log(variantRateFetchedData);
 
         // Transform the rows if needed
         const tableData = variantRateFetchedData.map((item: any) => {
@@ -159,7 +160,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
             };
           }
         });
-        console.log("tableData");
         console.log(tableData);
 
         return (
@@ -199,7 +199,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         )
                       )}
                       {/* LiveToggle if user is Admin or the same associate */}
-                      {user?.role === "Admin" ||
+                      {(!VariantRateMixed && user?.role === "Admin") ||
                       (rowItem.associateId === user?.id &&
                         user?.id !== undefined) ? (
                         <LiveToggle

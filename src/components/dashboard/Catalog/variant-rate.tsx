@@ -405,16 +405,17 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         placement={"center"}
         isDismissable={false}
         isOpen={isOpen}
-        className="max-w-full max-h-full"
+        className="max-w-[600px] max-h-full"
         onOpenChange={onOpenChange}
       >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Enquiry for {variantRate.product} {variantRate.productVariant}{" "}
+                Enquiry for {variantRate.product}{" "}
               </ModalHeader>
               <ModalBody>
+                Variant: {variantRate.productVariant}
                 <AddEnquiryForm
                   productVariant={productVariant}
                   variantRate={variantRate}
@@ -522,27 +523,31 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       className="border p-2 rounded flex flex-col gap-2"
     >
       <div>
-        <label className="block text-sm font-medium">Phone Number</label>
+        {/* <label className="block text-sm font-medium"></label> */}
         <Input
-          className="border px-2 py-1 w-full"
+          label={"Phone Number"}
+          // labelPlacement="outside"
+          className=" px-2 py-1 w-full"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium">Name</label>
         <Input
-          className="border px-2 py-1 w-full"
+          label={"Name"}
+          // labelPlacement="outside"
+          className=" px-2 py-1 w-full"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium">Quantity in Tons</label>
         <Input
-          className="border px-2 py-1 w-full"
+          label="Quantity in Tons"
+          // labelPlacement="outside"
+          className=" px-2 py-1 w-full"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
         />
@@ -550,7 +555,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       <Button
         type="submit"
         disabled={isLoading}
-        className="bg-blue-600 text-white px-3 py-1 rounded"
+        className="bg-warning text-white px-3 py-1 "
       >
         {isLoading ? "Creating..." : "Create Enquiry"}
       </Button>

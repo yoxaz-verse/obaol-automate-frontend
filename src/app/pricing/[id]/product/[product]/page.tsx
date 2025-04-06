@@ -4,7 +4,11 @@ import { useContext, useState } from "react";
 
 import { usePathname } from "next/navigation";
 import React from "react";
-import { generateColumns, initialTableConfig } from "@/utils/tableValues";
+import {
+  apiRoutesByRole,
+  generateColumns,
+  initialTableConfig,
+} from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 const Projects: NextPage = () => {
@@ -23,7 +27,7 @@ const Projects: NextPage = () => {
 
   return (
     <div className="flex items-center justify-center ">
-      <div className="w-[95%]  ">Yooooooooo</div>
+      <div className="w-[95%]  ">product {pathname}</div>
     </div>
   );
 };

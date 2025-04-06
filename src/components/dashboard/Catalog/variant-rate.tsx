@@ -397,11 +397,17 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-2 ">
       <Button onPress={onOpen} color="success" variant="flat">
         Enquiry
       </Button>
-      <Modal isDismissable={false} isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        placement={"center"}
+        isDismissable={false}
+        isOpen={isOpen}
+        className="max-w-full max-h-full"
+        onOpenChange={onOpenChange}
+      >
         <ModalContent>
           {(onClose) => (
             <>

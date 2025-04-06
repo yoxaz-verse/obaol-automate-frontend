@@ -19,7 +19,7 @@ export default function Product() {
   const [currentTable, setCurrentTable] = useState("selected"); // Default role set to 'manager'
 
   const tables = [
-    { key: "selected", title: "Selected Products Variants" }, // Translate Title
+    { key: "selected", title: "Selected Products" }, // Translate Title
     { key: "mine", title: "My Products" }, // Translate Title
     { key: "selectMore", title: "Add More" }, // Translate Title
     // { key: "worker", title: "Staff" },// Translate Title
@@ -38,7 +38,7 @@ export default function Product() {
                 selectedKey={currentTable}
                 onSelectionChange={(key) => setCurrentTable(key as string)}
               >
-                <Tab key={"selected"} title={"Selected Products Variants"}>
+                <Tab key={"selected"} title={"Products"}>
                   {/* Render UserTabContent for the current table */}
                   <VariantRate
                     rate={
@@ -62,7 +62,7 @@ export default function Product() {
                     }
                   />
                 </Tab>
-                <Tab key={"selectMore"} title={"Add More"}>
+                <Tab key={"selectMore"} title={"More"}>
                   {/* Render UserTabContent for the current table */}
                   <VariantRate rate="variantRate" />
                 </Tab>

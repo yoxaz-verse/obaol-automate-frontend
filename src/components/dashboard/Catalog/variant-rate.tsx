@@ -70,7 +70,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
     enabled: rate === "variantRate" && user?.role === "Admin",
   });
 
+  // If we only fetch associates if "rate" is "variantRate"
+  const { data: associateByIdResponse } = useQuery({
+    queryKey: ["associate", user?.id],
+    queryFn: () => getData(`${associateRoutes.getAll}/${user?.id}`),
+    enabled: user?.role === "Associate",
+  });
+
   const associateValue = associateResponse?.data?.data?.data;
+  const associateByIdValue = associateByIdResponse?.data;
+  console.log(associateByIdValue);
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: variantResponse } = useQuery({
@@ -144,9 +153,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   ? item.associate.name
                   : "OBAOL",
               associateId: item.associate._id,
-              productVariant: item.productVariant.name,
+              companyId: item.associate.associateCompany,
+              productVariant: item.productVariant?.name,
               product: item.productVariant?.product?.name,
-              productVariantId: item.productVariant._id,
+              productVariantId: item.productVariant?._id,
             };
           } else {
             // displayedRate
@@ -154,13 +164,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
             return {
               ...rest,
               rate: item.variantRate?.rate,
-              // associateId: item.associate._id,
+              associateId: item.associate._id,
+              companyId: item.associate.associateCompany,
               productVariant: item.variantRate?.productVariant?.name,
               product: item.variantRate?.productVariant?.product?.name,
             };
           }
         });
-        console.log(tableData);
 
         return (
           <>
@@ -187,20 +197,32 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   return (
                     <div className="flex w-full gap-8 items-end justify-end">
                       {/* Commission / selection logic */}
-                      {rowItem.associateId !== user?.id ? (
+
+                      {(rowItem.variantRate &&
+                        rowItem.associateId === user?.id) ||
+                      (rowItem.associateId !== user?.id &&
+                        rowItem.companyId !==
+                          associateByIdValue?.associateCompany?._id) ? (
                         <SelectModal
                           variantRate={rowItem}
                           refetchData={refetchData}
                         />
-                      ) : (
-                        rowItem.associateId === user?.id &&
-                        user?.id !== undefined && (
-                          <b className="text-warning-300">Your Rate</b>
-                        )
-                      )}
-                      {/* LiveToggle if user is Admin or the same associate */}
+                      ) : user?.id !== undefined ? (
+                        <>
+                          {rowItem.associateId === user.id ? (
+                            <b className="text-warning-200">Own Rate</b>
+                          ) : (
+                            rowItem.companyId ===
+                              associateByIdValue?.associateCompany?._id && (
+                              <b className="text-warning-200">Company Rate</b>
+                            )
+                          )}
+                        </>
+                      ) : null}
+                      {/* LiveToggle or Live Chip + Enquiry Button */}
                       {(!VariantRateMixed && user?.role === "Admin") ||
-                      (rowItem.associateId === user?.id &&
+                      (!rowItem.variantRate &&
+                        rowItem.associateId === user?.id &&
                         user?.id !== undefined) ? (
                         <LiveToggle
                           variantRate={rowItem}
@@ -211,11 +233,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           <Chip color="success" variant="dot">
                             Live
                           </Chip>
-                          {/* CreateEnquiry if user is Admin or rowItem.associateId != user */}
                           <CreateEnquiryButton
                             productVariant={
                               rowItem.productVariantId ||
-                              rowItem.variantRate.productVariant._id
+                              rowItem.variantRate?.productVariant?._id
                             }
                             variantRate={rowItem}
                           />
@@ -260,48 +281,59 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               {item.rate || "Price"}
                             </h1>
                           </div>
+
                           <div className="flex items-center gap-2">
-                            <div className="flex w-full gap-8 items-end justify-end">
-                              {user?.role === "Admin" ||
-                              (item.associateId === user?.id &&
-                                user?.id !== undefined) ? (
-                                <LiveToggle
+                            {/* LiveToggle or Live indicator with Enquiry for non-Admin */}
+                            {user?.role === "Admin" ||
+                            (!item.variantRate &&
+                              item.associateId === user?.id &&
+                              user?.id !== undefined) ? (
+                              <LiveToggle
+                                variantRate={item}
+                                refetchData={refetchData}
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center gap-2">
+                                <CreateEnquiryButton
+                                  productVariant={
+                                    item.productVariantId ||
+                                    item.variantRate.productVariant._id
+                                  }
                                   variantRate={item}
-                                  refetchData={refetchData}
                                 />
-                              ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  {/* CreateEnquiry if user is Admin or item.associateId != user */}
-                                  <CreateEnquiryButton
-                                    productVariant={
-                                      item.productVariantId ||
-                                      item.variantRate.productVariant._id
-                                    }
-                                    variantRate={item}
-                                  />
-                                  <Chip color="success" variant="dot">
-                                    Live
-                                  </Chip>{" "}
-                                </div>
-                              )}{" "}
-                              {/* LiveToggle if user is Admin or the same associate */}
-                            </div>
+                                <Chip color="success" variant="dot">
+                                  Live
+                                </Chip>
+                              </div>
+                            )}
                           </div>
                         </div>
 
+                        {/* Commission / selection logic */}
                         <div className="flex flex-col mt-3 gap-1">
-                          {/* Commission / selection logic */}
-                          {item.associateId !== user?.id ? (
+                          {(item.variantRate &&
+                            item.associateId === user?.id) ||
+                          (item.associateId !== user?.id &&
+                            item.companyId !==
+                              associateByIdValue?.associateCompany?._id) ? (
                             <SelectModal
                               variantRate={item}
                               refetchData={refetchData}
                             />
-                          ) : (
-                            item.associateId === user?.id &&
-                            user?.id !== undefined && (
-                              <b className="text-warning-300">Your Rate</b>
-                            )
-                          )}
+                          ) : user?.id !== undefined ? (
+                            <>
+                              {item.associateId === user.id ? (
+                                <b className="text-warning-300">Your Rate</b>
+                              ) : (
+                                item.companyId ===
+                                  associateByIdValue.associateCompany._id && (
+                                  <b className="text-warning-300">
+                                    Company Rate
+                                  </b>
+                                )
+                              )}
+                            </>
+                          ) : null}
                         </div>
                       </div>
                     </div>

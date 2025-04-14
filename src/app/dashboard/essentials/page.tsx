@@ -42,7 +42,9 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Title title="Location" /> {/* Translate */}
+          <Title title="Companies" /> {/* Translate */}
+          <EssentialTabContent essentialName="associateCompany" />
+          <Spacer y={4} /> <Title title="Location" /> {/* Translate */}
           <Tabs
             aria-label="Location Tabs" // Translate
             selectedKey={locationTab}
@@ -106,9 +108,6 @@ export default function Essentials() {
               </Tab>
             ))}
           </Tabs>
-          <Spacer y={4} />
-          <Title title="Associate Company" /> {/* Translate */}
-          <EssentialTabContent essentialName="associateCompany" />
           <Spacer y={4} />
         </div>
       </div>

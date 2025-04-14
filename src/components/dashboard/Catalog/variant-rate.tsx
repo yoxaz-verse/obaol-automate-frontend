@@ -14,7 +14,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Slider,
   Switch,
   useDisclosure,
 } from "@nextui-org/react";
@@ -31,7 +30,6 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import Image from "next/image";
 
 /**
  * Props for your existing VariantRate component
@@ -79,7 +77,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const associateValue = associateResponse?.data?.data?.data;
   const associateByIdValue = associateByIdResponse?.data;
-  console.log(associateByIdValue);
+  console.log(associateValue);
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: variantResponse } = useQuery({
@@ -140,53 +138,59 @@ const VariantRate: React.FC<VariantRateProps> = ({
         } else {
           variantRateFetchedData = variantRateData?.data || [];
         }
-        console.log(variantRateFetchedData);
 
         // Transform the rows if needed
-        const tableData = variantRateFetchedData.map((item: any) => {
-          const { isDeleted, isActive, password, __v, ...rest } = item;
-          if (!item.variantRate?.rate) {
-            return {
-              ...rest,
-              associate:
-                item.associate._id === user?.id || user?.role === "Admin"
-                  ? item.associate.name
-                  : "OBAOL",
-              associateId: item.associate._id,
-              companyId: item.associate.associateCompany,
-              productVariant: item.productVariant?.name,
-              product: item.productVariant?.product?.name,
-              productVariantId: item.productVariant?._id,
-            };
-          } else {
-            // displayedRate
+        const tableData = variantRateFetchedData
+          .filter((item: any) => item.associate?.name) // filters out items with no associate name
+          .map((item: any) => {
+            const { isDeleted, isActive, password, __v, ...rest } = item;
 
-            return {
-              ...rest,
-              rate: item.variantRate?.rate,
-              associateId: item.associate._id,
-              companyId: item.associate.associateCompany,
-              productVariant: item.variantRate?.productVariant?.name,
-              product: item.variantRate?.productVariant?.product?.name,
-            };
-          }
-        });
+            if (!item.variantRate?.rate) {
+              return {
+                ...rest,
+                associate:
+                  item.associate?._id === user?.id || user?.role === "Admin"
+                    ? item.associate.name
+                    : "OBAOL",
+                associateId: item.associate._id,
+                companyId: item.associate.associateCompany,
+                productVariant: item.productVariant?.name,
+                product: item.productVariant?.product?.name,
+                productVariantId: item.productVariant?._id,
+              };
+            } else {
+              return {
+                ...rest,
+                rate: item.variantRate?.rate,
+                associateId: item.associate._id,
+                companyId: item.associate.associateCompany,
+                productVariant: item.variantRate?.productVariant?.name,
+                product: item.variantRate?.productVariant?.product?.name,
+              };
+            }
+          });
 
         return (
           <>
-            {!displayOnly && rate === "variantRate" && (
-              <AddModal
-                currentTable={rate}
-                formFields={variantRateFormFields}
-                apiEndpoint={apiRoutesByRole[rate]}
-                refetchData={refetchData}
-                additionalVariable={
-                  productVariantValue && {
-                    productVariant: productVariantValue?._id,
-                  }
-                }
-              />
-            )}
+            {!displayOnly &&
+              rate === "variantRate" &&
+              (associateValue?.length > 0 ? (
+                <>
+                  <AddModal
+                    currentTable={rate}
+                    formFields={variantRateFormFields}
+                    apiEndpoint={apiRoutesByRole[rate]}
+                    refetchData={refetchData}
+                    additionalVariable={
+                      productVariantValue && {
+                        productVariant: productVariantValue?._id,
+                      }
+                    }
+                  />
+                </>
+              ) : (
+                "Add Associates for Variant rates"
+              ))}
             <Spacer y={5} />
             <section className="hidden md:block">
               <CommonTable

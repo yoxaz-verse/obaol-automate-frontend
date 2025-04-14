@@ -97,11 +97,12 @@ export default function EnquiryPage() {
               // variantRate: item.variantRate.rate + item.variantRate.commission,
               // displayedRate:
               //   item.variantRate.rate + item.variantRate.displayRate.commission,
+              specification: item.specification || "No Spec",
               product: item.productVariant.product.name,
               productVariant: item.productVariant.name,
-              productAssociate: item.productAssociate.name,
-              associateCompany: item.productAssociate.associateCompany.name,
-              mediatorAssociate: item.mediatorAssociate?.name || "N/A",
+              productAssociate: item.productAssociate?.name,
+              associateCompany: item.productAssociate?.associateCompany.name,
+              mediatorAssociate: item.mediatorAssociate?.name || "Direct",
             };
           });
 

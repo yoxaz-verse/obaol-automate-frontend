@@ -69,7 +69,7 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full">
-      <DashboardTilesComponent projectCounts={projectCounts} />
+      {/* <DashboardTilesComponent projectCounts={projectCounts} /> */}
       <div className="px-4 py-5 ">
         {(user?.role === "ActivityManager" || user?.role === "Worker") && (
           <Tabs
@@ -106,21 +106,20 @@ const Dashboard: NextPage = () => {
         <div className="flex flex-col lg:w-[23%] lg:pt-12">
           <div className="flex flex-col"></div>
           <div className="flex flex-col">
-            <div className="text-[#5F5F5F] font-medium pt-5">
-              Recent Projects{/* Translate */}
-            </div>
+            {/* <div className="text-[#5F5F5F] font-medium pt-5">
+              Recent Projects</div> */}
             <div className="pb-5">
-              <DashboardTile
+              {/* <DashboardTile
                 type="percentage charts"
                 stats={openPercentage}
-                heading="Open Projects" // Translate
-              />
+                heading="Open Projects" 
+              /> */}
             </div>
-            <DashboardTile
+            {/* <DashboardTile
               type="percentage charts"
               stats={closedPercentage}
-              heading="Closed Projects" // Translate
-            />{" "}
+              heading="Closed Projects" 
+            />{" "} */}
           </div>
         </div>
       </div>

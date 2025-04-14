@@ -4,7 +4,10 @@ import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiFileText, FiUsers } from "react-icons/fi";
 import { RiBuildingLine, RiFileAddLine } from "react-icons/ri";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdOutlinePriceChange } from "react-icons/md";
+import { AiOutlineProduct } from "react-icons/ai";
+import { GrCatalog } from "react-icons/gr";
+import { MdOutlineSettingsInputComponent } from "react-icons/md";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -50,33 +53,28 @@ export const sidebarOptions = [
     link: "/dashboard",
   },
   {
-    name: "Projects", //Translate
-    icon: <RiBuildingLine />,
-    link: "/dashboard/projects",
-  },
-  {
     name: "Users", //Translate
     icon: <FiUsers />,
     link: "/dashboard/users",
   },
   {
     name: "Essentials", //Translate
-    icon: <FiFileText />,
+    icon: <MdOutlineSettingsInputComponent />,
     link: "/dashboard/essentials",
   },
   {
     name: "Product", //Translate
-    icon: <FiFileText />,
+    icon: <AiOutlineProduct />,
     link: "/dashboard/product",
   },
   {
     name: "Catalog", //Translate
-    icon: <RiFileAddLine />,
+    icon: <GrCatalog />,
     link: "/dashboard/catalog",
   },
   {
     name: "Live Rates", //Translate
-    icon: <RiFileAddLine />,
+    icon: <MdOutlinePriceChange />,
     link: "/dashboard/rates",
   },
   {

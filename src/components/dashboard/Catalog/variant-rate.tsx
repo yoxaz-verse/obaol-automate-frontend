@@ -8,6 +8,7 @@ import {
   Card,
   CardBody,
   Chip,
+  Divider,
   Input,
   Modal,
   ModalBody,
@@ -78,7 +79,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const associateValue = associateResponse?.data?.data?.data;
   const associateByIdValue = associateByIdResponse?.data;
 
-  // If we only fetch associates if "rate" is "variantRate"
   const { data: variantResponse } = useQuery({
     queryKey: ["variantRate"],
     queryFn: () =>
@@ -262,7 +262,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 <Card
                   key={index}
                   isBlurred
-                  className="border-none bg-background/60 my-2  dark:bg-default-100/50 max-w-full"
+                  className="border-none bg-background/60 hover:bg-background/95 my-2   max-w-full"
                   shadow="sm"
                 >
                   <CardBody>
@@ -445,7 +445,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
       </Button>
       <Modal
         placement={"center"}
-        isDismissable={false}
+        // isDismissable={false}
         isOpen={isOpen}
         className="max-w-[600px] max-h-full"
         onOpenChange={onOpenChange}
@@ -560,16 +560,17 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border p-2 rounded flex flex-col gap-2"
-    >
+    <form onSubmit={handleSubmit} className="   flex flex-col gap-2">
       <div>
+        <Divider className="bg-orange-400" />
+        <Spacer y={4} />
         {/* <label className="block text-sm font-medium"></label> */}
         <Input
           label={"Phone Number"}
+          variant="bordered"
+          type="number"
           // labelPlacement="outside"
-          className=" px-2 py-1 w-full"
+          className=" px-2 py-1 w-full text-orange-400 "
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
@@ -579,7 +580,8 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         <Input
           label={"Name"}
           // labelPlacement="outside"
-          className=" px-2 py-1 w-full"
+          variant="bordered"
+          className=" px-2 py-1 w-full text-orange-400 "
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -588,8 +590,9 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       <div>
         <Input
           label="Quantity in Tons"
+          variant="bordered"
           // labelPlacement="outside"
-          className=" px-2 py-1 w-full"
+          className=" px-2 py-1 w-full text-orange-400 "
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
         />
@@ -597,7 +600,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       <Button
         type="submit"
         disabled={isLoading}
-        className="bg-warning text-white px-3 py-1 "
+        className="bg-warning-400 text-white px-3 py-1 "
       >
         {isLoading ? "Creating..." : "Create Enquiry"}
       </Button>

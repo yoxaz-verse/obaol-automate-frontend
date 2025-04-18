@@ -38,6 +38,9 @@ export default function EnquiryPage() {
   const tableConfig = { ...initialTableConfig };
 
   let columns = generateColumns("enquiry", tableConfig);
+  columns = columns.filter(
+    (col: any) => col.key !== "commission" && col.key !== "mediatorCommission"
+  );
   const { user } = useContext(AuthContext);
 
   /**
@@ -49,7 +52,7 @@ export default function EnquiryPage() {
   }, []);
 
   return (
-    <section>
+    <section className="mx-10">
       <Title title="Enquiry" />
 
       {/* 
@@ -63,8 +66,6 @@ export default function EnquiryPage() {
         apiEndpoint={apiRoutesByRole["enquiry"]} // e.g. "/api/enquiries"
         refetchData={refetchData}
       />
-
-      <Spacer y={2} />
 
       {/* 
         2) We fetch the Enquiries list and display them in a CommonTable (or similar).
@@ -81,28 +82,39 @@ export default function EnquiryPage() {
           // Suppose your API returns { data: { data: IEnquiry[] } } or something similar
           // Adjust to your actual shape:
           const enquiriesData = enquiryResponse?.data || [];
-          // Transform the rows if needed
-          console.log(enquiriesData);
 
           const tableData = enquiriesData.map((item: any) => {
-            const { isDeleted, isActive, password, __v, ...rest } = item;
+            const {
+              isDeleted,
+              isActive,
+              password,
+              __v,
+              commission,
+              mediatorCommission,
+              ...rest
+            } = item;
 
+            const isAdmin = user?.role === "Admin";
+
+            // Clone rest to avoid mutating original data
+            const data: any = { ...rest };
+
+            // Remove commission fields for non-admin users
+            if (!isAdmin) {
+              delete data.commission;
+              if (item.productAssociate?._id === user?.id)
+                delete data.mediatorCommission;
+            }
             return {
-              ...rest,
-              // associate:
-              //   item.associate._id === user?.id || user?.role === "Admin"
-              //     ? item.associate.name
-              //     : "OBAOL",
-              // associateId: item.associate._id,
-              // variantRate: item.variantRate.rate + item.variantRate.commission,
-              // displayedRate:
-              //   item.variantRate.rate + item.variantRate.displayRate.commission,
+              ...data,
               specification: item.specification || "No Spec",
-              product: item.productVariant.product.name,
-              productVariant: item.productVariant.name,
+              product: item.productVariant?.product?.name,
+              productVariant: item.productVariant?.name,
               productAssociate: item.productAssociate?.name,
-              associateCompany: item.productAssociate?.associateCompany.name,
+              associateCompany: item.productAssociate?.associateCompany?.name,
               mediatorAssociate: item.mediatorAssociate?.name || "Direct",
+              commission:
+                item.commission ?? data.mediatorCommission ?? "Own Rate",
             };
           });
 

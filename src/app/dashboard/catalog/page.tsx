@@ -32,7 +32,7 @@ export default function Essentials() {
                       setSelectedProduct(null);
                     }}
                     size="sm"
-                    color="danger"
+                    className="bg-red-500 text-white"
                   >
                     Back to Category
                   </Button>{" "}

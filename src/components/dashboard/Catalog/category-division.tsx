@@ -181,6 +181,7 @@ function CategoryList({
             aria-label={cat.name}
             // e.g. "Fruits (3)"
             title={`${cat.name} (${subCount})`}
+            className="opacity-60 hover:opacity-100 "
           >
             {cat.description && <p>{cat.description}</p>}
             <Spacer y={1} />
@@ -318,6 +319,7 @@ function SubCategoryList({
             aria-label={sub.name}
             // e.g. "Citrus (5)"
             title={`${sub.name} (${productCount})`}
+            className="opacity-90 hover:opacity-100 "
           >
             <p>{sub.description}</p>
             <Spacer y={1} />

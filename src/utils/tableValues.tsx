@@ -1360,6 +1360,22 @@ export const initialTableConfig: Record<
       inTable: true,
       inEdit: true,
     },
+    {
+      label: "Rate",
+      type: "text",
+      key: "rate",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Commission",
+      type: "text",
+      key: "commission",
+      inForm: false,
+      inTable: true,
+      inEdit: true,
+    },
     // {
     //   label: "Variant Rate| Commission",
     //   type: "text",

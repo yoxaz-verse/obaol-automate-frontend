@@ -136,7 +136,7 @@ export const ProductList = ({ product }: IProductList) => {
                                       key={productVariantValue._id}
                                       aria-label={productVariantValue.name}
                                       title={productVariantValue.name}
-                                      // className="border-1 border-orange-400 "
+                                      className="opacity-60 hover:opacity-100 "
                                     >
                                       <VariantRate
                                         productVariant={productVariantValue}

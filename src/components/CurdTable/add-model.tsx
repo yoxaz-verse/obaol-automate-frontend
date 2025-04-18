@@ -508,7 +508,7 @@ const AddModal: React.FC<AddModalProps> = ({
     <>
       <div className="flex justify-end">
         <button
-          className="w-[120px] bg-warning-400 rounded-lg text-white h-[35px] text-sm"
+          className="w-[120px] bg-warning-400 rounded-lg text-white h-[35px] text-sm shadow-sm shadow-warning-700"
           onClick={openModal}
         >
           Add
@@ -532,7 +532,7 @@ const AddModal: React.FC<AddModalProps> = ({
               </div>
               <div className="flex justify-end w-full mt-4">
                 <Button
-                  className="w-[100px] bg-[#3EADEB] rounded-3xl text-white h-[38px] text-sm"
+                  className="w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
                   type="submit"
                   disabled={loading}
                 >

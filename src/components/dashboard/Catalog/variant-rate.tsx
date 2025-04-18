@@ -77,7 +77,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const associateValue = associateResponse?.data?.data?.data;
   const associateByIdValue = associateByIdResponse?.data;
-  console.log(associateValue);
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: variantResponse } = useQuery({
@@ -117,17 +116,23 @@ const VariantRate: React.FC<VariantRateProps> = ({
         // If we have associates, populate the "associate" field values for AddModal
 
         let variantRateFormFields = tableConfig[rate];
-        if (associateValue) {
+        if (user?.role === "Associate") {
+          variantRateFormFields = variantRateFormFields.filter(
+            (field: any) => field.key !== "associate"
+          );
+        } else if (associateValue) {
           const associateValues = associateValue.map((associate: any) => ({
             key: String(associate._id),
             value: associate.name,
           }));
+
           variantRateFormFields = variantRateFormFields.map((field: any) =>
             field.key === "associate"
               ? { ...field, values: associateValues }
               : field
           );
         }
+
         var variantRateFetchedData: any;
         if (variantResponse?.data.data.data) {
           variantRateFetchedData =
@@ -172,25 +177,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <>
-            {!displayOnly &&
-              rate === "variantRate" &&
-              (associateValue?.length > 0 ? (
-                <>
-                  <AddModal
-                    currentTable={rate}
-                    formFields={variantRateFormFields}
-                    apiEndpoint={apiRoutesByRole[rate]}
-                    refetchData={refetchData}
-                    additionalVariable={
-                      productVariantValue && {
-                        productVariant: productVariantValue?._id,
-                      }
-                    }
-                  />
-                </>
-              ) : (
-                "Add Associates for Variant rates"
-              ))}
+            {!displayOnly && rate === "variantRate" ? (
+              <>
+                <AddModal
+                  currentTable={rate}
+                  formFields={variantRateFormFields}
+                  apiEndpoint={apiRoutesByRole[rate]}
+                  refetchData={refetchData}
+                  additionalVariable={{
+                    ...(productVariantValue && {
+                      productVariant: productVariantValue._id,
+                    }),
+                    ...(user?.role === "Associate" && {
+                      associate: user?.id,
+                    }),
+                  }}
+                />
+              </>
+            ) : (
+              "Add Associates for Variant rates"
+            )}
             <Spacer y={5} />
             <section className="hidden md:block">
               <CommonTable

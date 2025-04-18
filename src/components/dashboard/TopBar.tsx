@@ -29,7 +29,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="flex justify-between p-5 bg-black border-orange-400 border-b-4 text-white shadow-sm">
+    <div className="flex justify-between p-5 my-2 me-2 md:my-5 md:mx-10 bg-black border-white border-1 transition-all duration-75 text-white outline-8 outline-offset-2 outline-red-600 shadow-sm rounded-r-xl md:rounded-xl">
       {/* Menu for small screens */}
       <div className="flex gap-5 items-center justify-center ">
         <Dropdown className="items-center justify-center h-full flex ">

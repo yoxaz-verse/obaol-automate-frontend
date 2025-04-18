@@ -2,12 +2,13 @@ import { useMemo } from "react";
 import { emailRegex } from "./regex";
 import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
-import { FiFileText, FiUsers } from "react-icons/fi";
-import { RiBuildingLine, RiFileAddLine } from "react-icons/ri";
-import { MdDashboard, MdOutlinePriceChange } from "react-icons/md";
+import { FiUsers } from "react-icons/fi";
+import { RiFileAddLine } from "react-icons/ri";
+import { MdDashboard } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
-import { GrCatalog } from "react-icons/gr";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
+import { GiBookAura } from "react-icons/gi";
+import { GiBeamsAura } from "react-icons/gi";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -54,7 +55,7 @@ export const sidebarOptions = [
   },
   {
     name: "Users", //Translate
-    icon: <FiUsers />,
+    icon: <GiBeamsAura />,
     link: "/dashboard/users",
   },
   {
@@ -63,20 +64,20 @@ export const sidebarOptions = [
     link: "/dashboard/essentials",
   },
   {
-    name: "Product", //Translate
+    name: "Products", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
   },
   {
     name: "Catalog", //Translate
-    icon: <GrCatalog />,
+    icon: <GiBookAura />,
     link: "/dashboard/catalog",
   },
-  {
-    name: "Live Rates", //Translate
-    icon: <MdOutlinePriceChange />,
-    link: "/dashboard/rates",
-  },
+  // {
+  //   name: "Live Rates", //Translate
+  //   icon: <MdOutlinePriceChange />,
+  //   link: "/dashboard/rates",
+  // },
   {
     name: "Enquires", //Translate
     icon: <RiFileAddLine />,

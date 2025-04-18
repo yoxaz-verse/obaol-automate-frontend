@@ -57,7 +57,7 @@ export default function DashboardLayout({
               />
             )}
             <Spacer y={2} />
-            <div className="max-h-[84vh] w-full overflow-y-auto">
+            <div className="max-h-[84vh] w-full overflow-y-auto ">
               {/* Optionally, handle role-specific loading or error */}
               {/* {roleDataLoading && <p>Loading role-specific data...</p>} */}
               {/* {roleDataError && <p>Error loading role-specific data</p>} */}

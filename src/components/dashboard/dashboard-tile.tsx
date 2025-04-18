@@ -33,14 +33,14 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
     if (type === "view") {
       return (
         <>
-          <Card className="bg-white shadow-md outline-1 flex justify-center px-6">
-            <CardHeader className="font-medium text-black flex items-center gap-2 md:text-[20px]">
+          <Card className="bg-slate-950 shadow-md outline-1 flex justify-center border-white   border-1 px-6">
+            <CardHeader className="font-medium text-white flex items-center gap-2 md:text-[20px]">
               {data.icon}
               View {data.name}
               {/* Translate */}
             </CardHeader>
             <Link href={data.link || "#"}>
-              <CardBody className="rounded-xl border-1 hover:text-white hover:bg-primary duration-300 border-primary my-3 md:h-16 flex justify-center w-full items-center">
+              <CardBody className="rounded-xl border-1 text-slate-400 hover:text-white hover:bg-orange-400 duration-300 border-orange-400 my-3 md:h-16 flex justify-center w-full items-center">
                 <div className="text-xs text-center">
                   Tap to View {data.name}
                   {/* Translate */}

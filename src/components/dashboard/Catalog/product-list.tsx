@@ -129,13 +129,14 @@ export const ProductList = ({ product }: IProductList) => {
                             )}
                             <Spacer y={1} />
                             {productVariantValue && (
-                              <Accordion variant="bordered">
+                              <Accordion variant="splitted">
                                 {productVariantValue?.map(
                                   (productVariantValue: any) => (
                                     <AccordionItem
                                       key={productVariantValue._id}
                                       aria-label={productVariantValue.name}
                                       title={productVariantValue.name}
+                                      // className="border-1 border-orange-400 "
                                     >
                                       <VariantRate
                                         productVariant={productVariantValue}

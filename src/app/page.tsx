@@ -23,7 +23,7 @@ export default function Home() {
     checkAuthentication();
   }, [isAuthenticated, router]);
   return (
-    <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-[#F6F8FB]">
+    <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-black">
       <Image
         src={"/logo.png"}
         width={300}

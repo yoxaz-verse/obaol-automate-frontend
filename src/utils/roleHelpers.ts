@@ -22,6 +22,13 @@ export const routeRoles: { [key: string]: string[] } = {
   "/dashboard/catalog": ["Admin", "Associate"],
   "/dashboard/enquires": ["Admin", "Associate"],
   "/dashboard/rates": ["Admin"],
+  "/dashboard/profile": [
+    "Admin",
+    "Customer",
+    "Associate",
+    "ProjectManager",
+    "Worker",
+  ],
 };
 
 export const getAllowedRoles = (pathname: string): string[] => {

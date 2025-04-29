@@ -3,7 +3,7 @@ import { emailRegex } from "./regex";
 import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiUsers } from "react-icons/fi";
-import { RiFileAddLine } from "react-icons/ri";
+import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
@@ -82,6 +82,11 @@ export const sidebarOptions = [
     name: "Enquires", //Translate
     icon: <RiFileAddLine />,
     link: "/dashboard/enquires",
+  },
+  {
+    name: "Profile", //Translate
+    icon: <RiUser2Fill />,
+    link: "/dashboard/profile",
   },
   // {
   //   name: "Bulk Add", //Translate

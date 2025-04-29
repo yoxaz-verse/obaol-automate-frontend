@@ -11,6 +11,8 @@ import {
 } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
+import { Spacer } from "@nextui-org/react";
+import Title from "@/components/titles";
 const Projects: NextPage = () => {
   const [projectdetails, setProjectDetails] = useState(true);
   const [project, setProject] = useState({ id: "123" });
@@ -30,7 +32,19 @@ const Projects: NextPage = () => {
   return (
     <div className="flex items-center justify-center ">
       <div className="w-[95%]  ">
-        {CompanyName}-{subCategory}
+        <Spacer y={6} />
+        <div className="text-white">
+          <Title title={subCategory.replace(/\b\w/g, (c) => c.toUpperCase())} />
+        </div>
+        <VariantRate
+          displayOnly={true}
+          rate="displayedRate"
+          VariantRateMixed
+          additionalParams={{
+            associateCompanyName: CompanyName,
+            subCategory: subCategory,
+          }}
+        />
       </div>
     </div>
   );

@@ -18,8 +18,6 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 
 export default function Product() {
-  const [currentTable, setCurrentTable] = useState("selected"); // Default role set to 'manager'
-
   const { user } = useContext(AuthContext);
 
   const role = user?.role.toLowerCase();

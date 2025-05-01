@@ -1,9 +1,7 @@
 "use client";
 import { NextPage } from "next";
-import { useContext, useState } from "react";
-
 import React from "react";
-import { AccordionItem, Button, Spacer } from "@heroui/react";
+import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import Title from "@/components/titles";
 

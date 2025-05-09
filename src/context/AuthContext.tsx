@@ -16,6 +16,12 @@ export interface User {
   id: string;
   email: string;
   role: string;
+  verified: {
+    email: boolean;
+    phone?: boolean;
+    gst?: boolean;
+    // Add more verifications here as needed
+  };
 }
 
 interface AuthContextProps extends AuthState {

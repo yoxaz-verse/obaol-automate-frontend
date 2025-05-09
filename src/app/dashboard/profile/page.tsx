@@ -68,7 +68,7 @@ export default function Product() {
                   <CardBody className="gap-2">
                     <span>Phone :{profile.phone}</span>
                     <span>Phone Secondary :{profile.phoneSecondary}</span>
-                    <span>Company :{profile.associateCompany.name}</span>
+                    <span>Company :{profile.associateCompany?.name}</span>
                     <span>Role :{profile.role}</span>
                   </CardBody>
                   <Divider />

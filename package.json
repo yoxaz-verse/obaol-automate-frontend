@@ -14,7 +14,7 @@
     "@nextui-org/react": "^2.2.10",
     "@nextui-org/tabs": "^2.0.29",
     "@react-types/shared": "^3.26.0",
-    "@tanstack/react-query": "^5.25.0",
+    "@tanstack/react-query": "^5.75.5",
     "@tanstack/react-query-devtools": "^5.25.0",
     "@uppy/core": "^4.2.2",
     "@uppy/dashboard": "^4.1.1",

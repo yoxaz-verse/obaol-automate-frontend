@@ -1,502 +1,289 @@
+// components/EditModal.tsx
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
+  Button,
   Modal,
   ModalContent,
   ModalHeader,
+  ModalBody,
+  ModalFooter,
   Input,
   Select,
   SelectItem,
-  ModalBody,
   Chip,
-  Button,
-  ModalFooter,
   DatePicker,
   Switch,
   TimeInput,
   Spinner,
 } from "@nextui-org/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getData, patchData, putData } from "@/core/api/apiHandler"; // Ensure putData is correctly implemented
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getData, patchData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
-import { showToastMessage } from "@/utils/utils";
-import { Key } from "react";
+import { toast } from "react-toastify";
 import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
 import { Dashboard } from "@uppy/react";
-
-import "@uppy/core/dist/style.css";
-import "@uppy/dashboard/dist/style.css";
 import Image from "next/image";
-import { TbEdit } from "react-icons/tb";
-import { parseDate, toCalendarDate } from "@internationalized/date";
+import { parseDate } from "@internationalized/date";
 import { EditModalProps, FormField } from "@/data/interface-data";
 
-const EditModal: React.FC<EditModalProps> = ({
+export default function EditModal({
   _id,
   currentTable,
   formFields,
   apiEndpoint,
   refetchData,
-}) => {
+}: EditModalProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const uppyRef = useRef<Uppy | null>(null);
 
-  // Fetch admin data when currentTable is 'manager'
-  const {
-    data: fetchedData,
-    // isLoading: isAdminLoading,
-    // isError: isAdminError,
-  } = useQuery({
-    queryKey: [apiEndpoint],
+  // 1) Fetch the record when modal opens
+  const { data: fetched } = useQuery({
+    queryKey: [apiEndpoint, _id],
     queryFn: () => getData(`${apiEndpoint}/${_id}`),
     enabled: open,
     refetchOnWindowFocus: false,
   });
 
-  // Helper function to construct image URLs from file IDs
-  const getImageUrl = (fileID: string): string => {
-    // Define your base URL or uploads path
-    const baseUploadsUrl = process.env.NEXT_PUBLIC_UPLOADS_URL || "/uploads/";
-    // Ensure that the baseUploadsUrl ends with a slash
-    return `${baseUploadsUrl}${fileID}`;
-  };
-
-  // Initialize Uppy instance
+  // 2) Init Uppy once
   useEffect(() => {
-    const uppyInstance = new Uppy({
+    const uppy = new Uppy({
       restrictions: {
-        maxNumberOfFiles: 1, // Adjust as needed
-        allowedFileTypes: ["image/*", "application/pdf"], // Example: images and PDFs
-        maxFileSize: 10 * 1024 * 1024, // 10 MB
+        maxNumberOfFiles: 1,
+        allowedFileTypes: ["image/*", "application/pdf"],
       },
       autoProceed: false,
-      allowMultipleUploads: false,
-      debug: false, // Set to true for debugging
-    });
-
-    uppyInstance.use(XHRUpload, {
-      endpoint: `${process.env.NEXT_PUBLIC_BASE_URL}/upload`, // Ensure NEXT_PUBLIC_BASE_URL is set in .env
-      fieldName: "file", // Must match backend's expected field name
+    }).use(XHRUpload, {
+      endpoint: `${process.env.NEXT_PUBLIC_BASE_URL}/upload`,
+      fieldName: "file",
       formData: true,
-      method: "POST",
-      bundle: false, // Send files individually
-      withCredentials: true,
-      headers: {
-        // Add any required headers here, e.g., authorization tokens
-        // Authorization: `Bearer ${yourToken}`,
-      },
     });
-
-    uppyRef.current = uppyInstance;
-
+    uppyRef.current = uppy;
     return () => {
-      uppyInstance; // Properly clean up the Uppy instance
+      uppy.destroy();
+      uppyRef.current = null;
     };
-  }, [apiEndpoint]);
+  }, []);
 
-  // Initialize formData with initialData
+  // 3) Populate formData from fetched.data.data
   useEffect(() => {
-    if (!fetchedData) return;
-    const initialData = fetchedData?.data;
-    const updatedFormData: Record<string, any> = { ...initialData };
+    if (!fetched?.data?.data) return;
+    const raw = fetched.data.data;
+    const clone: Record<string, any> = { ...raw };
 
-    formFields.forEach((field) => {
-      // Skip filling specific fields like "password"
-      if (field.key === "password") return;
-      if (field.type === "select" && initialData[field.key]) {
-        updatedFormData[field.key] =
-          initialData[field.key]._id || initialData[field.key];
-      } else if (
-        field.type === "multiselect" &&
-        Array.isArray(initialData[field.key])
-      ) {
-        updatedFormData[field.key] = initialData[field.key].map(
-          (item: any) => item._id || item
-        );
+    formFields.forEach((f) => {
+      const val = raw[f.key];
+      if (f.type === "select" && val) {
+        clone[f.key] = val._id || val;
+      }
+      if (f.type === "multiselect" && Array.isArray(val)) {
+        clone[f.key] = val.map((x: any) => x._id || x);
       }
     });
 
-    setFormData(updatedFormData);
-  }, [fetchedData, formFields]);
+    setFormData(clone);
+  }, [fetched, formFields]);
 
-  const openModal = () => setOpen(true);
-  const closeModal = () => {
-    setOpen(false);
-    setFormData({});
-    if (uppyRef.current) {
-      uppyRef.current.destroy();
+  // 4) Compute lock & unlock using raw = fetched.data.data
+  const { isLocked, unlockAt } = useMemo(() => {
+    const raw = fetched?.data?.data;
+    if (!raw?.coolingStartTime) {
+      return { isLocked: false, unlockAt: null };
     }
-  };
+    const start = new Date(raw.coolingStartTime).getTime();
+    const end = start + (raw.duration || 1) * 86400_000;
+    return { isLocked: Date.now() < end, unlockAt: new Date(end) };
+  }, [fetched]);
 
-  // Mutation to handle data update
-  const editItem = useMutation({
-    mutationFn: async (data: any) =>
-      patchData(`${apiEndpoint}/${_id}`, data, {}),
+  // 5) PATCH mutation
+  const mutation = useMutation({
+    mutationFn: (payload: any) =>
+      patchData(`${apiEndpoint}/${_id}`, payload, {}),
     onSuccess: () => {
-      queryClient.refetchQueries({
-        queryKey: [currentTable, apiEndpoint],
-      });
+      queryClient.invalidateQueries();
       refetchData();
-      showToastMessage({
-        type: "success",
-        message: `${capitalize(currentTable)} Updated Successfully`,
-        position: "top-right",
-      });
-      closeModal();
+      toast.success(`${capitalize(currentTable)} updated successfully`);
       setLoading(false);
+      setOpen(false);
     },
-    onError: (error: any) => {
-      showToastMessage({
-        type: "error",
-        message: error.response?.data?.message || "An error occurred",
-        position: "top-right",
-      });
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || "Update failed";
+      if (msg.includes("locked or in cooldown") && unlockAt) {
+        toast.warning(
+          `Locked until ${unlockAt.toLocaleString("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}`
+        );
+      } else {
+        toast.error(msg);
+      }
       setLoading(false);
     },
   });
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    try {
-      // const hasFileInput = formFields.some(
-      //   (field) => field.type === "file" || field.type === "image"
-      // );
-
-      // let fileId: string | null = null;
-      // let fileURL: string | null = null;
-
-      // if (
-      //   hasFileInput &&
-      //   uppyRef.current &&
-      //   uppyRef.current.getFiles().length > 0
-      // ) {
-      //   // Define the entities array based on the current form context
-      //   const entities = [
-      //     { entity: "projects", entityId: "projectId123" }, // Replace with actual IDs or pass as props
-      //     { entity: "activities", entityId: "activityId456" },
-      //     { entity: "timesheets", entityId: "timesheetId789" },
-      //   ];
-
-      //   // Attach form data as meta data, including the entities array
-      //   uppyRef.current.setMeta({
-      //     ...formData,
-      //     entities: JSON.stringify(entities), // Serialize the array
-      //   });
-
-      //   // Initiate the upload
-      //   const uploadResult = await uppyRef.current.upload();
-      //   console.log("Uppy upload result:", uploadResult);
-
-      //   if (uploadResult?.failed && uploadResult.failed.length > 0) {
-      //     // Handle upload failures
-      //     showToastMessage({
-      //       type: "error",
-      //       message: "File upload failed",
-      //       position: "top-right",
-      //     });
-      //     setLoading(false);
-      //     return;
-      //   }
-
-      //   // Extract the file ID and construct the file URL
-      //   const uploadedFile =
-      //     uploadResult?.successful && uploadResult.successful[0];
-
-      //   if (
-      //     uploadedFile &&
-      //     uploadedFile.response &&
-      //     uploadedFile.response.body
-      //   ) {
-      //     const responseBody = uploadedFile.response.body as any;
-      //     fileId = responseBody.fileIds[0];
-      //     fileURL = responseBody.fileURLs[0]
-      //       ? responseBody.fileURLs[0]
-      //       : getImageUrl(responseBody.fileIds[0]); // Fallback to constructed URL
-      //   }
-
-      //   if (!fileId || !fileURL) {
-      //     // Handle missing fileId or fileURL
-      //     showToastMessage({
-      //       type: "error",
-      //       message: "Failed to retrieve uploaded file details",
-      //       position: "top-right",
-      //     });
-      //     setLoading(false);
-      //     return;
-      //   }
-      // }
-
-      // // Prepare the complete form data
-      const completeFormData = {
-        ...formData,
-        // fileId: fileId || fetchedData?.data.fileId, // Preserve existing fileId if no new file uploaded
-        // fileURL: fileURL || fetchedData?.data.fileURL, // Preserve existing fileURL if no new file uploaded
-      };
-
-      // Proceed with form submission
-      editItem.mutate(completeFormData);
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      showToastMessage({
-        type: "error",
-        message: "An error occurred during submission",
-        position: "top-right",
-      });
-      setLoading(false);
-    }
+    mutation.mutate(formData);
   };
 
-  // Handle input changes for text fields
-  const handleInputChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-      | { target: { name: string; value: string | number } }
-  ) => {
+  // 6) Input handlers
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
-
-  // Handle selection changes for select and multiselect fields
-  const handleSelectionChange = (fieldKey: string, value: Set<Key>) => {
-    const valueArray = Array.from(value).map(String);
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldKey]: valueArray,
-    }));
+  const handleSelection = (key: string, keys: Set<string>) => {
+    setFormData((p) => ({ ...p, [key]: Array.from(keys) }));
   };
+  const handleDate = (key: string, d: any) =>
+    setFormData((p) => ({ ...p, [key]: d.toString() }));
+  const handleBool = (key: string, v: boolean) =>
+    setFormData((p) => ({ ...p, [key]: v }));
+  const handleTime = (key: string, t: any) =>
+    setFormData((p) => ({ ...p, [key]: t }));
 
-  // Handle chip removal for multiselect fields
-  const handleChipClose = (itemToRemove: string, fieldKey: string) => {
-    const updatedItems = formData[fieldKey].filter(
-      (item: string) => item !== itemToRemove
-    );
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldKey]: updatedItems,
-    }));
-  };
-
-  // Helper function to capitalize strings
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  // Helper function to render form fields based on type
-  const handleDateChange = (key: string, date: any) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [key]: date, // Store as ISO string for compatibility
-    }));
-  };
-  const handleBooleanChange = (key: string, checked: boolean) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [key]: checked,
-    }));
-  };
-
-  const handleTimeChange = (key: string, time: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: time,
-    }));
-  };
-
-  const renderFormField = (field: FormField) => {
-    switch (field.type) {
-      case "date":
-      case "week":
-        const parsedDate = formData[field.key]
-          ? parseDate(new Date(formData[field.key]).toISOString().split("T")[0])
+  // 7) Render fields, disabling everything but `isLive` when locked
+  const renderField = (f: FormField) => {
+    const disabled = isLocked && f.key !== "isLive";
+    switch (f.type) {
+      case "date": {
+        const val = formData[f.key]
+          ? parseDate(new Date(formData[f.key]).toISOString().split("T")[0])
           : undefined;
-
         return (
           <DatePicker
-            name={field.key}
-            labelPlacement="outside"
-            label={field.label}
-            className="max-w-[284px]"
-            value={parsedDate} // Use `value` instead of `defaultValue`
-            onChange={(date) =>
-              handleDateChange(
-                field.key,
-                date.toString() // Convert DatePicker value to ISO string or another standard format
-              )
-            }
+            name={f.key}
+            label={f.label}
+            value={val}
+            isDisabled={disabled}
+            onChange={(d) => handleDate(f.key, d)}
           />
         );
-
+      }
       case "boolean":
         return (
           <Switch
-            name={field.key}
-            // defaultSelected={formData[field.key] || false}
-            onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
+            isDisabled={false}
+            checked={formData[f.key] || false}
+            onChange={(e) => handleBool(f.key, e.target.checked)}
           >
-            {field.label}
+            {f.label}
           </Switch>
         );
       case "time":
-        const parsedTime =
-          formData[field.key] &&
-          new Date(formData[field.key]).toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }); // e.g., "14:30" for 24-hour format
-
         return (
           <TimeInput
-            name={field.key}
-            label={field.label}
-            hourCycle={24} // Use 24-hour format
-            value={parsedTime || ""} // Pass time in "HH:mm" format
-            onChange={(time) => handleTimeChange(field.key, time)} // Handle updates
+            label={f.label}
+            value={formData[f.key] || ""}
+            isDisabled={disabled}
+            onChange={(t) => handleTime(f.key, t)}
           />
         );
-      case "textarea":
-        return (
-          <textarea
-            name={field.key}
-            placeholder={field.label}
-            className="py-2 border rounded-md w-full"
-            value={formData[field.key] || ""}
-            onChange={handleInputChange}
-          />
-        );
-
       case "select":
-        if (field.values && field.values.length > 0)
-          return (
+        return (
+          <Select
+            placeholder={`Select ${f.label}`}
+            isDisabled={disabled}
+            selectedKeys={
+              new Set(formData[f.key] ? [String(formData[f.key])] : [])
+            }
+            onSelectionChange={(keys) =>
+              handleChange({
+                target: { name: f.key, value: Array.from(keys)[0] },
+              })
+            }
+          >
+            {(f.values ?? []).map((opt) => (
+              <SelectItem key={opt.key} value={String(opt.key)}>
+                {opt.value}
+              </SelectItem>
+            ))}
+          </Select>
+        );
+      case "multiselect":
+        return (
+          <>
             <Select
-              name={field.key}
-              label={`Select ${field.label}`}
-              placeholder={field.label}
-              className="py-2 border rounded-md w-full"
-              selectedKeys={
-                formData[field.key]
-                  ? new Set([String(formData[field.key])])
-                  : new Set()
-              }
+              selectionMode="multiple"
+              isDisabled={disabled}
+              selectedKeys={new Set(formData[f.key] || [])}
               onSelectionChange={(keys) =>
-                handleInputChange({
-                  target: {
-                    name: field.key,
-                    value: String(Array.from(keys)[0]),
-                  },
-                })
+                handleSelection(f.key, keys as Set<string>)
               }
+              placeholder={`Select ${f.label}`}
             >
-              {field.values.map((option: any) => (
-                <SelectItem key={String(option.key)} value={String(option.key)}>
-                  {option.value}
+              {(f.values ?? []).map((opt) => (
+                <SelectItem key={opt.key} value={String(opt.key)}>
+                  {opt.value}
                 </SelectItem>
               ))}
             </Select>
-          );
-
-      case "multiselect":
-        if (field.values && field.values.length > 0)
-          return (
-            <>
-              <Select
-                name={field.key}
-                label={`Select Multiple ${field.label}`}
-                placeholder={field.label}
-                className="py-2 border rounded-md w-full"
-                selectionMode="multiple"
-                selectedKeys={
-                  formData[field.key] ? new Set(formData[field.key]) : new Set()
-                }
-                onSelectionChange={(keys) =>
-                  handleSelectionChange(field.key, keys as Set<Key>)
-                }
-              >
-                {field.values.map((option: any) => (
-                  <SelectItem
-                    key={String(option.key)}
-                    value={String(option.key)}
-                  >
-                    {option.value}
-                  </SelectItem>
-                ))}
-              </Select>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {(formData[field.key] || []).map(
-                  (item: string, index: number) => (
-                    <Chip
-                      key={index}
-                      onClose={() => handleChipClose(item, field.key)}
-                      variant="flat"
-                    >
-                      {field.values?.find((option: any) => option.key === item)
-                        ?.value || item}
-                    </Chip>
-                  )
-                )}
-              </div>
-            </>
-          );
-
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {(formData[f.key] || []).map((val: string) => (
+                <Chip
+                  isDisabled={disabled}
+                  key={val}
+                  onClose={() =>
+                    setFormData((p) => ({
+                      ...p,
+                      [f.key]: p[f.key].filter((x: string) => x !== val),
+                    }))
+                  }
+                >
+                  {val}
+                </Chip>
+              ))}
+            </div>
+          </>
+        );
       case "file":
       case "image":
         return (
           <div>
-            <label className="block mb-2">{field.label}</label>
+            <label>{f.label}</label>
             {uppyRef.current && (
               <Dashboard
                 uppy={uppyRef.current}
                 hideUploadButton
                 proudlyDisplayPoweredByUppy={false}
-                note="Only image and document files are allowed." //Translate
+                note="Only images & PDFs"
               />
             )}
-            {/* Display existing image or file */}
-            {formData[field.key] && (
-              <div className="mt-4 flex justify-center">
-                {typeof formData[field.key] === "string" &&
-                (formData[field.key].endsWith(".pdf") ||
-                  formData[field.key].endsWith(".PDF")) ? (
-                  <a
-                    href={formData[field.key]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                  >
-                    View PDF {/* Translate */}
+            {formData[f.key] && (
+              <div className="mt-2">
+                {/\.(pdf|PDF)$/.test(formData[f.key]) ? (
+                  <a href={formData[f.key]} target="_blank" rel="noopener">
+                    View PDF
                   </a>
-                ) : typeof formData[field.key] === "string" ? (
+                ) : (
                   <Image
-                    src={getImageUrl(formData[field.key])} // Ensure getImageUrl returns a valid URL
-                    alt={`${field.label} Preview`}
+                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${
+                      formData[f.key]
+                    }`}
                     width={100}
                     height={100}
-                    style={{ objectFit: "cover" }}
+                    alt="preview"
                   />
-                ) : null}
+                )}
               </div>
             )}
           </div>
         );
-
       default:
         return (
           <Input
-            name={field.key}
-            type={field.type}
-            placeholder={field.label}
-            className="py-2"
-            defaultValue={
-              field.key !== "password" ? formData[field.key] || "" : ""
-            }
-            onChange={handleInputChange}
+            name={f.key}
+            placeholder={f.label}
+            value={formData[f.key] || ""}
+            onChange={handleChange}
+            isDisabled={disabled}
           />
         );
     }
@@ -504,53 +291,55 @@ const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <>
-      {/* Edit Button */}
-      <button
-        className="flex items-center justify-center gap-2 w-[100px] bg-yellow-600 rounded-xl text-white h-[38px] text-sm"
-        onClick={openModal}
-      >
-        Edit{/* Translate */}
-        <TbEdit className="hover:text-yellow-300" />
-      </button>
+      <Button color="warning" onClick={() => setOpen(true)}>
+        Edit
+      </Button>
 
-      {/* Edit Modal */}
-      <Modal isOpen={open} onClose={closeModal} size="lg">
+      <Modal isOpen={open} onClose={() => setOpen(false)} size="lg">
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Edit {/* Translate */}
-            {/* {capitalize(currentTable)} */}
-          </ModalHeader>
+          <ModalHeader>Edit {capitalize(currentTable)}</ModalHeader>
 
-          {fetchedData && formData != null ? (
+          {isLocked && unlockAt && (
+            <ModalBody>
+              <p className="text-red-500">
+                🔒 Locked until{" "}
+                {unlockAt.toLocaleString("en-GB", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+                . Only “Live” can be toggled.
+              </p>
+            </ModalBody>
+          )}
+
+          {!fetched ? (
+            <Spinner />
+          ) : (
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
-                  .filter((field) => field.inEdit)
-                  .map((field, index) => (
-                    <div key={index} className="mb-4">
-                      {renderFormField(field)}
+                  .filter((f) => f.inEdit)
+                  .map((f, i) => (
+                    <div key={i} className="mb-4">
+                      {renderField(f)}
                     </div>
                   ))}
-                <div className="flex justify-end w-full mt-4">
+
+                <div className="flex justify-end mt-4">
                   <Button
                     type="submit"
-                    disabled={loading}
-                    className="w-[100px]"
-                    color="primary"
+                    disabled={loading || (isLocked && !formData.isLive)}
                   >
-                    {loading ? "Updating..." : "Update"}
+                    {loading ? "Updating…" : "Update"}
                   </Button>
                 </div>
               </form>
             </ModalBody>
-          ) : (
-            <Spinner />
           )}
-          <ModalFooter></ModalFooter>
+
+          <ModalFooter />
         </ModalContent>
       </Modal>
     </>
   );
-};
-
-export default EditModal;
+}

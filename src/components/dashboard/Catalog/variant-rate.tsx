@@ -31,6 +31,8 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
+import EditModal from "@/components/CurdTable/edit-model";
+import DeleteModal from "@/components/CurdTable/delete";
 
 /**
  * Props for your existing VariantRate component
@@ -112,9 +114,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
         ...(productVariantValue && { productVariant: productVariantValue._id }),
       }}
     >
-      {(variantRateData: any) => {
+      {(variantRateData: any, refetch) => {
         // If we have associates, populate the "associate" field values for AddModal
-
+        const refetchData = () => {
+          refetch?.(); // Safely call refetch if it's available
+        };
         let variantRateFormFields = tableConfig[rate];
         if (user?.role === "Associate") {
           variantRateFormFields = variantRateFormFields.filter(
@@ -143,7 +147,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
         } else {
           variantRateFetchedData = variantRateData?.data || [];
         }
-
+        // Inside your component, above the return:
+        const FIFTEEN_MINUTES = 15 * 60 * 1000;
+        const isCooling = (startTimestamp: string) =>
+          new Date(startTimestamp).getTime() + FIFTEEN_MINUTES > Date.now();
         // Transform the rows if needed
         const tableData = variantRateFetchedData
           .filter((item: any) => item.associate?.name) // filters out items with no associate name
@@ -234,10 +241,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       (!rowItem.variantRate &&
                         rowItem.associateId === user?.id &&
                         user?.id !== undefined) ? (
-                        <LiveToggle
-                          variantRate={rowItem}
-                          refetchData={refetchData}
-                        />
+                        <>
+                          {" "}
+                          <LiveToggle
+                            variantRate={rowItem}
+                            refetchData={refetchData}
+                          />
+                        </>
                       ) : (
                         <div className="flex items-center gap-2">
                           <Chip color="success" variant="dot">
@@ -255,6 +265,36 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                   );
                 }}
+                editModal={(item: any) =>
+                  user?.role === "Admin" ||
+                  (item.associateId !== user?.id &&
+                    isCooling(item.coolingStartTime) && (
+                      <>
+                        {console.log(item)}
+                        <EditModal
+                          _id={item._id}
+                          initialData={item}
+                          currentTable={rate}
+                          formFields={tableConfig[rate]}
+                          apiEndpoint={`${apiRoutesByRole[rate]}`} // Assuming API endpoint for update
+                          refetchData={refetchData}
+                        />
+                      </>
+                    ))
+                }
+                deleteModal={(item: any) =>
+                  user?.role === "Admin" ||
+                  (item.associateId !== user?.id &&
+                    isCooling(item.coolingStartTime) && (
+                      <DeleteModal
+                        _id={item._id}
+                        name={item.name}
+                        deleteApiEndpoint={apiRoutesByRole[rate]}
+                        refetchData={refetchData}
+                        useBody={true}
+                      />
+                    ))
+                }
               />
             </section>
             <section className="md:hidden block">

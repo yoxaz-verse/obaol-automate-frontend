@@ -494,7 +494,6 @@ const AddModal: React.FC<AddModalProps> = ({
           <Input
             name={field.key}
             type={field.type}
-            required
             placeholder={field.label}
             className="py-2"
             value={formData[field.key] || ""}

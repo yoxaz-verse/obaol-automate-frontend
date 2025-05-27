@@ -872,6 +872,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Description",
@@ -880,6 +881,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
 
     // {
@@ -925,6 +927,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: false,
+      required: true,
     },
     {
       label: "Description",
@@ -933,6 +936,7 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       inEdit: true,
+      required: true,
     },
 
     // {
@@ -1050,6 +1054,7 @@ export const initialTableConfig: Record<
       key: "rate",
       inForm: true,
       inTable: true,
+      inEdit: true,
     },
     {
       label: "Product Variant",
@@ -1059,7 +1064,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: false,
       inTable: true,
-      inEdit: true,
+      // inEdit: true,
     },
     {
       label: "Associate Name",
@@ -1069,7 +1074,7 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
-      inEdit: true,
+      // inEdit: true,
       required: true,
     },
 

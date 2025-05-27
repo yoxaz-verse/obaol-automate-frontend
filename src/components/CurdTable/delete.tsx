@@ -16,6 +16,7 @@ import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { DeleteModalProps } from "@/data/interface-data";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 export default function DeleteModal({
   _id,
@@ -60,10 +61,12 @@ export default function DeleteModal({
 
   return (
     <>
-      <FiDelete
-        onClick={onOpen}
-        className=" text-gray-300 hover:text-red-600"
-      />
+      <div className="flex items-center">
+        <RiDeleteBin6Line
+          onClick={onOpen}
+          className="text-[24px] text-gray-300 hover:text-red-600"
+        />
+      </div>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
         <ModalContent>
           {(onClose) => (

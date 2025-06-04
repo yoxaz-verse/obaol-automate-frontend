@@ -111,7 +111,7 @@ const AddModal: React.FC<AddModalProps> = ({
     };
 
     preloadDynamicSelectOptions();
-  }, []);
+  }, [formFields]);
 
   const addItem = useMutation({
     mutationFn: async (data: any) => postData(apiEndpoint, data, {}),

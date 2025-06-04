@@ -103,7 +103,14 @@ export const VerificationProvider = ({
     if (user && verifiedInitialized) {
       checks();
     }
-  }, [pathname, router, user, verifiedInitialized]);
+  }, [
+    pathname,
+    router,
+    user,
+    verifiedInitialized,
+    verificationRules,
+    verified,
+  ]);
 
   return (
     <VerificationContext.Provider

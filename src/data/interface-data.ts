@@ -181,7 +181,11 @@ export interface FormField {
   inForm: boolean;
   inEdit?: boolean;
   inTable: boolean;
+  dependsOn?: string; // <-- Add this
   values?: { key: string; value: string }[]; // For select and multiselect
+  dynamicValuesFn?: (
+    parentValue: string
+  ) => Promise<{ key: string; value: string }[]>; // optional async
   accept?: string; // For file inputs (e.g., "image/*")
   multiple?: boolean; // For file inputs
   required?: boolean; // For file inputs

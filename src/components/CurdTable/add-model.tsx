@@ -43,6 +43,9 @@ const AddModal: React.FC<AddModalProps> = ({
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [uppy, setUppy] = useState<Uppy | null>(null);
+  const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
+    {}
+  );
 
   useEffect(() => {
     const uppyInstance = new Uppy({
@@ -80,6 +83,35 @@ const AddModal: React.FC<AddModalProps> = ({
     setFormData({});
     uppy?.clear(); // Reset Uppy instance
   };
+  useEffect(() => {
+    const preloadDynamicSelectOptions = async () => {
+      const fetchOptionsPromises = formFields
+        .filter(
+          (field) =>
+            field.type === "select" &&
+            !field.dependsOn && // only fields with no dependency
+            typeof field.dynamicValuesFn === "function"
+        )
+        .map(async (field: any) => {
+          const options = await field.dynamicValuesFn();
+          return { key: field.key, options };
+        });
+
+      const results = await Promise.all(fetchOptionsPromises);
+
+      const optionsMap: Record<string, any[]> = {};
+      results.forEach(({ key, options }) => {
+        optionsMap[key] = options;
+      });
+
+      setDynamicOptions((prev) => ({
+        ...prev,
+        ...optionsMap,
+      }));
+    };
+
+    preloadDynamicSelectOptions();
+  }, []);
 
   const addItem = useMutation({
     mutationFn: async (data: any) => postData(apiEndpoint, data, {}),
@@ -221,11 +253,32 @@ const AddModal: React.FC<AddModalProps> = ({
       | { target: { name: string; value: string | number } }
   ) => {
     const { name, value } = e.target;
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+    // Update dependent fields if any
+    formFields.forEach(async (field) => {
+      if (
+        field.dependsOn === name &&
+        typeof field.dynamicValuesFn === "function"
+      ) {
+        const updatedValues = await field.dynamicValuesFn(String(value));
+        setDynamicOptions((prev) => ({
+          ...prev,
+          [field.key]: updatedValues,
+        }));
+
+        setFormData((prevData) => ({
+          ...prevData,
+          [field.key]: "",
+        }));
+      }
+    });
   };
+
   const handleDateChange = (key: string, date: any) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -398,13 +451,19 @@ const AddModal: React.FC<AddModalProps> = ({
             onChange={(time) => handleTimeChange(field.key, time)} // Update handler
           />
         );
-
       case "select":
+        const options =
+          field.dependsOn && dynamicOptions[field.key]
+            ? dynamicOptions[field.key]
+            : field.dynamicValuesFn
+            ? dynamicOptions[field.key] || []
+            : field.values || [];
+
         if (field.values)
           return (
             <Select
               name={field.key}
-              required
+              required={field.required}
               label={`Select ${field.label}`}
               placeholder={field.label}
               className="py-2 border rounded-md w-full"
@@ -422,7 +481,7 @@ const AddModal: React.FC<AddModalProps> = ({
                 })
               }
             >
-              {field.values?.map((option: any) => (
+              {options.map((option: any) => (
                 <SelectItem key={String(option.key)} value={String(option.key)}>
                   {option.value}
                 </SelectItem>

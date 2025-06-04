@@ -25,12 +25,6 @@ export default function Essentials() {
     { key: "activityType", title: "Activity Types" }, // Translate Title
   ];
 
-  const locationTabs = [
-    { key: "location", title: "Location" }, // Translate Title
-    { key: "locationManager", title: "Location Managers" }, // Translate Title
-    { key: "locationType", title: "Location Types" }, // Translate Title
-  ];
-
   // Optionally, add dynamic tabs based on fetched data
   // For example, if ProjectStatus or ActivityStatus have sub-categories
   // For simplicity, we'll stick to static tabs in this example
@@ -42,38 +36,10 @@ export default function Essentials() {
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Title title="Companies" /> {/* Translate */}
+          <Title title="Companies" />
           <EssentialTabContent essentialName="associateCompany" />
-          <Spacer y={4} /> <Title title="Location" /> {/* Translate */}
-          <Tabs
-            aria-label="Location Tabs" // Translate
-            selectedKey={locationTab}
-            onSelectionChange={(key) => setLocationTab(key as string)}
-          >
-            {locationTabs.map((tab) => (
-              <Tab key={tab.key} title={tab.title}>
-                {tab.key === "location" && (
-                  // <LocationTabContent currentType="all" />
-                  <>
-                    <BulkAdd
-                      apiEndpoint={`${locationRoutes.getAll}/bulk`}
-                      refetchData={refetchData} // Function to refetch activities list
-                      currentTable={"Locations"} // Translate
-                    />
-                    <EssentialTabContent essentialName="location" />
-                  </>
-                )}
-                {tab.key === "locationType" && (
-                  <EssentialTabContent essentialName="locationType" />
-                )}
-                {tab.key === "locationManager" && (
-                  <EssentialTabContent essentialName="locationManager" />
-                )}
-              </Tab>
-            ))}
-          </Tabs>{" "}
           <Spacer y={4} />
-          <Title title="Process Status" />{" "}
+          {/* <Title title="Process Status" />{" "}
           <Tabs
             aria-label="Process Tabs"
             selectedKey={activityTab}
@@ -91,7 +57,7 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Designation" /> {/* Translate */}
+          <Title title="Designation" />
           <Tabs
             aria-label="Designation Tabs" // Translate
             selectedKey={projectTab}
@@ -107,7 +73,7 @@ export default function Essentials() {
                 )}
               </Tab>
             ))}
-          </Tabs>
+          </Tabs> */}
           <Spacer y={4} />
         </div>
       </div>

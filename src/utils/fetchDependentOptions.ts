@@ -1,0 +1,54 @@
+import { getData } from "@/core/api/apiHandler";
+import { cityRoutes, districtRoutes, stateRoutes } from "@/core/api/apiRoutes";
+
+export const fetchDependentOptions = async (
+  fieldKey: string,
+  parentKey?: string,
+  parentValue?: string
+) => {
+  if (fieldKey.toLowerCase().includes("state")) {
+    const res = await getData(`${stateRoutes.getAll}`);
+    console.log("state");
+    console.log(res);
+
+    return (
+      res?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+
+  if (parentKey) {
+    if (fieldKey.toLowerCase().includes("district")) {
+      const res = await getData(`${districtRoutes.getAll}`, {
+        [parentKey]: parentValue,
+      });
+      console.log("district");
+      console.log(res);
+
+      return (
+        res?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (fieldKey.toLowerCase().includes("city")) {
+      const res = await getData(`${cityRoutes.getAll}`, {
+        [parentKey]: parentValue,
+      });
+      console.log("city");
+      console.log(res);
+      return (
+        res?.data?.data?.map((c: any) => ({
+          key: c._id,
+          value: c.name,
+        })) || []
+      );
+    }
+  }
+
+  return [];
+};

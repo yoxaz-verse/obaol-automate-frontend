@@ -14,9 +14,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import {
-  locationManagerRoutes,
+  cityRoutes,
+  districtRoutes,
   locationRoutes,
-  locationTypeRoutes,
+  stateRoutes,
 } from "@/core/api/apiRoutes";
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
@@ -32,27 +33,14 @@ const EssentialTabContent = ({
   const [filters, setFilters] = React.useState<Record<string, any>>({}); // Dynamic filters
   if (filter) setFilters(filter);
   const columns = generateColumns(essentialName, tableConfig);
-  const { data: locationTypeResponse } = useQuery({
-    queryKey: ["LocationType"],
-    queryFn: () => getData(locationTypeRoutes.getAll),
-    enabled: essentialName === "location",
-  });
-  const { data: locationManagerResponse } = useQuery({
-    queryKey: ["LocationManager"],
-    queryFn: () => getData(locationManagerRoutes.getAll),
-    enabled: essentialName === "location",
-  });
-  const { data: locationResponse } = useQuery({
-    queryKey: ["Location"],
-    queryFn: () => getData(locationRoutes.getAll),
-    enabled: essentialName === "associateCompany",
-  });
 
-  const locationTypeValue = locationTypeResponse?.data?.data.data;
+  // const { data: stateResponse } = useQuery({
+  //   queryKey: ["State"],
+  //   queryFn: () => getData(stateRoutes.getAll, { limit: 10000 }),
+  //   enabled: essentialName === "associateCompany",
+  // });
 
-  const locationManagerValue = locationManagerResponse?.data?.data.data;
-  const locationValue = locationResponse?.data?.data.data;
-
+  
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
@@ -66,42 +54,6 @@ const EssentialTabContent = ({
   // Define columns for the data table
   let formFields = tableConfig[essentialName];
 
-  if (essentialName === "location" && locationTypeValue) {
-    if (locationTypeValue) {
-      const locationTypeValues = locationTypeValue.map((locationType: any) => ({
-        key: String(locationType._id),
-        value: locationType.name,
-      }));
-      formFields = formFields.map((field: any) =>
-        field.key === "locationType"
-          ? { ...field, values: locationTypeValues }
-          : field
-      );
-    }
-    if (locationManagerValue) {
-      const locationManagerValues = locationManagerValue.map(
-        (locationManager: any) => ({
-          key: String(locationManager._id),
-          value: locationManager.name,
-        })
-      );
-      formFields = formFields.map((field: any) =>
-        field.key === "locationManager"
-          ? { ...field, values: locationManagerValues }
-          : field
-      );
-    }
-  }
-
-  if (essentialName === "associateCompany" && locationValue) {
-    const locationValues = locationValue.map((location: any) => ({
-      key: String(location._id),
-      value: location.name,
-    }));
-    formFields = formFields.map((field: any) =>
-      field.key === "location" ? { ...field, values: locationValues } : field
-    );
-  }
   return (
     <div className="flex items-center justify-center">
       <div className="w-[95%]">

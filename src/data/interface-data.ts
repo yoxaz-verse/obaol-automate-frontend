@@ -166,6 +166,7 @@ export interface BulkAddProps {
   currentTable: string;
 }
 export interface AddModalProps {
+  name?: string;
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;

@@ -84,6 +84,7 @@ export default function CategoryDivision({
       {/* Add a new Category, if needed */}
       {tableConfig["category"] && (
         <AddModal
+          name="Category"
           currentTable="Category"
           formFields={tableConfig["category"]}
           apiEndpoint={apiRoutesByRole["category"]}
@@ -189,6 +190,7 @@ function CategoryList({
             {/* If you want an AddModal for subCategory creation */}
             {tableConfig["subCategory"] && (
               <AddModal
+                name="Sub Category"
                 currentTable="Sub Category"
                 formFields={tableConfig["subCategory"].filter(
                   (f: any) => f.key !== "category"
@@ -327,6 +329,7 @@ function SubCategoryList({
             {/* If you want an AddModal for products */}
             {tableConfig["product"] && (
               <AddModal
+                name="Product"
                 currentTable="Product"
                 formFields={tableConfig["product"].filter(
                   (f: any) => f.key !== "subCategory"

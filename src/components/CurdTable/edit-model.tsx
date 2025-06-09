@@ -291,7 +291,12 @@ export default function EditModal({
 
   return (
     <>
-      <Button color="warning" onClick={() => setOpen(true)}>
+      <Button
+        color="warning"
+        className="text-white"
+        size="sm"
+        onClick={() => setOpen(true)}
+      >
         Edit
       </Button>
 

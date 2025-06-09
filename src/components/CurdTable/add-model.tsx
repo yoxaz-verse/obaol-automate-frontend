@@ -15,6 +15,8 @@ import {
   Switch,
   TimeInput,
   Button,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
@@ -33,6 +35,7 @@ import { toast } from "react-toastify";
 import { showToastMessage } from "@/utils/utils";
 
 const AddModal: React.FC<AddModalProps> = ({
+  name,
   currentTable,
   formFields,
   apiEndpoint,
@@ -315,6 +318,13 @@ const AddModal: React.FC<AddModalProps> = ({
       [fieldKey]: updatedItems,
     }));
   };
+  function toTitleCase(str: string): string {
+    return str
+      .replace(/[_\-]+/g, " ") // Replace underscores/dashes with space
+      .replace(/([a-z])([A-Z])/g, "$1 $2") // Add space before capital letters
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
+  }
 
   const validateFields = (
     fields: any[],
@@ -413,7 +423,7 @@ const AddModal: React.FC<AddModalProps> = ({
           <textarea
             name={field.key}
             placeholder={field.label}
-            className="py-2 border rounded-md w-full"
+            className="py-2 border rounded-md w-[90%]"
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
@@ -452,6 +462,11 @@ const AddModal: React.FC<AddModalProps> = ({
           />
         );
       case "select":
+        const dependsOnValue = field.dependsOn
+          ? formData[field.dependsOn]
+          : null;
+        const isDisabled = field.dependsOn && !dependsOnValue;
+
         const options =
           field.dependsOn && dynamicOptions[field.key]
             ? dynamicOptions[field.key]
@@ -459,35 +474,37 @@ const AddModal: React.FC<AddModalProps> = ({
             ? dynamicOptions[field.key] || []
             : field.values || [];
 
-        if (field.values)
-          return (
-            <Select
-              name={field.key}
-              required={field.required}
-              label={`Select ${field.label}`}
-              placeholder={field.label}
-              className="py-2 border rounded-md w-full"
-              selectedKeys={
-                formData[field.key]
-                  ? new Set([String(formData[field.key])])
-                  : new Set()
-              }
-              onSelectionChange={(keys) =>
-                handleInputChange({
-                  target: {
-                    name: field.key,
-                    value: String(Array.from(keys)[0]),
-                  },
-                })
-              }
-            >
-              {options.map((option: any) => (
-                <SelectItem key={String(option.key)} value={String(option.key)}>
-                  {option.value}
-                </SelectItem>
-              ))}
-            </Select>
-          );
+        return (
+          <Autocomplete
+            name={field.key}
+            className="w-[90%]"
+            label={`Select ${field.label}`}
+            placeholder={
+              isDisabled && field.dependsOn
+                ? `Please select ${toTitleCase(field.dependsOn)} first`
+                : field.label
+            }
+            isDisabled={!!isDisabled}
+            defaultItems={options}
+            selectedKey={
+              formData[field.key] ? String(formData[field.key]) : null
+            }
+            onSelectionChange={(key) =>
+              handleInputChange({
+                target: {
+                  name: field.key,
+                  value: String(key),
+                },
+              })
+            }
+          >
+            {(item) => (
+              <AutocompleteItem key={String(item.key)}>
+                {item.value}
+              </AutocompleteItem>
+            )}
+          </Autocomplete>
+        );
 
       case "multiselect":
         if (field.values)
@@ -554,7 +571,7 @@ const AddModal: React.FC<AddModalProps> = ({
             name={field.key}
             type={field.type}
             placeholder={field.label}
-            className="py-2"
+            className="py-2 w-[90%]"
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
@@ -566,10 +583,10 @@ const AddModal: React.FC<AddModalProps> = ({
     <>
       <div className="flex justify-end">
         <button
-          className="w-[120px] bg-warning-400 rounded-lg text-white h-[35px] text-sm shadow-sm shadow-warning-200"
+          className="min-w-[120px] px-2 bg-warning-400 rounded-lg text-white h-[35px] text-sm shadow-sm shadow-warning-200"
           onClick={openModal}
         >
-          Add
+          Add {name ?? ""}
         </button>
       </div>
       <Modal isOpen={open} onClose={closeModal} size="lg">
@@ -590,11 +607,11 @@ const AddModal: React.FC<AddModalProps> = ({
               </div>
               <div className="flex justify-end w-full mt-4">
                 <Button
-                  className="w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
+                  className="min-w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? "Adding..." : "Add"}
+                  {loading ? `Adding ${name ?? ""} ...` : `Add ${name ?? ""}`}
                 </Button>
               </div>
             </form>

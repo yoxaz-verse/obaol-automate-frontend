@@ -187,6 +187,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             {!displayOnly && rate === "variantRate" ? (
               <>
                 <AddModal
+                  name="Rate"
                   currentTable={rate}
                   formFields={variantRateFormFields}
                   apiEndpoint={apiRoutesByRole[rate]}
@@ -265,36 +266,53 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     </div>
                   );
                 }}
-                editModal={(item: any) =>
-                  user?.role === "Admin" ||
-                  (item.associateId !== user?.id &&
-                    isCooling(item.coolingStartTime) && (
-                      <>
-                        {console.log(item)}
+                editModal={(item: any) => {
+                  if (!user) return null;
+
+                  const isAdmin = user.role === "Admin";
+                  const isCoolingTime = isCooling(item.coolingStartTime);
+                  const isDifferentAssociate = item.associateId !== user.id;
+
+                  if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                    return (
+                      <div className="flex w-full h-[50px]  gap-8 items-end justify-end align-bottom">
                         <EditModal
                           _id={item._id}
                           initialData={item}
                           currentTable={rate}
                           formFields={tableConfig[rate]}
-                          apiEndpoint={`${apiRoutesByRole[rate]}`} // Assuming API endpoint for update
+                          apiEndpoint={`${apiRoutesByRole[rate]}`}
                           refetchData={refetchData}
                         />
-                      </>
-                    ))
-                }
-                deleteModal={(item: any) =>
-                  user?.role === "Admin" ||
-                  (item.associateId !== user?.id &&
-                    isCooling(item.coolingStartTime) && (
-                      <DeleteModal
-                        _id={item._id}
-                        name={item.name}
-                        deleteApiEndpoint={apiRoutesByRole[rate]}
-                        refetchData={refetchData}
-                        useBody={true}
-                      />
-                    ))
-                }
+                      </div>
+                    );
+                  }
+
+                  return null;
+                }}
+                deleteModal={(item: any) => {
+                  if (!user) return null;
+
+                  const isAdmin = user.role === "Admin";
+                  const isCoolingTime = isCooling(item.coolingStartTime);
+                  const isDifferentAssociate = item.associateId !== user.id;
+
+                  if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                    return (
+                      <div className="flex w-full h-[50px]  gap-8 items-end justify-end align-bottom">
+                        <DeleteModal
+                          _id={item._id}
+                          name={item.name}
+                          deleteApiEndpoint={apiRoutesByRole[rate]}
+                          refetchData={refetchData}
+                          useBody={true}
+                        />
+                      </div>
+                    );
+                  }
+
+                  return null;
+                }}
               />
             </section>
             <section className="md:hidden block">

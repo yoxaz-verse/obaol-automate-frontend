@@ -62,7 +62,7 @@ export const ProductList = ({ product }: IProductList) => {
           <Title title={product.name} /> {/* Translate */}
           <Divider />
           <Spacer y={1} />
-          <Tabs
+          {/* <Tabs
             aria-label={product.name + " Variant Tabs"} // Translate
             selectedKey={locationTab}
             onSelectionChange={(key) => setLocationTab(key as string)}
@@ -71,7 +71,7 @@ export const ProductList = ({ product }: IProductList) => {
               <Tab key={tab.key} title={tab.title}>
                 {tab.key === "productVariant" && (
                   // <LocationTabContent currentType="all" />
-                  <>
+                  <> */}
                     <QueryComponent
                       api={apiRoutesByRole["productVariant"]}
                       queryKey={[
@@ -118,6 +118,7 @@ export const ProductList = ({ product }: IProductList) => {
                           <section>
                             {productVariantFormFields && (
                               <AddModal
+                                name="Product Variant"
                                 currentTable={"ProductVariant"}
                                 formFields={productVariantFormFields} // Pass the updated formFields
                                 apiEndpoint={apiRoutesByRole["productVariant"]}
@@ -151,7 +152,7 @@ export const ProductList = ({ product }: IProductList) => {
                         );
                       }}
                     </QueryComponent>{" "}
-                  </>
+                  {/* </>
                 )}
                 {tab.key === "locationType" && (
                   <div>ssss</div>
@@ -160,7 +161,7 @@ export const ProductList = ({ product }: IProductList) => {
                 {tab.key === "locationManager" && <div>ssss</div>}
               </Tab>
             ))}
-          </Tabs>{" "}
+          </Tabs>{" "} */}
         </section>
       ) : (
         <Title title="Select Any Product" />

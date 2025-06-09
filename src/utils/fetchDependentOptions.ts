@@ -7,8 +7,7 @@ export const fetchDependentOptions = async (
   parentValue?: string
 ) => {
   if (fieldKey.toLowerCase().includes("state")) {
-    const res = await getData(`${stateRoutes.getAll}`);
-    console.log("state");
+    const res = await getData(`${stateRoutes.getAll}`, { limit: "1000" });
     console.log(res);
 
     return (

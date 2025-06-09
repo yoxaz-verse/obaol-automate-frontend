@@ -17,7 +17,7 @@ export default function Verification() {
       <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden">
         {/* <LoginComponent role="Associate" /> */}
         {/* <LoginComponent role="Admin" /> */}
-        <OtpVerification user={user} />
+        {/* <OtpVerification user={user} /> */}
       </div>
     </>
   );

@@ -592,6 +592,7 @@ const AddModal: React.FC<AddModalProps> = ({
       <Modal
         isOpen={open}
         onClose={closeModal}
+        placement="top-center"
         size="lg"
         className="!max-h-[90vh] sm:!max-h-[80vh] overflow-hidden"
         scrollBehavior="inside"

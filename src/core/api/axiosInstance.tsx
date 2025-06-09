@@ -4,9 +4,9 @@ import axios from "axios";
 
 export const baseUrl =
   // process.env.NEXT_PUBLIC_API_BASE_URL
-  // "http://localhost:5001/api/v1/web";
-  // ||"backend.obaol.com/api/v1/web"
-  "https://backend.obaol.com/api/v1/web";
+  "http://localhost:5001/api/v1/web";
+// ||"backend.obaol.com/api/v1/web"
+// "https://backend.obaol.com/api/v1/web";
 
 const instance = axios.create({
   baseURL: baseUrl,
@@ -16,7 +16,6 @@ const instance = axios.create({
   },
   withCredentials: true, // Important for sending cookies
 });
-
 
 // Optionally, keep response interceptor for handling 401 errors
 instance.interceptors.response.use(

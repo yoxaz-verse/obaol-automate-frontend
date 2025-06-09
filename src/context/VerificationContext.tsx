@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AuthContext from "./AuthContext";
 import { postData } from "@/core/api/apiHandler";
@@ -25,30 +25,26 @@ export const VerificationProvider = ({
   const { user } = useContext(AuthContext);
   const router = useRouter();
   const pathname = usePathname();
+
   const [verified, setVerified] = useState<{
     [key in VerificationTypes]?: boolean;
   }>({});
 
-  const [verifiedInitialized, setVerifiedInitialized] = useState(false); // 🔥 Fix
+  const [verifiedInitialized, setVerifiedInitialized] = useState(false);
 
-  const verificationRules: { [key: string]: VerificationTypes[] } = {
-    "/dashboard": [],
-    "/dashboard/settings": ["email", "phone", "gst"],
-    "/dashboard/profile": [],
-  };
 
-  const updateVerificationStatus = (
-    type: VerificationTypes,
-    value: boolean
-  ) => {
+const updateVerificationStatus = useCallback(
+  (type: VerificationTypes, value: boolean) => {
     setVerified((prev) => ({
       ...prev,
       [type]: value,
     }));
-  };
+  },
+  []
+);
 
-  // 🧠 Central check for auto-verification (like email already verified)
-  const checkIfAlreadyVerified = async () => {
+
+  const checkIfAlreadyVerified = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -63,36 +59,50 @@ export const VerificationProvider = ({
         }
       }
     } catch (err) {
-      // Silent fail – user will go through manual verification
+      // silent fail
     } finally {
-      setVerifiedInitialized(true); // ✅ Mark init done
+      setVerifiedInitialized(true);
     }
-  };
+  }, [user, updateVerificationStatus, pathname, router]);
 
   useEffect(() => {
-    if (user) checkIfAlreadyVerified();
-  }, [user]);
+    if (user) {
+      checkIfAlreadyVerified();
+    }
+  }, [user, checkIfAlreadyVerified]);
 
   useEffect(() => {
     const checks = async () => {
+      const verificationRules: { [key: string]: VerificationTypes[] } = {
+        "/dashboard": [],
+        "/dashboard/settings": ["email", "phone", "gst"],
+        "/dashboard/profile": [],
+      };
       const required = verificationRules[pathname] || [];
 
-      let passed: { [key in VerificationTypes]?: boolean } = {};
+      const passed: { [key in VerificationTypes]?: boolean } = {};
       for (const type of required) {
         switch (type) {
           case "email":
-            passed.email = user?.verified?.email ?? verified.email ?? false;
+            passed.email = user?.verified?.email ?? false;
             break;
           case "phone":
-            passed.phone = user?.verified?.phone ?? verified.phone ?? false;
+            passed.phone = user?.verified?.phone ?? false;
             break;
           case "gst":
-            passed.gst = user?.verified?.gst ?? verified.gst ?? false;
+            passed.gst = user?.verified?.gst ?? false;
             break;
         }
       }
 
-      setVerified((prev) => ({ ...prev, ...passed }));
+      setVerified((prev) => {
+        const updated = { ...prev, ...passed };
+        // Avoid unnecessary re-renders
+        if (JSON.stringify(updated) !== JSON.stringify(prev)) {
+          return updated;
+        }
+        return prev;
+      });
 
       const failed = required.find((v) => !passed[v]);
       if (failed) {
@@ -103,14 +113,7 @@ export const VerificationProvider = ({
     if (user && verifiedInitialized) {
       checks();
     }
-  }, [
-    pathname,
-    router,
-    user,
-    verifiedInitialized,
-    verificationRules,
-    verified,
-  ]);
+  }, [pathname, router, user, verifiedInitialized]);
 
   return (
     <VerificationContext.Provider

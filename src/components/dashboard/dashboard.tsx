@@ -35,6 +35,8 @@ const Dashboard: NextPage = () => {
   const projectCounts: Status[] = projectCountsResponse
     ? Object.values(projectCountsResponse.data.data)
     : [];
+
+    
   // Calculate total projects
   const totalProjects = projectCounts.reduce(
     (sum, project) => sum + project.count,

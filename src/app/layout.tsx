@@ -28,11 +28,11 @@ export default function RootLayout({
     <html lang="en" className="bg-neutral-950">
       <body className={inter.className} style={{ overflowX: "hidden" }}>
         <AuthProvider>
-          <VerificationProvider>
+          {/* <VerificationProvider> */}
             {" "}
             {/* ← wrap here */}
             <Providers>{children}</Providers>
-          </VerificationProvider>
+          {/* </VerificationProvider> */}
         </AuthProvider>
       </body>
     </html>

@@ -589,7 +589,16 @@ const AddModal: React.FC<AddModalProps> = ({
           Add {name ?? ""}
         </button>
       </div>
-      <Modal isOpen={open} onClose={closeModal} size="lg">
+      <Modal
+        isOpen={open}
+        onClose={closeModal}
+        size="lg"
+        className="!max-h-[90vh] sm:!max-h-[80vh] overflow-hidden"
+        scrollBehavior="inside"
+        isDismissable={true}
+        hideCloseButton={false}
+      >
+        {" "}
         <ModalContent>
           <ModalHeader className="flex flex-col ">
             Add New {currentTable} {/* Translate */}

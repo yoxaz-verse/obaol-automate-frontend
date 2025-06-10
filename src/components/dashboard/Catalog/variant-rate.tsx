@@ -33,6 +33,7 @@ import {
 } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 import DeleteModal from "@/components/CurdTable/delete";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 
 /**
  * Props for your existing VariantRate component
@@ -80,6 +81,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const associateValue = associateResponse?.data?.data?.data;
   const associateByIdValue = associateByIdResponse?.data;
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+  };
 
   const { data: variantResponse } = useQuery({
     queryKey: ["variantRate"],
@@ -130,11 +135,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
             value: associate.name,
           }));
 
-          variantRateFormFields = variantRateFormFields.map((field: any) =>
-            field.key === "associate"
-              ? { ...field, values: associateValues }
-              : field
-          );
+          // variantRateFormFields = variantRateFormFields.map((field: any) =>
+          //   field.key === "associate"
+          //     ? { ...field, values: associateValues }
+          //     : field
+          // );
         }
 
         var variantRateFetchedData: any;
@@ -200,6 +205,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       associate: user?.id,
                     }),
                   }}
+                />
+                <DynamicFilter
+                  currentTable={"variantRate"}
+                  formFields={variantRateFormFields}
+                  onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
                 />
               </>
             ) : (

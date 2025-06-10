@@ -7,6 +7,7 @@ import { Spacer, Accordion, AccordionItem, Button } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { inventoryManagerRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
+import UserDeleteModal from "@/components/CurdTable/delete";
 
 import Title from "@/components/titles";
 import AddModal from "@/components/CurdTable/add-model";
@@ -186,7 +187,6 @@ function CategoryList({
           >
             {cat.description && <p>{cat.description}</p>}
             <Spacer y={1} />
-
             {/* If you want an AddModal for subCategory creation */}
             {tableConfig["subCategory"] && (
               <AddModal
@@ -200,7 +200,6 @@ function CategoryList({
                 refetchData={refetchData}
               />
             )}
-
             <Spacer y={1} />
             {/* 2) On expand, fetch subCategories again for actual usage */}
             <SubCategorySection
@@ -209,6 +208,18 @@ function CategoryList({
               refetchData={refetchData}
               setSelectedProduct={setSelectedProduct}
             />
+            <Divider />
+            <Spacer y={4} />
+            <div className="flex justify-around">
+              <p>{cat.name} Actions</p>
+
+              <UserDeleteModal
+                _id={cat._id}
+                name={cat.name}
+                deleteApiEndpoint={apiRoutesByRole["category"]}
+                refetchData={refetchData}
+              />
+            </div>
           </AccordionItem>
         );
       })}
@@ -346,6 +357,18 @@ function SubCategoryList({
               subCategoryId={sub._id}
               setSelectedProduct={setSelectedProduct}
             />
+            <Divider />
+            <Spacer y={4} />
+            <div className="flex justify-around">
+              <p>{sub.name} Actions</p>
+
+              <UserDeleteModal
+                _id={sub._id}
+                name={sub.name}
+                deleteApiEndpoint={apiRoutesByRole["subCategory"]}
+                refetchData={refetchData}
+              />
+            </div>
           </AccordionItem>
         );
       })}

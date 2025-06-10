@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   DateRangePicker,
@@ -25,7 +25,7 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export interface DynamicFilterProps {
   currentTable: string;
   formFields: FormField[];
-  onApply: (filters: Record<string, any>) => void; // Callback prop to send filters to the parent
+  onApply: (filters: Record<string, any>) => void;
 }
 
 const DynamicFilter: React.FC<DynamicFilterProps> = ({
@@ -34,26 +34,64 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   onApply,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
-  // State for managing filters dynamically
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
+    {}
+  );
 
-  // Handle changes in filters
+  // Load options that have dynamic functions and no dependencies
+  useEffect(() => {
+    const loadInitialOptions = async () => {
+      const updatedOptions: Record<string, any[]> = {};
+      for (const field of formFields) {
+        if (field.dynamicValuesFn && !field.dependsOn) {
+          const result = await field.dynamicValuesFn(""); // ✅ Pass empty string
+          updatedOptions[field.key] = result;
+        } else if (field.values) {
+          updatedOptions[field.key] = field.values;
+        }
+      }
+      setDynamicOptions(updatedOptions);
+    };
+    loadInitialOptions();
+  }, [formFields]);
+
+  // Fetch dependent dropdown values
+  useEffect(() => {
+    for (const field of formFields) {
+      const fn = field.dynamicValuesFn;
+      const dependencyKey = field.dependsOn;
+
+      if (dependencyKey && filters[dependencyKey] && typeof fn === "function") {
+        const fetchDependentValues = async () => {
+          try {
+            const result = await fn(filters[dependencyKey]);
+            setDynamicOptions((prev) => ({ ...prev, [field.key]: result }));
+          } catch (err) {
+            console.error(
+              `Error fetching dynamic values for ${field.key}:`,
+              err
+            );
+          }
+        };
+        fetchDependentValues();
+      }
+    }
+  }, [filters, formFields]);
+
   const handleFilterChange = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Remove a specific filter and trigger onApply
   const removeFilter = (key: string) => {
     setFilters((prev) => {
       const updatedFilters = { ...prev };
       delete updatedFilters[key];
-      onApply(updatedFilters); // Trigger onApply with updated filters
+      onApply(updatedFilters);
       return updatedFilters;
     });
   };
 
-  // Validate the filters before applying
   const isValidFilters = () => {
     for (const key in filters) {
       const value = filters[key];
@@ -63,21 +101,20 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         value.start &&
         !value.end
       ) {
-        alert(`${key} has an invalid date range.`); // Translate
+        alert(`${capitalize(key)} has an invalid date range.`);
         return false;
       }
     }
     return true;
   };
 
-  // Apply filters and send the payload to the parent component
   const applyFilters = () => {
-    const payload: Record<string, any> = {};
+    if (!isValidFilters()) return;
 
+    const payload: Record<string, any> = {};
     for (const key in filters) {
       const value = filters[key];
       if (Array.isArray(value)) {
-        // Handle multiselect filters
         payload[key] = value;
       } else if (
         typeof value === "object" &&
@@ -85,33 +122,27 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         value.start &&
         value.end
       ) {
-        // Ensure start and end are valid Date objects
-        payload[key] = {
-          start: value.start,
-          end: value.end,
-        };
+        payload[key] = { start: value.start, end: value.end };
       } else {
-        // Handle other filter types (e.g., text, select)
         payload[key] = value;
       }
     }
 
-    if (isValidFilters()) {
-      onApply(payload); // Send filters to parent
-      console.log("Payload to Send:", payload); // Translate
-    }
+    onApply(payload);
+    console.log("Applied Filters Payload:", payload);
   };
 
-  // Render filters based on their type
   const renderFilter = (field: FormField) => {
-    const { key, label, filterType, values } = field;
+    const { key, label, filterType } = field;
+    const options = field.values || dynamicOptions[key] || [];
 
     switch (filterType) {
       case "text":
         return (
           <Input
+            label={label}
             type="text"
-            placeholder={`Search by ${label}`} // Translate
+            placeholder={`Search by ${label}`}
             value={filters[key] || ""}
             onChange={(e) => handleFilterChange(key, e.target.value)}
           />
@@ -120,17 +151,14 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <Select
             label={label}
-            placeholder={`Select ${label}`} // Translate
+            placeholder={`Select ${label}`}
             selectedKeys={filters[key] ? new Set([filters[key]]) : new Set()}
-            onSelectionChange={(keys) => {
-              const selectedKey = Array.from(keys)[0];
-              handleFilterChange(key, selectedKey || null);
-            }}
+            onSelectionChange={(keys) =>
+              handleFilterChange(key, Array.from(keys)[0] || null)
+            }
           >
-            {(values || []).map((option) => (
-              <SelectItem key={String(option.key)} value={String(option.key)}>
-                {option.value}
-              </SelectItem>
+            {options.map((option) => (
+              <SelectItem key={String(option.key)}>{option.value}</SelectItem>
             ))}
           </Select>
         );
@@ -138,17 +166,15 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <Select
             label={label}
-            placeholder={`Select ${label}`} // Translate
+            placeholder={`Select ${label}`}
             selectionMode="multiple"
             selectedKeys={filters[key] ? new Set(filters[key]) : new Set()}
             onSelectionChange={(keys) =>
               handleFilterChange(key, Array.from(keys))
             }
           >
-            {(values || []).map((option) => (
-              <SelectItem key={String(option.key)} value={String(option.key)}>
-                {option.value}
-              </SelectItem>
+            {options.map((option) => (
+              <SelectItem key={String(option.key)}>{option.value}</SelectItem>
             ))}
           </Select>
         );
@@ -156,7 +182,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         return (
           <DateRangePicker
             label={label}
-            defaultValue={filters[key] || null}
+            value={filters[key] || null}
             onChange={(range) => handleFilterChange(key, range)}
           />
         );
@@ -174,75 +200,77 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
       case "boolean":
         return (
           <Switch
-            aria-label={label}
             isSelected={filters[key] || false}
-            onChange={(value) => handleFilterChange(key, value)}
-          />
+            onChange={(e) => handleFilterChange(key, e.target.checked)}
+          >
+            {label}
+          </Switch>
         );
       default:
         return null;
     }
   };
 
+  const renderChipValue = (key: string, value: any) => {
+    const field = formFields.find((field) => field.key === key);
+    const options = field?.values || dynamicOptions[key] || [];
+
+    const getLabel = (val: any) => {
+      const option = options.find((item) => item.key === val);
+      return option?.value ?? String(val);
+    };
+
+    if (Array.isArray(value)) {
+      return value.map(getLabel).join(", ");
+    } else if (typeof value === "object" && value?.start && value?.end) {
+      return `${new Date(value.start).toLocaleDateString()} - ${new Date(
+        value.end
+      ).toLocaleDateString()}`;
+    } else if (typeof value === "boolean") {
+      return value ? "Yes" : "No";
+    } else {
+      return getLabel(value);
+    }
+  };
+
   return (
     <div className="my-4">
-      {/* Display applied filters as chips */}
-      {/* Display applied filters as chips */}
       <div className="mb-4 flex flex-wrap gap-2 justify-end">
-        {Object.entries(filters).map(([key, value]) => {
-          const field = formFields.find((field) => field.key === key); // Find the corresponding form field
-          const values = field?.values || []; // Get the options for the field
-
-          const getLabel = (val: string) => {
-            const option = values.find((item) => item.key === val); // Match key with options
-            return option ? option.value : val; // Return the label or the value itself if no match is found
-          };
-
-          return (
-            <Chip
-              key={key}
-              variant="bordered"
-              color="primary"
-              onClose={() => removeFilter(key)} // Remove filter on close
-            >
-              {capitalize(key)}:{" "}
-              {Array.isArray(value)
-                ? value.map(getLabel).join(", ") // For multiselect, map to labels
-                : typeof value === "object" && value?.start
-                ? `${new Date(value.start).toDateString()} - ${new Date(
-                    value.end
-                  ).toDateString()}` // For date ranges
-                : getLabel(value)}{" "}
-              {/* For select or single value, map to label */}
-            </Chip>
-          );
-        })}
+        {Object.entries(filters).map(([key, value]) => (
+          <Chip
+            key={key}
+            variant="bordered"
+            color="primary"
+            onClose={() => removeFilter(key)}
+          >
+            {capitalize(key)}: {renderChipValue(key, value)}
+          </Chip>
+        ))}
       </div>
 
       <div className="flex justify-end">
         <Button onPress={onOpen} variant="ghost" color="primary">
-          <IoFilterOutline />
-          Filter
+          <IoFilterOutline className="mr-1" /> Filter
         </Button>
       </div>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        scrollBehavior="inside"
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                {capitalize(currentTable)} Filter{/* Translate */}
-              </ModalHeader>
-              <ModalBody>
+              <ModalHeader>{capitalize(currentTable)} Filters</ModalHeader>
+              <ModalBody className="space-y-4">
                 {formFields.map((field) => (
-                  <div key={field.key} className="">
-                    {renderFilter(field)}
-                  </div>
+                  <div key={field.key}>{renderFilter(field)}</div>
                 ))}
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Close{/* Translate */}
+                  Cancel
                 </Button>
                 <Button
                   color="primary"
@@ -251,7 +279,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                     onClose();
                   }}
                 >
-                  Apply{/* Translate */}
+                  Apply
                 </Button>
               </ModalFooter>
             </>

@@ -30,142 +30,87 @@ import React, { useContext, useEffect, useState } from "react";
 import SelectModal from "./select-modal";
 import { Input, Switch } from "@nextui-org/react";
 import VariantRate from "./variant-rate";
+import UserDeleteModal from "@/components/CurdTable/delete";
 
-const productVariantTabs = [
-  { key: "productVariant", title: "Product Variant" }, // Translate Title
-  // { key: "locationManager", title: "Product Associate" }, // Translate Title
-  // { key: "locationType", title: "Product Location" }, // Translate Title
-];
+// ... other imports
 
 interface IProductList {
   product: any;
+  setProduct: (product: any) => void; // ✅ Add this line
 }
 
-export const ProductList = ({ product }: IProductList) => {
-  const [locationTab, setLocationTab] = React.useState("location");
-  const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
+export const ProductList = ({ product, setProduct }: IProductList) => {
+  const tableConfig = { ...initialTableConfig };
 
-  const { data: locationResponse } = useQuery({
-    queryKey: ["Location"],
-    queryFn: () => getData(locationRoutes.getAll),
-    // enabled: essentialName === "associateCompany",
-  });
-
-  const locationValue = locationResponse?.data?.data.data;
   const refetchData = () => {
-    // Implement refetch logic if necessary
+    // ✅ This clears the selected product
+    setProduct(null);
   };
-  return (
-    <>
-      {product ? (
-        <section>
-          <Title title={product.name} /> {/* Translate */}
-          <Divider />
-          <Spacer y={1} />
-          {/* <Tabs
-            aria-label={product.name + " Variant Tabs"} // Translate
-            selectedKey={locationTab}
-            onSelectionChange={(key) => setLocationTab(key as string)}
-          >
-            {productVariantTabs.map((tab) => (
-              <Tab key={tab.key} title={tab.title}>
-                {tab.key === "productVariant" && (
-                  // <LocationTabContent currentType="all" />
-                  <> */}
-                    <QueryComponent
-                      api={apiRoutesByRole["productVariant"]}
-                      queryKey={[
-                        "productVariant",
-                        apiRoutesByRole["productVariant"],
-                        product._id,
-                      ]}
-                      page={1}
-                      limit={100}
-                      additionalParams={{
-                        product: product._id,
-                      }}
+
+  return product ? (
+    <section>
+      <div className="flex justify-between">
+        <Title title={product.name} />
+        <UserDeleteModal
+          _id={product._id}
+          name={product.name}
+          deleteApiEndpoint={apiRoutesByRole["product"]}
+          refetchData={refetchData}
+        />
+      </div>
+      <Spacer y={1} />
+
+      <QueryComponent
+        api={apiRoutesByRole["productVariant"]}
+        queryKey={[
+          "productVariant",
+          apiRoutesByRole["productVariant"],
+          product._id,
+        ]}
+        page={1}
+        limit={100}
+        additionalParams={{ product: product._id }}
+      >
+        {(productVariantData: any) => {
+          const productVariantFormFields = tableConfig["productVariant"];
+          const productVariantValue = productVariantData || [];
+
+          return (
+            <section>
+              {productVariantFormFields && (
+                <AddModal
+                  name="Product Variant"
+                  currentTable={"ProductVariant"}
+                  formFields={productVariantFormFields}
+                  apiEndpoint={apiRoutesByRole["productVariant"]}
+                  refetchData={refetchData}
+                  additionalVariable={{ product: product._id }}
+                />
+              )}
+              <Spacer y={1} />
+              {productVariantValue && (
+                <Accordion variant="splitted">
+                  {productVariantValue.map((productVariantValue: any) => (
+                    <AccordionItem
+                      key={productVariantValue._id}
+                      aria-label={productVariantValue.name}
+                      title={productVariantValue.name}
+                      className="opacity-60 hover:opacity-100 "
                     >
-                      {(productVariantData: any) => {
-                        var productVariantFormFields =
-                          tableConfig["productVariant"];
-                        const productVariantValue = productVariantData || [];
-
-                        if (locationValue) {
-                          const locationValues = locationValue.map(
-                            (location: any) => ({
-                              key: String(location._id),
-                              value: location.name,
-                            })
-                          );
-                          productVariantFormFields =
-                            productVariantFormFields.map((field: any) =>
-                              field.key === "locations"
-                                ? {
-                                    ...field,
-                                    values: locationValues,
-                                  }
-                                : field
-                            );
-                        }
-                        // const subCategoryValues = subCategoryValue.map(
-                        //   (subCategory: any) => ({
-                        //     key: String(subCategory._id),
-                        //     value: subCategory.name,
-                        //   })
-                        // );
-
-                        return (
-                          <section>
-                            {productVariantFormFields && (
-                              <AddModal
-                                name="Product Variant"
-                                currentTable={"ProductVariant"}
-                                formFields={productVariantFormFields} // Pass the updated formFields
-                                apiEndpoint={apiRoutesByRole["productVariant"]}
-                                refetchData={refetchData}
-                                additionalVariable={{
-                                  product: product._id,
-                                }}
-                              />
-                            )}
-                            <Spacer y={1} />
-                            {productVariantValue && (
-                              <Accordion variant="splitted">
-                                {productVariantValue?.map(
-                                  (productVariantValue: any) => (
-                                    <AccordionItem
-                                      key={productVariantValue._id}
-                                      aria-label={productVariantValue.name}
-                                      title={productVariantValue.name}
-                                      className="opacity-60 hover:opacity-100 "
-                                    >
-                                      <VariantRate
-                                        productVariant={productVariantValue}
-                                        rate="variantRate"
-                                      />
-                                    </AccordionItem>
-                                  )
-                                )}
-                              </Accordion>
-                            )}
-                          </section>
-                        );
-                      }}
-                    </QueryComponent>{" "}
-                  {/* </>
-                )}
-                {tab.key === "locationType" && (
-                  <div>ssss</div>
-                  //   <EssentialTabContent essentialName="locationType" />
-                )}
-                {tab.key === "locationManager" && <div>ssss</div>}
-              </Tab>
-            ))}
-          </Tabs>{" "} */}
-        </section>
-      ) : (
-        <Title title="Select Any Product" />
-      )}
-    </>
+                      <VariantRate
+                        productVariant={productVariantValue}
+                        rate="variantRate"
+                      />
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              )}
+            </section>
+          );
+        }}
+      </QueryComponent>
+    </section>
+  ) : (
+    <Title title="Select Any Product" />
   );
 };

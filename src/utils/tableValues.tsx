@@ -824,6 +824,7 @@ export const initialTableConfig: Record<
       type: "select",
       filterType: "select",
       key: "associate",
+      dynamicValuesFn: () => fetchDependentOptions("associate"),
       values: [],
       inForm: true,
       inTable: true,
@@ -834,6 +835,7 @@ export const initialTableConfig: Record<
       label: "State",
       type: "select",
       key: "state",
+      filterType: "select",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("state"),
       inForm: true,
@@ -844,6 +846,7 @@ export const initialTableConfig: Record<
       label: "District",
       type: "select",
       key: "district",
+      filterType: "select",
       dependsOn: "state",
       values: [],
       dynamicValuesFn: (stateId: string) =>
@@ -856,6 +859,7 @@ export const initialTableConfig: Record<
       label: "City / Town",
       type: "select",
       key: "city",
+      filterType: "select",
       dependsOn: "district", // 👈
       dynamicValuesFn: (districtId: string) =>
         fetchDependentOptions("city", "district", districtId),

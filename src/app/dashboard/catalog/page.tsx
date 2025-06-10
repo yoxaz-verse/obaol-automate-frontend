@@ -38,7 +38,10 @@ export default function Essentials() {
                   </Button>{" "}
                   <Spacer y={4} />
                 </div>
-                <ProductList product={selectedProduct} />
+                <ProductList
+                  product={selectedProduct}
+                  setProduct={setSelectedProduct}
+                />
               </div>
             )}
           </div>
@@ -50,7 +53,10 @@ export default function Essentials() {
               />{" "}
             </div>
             <div className="md:w-[60%] gap-4  max-h-[80vh]">
-              <ProductList product={selectedProduct} />
+              <ProductList
+                product={selectedProduct}
+                setProduct={setSelectedProduct}
+              />
             </div>
           </div>
           <Spacer y={4} />

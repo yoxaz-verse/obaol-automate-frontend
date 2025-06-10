@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AuthContext from "./AuthContext";
 import { postData } from "@/core/api/apiHandler";
@@ -29,28 +36,26 @@ export const VerificationProvider = ({
   const [verified, setVerified] = useState<{
     [key in VerificationTypes]?: boolean;
   }>({});
+  const [initialized, setInitialized] = useState(false);
 
-  const [verifiedInitialized, setVerifiedInitialized] = useState(false);
+  const updateVerificationStatus = useCallback(
+    (type: VerificationTypes, value: boolean) => {
+      setVerified((prev) => {
+        if (prev[type] === value) return prev;
+        return { ...prev, [type]: value };
+      });
+    },
+    []
+  );
 
+  // Prevent repeat router.push
+  const hasRedirected = useRef(false);
 
-const updateVerificationStatus = useCallback(
-  (type: VerificationTypes, value: boolean) => {
-    setVerified((prev) => ({
-      ...prev,
-      [type]: value,
-    }));
-  },
-  []
-);
-
-
-  const checkIfAlreadyVerified = useCallback(async () => {
+  const fetchInitialStatus = useCallback(async () => {
     if (!user) return;
 
     try {
-      const res = await postData(`/verification/status`, {
-        method: "email",
-      });
+      const res = await postData(`/verification/status`, { method: "email" });
 
       if (res?.data?.verified) {
         updateVerificationStatus("email", true);
@@ -59,61 +64,56 @@ const updateVerificationStatus = useCallback(
         }
       }
     } catch (err) {
-      // silent fail
+      // Optional: console.warn("Verification fetch error", err);
     } finally {
-      setVerifiedInitialized(true);
+      setInitialized(true);
     }
-  }, [user, updateVerificationStatus, pathname, router]);
+  }, [user, pathname, router, updateVerificationStatus]);
 
   useEffect(() => {
-    if (user) {
-      checkIfAlreadyVerified();
+    if (user && !initialized) {
+      fetchInitialStatus();
     }
-  }, [user, checkIfAlreadyVerified]);
+  }, [user, initialized, fetchInitialStatus]);
 
   useEffect(() => {
-    const checks = async () => {
-      const verificationRules: { [key: string]: VerificationTypes[] } = {
-        "/dashboard": [],
-        "/dashboard/settings": ["email", "phone", "gst"],
-        "/dashboard/profile": [],
-      };
-      const required = verificationRules[pathname] || [];
+    if (!user || !initialized || hasRedirected.current) return;
 
-      const passed: { [key in VerificationTypes]?: boolean } = {};
-      for (const type of required) {
-        switch (type) {
-          case "email":
-            passed.email = user?.verified?.email ?? false;
-            break;
-          case "phone":
-            passed.phone = user?.verified?.phone ?? false;
-            break;
-          case "gst":
-            passed.gst = user?.verified?.gst ?? false;
-            break;
-        }
-      }
-
-      setVerified((prev) => {
-        const updated = { ...prev, ...passed };
-        // Avoid unnecessary re-renders
-        if (JSON.stringify(updated) !== JSON.stringify(prev)) {
-          return updated;
-        }
-        return prev;
-      });
-
-      const failed = required.find((v) => !passed[v]);
-      if (failed) {
-        router.push("/verification-pending");
-      }
+    const verificationRules: Record<string, VerificationTypes[]> = {
+      "/dashboard": ["email"],
+      "/dashboard/settings": ["email", "phone", "gst"],
+      "/dashboard/profile": [],
     };
 
-    if (user && verifiedInitialized) {
-      checks();
+    const getVerificationTypes = (path: string): VerificationTypes[] => {
+      const matched = Object.keys(verificationRules)
+        .filter((rulePath) => path.startsWith(rulePath))
+        .sort((a, b) => b.length - a.length); // prioritize deeper match
+      return matched.length > 0 ? verificationRules[matched[0]] : [];
+    };
+
+    const requiredVerifications = getVerificationTypes(pathname);
+
+    const notVerified = requiredVerifications.find(
+      (type) => !(user?.verified?.[type] || verified[type])
+    );
+
+    if (notVerified) {
+      hasRedirected.current = true;
+      router.push("/verification-pending");
+    } else {
+      const updates: Partial<typeof verified> = {};
+      requiredVerifications.forEach((type) => {
+        if (!verified[type] && user?.verified?.[type]) {
+          updates[type] = true;
+        }
+      });
+
+      if (Object.keys(updates).length > 0) {
+        setVerified((prev) => ({ ...prev, ...updates }));
+      }
     }
-  }, [pathname, router, user, verifiedInitialized]);
+  }, [user, pathname, verified, initialized, router]);
 
   return (
     <VerificationContext.Provider

@@ -41,10 +41,18 @@ interface IProductList {
 
 export const ProductList = ({ product, setProduct }: IProductList) => {
   const tableConfig = { ...initialTableConfig };
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  useEffect(() => {
+    if (isDeleted) {
+      setProduct(null);
+      setIsDeleted(false);
+    }
+  }, [isDeleted, setProduct]);
 
   const refetchData = () => {
-    // ✅ This clears the selected product
-    setProduct(null);
+    // ✅ Trigger deletion effect
+    setIsDeleted(true);
   };
 
   return product ? (
@@ -89,21 +97,38 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
               )}
               <Spacer y={1} />
               {productVariantValue && (
-                <Accordion variant="splitted">
-                  {productVariantValue.map((productVariantValue: any) => (
-                    <AccordionItem
-                      key={productVariantValue._id}
-                      aria-label={productVariantValue.name}
-                      title={productVariantValue.name}
-                      className="opacity-60 hover:opacity-100 "
-                    >
-                      <VariantRate
-                        productVariant={productVariantValue}
-                        rate="variantRate"
-                      />
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                <>
+                  <Accordion variant="splitted">
+                    {productVariantValue.map((productVariantValue: any) => (
+                      <AccordionItem
+                        key={productVariantValue._id}
+                        aria-label={productVariantValue.name}
+                        title={productVariantValue.name}
+                        className="opacity-60 hover:opacity-100 "
+                      >
+                        <VariantRate
+                          productVariant={productVariantValue}
+                          rate="variantRate"
+                        />
+                        <Spacer y={2} />
+                        <Divider />
+                        <Spacer y={5} />
+                        <div className="flex gap-5">
+                          <p>{productVariantValue.name} actions</p>
+
+                          <UserDeleteModal
+                            _id={productVariantValue._id}
+                            name={productVariantValue.name}
+                            deleteApiEndpoint={
+                              apiRoutesByRole["productVariant"]
+                            }
+                            refetchData={refetchData}
+                          />
+                        </div>{" "}
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </>
               )}
             </section>
           );

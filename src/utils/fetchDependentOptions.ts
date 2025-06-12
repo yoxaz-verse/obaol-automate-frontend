@@ -28,7 +28,7 @@ export const fetchDependentOptions = async (
     );
   }
 
-  if (fieldKey.toLowerCase().includes("associateCompany")) {
+  if (fieldKey === "associateCompany") {
     const res = await getData(`${associateCompanyRoutes.getAll}`, {
       limit: "1000",
     });
@@ -54,7 +54,7 @@ export const fetchDependentOptions = async (
       })) || []
     );
   }
-  if (fieldKey.toLowerCase().includes("productVariant")) {
+  if (fieldKey === "associate") {
     const res = await getData(`${productVariantRoutes.getAll}`, {
       limit: "1000",
     });

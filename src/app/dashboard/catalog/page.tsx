@@ -41,6 +41,7 @@ export default function Essentials() {
                 <ProductList
                   product={selectedProduct}
                   setProduct={setSelectedProduct}
+                  onProductDeleted={() => setSelectedProduct(null)}
                 />
               </div>
             )}
@@ -50,12 +51,13 @@ export default function Essentials() {
               <CategoryDivision
                 selectedProduct={selectedProduct}
                 setSelectedProduct={setSelectedProduct}
-              />{" "}
+              />
             </div>
             <div className="md:w-[60%] gap-4  max-h-[80vh]">
               <ProductList
                 product={selectedProduct}
                 setProduct={setSelectedProduct}
+                onProductDeleted={() => setSelectedProduct(null)}
               />
             </div>
           </div>

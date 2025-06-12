@@ -9,28 +9,7 @@ import BulkAdd from "@/components/CurdTable/bulk-add";
 import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
-  const [locationTab, setLocationTab] = React.useState("location");
-  const [activityTab, setActivityTab] = React.useState("activityStatus");
   const [projectTab, setProjectTab] = React.useState("projectStatus");
-
-  // Define static tabs
-  const projectTabs = [
-    { key: "projectStatus", title: "Project Status" },
-    { key: "projectType", title: "Project Types" },
-  ];
-
-  // Define static tabs
-  const activityTabs = [
-    { key: "activityStatus", title: "Activity Status" }, // Translate Title
-    { key: "activityType", title: "Activity Types" }, // Translate Title
-  ];
-
-  // Optionally, add dynamic tabs based on fetched data
-  // For example, if ProjectStatus or ActivityStatus have sub-categories
-  // For simplicity, we'll stick to static tabs in this example
-  const refetchData = () => {
-    // Implement refetch logic if necessary
-  };
 
   return (
     <div className="flex items-center justify-center">

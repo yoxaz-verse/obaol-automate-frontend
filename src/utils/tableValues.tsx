@@ -385,6 +385,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "associateCompany",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("associateCompany"),
       inForm: true,
       inTable: true,
       required: true,

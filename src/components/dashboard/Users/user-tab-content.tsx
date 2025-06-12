@@ -47,16 +47,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   // Extract admin data
   const adminData = adminResponse?.data.data.data || [];
 
-  // Fetch admin data when currentTable is 'serviceCompany'
-  const { data: associateCompanyResponse } = useQuery({
-    queryKey: ["associateCompany"],
-    queryFn: () => getData(associateCompanyRoutes.getAll),
-    enabled: currentTable === "associate", // Only fetch when currentTable is 'associateCompany'
-  });
-
-  // Extract associateCompany data
-  const associateCompanyData = associateCompanyResponse?.data.data.data || [];
-
   return (
     <>
       <QueryComponent
@@ -85,21 +75,8 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 ? { ...field, values: relatedValues }
                 : field
             );
-          } else if (currentTable === "associate") {
-            // You can similarly fetch manager data and populate 'Manager' select options
-            const relatedValues = associateCompanyData.map(
-              (associateCompany: any) => ({
-                key: String(associateCompany._id),
-                value: associateCompany.name,
-              })
-            );
-            // Update formFields with relatedValues
-            formFields = formFields.map((field: any) =>
-              field.key === "associateCompany"
-                ? { ...field, values: relatedValues }
-                : field
-            );
           }
+
           // Handle other user types similarly if needed
 
           const tableData = fetchedData.map((item: any) => {

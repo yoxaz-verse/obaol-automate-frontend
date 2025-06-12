@@ -1,34 +1,19 @@
+"use client";
 import AddModal from "@/components/CurdTable/add-model";
-import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
 import Title from "@/components/titles";
-import AuthContext from "@/context/AuthContext";
-import { getData, patchData, postData } from "@/core/api/apiHandler";
-import {
-  associateRoutes,
-  displayedRateRoutes,
-  locationRoutes,
-} from "@/core/api/apiRoutes";
+import {} from "@/core/api/apiRoutes";
 import {
   apiRoutesByRole,
-  generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
 import {
   Accordion,
   AccordionItem,
-  Button,
   Divider,
   Spacer,
-  Tab,
-  Tabs,
-  toast,
-  useDisclosure,
 } from "@heroui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useContext, useEffect, useState } from "react";
-import SelectModal from "./select-modal";
-import { Input, Switch } from "@nextui-org/react";
+import React, {  useState } from "react";
 import VariantRate from "./variant-rate";
 import UserDeleteModal from "@/components/CurdTable/delete";
 
@@ -36,27 +21,24 @@ import UserDeleteModal from "@/components/CurdTable/delete";
 
 interface IProductList {
   product: any;
-  setProduct: (product: any) => void; // ✅ Add this line
+  setProduct: (product: any) => void;
+  onProductDeleted: () => void;
 }
-
 export const ProductList = ({ product, setProduct }: IProductList) => {
   const tableConfig = { ...initialTableConfig };
   const [isDeleted, setIsDeleted] = useState(false);
 
-  useEffect(() => {
-    if (isDeleted) {
-      setProduct(null);
-      setIsDeleted(false);
-    }
-  }, [isDeleted, setProduct]);
-
   const refetchData = () => {
     // ✅ Trigger deletion effect
+    console.log(product);
+
     setIsDeleted(true);
   };
 
+
   return product ? (
     <section>
+      {/* <Title title={isDeleted ? "DSsd" : "aaaaaaaaaaaaaaaa"} /> */}
       <div className="flex justify-between">
         <Title title={product.name} />
         <UserDeleteModal

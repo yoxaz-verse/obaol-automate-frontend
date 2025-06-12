@@ -32,21 +32,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
     // Implement refetch logic if necessary
   };
 
-  // Fetch admin data when currentTable is 'manager'
-  const {
-    data: adminResponse,
-    isLoading: isAdminLoading,
-    isError: isAdminError,
-  } = useQuery({
-    queryKey: ["adminData"],
-    queryFn: () => getData(adminRoutes.getAll),
-    enabled:
-      currentTable === "inventoryManager" || currentTable === "projectManager", // Only fetch when currentTable is 'manager'
-  });
-
-  // Extract admin data
-  const adminData = adminResponse?.data.data.data || [];
-
   return (
     <>
       <QueryComponent
@@ -59,25 +44,6 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           const fetchedData = data?.data || [];
           // Generate formFields with updated values
           let formFields = tableConfig[currentTable];
-          // Populate related field values dynamically
-          if (
-            currentTable === "inventoryManager" ||
-            currentTable === "projectManager"
-          ) {
-            // Use adminData to populate 'Admin' select options
-            const relatedValues = adminData.map((admin: any) => ({
-              key: String(admin._id),
-              value: admin.name,
-            }));
-            // Update formFields with relatedValues
-            formFields = formFields.map((field: any) =>
-              field.key === "admin"
-                ? { ...field, values: relatedValues }
-                : field
-            );
-          }
-
-          // Handle other user types similarly if needed
 
           const tableData = fetchedData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;

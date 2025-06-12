@@ -286,6 +286,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "admin",
       values: [], // We'll populate this dynamically
+      dynamicValuesFn: () => fetchDependentOptions("admin"),
       inEdit: true,
       inForm: true,
       inTable: false,

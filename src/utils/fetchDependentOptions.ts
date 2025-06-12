@@ -1,5 +1,6 @@
 import { getData } from "@/core/api/apiHandler";
 import {
+  adminRoutes,
   associateCompanyRoutes,
   associateRoutes,
   cityRoutes,
@@ -13,6 +14,20 @@ export const fetchDependentOptions = async (
   parentKey?: string,
   parentValue?: string
 ) => {
+  if (fieldKey.toLowerCase().includes("admin")) {
+    const res = await getData(`${adminRoutes.getAll}`, {
+      limit: "1000",
+    });
+    console.log(res);
+
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+
   if (fieldKey.toLowerCase().includes("associateCompany")) {
     const res = await getData(`${associateCompanyRoutes.getAll}`, {
       limit: "1000",

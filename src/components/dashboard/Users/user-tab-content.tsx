@@ -55,7 +55,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 ...rest,
                 admin: item.admin ? item.admin.name : "N/A",
               };
-            } else if (currentTable === "worker") {
+            } else if (currentTable === "associate") {
               return {
                 ...rest,
                 associateCompany: item.associateCompany

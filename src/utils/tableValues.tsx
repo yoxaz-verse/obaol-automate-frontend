@@ -43,8 +43,8 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
       type: field.type,
     }));
 
-  if (currentTable === "worker") {
-    nonActionColumns.push({ name: "SERVICE COMPANY", uid: "serviceCompany" });
+  if (currentTable === "associate") {
+    nonActionColumns.push({ name: "COMPANY", uid: "associateCompany" });
   } else if (currentTable === "projects") {
     // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({

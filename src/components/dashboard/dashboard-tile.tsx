@@ -19,11 +19,11 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
     if (type === "details") {
       return (
         <>
-          <Card className="bg-white shadow-md outline-1 flex items-center justify-center px-6">
-            <CardHeader className="font-medium text-[#5B5B5B]">
+          <Card className="bg-slate-950 shadow-md outline-1 flex items-center justify-center px-6 border-1 border-white ">
+            <CardHeader className="font-medium text-[18px] text-white">
               {heading}
             </CardHeader>
-            <CardBody className="bg-[#CEECFD] text-[#3EADEB] flex items-center justify-center text-3xl w-[100px] rounded-3xl h-[75px] m-5 font-semibold mb-8">
+            <CardBody className="bg-orange-100  text-orange-400 flex items-center justify-center text-3xl w-[100px] rounded-3xl h-[75px] m-5 font-semibold mb-8">
               {data}
             </CardBody>
           </Card>
@@ -54,8 +54,8 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
     if (type === "percentage charts") {
       return (
         <>
-          <Card className="bg-white shadow-md outline-1 flex items-center justify-center px-6">
-            <CardHeader className="font-medium text-black">
+          <Card className="bg-slate-950 shadow-md outline-1 flex items-center justify-center px-6 border-1 border-white">
+            <CardHeader className="font-medium text-white">
               {heading}
             </CardHeader>
             <CardBody className="my-1 w-11/12 flex justify-center items-center">

@@ -97,15 +97,17 @@ export const fetchDependentOptions = async (
         })) || []
       );
     }
-    if (fieldKey.toLowerCase().includes("pincodeEntry")) {
+
+    if (fieldKey.toLowerCase().includes("pincodeentry")) {
       const res = await getData(`${pincodeEntryRoutes.getAll}`, {
         [parentKey]: parentValue,
-        limit: "1000",
       });
+      console.log("pincodeEntry");
+      console.log(res);
       return (
         res?.data?.data?.map((p: any) => ({
           key: p._id,
-          value: p.pincode + p.officename,
+          value: p.pincode + " - " + p.officename,
         })) || []
       );
     }

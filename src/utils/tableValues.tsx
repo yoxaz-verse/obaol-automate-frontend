@@ -879,7 +879,7 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
-      label: "Pin Code ",
+      label: "PinCode",
       type: "select",
       key: "pincodeEntry",
       dependsOn: "division", // 👈

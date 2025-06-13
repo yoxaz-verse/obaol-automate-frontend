@@ -73,6 +73,7 @@ export const fetchDependentOptions = async (
     if (fieldKey.toLowerCase().includes("district")) {
       const res = await getData(`${districtRoutes.getAll}`, {
         [parentKey]: parentValue,
+        limit: "1000",
       });
       console.log("district");
       console.log(res);
@@ -87,6 +88,7 @@ export const fetchDependentOptions = async (
     if (fieldKey.toLowerCase().includes("division")) {
       const res = await getData(`${divisionRoutes.getAll}`, {
         [parentKey]: parentValue,
+        limit: "1000",
       });
       return (
         res?.data?.data?.map((d: any) => ({
@@ -98,6 +100,7 @@ export const fetchDependentOptions = async (
     if (fieldKey.toLowerCase().includes("pincodeEntry")) {
       const res = await getData(`${pincodeEntryRoutes.getAll}`, {
         [parentKey]: parentValue,
+        limit: "1000",
       });
       return (
         res?.data?.data?.map((p: any) => ({

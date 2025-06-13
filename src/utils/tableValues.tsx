@@ -868,17 +868,26 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
-      label: "City / Town",
+      label: "Division",
       type: "select",
-      key: "city",
-      filterType: "select",
+      key: "division",
       dependsOn: "district", // 👈
       dynamicValuesFn: (districtId: string) =>
-        fetchDependentOptions("city", "district", districtId),
+        fetchDependentOptions("division", "district", districtId),
       values: [],
       inForm: true,
       inTable: true,
-      required: true,
+    },
+    {
+      label: "Pin Code ",
+      type: "select",
+      key: "pincodeEntry",
+      dependsOn: "division", // 👈
+      dynamicValuesFn: (divisionId: string) =>
+        fetchDependentOptions("pincodeEntry", "division", divisionId),
+      values: [],
+      inForm: true,
+      inTable: true,
     },
     {
       label: "Live",

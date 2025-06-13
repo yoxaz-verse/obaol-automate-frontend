@@ -481,7 +481,6 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
-      required: true,
     },
     {
       label: "Pin Code ",
@@ -493,7 +492,6 @@ export const initialTableConfig: Record<
       values: [],
       inForm: true,
       inTable: true,
-      required: true,
     },
     {
       label: "Phone Secondary",

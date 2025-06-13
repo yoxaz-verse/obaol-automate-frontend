@@ -3,8 +3,9 @@ import {
   adminRoutes,
   associateCompanyRoutes,
   associateRoutes,
-  cityRoutes,
   districtRoutes,
+  divisionRoutes,
+  pincodeEntryRoutes,
   productVariantRoutes,
   stateRoutes,
 } from "@/core/api/apiRoutes";
@@ -18,8 +19,6 @@ export const fetchDependentOptions = async (
     const res = await getData(`${adminRoutes.getAll}`, {
       limit: "1000",
     });
-    console.log(res);
-
     return (
       res?.data?.data?.data?.map((d: any) => ({
         key: d._id,
@@ -32,8 +31,6 @@ export const fetchDependentOptions = async (
     const res = await getData(`${associateCompanyRoutes.getAll}`, {
       limit: "1000",
     });
-    console.log(res);
-
     return (
       res?.data?.data?.data?.map((d: any) => ({
         key: d._id,
@@ -45,8 +42,6 @@ export const fetchDependentOptions = async (
     const res = await getData(`${associateRoutes.getAll}`, {
       limit: "1000",
     });
-    console.log(res);
-
     return (
       res?.data?.data?.data?.map((d: any) => ({
         key: d._id,
@@ -58,8 +53,6 @@ export const fetchDependentOptions = async (
     const res = await getData(`${productVariantRoutes.getAll}`, {
       limit: "1000",
     });
-    console.log(res);
-
     return (
       res?.data?.data?.map((d: any) => ({
         key: d._id,
@@ -69,8 +62,6 @@ export const fetchDependentOptions = async (
   }
   if (fieldKey.toLowerCase().includes("state")) {
     const res = await getData(`${stateRoutes.getAll}`, { limit: "1000" });
-    console.log(res);
-
     return (
       res?.data?.data?.map((d: any) => ({
         key: d._id,
@@ -93,17 +84,25 @@ export const fetchDependentOptions = async (
         })) || []
       );
     }
-
-    if (fieldKey.toLowerCase().includes("city")) {
-      const res = await getData(`${cityRoutes.getAll}`, {
+    if (fieldKey.toLowerCase().includes("division")) {
+      const res = await getData(`${divisionRoutes.getAll}`, {
         [parentKey]: parentValue,
       });
-      console.log("city");
-      console.log(res);
       return (
-        res?.data?.data?.map((c: any) => ({
-          key: c._id,
-          value: c.name,
+        res?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+    if (fieldKey.toLowerCase().includes("pincodeEntry")) {
+      const res = await getData(`${pincodeEntryRoutes.getAll}`, {
+        [parentKey]: parentValue,
+      });
+      return (
+        res?.data?.data?.map((p: any) => ({
+          key: p._id,
+          value: p.pincode + p.officename,
         })) || []
       );
     }

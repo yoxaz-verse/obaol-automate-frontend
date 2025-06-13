@@ -35,10 +35,10 @@ const BASE_PATHS = {
   VARIANT_RATE: "/variantRate",
   DISPLAYED_RATE: "/displayedRate",
   ENQUIRY: "/enquiry",
-  CITY: "/city",
+  PINCODE_ENTRY: "/pincodeEntry",
+  DIVISION: "/division",
   DISTRICT: "/district",
   STATE: "/state",
-  ABBREVIATION: "/abbreviation",
 };
 
 // Define account-related routes separately
@@ -87,16 +87,19 @@ export const locationRoutes = addCustomRoutes(
   }
 );
 
-export const abbreviationRoutes = addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.ABBREVIATION),
+export const divisionRoutes = addCustomRoutes(
+  createCRUDRoutes(BASE_PATHS.DIVISION),
   {
     // If you have other custom routes for location, add them here
   }
 );
 
-export const cityRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.CITY), {
-  // If you have other custom routes for location, add them here
-});
+export const pincodeEntryRoutes = addCustomRoutes(
+  createCRUDRoutes(BASE_PATHS.PINCODE_ENTRY),
+  {
+    // If you have other custom routes for location, add them here
+  }
+);
 
 export const districtRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.DISTRICT),
@@ -236,8 +239,8 @@ export const apiRoutes = {
   displayedRate: displayedRateRoutes,
   inventoryManager: inventoryManagerRoutes,
   enquiry: enquiryRoutes,
-  city: cityRoutes,
-  abbreviation: abbreviationRoutes,
+  pincodeEntry: pincodeEntryRoutes,
   state: stateRoutes,
   district: districtRoutes,
+  division: divisionRoutes,
 };

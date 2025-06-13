@@ -11,14 +11,7 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
-import {
-  cityRoutes,
-  districtRoutes,
-  locationRoutes,
-  stateRoutes,
-} from "@/core/api/apiRoutes";
+
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 
@@ -40,7 +33,6 @@ const EssentialTabContent = ({
   //   enabled: essentialName === "associateCompany",
   // });
 
-  
   const refetchData = () => {
     // Implement refetch logic if necessary
   };

@@ -3,6 +3,7 @@ import React from "react";
 import {
   adminRoutes,
   associateCompanyRoutes,
+  designationRoutes,
   serviceCompanyRoutes,
 } from "@/core/api/apiRoutes";
 import QueryComponent from "@/components/queryComponent";
@@ -61,6 +62,9 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 associateCompany: item.associateCompany
                   ? item.associateCompany.name
                   : "N/A",
+                designation: item.designation
+                  ? item.designation.name
+                  : "Unknown",
               };
             }
             // Handle other user types similarly if needed

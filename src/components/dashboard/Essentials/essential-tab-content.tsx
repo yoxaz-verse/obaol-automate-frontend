@@ -82,11 +82,17 @@ const EssentialTabContent = ({
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;
 
-                if (essentialName === "location") {
+                if (essentialName === "associateCompany") {
+                  console.log(item);
+
                   return {
                     ...rest,
-
-                    locationType: item.locationType.name,
+                    location: item.state
+                      ? item.district.name + ", " + item.state.name
+                      : "Unknown",
+                    companyType: item.companyType
+                      ? item.companyType.name
+                      : "Not Defined",
                   };
                   // Handle other user types similarly if needed
                 }

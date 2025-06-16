@@ -9,50 +9,45 @@ import BulkAdd from "@/components/CurdTable/bulk-add";
 import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
-  const [projectTab, setProjectTab] = React.useState("projectStatus");
-
+  const [userOption, setuserOption] = React.useState("projectStatus");
+  const userOptionTabs = [
+    { key: "designation", title: "Designation" }, // Translate Title
+    { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
+  ];
+  const [company, setCompany] = React.useState("projectStatus");
+  const companyTabs = [
+    { key: "associateCompany", title: "Associates Company" }, // Translate Title
+    { key: "companyType", title: "Company Type" }, // Translate Title
+  ];
   return (
     <div className="flex items-center justify-center">
       <div className="w-[95%]">
         <div className="my-4">
-          <Title title="Companies" />
-          <EssentialTabContent essentialName="associateCompany" />
-          <Spacer y={4} />
-          {/* <Title title="Process Status" />{" "}
           <Tabs
-            aria-label="Process Tabs"
-            selectedKey={activityTab}
-            onSelectionChange={(key) => setActivityTab(key as string)}
+            aria-label="Company Tabs" // Translate
+            selectedKey={company}
+            onSelectionChange={(key) => setCompany(key as string)}
           >
-            {activityTabs.map((tab) => (
+            {companyTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
-                {tab.key === "activityStatus" && (
-                  <EssentialTabContent essentialName="activityStatus" />
-                )}
-                {tab.key === "activityType" && (
-                  <EssentialTabContent essentialName="activityType" />
-                )}
+                <Title title={tab.title} />
+                <EssentialTabContent essentialName={tab.key} />
               </Tab>
             ))}
           </Tabs>
           <Spacer y={4} />
-          <Title title="Designation" />
           <Tabs
             aria-label="Designation Tabs" // Translate
-            selectedKey={projectTab}
-            onSelectionChange={(key) => setProjectTab(key as string)}
+            selectedKey={userOption}
+            onSelectionChange={(key) => setuserOption(key as string)}
           >
-            {projectTabs.map((tab) => (
+            {userOptionTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
-                {tab.key === "projectStatus" && (
-                  <EssentialTabContent essentialName="projectStatus" />
-                )}
-                {tab.key === "projectType" && (
-                  <EssentialTabContent essentialName="projectType" />
-                )}
+                <Title title={tab.title} />
+                <EssentialTabContent essentialName={tab.key} />
               </Tab>
             ))}
-          </Tabs> */}
+          </Tabs>
           <Spacer y={4} />
         </div>
       </div>

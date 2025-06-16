@@ -8,8 +8,11 @@ import {
   associateCompanyRoutes,
   associateRoutes,
   categoryRoutes,
+  companyTypeRoutes,
   customerRoutes,
+  designationRoutes,
   displayedRateRoutes,
+  enquiryProcessStatusRoutes,
   enquiryRoutes,
   inventoryManagerRoutes,
   locationManagerRoutes,
@@ -45,6 +48,11 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
 
   if (currentTable === "associate") {
     nonActionColumns.push({ name: "COMPANY", uid: "associateCompany" });
+    nonActionColumns.push({ name: "DESIGNATION", uid: "designation" });
+  }
+  if (currentTable === "associateCompany") {
+    nonActionColumns.push({ name: "LOCATION", uid: "location" });
+    nonActionColumns.push({ name: "COMPANY TYPE", uid: "companyType" });
   } else if (currentTable === "projects") {
     // nonActionColumns.push({ name: "Admin Name", uid: "adminName" });
     nonActionColumns.push({
@@ -117,6 +125,9 @@ export const apiRoutesByRole: Record<string, string> = {
   variantRate: variantRateRoutes.getAll,
   displayedRate: displayedRateRoutes.getAll,
   enquiry: enquiryRoutes.getAll,
+  enquiryProcessStatus: enquiryProcessStatusRoutes.getAll,
+  designation: designationRoutes.getAll,
+  companyType: companyTypeRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -382,6 +393,16 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
+      label: "Designation",
+      type: "select",
+      key: "designation",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("designation"),
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
       label: "Associate Company",
       type: "select",
       key: "associateCompany",
@@ -450,6 +471,16 @@ export const initialTableConfig: Record<
     //   required: true,
     // },
     {
+      label: "Company Type",
+      type: "select",
+      key: "companyType",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("companyType"),
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
       label: "State",
       type: "select",
       key: "state",
@@ -509,6 +540,99 @@ export const initialTableConfig: Record<
       inForm: false,
       inTable: true,
     },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  companyType: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    // {
+    //   label: "Active",
+    //   type: "checkbox",
+    //   key: "isActive",
+    //   inForm: false,
+    //   inTable: true,
+    // },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  enquiryProcessStatus: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    // {
+    //   label: "Active",
+    //   type: "checkbox",
+    //   key: "isActive",
+    //   inForm: false,
+    //   inTable: true,
+    // },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  designation: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    // {
+    //   label: "Active",
+    //   type: "checkbox",
+    //   key: "isActive",
+    //   inForm: false,
+    //   inTable: true,
+    // },
     {
       label: "Actions",
       type: "action",

@@ -36,13 +36,10 @@ const Dashboard: NextPage = () => {
   });
 
   const productValue = productResponse?.data.data;
-  console.log(productValue);
 
   const associateValue = associatesResponse?.data.data;
-  console.log(associateValue);
 
   const rateValue = variantRateResponse?.data.data;
-  console.log(rateValue);
 
   const [currentTable, setCurrentTable] = useState(""); // Default tab
   const tabs = [
@@ -176,18 +173,16 @@ const Dashboard: NextPage = () => {
 
         <div className="flex flex-col lg:w-[23%] ">
           <div className="flex flex-col"> </div>
-          <div className="flex flex-col">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
             {/* <div className="text-[#5F5F5F] font-medium pt-5">
               Recent Projects</div> */}
-            <div className="pb-5">
-              <DashboardTile
-                type="percentage charts"
-                stats={
-                  ((liveRate / rateValue?.totalCount) * 100).toString() ?? "0"
-                }
-                heading="Live Rates"
-              />
-            </div>
+            <DashboardTile
+              type="percentage charts"
+              stats={
+                ((liveRate / rateValue?.totalCount) * 100).toString() ?? "0"
+              }
+              heading="Live Rates"
+            />
             <DashboardTile
               type="percentage charts"
               stats={percentageWithProducts.toString() ?? "0"}

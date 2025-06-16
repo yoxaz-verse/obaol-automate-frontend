@@ -167,11 +167,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...rest,
                 associate:
                   item.associate?._id === user?.id || user?.role === "Admin"
-                    ? item.associate.name
+                    ? item.associateCompany.name
                     : "OBAOL",
                 associateId: item.associate._id,
                 companyId: item.associate.associateCompany,
-                productVariant: item.productVariant?.name,
+                productVariant:
+                  item.productVariant?.product?.name +
+                  " " +
+                  item.productVariant?.name,
                 product: item.productVariant?.product?.name,
                 productVariantId: item.productVariant?._id,
               };

@@ -39,6 +39,9 @@ const BASE_PATHS = {
   DIVISION: "/division",
   DISTRICT: "/district",
   STATE: "/state",
+  COMPANY_TYPE: "/companyType",
+  DESIGNATION: "/designation",
+  ENQUIRY_PROCESS_STATUS: "/enquiryProcessStatus",
 };
 
 // Define account-related routes separately
@@ -191,6 +194,11 @@ export const associateRoutes = createCRUDRoutes(BASE_PATHS.ASSOCIATE);
 export const associateCompanyRoutes = createCRUDRoutes(
   BASE_PATHS.ASSOCIATE_COMPANY
 );
+export const companyTypeRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_TYPE);
+export const designationRoutes = createCRUDRoutes(BASE_PATHS.DESIGNATION);
+export const enquiryProcessStatusRoutes = createCRUDRoutes(
+  BASE_PATHS.ENQUIRY_PROCESS_STATUS
+);
 export const categoryRoutes = createCRUDRoutes(BASE_PATHS.CATEGORY);
 export const subCategoryRoutes = createCRUDRoutes(BASE_PATHS.SUB_CATEGORY);
 export const productRoutes = createCRUDRoutes(BASE_PATHS.PRODUCT);
@@ -243,4 +251,7 @@ export const apiRoutes = {
   state: stateRoutes,
   district: districtRoutes,
   division: divisionRoutes,
+  designation: designationRoutes,
+  companyType: companyTypeRoutes,
+  enquiryProcessStatus: enquiryProcessStatusRoutes,
 };

@@ -3,8 +3,11 @@ import {
   adminRoutes,
   associateCompanyRoutes,
   associateRoutes,
+  companyTypeRoutes,
+  designationRoutes,
   districtRoutes,
   divisionRoutes,
+  enquiryProcessStatusRoutes,
   pincodeEntryRoutes,
   productVariantRoutes,
   stateRoutes,
@@ -55,6 +58,39 @@ export const fetchDependentOptions = async (
     });
     return (
       res?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "companyType") {
+    const res = await getData(`${companyTypeRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "designation") {
+    const res = await getData(`${designationRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "enquiryProcessStatus") {
+    const res = await getData(`${enquiryProcessStatusRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data.map((d: any) => ({
         key: d._id,
         value: d.name,
       })) || []

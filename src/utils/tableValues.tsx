@@ -245,6 +245,7 @@ export const initialTableConfig: Record<
       type: "select",
       key: "admin",
       values: [], // We'll populate this dynamically
+      dynamicValuesFn: () => fetchDependentOptions("admin"),
       inEdit: true,
       inForm: true,
       inTable: false,
@@ -729,7 +730,6 @@ export const initialTableConfig: Record<
       inForm: true,
       inEdit: true,
       inTable: false,
-      inEdit: true,
     },
 
     // {
@@ -746,6 +746,7 @@ export const initialTableConfig: Record<
       filterType: "select",
       key: "inventoryManager",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("inventoryManager"),
       inForm: true,
       inTable: false,
       required: true,
@@ -756,7 +757,6 @@ export const initialTableConfig: Record<
       type: "text",
       key: "createdAt",
       inForm: false,
-      inEdit: true,
       inTable: false,
     },
     {
@@ -774,6 +774,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "name",
       inForm: true,
+      inEdit: true,
       inTable: false,
       required: true,
     },
@@ -801,6 +802,7 @@ export const initialTableConfig: Record<
       filterType: "select",
       key: "category",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("category"),
       inForm: true,
       inTable: false,
       required: true,
@@ -829,6 +831,7 @@ export const initialTableConfig: Record<
       key: "name",
       inForm: true,
       inTable: false,
+      inEdit: true,
       required: true,
     },
     {
@@ -855,6 +858,7 @@ export const initialTableConfig: Record<
       filterType: "select",
       key: "subCategory",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("subCategory"),
       inForm: true,
       inTable: true,
       inEdit: true,
@@ -882,6 +886,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "name",
       inForm: true,
+      inEdit: true,
       inTable: false,
     },
     {
@@ -929,6 +934,7 @@ export const initialTableConfig: Record<
       filterType: "select",
       key: "product",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("product"),
       inForm: false,
       inTable: false,
       inEdit: true,
@@ -964,6 +970,7 @@ export const initialTableConfig: Record<
       filterType: "select",
       key: "productVariant",
       values: [],
+      dynamicValuesFn: () => fetchDependentOptions("productVariant"),
       inForm: false,
       inTable: true,
       // inEdit: true,

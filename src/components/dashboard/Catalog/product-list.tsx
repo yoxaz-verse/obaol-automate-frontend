@@ -3,19 +3,12 @@ import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import Title from "@/components/titles";
 import {} from "@/core/api/apiRoutes";
-import {
-  apiRoutesByRole,
-  initialTableConfig,
-} from "@/utils/tableValues";
-import {
-  Accordion,
-  AccordionItem,
-  Divider,
-  Spacer,
-} from "@heroui/react";
-import React, {  useState } from "react";
+import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
+import { Accordion, AccordionItem, Divider, Spacer } from "@heroui/react";
+import React, { useState } from "react";
 import VariantRate from "./variant-rate";
 import UserDeleteModal from "@/components/CurdTable/delete";
+import EditModal from "@/components/CurdTable/edit-model";
 
 // ... other imports
 
@@ -35,20 +28,35 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
     setIsDeleted(true);
   };
 
-
   return product ? (
     <section>
       {/* <Title title={isDeleted ? "DSsd" : "aaaaaaaaaaaaaaaa"} /> */}
       <div className="flex justify-between">
         <Title title={product.name} />
-        <UserDeleteModal
-          _id={product._id}
-          name={product.name}
-          deleteApiEndpoint={apiRoutesByRole["product"]}
-          refetchData={refetchData}
-        />
+        <div className="flex gap-2 items-center">
+          <EditModal
+            _id={product._id}
+            initialData={product}
+            currentTable="Product"
+            formFields={tableConfig["product"].filter(
+              (f: any) => f.key !== "subCategory"
+            )}
+            apiEndpoint={apiRoutesByRole["product"]}
+            refetchData={refetchData}
+          />{" "}
+          <UserDeleteModal
+            _id={product._id}
+            name={product.name}
+            deleteApiEndpoint={apiRoutesByRole["product"]}
+            refetchData={refetchData}
+          />
+        </div>
       </div>
-      <Spacer y={1} />
+      {product.description && (
+        <p className="text-white">{product.description}</p>
+      )}
+
+      <Spacer y={6} />
 
       <QueryComponent
         api={apiRoutesByRole["productVariant"]}
@@ -88,6 +96,12 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
                         title={productVariantValue.name}
                         className="opacity-60 hover:opacity-100 "
                       >
+                        {productVariantValue.description && (
+                          <p className="text-gray-700">
+                            {productVariantValue.description}
+                          </p>
+                        )}
+                        <Spacer y={6} />
                         <VariantRate
                           productVariant={productVariantValue}
                           rate="variantRate"
@@ -97,7 +111,16 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
                         <Spacer y={5} />
                         <div className="flex gap-5">
                           <p>{productVariantValue.name} actions</p>
-
+                          <EditModal
+                            _id={productVariantValue._id}
+                            initialData={productVariantValue}
+                            currentTable="Product Variant"
+                            formFields={tableConfig["productVariant"].filter(
+                              (f: any) => f.key !== "product"
+                            )}
+                            apiEndpoint={apiRoutesByRole["productVariant"]}
+                            refetchData={refetchData}
+                          />{" "}
                           <UserDeleteModal
                             _id={productVariantValue._id}
                             name={productVariantValue.name}

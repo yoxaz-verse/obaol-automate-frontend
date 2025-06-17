@@ -13,6 +13,7 @@ import Title from "@/components/titles";
 import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import { Divider } from "@nextui-org/react";
+import EditModal from "@/components/CurdTable/edit-model";
 
 // -- Adjust these interfaces to match your data shape --
 interface ICategory {
@@ -58,25 +59,6 @@ export default function CategoryDivision({
   const refetchData = React.useCallback(() => {
     // e.g. queryClient.invalidateQueries(["category","subCategory","product"]);
   }, []);
-
-  // Example: fetch "inventoryManager" data to populate a dropdown in the Category form
-  const { data: inventoryManagerResponse } = useQuery({
-    queryKey: ["InventoryManager"],
-    queryFn: () => getData(inventoryManagerRoutes.getAll),
-  });
-  const inventoryManagerValue = inventoryManagerResponse?.data?.data?.data;
-  if (inventoryManagerValue) {
-    const inventoryManagerOptions = inventoryManagerValue.map((inv: any) => ({
-      key: String(inv._id),
-      value: inv.name,
-    }));
-
-    tableConfig["category"] = tableConfig["category"].map((field: any) =>
-      field.key === "inventoryManager"
-        ? { ...field, values: inventoryManagerOptions }
-        : field
-    );
-  }
 
   return (
     <section>
@@ -212,7 +194,14 @@ function CategoryList({
             <Spacer y={4} />
             <div className="flex justify-around">
               <p>{cat.name} Actions</p>
-
+              <EditModal
+                _id={cat._id}
+                initialData={cat}
+                currentTable="Category"
+                formFields={tableConfig["category"]}
+                apiEndpoint={apiRoutesByRole["category"]}
+                refetchData={refetchData}
+              />
               <UserDeleteModal
                 _id={cat._id}
                 name={cat.name}
@@ -361,7 +350,16 @@ function SubCategoryList({
             <Spacer y={4} />
             <div className="flex justify-around">
               <p>{sub.name} Actions</p>
-
+              <EditModal
+                _id={sub._id}
+                initialData={sub}
+                currentTable="Sub Category"
+                formFields={tableConfig["subCategory"].filter(
+                  (f: any) => f.key !== "category"
+                )}
+                apiEndpoint={apiRoutesByRole["subCategory"]}
+                refetchData={refetchData}
+              />
               <UserDeleteModal
                 _id={sub._id}
                 name={sub.name}

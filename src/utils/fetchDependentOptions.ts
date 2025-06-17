@@ -3,14 +3,18 @@ import {
   adminRoutes,
   associateCompanyRoutes,
   associateRoutes,
+  categoryRoutes,
   companyTypeRoutes,
   designationRoutes,
   districtRoutes,
   divisionRoutes,
   enquiryProcessStatusRoutes,
+  inventoryManagerRoutes,
   pincodeEntryRoutes,
+  productRoutes,
   productVariantRoutes,
   stateRoutes,
+  subCategoryRoutes,
 } from "@/core/api/apiRoutes";
 
 export const fetchDependentOptions = async (
@@ -29,7 +33,61 @@ export const fetchDependentOptions = async (
       })) || []
     );
   }
-
+  if (fieldKey === "category") {
+    const res = await getData(`${categoryRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "product") {
+    const res = await getData(`${productRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "productVariant") {
+    const res = await getData(`${productVariantRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "subCategory") {
+    const res = await getData(`${subCategoryRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
+  if (fieldKey === "inventoryManager") {
+    const res = await getData(`${inventoryManagerRoutes.getAll}`, {
+      limit: "1000",
+    });
+    return (
+      res?.data?.data?.data?.map((d: any) => ({
+        key: d._id,
+        value: d.name,
+      })) || []
+    );
+  }
   if (fieldKey === "associateCompany") {
     const res = await getData(`${associateCompanyRoutes.getAll}`, {
       limit: "1000",

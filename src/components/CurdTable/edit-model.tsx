@@ -17,6 +17,8 @@ import {
   Switch,
   TimeInput,
   Spinner,
+  AutocompleteItem,
+  Autocomplete,
 } from "@nextui-org/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
@@ -28,6 +30,7 @@ import { Dashboard } from "@uppy/react";
 import Image from "next/image";
 import { parseDate } from "@internationalized/date";
 import { EditModalProps, FormField } from "@/data/interface-data";
+import { toTitleCase } from "../titles";
 
 export default function EditModal({
   _id,
@@ -40,6 +43,9 @@ export default function EditModal({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const uppyRef = useRef<Uppy | null>(null);
+  const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
+    {}
+  );
 
   // 1) Fetch the record when modal opens
   const { data: fetched } = useQuery({
@@ -68,6 +74,35 @@ export default function EditModal({
       uppyRef.current = null;
     };
   }, []);
+  useEffect(() => {
+    const preloadDynamicSelectOptions = async () => {
+      const fetchOptionsPromises = formFields
+        .filter(
+          (field) =>
+            field.type === "select" &&
+            !field.dependsOn && // only fields with no dependency
+            typeof field.dynamicValuesFn === "function"
+        )
+        .map(async (field: any) => {
+          const options = await field.dynamicValuesFn();
+          return { key: field.key, options };
+        });
+
+      const results = await Promise.all(fetchOptionsPromises);
+
+      const optionsMap: Record<string, any[]> = {};
+      results.forEach(({ key, options }) => {
+        optionsMap[key] = options;
+      });
+
+      setDynamicOptions((prev) => ({
+        ...prev,
+        ...optionsMap,
+      }));
+    };
+
+    preloadDynamicSelectOptions();
+  }, [formFields]);
 
   // 3) Populate formData from fetched.data.data
   useEffect(() => {
@@ -131,7 +166,37 @@ export default function EditModal({
     setLoading(true);
     mutation.mutate(formData);
   };
+  const handleInputChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | { target: { name: string; value: string | number } }
+  ) => {
+    const { name, value } = e.target;
 
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+
+    // Update dependent fields if any
+    formFields.forEach(async (field) => {
+      if (
+        field.dependsOn === name &&
+        typeof field.dynamicValuesFn === "function"
+      ) {
+        const updatedValues = await field.dynamicValuesFn(String(value));
+        setDynamicOptions((prev) => ({
+          ...prev,
+          [field.key]: updatedValues,
+        }));
+
+        setFormData((prevData) => ({
+          ...prevData,
+          [field.key]: "",
+        }));
+      }
+    });
+  };
   // 6) Input handlers
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -187,6 +252,46 @@ export default function EditModal({
           />
         );
       case "select":
+        const dependsOnValue = f.dependsOn ? formData[f.dependsOn] : null;
+        const isDisabled = f.dependsOn && !dependsOnValue;
+
+        const options =
+          f.dependsOn && dynamicOptions[f.key]
+            ? dynamicOptions[f.key]
+            : f.dynamicValuesFn
+            ? dynamicOptions[f.key] || []
+            : f.values || [];
+
+        return (
+          <Autocomplete
+            name={f.key}
+            className="w-[90%]"
+            label={`Select ${f.label}`}
+            placeholder={
+              isDisabled && f.dependsOn
+                ? `Please select ${toTitleCase(f.dependsOn)} first`
+                : f.label
+            }
+            isDisabled={!!isDisabled}
+            defaultItems={options}
+            selectedKey={formData[f.key] ? String(formData[f.key]) : null}
+            onSelectionChange={(key) =>
+              handleInputChange({
+                target: {
+                  name: f.key,
+                  value: String(key),
+                },
+              })
+            }
+          >
+            {(item) => (
+              <AutocompleteItem key={String(item.key)}>
+                {item.value}
+              </AutocompleteItem>
+            )}
+          </Autocomplete>
+        );
+
         return (
           <Select
             placeholder={`Select ${f.label}`}

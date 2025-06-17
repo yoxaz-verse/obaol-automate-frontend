@@ -33,6 +33,7 @@ import { baseUrl } from "@/core/api/axiosInstance";
 import { AddModalProps, FormField } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { showToastMessage } from "@/utils/utils";
+import { toTitleCase } from "../titles";
 
 const AddModal: React.FC<AddModalProps> = ({
   name,
@@ -318,13 +319,7 @@ const AddModal: React.FC<AddModalProps> = ({
       [fieldKey]: updatedItems,
     }));
   };
-  function toTitleCase(str: string): string {
-    return str
-      .replace(/[_\-]+/g, " ") // Replace underscores/dashes with space
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // Add space before capital letters
-      .toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of each word
-  }
+
 
   const validateFields = (
     fields: any[],

@@ -14,6 +14,7 @@ import {
 
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import EditModal from "@/components/CurdTable/edit-model";
 
 const EssentialTabContent = ({
   essentialName,
@@ -116,6 +117,16 @@ const EssentialTabContent = ({
                           columns={columns}
                         />
                       </>
+                    )}
+                    editModal={(item: any) => (
+                      <EditModal
+                        _id={item._id}
+                        initialData={item}
+                        currentTable={essentialName}
+                        formFields={formFields}
+                        apiEndpoint={apiRoutesByRole[essentialName]} // Assuming API endpoint for update
+                        refetchData={refetchData}
+                      />
                     )}
                     deleteModal={(item: any) => (
                       <UserDeleteModal

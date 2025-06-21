@@ -5,8 +5,6 @@ import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
-import BulkAdd from "@/components/CurdTable/bulk-add";
-import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
   const [userOption, setuserOption] = React.useState("projectStatus");

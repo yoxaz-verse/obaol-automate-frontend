@@ -14,6 +14,8 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
+import useFilteredStatusOptions from "@/utils/roleActivityStatus";
+import StatusUpdate from "@/components/CurdTable/status-update";
 
 /**
  * Basic interface for an Enquiry (example)
@@ -36,6 +38,7 @@ interface IEnquiry {
 export default function EnquiryPage() {
   // You might clone your table config so you can customize the "enquiry" fields
   const tableConfig = { ...initialTableConfig };
+  const filteredStatusOptions = useFilteredStatusOptions();
 
   let columns = generateColumns("enquiry", tableConfig);
   columns = columns.filter(
@@ -122,7 +125,34 @@ export default function EnquiryPage() {
             <section className="p-5">
               {/* <h2>All Enquiries</h2> */}
               <Spacer y={1} />
-              <CommonTable TableData={tableData} columns={columns} />
+              <CommonTable
+                TableData={tableData}
+                columns={columns}
+                otherModal={(item: any) => {
+                  const currentStatus = item.status
+                    ? {
+                        key: item.status._id,
+                        label: item.status.name,
+                      }
+                    : {
+                        key: "Unknown",
+                        label: "Unknown",
+                      };
+
+                  return (
+                    filteredStatusOptions && (
+                      <StatusUpdate
+                        currentEntity="Enquiry"
+                        statusOptions={filteredStatusOptions}
+                        apiEndpoint={apiRoutesByRole["enquiry"]}
+                        recordId={item._id}
+                        currentStatus={currentStatus}
+                        refetchData={refetchData ?? (() => {})} // ✅ Ensures refetchData is always a function
+                      />
+                    )
+                  );
+                }}
+              />
               <Spacer y={1} />
             </section>
           );

@@ -111,7 +111,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         refetchData,
       ]}
       page={1}
-      limit={100}
+      limit={1000}
       additionalParams={{
         ...(additionalParams || {}),
         ...(displayOnly && { selected: "true" }),
@@ -167,7 +167,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...rest,
                 associate:
                   item.associate?._id === user?.id || user?.role === "Admin"
-                    ? item.associateCompany.name
+                    ? item.associateCompany?.name
                     : "OBAOL",
                 associateId: item.associate._id,
                 companyId: item.associate.associateCompany,
@@ -209,11 +209,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     }),
                   }}
                 />
-                <DynamicFilter
+                {/* <DynamicFilter
                   currentTable={"variantRate"}
                   formFields={variantRateFormFields}
                   onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
-                />
+                /> */}
               </>
             ) : (
               "Add Associates for Variant rates"

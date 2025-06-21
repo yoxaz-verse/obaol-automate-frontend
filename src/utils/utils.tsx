@@ -4,11 +4,13 @@ import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiUsers } from "react-icons/fi";
 import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdOutlinePriceChange } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
 import { GiBookAura } from "react-icons/gi";
 import { GiBeamsAura } from "react-icons/gi";
+import { LiaMapMarkedAltSolid } from "react-icons/lia";
+import { GoOrganization } from "react-icons/go";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -73,11 +75,11 @@ export const sidebarOptions = [
     icon: <GiBookAura />,
     link: "/dashboard/catalog",
   },
-  // {
-  //   name: "Live Rates", //Translate
-  //   icon: <MdOutlinePriceChange />,
-  //   link: "/dashboard/rates",
-  // },
+  {
+    name: "Companies Product", //Translate
+    icon: <GoOrganization />,
+    link: "/dashboard/companyProduct",
+  },
   {
     name: "Enquires", //Translate
     icon: <RiFileAddLine />,
@@ -88,9 +90,9 @@ export const sidebarOptions = [
     icon: <RiUser2Fill />,
     link: "/dashboard/profile",
   },
-  // {
-  //   name: "Bulk Add", //Translate
-  //   icon: <RiFileAddLine />,
-  //   link: "/dashboard/bulk",
-  // },
+  {
+    name: "Map", //Translate
+    icon: <LiaMapMarkedAltSolid />,
+    link: "/dashboard/map",
+  },
 ];

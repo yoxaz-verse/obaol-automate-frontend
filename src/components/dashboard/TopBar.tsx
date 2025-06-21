@@ -46,8 +46,8 @@ const TopBar = ({ username, role }: TopbarProps) => {
             {filteredOptions.map((option) => (
               <DropdownItem key={option.name}>
                 <Link href={option.link}>
-                  <div className="flex items-center gap-2">
-                    {option.icon}
+                  <div className="flex items-center gap-1  px-2   border-l-1 border-warning-400">
+                    <span className="text-warning-500"> {option.icon}</span>{" "}
                     {option.name}
                   </div>
                 </Link>

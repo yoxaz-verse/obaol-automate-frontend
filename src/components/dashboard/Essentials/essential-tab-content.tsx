@@ -71,7 +71,7 @@ const EssentialTabContent = ({
             api={apiRoutesByRole[essentialName]}
             queryKey={[essentialName, apiRoutesByRole[essentialName], filters]}
             page={1}
-            limit={100}
+            limit={1000}
             additionalParams={filters}
           >
             {(data: any) => {

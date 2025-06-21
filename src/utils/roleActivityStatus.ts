@@ -2,11 +2,14 @@ import { useContext, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
-import { activityStatusRoutes } from "@/core/api/apiRoutes";
+import {
+  activityStatusRoutes,
+  enquiryProcessStatusRoutes,
+} from "@/core/api/apiRoutes";
 
 const roleStatusMap: Record<string, string[]> = {
-  Worker: ["Submitted"],
-  Admin: ["Submitted", "Rejected", "Suspended", "Blocked", "Approved"],
+  Associate: ["Submitted"],
+  Admin: ["Qouted", "Rejected", "Suspended", "Blocked", "Approved"],
   ProjectManager: ["Submitted", "Rejected", "Suspended", "Blocked", "Approved"],
   ActivityManager: ["Submitted", "Rejected", "Suspended"],
 };
@@ -16,8 +19,8 @@ const useFilteredStatusOptions = () => {
 
   // Fetch activity statuses
   const { data: statusData } = useQuery({
-    queryKey: ["activityStatuses"],
-    queryFn: () => getData(activityStatusRoutes.getAll),
+    queryKey: ["enquiryProcessStatus"],
+    queryFn: () => getData(enquiryProcessStatusRoutes.getAll),
   });
 
   // Compute status options

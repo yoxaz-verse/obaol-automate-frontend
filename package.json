@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@heroui/react": "^2.7.2",
     "@internationalized/date": "^3.6.0",
+    "@mui/material": "^7.1.2",
     "@nextui-org/react": "^2.2.10",
     "@nextui-org/tabs": "^2.0.29",
     "@react-types/shared": "^3.26.0",

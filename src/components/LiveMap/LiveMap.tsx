@@ -24,8 +24,7 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
 
-    // Initialize map
-    leafletMap.current = L.map(mapRef.current).setView([22.9734, 78.6569], 5); // Center of India
+    leafletMap.current = L.map(mapRef.current).setView([22.9734, 78.6569], 5); // India center
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
@@ -35,14 +34,12 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
   useEffect(() => {
     if (!leafletMap.current) return;
 
-    // Clear existing markers by resetting the map
     leafletMap.current.eachLayer((layer) => {
       if ((layer as any)._url === undefined) {
         leafletMap.current!.removeLayer(layer);
       }
     });
 
-    // Group markers by lat/lng
     const groupedMarkers: Record<string, MarkerData[]> = {};
     markers.forEach((marker) => {
       const key = `${marker.latitude.toFixed(5)},${marker.longitude.toFixed(
@@ -54,11 +51,8 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
       groupedMarkers[key].push(marker);
     });
 
-    // Add grouped markers to map
-    Object.entries(groupedMarkers).forEach(([key, group]) => {
+    Object.entries(groupedMarkers).forEach(([_, group]) => {
       const { latitude, longitude, source } = group[0];
-
-      // Choose icon color
       const iconColor =
         source === "pinEntry"
           ? "red"
@@ -77,7 +71,6 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
         iconAnchor: [16, 32],
       });
 
-      // Build popup content
       const popupContent = group
         .map(
           (item) => `
@@ -89,7 +82,6 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
         )
         .join("");
 
-      // Add marker to map
       L.marker([latitude, longitude], { icon: customIcon })
         .addTo(leafletMap.current!)
         .bindPopup(popupContent);

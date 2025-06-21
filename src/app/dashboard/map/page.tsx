@@ -1,17 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import LiveMap, { MarkerData } from "@/components/LiveMap/LiveMap";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
-const geoCache: Record<string, { lat: number; lon: number }> = JSON.parse(
-  localStorage.getItem("geoCache") || "{}"
-);
+import { MarkerData } from "@/components/LiveMap/LiveMap";
+
+// Dynamically import the map to prevent SSR issues with Leaflet
+const LiveMap = dynamic(() => import("@/components/LiveMap/LiveMap"), {
+  ssr: false,
+});
+
+let geoCache: Record<string, { lat: number; lon: number }> = {};
 
 const geocode = async (
   query: string
 ): Promise<{ lat: number; lon: number } | null> => {
+  if (typeof window !== "undefined" && Object.keys(geoCache).length === 0) {
+    try {
+      geoCache = JSON.parse(localStorage.getItem("geoCache") || "{}");
+    } catch {
+      geoCache = {};
+    }
+  }
+
   if (geoCache[query]) return geoCache[query];
 
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -25,7 +38,9 @@ const geocode = async (
     if (data.length > 0) {
       const result = { lat: +data[0].lat, lon: +data[0].lon };
       geoCache[query] = result;
-      localStorage.setItem("geoCache", JSON.stringify(geoCache)); // Save back
+      if (typeof window !== "undefined") {
+        localStorage.setItem("geoCache", JSON.stringify(geoCache));
+      }
       return result;
     }
   } catch (err) {
@@ -43,7 +58,6 @@ export default function HomePage() {
   });
 
   const variantRateValue = variantRateResponse?.data?.data?.data;
-  console.log(variantRateValue);
 
   useEffect(() => {
     if (!isSuccess || !variantRateValue) return;

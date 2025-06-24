@@ -181,7 +181,35 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <>
-            <CurrencySelector />
+            <div className="flex justify-between">
+              <CurrencySelector />
+              {!displayOnly && rate === "variantRate" ? (
+                <>
+                  <AddModal
+                    name="Rate"
+                    currentTable={rate}
+                    formFields={variantRateFormFields}
+                    apiEndpoint={apiRoutesByRole[rate]}
+                    refetchData={refetchData}
+                    additionalVariable={{
+                      ...(productVariantValue && {
+                        productVariant: productVariantValue._id,
+                      }),
+                      ...(user?.role === "Associate" && {
+                        associate: user?.id,
+                      }),
+                    }}
+                  />
+                  {/* <DynamicFilter
+                  currentTable={"variantRate"}
+                  formFields={variantRateFormFields}
+                  onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+                /> */}
+                </>
+              ) : (
+                "Add Associates for Variant rates"
+              )}
+            </div>{" "}
             <Spacer y={5} />
             <section className="hidden md:block">
               <CommonTable

@@ -320,7 +320,6 @@ const AddModal: React.FC<AddModalProps> = ({
     }));
   };
 
-
   const validateFields = (
     fields: any[],
     data: Record<string, any>
@@ -416,6 +415,7 @@ const AddModal: React.FC<AddModalProps> = ({
       case "textarea":
         return (
           <textarea
+            aria-label={`Select ${field.label}`}
             name={field.key}
             placeholder={field.label}
             className="py-2 border rounded-md w-[90%]"
@@ -427,6 +427,7 @@ const AddModal: React.FC<AddModalProps> = ({
       case "week":
         return (
           <DatePicker
+            aria-label={`Select ${field.label}`}
             showMonthAndYearPickers
             name={field.key}
             labelPlacement="outside"
@@ -439,6 +440,7 @@ const AddModal: React.FC<AddModalProps> = ({
       case "boolean":
         return (
           <Switch
+            aria-label={`Select ${field.label}`}
             name={field.key}
             defaultSelected={formData[field.key] || false}
             onChange={(e) => handleBooleanChange(field.key, e.target.checked)} // Use handleBooleanChange
@@ -449,6 +451,7 @@ const AddModal: React.FC<AddModalProps> = ({
       case "time":
         return (
           <TimeInput
+            aria-label={`Select ${field.label}`}
             name={field.key}
             label={field.label}
             hourCycle={24}
@@ -471,6 +474,7 @@ const AddModal: React.FC<AddModalProps> = ({
 
         return (
           <Autocomplete
+            aria-label={`Select ${field.label}`}
             name={field.key}
             className="w-[90%]"
             label={`Select ${field.label}`}
@@ -506,6 +510,7 @@ const AddModal: React.FC<AddModalProps> = ({
           return (
             <>
               <Select
+                aria-label={`Select ${field.label}`}
                 name={field.key}
                 label={`Select Multiple ${field.label}`}
                 placeholder={field.label}
@@ -563,6 +568,7 @@ const AddModal: React.FC<AddModalProps> = ({
       default:
         return (
           <Input
+            aria-label={`Select ${field.label}`}
             name={field.key}
             type={field.type}
             placeholder={field.label}

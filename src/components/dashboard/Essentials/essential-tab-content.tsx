@@ -40,7 +40,6 @@ const EssentialTabContent = ({
   // Update filters from AddProject
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
-    console.log(updatedFilters);
   };
   // Form fields for add/edit modal
 
@@ -84,8 +83,6 @@ const EssentialTabContent = ({
                 const { isDeleted, isActive, password, __v, ...rest } = item;
 
                 if (essentialName === "associateCompany") {
-                  console.log(item);
-
                   return {
                     ...rest,
                     location: item.state

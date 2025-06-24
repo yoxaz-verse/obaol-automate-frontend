@@ -9,7 +9,6 @@ import { usePathname } from "next/navigation";
 import { Spacer } from "@nextui-org/react";
 import { getAllowedRoles } from "@/utils/roleHelpers";
 import { GoogleTagManager } from "@/components/analytics/GTM";
-import { CurrencyProvider } from "@/context/CurrencyContext";
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [
@@ -63,9 +62,7 @@ export default function DashboardLayout({
               {/* {roleDataLoading && <p>Loading role-specific data...</p>} */}
               {/* {roleDataError && <p>Error loading role-specific data</p>} */}
 
-              <CurrencyProvider>
-                <Template>{children}</Template>
-              </CurrencyProvider>
+              <Template>{children}</Template>
             </div>
           </div>
         </div>

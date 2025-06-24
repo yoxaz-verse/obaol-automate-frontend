@@ -55,10 +55,10 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
       const { latitude, longitude, source } = group[0];
       const iconColor =
         source === "pinEntry"
-          ? "red"
+          ? "green"
           : source === "district"
           ? "blue"
-          : "green";
+          : "red";
 
       const iconMarkup = renderToStaticMarkup(
         <FaMapMarkerAlt color={iconColor} size="32px" />
@@ -74,17 +74,26 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
       const popupContent = group
         .map(
           (item) => `
-            <div>
+            <div class="mb-2" >
               <strong>${item.label}</strong><br/>
               ${item.description}
-            </div><hr/>
+           </div>
+           <hr/>
           `
         )
         .join("");
 
       L.marker([latitude, longitude], { icon: customIcon })
         .addTo(leafletMap.current!)
-        .bindPopup(popupContent);
+        .bindPopup(
+          `
+               <section>    <div class="max-h-[250px] overflow-auto mb-4">
+   ${popupContent}
+    </div>
+                  <strong class="text-warning-500">Rates Number:  ${group.length}</strong>
+    </section>
+          `
+        );
     });
   }, [markers]);
 

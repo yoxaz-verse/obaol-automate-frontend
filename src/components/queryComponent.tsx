@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Spinner } from "@nextui-org/react";
 
 interface QueryComponentProps<T> {
   api: string;
@@ -43,16 +44,21 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.98 }}
           transition={{ duration: 0.3 }}
-          className="flex h-full py-4 w-full justify-center items-center flex-col bg-neutral-950 rounded-md"
+          className="flex h-full pt-4 w-full justify-center items-center flex-col bg-neutral-950 rounded-md"
         >
           <Image
             src="/obaol.gif"
+            priority
             width={200}
             height={200}
             alt="Obaol Supreme"
             className="w-max rounded-md"
           />
-          <b className="text-warning-400">Loading ..</b>
+          <Spinner
+            color="warning"
+            classNames={{ label: "text-foreground mt-4" }}
+            label="dots"
+          />
         </motion.div>
       ) : isError ? (
         <motion.div

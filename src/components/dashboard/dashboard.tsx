@@ -107,7 +107,6 @@ const Dashboard: NextPage = () => {
   const percentageWithProducts = totalAssociates
     ? ((associatesWithProductsCount / totalAssociates) * 100).toFixed(2)
     : "0";
-  console.log(percentageWithProducts);
 
   const { user } = useContext(AuthContext);
   let filteredOptions;

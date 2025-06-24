@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Spacer } from "@heroui/react";
 import {
@@ -15,6 +15,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   Switch,
   useDisclosure,
 } from "@nextui-org/react";
@@ -34,6 +36,8 @@ import {
 import EditModal from "@/components/CurdTable/edit-model";
 import DeleteModal from "@/components/CurdTable/delete";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import { useCurrency } from "@/context/CurrencyContext";
+import CurrencySelector from "./currency-selector";
 
 /**
  * Props for your existing VariantRate component
@@ -65,12 +69,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const tableConfig = { ...initialTableConfig }; // avoid mutations
   const { user } = useContext(AuthContext);
 
-  // If we only fetch associates if "rate" is "variantRate"
-  const { data: associateResponse } = useQuery({
-    queryKey: ["associate"],
-    queryFn: () => getData(associateRoutes.getAll),
-    enabled: rate === "variantRate" && user?.role === "Admin",
-  });
+  const { convertRate } = useCurrency();
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: associateByIdResponse } = useQuery({
@@ -79,7 +78,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
     enabled: user?.role === "Associate",
   });
 
-  const associateValue = associateResponse?.data?.data?.data;
   const associateByIdValue = associateByIdResponse?.data;
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
@@ -130,19 +128,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
           variantRateFormFields = variantRateFormFields.filter(
             (field: any) => field.key !== "associate"
           );
-        } else if (associateValue) {
-          const associateValues = associateValue.map((associate: any) => ({
-            key: String(associate._id),
-            value: associate.name,
-          }));
-
-          // variantRateFormFields = variantRateFormFields.map((field: any) =>
-          //   field.key === "associate"
-          //     ? { ...field, values: associateValues }
-          //     : field
-          // );
         }
-
         var variantRateFetchedData: any;
         if (variantResponse?.data.data.data) {
           variantRateFetchedData =
@@ -153,6 +139,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         } else {
           variantRateFetchedData = variantRateData?.data || [];
         }
+
         // Inside your component, above the return:
         const FIFTEEN_MINUTES = 15 * 60 * 1000;
         const isCooling = (startTimestamp: string) =>
@@ -178,11 +165,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   item.productVariant?.name,
                 product: item.productVariant?.product?.name,
                 productVariantId: item.productVariant?._id,
+                rate: convertRate(item.rate),
               };
             } else {
               return {
                 ...rest,
-                rate: item.variantRate?.rate,
+                rate: convertRate(item.variantRate?.rate),
                 associateId: item.associate._id,
                 companyId: item.associate.associateCompany,
                 productVariant: item.variantRate?.productVariant?.name,
@@ -193,32 +181,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <>
-            {!displayOnly && rate === "variantRate" ? (
-              <>
-                <AddModal
-                  name="Rate"
-                  currentTable={rate}
-                  formFields={variantRateFormFields}
-                  apiEndpoint={apiRoutesByRole[rate]}
-                  refetchData={refetchData}
-                  additionalVariable={{
-                    ...(productVariantValue && {
-                      productVariant: productVariantValue._id,
-                    }),
-                    ...(user?.role === "Associate" && {
-                      associate: user?.id,
-                    }),
-                  }}
-                />
-                {/* <DynamicFilter
-                  currentTable={"variantRate"}
-                  formFields={variantRateFormFields}
-                  onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
-                /> */}
-              </>
-            ) : (
-              "Add Associates for Variant rates"
-            )}
+            <CurrencySelector />
             <Spacer y={5} />
             <section className="hidden md:block">
               <CommonTable

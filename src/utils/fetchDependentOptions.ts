@@ -1,3 +1,5 @@
+// src/utils/fetchDependentOptions.ts
+import { queryClient } from "@/app/provider";
 import { getData } from "@/core/api/apiHandler";
 import {
   adminRoutes,
@@ -17,195 +19,181 @@ import {
   subCategoryRoutes,
 } from "@/core/api/apiRoutes";
 
-export const fetchDependentOptions = async (
+const getOptions = async (
   fieldKey: string,
   parentKey?: string,
   parentValue?: string
-) => {
-  if (fieldKey.toLowerCase().includes("admin")) {
-    const res = await getData(`${adminRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "category") {
-    const res = await getData(`${categoryRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "product") {
-    const res = await getData(`${productRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "productVariant") {
-    const res = await getData(`${productVariantRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "subCategory") {
-    const res = await getData(`${subCategoryRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "inventoryManager") {
-    const res = await getData(`${inventoryManagerRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "associateCompany") {
-    const res = await getData(`${associateCompanyRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey.toLowerCase().includes("associate")) {
-    const res = await getData(`${associateRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "associate") {
-    const res = await getData(`${productVariantRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "companyType") {
-    const res = await getData(`${companyTypeRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "designation") {
-    const res = await getData(`${designationRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey === "enquiryProcessStatus") {
-    const res = await getData(`${enquiryProcessStatusRoutes.getAll}`, {
-      limit: "1000",
-    });
-    return (
-      res?.data?.data?.data.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (fieldKey.toLowerCase().includes("state")) {
-    const res = await getData(`${stateRoutes.getAll}`, { limit: "1000" });
-    return (
-      res?.data?.data?.map((d: any) => ({
-        key: d._id,
-        value: d.name,
-      })) || []
-    );
-  }
-  if (parentKey) {
-    if (fieldKey.toLowerCase().includes("district")) {
-      const res = await getData(`${districtRoutes.getAll}`, {
-        [parentKey]: parentValue,
-        limit: "1000",
-      });
-      console.log("district");
-      console.log(res);
+): Promise<{ key: string; value: string }[]> => {
+  const lowerKey = fieldKey.toLowerCase();
 
+  const query = async () => {
+    if (lowerKey.includes("admin")) {
+      const res = await getData(adminRoutes.getAll, { limit: "1000" });
       return (
-        res?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
-    }
-    if (fieldKey.toLowerCase().includes("division")) {
-      const res = await getData(`${divisionRoutes.getAll}`, {
-        [parentKey]: parentValue,
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.map((d: any) => ({
+        res?.data?.data?.data?.map((d: any) => ({
           key: d._id,
           value: d.name,
         })) || []
       );
     }
 
-    if (fieldKey.toLowerCase().includes("pincodeentry")) {
-      const res = await getData(`${pincodeEntryRoutes.getAll}`, {
+    if (lowerKey === "category") {
+      const res = await getData(categoryRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "product") {
+      const res = await getData(productRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "productvariant") {
+      const res = await getData(productVariantRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "subcategory") {
+      const res = await getData(subCategoryRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "inventorymanager") {
+      const res = await getData(inventoryManagerRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "associatecompany") {
+      const res = await getData(associateCompanyRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey.includes("associate")) {
+      const res = await getData(associateRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "companytype") {
+      const res = await getData(companyTypeRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "designation") {
+      const res = await getData(designationRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "enquiryprocessstatus") {
+      const res = await getData(enquiryProcessStatusRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey.includes("state")) {
+      const res = await getData(stateRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+      );
+    }
+
+    if (parentKey && lowerKey.includes("district")) {
+      const res = await getData(districtRoutes.getAll, {
+        [parentKey]: parentValue,
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+      );
+    }
+
+    if (parentKey && lowerKey.includes("division")) {
+      const res = await getData(divisionRoutes.getAll, {
+        [parentKey]: parentValue,
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+      );
+    }
+
+    if (parentKey && lowerKey.includes("pincodeentry")) {
+      const res = await getData(pincodeEntryRoutes.getAll, {
         [parentKey]: parentValue,
       });
-      console.log("pincodeEntry");
-      console.log(res);
       return (
         res?.data?.data?.map((p: any) => ({
           key: p._id,
-          value: p.pincode + " - " + p.officename,
+          value: `${p.pincode} - ${p.officename}`,
         })) || []
       );
     }
-  }
 
-  return [];
+    return [];
+  };
+
+  // cache key includes dependencies
+  const queryKey = [fieldKey, parentKey, parentValue];
+
+  // fetch or return cached data
+  return queryClient.fetchQuery({
+    queryKey,
+    queryFn: query,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };
+
+export { getOptions as fetchDependentOptions };

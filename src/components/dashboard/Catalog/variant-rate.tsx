@@ -108,6 +108,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         rate,
         apiRoutesByRole[rate],
         productVariantValue?._id,
+        additionalParams,
         refetchData,
       ]}
       page={1}

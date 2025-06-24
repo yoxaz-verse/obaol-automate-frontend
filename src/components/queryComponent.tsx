@@ -38,12 +38,12 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
       position: "top-right",
     });
     return (
-      <div className="flex h-full py-4 relative w-full m-0 p-0 justify-center items-center flex-col ">
+      <div className="flex h-full py-4 relative w-full m-0 p-0 justify-center items-center flex-col bg-neutral-950 rounded-md ">
         <Image
-          src={"/logo.png"}
+          src={"/obaol.gif"}
           width={200}
           height={200}
-          alt="Obaol"
+          alt="Obaol Supreme"
           className="w-max rounded-md"
         />
         <b className="text-warning-400">

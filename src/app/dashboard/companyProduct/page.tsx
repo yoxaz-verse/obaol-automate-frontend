@@ -128,6 +128,7 @@ export default function Product() {
   if (loadingCompanies || loadingRates) {
     return <div className="p-6 text-gray-500">Loading company catalog...</div>;
   }
+  console.log(currentCompaniesPage);
 
   return (
     <div className="flex items-center justify-center">

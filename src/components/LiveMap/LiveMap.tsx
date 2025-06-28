@@ -97,7 +97,13 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
     });
   }, [markers]);
 
-  return <div ref={mapRef} style={{ height: "100%", width: "100%" }} />;
+  return (
+    <div
+      ref={mapRef}
+      className="z-40"
+      style={{ height: "100%", width: "100%" }}
+    />
+  );
 };
 
 export default LiveMap;

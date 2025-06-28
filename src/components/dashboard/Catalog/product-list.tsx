@@ -71,7 +71,7 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
       >
         {(productVariantData: any) => {
           const productVariantFormFields = tableConfig["productVariant"];
-          const productVariantValue = productVariantData || [];
+          const productVariantValue = productVariantData.data || [];
 
           return (
             <section>

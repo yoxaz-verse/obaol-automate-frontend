@@ -243,7 +243,7 @@ function SubCategorySection({
     >
       {(subCategoryData: any) => {
         // Suppose we get an array of subCategories
-        const subCategories: ISubCategory[] = subCategoryData || [];
+        const subCategories: ISubCategory[] = subCategoryData.data || [];
         if (subCategories.length === 0) {
           return <p>No subcategories found.</p>;
         }

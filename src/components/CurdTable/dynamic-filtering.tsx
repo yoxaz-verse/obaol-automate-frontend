@@ -16,9 +16,12 @@ import {
   Switch,
   useDisclosure,
   Chip,
+  AutocompleteItem,
+  Autocomplete,
 } from "@nextui-org/react";
 import { IoFilterOutline } from "react-icons/io5";
 import { FormField } from "@/data/interface-data";
+import { toTitleCase } from "../titles";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -36,6 +39,9 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
+    {}
+  );
+  const [selectedLabels, setSelectedLabels] = useState<Record<string, string>>(
     {}
   );
 
@@ -85,10 +91,62 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
 
   const removeFilter = (key: string) => {
     setFilters((prev) => {
-      const updatedFilters = { ...prev };
-      delete updatedFilters[key];
-      onApply(updatedFilters);
-      return updatedFilters;
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+
+    setSelectedLabels((prev) => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+  };
+
+  const handleInputChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | {
+          target: { name: string; show: string | null; value: string | number };
+        }
+  ) => {
+    const { name, value } = e.target;
+    const show = "show" in e.target ? e.target.show : null;
+
+    setFilters((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+
+    if (show) {
+      setSelectedLabels((prev) => ({
+        ...prev,
+        [name]: show, // This is the display label (e.g. category name or user name)
+      }));
+    }
+
+    // Update dependent fields if any
+    formFields.forEach(async (field) => {
+      if (
+        field.dependsOn === name &&
+        typeof field.dynamicValuesFn === "function"
+      ) {
+        const updatedValues = await field.dynamicValuesFn(String(value));
+        setDynamicOptions((prev) => ({
+          ...prev,
+          [field.key]: updatedValues,
+        }));
+
+        setFilters((prevData) => ({
+          ...prevData,
+          [field.key]: "",
+        }));
+
+        setSelectedLabels((prev) => ({
+          ...prev,
+          [field.key]: "",
+        }));
+      }
     });
   };
 
@@ -148,36 +206,74 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           />
         );
       case "select":
+        const dependsOnValue = field.dependsOn
+          ? filters[field.dependsOn]
+          : null;
+        const isDisabled = field.dependsOn && !dependsOnValue;
+
+        const options =
+          field.dependsOn && dynamicOptions[field.key]
+            ? dynamicOptions[field.key]
+            : field.dynamicValuesFn
+            ? dynamicOptions[field.key] || []
+            : field.values || [];
+
         return (
-          <Select
-            label={label}
-            placeholder={`Select ${label}`}
-            selectedKeys={filters[key] ? new Set([filters[key]]) : new Set()}
-            onSelectionChange={(keys) =>
-              handleFilterChange(key, Array.from(keys)[0] || null)
+          <Autocomplete
+            aria-label={`Select ${field.label}`}
+            name={field.key}
+            className="w-[90%]"
+            label={`Select ${field.label}`}
+            placeholder={
+              isDisabled && field.dependsOn
+                ? `Please select ${toTitleCase(field.dependsOn)} first`
+                : field.label
             }
+            isDisabled={!!isDisabled}
+            defaultItems={options}
+            selectedKey={filters[field.key] ? String(filters[field.key]) : null}
+            onSelectionChange={(key) => {
+              if (!key) return;
+
+              const selected = options.find(
+                (item) => String(item.key) === String(key)
+              );
+              console.log(selected.value);
+
+              if (selected) {
+                handleInputChange({
+                  target: {
+                    name: field.key,
+                    value: selected.key,
+                    show: selected.value, // use this to show in chip
+                  },
+                });
+              }
+            }}
           >
-            {options.map((option) => (
-              <SelectItem key={String(option.key)}>{option.value}</SelectItem>
-            ))}
-          </Select>
+            {(item) => (
+              <AutocompleteItem key={String(item.key)} value={item.value}>
+                {item.value}
+              </AutocompleteItem>
+            )}
+          </Autocomplete>
         );
-      case "multiselect":
-        return (
-          <Select
-            label={label}
-            placeholder={`Select ${label}`}
-            selectionMode="multiple"
-            selectedKeys={filters[key] ? new Set(filters[key]) : new Set()}
-            onSelectionChange={(keys) =>
-              handleFilterChange(key, Array.from(keys))
-            }
-          >
-            {options.map((option) => (
-              <SelectItem key={String(option.key)}>{option.value}</SelectItem>
-            ))}
-          </Select>
-        );
+      // case "multiselect":
+      //   return (
+      //     <Select
+      //       label={label}
+      //       placeholder={`Select ${label}`}
+      //       selectionMode="multiple"
+      //       selectedKeys={filters[key] ? new Set(filters[key]) : new Set()}
+      //       onSelectionChange={(keys) =>
+      //         handleFilterChange(key, Array.from(keys))
+      //       }
+      //     >
+      //       {options.map((option) => (
+      //         <SelectItem key={String(option.key)}>{option.value}</SelectItem>
+      //       ))}
+      //     </Select>
+      //   );
       case "date":
         return (
           <DateRangePicker
@@ -234,22 +330,23 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   };
 
   return (
-    <div className="my-4">
+    <div className=" ">
       <div className="mb-4 flex flex-wrap gap-2 justify-end">
         {Object.entries(filters).map(([key, value]) => (
           <Chip
             key={key}
             variant="bordered"
-            color="primary"
+            color="warning"
             onClose={() => removeFilter(key)}
           >
-            {capitalize(key)}: {renderChipValue(key, value)}
+            {capitalize(key)}:{" "}
+            {selectedLabels[key] || renderChipValue(key, value)}
           </Chip>
         ))}
       </div>
 
-      <div className="flex justify-end">
-        <Button onPress={onOpen} variant="ghost" color="primary">
+      <div className="flex justify-end z-100">
+        <Button onPress={onOpen} variant="ghost" size="sm" color="warning">
           <IoFilterOutline className="mr-1" /> Filter
         </Button>
       </div>
@@ -258,12 +355,13 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         scrollBehavior="inside"
+        className={"z-100"}
       >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>{capitalize(currentTable)} Filters</ModalHeader>
-              <ModalBody className="space-y-4">
+              <ModalBody>
                 {formFields.map((field) => (
                   <div key={field.key}>{renderFilter(field)}</div>
                 ))}

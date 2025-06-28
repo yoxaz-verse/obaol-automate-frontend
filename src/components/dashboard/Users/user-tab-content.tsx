@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   adminRoutes,
   associateCompanyRoutes,
@@ -20,6 +20,7 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 
 interface UserTabContentProps {
   currentTable: string;
@@ -28,7 +29,10 @@ interface UserTabContentProps {
 const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
-
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+  };
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
@@ -37,9 +41,12 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
     <>
       <QueryComponent
         api={apiRoutesByRole[currentTable]}
-        queryKey={[currentTable, apiRoutesByRole[currentTable]]}
+        queryKey={[currentTable, apiRoutesByRole[currentTable], filters]}
         page={1}
         limit={100}
+        additionalParams={{
+          ...filters,
+        }}
       >
         {(data: any) => {
           const fetchedData = data?.data || [];
@@ -74,13 +81,20 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
 
           return (
             <>
-              {/* AddModal for adding new entries */}
-              <AddModal
-                currentTable={currentTable}
-                formFields={formFields} // Pass the updated formFields
-                apiEndpoint={apiRoutesByRole[currentTable]}
-                refetchData={refetchData}
-              />
+              <div className="flex items-center justify-between">
+                {/* AddModal for adding new entries */}
+                <AddModal
+                  currentTable={currentTable}
+                  formFields={formFields} // Pass the updated formFields
+                  apiEndpoint={apiRoutesByRole[currentTable]}
+                  refetchData={refetchData}
+                />
+                <DynamicFilter
+                  currentTable={currentTable}
+                  formFields={tableConfig[currentTable]}
+                  onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+                />{" "}
+              </div>
               <Spacer y={5} />
               {tableData.length > 0 ? (
                 <CommonTable

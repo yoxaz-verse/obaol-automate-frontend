@@ -1,150 +1,68 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
-import { MarkerData } from "@/components/LiveMap/LiveMap";
+import LiveMapWrapper from "@/components/LiveMap/LiveMapWrapper";
+import { initialTableConfig } from "@/utils/tableValues";
+import { useState } from "react";
+import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import { Spacer } from "@nextui-org/react";
 
-// Dynamic import to fix SSR issue
-const LiveMap = dynamic(() => import("@/components/LiveMap/LiveMap"), {
-  ssr: false,
-});
-
-let geoCache: Record<string, { lat: number; lon: number }> = {};
-
-const geocode = async (
-  query: string
-): Promise<{ lat: number; lon: number } | null> => {
-  if (typeof window !== "undefined" && Object.keys(geoCache).length === 0) {
-    try {
-      geoCache = JSON.parse(localStorage.getItem("geoCache") || "{}");
-    } catch {
-      geoCache = {};
-    }
-  }
-
-  if (geoCache[query]) return geoCache[query];
-
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-    query
-  )}`;
-  try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": "GeoMap/1.0 (contact@example.com)" },
-    });
-    const data = await res.json();
-    if (data.length > 0) {
-      const result = { lat: +data[0].lat, lon: +data[0].lon };
-      geoCache[query] = result;
-      if (typeof window !== "undefined") {
-        localStorage.setItem("geoCache", JSON.stringify(geoCache));
-      }
-      return result;
-    }
-  } catch (err) {
-    console.error("Geocode error", err);
-  }
-  return null;
-};
-
-export default function HomePage() {
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
-
-  const { data: variantRateResponse, isSuccess } = useQuery({
-    queryKey: ["variantRate"],
-    queryFn: () => getData(variantRateRoutes.getAll, { limit: 10000 }),
+export default function Page() {
+  const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
+  const { data: variantRateResponse } = useQuery({
+    queryKey: ["variantRate", filters],
+    queryFn: () =>
+      getData(variantRateRoutes.getAll, { limit: 10000, ...filters }),
   });
 
   const variantRateValue = variantRateResponse?.data?.data?.data;
+  const tableConfig = { ...initialTableConfig }; // avoid mutations
+  // Step 1: Combine all fields
+  const combinedFields = [
+    ...(tableConfig["category"] || []),
+    ...(tableConfig["subCategory"] || []),
+    ...(tableConfig["product"] || []),
+    ...(tableConfig["productVariant"] || []),
+    ...(tableConfig["variantRate"] || []),
+  ];
 
-  useEffect(() => {
-    if (!isSuccess || !variantRateValue) return;
+  // Step 2: Create a map to track the preferred field (prefer "select" over "text")
+  const fieldMap = new Map<string, any>();
 
-    const immediateMarkers: MarkerData[] = [];
-    const delayedQueue: (() => Promise<void>)[] = [];
+  combinedFields.forEach((field) => {
+    const existing = fieldMap.get(field.key);
 
-    for (const item of variantRateValue) {
-      const label =
-        item.productVariant?.product?.name +
-          " " +
-          item.productVariant?.name +
-          " - " +
-          item.rate || "Unknown";
-
-      const description = `by: ${item.associateCompany?.name}`;
-
-      if (item.pinEntry?.latitude && item.pinEntry?.longitude) {
-        immediateMarkers.push({
-          latitude: item.pinEntry.latitude,
-          longitude: item.pinEntry.longitude,
-          label,
-          description,
-          source: "pinEntry",
-        });
-      } else if (item.district?.name && item.state?.name) {
-        const query = `${item.district.name}, ${item.state.name}, India`;
-        delayedQueue.push(async () => {
-          const geo = await geocode(query);
-          if (geo) {
-            setMarkers((prev) => [
-              ...prev,
-              {
-                latitude: geo.lat,
-                longitude: geo.lon,
-                label,
-                description,
-                source: "district",
-              },
-            ]);
-          }
-        });
-      } else if (item.state?.name) {
-        const query = `${item.state.name}, India`;
-        delayedQueue.push(async () => {
-          const geo = await geocode(query);
-          if (geo) {
-            setMarkers((prev) => [
-              ...prev,
-              {
-                latitude: geo.lat,
-                longitude: geo.lon,
-                label,
-                description,
-                source: "state",
-              },
-            ]);
-          }
-        });
-      }
+    if (!existing) {
+      fieldMap.set(field.key, field);
+    } else if (existing.type === "text" && field.type === "select") {
+      // Replace text with select if exists
+      fieldMap.set(field.key, field);
     }
+    // If existing is select, we ignore the text one
+  });
 
-    // Show all available markers immediately
-    setMarkers(immediateMarkers);
-
-    // Limit concurrent geocode requests (to prevent API throttling)
-    const maxConcurrent = 5;
-    let running = 0;
-    let index = 0;
-
-    const processQueue = () => {
-      while (running < maxConcurrent && index < delayedQueue.length) {
-        const job = delayedQueue[index++];
-        running++;
-        job().finally(() => {
-          running--;
-          processQueue();
-        });
-      }
-    };
-
-    processQueue();
-  }, [isSuccess, variantRateValue]);
+  // Step 3: Final filtered field list
+  const variantRateFormFields = Array.from(fieldMap.values());
+  const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+    setFilters(updatedFilters); // Update the filters
+  };
+  console.log(filters);
 
   return (
-    <div className="h-[82vh] w-full">
-      <LiveMap markers={markers} />
+    <div className=" w-full h-[75vh] overflow-hidden   gap-2">
+      <div className="absolute bottom-2 right-2">
+        <DynamicFilter
+          currentTable={"variantRate"}
+          formFields={variantRateFormFields}
+          onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+        />
+      </div>
+      <Spacer y={2} />
+      <div className="h-[82vh]  w-full">
+        <LiveMapWrapper mappingValue={variantRateValue} />
+      </div>
     </div>
   );
 }

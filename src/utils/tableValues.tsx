@@ -176,6 +176,7 @@ export const initialTableConfig: Record<
     {
       label: "Name",
       type: "text",
+      filterType: "text",
       key: "name",
       inForm: true,
       inTable: true,
@@ -184,6 +185,7 @@ export const initialTableConfig: Record<
     {
       label: "Email",
       type: "email",
+      filterType: "text",
       key: "email",
       inForm: true,
       inTable: true,
@@ -323,6 +325,7 @@ export const initialTableConfig: Record<
     {
       label: "Customer Name",
       type: "text",
+      filterType: "text",
       key: "name",
       inForm: true,
       inTable: true,
@@ -331,6 +334,7 @@ export const initialTableConfig: Record<
     {
       label: "Email",
       type: "email",
+      filterType: "text",
       key: "email",
       inForm: true,
       inTable: true,
@@ -365,6 +369,7 @@ export const initialTableConfig: Record<
       label: "Associate Name",
       type: "text",
       key: "name",
+      filterType: "text",
       inForm: true,
       inTable: true,
       required: true,
@@ -373,6 +378,7 @@ export const initialTableConfig: Record<
       label: "Email",
       type: "email",
       key: "email",
+      filterType: "text",
       inForm: true,
       inEdit: true,
       inTable: true,
@@ -383,6 +389,7 @@ export const initialTableConfig: Record<
       type: "number",
       key: "phone",
       inForm: true,
+      filterType: "text",
       inTable: true,
       inEdit: true,
       required: true,
@@ -398,6 +405,7 @@ export const initialTableConfig: Record<
     {
       label: "Designation",
       type: "select",
+      filterType: "select",
       key: "designation",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("designation"),
@@ -410,6 +418,7 @@ export const initialTableConfig: Record<
       label: "Associate Company",
       type: "select",
       key: "associateCompany",
+      filterType: "select",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("associateCompany"),
       inForm: true,
@@ -445,6 +454,7 @@ export const initialTableConfig: Record<
       label: "Company Name",
       type: "text",
       key: "name",
+      filterType: "text",
       inForm: true,
       inTable: true,
       required: true,
@@ -453,6 +463,7 @@ export const initialTableConfig: Record<
       label: "Email",
       type: "email",
       key: "email",
+      filterType: "text",
       inForm: true,
       inTable: true,
       required: true,
@@ -460,6 +471,7 @@ export const initialTableConfig: Record<
     {
       label: "Phone",
       type: "number",
+      filterType: "text",
       key: "phone",
       inForm: true,
       inTable: true,
@@ -477,6 +489,7 @@ export const initialTableConfig: Record<
     {
       label: "Company Type",
       type: "select",
+      filterType: "select",
       key: "companyType",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("companyType"),
@@ -488,6 +501,7 @@ export const initialTableConfig: Record<
     {
       label: "State",
       type: "select",
+      filterType: "select",
       key: "state",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("state"),
@@ -500,6 +514,7 @@ export const initialTableConfig: Record<
       label: "District",
       type: "select",
       key: "district",
+      filterType: "select",
       dependsOn: "state",
       values: [],
       dynamicValuesFn: (stateId: string) =>
@@ -512,6 +527,7 @@ export const initialTableConfig: Record<
     {
       label: "Division",
       type: "select",
+      filterType: "select",
       key: "division",
       dependsOn: "district", // 👈
       dynamicValuesFn: (districtId: string) =>
@@ -524,6 +540,7 @@ export const initialTableConfig: Record<
     {
       label: "Pin Code ",
       type: "select",
+      filterType: "select",
       key: "pincodeEntry",
       dependsOn: "division", // 👈
       dynamicValuesFn: (divisionId: string) =>
@@ -716,10 +733,9 @@ export const initialTableConfig: Record<
   // Category
   category: [
     {
-      label: "Name",
+      label: "Category Name",
       type: "text",
       key: "name",
-      inEdit: true,
       inForm: true,
       inTable: true,
     },
@@ -728,7 +744,6 @@ export const initialTableConfig: Record<
       type: "textarea",
       key: "description",
       inForm: true,
-      inEdit: true,
       inTable: false,
     },
 
@@ -743,7 +758,6 @@ export const initialTableConfig: Record<
     {
       label: "Inventory Manager",
       type: "select",
-      filterType: "select",
       key: "inventoryManager",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("inventoryManager"),
@@ -770,7 +784,7 @@ export const initialTableConfig: Record<
   // Sub Category
   subCategory: [
     {
-      label: "Name",
+      label: "Sub Category Name",
       type: "text",
       key: "name",
       inForm: true,
@@ -1064,7 +1078,6 @@ export const initialTableConfig: Record<
       key: "product",
       inForm: false,
       inTable: true,
-      inEdit: true,
     },
     {
       label: "Product Variant",

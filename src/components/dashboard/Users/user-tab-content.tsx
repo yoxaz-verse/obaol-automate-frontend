@@ -41,9 +41,14 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
     <>
       <QueryComponent
         api={apiRoutesByRole[currentTable]}
-        queryKey={[currentTable, apiRoutesByRole[currentTable], filters]}
+        queryKey={[
+          currentTable,
+          apiRoutesByRole[currentTable],
+          filters,
+          handleFiltersUpdate,
+        ]}
         page={1}
-        limit={100}
+        limit={1000}
         additionalParams={{
           ...filters,
         }}

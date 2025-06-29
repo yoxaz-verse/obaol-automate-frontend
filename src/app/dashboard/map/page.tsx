@@ -48,10 +48,9 @@ export default function Page() {
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
-  console.log(filters);
 
   return (
-    <div className=" w-full h-[75vh] overflow-hidden   gap-2">
+    <div className=" w-full h-[700px] flex justify-center overflow-hidden   gap-2">
       <div className="absolute bottom-2 right-2">
         <DynamicFilter
           currentTable={"variantRate"}
@@ -60,7 +59,7 @@ export default function Page() {
         />
       </div>
       <Spacer y={2} />
-      <div className="h-[82vh]  w-full">
+      <div className="rounded-bl-lg  w-[95%]">
         <LiveMapWrapper mappingValue={variantRateValue} />
       </div>
     </div>

@@ -139,7 +139,7 @@ export default function LiveMapWrapper({ mappingValue }: LiveMapProps) {
   }, [mappingValue]);
 
   return (
-    <div className="h-[82vh] w-full">
+    <div className="h-[82vh] z-10 w-full">
       <LiveMap markers={markers} />
     </div>
   );

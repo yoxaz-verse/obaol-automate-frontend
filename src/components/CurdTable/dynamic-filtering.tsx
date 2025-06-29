@@ -90,17 +90,17 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   };
 
   const removeFilter = (key: string) => {
-    setFilters((prev) => {
-      const updated = { ...prev };
-      delete updated[key];
-      return updated;
-    });
+    const updatedFilters = { ...filters };
+    delete updatedFilters[key];
 
+    setFilters(updatedFilters);
     setSelectedLabels((prev) => {
       const updated = { ...prev };
       delete updated[key];
       return updated;
     });
+
+    onApply(updatedFilters); // 🔥 Ensure parent's query logic is triggered
   };
 
   const handleInputChange = (
@@ -330,7 +330,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   };
 
   return (
-    <div className=" ">
+    <div className="z-100">
       <div className="mb-4 flex flex-wrap gap-2 justify-end">
         {Object.entries(filters).map(([key, value]) => (
           <Chip

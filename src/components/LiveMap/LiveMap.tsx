@@ -100,7 +100,7 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
   return (
     <div
       ref={mapRef}
-      className="z-40"
+      className="z-10"
       style={{ height: "100%", width: "100%" }}
     />
   );

@@ -68,6 +68,32 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const productVariantValue = productVariant || null;
   const tableConfig = { ...initialTableConfig }; // avoid mutations
   const { user } = useContext(AuthContext);
+  // Step 1: Combine all fields
+  const combinedFields = [
+    ...(tableConfig["category"] || []),
+    ...(tableConfig["subCategory"] || []),
+    ...(tableConfig["product"] || []),
+    ...(tableConfig["productVariant"] || []),
+    ...(tableConfig["variantRate"] || []),
+  ];
+
+  // Step 2: Create a map to track the preferred field (prefer "select" over "text")
+  const fieldMap = new Map<string, any>();
+
+  combinedFields.forEach((field) => {
+    const existing = fieldMap.get(field.key);
+
+    if (!existing) {
+      fieldMap.set(field.key, field);
+    } else if (existing.type === "text" && field.type === "select") {
+      // Replace text with select if exists
+      fieldMap.set(field.key, field);
+    }
+    // If existing is select, we ignore the text one
+  });
+
+  // Step 3: Final filtered field list
+  const filterVariantRateFormFields = Array.from(fieldMap.values());
 
   const { convertRate } = useCurrency();
 
@@ -108,10 +134,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
         productVariantValue?._id,
         additionalParams,
         refetchData,
+        filters,
       ]}
       page={1}
       limit={1000}
       additionalParams={{
+        ...(filters || {}),
         ...(additionalParams || {}),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
@@ -185,26 +213,29 @@ const VariantRate: React.FC<VariantRateProps> = ({
               <CurrencySelector />
               {!displayOnly && rate === "variantRate" ? (
                 <>
-                  <AddModal
-                    name="Rate"
-                    currentTable={rate}
-                    formFields={variantRateFormFields}
-                    apiEndpoint={apiRoutesByRole[rate]}
-                    refetchData={refetchData}
-                    additionalVariable={{
-                      ...(productVariantValue && {
-                        productVariant: productVariantValue._id,
-                      }),
-                      ...(user?.role === "Associate" && {
-                        associate: user?.id,
-                      }),
-                    }}
-                  />
-                  {/* <DynamicFilter
-                  currentTable={"variantRate"}
-                  formFields={variantRateFormFields}
-                  onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
-                /> */}
+                  <div>
+                    <DynamicFilter
+                      currentTable={"variantRate"}
+                      formFields={filterVariantRateFormFields}
+                      onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+                    />{" "}
+                    <Spacer y={2} />
+                    <AddModal
+                      name="Rate"
+                      currentTable={rate}
+                      formFields={variantRateFormFields}
+                      apiEndpoint={apiRoutesByRole[rate]}
+                      refetchData={refetchData}
+                      additionalVariable={{
+                        ...(productVariantValue && {
+                          productVariant: productVariantValue._id,
+                        }),
+                        ...(user?.role === "Associate" && {
+                          associate: user?.id,
+                        }),
+                      }}
+                    />
+                  </div>
                 </>
               ) : (
                 "Add Associates for Variant rates"

@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
-import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { MarkerData } from "@/components/LiveMap/LiveMap";
 
 // Dynamic import to fix SSR issue

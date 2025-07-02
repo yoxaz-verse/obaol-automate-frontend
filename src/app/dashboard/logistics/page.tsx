@@ -13,7 +13,7 @@ export default function CIFPage() {
     originLat: "",
     originLon: "",
     originPort: "",
-    destinationLQon: "",
+    destinationLon: "",
     destinationLat: "",
     destinationPort: "",
     destPort: "",

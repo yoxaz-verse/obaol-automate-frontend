@@ -94,7 +94,7 @@ export default function CIFPage() {
       </div>
       <div className="mt-6 p-4 rounded-lg bg-gray-100 shadow-sm h-max w-[300px]">
         {result ? (
-          <>
+          <div className="h-max">
             {" "}
             <h2 className="text-lg font-semibold mb-3 text-gray-800">
               📦 CIF Calculation Breakdown
@@ -123,7 +123,7 @@ export default function CIFPage() {
                 </span>
               </li>
             </ul>
-          </>
+          </div>
         ) : (
           <h2 className="text-lg font-semibold  text-gray-800">
             📦 Enter parameter to Breakdown

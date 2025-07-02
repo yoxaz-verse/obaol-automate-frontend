@@ -21,6 +21,8 @@ export default function CIFPage() {
     weight: "",
   });
   const [result, setResult] = useState<any>(null);
+  console.log(result.data);
+
   const addItem = useMutation({
     mutationFn: async (data: any) => postData("/cif", data, {}),
     onSuccess: (res) => {
@@ -87,7 +89,6 @@ export default function CIFPage() {
           Calculate
         </Button>
       </form>
-
       {result && (
         <div className="mt-6 p-4 rounded-lg bg-gray-100 shadow-sm">
           <h2 className="text-lg font-semibold mb-3 text-gray-800">
@@ -97,29 +98,30 @@ export default function CIFPage() {
           <ul className="space-y-2 text-sm text-gray-700">
             <li>
               <span className="font-medium">📍 Road Distance:</span>{" "}
-              {result.distanceKm.toFixed(2)} km
+              {result.data.distanceKm?.toFixed(2) ?? " "} km
             </li>
             <li>
               <span className="font-medium">🚚 Inland Transport Cost:</span> $
-              {result.inlandCostUSD.toFixed(2)}
+              {result.data.inlandCostUSD?.toFixed(2) ?? " "}
             </li>
             <li>
               <span className="font-medium">🛳️ Ocean Freight Cost:</span> $
-              {result.oceanCostUSD.toFixed(2)}
+              {result.data.oceanCostUSD?.toFixed(2) ?? ""}
             </li>
             <li>
               <span className="font-medium">🛡️ Insurance Cost:</span> $
-              {result.insuranceUSD.toFixed(2)}
+              {result.data.insuranceUSD?.toFixed(2) ?? " "}
             </li>
             <li className="mt-2 border-t pt-2 font-semibold text-black">
               <span className="text-md">💰 Total CIF Cost:</span>{" "}
               <span className="text-green-700">
-                ${result.cifUSD.toFixed(2)}
+                ${result.data.cifUSD?.toFixed(2) ?? " "}
               </span>
             </li>
           </ul>
         </div>
       )}
+      zzzz
     </div>
   );
 }

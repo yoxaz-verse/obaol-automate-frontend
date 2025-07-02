@@ -92,8 +92,8 @@ export default function CIFPage() {
           </Button>
         </form>
       </div>
-      <div className="mt-6 p-4 rounded-lg bg-gray-100 shadow-sm w-[300px]">
-        {result && (
+      <div className="mt-6 p-4 rounded-lg bg-gray-100 shadow-sm h-max w-[300px]">
+        {result ? (
           <>
             {" "}
             <h2 className="text-lg font-semibold mb-3 text-gray-800">
@@ -124,6 +124,10 @@ export default function CIFPage() {
               </li>
             </ul>
           </>
+        ) : (
+          <h2 className="text-lg font-semibold  text-gray-800">
+            📦 Enter parameter to Breakdown
+          </h2>
         )}
       </div>
     </div>

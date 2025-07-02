@@ -13,8 +13,8 @@ export default function CIFPage() {
     originLat: "",
     originLon: "",
     originPort: "",
-    destinationLon: "",
     destinationLat: "",
+    destinationLon: "",
     destinationPort: "",
     destPort: "",
     value: "",
@@ -63,8 +63,8 @@ export default function CIFPage() {
         {[
           { key: "originLat", label: "Origin Latitude" },
           { key: "originLon", label: "Origin Longitude" },
-          { key: "destinationLon", label: "Destination Longitude" },
           { key: "destinationLat", label: "Destination Latitude" },
+          { key: "destinationLon", label: "Destination Longitude" },
           { key: "originPort", label: "Origin Port" },
           { key: "destPort", label: "Destination Port" },
           { key: "value", label: "Cargo Value (USD)" },
@@ -89,8 +89,35 @@ export default function CIFPage() {
       </form>
 
       {result && (
-        <div className="mt-4 bg-gray-100 p-3 rounded">
-          <pre className="text-sm">{JSON.stringify(result, null, 2)}</pre>
+        <div className="mt-6 p-4 rounded-lg bg-gray-100 shadow-sm">
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">
+            📦 CIF Calculation Breakdown
+          </h2>
+
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li>
+              <span className="font-medium">📍 Road Distance:</span>{" "}
+              {result.distanceKm.toFixed(2)} km
+            </li>
+            <li>
+              <span className="font-medium">🚚 Inland Transport Cost:</span> $
+              {result.inlandCostUSD.toFixed(2)}
+            </li>
+            <li>
+              <span className="font-medium">🛳️ Ocean Freight Cost:</span> $
+              {result.oceanCostUSD.toFixed(2)}
+            </li>
+            <li>
+              <span className="font-medium">🛡️ Insurance Cost:</span> $
+              {result.insuranceUSD.toFixed(2)}
+            </li>
+            <li className="mt-2 border-t pt-2 font-semibold text-black">
+              <span className="text-md">💰 Total CIF Cost:</span>{" "}
+              <span className="text-green-700">
+                ${result.cifUSD.toFixed(2)}
+              </span>
+            </li>
+          </ul>
         </div>
       )}
     </div>

@@ -12,7 +12,7 @@ export default function UnLoCodeMapPage() {
         api={unLoCodeRoutes.getAll}
         queryKey={["unlocodes", unLoCodeRoutes.getAll]}
         page={1}
-        limit={20000}
+        limit={200000}
       >
         {(response: any) => {
           const docs: any[] = response?.data || [];

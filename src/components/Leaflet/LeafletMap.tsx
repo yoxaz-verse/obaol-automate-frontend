@@ -64,8 +64,8 @@ export default function LeafletMap({
 }: LeafletMapProps) {
   return (
     <MapContainer
-      center={[20, 0]}
-      zoom={2}
+      center={[20, 80]}
+      zoom={4.5}
       style={{ height: "100%", width: "100%" }}
     >
       <SetMapRef mapRef={mapRef} />

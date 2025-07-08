@@ -12,6 +12,7 @@ import { GiBeamsAura } from "react-icons/gi";
 import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { GiShipWheel } from "react-icons/gi";
+import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -95,6 +96,11 @@ export const sidebarOptions = [
     name: "Map", //Translate
     icon: <LiaMapMarkedAltSolid />,
     link: "/dashboard/map",
+  },
+  {
+    name: "Geo Sphere", //Translate
+    icon: <BsGlobeCentralSouthAsia />,
+    link: "/dashboard/geosphere",
   },
   {
     name: "Logistics", //Translate

@@ -42,6 +42,10 @@ const BASE_PATHS = {
   COMPANY_TYPE: "/companyType",
   DESIGNATION: "/designation",
   ENQUIRY_PROCESS_STATUS: "/enquiryProcessStatus",
+  COUNTRY: "/country",
+  UN_LO_CODE: "/unLoCode",
+  UN_LO_CODE_STATUS: "/unLoCodeFunction",
+  UN_LO_CODE_FUNCTION: "/unLoCodeStatus",
 };
 
 // Define account-related routes separately
@@ -215,6 +219,15 @@ export const variantRateRoutes = addCustomRoutes(
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
 export const enquiryRoutes = createCRUDRoutes(BASE_PATHS.ENQUIRY);
 
+export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);
+export const unLoCodeRoutes = createCRUDRoutes(BASE_PATHS.UN_LO_CODE);
+export const unLoCodeFunctionRoutes = createCRUDRoutes(
+  BASE_PATHS.UN_LO_CODE_FUNCTION
+);
+export const unLoCodeStatusRoutes = createCRUDRoutes(
+  BASE_PATHS.UN_LO_CODE_STATUS
+);
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   account: accountRoutes,
@@ -254,4 +267,8 @@ export const apiRoutes = {
   designation: designationRoutes,
   companyType: companyTypeRoutes,
   enquiryProcessStatus: enquiryProcessStatusRoutes,
+  country: countryRoutes,
+  unLoCode: unLoCodeRoutes,
+  unLoCodeFunction: unLoCodeFunctionRoutes,
+  unLoCodeStatus: unLoCodeStatusRoutes,
 };

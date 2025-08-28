@@ -7,12 +7,10 @@
 const BASE_PATHS = {
   USER: "/user",
   ADMIN: "/admin",
+  EMPLOYEE: "/employee",
   INVENTORY_MANAGER: "/inventoryManager",
   PROJECT_MANAGER: "/projectManager",
-  LOCATION_MANAGER: "/locationManager",
-  LOCATION: "/location",
   SERVICE_COMPANY: "/serviceCompany",
-  LOCATION_TYPE: "/locationType",
   ACTIVITY: "/activity",
   ACTIVITY_TYPE: "/activityType",
   ACTIVITY_STATUS: "/activityStatus",
@@ -39,13 +37,22 @@ const BASE_PATHS = {
   DIVISION: "/division",
   DISTRICT: "/district",
   STATE: "/state",
-  COMPANY_TYPE: "/companyType",
   DESIGNATION: "/designation",
   ENQUIRY_PROCESS_STATUS: "/enquiryProcessStatus",
   COUNTRY: "/country",
   UN_LO_CODE: "/unLoCode",
   UN_LO_CODE_STATUS: "/unLoCodeFunction",
   UN_LO_CODE_FUNCTION: "/unLoCodeStatus",
+  CERTIFICATION: "/certification",
+  COMPANY_BUSINESS_MODEL: "/companyBusinessModel",
+  GENERAL_INTENT: "/generalIntent",
+  SUB_INTENT: "/subIntent",
+  COMPANY_TYPE: "/companyType",
+  COMPANY_STAGE: "/companyStage",
+  RESEARCHED_COMPANY: "/researchedCompany",
+  JOB_ROLE: "/jobRole",
+  JOB_TYPE: "/jobType",
+  LANGUAGE: "/language",
 };
 
 // Define account-related routes separately
@@ -76,6 +83,7 @@ const addCustomRoutes = (
 // Define resource-specific routes using the CRUD generator
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
+export const employeeRoutes = createCRUDRoutes(BASE_PATHS.EMPLOYEE);
 export const statusHistoryRoutes = createCRUDRoutes(BASE_PATHS.STATUS_HISTORY);
 export const inventoryManagerRoutes = createCRUDRoutes(
   BASE_PATHS.INVENTORY_MANAGER
@@ -83,15 +91,6 @@ export const inventoryManagerRoutes = createCRUDRoutes(
 export const activityFileRoutes = createCRUDRoutes(BASE_PATHS.ACTIVITY_FILE);
 export const projectManagerRoutes = createCRUDRoutes(
   BASE_PATHS.PROJECT_MANAGER
-);
-export const locationManagerRoutes = createCRUDRoutes(
-  BASE_PATHS.LOCATION_MANAGER
-);
-export const locationRoutes = addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.LOCATION),
-  {
-    // If you have other custom routes for location, add them here
-  }
 );
 
 export const divisionRoutes = addCustomRoutes(
@@ -131,12 +130,7 @@ export const timeSheetRoutes = addCustomRoutes(
     // If you have other custom routes for serviceCompany, add them here
   }
 );
-export const locationTypeRoutes = addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.LOCATION_TYPE),
-  {
-    // If you have other custom routes for locationType, add them here
-  }
-);
+
 export const activityTypeRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.ACTIVITY_TYPE),
   {
@@ -228,15 +222,29 @@ export const unLoCodeStatusRoutes = createCRUDRoutes(
   BASE_PATHS.UN_LO_CODE_STATUS
 );
 
+export const certificationRoutes = createCRUDRoutes(BASE_PATHS.CERTIFICATION);
+export const companyBusinessModelRoutes = createCRUDRoutes(
+  BASE_PATHS.COMPANY_BUSINESS_MODEL
+);
+export const jobRoleRoutes = createCRUDRoutes(BASE_PATHS.JOB_ROLE);
+export const jobTypeRoutes = createCRUDRoutes(BASE_PATHS.JOB_TYPE);
+export const languageRoutes = createCRUDRoutes(BASE_PATHS.LANGUAGE);
+
+export const generalIntentRoutes = createCRUDRoutes(BASE_PATHS.GENERAL_INTENT);
+export const companyStageRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_STAGE);
+export const subIntentRoutes = createCRUDRoutes(BASE_PATHS.SUB_INTENT);
+export const researchedCompanyRoutes = createCRUDRoutes(
+  BASE_PATHS.RESEARCHED_COMPANY
+);
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   account: accountRoutes,
   user: userRoutes,
+  employee: employeeRoutes,
   admin: adminRoutes,
-  locationManager: locationManagerRoutes,
-  location: locationRoutes,
+
   serviceCompany: serviceCompanyRoutes,
-  locationType: locationTypeRoutes,
   activityType: activityTypeRoutes,
   activityFile: activityFileRoutes,
   projectType: projectTypeRoutes,
@@ -271,4 +279,13 @@ export const apiRoutes = {
   unLoCode: unLoCodeRoutes,
   unLoCodeFunction: unLoCodeFunctionRoutes,
   unLoCodeStatus: unLoCodeStatusRoutes,
+  researchedCompany: researchedCompanyRoutes,
+  certification: certificationRoutes,
+  companyBusinessModel: companyBusinessModelRoutes,
+  generalIntent: generalIntentRoutes,
+  subIntent: subIntentRoutes,
+  companyStage: companyStageRoutes,
+  jobRole: jobRoleRoutes,
+  jobType: jobTypeRoutes,
+  language: languageRoutes,
 };

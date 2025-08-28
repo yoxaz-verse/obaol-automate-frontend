@@ -6,17 +6,23 @@ import {
   associateCompanyRoutes,
   associateRoutes,
   categoryRoutes,
+  certificationRoutes,
+  companyBusinessModelRoutes,
+  companyStageRoutes,
   companyTypeRoutes,
   designationRoutes,
   districtRoutes,
   divisionRoutes,
+  employeeRoutes,
   enquiryProcessStatusRoutes,
+  generalIntentRoutes,
   inventoryManagerRoutes,
   pincodeEntryRoutes,
   productRoutes,
   productVariantRoutes,
   stateRoutes,
   subCategoryRoutes,
+  subIntentRoutes,
 } from "@/core/api/apiRoutes";
 
 const getOptions = async (
@@ -37,6 +43,15 @@ const getOptions = async (
       );
     }
 
+    if (lowerKey === "employee") {
+      const res = await getData(employeeRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
     if (lowerKey === "category") {
       const res = await getData(categoryRoutes.getAll, { limit: "1000" });
       return (
@@ -101,6 +116,61 @@ const getOptions = async (
       );
     }
 
+    if (lowerKey === "generalintent") {
+      const res = await getData(generalIntentRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+    if (lowerKey === "subintent") {
+      const res = await getData(subIntentRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+    if (lowerKey === "certification") {
+      const res = await getData(certificationRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+    if (lowerKey === "companybusinessmodel") {
+      const res = await getData(companyBusinessModelRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+    if (lowerKey === "companystage") {
+      const res = await getData(companyStageRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
     if (lowerKey.includes("associate")) {
       const res = await getData(associateRoutes.getAll, { limit: "1000" });
       return (

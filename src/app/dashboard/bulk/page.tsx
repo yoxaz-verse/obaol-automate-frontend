@@ -5,7 +5,6 @@ import React from "react";
 import { Tabs, Tab, Spacer } from "@nextui-org/react";
 import Title from "@/components/titles";
 import BulkAdd from "@/components/CurdTable/bulk-add";
-import { locationRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole } from "@/utils/tableValues";
 
 export default function Essentials() {
@@ -32,11 +31,11 @@ export default function Essentials() {
           />{" "}
           <Spacer y={12} />
           <Title title="Location" />
-          <BulkAdd
+          {/* <BulkAdd
             apiEndpoint={`${locationRoutes.getAll}/bulk`}
             refetchData={refetchData} // Function to refetch activities list
             currentTable={"Locations"} // Translate
-          />
+          /> */}
           <Spacer y={12} />
         </div>
       </div>

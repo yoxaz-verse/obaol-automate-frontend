@@ -2,7 +2,6 @@
 import { NextPage } from "next";
 import React, { useState } from "react";
 
-import ProjectDetails from "@/components/dashboard/Projects/project-details";
 import { usePathname } from "next/navigation";
 
 const Projects: NextPage = () => {
@@ -20,13 +19,7 @@ const Projects: NextPage = () => {
       {/* <div className="w-full p-[1rem]">
         <ManagerActivityDetailsComponent />
       </div> */}
-      <div className="w-[95%] ">
-        <ProjectDetails
-          id={pathname}
-          role={role}
-          setProjectDetail={(value) => setProjectDetails(value)}
-        />
-      </div>
+      <div className="w-[95%] "></div>
     </div>
   );
 };

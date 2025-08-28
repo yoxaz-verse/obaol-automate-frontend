@@ -13,6 +13,7 @@ import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { GiShipWheel } from "react-icons/gi";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
+import { SiGoogleforms } from "react-icons/si";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -106,5 +107,10 @@ export const sidebarOptions = [
     name: "Logistics", //Translate
     icon: <GiShipWheel />,
     link: "/dashboard/logistics",
+  },
+  {
+    name: "RS Form", //Translate
+    icon: <SiGoogleforms />,
+    link: "/dashboard/rsForm",
   },
 ];

@@ -32,6 +32,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const roles = [
     "Associate",
     // "ProjectManager",
+    "Employee",
     "Admin",
     "Customer",
     "Worker",

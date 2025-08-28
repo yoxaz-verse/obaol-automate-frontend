@@ -174,6 +174,16 @@ export interface AddModalProps {
   additionalVariable?: Record<string, any>; // Dynamic additional parameters
 }
 
+export interface AddFormProps {
+  name?: string;
+  currentTable: string;
+  formFields: FormField[];
+  apiEndpoint: string;
+  refetchData?: () => void;
+  additionalVariable?: Record<string, any>; // Dynamic additional parameters
+  onSuccess?: () => void; // callback when form successfully submits
+}
+
 export interface FormField {
   label: string;
   type: string; // e.g., "text", "email", "select", "multiselect", "file", "textarea"

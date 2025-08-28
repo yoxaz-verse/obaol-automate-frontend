@@ -6,7 +6,6 @@ import { Tabs, Tab, Spacer, Accordion, AccordionItem } from "@heroui/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
 import BulkAdd from "@/components/CurdTable/bulk-add";
-import { locationRoutes } from "@/core/api/apiRoutes";
 
 export default function Essentials() {
   const [locationTab, setLocationTab] = React.useState("location");
@@ -94,11 +93,11 @@ export default function Essentials() {
                     {tab.key === "location" && (
                       // <LocationTabContent currentType="all" />
                       <>
-                        <BulkAdd
+                        {/* <BulkAdd
                           apiEndpoint={`${locationRoutes.getAll}/bulk`}
                           refetchData={refetchData} // Function to refetch activities list
                           currentTable={"Locations"} // Translate
-                        />
+                        /> */}
                         <Spacer y={6} />
                         <Accordion variant="light">
                           <AccordionItem

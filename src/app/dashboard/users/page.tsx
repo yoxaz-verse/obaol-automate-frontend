@@ -12,6 +12,7 @@ export default function Page() {
     { key: "associate", title: "Associates" }, // Translate Title
     { key: "admin", title: "Admins" }, // Translate Title
     { key: "customer", title: "Customers" }, // Translate Title
+    { key: "employee", title: "Employee" }, // Translate Title
     // { key: "worker", title: "Staff" },// Translate Title
   ];
 

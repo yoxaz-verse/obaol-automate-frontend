@@ -7,15 +7,31 @@ import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
 
 export default function Essentials() {
-  const [userOption, setuserOption] = React.useState("projectStatus");
-  const userOptionTabs = [
-    { key: "designation", title: "Designation" }, // Translate Title
-    { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
+  const [companyEssentials, setCompanyEssentials] =
+    React.useState("generalIntent");
+  const companyEssentialsTabs = [
+    { key: "generalIntent", title: "General Intent" }, // Translate Title
+    { key: "subIntent", title: "Sub Intent" }, // Translate Title
+    { key: "companyBusinessModel", title: "Business Model" }, // Translate Title
+    { key: "certification", title: "Certifications" }, // Translate Title
   ];
-  const [company, setCompany] = React.useState("projectStatus");
+  const [company, setCompany] = React.useState("associateCompany");
   const companyTabs = [
     { key: "associateCompany", title: "Associates Company" }, // Translate Title
+    { key: "researchedCompany", title: "Researched Company" }, // Translate Title
     { key: "companyType", title: "Company Type" }, // Translate Title
+    { key: "companyStage", title: "Company Stage" }, // Translate Title
+  ];
+
+  const [userEssentials, setUserEssentials] = React.useState("designation");
+  const userEssentialsTabs = [
+    { key: "designation", title: "Designation" }, // Translate Title
+    { key: "jobRole", title: "Job Role" }, // Translate Title
+    { key: "jobType", title: "Job Type" }, // Translate Title
+    { key: "language", title: "Language" }, // Translate Title
+  ];
+  const enquiryTabs = [
+    { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
   ];
   return (
     <div className="flex items-center justify-center">
@@ -35,11 +51,23 @@ export default function Essentials() {
           </Tabs>
           <Spacer y={4} />
           <Tabs
-            aria-label="Designation Tabs" // Translate
-            selectedKey={userOption}
-            onSelectionChange={(key) => setuserOption(key as string)}
+            aria-label="Essentials Tabs" // Translate
+            selectedKey={companyEssentials}
+            onSelectionChange={(key) => setCompanyEssentials(key as string)}
           >
-            {userOptionTabs.map((tab) => (
+            {companyEssentialsTabs.map((tab) => (
+              <Tab key={tab.key} title={tab.title}>
+                <Title title={tab.title} />
+                <EssentialTabContent essentialName={tab.key} />
+              </Tab>
+            ))}
+          </Tabs>
+          <Tabs
+            aria-label="User Essentials Tabs" // Translate
+            selectedKey={userEssentials}
+            onSelectionChange={(key) => setUserEssentials(key as string)}
+          >
+            {userEssentialsTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
                 <Title title={tab.title} />
                 <EssentialTabContent essentialName={tab.key} />

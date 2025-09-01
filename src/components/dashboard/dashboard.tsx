@@ -16,7 +16,6 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { routeRoles } from "@/utils/roleHelpers";
 import { Spacer, Tab, Tabs } from "@nextui-org/react";
-import TimeSheetTabContent from "./TimeSheet/all-timesheet-tab-content";
 
 const Dashboard: NextPage = () => {
   // Fetch project counts by status using the count-by-status API

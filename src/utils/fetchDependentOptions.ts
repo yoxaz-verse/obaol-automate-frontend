@@ -10,6 +10,7 @@ import {
   companyBusinessModelRoutes,
   companyStageRoutes,
   companyTypeRoutes,
+  countryRoutes,
   designationRoutes,
   districtRoutes,
   divisionRoutes,
@@ -17,6 +18,9 @@ import {
   enquiryProcessStatusRoutes,
   generalIntentRoutes,
   inventoryManagerRoutes,
+  jobRoleRoutes,
+  jobTypeRoutes,
+  languageRoutes,
   pincodeEntryRoutes,
   productRoutes,
   productVariantRoutes,
@@ -116,6 +120,18 @@ const getOptions = async (
       );
     }
 
+    if (lowerKey === "country") {
+      const res = await getData(countryRoutes.getAll, {
+        limit: "1000",
+      });
+      return (
+        res?.data?.data?.data?.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
     if (lowerKey === "generalintent") {
       const res = await getData(generalIntentRoutes.getAll, {
         limit: "1000",
@@ -183,6 +199,36 @@ const getOptions = async (
 
     if (lowerKey === "companytype") {
       const res = await getData(companyTypeRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "jobrole") {
+      const res = await getData(jobRoleRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "jobtype") {
+      const res = await getData(jobTypeRoutes.getAll, { limit: "1000" });
+      return (
+        res?.data?.data?.data.map((d: any) => ({
+          key: d._id,
+          value: d.name,
+        })) || []
+      );
+    }
+
+    if (lowerKey === "language") {
+      const res = await getData(languageRoutes.getAll, { limit: "1000" });
       return (
         res?.data?.data?.data.map((d: any) => ({
           key: d._id,

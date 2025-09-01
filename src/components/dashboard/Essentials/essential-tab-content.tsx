@@ -79,8 +79,15 @@ const EssentialTabContent = ({
               //   ...item,
               // }));
 
+              console.log();
+
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;
+                // Helper function to join array of objects by `name`
+                const joinNames = (arr: any[] = []) =>
+                  arr.length > 0
+                    ? arr.map((x) => x.name).join(", ")
+                    : "Not Defined";
 
                 if (essentialName === "associateCompany") {
                   return {
@@ -92,7 +99,24 @@ const EssentialTabContent = ({
                       ? item.companyType.name
                       : "Not Defined",
                   };
+
                   // Handle other user types similarly if needed
+                }
+                if (essentialName === "researchedCompany") {
+                  return {
+                    ...rest,
+                    location: item.state
+                      ? `${item.district?.name || ""}, ${
+                          item.state?.name || ""
+                        }`
+                      : "Unknown",
+                    companyType: item.companyType?.name || "Not Defined",
+                    companyStage: item.companyStage?.name || "Not Defined",
+                    product: joinNames(item.product),
+                    certification: joinNames(item.certification),
+                    companyBusinessModel: joinNames(item.companyBusinessModel),
+                    companyIntent: joinNames(item.companyIntent),
+                  };
                 }
                 // Handle other user types similarly if needed
 

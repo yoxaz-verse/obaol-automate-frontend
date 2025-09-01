@@ -131,7 +131,7 @@ export default function Product() {
   console.log(currentCompaniesPage);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center ">
       <div className="w-[95%]">
         {/* 🔍 Autocomplete Search */}
         <div className="w-full max-w-md mb-6">
@@ -200,7 +200,7 @@ export default function Product() {
         <div className="flex w-full gap-4 min-h-[80vh]">
           <div className="w-full pb-10 pr-6 overflow-auto">
             {currentCompaniesPage.map((company) => (
-              <div key={company._id} className="mb-10">
+              <div key={company._id} className="mb-10 border p-2 rounded-xl">
                 <Title title={company.name} />
                 <VariantRate
                   rate="variantRate"

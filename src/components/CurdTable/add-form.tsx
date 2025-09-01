@@ -93,7 +93,7 @@ const AddForm: React.FC<AddFormProps> = ({
       const fetchOptionsPromises = formFields
         .filter(
           (field) =>
-            field.type === "select" &&
+            (field.type === "select" || field.type === "multiselect") &&
             !field.dependsOn && // only fields with no dependency
             typeof field.dynamicValuesFn === "function"
         )
@@ -410,6 +410,64 @@ const AddForm: React.FC<AddFormProps> = ({
       </>
     );
   };
+  // --- MultiTime Helpers ---
+  const handleMultiTimeChange = (
+    fieldKey: string,
+    index: number,
+    time: any
+  ) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated[index] = time;
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+
+  const addTimeField = (fieldKey: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: [...(prev[fieldKey] || []), ""], // start empty
+    }));
+  };
+
+  const removeTimeField = (fieldKey: string, index: number) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated.splice(index, 1);
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+  // --- Time Range Helpers ---
+  const handleTimeRangeChange = (
+    fieldKey: string,
+    index: number,
+    type: "start" | "end",
+    time: any
+  ) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated[index] = {
+        ...updated[index],
+        [type]: time,
+      };
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+
+  const addTimeRangeField = (fieldKey: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: [...(prev[fieldKey] || []), { start: "", end: "" }],
+    }));
+  };
+
+  const removeTimeRangeField = (fieldKey: string, index: number) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated.splice(index, 1);
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
 
   // Helper function to render form fields based on type
   const renderFormField = (field: FormField) => {
@@ -461,6 +519,99 @@ const AddForm: React.FC<AddFormProps> = ({
             onChange={(time) => handleTimeChange(field.key, time)} // Update handler
           />
         );
+
+      case "multiTime": {
+        const timeValues: any[] = formData[field.key] || [];
+
+        return (
+          <div className="flex flex-col gap-3 w-[90%]">
+            <label className="font-medium">{field.label}</label>
+
+            {timeValues.map((time, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <TimeInput
+                  aria-label={`Select ${field.label} ${index + 1}`}
+                  value={time || ""}
+                  onChange={(t) => handleMultiTimeChange(field.key, index, t)}
+                  hourCycle={24}
+                />
+                <Button
+                  type="button"
+                  onClick={() => removeTimeField(field.key, index)}
+                  className=" py-1 bg-red-500 text-white rounded"
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+
+            <Button
+              size="sm"
+              type="button"
+              onClick={() => addTimeField(field.key)}
+              className="px-3 py-1 bg-blue-500 text-white rounded mt-2"
+            >
+              + Add Time
+            </Button>
+          </div>
+        );
+      }
+      case "multiTimeRange": {
+        const timeRanges: { start: any; end: any }[] =
+          formData[field.key] || [];
+
+        return (
+          <div className="flex flex-col gap-3 w-[90%]">
+            <label className="font-medium">{field.label}</label>
+
+            {timeRanges.map((range, index) => (
+              <div key={index} className="flex items-center gap-3">
+                {/* Start Time */}
+                <TimeInput
+                  aria-label={`Select start time ${index + 1}`}
+                  value={range.start || ""}
+                  onChange={(t) =>
+                    handleTimeRangeChange(field.key, index, "start", t)
+                  }
+                  hourCycle={24}
+                />
+
+                <span className="mx-1">to</span>
+
+                {/* End Time */}
+                <TimeInput
+                  aria-label={`Select end time ${index + 1}`}
+                  value={range.end || ""}
+                  onChange={(t) =>
+                    handleTimeRangeChange(field.key, index, "end", t)
+                  }
+                  hourCycle={24}
+                />
+
+                {/* Remove Button */}
+                <Button
+                  type="button"
+                  onClick={() => removeTimeRangeField(field.key, index)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+
+            {/* Add Button */}
+            <Button
+              size="sm"
+              type="button"
+              onClick={() => addTimeRangeField(field.key)}
+              className="px-3 py-1 bg-blue-500 text-white rounded mt-2"
+            >
+              + Add Time Range
+            </Button>
+          </div>
+        );
+      }
+
       case "select":
         const dependsOnValue = field.dependsOn
           ? formData[field.dependsOn]
@@ -507,47 +658,76 @@ const AddForm: React.FC<AddFormProps> = ({
           </Autocomplete>
         );
 
-      case "multiselect":
-        if (field.values)
-          return (
-            <>
-              <Select
-                aria-label={`Select ${field.label}`}
-                name={field.key}
-                label={`Select Multiple ${field.label}`}
-                placeholder={field.label}
-                className="py-2 border rounded-md w-full"
-                selectionMode="multiple"
-                selectedKeys={new Set(formData[field.key] || [])}
-                onSelectionChange={(keys) =>
-                  handleSelectionChange(field.key, keys as Set<Key>)
-                }
-              >
-                {field.values.map((option) => (
-                  <SelectItem
-                    key={String(option.key)}
-                    value={String(option.key)}
-                  >
-                    {option.value}
-                  </SelectItem>
-                ))}
-              </Select>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {(formData[field.key] || []).map(
-                  (item: string, index: number) => (
-                    <Chip
-                      key={index}
-                      onClose={() => handleChipClose(item, field.key)}
-                      variant="flat"
-                    >
-                      {field?.values?.find((option) => option.key === item)
-                        ?.value || item}
-                    </Chip>
-                  )
-                )}
-              </div>
-            </>
-          );
+      case "multiselect": {
+        const dependsOnValue = field.dependsOn
+          ? formData[field.dependsOn]
+          : null;
+        const isDisabled = field.dependsOn && !dependsOnValue;
+        console.log("isDisabled");
+        console.log(isDisabled);
+
+        const options =
+          field.dependsOn && dynamicOptions[field.key]
+            ? dynamicOptions[field.key] || []
+            : field.dynamicValuesFn
+            ? dynamicOptions[field.key] || []
+            : field.values || [];
+
+        // Ensure formData is always stored as an array of strings
+        const selectedValues: string[] = formData[field.key] || [];
+        const selectedKeys = new Set(selectedValues);
+        console.log("options");
+        console.log(options);
+
+        return (
+          <>
+            <Select
+              aria-label={`Select ${field.label}`}
+              name={field.key}
+              label={`Select Multiple ${field.label}`}
+              placeholder={
+                isDisabled && field.dependsOn
+                  ? `Please select ${toTitleCase(field.dependsOn)} first`
+                  : field.label
+              }
+              className="  w-[90%]"
+              selectionMode="multiple"
+              isDisabled={!!isDisabled}
+              selectedKeys={selectedKeys}
+              onSelectionChange={(keys) => {
+                const values = Array.from(keys as Set<Key>).map(String);
+                setFormData((prev) => ({
+                  ...prev,
+                  [field.key]: values,
+                }));
+              }}
+            >
+              {options.map((option) => (
+                <SelectItem key={String(option.key)}>{option.value}</SelectItem>
+              ))}
+            </Select>
+
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {selectedValues.map((item, index) => (
+                <Chip
+                  key={index}
+                  onClose={() => {
+                    const updated = selectedValues.filter((v) => v !== item);
+                    setFormData((prev) => ({
+                      ...prev,
+                      [field.key]: updated,
+                    }));
+                  }}
+                  variant="flat"
+                >
+                  {options.find((option) => option.key === item)?.value || item}
+                </Chip>
+              ))}
+            </div>
+          </>
+        );
+      }
+
       case "multiselectValue":
         return renderMultiselectValueField(field);
 

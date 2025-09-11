@@ -79,7 +79,6 @@ const EssentialTabContent = ({
               //   ...item,
               // }));
 
-              console.log();
 
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;

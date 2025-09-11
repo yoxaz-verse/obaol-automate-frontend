@@ -38,13 +38,18 @@ const AddModal: React.FC<AddModalProps> = ({
         isOpen={open}
         onClose={closeModal}
         placement="top-center"
-        size="lg"
+        size="xl"
         className="!max-h-[90vh] sm:!max-h-[80vh] overflow-hidden"
         scrollBehavior="inside"
       >
         <ModalContent>
           <ModalHeader className="flex flex-col">
-            Add New {currentTable}
+            <h5 className="font-extrabold text-yellow-500 text-[42px] m-0 p-0 opacity-20">
+              Add new
+            </h5>
+            <h5 className="font-extrabold text-yellow-500 text-[54px] mt-2 p-0 opacity-40">
+              {currentTable}
+            </h5>
           </ModalHeader>
           <ModalBody>
             <div className=" w-full ">

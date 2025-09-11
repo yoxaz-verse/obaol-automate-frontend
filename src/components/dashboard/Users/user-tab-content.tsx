@@ -52,13 +52,16 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
 
           const tableData = fetchedData.map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
-            if (
-              currentTable === "inventoryManager" ||
-              currentTable === "projectManager"
-            ) {
+            const joinNames = (arr: any[] = []) =>
+              arr.length > 0
+                ? arr.map((x) => x.name).join(", ")
+                : "Not Defined";
+
+            if (currentTable === "employee") {
               return {
                 ...rest,
                 admin: item.admin ? item.admin.name : "N/A",
+                languageKnown: joinNames(item.languageKnown),
               };
             } else if (currentTable === "associate") {
               return {

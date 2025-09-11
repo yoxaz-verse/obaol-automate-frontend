@@ -175,6 +175,7 @@ export interface AddModalProps {
 }
 
 export interface AddFormProps {
+  grid?:string
   name?: string;
   currentTable: string;
   formFields: FormField[];

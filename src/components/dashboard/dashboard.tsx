@@ -1,17 +1,14 @@
 import React, { useContext, useState } from "react";
-import DashboardTilesComponent from "./dashboard-tiles-component";
-import DashboardCharts from "./dashboard-charts";
 import DashboardTile from "./dashboard-tile";
 import { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
-import { getData, postData } from "@/core/api/apiHandler";
+import { getData } from "@/core/api/apiHandler";
 import {
   associateRoutes,
   productRoutes,
   projectRoutes,
   variantRateRoutes,
 } from "@/core/api/apiRoutes";
-import { Status } from "@/data/interface-data";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { routeRoles } from "@/utils/roleHelpers";

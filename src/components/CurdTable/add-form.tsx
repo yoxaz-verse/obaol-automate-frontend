@@ -26,6 +26,7 @@ import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
 import { Dashboard } from "@uppy/react";
 import { Key } from "@react-types/shared";
+import { motion } from "framer-motion";
 
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
@@ -42,11 +43,13 @@ const AddForm: React.FC<AddFormProps> = ({
   apiEndpoint,
   additionalVariable,
   onSuccess,
+  grid = 2,
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false); // 👈 success state
   const [uppy, setUppy] = useState<Uppy | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
     {}
@@ -128,7 +131,13 @@ const AddForm: React.FC<AddFormProps> = ({
       toast.success("You did it!"); // Displays a success message
 
       closeModal();
+      setSuccess(true); // 👈 trigger success state
       setLoading(false);
+      // Auto-close after 2s
+      setTimeout(() => {
+        setSuccess(false);
+        closeModal();
+      }, 2000);
     },
     onError: (error: any) => {
       showToastMessage({
@@ -490,9 +499,8 @@ const AddForm: React.FC<AddFormProps> = ({
             aria-label={`Select ${field.label}`}
             showMonthAndYearPickers
             name={field.key}
-            labelPlacement="outside"
             label={field.label}
-            className="max-w-[284px]"
+            className="w-[90%]"
             defaultValue={formData[field.key] || null} // Set the initial date if it exists in formData
             onChange={(date) => handleDateChange(field.key, date)} // Use handleDateChange to update state
           />
@@ -563,9 +571,8 @@ const AddForm: React.FC<AddFormProps> = ({
         return (
           <div className="flex flex-col gap-3 w-[90%]">
             <label className="font-medium">{field.label}</label>
-
             {timeRanges.map((range, index) => (
-              <div key={index} className="flex items-center gap-3">
+              <div key={index} className="flex items-center gap-1">
                 {/* Start Time */}
                 <TimeInput
                   aria-label={`Select start time ${index + 1}`}
@@ -591,20 +598,20 @@ const AddForm: React.FC<AddFormProps> = ({
                 {/* Remove Button */}
                 <Button
                   type="button"
+                  size="sm"
                   onClick={() => removeTimeRangeField(field.key, index)}
-                  className="px-2 py-1 bg-red-500 text-white rounded"
+                  className=" bg-red-500 text-white rounded"
                 >
                   ✕
                 </Button>
               </div>
             ))}
-
             {/* Add Button */}
             <Button
               size="sm"
               type="button"
               onClick={() => addTimeRangeField(field.key)}
-              className="px-3 py-1 bg-blue-500 text-white rounded mt-2"
+              className="px-3 py-1 bg-yellow-500 text-white rounded mt-2"
             >
               + Add Time Range
             </Button>
@@ -663,8 +670,6 @@ const AddForm: React.FC<AddFormProps> = ({
           ? formData[field.dependsOn]
           : null;
         const isDisabled = field.dependsOn && !dependsOnValue;
-        console.log("isDisabled");
-        console.log(isDisabled);
 
         const options =
           field.dependsOn && dynamicOptions[field.key]
@@ -676,21 +681,19 @@ const AddForm: React.FC<AddFormProps> = ({
         // Ensure formData is always stored as an array of strings
         const selectedValues: string[] = formData[field.key] || [];
         const selectedKeys = new Set(selectedValues);
-        console.log("options");
-        console.log(options);
 
         return (
-          <>
+          <div className="w-[90%]">
             <Select
               aria-label={`Select ${field.label}`}
               name={field.key}
-              label={`Select Multiple ${field.label}`}
+              label={`Select Multi ${field.label}`}
               placeholder={
                 isDisabled && field.dependsOn
                   ? `Please select ${toTitleCase(field.dependsOn)} first`
                   : field.label
               }
-              className="  w-[90%]"
+              className="w-full"
               selectionMode="multiple"
               isDisabled={!!isDisabled}
               selectedKeys={selectedKeys}
@@ -724,7 +727,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 </Chip>
               ))}
             </div>
-          </>
+          </div>
         );
       }
 
@@ -753,8 +756,9 @@ const AddForm: React.FC<AddFormProps> = ({
             aria-label={`Select ${field.label}`}
             name={field.key}
             type={field.type}
-            placeholder={field.label}
-            className="py-2 w-[90%]"
+            label={field.label}
+            placeholder={"Enter the " + field.label}
+            className=" w-[90%]"
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
@@ -765,30 +769,51 @@ const AddForm: React.FC<AddFormProps> = ({
   return (
     <>
       <div className="w-full ">
-        <form onSubmit={handleSubmit}>
-          <div className="w-full    overflow-auto">
-            {formFields
-              .filter((field) => field.inForm)
-              .map((field, index) => (
-                <div key={index} className="mb-4 ">
-                  {renderFormField(field)}
-                </div>
-              ))}
-          </div>
-          <div className="flex justify-end w-full mt-4">
-            <Button
-              className="min-w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
-              type="submit"
-              disabled={loading}
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-10">
+            {/* ✅ Tick Animation */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1, rotate: 360 }}
+              transition={{ duration: 0.5 }}
+              className="w-20 h-20 flex items-center justify-center rounded-full bg-green-500 text-white text-4xl"
             >
-              {loading ? `Adding ${name ?? ""} ...` : `Add ${name ?? ""}`}
-            </Button>
+              ✓
+            </motion.div>
+            <p className="mt-4 text-green-600 font-semibold text-lg">
+              {name ?? "Form"} Submitted Successfully!
+            </p>
           </div>
-        </form>
-        {missingFields.length > 0 && (
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div
+              className="w-full grid grid-cols-1 overflow-auto md:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+              style={{ ["--cols" as any]: grid }}
+            >
+              {formFields
+                .filter((field) => field.inForm)
+                .map((field, index) => (
+                  <div key={index} className="mb-4">
+                    {renderFormField(field)}
+                  </div>
+                ))}
+            </div>
+
+            <div className="flex justify-end w-full mt-4">
+              <Button
+                className="min-w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? `Adding ${name ?? ""} ...` : `Add ${name ?? ""}`}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {missingFields.length > 0 && !success && (
           <div className="mt-4">
             <span>Please fill:</span>
-            {/* Translate */}
             <div className="flex gap-2 mt-2 flex-wrap">
               {missingFields.map((field, index) => (
                 <Chip key={index} color="warning" variant="bordered">

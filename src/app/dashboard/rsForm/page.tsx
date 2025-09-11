@@ -17,9 +17,10 @@ export default function Product() {
   return (
     role && (
       <div className="flex  m-10 ">
-        <div className="w-full max-w-[500px]">
+        <div className="w-full ">
           <AddForm
-            name={"Form fill"}
+            grid="3"
+            name={"Research Form"}
             currentTable={"researchedCompany"}
             formFields={formFields}
             apiEndpoint={apiRoutesByRole["researchedCompany"]}

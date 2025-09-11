@@ -2,8 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer, Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
-import { Button } from "@nextui-org/react";
+import { Spacer, Button } from "@nextui-org/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import Title from "@/components/titles";
 import { getData } from "@/core/api/apiHandler";
@@ -11,40 +10,7 @@ import {
   associateCompanyRoutes,
   variantRateRoutes,
 } from "@/core/api/apiRoutes";
-import { IoSearchCircleOutline } from "react-icons/io5";
-
-const SearchIcon = ({
-  size = 24,
-  strokeWidth = 1.5,
-
-  ...props
-}) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    focusable="false"
-    height={size}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size}
-    {...props}
-  >
-    <path
-      d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={strokeWidth}
-    />
-    <path
-      d="M22 22L20 20"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={strokeWidth}
-    />
-  </svg>
-);
+import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
 interface Company {
   _id: string;
@@ -58,7 +24,7 @@ interface VariantRateItem {
 
 const ITEMS_PER_PAGE = 10;
 
-export default function Product() {
+export default function CompanyProductPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     null
@@ -89,7 +55,6 @@ export default function Product() {
     for (const item of variantRates) {
       const direct = item.associateCompany?._id;
       const fromAssociate = item.associate?.associateCompany?._id;
-
       if (direct) productCompanyIds.add(direct);
       else if (fromAssociate) productCompanyIds.add(fromAssociate);
     }
@@ -111,7 +76,7 @@ export default function Product() {
     const currentCompaniesPage = filteredCompanies.slice(start, end);
 
     return {
-      companiesWithProducts: filteredCompanies,
+      companiesWithProducts: withProducts,
       companiesWithoutProducts: withoutProducts,
       totalPages,
       currentCompaniesPage,
@@ -128,75 +93,25 @@ export default function Product() {
   if (loadingCompanies || loadingRates) {
     return <div className="p-6 text-gray-500">Loading company catalog...</div>;
   }
-  console.log(currentCompaniesPage);
 
   return (
-    <div className="flex items-center justify-center ">
+    <div className="flex items-center justify-center">
       <div className="w-[95%]">
-        {/* 🔍 Autocomplete Search */}
-        <div className="w-full max-w-md mb-6">
-          <Autocomplete
-            aria-label="Select a company"
-            defaultItems={companiesWithProducts}
-            maxListboxHeight={400}
-            itemHeight={60}
-            placeholder="Search by company name"
-            variant="bordered"
-            radius="full"
-            className="text-warning-400"
-            classNames={{
-              base: "max-w-full",
-              listboxWrapper: "max-h-[320px]",
-              selectorButton: "text-warning-500",
-            }}
-            startContent={
-              <SearchIcon
-                className="text-default-400"
-                size={20}
-                strokeWidth={2.5}
-              />
-            }
-            inputProps={{
-              classNames: {
-                input: "ml-1",
-                inputWrapper: "h-[48px]",
-              },
-            }}
-            popoverProps={{
-              offset: 10,
-              classNames: {
-                base: "rounded-large",
-                content:
-                  "p-1 flex flex-col gap-2 border-small border-default-100 bg-background",
-              },
-            }}
-            onSelectionChange={(key) => {
-              setCurrentPage(1);
-              setSelectedCompanyId((key as string) ?? null);
-            }}
-          >
-            {(item) => (
-              <AutocompleteItem
-                key={item._id}
-                textValue={item.name}
-                className="flex items-center gap-2 py-2"
-              >
-                <div className="flex items-center gap-2 py-2">
-                  <Avatar
-                    className="flex-shrink-0"
-                    size="sm"
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      item.name
-                    )}&background=random`}
-                  />
-                  <div className="text-small">{item.name}</div>
-                </div>
-              </AutocompleteItem>
-            )}
-          </Autocomplete>
-        </div>
+        {/* 🔍 Company Search */}
+        <CompanySearch
+          defaultSelected={selectedCompanyId}
+          itemsFilter={(companies) =>
+            companies.filter((c) =>
+              companiesWithProducts.some((p) => p._id === c._id)
+            )
+          }
+          onSelect={(id) => {
+            setCurrentPage(1);
+            setSelectedCompanyId(id);
+          }}
+        />
 
-        {/* 🔄 Company List with Products */}
+        {/* 🏭 Company List with Products */}
         <div className="flex w-full gap-4 min-h-[80vh]">
           <div className="w-full pb-10 pr-6 overflow-auto">
             {currentCompaniesPage.map((company) => (

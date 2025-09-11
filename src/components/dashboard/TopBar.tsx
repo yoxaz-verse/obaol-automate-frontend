@@ -97,7 +97,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
               as="button"
               avatarProps={{
                 isBordered: true,
-                color: "warning",
+                color: "default",
               }}
               name={username}
               description={role}
@@ -109,6 +109,17 @@ const TopBar = ({ username, role }: TopbarProps) => {
                 Signed in as <strong>{username}</strong>
                 {/* Translate */}
               </div>
+            </DropdownItem>
+            <DropdownItem
+              onClick={async () => {
+                try {
+                  router.push("/dashboard/profile");
+                } catch (err) {
+                  console.error("Redirect Failed", err);
+                }
+              }}
+            >
+              <div>View Profile {/* Translate */}</div>
             </DropdownItem>
             <DropdownItem
               key="logout"

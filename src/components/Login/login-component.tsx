@@ -116,48 +116,48 @@ const LoginComponent = ({ role }: ILoginProps) => {
   return (
     <>
       <div
-        className="py-10 z-50 lg:py-20  flex flex-col justify-evenly items-center  bg-[#F6F8FB] rounded-xl px-12 lg:px-24 overflow-hidden"
+        className="py-14 z-50 lg:py-28  flex flex-col justify-evenly items-center text-white  outline-white  outline-double  rounded-xl px-8 lg:px-16 overflow-hidden"
         // style={{ border: "1px dotted orange" }}
       >
-        <div className="flex flex-col w-full items-center overflow-hidden">
-          <div className="bg-black w-full flex flex-col  items-center">
+        <div className="flex flex-col w-full items-center   overflow-hidden">
+          <div className=" w-full flex  justify-between  items-center">
+            <h3 className="text-xl lg:text-xl py-2  font-bold ">
+              <span className="text-warning-400">{role} </span> Login
+            </h3>
             <Image
               src={"/logo.png"}
               width={1000}
               height={1000}
               alt="Obaol"
-              className="w-[100px]  rounded-md   "
+              className="w-[75px]   rounded-md   "
             />{" "}
-            <div className="bg-[#F6F8FB] h-[2px] w-full" />
-            <div className="bg-warning-400 h-[2px] w-full" />
           </div>
-
-          <h3 className="text-xl lg:text-xl py-2 font-bold ">
-            <span className="text-warning-400">{role} </span> Login
-          </h3>
+          <div className="bg-warning-400 h-[2px] w-full" />
 
           {/* <h3 className="text-sm py-2 text-[#788BA5]">
             Use your {role} credentials
           </h3> */}
         </div>
+
         <Spacer y={2} />
         <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
           <Input
             value={email}
             className="w-[300px]"
             type="text"
-            variant="underlined"
+            variant="flat"
+            label="Email"
             isInvalid={!isInvalidEmail}
             isRequired={true}
             color={!isInvalidEmail ? "danger" : "success"}
-            placeholder="Email"
+            placeholder="Enter your email"
             onValueChange={setEmail}
           />
           <Input
             value={password}
             className="w-[300px] pb-1"
-            variant="underlined"
-            placeholder="Password"
+            label="Password"
+            placeholder="Enter your Password"
             id="password"
             required
             endContent={
@@ -166,7 +166,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
               ) : (
                 <IoEyeOff
                   onClick={toggleVisibility}
-                  className="cursor-pointer"
+                  className="cursor-pointer text-black"
                 />
               )
             }
@@ -192,10 +192,10 @@ const LoginComponent = ({ role }: ILoginProps) => {
             ))}
           </Autocomplete> */}
 
-          <div className="flex justify-between items-center">
+          {/* <div className="flex justify-between text-white items-center">
             <Checkbox
               color="default"
-              className="text-[#788BA5]"
+              className="text-white"
               isSelected={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
               size="sm"
@@ -203,9 +203,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
               Remember me
             </Checkbox>
             <div className="text-center mt-2 text-xs text-[#788BA5]">
-              {/* Forgot Password Link Placeholder */}
             </div>
-          </div>
+          </div> */}
 
           {errorMessage && (
             <p className="text-red-500 text-sm text-center">{errorMessage}</p>
@@ -213,7 +212,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
           <Spacer y={2} />
           <Button
-            className="text-white w-full flex justify-center rounded  py-2"
+            className="text-white w-full flex justify-center rounded-md font-bold  py-2"
+            variant="ghost"
             color="warning"
             type="submit"
             disabled={isLoading}

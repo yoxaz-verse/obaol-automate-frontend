@@ -116,13 +116,34 @@ const LoginComponent = ({ role }: ILoginProps) => {
   return (
     <>
       <div
-        className="py-14 z-50 lg:py-28  flex flex-col justify-evenly items-center text-white  outline-white  outline-double  rounded-xl px-8 lg:px-16 overflow-hidden"
+        className="py-4 z-50 lg:py-8  flex flex-col justify-evenly items-center text-white  outline-white  outline-double  rounded-xl px-8 lg:px-16 overflow-hidden"
         // style={{ border: "1px dotted orange" }}
       >
+        <Image
+          src={"/Auth Page Banner.png"}
+          width={200}
+          height={300}
+          alt="Obaol"
+          className="w-full rounded-md"
+        />
         <div className="flex flex-col w-full items-center   overflow-hidden">
           <div className=" w-full flex  justify-between  items-center">
             <h3 className="text-xl lg:text-xl py-2  font-bold ">
-              <span className="text-warning-400">{role} </span> Login
+              {/* <h1 className="font-bold text-[22px] md:text-[44px] text-transparent">
+                {title}
+              </h1> */}
+              <span
+                className="text-transparent hover:text-orange-400 duration-300 cursor-pointer"
+                style={{
+                  WebkitTextStroke: "1px #ce8a23", // outline
+                  textShadow: `
+          0 0 5px orange,
+        `, // glow layers
+                }}
+              >
+                {role}{" "}
+              </span>{" "}
+              <span className="opacity-50">Login</span>
             </h3>
             <Image
               src={"/logo.png"}

@@ -15,7 +15,7 @@ export const routeRoles: { [key: string]: string[] } = {
     "Worker",
     "Employee",
   ],
-  "/dashboard/essentials": ["Admin", "Employee"],
+  "/dashboard/essentials": ["Admin"],
   "/dashboard/users": ["Admin"],
   // "/dashboard/bulk": ["Admin","Employee"],
 

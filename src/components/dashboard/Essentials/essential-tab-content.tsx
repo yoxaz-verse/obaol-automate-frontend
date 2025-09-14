@@ -15,17 +15,27 @@ import {
 import DetailsModal from "@/components/CurdTable/details";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import EditModal from "@/components/CurdTable/edit-model";
+import ApproveRejectButtons from "@/components/CurdTable/approve-reject-button";
 
 const EssentialTabContent = ({
   essentialName,
   filter,
+  hideAdd,
 }: {
   essentialName: string;
   filter?: any;
+  hideAdd?: boolean;
 }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
-  const [filters, setFilters] = React.useState<Record<string, any>>({}); // Dynamic filters
-  if (filter) setFilters(filter);
+  const [filters, setFilters] = React.useState<Record<string, any>>({});
+
+  // ✅ Apply filter only when prop changes
+  React.useEffect(() => {
+    if (filter) {
+      setFilters(filter);
+    }
+  }, [filter]);
+
   const columns = generateColumns(essentialName, tableConfig);
 
   // const { data: stateResponse } = useQuery({
@@ -51,13 +61,14 @@ const EssentialTabContent = ({
       <div className="w-[95%]">
         <div className="my-4">
           <div className="flex items-center justify-between  gap-3">
-            {}{" "}
-            <AddModal
-              currentTable={""}
-              formFields={formFields}
-              apiEndpoint={apiRoutesByRole[essentialName]}
-              refetchData={refetchData}
-            />
+            {!hideAdd && (
+              <AddModal
+                currentTable={""}
+                formFields={formFields}
+                apiEndpoint={apiRoutesByRole[essentialName]}
+                refetchData={refetchData}
+              />
+            )}{" "}
             {essentialName === "location" && (
               <DynamicFilter
                 currentTable={essentialName}
@@ -78,7 +89,6 @@ const EssentialTabContent = ({
               // const tableData = fetchedData.map((item: any) => ({
               //   ...item,
               // }));
-
 
               const tableData = fetchedData.map((item: any) => {
                 const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -121,43 +131,55 @@ const EssentialTabContent = ({
 
                 return rest;
               });
+              console.log(tableData);
+
               return (
-                <>
-                  <Spacer y={5} />
-                  <CommonTable
-                    TableData={tableData}
-                    columns={columns}
-                    isLoading={false}
-                    viewModal={(item: any) => (
-                      // Implement view modal if needed
-                      <>
-                        <DetailsModal
-                          currentTable={""}
-                          data={item}
-                          columns={columns}
+                tableData.length > 0 && (
+                  <>
+                    <Spacer y={5} />
+                    <CommonTable
+                      TableData={tableData}
+                      columns={columns}
+                      isLoading={false}
+                      viewModal={(item: any) => (
+                        // Implement view modal if needed
+                        <>
+                          <DetailsModal
+                            currentTable={""}
+                            data={item}
+                            columns={columns}
+                          />
+                        </>
+                      )}
+                      editModal={(item: any) => (
+                        <EditModal
+                          _id={item._id}
+                          initialData={item}
+                          currentTable={essentialName}
+                          formFields={formFields}
+                          apiEndpoint={apiRoutesByRole[essentialName]} // Assuming API endpoint for update
+                          refetchData={refetchData}
                         />
-                      </>
-                    )}
-                    editModal={(item: any) => (
-                      <EditModal
-                        _id={item._id}
-                        initialData={item}
-                        currentTable={essentialName}
-                        formFields={formFields}
-                        apiEndpoint={apiRoutesByRole[essentialName]} // Assuming API endpoint for update
-                        refetchData={refetchData}
-                      />
-                    )}
-                    deleteModal={(item: any) => (
-                      <UserDeleteModal
-                        _id={item._id}
-                        name={item.name}
-                        deleteApiEndpoint={apiRoutesByRole[essentialName]}
-                        refetchData={refetchData}
-                      />
-                    )}
-                  />
-                </>
+                      )}
+                      deleteModal={(item: any) => (
+                        <UserDeleteModal
+                          _id={item._id}
+                          name={item.name}
+                          deleteApiEndpoint={apiRoutesByRole[essentialName]}
+                          refetchData={refetchData}
+                        />
+                      )}
+                      otherModal={(item: any) =>
+                        essentialName === "researchedCompany" && (
+                          <ApproveRejectButtons
+                            item={item}
+                            refetchData={refetchData}
+                          />
+                        )
+                      }
+                    />
+                  </>
+                )
               );
             }}
           </QueryComponent>

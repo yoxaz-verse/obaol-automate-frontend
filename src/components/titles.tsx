@@ -3,9 +3,9 @@ export default function Title({ title }: { title: string }) {
     <h1
       className="font-bold text-[22px] md:text-[44px] text-transparent"
       style={{
-        WebkitTextStroke: "1px orange", // outline
+        WebkitTextStroke: "1px #ce8a23", // outline
         textShadow: `
-          0 0 5px orange,
+          0 0 5px #ce8a23,
         `, // glow layers
       }}
     >

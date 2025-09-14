@@ -13,6 +13,7 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { routeRoles } from "@/utils/roleHelpers";
 import { Spacer, Tab, Tabs } from "@nextui-org/react";
+import EssentialTabContent from "./Essentials/essential-tab-content";
 
 const Dashboard: NextPage = () => {
   // Fetch project counts by status using the count-by-status API
@@ -131,28 +132,30 @@ const Dashboard: NextPage = () => {
           </Tabs>
         )}
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2 px-4 py-5">
-        <DashboardTile
-          heading={"Total Rates"}
-          data={rateValue?.totalCount ?? "0"}
-          type="details"
-        />
-        <DashboardTile
-          heading={"Live Rates"}
-          data={liveRate ?? "0"}
-          type="details"
-        />
-        <DashboardTile
-          heading={"Associates"}
-          data={associateValue?.totalCount ?? "0"}
-          type="details"
-        />
-        <DashboardTile
-          heading={"Total Products"}
-          data={productValue?.totalCount ?? "0"}
-          type="details"
-        />
-      </div>
+      {user?.id && user?.role === "Admin" && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2 px-4 py-5">
+          <DashboardTile
+            heading={"Total Rates"}
+            data={rateValue?.totalCount ?? "0"}
+            type="details"
+          />
+          <DashboardTile
+            heading={"Live Rates"}
+            data={liveRate ?? "0"}
+            type="details"
+          />
+          <DashboardTile
+            heading={"Associates"}
+            data={associateValue?.totalCount ?? "0"}
+            type="details"
+          />
+          <DashboardTile
+            heading={"Total Products"}
+            data={productValue?.totalCount ?? "0"}
+            type="details"
+          />
+        </div>
+      )}
       <div className="flex px-4 py-5 justify-between w-full flex-col lg:flex-row">
         <div className="lg:w-[70%] grid grid-cols-2 gap-5">
           {filteredOptions?.map((option, index) =>
@@ -165,25 +168,36 @@ const Dashboard: NextPage = () => {
           )}
           {/* <DashboardCharts /> */}
         </div>
+        {/* Employee-specific section */}
+        {user?.id && user?.role === "Employee" && (
+          <EssentialTabContent
+            essentialName="researchedCompany"
+            filter={{ submittedBy: user.id }}
+            hideAdd={true}
+          />
+        )}
 
         <div className="flex flex-col lg:w-[23%] ">
           <div className="flex flex-col"> </div>
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-            {/* <div className="text-[#5F5F5F] font-medium pt-5">
+          {user?.id && user?.role === "Admin" && (
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+              {/* <div className="text-[#5F5F5F] font-medium pt-5">
               Recent Projects</div> */}
-            <DashboardTile
-              type="percentage charts"
-              stats={
-                ((liveRate / rateValue?.totalCount) * 100).toString() ?? "0"
-              }
-              heading="Live Rates"
-            />
-            <DashboardTile
-              type="percentage charts"
-              stats={percentageWithProducts.toString() ?? "0"}
-              heading="Associates with Products"
-            />{" "}
-          </div>
+
+              <DashboardTile
+                type="percentage charts"
+                stats={
+                  ((liveRate / rateValue?.totalCount) * 100).toString() ?? "0"
+                }
+                heading="Live Rates"
+              />
+              <DashboardTile
+                type="percentage charts"
+                stats={percentageWithProducts.toString() ?? "0"}
+                heading="Associates with Products"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

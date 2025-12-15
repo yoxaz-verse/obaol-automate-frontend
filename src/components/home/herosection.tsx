@@ -133,7 +133,7 @@ export default function HeroSection() {
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
 
     <Image
-    src="/images/dock.png" // <-- your image path
+    src="/images/hero_dock.png" // <-- your image path
     alt="Global commodity trading infrastructure"
     fill
     priority={true}

@@ -4,19 +4,86 @@ import { Providers } from "./provider";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { VerificationProvider } from "@/context/VerificationContext";
+import Script from "next/script";
 
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({ subsets: ["latin"] });
 
+// app/layout.tsx
+
 export const metadata: Metadata = {
-  title: "OBAOL Supreme",
-  description: "Be part of Supremacy in Trading Industry",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-    shortcut: "/favicon.ico",
+  metadataBase: new URL("https://obaol.com"),
+
+  title: {
+    default: "OBAOL — Commodity Trading Operating System",
+    template: "%s | OBAOL",
   },
+
+  description:
+    "OBAOL is a unified operating system for physical commodity trading, focused on agro commodities, import-export workflows, supplier verification, procurement, logistics, and secure trade execution.",
+
+  keywords: [
+    "commodity trading platform",
+    "agro commodity trading",
+    "physical commodity trading",
+    "import export trade system",
+    "commodity procurement platform",
+    "trade execution system",
+    "commodity logistics management",
+    "supplier verification platform",
+    "commodity trading without capital",
+  ],
+
+  authors: [{ name: "OBAOL" }],
+  creator: "OBAOL",
+  publisher: "OBAOL",
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://obaol.com",
+    siteName: "OBAOL",
+    title: "OBAOL — Commodity Trading Operating System",
+    description:
+      "A standardized operating system for agro and physical commodity trading. Source, verify, procure, package, transport, and execute trades on one system.",
+    images: [
+      {
+        url: "/og-image.png", // MUST exist
+        width: 1200,
+        height: 630,
+        alt: "OBAOL Commodity Trading Platform",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "OBAOL — Commodity Trading Operating System",
+    description:
+      "A unified operating system for agro and physical commodity trading.",
+    images: ["/og-image.png"],
+  },
+
+  category: "Business",
 };
+
+
 const GTM_ID = "G-F4YK8H3Q4L";
 
 export default function RootLayout({
@@ -66,6 +133,26 @@ export default function RootLayout({
             <Providers>{children}</Providers>
           </VerificationProvider>
         </AuthProvider>
+        <script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "OBAOL",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "A unified operating system for physical commodity and agro-commodity trading.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+    }),
+  }}
+/>
+
       </body>
     </html>
   );

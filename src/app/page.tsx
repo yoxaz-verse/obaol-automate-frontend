@@ -10,9 +10,16 @@ import ProcurementSpecialistSection from "@/components/home/procurementprocess";
 import StartedIn from "@/components/home/startedin";
 import SystemIntergrationSection from "@/components/home/systemintergration";
 import TradeOperatingLayer from "@/components/home/tradeoperatinglayer";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 
+
+export const metadata: Metadata = {
+  title: "Commodity & Agro Trading Platform",
+  description:
+    "OBAOL is a commodity trading operating system for agro commodities, enabling supplier discovery, verification, procurement, logistics, and secure trade execution — without capital-heavy entry barriers.",
+};
 
 export default function HomePage() {
  

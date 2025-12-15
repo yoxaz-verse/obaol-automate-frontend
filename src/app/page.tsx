@@ -10,7 +10,6 @@ import ProcurementSpecialistSection from "@/components/home/procurementprocess";
 import StartedIn from "@/components/home/startedin";
 import SystemIntergrationSection from "@/components/home/systemintergration";
 import TradeOperatingLayer from "@/components/home/tradeoperatinglayer";
-import type { Metadata } from "next";
 import Link from "next/link";
 
 

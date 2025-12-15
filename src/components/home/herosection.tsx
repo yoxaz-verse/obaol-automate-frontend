@@ -133,7 +133,7 @@ export default function HeroSection() {
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
 
     <Image
-    src="/images/docks.png" // <-- your image path
+    src="/images/dock.png" // <-- your image path
     alt="Global commodity trading infrastructure"
     fill
     priority={true}
@@ -328,7 +328,7 @@ export default function HeroSection() {
                   backgroundSize: "200% auto",
                 }}
               >
-              <span className="inline-block text-gray-400" style={{ fontSize: "0.65em" }}>for</span>{" "}
+              <span className="inline-block text-gray-400 opacity-50" style={{ fontSize: "0.65em" }}>for</span>{" "}
 
                 Global Commodity Trading
                 <motion.span

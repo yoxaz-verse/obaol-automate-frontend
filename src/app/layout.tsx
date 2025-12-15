@@ -15,12 +15,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://obaol.com"),
 
   title: {
-    default: "OBAOL — Commodity Trading Operating System",
-    template: "%s | OBAOL",
+    default: "OBAOL Supreme — Commodity Trading Operating System",
+    template: "%s | OBAOL Supreme",
   },
 
   description:
-    "OBAOL is a unified operating system for physical commodity trading, focused on agro commodities, import-export workflows, supplier verification, procurement, logistics, and secure trade execution.",
+    "OBAOL Supreme is a unified operating system for physical commodity trading, focused on agro commodities, import-export workflows, supplier verification, procurement, logistics, and secure trade execution.",
 
   keywords: [
     "commodity trading platform",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://obaol.com",
     siteName: "OBAOL",
-    title: "OBAOL — Commodity Trading Operating System",
+    title: "OBAOL Supreme — Commodity Trading Operating System",
     description:
       "A standardized operating system for agro and physical commodity trading. Source, verify, procure, package, transport, and execute trades on one system.",
     images: [

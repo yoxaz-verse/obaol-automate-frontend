@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import Image from "next/image";
 
 
 const containerVariants = {
@@ -130,6 +131,14 @@ export default function HeroSection() {
     >
     {/* Enhanced Animated Background Gradient */}
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+
+    <Image
+    src="/images/docks.png" // <-- your image path
+    alt="Global commodity trading infrastructure"
+    fill
+    priority={true}
+    className="object-cover object-center  opacity-25"
+  />
       {/* Primary Gradient Orb */}
       <motion.div
         animate={{
@@ -305,7 +314,6 @@ export default function HeroSection() {
           >
             {/* Base text */}
             <span className="relative z-0">
-              <span className="inline-block text-gray-400" style={{ fontSize: "0.65em" }}>for</span>{" "}
               <motion.span
                 className="inline-block bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent relative"
                 animate={{
@@ -320,6 +328,8 @@ export default function HeroSection() {
                   backgroundSize: "200% auto",
                 }}
               >
+              <span className="inline-block text-gray-400" style={{ fontSize: "0.65em" }}>for</span>{" "}
+
                 Global Commodity Trading
                 <motion.span
                   className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-orange-400/50 via-yellow-400/50 to-orange-400/50 rounded-full"

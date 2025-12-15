@@ -3,6 +3,7 @@
 import BrokenTradeSystemSection from "@/components/home/brokentradesystemsection";
 import CommodityServicesSection from "@/components/home/commodityservices";
 import EndToEndSection from "@/components/home/endtoend";
+import Header from "@/components/home/header";
 
 import HeroSection from "@/components/home/herosection";
 import ProcurementSpecialistSection from "@/components/home/procurementprocess";
@@ -25,7 +26,7 @@ export default function HomePage() {
   return (
     <main className="bg-black text-white overflow-hidden">
       {/* HERO */}
-      {/* <Header /> */}
+      <Header />
      
 <HeroSection />
       {/* CLARITY */}

@@ -133,7 +133,7 @@ export default function RootLayout({
             <Providers>{children}</Providers>
           </VerificationProvider>
         </AuthProvider>
-        <script
+   <script
   type="application/ld+json"
   dangerouslySetInnerHTML={{
     __html: JSON.stringify({

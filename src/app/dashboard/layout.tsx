@@ -42,7 +42,8 @@ export default function DashboardLayout({
 
   return (
     <section className="w-full h-full flex overflow-hidden">
-      <GoogleTagManager />
+      {/* <GoogleTagManager />÷ */}
+      
       <PrivateRoute allowedRoles={allowedRoles}>
         {/* <div className="w-1/6 h-screen hidden xl:block">
           <Sidebar />

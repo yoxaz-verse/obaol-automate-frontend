@@ -1,4 +1,3 @@
-"use client";
 
 import BrokenTradeSystemSection from "@/components/home/brokentradesystemsection";
 import CommodityServicesSection from "@/components/home/commodityservices";
@@ -10,22 +9,23 @@ import ProcurementSpecialistSection from "@/components/home/procurementprocess";
 import StartedIn from "@/components/home/startedin";
 import SystemIntergrationSection from "@/components/home/systemintergration";
 import TradeOperatingLayer from "@/components/home/tradeoperatinglayer";
+import { Metadata } from "next";
 import Link from "next/link";
 
 
 
-// export const metadata: Metadata = {
-//   title: "Commodity & Agro Trading Platform",
-//   description:
-//     "OBAOL is a commodity trading operating system for agro commodities, enabling supplier discovery, verification, procurement, logistics, and secure trade execution — without capital-heavy entry barriers.",
-// };
+export const metadata: Metadata = {
+  title: "Commodity & Agro Trading Platform",
+  description:
+    "OBAOL is a commodity trading operating system for agro commodities, enabling supplier discovery, verification, procurement, logistics, and secure trade execution — without capital-heavy entry barriers.",
+};
 
 export default function HomePage() {
  
   return (
     <main className="bg-black text-white overflow-hidden">
       {/* HERO */}
-      <Header />
+      {/* <Header /> */}
      
 <HeroSection />
       {/* CLARITY */}
@@ -55,17 +55,19 @@ export default function HomePage() {
 
         <div className="mt-8 flex justify-center gap-4">
           <Link
-            href="/auth"
+            href="https://typebot.co/obaol-early-access"
+  target="_blank"
+
             className="px-6 py-3 rounded-md bg-white text-black font-medium"
           >
-            Get Started
-          </Link>
-          <Link
+    Apply for Early Access
+    </Link>
+          {/* <Link
             href="/product"
             className="px-6 py-3 rounded-md border border-gray-600 text-white"
           >
             Learn How It Works
-          </Link>
+          </Link> */}
         </div>
       </section>
       {/* <Footer /> */}

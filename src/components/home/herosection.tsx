@@ -300,6 +300,7 @@ export default function HeroSection() {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 color: "transparent",
+                height:"100%",
                 width: "70%",
                 WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)",
                 maskImage: "linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%)",
@@ -501,22 +502,36 @@ export default function HeroSection() {
           transition={{ delay: 1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="w-full sm:w-auto"
         >
-          <Link
-            href="/product"
-            className="group relative px-10 py-5 rounded-xl bg-white text-black font-semibold text-lg overflow-hidden transition-all duration-300 block text-center shadow-lg shadow-orange-400/20 hover:shadow-xl hover:shadow-orange-400/30"
-          >
-            <span className="relative z-10 tracking-wide">Explore the System</span>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-orange-400 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              initial={false}
-            />
-            <motion.div
-              className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100"
-              initial={false}
-            />
-          </Link>
+      <Link
+  href="https://typebot.co/obaol-early-access"
+  target="_blank"
+  className="group relative px-10 py-5 rounded-xl
+             bg-white text-black font-semibold text-lg
+             overflow-hidden transition-all duration-300
+             block text-center shadow-lg shadow-orange-400/20
+             hover:shadow-xl hover:shadow-orange-400/30"
+>
+  <span className="relative z-10 tracking-wide">
+    Apply for Early Access
+  </span>
+
+  <motion.div
+    className="absolute inset-0
+               bg-gradient-to-r from-orange-400 to-yellow-400
+               opacity-0 group-hover:opacity-100
+               transition-opacity duration-500"
+    initial={false}
+  />
+
+  <motion.div
+    className="absolute inset-0 bg-white/10
+               opacity-0 group-hover:opacity-100"
+    initial={false}
+  />
+</Link>
+
         </motion.div>
-        <motion.div
+        {/* <motion.div
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.98 }}
           initial={{ opacity: 0, y: 20 }}
@@ -528,7 +543,7 @@ export default function HeroSection() {
             href="/auth"
             className="group relative px-10 py-5 rounded-xl border-2 border-gray-600 text-white font-semibold text-lg overflow-hidden transition-all duration-300 hover:border-orange-400 block text-center backdrop-blur-sm bg-white/5 hover:bg-white/10"
           >
-            <span className="relative z-10 tracking-wide">Access Dashboard</span>
+            <span className="relative z-10 tracking-wide">Lauching Soon</span>
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               initial={false}
@@ -538,7 +553,7 @@ export default function HeroSection() {
               initial={false}
             />
           </Link>
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     </motion.div>
     

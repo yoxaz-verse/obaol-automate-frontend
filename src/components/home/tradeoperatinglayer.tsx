@@ -1,10 +1,48 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function WhoCanUseObaol() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+const { scrollYProgress } = useScroll({
+  target: sectionRef,
+  offset: ["start end", "end start"],
+});
+
+// SLOW, SOFT, CINEMATIC FADE
+const opacity = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [0, 1, 1, 0]
+);
+
+// COMING FROM BACK → GOING BACK
+const y = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [200, 0, 0, -200]
+);
+
+// DEPTH FEEL
+const scale = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [0.94, 1, 1, 0.94]
+);
+
   return (
-    <section className="py-28 sm:py-36 px-4 sm:px-6 bg-black border-t border-gray-800">
+    <motion.section 
+    ref={sectionRef}
+  style={{
+    opacity,
+    y,
+    scale,
+    willChange: "transform, opacity",
+  }}
+
+    className="py-28 sm:py-36 px-4 sm:px-6 bg-black border-t border-gray-800">
       <div className="max-w-7xl mx-auto">
         {/* SECTION HEADER – SEO + POSITIONING */}
         <header className="max-w-4xl mb-24">
@@ -125,7 +163,7 @@ export default function WhoCanUseObaol() {
           </p>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 

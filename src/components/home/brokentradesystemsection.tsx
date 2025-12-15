@@ -54,14 +54,49 @@ const FAILURES: FailureStage[] = [
   },
 ];
 
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function BrokenTradeExperience() {
   const [index, setIndex] = useState(0);
-  const current = FAILURES[index];
+  const sectionRef = useRef<HTMLElement>(null);
 
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const current = FAILURES[index];
+// SLOW, SOFT, CINEMATIC FADE
+const opacity = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [0, 1, 1, 0]
+);
+
+// COMING FROM BACK → GOING BACK
+const y = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [200, 0, 0, -200]
+);
+
+// DEPTH FEEL
+const scale = useTransform(
+  scrollYProgress,
+  [0, 0.25, 0.75, 1],
+  [0.94, 1, 1, 0.94]
+);
   return (
-    <section className="py-20 sm:py-32 px-4 sm:px-6 border-t border-gray-800 bg-neutral-950">
+    <motion.section 
+    
+    ref={sectionRef}
+    style={{
+      opacity,
+      y,
+      scale,
+      willChange: "transform, opacity",
+    }}
+  className="py-20 sm:py-32 px-4 sm:px-6 border-t border-gray-800 bg-neutral-950">
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="max-w-3xl mb-12 sm:mb-20">
@@ -170,6 +205,6 @@ export default function BrokenTradeExperience() {
           </div>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }

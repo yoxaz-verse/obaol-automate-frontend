@@ -53,6 +53,69 @@ const STAGES: Stage[] = [
   },
 ];
 
+const COMPARISON_ROWS = [
+  {
+    label: "Primary Purpose",
+    traditional: "Visibility and lead generation",
+    obaol: "Trade execution and deal completion",
+  },
+  {
+    label: "Core Focus",
+    traditional: "Listings, inquiries, contacts",
+    obaol: "Opportunity identification + execution",
+  },
+  {
+    label: "Verification Level",
+    traditional: "Limited or optional",
+    obaol: "Mandatory, multi-step verification",
+  },
+  {
+    label: "Role After Introduction",
+    traditional: "No involvement",
+    obaol: "Active involvement till closure",
+  },
+  {
+    label: "Opportunity Quality",
+    traditional: "High volume, mixed seriousness",
+    obaol: "Fewer, filtered, serious opportunities",
+  },
+  {
+    label: "Execution Support",
+    traditional: "Not provided",
+    obaol: "Provided (coordination, supervision)",
+  },
+  {
+    label: "On-Ground Involvement",
+    traditional: "None",
+    obaol: "Yes (as required)",
+  },
+  {
+    label: "Accountability",
+    traditional: "None after contact exchange",
+    obaol: "Exists through relationship ownership",
+  },
+  {
+    label: "Revenue Model",
+    traditional: "Subscriptions, ads, lead selling",
+    obaol: "Success-based execution model",
+  },
+  {
+    label: "Incentive Alignment",
+    traditional: "Platform earns regardless of outcome",
+    obaol: "OBAOL earns only if trade completes",
+  },
+  {
+    label: "Risk Handling",
+    traditional: "User-managed",
+    obaol: "Supported and monitored",
+  },
+  {
+    label: "Relationship Management",
+    traditional: "No continuity",
+    obaol: "Dedicated Relationship Partner",
+  },
+];
+
 export default function ResponsibilityTransferSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [obaolHandles, setObaolHandles] = useState<string[]>([]);
@@ -110,8 +173,11 @@ const scale = useTransform(
       </div>
 
       <div className="relative max-w-7xl mx-auto">
+        
+      
+      
         {/* Heading */}
-        <div className="max-w-3xl mb-24">
+        <div className="max-w-3xl mb-12">
           <span className="text-xs uppercase tracking-widest text-gray-500">
             Who we are
           </span>
@@ -123,6 +189,75 @@ const scale = useTransform(
               A Complete Trading System.
             </span>
           </h2>
+   </div>
+   {/* Differentiation Panel */}
+   <div className="mt-12 mb-32">
+  <div className=" mx-auto">
+    <h3 className="text-xl  text-gray-400 mb-4">
+      Why OBAOL is not a traditional B2B Platform
+    </h3>
+
+    <p className="text-gray-400 mb-10 max-w-3xl">
+      Most B2B platforms stop at introductions. OBAOL stays accountable
+      through execution, verification, and closure.
+    </p>
+
+    {/* Desktop Table */}
+    <div className="hidden md:block border border-gray-800 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-3 bg-neutral-950">
+        <div className="p-4 text-sm font-medium text-gray-400">
+          Aspect
+        </div>
+        <div className="p-4 text-sm font-medium text-gray-400">
+          Traditional B2B Platforms
+        </div>
+        <div className="p-4 text-sm font-medium text-orange-400">
+          OBAOL – Trade Execution System
+        </div>
+      </div>
+
+      {COMPARISON_ROWS.map((row, i) => (
+        <div
+          key={row.label}
+          className={`grid grid-cols-3 border-t border-gray-800 ${
+            i % 2 === 0 ? "bg-black" : "bg-neutral-950"
+          }`}
+        >
+          <div className="p-4 text-sm text-gray-300">
+            {row.label}
+          </div>
+          <div className="p-4 text-sm text-gray-400">
+            {row.traditional}
+          </div>
+          <div className="p-4 text-sm text-white">
+            {row.obaol}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Mobile (Stacked) */}
+    <div className="md:hidden space-y-6">
+      {COMPARISON_ROWS.map((row) => (
+        <div
+          key={row.label}
+          className="border border-gray-800 rounded-lg p-4 bg-neutral-950"
+        >
+          <p className="text-sm text-gray-400 mb-2">
+            {row.label}
+          </p>
+          <p className="text-xs text-gray-500">
+            Traditional: {row.traditional}
+          </p>
+          <p className="mt-2 text-sm text-white">
+            OBAOL: {row.obaol}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+          <div className="max-w-3xl mb-12">
 
           <p className="mt-6 text-gray-300 leading-relaxed">
             OBAOL executes the full commodity trade lifecycle — from supplier
@@ -134,7 +269,7 @@ const scale = useTransform(
             Delegate execution selectively. Retain strategic control.
           </p>
         </div>
-
+  
         {/* Main Grid */}
         <div className="grid md:grid-cols-2 gap-16">
           {/* LEFT */}
@@ -225,6 +360,8 @@ const scale = useTransform(
           </p>
         </div>
       </div>
+
+      
     </motion.section>
   );
 }

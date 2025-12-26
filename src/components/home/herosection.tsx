@@ -30,7 +30,7 @@ export default function HeroSection() {
   /* ===== Lag-safe scroll fade ===== */
   const { scrollYProgress } = useScroll({
     target: heroRef,
-    offset: ["start start", "start+=200 start"],
+    offset: ["start start", "start start"],
   });
 
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
@@ -90,7 +90,7 @@ export default function HeroSection() {
             <br />
             <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
               <span className="text-gray-400 text-[0.65em] mr-2">for</span>
-              Commodity Trading            </span>
+              Modern Commodity Trading            </span>
           </motion.h1>
 
           {/* 2️⃣ BRAND / MQ — measured pause */}
@@ -107,8 +107,12 @@ export default function HeroSection() {
             <span className="text-orange-400 font-semibold">
               OBAOL Supreme
             </span>{" "}
-            is an agro trade execution platform that combines technology with on-ground services to complete{" "}
-            <span className="text-white">real agricultural commodity trades.</span>.
+            is a verified agro trade ecosystem that supports discovery, engagement, and execution of real commodity trades — with 
+            <span className="text-white">
+            {" "}execution support engaged 
+            </span>
+            {" "}only when trades move forward.            
+      
           </motion.p>
 
           {/* 3️⃣ CLARIFICATION — calm assurance */}

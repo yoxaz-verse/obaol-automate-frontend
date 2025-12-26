@@ -1,15 +1,35 @@
 import "../styles/global.css";
 import type { Metadata } from "next";
 import { Providers } from "./provider";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Sans, Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { VerificationProvider } from "@/context/VerificationContext";
 import Script from "next/script";
 
 // If loading a variable font, you don't need to specify the font weight
-const inter = Inter({ subsets: ["latin"] });
-
+const font = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+});
 // app/layout.tsx
+
+
+// import { Source_Serif_4, IBM_Plex_Sans } from "next/font/google";
+
+// const headingFont = Source_Serif_4({
+//   subsets: ["latin"],
+//   weight: ["600"],
+//   variable: "--font-heading",
+//   display: "swap",
+// });
+
+// const bodyFont = IBM_Plex_Sans({
+//   subsets: ["latin"],
+//   weight: ["400", "500"],
+//   variable: "--font-body",
+//   display: "swap",
+// });
+
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://obaol.com"),
@@ -92,7 +112,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-neutral-950">
+    <html lang="en" 
+    className={`${font.className}  + bg-neutral-950`}
+    >
         <head>
         {/* Google Tag Manager */}
         {GTM_ID && (
@@ -114,7 +136,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className={inter.className} style={{ overflowX: "hidden" }}>
+      <body  style={{ overflowX: "hidden" }}>
       {GTM_ID && (
           <noscript>
             <iframe
@@ -127,7 +149,7 @@ export default function RootLayout({
               }}
             />
           </noscript>
-        )}ß
+        )}
         <AuthProvider>
           <VerificationProvider>
             <Providers>{children}</Providers>

@@ -111,6 +111,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
               </div>
             </DropdownItem>
             <DropdownItem
+            key={"dashboard"}
               onClick={async () => {
                 try {
                   router.push("/dashboard/profile");

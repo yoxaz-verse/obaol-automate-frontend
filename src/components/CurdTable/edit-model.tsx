@@ -226,7 +226,7 @@ export default function EditModal({
           <DatePicker
             name={f.key}
             label={f.label}
-            value={val}
+            // value={val}
             isDisabled={disabled}
             onChange={(d) => handleDate(f.key, d)}
           />

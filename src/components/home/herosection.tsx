@@ -76,7 +76,7 @@ export default function HeroSection() {
             }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.1] tracking-tight text-white"
           >
-            A{" "}
+            Agro Trade{" "}
             <span
               className="inline-block"
               style={{
@@ -84,14 +84,13 @@ export default function HeroSection() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Digital
+               Execution
             </span>{" "}
-            Infrastructure
+             Platform
             <br />
             <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
               <span className="text-gray-400 text-[0.65em] mr-2">for</span>
-              Global Commodity Trading
-            </span>
+              Commodity Trading            </span>
           </motion.h1>
 
           {/* 2️⃣ BRAND / MQ — measured pause */}
@@ -108,8 +107,8 @@ export default function HeroSection() {
             <span className="text-orange-400 font-semibold">
               OBAOL Supreme
             </span>{" "}
-            is an end-to-end trading system built for{" "}
-            <span className="text-white">physical commodity trade</span>.
+            is an agro trade execution platform that combines technology with on-ground services to complete{" "}
+            <span className="text-white">real agricultural commodity trades.</span>.
           </motion.p>
 
           {/* 3️⃣ CLARIFICATION — calm assurance */}

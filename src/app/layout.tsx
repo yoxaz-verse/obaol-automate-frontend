@@ -9,7 +9,8 @@ import Script from "next/script";
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 // app/layout.tsx
 
@@ -112,9 +113,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" 
-    className={`${font.className}  + bg-neutral-950`}
-    >
+    <html
+    lang="en"
+    className={`${font.className} bg-neutral-950`}
+  >
+  
         <head>
         {/* Google Tag Manager */}
         {GTM_ID && (
@@ -171,6 +174,21 @@ export default function RootLayout({
         price: "0",
         priceCurrency: "USD",
       },
+    }),
+  }}
+/>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "OBAOL",
+      url: "https://obaol.com",
+      logo: "https://obaol.com/logo.png",
+      description:
+        "Execution-focused commodity trade operating system for agro and physical commodities.",
+      sameAs: [],
     }),
   }}
 />

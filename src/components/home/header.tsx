@@ -31,18 +31,18 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            <Link
+            {/* <Link
               href="/auth"
               className="text-sm text-gray-300 hover:text-white transition-colors"
             >
               Sign In
-            </Link>
+            </Link> */}
 
             <Link
-              href="/dashboard"
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition-colors"
+            href="https://typebot.co/obaol-early-access"
+            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition-colors"
             >
-              Dashboard
+              Want Early Access
             </Link>
           </div>
         </div>

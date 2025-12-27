@@ -85,7 +85,7 @@ export const metadata: Metadata = {
       "A standardized operating system for agro and physical commodity trading. Source, verify, procure, package, transport, and execute trades on one system.",
     images: [
       {
-        url: "/og-image.png", // MUST exist
+        url: "/logo.png", // MUST exist
         width: 1200,
         height: 630,
         alt: "OBAOL Commodity Trading Platform",

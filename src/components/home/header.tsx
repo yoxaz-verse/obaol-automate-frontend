@@ -24,8 +24,8 @@ export default function Header() {
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-sm">
             <NavLink href="/about">About</NavLink>
-            <NavLink href="/why_obaol">Why OBAOL</NavLink>
-            <NavLink href="/how_it_works">How It Works</NavLink>
+            <NavLink href="/why-obaol">Why OBAOL</NavLink>
+            <NavLink href="/how-it-works">How It Works</NavLink>
             <NavLink href="/faq">FAQ</NavLink>
           </nav>
 

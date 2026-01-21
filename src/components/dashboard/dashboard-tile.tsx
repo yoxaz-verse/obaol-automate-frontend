@@ -18,96 +18,81 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
   function DashboardTileData() {
     if (type === "details") {
       return (
-        <>
-          <Card className="bg-slate-950 shadow-md outline-1 flex items-center justify-center px-6 border-1 border-white ">
-            <CardHeader className="font-medium text-[18px] text-white">
+        <Card className="bg-content1 shadow-sm border border-default-200 h-full">
+          <CardBody className="flex flex-col items-center justify-center py-6">
+            <span className="text-4xl font-bold text-warning-500 mb-2">{data}</span>
+            <span className="text-sm font-medium text-default-500 uppercase tracking-wider text-center">
               {heading}
-            </CardHeader>
-            <CardBody className="bg-orange-100  text-orange-400 flex items-center justify-center text-3xl w-[100px] rounded-3xl h-[75px] m-5 font-semibold mb-8">
-              {data}
-            </CardBody>
-          </Card>
-        </>
+            </span>
+          </CardBody>
+        </Card>
       );
     }
     if (type === "view") {
       return (
-        <>
-          <Card className="bg-slate-950 shadow-md outline-1 flex justify-center border-white   border-1 px-6">
-            <CardHeader className="font-medium text-white flex items-center gap-2 md:text-[20px]">
+        <Card className="bg-content1 shadow-sm border border-default-200 h-full hover:bg-content2 transition-colors duration-300">
+          <Link href={data.link || "#"} className="w-full h-full flex flex-col items-center justify-center p-6 gap-3 group">
+            <div className="text-warning-500 text-3xl group-hover:scale-110 transition-transform duration-300">
               {data.icon}
-              View {data.name}
-              {/* Translate */}
-            </CardHeader>
-            <Link href={data.link || "#"}>
-              <CardBody className="rounded-xl border-1 text-slate-400 hover:text-white hover:bg-orange-400 duration-300 border-orange-400 my-3 md:h-16 flex justify-center w-full items-center">
-                <div className="text-xs text-center">
-                  Tap to View {data.name}
-                  {/* Translate */}
-                </div>
-              </CardBody>
-            </Link>
-          </Card>
-        </>
+            </div>
+            <div className="font-medium text-foreground text-lg">
+              {data.name}
+            </div>
+            <div className="text-xs text-default-500 group-hover:text-warning-500 transition-colors">
+              Tap to View
+            </div>
+          </Link>
+        </Card>
       );
     }
     if (type === "percentage charts") {
       return (
-        <>
-          <Card className="bg-slate-950 shadow-md outline-1 flex items-center justify-center px-6 border-1 border-white">
-            <CardHeader className="font-medium text-white">
-              {heading}
-            </CardHeader>
-            <CardBody className="my-1 w-11/12 flex justify-center items-center">
-              <CircularProgress
-                classNames={{
-                  svg: "w-36 h-36 drop-shadow-md",
-                  indicator: "stroke-blue-300",
-                  track: "stroke-blue-300/10",
-                  value: "text-3xl font-semibold text-blue-300",
-                }}
-                value={Number(stats)} // Use the percentage value
-                strokeWidth={4}
-                showValueLabel={true}
-              />
-            </CardBody>
-          </Card>
-        </>
+        <Card className="bg-content1 shadow-sm border border-default-200 h-full">
+          <CardHeader className="justify-center pb-0 pt-4">
+            <span className="text-sm font-medium text-default-500 uppercase tracking-wider text-center">{heading}</span>
+          </CardHeader>
+          <CardBody className="items-center justify-center py-4 overflow-hidden">
+            <CircularProgress
+              classNames={{
+                svg: "w-24 h-24 drop-shadow-md",
+                indicator: "stroke-warning-500",
+                track: "stroke-default-200",
+                value: "text-xl font-semibold text-foreground",
+              }}
+              value={Number(stats)}
+              strokeWidth={3}
+              showValueLabel={true}
+            />
+          </CardBody>
+        </Card>
       );
     }
 
     if (type === "line charts") {
       return (
-        <>
-          <Card className="bg-white shadow-md outline-1 flex items-center justify-center px-6">
-            <CardHeader className=" text-black flex flex-col">
-              <div className="text-start w-full font-medium">{heading}</div>
-              <div className="flex justify-between w-full">
-                <div className="">Statistics</div>
-                {/* Translate */}
-                <div className="text-green-500">{stats}</div>
-              </div>
-            </CardHeader>
-            <Divider />
-            <CardBody className="my-1 w-full flex justify-center items-center">
-              <LineChart />
-            </CardBody>
-          </Card>
-        </>
+        <Card className="bg-content1 shadow-sm border border-default-200 h-full">
+          <CardHeader className="flex flex-row justify-between items-center px-4 py-3">
+            <span className="font-semibold text-foreground text-sm">{heading}</span>
+            <span className="text-success-500 font-bold text-sm">{stats}</span>
+          </CardHeader>
+          <Divider className="bg-default-200" />
+          <CardBody className="p-2 overflow-hidden">
+            <LineChart />
+          </CardBody>
+        </Card>
       );
     }
     if (type === "bar chart") {
       return (
-        <>
-          <Card className="bg-white shadow-md outline-1 flex items-center justify-center px-6">
-            <CardHeader className="font-medium text-black">
-              {heading}
-            </CardHeader>
-            <CardBody className="my-1 w-full flex justify-center items-center">
-              <GrowthTypeChart />
-            </CardBody>
-          </Card>
-        </>
+        <Card className="bg-content1 shadow-sm border border-default-200 h-full">
+          <CardHeader className="px-4 py-3 font-semibold text-foreground text-sm">
+            {heading}
+          </CardHeader>
+          <Divider className="bg-default-200" />
+          <CardBody className="p-2 overflow-hidden">
+            <GrowthTypeChart />
+          </CardBody>
+        </Card>
       );
     }
   }

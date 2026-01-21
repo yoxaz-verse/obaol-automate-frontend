@@ -36,23 +36,23 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://obaol.com"),
 
   title: {
-    default: "OBAOL Supreme — Commodity Trading Operating System",
+    default: "OBAOL Supreme — Commodity Trade Execution System",
     template: "%s | OBAOL Supreme",
   },
 
   description:
-    "OBAOL Supreme is a unified operating system for physical commodity trading, focused on agro commodities, import-export workflows, supplier verification, procurement, logistics, and secure trade execution.",
+    "OBAOL Supreme is a software-led commodity trade execution system combining online coordination with on-ground support. We help buyers find verified suppliers, assist suppliers in reaching genuine buyers, and support documentation, logistics, packaging, and execution until trade closure.",
 
   keywords: [
-    "commodity trading platform",
-    "agro commodity trading",
-    "physical commodity trading",
-    "import export trade system",
-    "commodity procurement platform",
-    "trade execution system",
-    "commodity logistics management",
-    "supplier verification platform",
-    "commodity trading without capital",
+    "commodity trade execution",
+    "agro commodity trade support",
+    "buyer supplier coordination",
+    "commodity sourcing system",
+    "supplier buyer verification",
+    "import export trade execution",
+    "commodity logistics coordination",
+    "trade documentation support",
+    "physical commodity trading system",
   ],
 
   authors: [{ name: "OBAOL" }],
@@ -80,25 +80,25 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://obaol.com",
     siteName: "OBAOL",
-    title: "OBAOL Supreme — Commodity Trading Operating System",
+    title: "OBAOL Supreme — Where Commodity Trades Get Executed",
     description:
-      "A standardized operating system for agro and physical commodity trading. Source, verify, procure, package, transport, and execute trades on one system.",
+      "A hybrid online and offline system for commodity trade execution. OBAOL supports sourcing, buyer–supplier coordination, documentation, logistics, packaging, and on-ground execution oversight.",
     images: [
       {
-        url: "/logo.png", // MUST exist
+        url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "OBAOL Commodity Trading Platform",
+        alt: "OBAOL Commodity Trade Execution System",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "OBAOL — Commodity Trading Operating System",
+    title: "OBAOL — Commodity Trade Execution System",
     description:
-      "A unified operating system for agro and physical commodity trading.",
-    images: ["/og-image.png"],
+      "Software-led coordination with real-world execution support for physical commodity trades.",
+    images: ["/logo.png"],
   },
 
   category: "Business",
@@ -114,11 +114,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-    lang="en"
-    className={`${font.className} bg-neutral-950`}
-  >
-  
-        <head>
+      lang="en"
+      className={`${font.className}  text-foreground`}
+    >
+
+      <head>
         {/* Google Tag Manager */}
         {GTM_ID && (
           <Script
@@ -139,8 +139,8 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body  style={{ overflowX: "hidden" }}>
-      {GTM_ID && (
+      <body style={{ overflowX: "hidden" }}>
+        {GTM_ID && (
           <noscript>
             <iframe
               src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -158,40 +158,40 @@ export default function RootLayout({
             <Providers>{children}</Providers>
           </VerificationProvider>
         </AuthProvider>
-   <script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{
-    __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: "OBAOL",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      description:
-        "A unified operating system for physical commodity and agro-commodity trading.",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD",
-      },
-    }),
-  }}
-/>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{
-    __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "OBAOL",
-      url: "https://obaol.com",
-      logo: "https://obaol.com/logo.png",
-      description:
-        "Execution-focused commodity trade operating system for agro and physical commodities.",
-      sameAs: [],
-    }),
-  }}
-/>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "OBAOL",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              description:
+                "A unified operating system for physical commodity and agro-commodity trading.",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "OBAOL",
+              url: "https://obaol.com",
+              logo: "https://obaol.com/logo.png",
+              description:
+                "Execution-focused commodity trade operating system for agro and physical commodities.",
+              sameAs: [],
+            }),
+          }}
+        />
 
       </body>
     </html>

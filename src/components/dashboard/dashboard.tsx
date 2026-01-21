@@ -86,11 +86,11 @@ const Dashboard: NextPage = () => {
   const associatesWithProductsSet = new Set(
     Array.isArray(rateValue?.data)
       ? rateValue.data
-          .filter(
-            (r: any) =>
-              r.associate !== null && r.productVariant?.product !== null
-          )
-          .map((r: any) => r.associate)
+        .filter(
+          (r: any) =>
+            r.associate !== null && r.productVariant?.product !== null
+        )
+        .map((r: any) => r.associate)
       : []
   );
 
@@ -116,7 +116,6 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full">
-      {/* <DashboardTilesComponent projectCounts={projectCounts} /> */}
       <div className="px-4 py-5 ">
         {(user?.role === "ActivityManager" || user?.role === "Worker") && (
           <Tabs
@@ -133,7 +132,7 @@ const Dashboard: NextPage = () => {
         )}
       </div>
       {user?.id && user?.role === "Admin" && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2 px-4 py-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 px-4 py-5">
           <DashboardTile
             heading={"Total Rates"}
             data={rateValue?.totalCount ?? "0"}
@@ -156,17 +155,15 @@ const Dashboard: NextPage = () => {
           />
         </div>
       )}
-      <div className="flex px-4 py-5 justify-between w-full flex-col lg:flex-row">
-        <div className="lg:w-[70%] grid grid-cols-2 gap-5">
+      <div className="flex px-4 py-5 justify-between w-full flex-col lg:flex-row gap-2">
+        <div className="lg:w-[70%] grid grid-cols-2 md:grid-cols-3 gap-5">
           {filteredOptions?.map((option, index) =>
             option.name !== "Dashboard" ? (
               <div key={index}>
                 <DashboardTile data={option} type="view" />
-                <Spacer y={4} />
               </div>
             ) : null
           )}
-          {/* <DashboardCharts /> */}
         </div>
         {/* Employee-specific section */}
         {user?.id && user?.role === "Employee" && (

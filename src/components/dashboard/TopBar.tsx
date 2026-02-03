@@ -31,7 +31,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="flex justify-between items-center px-6 py-4 my-2 mx-4 md:my-4 md:mx-6 bg-content1 border border-default-200 shadow-md rounded-2xl transition-all duration-300">
+    <div className="flex text-foreground justify-between items-center px-6 py-4 my-2 mx-4 md:my-4 md:mx-6 bg-content1 border border-default-200  rounded-2xl transition-all duration-300">
       {/* Menu for small screens */}
       <div className="flex gap-4 items-center">
         <Dropdown>
@@ -44,6 +44,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
             aria-label="Sidebar Options"
             disallowEmptySelection
             selectionMode="single"
+            className="text-foreground"
           >
             {filteredOptions.map((option) => (
               <DropdownItem key={option.name}>
@@ -106,8 +107,8 @@ const TopBar = ({ username, role }: TopbarProps) => {
               }}
             />
           </DropdownTrigger>
-          <DropdownMenu aria-label="User Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
+          <DropdownMenu aria-label="User Actions" variant="flat" className="text-foreground">
+            <DropdownItem key="profile" className="h-14 gap-2 ">
               <p className="font-semibold">Signed in as</p>
               <p className="font-semibold text-warning-500">{username}</p>
             </DropdownItem>

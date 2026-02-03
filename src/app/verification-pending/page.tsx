@@ -18,7 +18,7 @@ export default function Verification() {
   if (!user) return null; // prevent flashing before redirect
 
   return (
-    <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden">
+    <div className="flex h-screen   relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden">
       <OtpVerification user={user} />
     </div>
   );

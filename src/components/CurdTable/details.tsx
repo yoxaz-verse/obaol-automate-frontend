@@ -215,7 +215,7 @@ export default function DetailsModal({
                 {currentTable && toTitleCase(currentTable)} Details
                 {/* Translate */}
               </ModalHeader>
-              <ModalBody className="space-y-4 overflow-y-auto max-h-[90vh] ">
+              <ModalBody className="space-y-4 overflow-y-auto max-h-[90vh] text-foreground">
                 {/* Display User Details */}
                 {Object.keys(data).map((key) => {
                   // Skip rendering excluded fields
@@ -224,8 +224,8 @@ export default function DetailsModal({
                   if (Array.isArray(data[key]) && key === "locationManagers") {
                     return (
                       <div key={key} className="mb-4">
-                        <strong>{formatLabel(key)}:</strong>
-                        <div className="list-disc list-inside">
+                        <strong className="text-foreground">{formatLabel(key)}:</strong>
+                        <div className="list-disc list-inside text-foreground">
                           {data[key].map((manager: any, index: number) => (
                             <div key={index}>
                               <Spacer y={3} />

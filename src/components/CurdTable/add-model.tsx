@@ -41,6 +41,7 @@ const AddModal: React.FC<AddModalProps> = ({
         size="xl"
         className="!max-h-[90vh] sm:!max-h-[80vh] overflow-hidden"
         scrollBehavior="inside"
+        isDismissable={false}
       >
         <ModalContent>
           <ModalHeader className="flex flex-col">

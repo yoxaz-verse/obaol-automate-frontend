@@ -13,7 +13,7 @@ export default function Essentials() {
   );
 
   return (
-    <div className="flex items-center justify-center ">
+    <div className="flex items-center text-foreground justify-center ">
       <div className="w-[95%]  ">
         <div className=" ">
           <div className="md:hidden flex w-[100%] flex-col md:flex-row gap-4 max-h-[80vh]">

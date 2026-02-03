@@ -109,6 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   // Check authentication status on mount
   useEffect(() => {
+    
     const checkAuth = async () => {
       try {
         const response = await getData("/verify-token");

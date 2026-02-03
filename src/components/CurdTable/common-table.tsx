@@ -208,7 +208,7 @@ export default function CommonTable({
 
       <TableBody items={items}>
         {(item: any) => (
-          <TableRow key={item._id}>
+          <TableRow key={item._id} className="text-foreground">
             {(columnKey) => (
               <TableCell>{renderCell(item, columnKey)}</TableCell>
             )}

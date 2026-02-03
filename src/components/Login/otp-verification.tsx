@@ -14,7 +14,6 @@ import { useVerification } from "@/context/VerificationContext";
 interface IVerification {
   user: User | null;
 }
-
 export default function OtpVerification({ user }: IVerification) {
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -78,7 +77,7 @@ export default function OtpVerification({ user }: IVerification) {
     const maskedName =
       name.length > visibleChars
         ? name.substring(0, visibleChars) +
-          "*".repeat(name.length - visibleChars)
+        "*".repeat(name.length - visibleChars)
         : "*".repeat(name.length);
     return `${maskedName}@${domain}`;
   }
@@ -89,9 +88,8 @@ export default function OtpVerification({ user }: IVerification) {
   };
 
   return (
-    <div className="space-y-6 max-w-sm mx-auto mt-5 text-center flex flex-col items-center justify-center">
+    <div className="space-y-6  max-w-sm mx-auto mt-5 text-center flex flex-col items-center justify-center">
       <h2 className="text-2xl font-bold text-warning-700">Verification</h2>
-
       {!isOtpSent && user ? (
         <>
           <p className="text-sm text-gray-300 mb-4">
@@ -126,7 +124,7 @@ export default function OtpVerification({ user }: IVerification) {
             <InputOtp
               length={6}
               defaultValue={otp}
-              color="warning"
+              color="default"
               classNames={{ segmentWrapper: "gap-x-2" }}
               onChange={handleChange}
               inputMode="numeric"

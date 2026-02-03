@@ -259,13 +259,13 @@ export default function EditModal({
           f.dependsOn && dynamicOptions[f.key]
             ? dynamicOptions[f.key]
             : f.dynamicValuesFn
-            ? dynamicOptions[f.key] || []
-            : f.values || [];
+              ? dynamicOptions[f.key] || []
+              : f.values || [];
 
         return (
           <Autocomplete
             name={f.key}
-            className="w-[90%]"
+            className="w-[90%] text-foreground"
             label={`Select ${f.label}`}
             placeholder={
               isDisabled && f.dependsOn
@@ -285,7 +285,7 @@ export default function EditModal({
             }
           >
             {(item) => (
-              <AutocompleteItem key={String(item.key)}>
+              <AutocompleteItem key={String(item.key)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
             )}
@@ -304,9 +304,10 @@ export default function EditModal({
                 target: { name: f.key, value: Array.from(keys)[0] },
               })
             }
+            className="text-foreground"
           >
             {(f.values ?? []).map((opt) => (
-              <SelectItem key={opt.key} value={String(opt.key)}>
+              <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
                 {opt.value}
               </SelectItem>
             ))}
@@ -325,7 +326,7 @@ export default function EditModal({
               placeholder={`Select ${f.label}`}
             >
               {(f.values ?? []).map((opt) => (
-                <SelectItem key={opt.key} value={String(opt.key)}>
+                <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
                   {opt.value}
                 </SelectItem>
               ))}
@@ -341,6 +342,7 @@ export default function EditModal({
                       [f.key]: p[f.key].filter((x: string) => x !== val),
                     }))
                   }
+                  className="text-foreground"
                 >
                   {val}
                 </Chip>
@@ -369,9 +371,8 @@ export default function EditModal({
                   </a>
                 ) : (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${
-                      formData[f.key]
-                    }`}
+                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${formData[f.key]
+                      }`}
                     width={100}
                     height={100}
                     alt="preview"
@@ -405,7 +406,8 @@ export default function EditModal({
         Edit
       </Button>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)} size="lg">
+      <Modal isDismissable={false}
+        isOpen={open} onClose={() => setOpen(false)} size="lg">
         <ModalContent>
           <ModalHeader>Edit {capitalize(currentTable)}</ModalHeader>
 

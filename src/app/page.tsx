@@ -1,5 +1,6 @@
 
 import BrokenTradeSystemSection from "@/components/home/brokentradesystemsection";
+import AboutSection from "@/components/home/aboutsection";
 import CommodityServicesSection from "@/components/home/commodityservices";
 import EndToEndSection from "@/components/home/endtoend";
 import Footer from "@/components/home/footer";
@@ -16,19 +17,36 @@ import Link from "next/link";
 
 
 export const metadata: Metadata = {
-  title: "Commodity & Agro Trading Platform",
+  title: "OBAOL Supreme | Commodity & Agro Trading Platform",
   description:
-    "OBAOL is a commodity trading operating system for agro commodities, enabling supplier discovery, verification, procurement, logistics, and secure trade execution — without capital-heavy entry barriers.",
+    "OBAOL is a verified commodity trading operating system. Securely trade agro commodities with integrated procurement, logistics, and trade execution.",
+  keywords: ["Agro Commodities", "Commodity Trading", "Supply Chain", "Procurement", "Trade Execution", "OBAOL", "Agriculture", "B2B Trading"],
+  authors: [{ name: "OBAOL Supreme" }],
+  creator: "OBAOL Supreme",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://obaol.com",
+    title: "OBAOL Supreme | Commodity & Agro Trading Platform",
+    description: "Secure, verified agro commodity trading system. From procurement to logistics.",
+    siteName: "OBAOL Supreme",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OBAOL Supreme | Commodity & Agro Trading Platform",
+    description: "Secure, verified agro commodity trading system.",
+    creator: "@obaol_supreme", // Placeholder if they have one, or remove
+  },
+  metadataBase: new URL('https://obaol.com'), // Important for resolving social images
 };
 
 export default function HomePage() {
- 
+
   return (
     <main className=" text-white overflow-hidden">
       {/* HERO */}
       <Header />
-     
-<HeroSection />
+      <HeroSection />
       {/* CLARITY */}
       {/* COMMODITY FOCUS SECTION */}
 
@@ -39,14 +57,17 @@ export default function HomePage() {
       {/* END-TO-END TIME SIMULATION (UPDATED) */}
       <EndToEndSection />
 
-<ProcurementSpecialistSection />
-    
+      <ProcurementSpecialistSection />
 
-   <SystemIntergrationSection />
+
+      <SystemIntergrationSection />
 
       {/* GLOBAL */}
       {/* TRADE SCOPE & ORIGIN */}
-<StartedIn/>
+      <StartedIn />
+
+      {/* ABOUT */}
+      <AboutSection />
 
       {/* CTA */}
       <section className="py-24 px-6 border-t border-gray-800 text-center">
@@ -57,12 +78,12 @@ export default function HomePage() {
         <div className="mt-8 flex justify-center gap-4">
           <Link
             href="https://typebot.co/obaol-early-access"
-  target="_blank"
+            target="_blank"
 
             className="px-6 py-3 rounded-md bg-white text-black font-medium"
           >
-    Apply for Early Access
-    </Link>
+            Apply for Early Access
+          </Link>
           {/* <Link
             href="/product"
             className="px-6 py-3 rounded-md border border-gray-600 text-white"

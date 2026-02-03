@@ -40,9 +40,9 @@ export default function DashboardLayout({
   const { user } = useContext(AuthContext);
 
   return (
-    <section className="w-full h-full flex overflow-hidden">
+    <section className="w-full h-full flex overflow-hidden bg-content1">
       {/* <GoogleTagManager />÷ */}
-      
+
       <PrivateRoute allowedRoles={allowedRoles}>
         {/* <div className="w-1/6 h-screen hidden xl:block">
           <Sidebar />
@@ -62,7 +62,9 @@ export default function DashboardLayout({
               {/* {roleDataLoading && <p>Loading role-specific data...</p>} */}
               {/* {roleDataError && <p>Error loading role-specific data</p>} */}
 
-              <Template>{children}</Template>
+              <Template>
+                {children}
+              </Template>
             </div>
           </div>
         </div>

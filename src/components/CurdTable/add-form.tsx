@@ -629,14 +629,14 @@ const AddForm: React.FC<AddFormProps> = ({
           field.dependsOn && dynamicOptions[field.key]
             ? dynamicOptions[field.key]
             : field.dynamicValuesFn
-            ? dynamicOptions[field.key] || []
-            : field.values || [];
+              ? dynamicOptions[field.key] || []
+              : field.values || [];
 
         return (
           <Autocomplete
             aria-label={`Select ${field.label}`}
             name={field.key}
-            className="w-[90%]"
+            className="w-[90%] text-foreground"
             label={`Select ${field.label}`}
             placeholder={
               isDisabled && field.dependsOn
@@ -658,7 +658,7 @@ const AddForm: React.FC<AddFormProps> = ({
             }
           >
             {(item) => (
-              <AutocompleteItem key={String(item.key)}>
+              <AutocompleteItem key={String(item.key)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
             )}
@@ -675,15 +675,15 @@ const AddForm: React.FC<AddFormProps> = ({
           field.dependsOn && dynamicOptions[field.key]
             ? dynamicOptions[field.key] || []
             : field.dynamicValuesFn
-            ? dynamicOptions[field.key] || []
-            : field.values || [];
+              ? dynamicOptions[field.key] || []
+              : field.values || [];
 
         // Ensure formData is always stored as an array of strings
         const selectedValues: string[] = formData[field.key] || [];
         const selectedKeys = new Set(selectedValues);
 
         return (
-          <div className="w-[90%]">
+          <div className="w-[90%] text-foreground">
             <Select
               aria-label={`Select ${field.label}`}
               name={field.key}
@@ -706,7 +706,7 @@ const AddForm: React.FC<AddFormProps> = ({
               }}
             >
               {options.map((option) => (
-                <SelectItem key={String(option.key)}>{option.value}</SelectItem>
+                <SelectItem key={String(option.key)} className="text-foreground">{option.value}</SelectItem>
               ))}
             </Select>
 
@@ -793,7 +793,7 @@ const AddForm: React.FC<AddFormProps> = ({
               {formFields
                 .filter((field) => field.inForm)
                 .map((field, index) => (
-                  <div key={index} className="mb-4">
+                  <div key={index} className="mb-4 text-foreground">
                     {renderFormField(field)}
                   </div>
                 ))}

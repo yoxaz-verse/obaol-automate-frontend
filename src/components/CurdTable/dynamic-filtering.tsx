@@ -107,8 +107,8 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       | {
-          target: { name: string; show: string | null; value: string | number };
-        }
+        target: { name: string; show: string | null; value: string | number };
+      }
   ) => {
     const { name, value } = e.target;
     const show = "show" in e.target ? e.target.show : null;
@@ -215,14 +215,14 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           field.dependsOn && dynamicOptions[field.key]
             ? dynamicOptions[field.key]
             : field.dynamicValuesFn
-            ? dynamicOptions[field.key] || []
-            : field.values || [];
+              ? dynamicOptions[field.key] || []
+              : field.values || [];
 
         return (
           <Autocomplete
             aria-label={`Select ${field.label}`}
             name={field.key}
-            className="w-[90%]"
+            className="w-[90%] text-foreground"
             label={`Select ${field.label}`}
             placeholder={
               isDisabled && field.dependsOn
@@ -252,7 +252,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             }}
           >
             {(item) => (
-              <AutocompleteItem key={String(item.key)} value={item.value}>
+              <AutocompleteItem key={String(item.key)} value={item.value} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
             )}
@@ -355,6 +355,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         scrollBehavior="inside"
+        isDismissable={false}
         className={"z-100"}
       >
         <ModalContent>

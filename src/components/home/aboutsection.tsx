@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import ParticleNetwork from "@/components/ui/particle-network";
 
 export default function AboutSection() {
     return (
@@ -33,20 +34,7 @@ export default function AboutSection() {
 
                 {/* IMAGE / VISUAL */}
                 <div className="relative h-96 w-full rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center">
-                    {/* Placeholder for Founder Image or Office */}
-                    <div className="text-center p-8">
-                        <p className="text-gray-600 mb-2">Image Placeholder</p>
-                        <p className="text-gray-700 text-sm">(Replace with Founder/Team Photo)</p>
-                    </div>
-                    {/* 
-             Uncomment and use real image:
-             <Image 
-               src="/images/founder.jpg" 
-               alt="Founder of OBAOL"
-               fill
-               className="object-cover"
-             />
-             */}
+                    <ParticleNetwork />
                 </div>
             </div>
         </section>

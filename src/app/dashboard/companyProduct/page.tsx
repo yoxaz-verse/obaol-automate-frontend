@@ -1,35 +1,51 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Spacer, Button } from "@nextui-org/react";
+import React, { useMemo, useState, useContext } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Card,
+  Avatar,
+  Tabs as HeroTabs,
+  Tab as HeroTab,
+  Chip as HeroChip,
+  Select as HeroSelect,
+  SelectItem,
+  Button,
+} from "@heroui/react";
+
+const Tabs = HeroTabs as any;
+const Tab = HeroTab as any;
+const Chip = HeroChip as any;
+const Select = HeroSelect as any;
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
-import Title from "@/components/titles";
-import { getData } from "@/core/api/apiHandler";
+import AuthContext from "@/context/AuthContext";
+import { getData, patchData } from "@/core/api/apiHandler";
 import {
   associateCompanyRoutes,
   variantRateRoutes,
+  employeeRoutes,
 } from "@/core/api/apiRoutes";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
 interface Company {
   _id: string;
   name: string;
+  assignedEmployee?: any;
 }
 
 interface VariantRateItem {
-  associateCompany: { _id: string; name: string } | null;
-  associate?: { associateCompany?: { _id: string; name: string } | null };
+  isLive?: boolean;
+  associateCompany?: { _id: string; name: string } | string | null;
+  associate?: { associateCompany?: { _id: string; name: string } | string | null };
 }
 
-const ITEMS_PER_PAGE = 10;
-
 export default function CompanyProductPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
-    null
-  );
-  const [isPaginating, setIsPaginating] = useState(false);
+  const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty"
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
 
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
     queryKey: ["companies"],
@@ -41,133 +57,397 @@ export default function CompanyProductPage() {
     queryFn: () => getData(variantRateRoutes.getAll, { limit: 10000 }),
   });
 
+  const { data: employeeData, isLoading: loadingEmployees } = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => getData(employeeRoutes.getAll, { limit: 10000 }),
+    enabled: user?.role === "admin",
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: (employeeId: string | null) =>
+      patchData(`${associateCompanyRoutes.getAll}/${selectedCompanyId}`, { assignedEmployee: employeeId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      setIsAssigning(false);
+    },
+  });
+
   const {
-    companiesWithProducts,
-    companiesWithoutProducts,
-    totalPages,
-    currentCompaniesPage,
+    liveCompanies,
+    activeCompanies,
+    emptyCompanies,
+    selectedCompany,
+    allEmployees,
   } = useMemo(() => {
-    const allCompanies: Company[] = companyData?.data?.data?.data || [];
-    const variantRates: VariantRateItem[] = rateData?.data?.data?.data || [];
+    let allCompanies: Company[] = companyData?.data?.data?.data || [];
+    const variantRates: any[] = rateData?.data?.data?.data || [];
+    const allEmployees: any[] = employeeData?.data?.data?.data || [];
 
-    const productCompanyIds = new Set<string>();
-
-    for (const item of variantRates) {
-      const direct = item.associateCompany?._id;
-      const fromAssociate = item.associate?.associateCompany?._id;
-      if (direct) productCompanyIds.add(direct);
-      else if (fromAssociate) productCompanyIds.add(fromAssociate);
+    // Role-based filtering: Employees only see assigned companies
+    if (user?.role === "employee") {
+      allCompanies = allCompanies.filter(c => {
+        const assignedId = typeof c.assignedEmployee === "object" ? c.assignedEmployee?._id : c.assignedEmployee;
+        return assignedId === user?.id;
+      });
     }
 
-    const withProducts = allCompanies.filter((c) =>
-      productCompanyIds.has(c._id)
-    );
-    const withoutProducts = allCompanies.filter(
-      (c) => !productCompanyIds.has(c._id)
-    );
+    const liveCompanyIds = new Set<string>();
+    const hasProductCompanyIds = new Set<string>();
 
-    const filteredCompanies = selectedCompanyId
-      ? withProducts.filter((c) => c._id === selectedCompanyId)
-      : withProducts;
+    for (const item of variantRates) {
+      const direct = typeof item.associateCompany === "object" ? item.associateCompany?._id : item.associateCompany;
+      const fromAssociate = typeof item.associate?.associateCompany === "object" ? item.associate?.associateCompany?._id : item.associate?.associateCompany;
+      const coId = (direct || fromAssociate) as string;
 
-    const totalPages = Math.ceil(filteredCompanies.length / ITEMS_PER_PAGE);
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const currentCompaniesPage = filteredCompanies.slice(start, end);
+      if (coId) {
+        // Only keep if in the allowed company list
+        if (allCompanies.some(c => c._id === coId)) {
+          hasProductCompanyIds.add(coId);
+          if (item.isLive) {
+            liveCompanyIds.add(coId);
+          }
+        }
+      }
+    }
+
+    // Categorize
+    const live = allCompanies
+      .filter((c) => liveCompanyIds.has(c._id))
+      .map(c => ({
+        ...c,
+        productCount: variantRates.filter(r => {
+          const d = typeof r.associateCompany === "object" ? r.associateCompany?._id : r.associateCompany;
+          const f = typeof r.associate?.associateCompany === "object" ? r.associate?.associateCompany?._id : r.associate?.associateCompany;
+          return (d === c._id || f === c._id) && r.isLive;
+        }).length
+      }));
+
+    const active = allCompanies
+      .filter((c) => hasProductCompanyIds.has(c._id) && !liveCompanyIds.has(c._id))
+      .map(c => ({
+        ...c,
+        productCount: variantRates.filter(r => {
+          const d = typeof r.associateCompany === "object" ? r.associateCompany?._id : r.associateCompany;
+          const f = typeof r.associate?.associateCompany === "object" ? r.associate?.associateCompany?._id : r.associate?.associateCompany;
+          return (d === c._id || f === c._id);
+        }).length
+      }));
+
+    const empty = allCompanies.filter((c) => !hasProductCompanyIds.has(c._id));
+
+    // Determine selection based on current tab
+    const currentList =
+      activeTab === "live" ? live :
+        activeTab === "active" ? active :
+          empty;
+
+    const selected = currentList.find(c => c._id === selectedCompanyId) || null;
 
     return {
-      companiesWithProducts: withProducts,
-      companiesWithoutProducts: withoutProducts,
-      totalPages,
-      currentCompaniesPage,
+      liveCompanies: live,
+      activeCompanies: active,
+      emptyCompanies: empty,
+      selectedCompany: selected,
+      allEmployees,
     };
-  }, [companyData, rateData, currentPage, selectedCompanyId]);
-
-  const handlePageChange = (newPage: number) => {
-    if (isPaginating || newPage === currentPage) return;
-    setIsPaginating(true);
-    setCurrentPage(newPage);
-    setTimeout(() => setIsPaginating(false), 300);
-  };
+  }, [companyData, rateData, employeeData, selectedCompanyId, activeTab, user]);
 
   if (loadingCompanies || loadingRates) {
-    return <div className="p-6 text-gray-500">Loading company catalog...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-warning-500 animate-pulse font-medium">Loading company catalog...</div>
+      </div>
+    );
   }
 
+  const displayedCompanies =
+    activeTab === "live" ? liveCompanies :
+      activeTab === "active" ? activeCompanies :
+        emptyCompanies;
+
+  const handleAssign = () => {
+    assignMutation.mutate(selectedEmployeeId);
+  };
+
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-[95%]">
-        {/* 🔍 Company Search */}
-        <CompanySearch
-          defaultSelected={selectedCompanyId}
-          itemsFilter={(companies) =>
-            companies.filter((c) =>
-              companiesWithProducts.some((p) => p._id === c._id)
-            )
-          }
-          onSelect={(id) => {
-            setCurrentPage(1);
-            setSelectedCompanyId(id);
-          }}
-        />
+    <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+      <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px]">
 
-        {/* 🏭 Company List with Products */}
-        <div className="flex w-full gap-4 min-h-[80vh]">
-          <div className="w-full pb-10 pr-6 overflow-auto">
-            {currentCompaniesPage.map((company) => (
-              <div key={company._id} className="mb-10 border p-2 rounded-xl">
-                <Title title={company.name} />
-                <VariantRate
-                  rate="variantRate"
-                  additionalParams={{ associateCompany: company._id }}
-                />
+        {/* --- Sidebar (Master) --- */}
+        <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col gap-4">
+          <Card className="p-4 bg-background/60 backdrop-blur-md border-none shadow-sm h-full overflow-hidden">
+            <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Catalog Companies</h2>
+
+            <CompanySearch
+              defaultSelected={selectedCompanyId}
+              itemsFilter={(companies) =>
+                companies.filter((c) =>
+                  displayedCompanies.some((p) => p._id === c._id)
+                )
+              }
+              onSelect={(id) => setSelectedCompanyId(id)}
+            />
+
+            <Tabs
+              fullWidth
+              size="sm"
+              variant="underlined"
+              aria-label="Filter companies"
+              selectedKey={activeTab}
+              onSelectionChange={(key: any) => {
+                setActiveTab(key as string);
+                setSelectedCompanyId(null);
+              }}
+              classNames={{
+                tabList:
+                  "gap-4 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto",
+                cursor: "w-full bg-warning-500",
+                tab: "max-w-fit px-0 h-10",
+                tabContent:
+                  "group-data-[selected=true]:text-warning-500 font-semibold text-xs",
+              }}
+            >
+              <Tab
+                key="live"
+                title={
+                  <div className="flex items-center space-x-1 whitespace-nowrap">
+                    <span>Live</span>
+                    <div className="bg-success-50 text-success-600 px-1 py-0.5 rounded text-[10px] font-bold">
+                      {liveCompanies.length}
+                    </div>
+                  </div>
+                }
+              />
+              <Tab
+                key="active"
+                title={
+                  <div className="flex items-center space-x-1 whitespace-nowrap">
+                    <span>Active</span>
+                    <div className="bg-warning-50 text-warning-600 px-1 py-0.5 rounded text-[10px] font-bold">
+                      {activeCompanies.length}
+                    </div>
+                  </div>
+                }
+              />
+              <Tab
+                key="empty"
+                title={
+                  <div className="flex items-center space-x-1 whitespace-nowrap">
+                    <span>Empty</span>
+                    <div className="bg-default-100 text-default-600 px-1 py-0.5 rounded text-[10px] font-bold">
+                      {emptyCompanies.length}
+                    </div>
+                  </div>
+                }
+              />
+            </Tabs>
+
+            <div className="flex-1 overflow-y-auto mt-4 pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-2">
+                {displayedCompanies.map((company) => {
+                  const isActive = selectedCompanyId === company._id;
+                  const prodCount = (company as any).productCount;
+
+                  return (
+                    <button
+                      key={company._id}
+                      onClick={() => setSelectedCompanyId(company._id)}
+                      className={`flex items-center gap-3 p-3 rounded-xl transition-all text-left ${isActive
+                        ? "bg-warning-500 text-white shadow-md scale-[1.02]"
+                        : "bg-default-100/50 hover:bg-default-200/50 text-foreground/80 hover:scale-[1.01]"
+                        }`}
+                    >
+                      <Avatar
+                        size="sm"
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&bold=true`}
+                        className="flex-shrink-0 border-2 border-white/20"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate text-sm">{company.name}</div>
+                        {activeTab !== "empty" && (
+                          <div className={`text-[10px] ${isActive ? "text-white/80" : "text-default-400"}`}>
+                            {prodCount} {activeTab === "live" ? "live products" : "total products"}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+                {displayedCompanies.length === 0 && (
+                  <div className="flex flex-col items-center justify-center p-10 opacity-60">
+                    <svg className="w-10 h-10 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p className="text-xs italic">No companies here.</p>
+                  </div>
+                )}
               </div>
-            ))}
-
-            {/* 🔁 Pagination */}
-            {totalPages > 1 && (
-              <div className="flex gap-2 mt-4 items-center">
-                <Button
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || isPaginating}
-                  className="px-3 py-1 text-white rounded text-sm bg-warning-500 hover:bg-warning-300 disabled:opacity-50"
-                >
-                  Prev
-                </Button>
-                <span className="text-sm text-white">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages || isPaginating}
-                  className="px-3 py-1 text-white rounded text-sm bg-warning-500 hover:bg-warning-300 disabled:opacity-50"
-                >
-                  Next
-                </Button>
-              </div>
-            )}
-
-            <Spacer y={4} />
-
-            {/* ❌ Companies Without Products */}
-            {companiesWithoutProducts.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold text-gray-700 mb-3">
-                  Companies Without Products
-                </h2>
-                <ul className="text-sm text-gray-500 list-disc pl-6">
-                  {companiesWithoutProducts.map((company) => (
-                    <li key={company._id}>{company.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+            </div>
+          </Card>
         </div>
-        <Spacer y={4} />
+
+        {/* --- Main Content (Detail) --- */}
+        <div className="flex-1 min-w-0">
+          <Card className="h-full bg-background/60 backdrop-blur-md border-none shadow-sm overflow-hidden flex flex-col">
+            {selectedCompany ? (
+              <>
+                <div className="p-6 border-b border-default-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar
+                      size="lg"
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
+                      className="border-4 border-warning-100 shadow-sm"
+                    />
+                    <div>
+                      <h1 className="text-2xl font-black text-foreground tracking-tight">{selectedCompany.name}</h1>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : "default"}
+                          className="capitalize text-[10px] font-bold"
+                        >
+                          {activeTab} Status
+                        </Chip>
+                        <p className="text-default-400 text-[11px] font-medium">
+                          {activeTab === "live" ? "Showing live products only" :
+                            activeTab === "active" ? "Showing all offline products" :
+                              "Initial allocation required"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* --- Employee Assignment Section (Admin Only) --- */}
+                  {user?.role === "admin" && (
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="text-[10px] font-bold text-default-400 uppercase">Assigned Overseer</div>
+                      {!isAssigning ? (
+                        <div className="flex items-center gap-2">
+                          {selectedCompany.assignedEmployee ? (
+                            <div className="flex items-center gap-2 bg-default-100 px-3 py-1.5 rounded-full">
+                              <Avatar
+                                size="xs"
+                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee.name : 'Unknown')}&background=random`}
+                              />
+                              <span className="text-xs font-semibold text-foreground/80">
+                                {typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee.name : 'Unknown'}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-default-400 italic">No one assigned</span>
+                          )}
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            className="text-warning-500"
+                            onClick={() => {
+                              setSelectedEmployeeId(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee._id : null);
+                              setIsAssigning(true);
+                            }}
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Select
+                            size="sm"
+                            placeholder="Assign Employee"
+                            className="w-48"
+                            selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
+                            onSelectionChange={(keys: any) => setSelectedEmployeeId(Array.from(keys)[0] as string)}
+                          >
+                            {allEmployees.map((emp) => (
+                              <SelectItem key={emp._id} textValue={emp.name}>
+                                <div className="flex items-center gap-2">
+                                  <Avatar size="xs" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random`} />
+                                  <span>{emp.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </Select>
+                          <Button
+                            size="sm"
+                            color="warning"
+                            isLoading={assignMutation.isPending}
+                            onClick={handleAssign}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="light"
+                            onClick={() => setIsAssigning(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* --- Assigned Overseer (Employee View) --- */}
+                  {user?.role === "employee" && selectedCompany.assignedEmployee && (
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="text-[10px] font-bold text-default-400 uppercase">Your Assignment</div>
+                      <div className="flex items-center gap-2 bg-success-50 px-3 py-1 rounded-full border border-success-100">
+                        <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                        <span className="text-[10px] font-bold text-success-700">Under your supervision</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 pt-2 custom-scrollbar">
+                  {activeTab !== "empty" ? (
+                    <VariantRate
+                      rate="variantRate"
+                      additionalParams={{
+                        associateCompany: selectedCompany._id,
+                        ...(activeTab === "live" ? { isLive: true } : {})
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-default-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold text-foreground/80">Allocation Required</h4>
+                      <p className="text-default-400 text-sm mt-1 max-w-[280px]">
+                        This company has no active products or rates. Go to the Catalog to assign products.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center p-10">
+                <div className="w-24 h-24 bg-warning-50 rounded-full flex items-center justify-center mb-6">
+                  <svg className="w-12 h-12 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-foreground/90 uppercase tracking-tight">Select a Company</h3>
+                <p className="text-default-500 max-w-[320px] mt-2 text-sm leading-relaxed">
+                  {activeTab === "live"
+                    ? "Choose a live company to manage their current in-market rates."
+                    : activeTab === "active"
+                      ? "Pick an active company to review or take their products live."
+                      : "Select an empty company to begin their first product allocation."}
+                </p>
+              </div>
+            )}
+          </Card>
+        </div>
+
       </div>
+      <div className="h-6" />
     </div>
   );
 }

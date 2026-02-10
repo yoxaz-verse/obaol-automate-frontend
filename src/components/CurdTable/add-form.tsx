@@ -137,6 +137,7 @@ const AddForm: React.FC<AddFormProps> = ({
       setTimeout(() => {
         setSuccess(false);
         closeModal();
+        onSuccess?.(); // 👈 Notify parent to close
       }, 2000);
     },
     onError: (error: any) => {
@@ -644,11 +645,11 @@ const AddForm: React.FC<AddFormProps> = ({
                 : field.label
             }
             isDisabled={!!isDisabled}
-            defaultItems={options}
+            items={options}
             selectedKey={
               formData[field.key] ? String(formData[field.key]) : null
             }
-            onSelectionChange={(key) =>
+            onSelectionChange={(key: any) =>
               handleInputChange({
                 target: {
                   name: field.key,
@@ -657,7 +658,7 @@ const AddForm: React.FC<AddFormProps> = ({
               })
             }
           >
-            {(item) => (
+            {(item: any) => (
               <AutocompleteItem key={String(item.key)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>

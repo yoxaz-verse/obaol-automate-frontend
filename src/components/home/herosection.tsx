@@ -38,7 +38,7 @@ export default function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen bg-black overflow-hidden"
+      className="relative min-h-screen bg-background overflow-hidden"
     >
       {/* ================= BACKGROUND ================= */}
       <div className="absolute inset-0 pointer-events-none">
@@ -50,7 +50,7 @@ export default function HeroSection() {
           className="object-cover object-center opacity-25"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
       </div>
 
       {/* ================= SCROLL OPACITY ================= */}
@@ -74,22 +74,22 @@ export default function HeroSection() {
               delay: 0.4,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.1] tracking-tight text-white"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.1] tracking-tight text-foreground"
           >
             Agro Trade{" "}
             <span
               className="inline-block"
               style={{
-                WebkitTextStroke: "2px rgba(255,255,255,0.95)",
+                WebkitTextStroke: "2px currentColor",
                 WebkitTextFillColor: "transparent",
               }}
             >
-               Execution
+              Execution
             </span>{" "}
-             Platform
+            Platform
             <br />
             <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
-              <span className="text-gray-400 text-[0.65em] mr-2">for</span>
+              <span className="text-default-500 text-[0.65em] mr-2">for</span>
               Modern Commodity Trading            </span>
           </motion.h1>
 
@@ -102,17 +102,17 @@ export default function HeroSection() {
               delay: 1.8,
               ease: "easeOut",
             }}
-            className="mt-14 max-w-4xl mx-auto text-xl md:text-2xl text-gray-300"
+            className="mt-14 max-w-4xl mx-auto text-xl md:text-2xl text-default-600"
           >
             <span className="text-orange-400 font-semibold">
               OBAOL Supreme
             </span>{" "}
-            is a verified agro trade ecosystem that supports discovery, engagement, and execution of real commodity trades — with 
-            <span className="text-white">
-            {" "}execution support engaged 
+            is a verified agro trade ecosystem that supports discovery, engagement, and execution of real commodity trades — with
+            <span className="text-foreground">
+              {" "}execution support engaged
             </span>
-            {" "}only when trades move forward.            
-      
+            {" "}only when trades move forward.
+
           </motion.p>
 
           {/* 3️⃣ CLARIFICATION — calm assurance */}
@@ -124,7 +124,7 @@ export default function HeroSection() {
               delay: 2.9,
               ease: "easeOut",
             }}
-            className="mt-8 text-base md:text-lg text-white"
+            className="mt-8 text-base md:text-lg text-foreground"
           >
             <span className="text-orange-400">
               This is not financial trading.
@@ -146,7 +146,7 @@ export default function HeroSection() {
             <Link
               href="https://typebot.co/obaol-early-access"
               target="_blank"
-              className="inline-block px-10 py-5 rounded-xl bg-white text-black font-semibold text-lg shadow-lg shadow-orange-400/20 hover:shadow-xl hover:shadow-orange-400/30 transition-all"
+              className="inline-block px-10 py-5 rounded-xl bg-warning text-warning-foreground font-semibold text-lg shadow-lg shadow-warning/20 hover:shadow-xl hover:shadow-warning/30 transition-all"
             >
               Apply for Early Access
             </Link>

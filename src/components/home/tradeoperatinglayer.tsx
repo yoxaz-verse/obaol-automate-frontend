@@ -6,43 +6,43 @@ import { useRef } from "react";
 export default function WhoCanUseObaol() {
   const sectionRef = useRef<HTMLElement>(null);
 
-const { scrollYProgress } = useScroll({
-  target: sectionRef,
-  offset: ["start end", "end start"],
-});
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
 
-// SLOW, SOFT, CINEMATIC FADE
-const opacity = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [0, 1, 1, 0]
-);
+  // SLOW, SOFT, CINEMATIC FADE
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0, 1, 1, 0]
+  );
 
-// COMING FROM BACK → GOING BACK
-const y = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [200, 0, 0, -200]
-);
+  // COMING FROM BACK → GOING BACK
+  const y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [200, 0, 0, -200]
+  );
 
-// DEPTH FEEL
-const scale = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [0.94, 1, 1, 0.94]
-);
+  // DEPTH FEEL
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0.94, 1, 1, 0.94]
+  );
 
   return (
-    <motion.section 
-    ref={sectionRef}
-  style={{
-    opacity,
-    y,
-    scale,
-    willChange: "transform, opacity",
-  }}
+    <motion.section
+      ref={sectionRef}
+      style={{
+        opacity,
+        y,
+        scale,
+        willChange: "transform, opacity",
+      }}
 
-    className="py-28 sm:py-36 px-4 sm:px-6 bg-black border-t border-gray-800">
+      className="py-28 sm:py-36 px-4 sm:px-6 bg-background border-t border-default-200">
       <div className="max-w-7xl mx-auto">
         {/* SECTION HEADER – SEO + POSITIONING */}
         <header className="max-w-4xl mb-24">
@@ -50,14 +50,14 @@ const scale = useTransform(
             Built to Lower the Entry Barrier to Commodity Trading
           </h2>
 
-          <p className="mt-6 text-gray-300 text-base sm:text-lg">
+          <p className="mt-6 text-default-600 text-base sm:text-lg">
             Commodity trading has traditionally been difficult to enter —
             requiring capital, insider access, and years of informal experience.
             OBAOL changes this by turning trade execution into a structured
             system, not a capital-heavy gamble.
           </p>
 
-          <p className="mt-4 text-gray-400 text-sm sm:text-base">
+          <p className="mt-4 text-default-500 text-sm sm:text-base">
             Participants can enter the ecosystem, learn how real trades work,
             and contribute value without needing upfront investment to start.
           </p>
@@ -154,7 +154,7 @@ const scale = useTransform(
 
         {/* TRUST & CLARITY FOOTNOTE */}
         <div className="max-w-4xl mt-24">
-          <p className="text-gray-400 text-sm sm:text-base">
+          <p className="text-default-500 text-sm sm:text-base">
             OBAOL does not promise shortcuts or guaranteed profits. It provides
             a standardized system where participants earn by executing real work
             — sourcing, verifying, packaging, transporting, coordinating, and
@@ -186,19 +186,18 @@ function BenefitRow({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.45 }}
-      className={`grid md:grid-cols-12 gap-6 items-start ${
-        reverse ? "md:flex-row-reverse" : ""
-      }`}
+      className={`grid md:grid-cols-12 gap-6 items-start ${reverse ? "md:flex-row-reverse" : ""
+        }`}
     >
       {/* LEFT: ROLE */}
       <div className="md:col-span-4">
-        <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
         <p className="mt-2 text-sm text-orange-400">{subtitle}</p>
       </div>
 
       {/* RIGHT: BENEFITS */}
       <div className="md:col-span-8">
-        <ul className="space-y-3 text-sm sm:text-base text-gray-300 leading-relaxed">
+        <ul className="space-y-3 text-sm sm:text-base text-default-600 leading-relaxed">
           {points.map((point, i) => (
             <li key={i}>— {point}</li>
           ))}

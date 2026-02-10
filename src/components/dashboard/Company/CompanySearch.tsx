@@ -62,7 +62,7 @@ export default function CompanySearch({
     queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 10000 }),
   });
 
-  let companies: Company[] = companyData?.data?.data?.data || [];
+  let companies: Company[] = companyData?.data?.data?.data || companyData?.data?.data || [];
   if (itemsFilter) {
     companies = itemsFilter(companies);
   }
@@ -71,10 +71,12 @@ export default function CompanySearch({
     return <div className="p-2 text-gray-500">Loading companies...</div>;
   }
 
+  const AutocompleteAny = Autocomplete as any;
+
   return (
-    <Autocomplete
+    <AutocompleteAny
       aria-label="Select a company"
-      defaultItems={companies}
+      items={companies}
       maxListboxHeight={400}
       itemHeight={60}
       placeholder="Search by company name"
@@ -104,11 +106,11 @@ export default function CompanySearch({
             "p-1 flex flex-col gap-2 border-small border-default-100 bg-background",
         },
       }}
-      onSelectionChange={(key) => {
+      onSelectionChange={(key: any) => {
         if (onSelect) onSelect((key as string) ?? null);
       }}
     >
-      {(item) => (
+      {(item: any) => (
         <AutocompleteItem
           key={item._id}
           textValue={item.name}
@@ -126,6 +128,6 @@ export default function CompanySearch({
           </div>
         </AutocompleteItem>
       )}
-    </Autocomplete>
+    </AutocompleteAny>
   );
 }

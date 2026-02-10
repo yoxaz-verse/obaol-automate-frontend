@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Header from "@/components/home/header";
 import { FAQS, generateFaqSchema } from "./faqSchema";
 import Footer from "@/components/home/footer";
+import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions | OBAOL",
@@ -24,45 +25,43 @@ export default function FAQPage() {
         }}
       />
 
-      <section className="py-32 px-6 bg-black">
-        <div className="max-w-4xl mx-auto">
-          {/* Page Header */}
-          <header className="mb-16">
-            <h1 className="text-3xl md:text-4xl font-semibold text-white">
-              Frequently Asked Questions
-            </h1>
-            <p className="mt-4 text-gray-400">
-              Clear answers to common questions about OBAOL and its
-              execution-focused trade system.
-            </p>
-          </header>
+      <ThemedContentWrapper>
+        {/* Page Header */}
+        <header className="mb-16">
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
+            Frequently Asked Questions
+          </h1>
+          <p className="mt-4 text-default-500">
+            Clear answers to common questions about OBAOL and its
+            execution-focused trade system.
+          </p>
+        </header>
 
-          {/* FAQ List */}
-          <div className="space-y-4">
-            {FAQS.map((faq) => (
-              <details
-                key={faq.id}
-                className="group border border-gray-800 rounded-lg bg-neutral-950"
-              >
-                <summary className="cursor-pointer list-none px-6 py-4 flex justify-between items-center">
-                  <span className="text-white font-medium">
-                    {faq.question}
-                  </span>
-                  <span className="text-gray-500 group-open:rotate-45 transition-transform">
-                    +
-                  </span>
-                </summary>
+        {/* FAQ List */}
+        <div className="space-y-4">
+          {FAQS.map((faq) => (
+            <details
+              key={faq.id}
+              className="group border border-default-200 rounded-lg bg-content1"
+            >
+              <summary className="cursor-pointer list-none px-6 py-4 flex justify-between items-center">
+                <span className="text-foreground font-medium">
+                  {faq.question}
+                </span>
+                <span className="text-default-500 group-open:rotate-45 transition-transform">
+                  +
+                </span>
+              </summary>
 
-                <div className="px-6 pb-6 text-gray-300 leading-relaxed">
-                  <p>{faq.answer}</p>
-                </div>
-              </details>
-            ))}
-          </div>
+              <div className="px-6 pb-6 text-default-600 leading-relaxed border-t border-default-100 mt-4 pt-4">
+                <p>{faq.answer}</p>
+              </div>
+            </details>
+          ))}
         </div>
-        </section>
-  
-        <Footer/>
-        </>
+      </ThemedContentWrapper>
+
+      <Footer />
+    </>
   );
 }

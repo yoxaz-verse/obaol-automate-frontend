@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
 
   return (
-    <main className=" text-white overflow-hidden">
+    <main className="bg-background text-foreground overflow-hidden">
       {/* HERO */}
       <Header />
       <HeroSection />
@@ -70,7 +70,7 @@ export default function HomePage() {
       <AboutSection />
 
       {/* CTA */}
-      <section className="py-24 px-6 border-t border-gray-800 text-center">
+      <section className="py-24 px-6 border-t border-default-200 text-center">
         <h2 className="text-3xl font-semibold">
           Trade Faster. Trade Smarter. Trade Securely.
         </h2>
@@ -79,17 +79,10 @@ export default function HomePage() {
           <Link
             href="https://typebot.co/obaol-early-access"
             target="_blank"
-
-            className="px-6 py-3 rounded-md bg-white text-black font-medium"
+            className="px-6 py-3 rounded-md bg-warning text-warning-foreground font-medium hover:opacity-90 transition-opacity"
           >
             Apply for Early Access
           </Link>
-          {/* <Link
-            href="/product"
-            className="px-6 py-3 rounded-md border border-gray-600 text-white"
-          >
-            Learn How It Works
-          </Link> */}
         </div>
       </section>
       <Footer />

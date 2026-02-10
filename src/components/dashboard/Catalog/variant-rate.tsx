@@ -2,7 +2,6 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Spacer } from "@heroui/react";
 import {
   Button,
   Card,
@@ -17,9 +16,10 @@ import {
   ModalHeader,
   Select,
   SelectItem,
+  Spacer,
   Switch,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
@@ -219,7 +219,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       formFields={filterVariantRateFormFields}
                       onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
                     />{" "}
-                    <Spacer y={2} />
+                    <div className="h-2" />
                     <AddModal
                       name="Rate"
                       currentTable={rate}
@@ -241,7 +241,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 "Add Associates for Variant rates"
               )}
             </div>{" "}
-            <Spacer y={5} />
+            <div className="h-5" />
             <section className="hidden md:block">
               <CommonTable
                 TableData={tableData}
@@ -254,8 +254,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                       {(rowItem.variantRate &&
                         rowItem.associateId === user?.id) ||
-                      (rowItem.associateId !== user?.id &&
-                        rowItem.companyId !==
+                        (rowItem.associateId !== user?.id &&
+                          rowItem.companyId !==
                           associateByIdValue?.associateCompany?._id) ? (
                         <SelectModal
                           variantRate={rowItem}
@@ -267,7 +267,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             <b className="text-warning-200">Own Rate</b>
                           ) : (
                             rowItem.companyId ===
-                              associateByIdValue?.associateCompany?._id && (
+                            associateByIdValue?.associateCompany?._id && (
                               <b className="text-warning-200">Company Rate</b>
                             )
                           )}
@@ -275,9 +275,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       ) : null}
                       {/* LiveToggle or Live Chip + Enquiry Button */}
                       {(!VariantRateMixed && user?.role === "Admin") ||
-                      (!rowItem.variantRate &&
-                        rowItem.associateId === user?.id &&
-                        user?.id !== undefined) ? (
+                        (!rowItem.variantRate &&
+                          rowItem.associateId === user?.id &&
+                          user?.id !== undefined) ? (
                         <>
                           {" "}
                           <LiveToggle
@@ -287,7 +287,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         </>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <Chip color="success" variant="dot">
+                          <Chip color={"success" as any} variant="dot">
                             Live
                           </Chip>
                           <CreateEnquiryButton
@@ -355,9 +355,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
               {tableData.map((item: any, index: number) => (
                 <Card
                   key={index}
-                  isBlurred
-                  className="border-none bg-background/60 hover:bg-background/95 my-2   max-w-full"
-                  shadow="sm"
+                  className="border-none bg-background/60 hover:bg-background/95 my-2 max-w-full"
+                  shadow={"sm" as any}
                 >
                   <CardBody>
                     <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
@@ -389,9 +388,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           <div className="flex items-center gap-2">
                             {/* LiveToggle or Live indicator with Enquiry for non-Admin */}
                             {user?.role === "Admin" ||
-                            (!item.variantRate &&
-                              item.associateId === user?.id &&
-                              user?.id !== undefined) ? (
+                              (!item.variantRate &&
+                                item.associateId === user?.id &&
+                                user?.id !== undefined) ? (
                               <LiveToggle
                                 variantRate={item}
                                 refetchData={refetchData}
@@ -401,11 +400,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <CreateEnquiryButton
                                   productVariant={
                                     item.productVariantId ||
-                                    item.variantRate.productVariant._id
+                                    item.variantRate?.productVariant?._id
                                   }
                                   variantRate={item}
                                 />
-                                <Chip color="success" variant="dot">
+                                <Chip color={"success" as any} variant="dot">
                                   Live
                                 </Chip>
                               </div>
@@ -417,8 +416,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         <div className="flex flex-col mt-3 gap-1">
                           {(item.variantRate &&
                             item.associateId === user?.id) ||
-                          (item.associateId !== user?.id &&
-                            item.companyId !==
+                            (item.associateId !== user?.id &&
+                              item.companyId !==
                               associateByIdValue?.associateCompany?._id) ? (
                             <SelectModal
                               variantRate={item}
@@ -430,7 +429,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <b className="text-warning-300">Your Rate</b>
                               ) : (
                                 item.companyId ===
-                                  associateByIdValue.associateCompany._id && (
+                                associateByIdValue.associateCompany._id && (
                                   <b className="text-warning-300">
                                     Company Rate
                                   </b>
@@ -503,14 +502,13 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
   return (
     <div className="flex flex-col items-start gap-2">
       <p
-        className={`text-small m-0 p-0 ${
-          isSelected ? "text-green-500" : "text-red-500"
-        }`}
+        className={`text-small m-0 p-0 ${isSelected ? "text-green-500" : "text-red-500"
+          }`}
       >
         {isSelected ? "Live" : "Not Live"}
       </p>
       <Switch
-        color="success"
+        color={"success" as any}
         isSelected={isSelected}
         isDisabled={loading}
         onChange={handleToggle}
@@ -538,7 +536,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         Enquiry
       </Button>
       <Modal
-        placement={"center"}
+        placement={"center" as any}
         // isDismissable={false}
         isOpen={isOpen}
         className="max-w-[600px] max-h-full"
@@ -565,7 +563,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
                 {/* <Button color="primary" onPress={onClose}>
                   Action
                 </Button> */}
-                <Spacer y={2} />
+                <div className="h-2" />
                 <p>Enquiry will be responded with 10 mins</p>
               </ModalFooter>
             </>
@@ -666,7 +664,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           // labelPlacement="outside"
           className=" px-2 py-1 w-full text-orange-400 "
           value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
           required
         />
       </div>
@@ -677,7 +675,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           variant="bordered"
           className=" px-2 py-1 w-full text-orange-400 "
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
           required
         />
       </div>
@@ -688,7 +686,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           // labelPlacement="outside"
           className=" px-2 py-1 w-full text-orange-400 "
           value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value)}
         />
       </div>
       <Button

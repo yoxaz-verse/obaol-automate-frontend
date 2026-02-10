@@ -28,9 +28,10 @@ import Uppy from "@uppy/core";
 import XHRUpload from "@uppy/xhr-upload";
 import { Dashboard } from "@uppy/react";
 import Image from "next/image";
-import { parseDate } from "@internationalized/date";
+import { parseDate, parseTime, Time, CalendarDate } from "@internationalized/date";
 import { EditModalProps, FormField } from "@/data/interface-data";
 import { toTitleCase } from "../titles";
+import { Key } from "@react-types/shared";
 
 export default function EditModal({
   _id,
@@ -198,19 +199,72 @@ export default function EditModal({
     });
   };
   // 6) Input handlers
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
   };
-  const handleSelection = (key: string, keys: Set<string>) => {
-    setFormData((p) => ({ ...p, [key]: Array.from(keys) }));
-  };
   const handleDate = (key: string, d: any) =>
-    setFormData((p) => ({ ...p, [key]: d.toString() }));
+    setFormData((p) => ({ ...p, [key]: d ? d.toString() : "" }));
   const handleBool = (key: string, v: boolean) =>
     setFormData((p) => ({ ...p, [key]: v }));
   const handleTime = (key: string, t: any) =>
     setFormData((p) => ({ ...p, [key]: t }));
+
+  // --- MultiTime Helpers ---
+  const handleMultiTimeChange = (fieldKey: string, index: number, time: any) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated[index] = time;
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+
+  const addTimeField = (fieldKey: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: [...(prev[fieldKey] || []), ""],
+    }));
+  };
+
+  const removeTimeField = (fieldKey: string, index: number) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated.splice(index, 1);
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+
+  // --- Time Range Helpers ---
+  const handleTimeRangeChange = (
+    fieldKey: string,
+    index: number,
+    type: "start" | "end",
+    time: any
+  ) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated[index] = {
+        ...updated[index],
+        [type]: time,
+      };
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
+
+  const addTimeRangeField = (fieldKey: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: [...(prev[fieldKey] || []), { start: "", end: "" }],
+    }));
+  };
+
+  const removeTimeRangeField = (fieldKey: string, index: number) => {
+    setFormData((prev) => {
+      const updated = [...(prev[fieldKey] || [])];
+      updated.splice(index, 1);
+      return { ...prev, [fieldKey]: updated };
+    });
+  };
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -226,7 +280,7 @@ export default function EditModal({
           <DatePicker
             name={f.key}
             label={f.label}
-            // value={val}
+            value={val as any}
             isDisabled={disabled}
             onChange={(d) => handleDate(f.key, d)}
           />
@@ -242,13 +296,100 @@ export default function EditModal({
             {f.label}
           </Switch>
         );
-      case "time":
         return (
           <TimeInput
             label={f.label}
-            value={formData[f.key] || ""}
+            value={formData[f.key] || null}
             isDisabled={disabled}
             onChange={(t) => handleTime(f.key, t)}
+            hourCycle={24}
+          />
+        );
+      case "multiTime": {
+        const timeValues: any[] = formData[f.key] || [];
+        return (
+          <div className="flex flex-col gap-3 w-full">
+            <label className="font-medium">{f.label}</label>
+            {timeValues.map((time, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <TimeInput
+                  aria-label={`Select ${f.label} ${index + 1}`}
+                  value={time || null}
+                  onChange={(t) => handleMultiTimeChange(f.key, index, t)}
+                  hourCycle={24}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => removeTimeField(f.key, index)}
+                  className="bg-red-500 text-white rounded"
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+            <Button
+              size="sm"
+              type="button"
+              onClick={() => addTimeField(f.key)}
+              className="px-3 py-1 bg-blue-500 text-white rounded mt-2 max-w-fit"
+            >
+              + Add Time
+            </Button>
+          </div>
+        );
+      }
+      case "multiTimeRange": {
+        const timeRanges: { start: any; end: any }[] = formData[f.key] || [];
+        return (
+          <div className="flex flex-col gap-3 w-full">
+            <label className="font-medium">{f.label}</label>
+            {timeRanges.map((range, index) => (
+              <div key={index} className="flex items-center gap-1">
+                <TimeInput
+                  aria-label={`Select start time ${index + 1}`}
+                  value={range.start || null}
+                  onChange={(t) => handleTimeRangeChange(f.key, index, "start", t)}
+                  hourCycle={24}
+                />
+                <span className="mx-1">to</span>
+                <TimeInput
+                  aria-label={`Select end time ${index + 1}`}
+                  value={range.end || null}
+                  onChange={(t) => handleTimeRangeChange(f.key, index, "end", t)}
+                  hourCycle={24}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => removeTimeRangeField(f.key, index)}
+                  className="bg-red-500 text-white rounded"
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+            <Button
+              size="sm"
+              type="button"
+              onClick={() => addTimeRangeField(f.key)}
+              className="px-3 py-1 bg-yellow-500 text-white rounded mt-2 max-w-fit"
+            >
+              + Add Time Range
+            </Button>
+          </div>
+        );
+      }
+      case "textarea":
+        return (
+          <textarea
+            aria-label={f.label}
+            name={f.key}
+            placeholder={f.label}
+            className="py-2 px-3 border rounded-md w-full bg-transparent text-foreground"
+            value={formData[f.key] || ""}
+            onChange={handleChange}
+            disabled={disabled}
           />
         );
       case "select":
@@ -275,7 +416,7 @@ export default function EditModal({
             isDisabled={!!isDisabled}
             defaultItems={options}
             selectedKey={formData[f.key] ? String(formData[f.key]) : null}
-            onSelectionChange={(key) =>
+            onSelectionChange={(key: any) =>
               handleInputChange({
                 target: {
                   name: f.key,
@@ -284,7 +425,7 @@ export default function EditModal({
               })
             }
           >
-            {(item) => (
+            {(item: any) => (
               <AutocompleteItem key={String(item.key)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
@@ -320,8 +461,8 @@ export default function EditModal({
               selectionMode="multiple"
               isDisabled={disabled}
               selectedKeys={new Set(formData[f.key] || [])}
-              onSelectionChange={(keys) =>
-                handleSelection(f.key, keys as Set<string>)
+              onSelectionChange={(keys: any) =>
+                setFormData((p) => ({ ...p, [f.key]: Array.from(keys as Set<string>) }))
               }
               placeholder={`Select ${f.label}`}
             >
@@ -332,21 +473,30 @@ export default function EditModal({
               ))}
             </Select>
             <div className="flex gap-2 mt-2 flex-wrap">
-              {(formData[f.key] || []).map((val: string) => (
-                <Chip
-                  isDisabled={disabled}
-                  key={val}
-                  onClose={() =>
-                    setFormData((p) => ({
-                      ...p,
-                      [f.key]: p[f.key].filter((x: string) => x !== val),
-                    }))
-                  }
-                  className="text-foreground"
-                >
-                  {val}
-                </Chip>
-              ))}
+              {(formData[f.key] || []).map((val: string) => {
+                const options =
+                  f.dependsOn && dynamicOptions[f.key]
+                    ? dynamicOptions[f.key]
+                    : f.dynamicValuesFn
+                      ? dynamicOptions[f.key] || []
+                      : f.values || [];
+                const label = options.find((opt: any) => String(opt.key) === String(val))?.value || val;
+                return (
+                  <Chip
+                    isDisabled={disabled}
+                    key={val}
+                    onClose={() =>
+                      setFormData((p) => ({
+                        ...p,
+                        [f.key]: p[f.key].filter((x: string) => x !== val),
+                      }))
+                    }
+                    className="text-foreground"
+                  >
+                    {label}
+                  </Chip>
+                );
+              })}
             </div>
           </>
         );
@@ -406,8 +556,13 @@ export default function EditModal({
         Edit
       </Button>
 
-      <Modal isDismissable={false}
-        isOpen={open} onClose={() => setOpen(false)} size="lg">
+      <Modal
+        isDismissable={false}
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        size="lg"
+        scrollBehavior="inside"
+      >
         <ModalContent>
           <ModalHeader>Edit {capitalize(currentTable)}</ModalHeader>
 

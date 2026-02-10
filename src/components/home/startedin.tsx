@@ -24,7 +24,7 @@ export default function StartedIn() {
     <section
       ref={sectionRef}
       className="relative py-28 px-6 min-h-[720px]
-                 border-t border-gray-800 bg-black overflow-hidden"
+                 border-t border-default-200 bg-background overflow-hidden"
     >
       {/* RIGHT-SIDE IMAGE LAYER */}
       <div
@@ -42,7 +42,7 @@ export default function StartedIn() {
 
         {/* Fade into content */}
         <div className="absolute inset-y-0 left-0 w-32
-                        bg-gradient-to-r from-black to-transparent" />
+                        bg-gradient-to-r from-background to-transparent" />
       </div>
 
       {/* Ambient gradients */}
@@ -73,7 +73,7 @@ export default function StartedIn() {
             Designed for Domestic and Global Trade.
           </h2>
 
-          <p className="mt-6 text-lg text-gray-300 leading-relaxed">
+          <p className="mt-6 text-lg text-default-600 leading-relaxed">
             OBAOL simplifies and automates both domestic and international
             commodity trading using a single, structured operating system.
           </p>
@@ -86,16 +86,16 @@ export default function StartedIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="p-6 rounded-xl border border-gray-800/60
-                       bg-neutral-950/60 backdrop-blur"
+            className="p-6 rounded-xl border border-default-200
+                       bg-content1 backdrop-blur"
           >
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-default-600 leading-relaxed">
               We began by building and validating the system in India — not
               because it is geographically limited, but because India represents
               one of the most complex commodity trading environments.
             </p>
 
-            <p className="mt-4 text-gray-400 leading-relaxed">
+            <p className="mt-4 text-default-500 leading-relaxed">
               Fragmented supply chains, diverse raw material sources, varying
               quality standards, and multi-layer logistics operate simultaneously.
             </p>
@@ -107,15 +107,15 @@ export default function StartedIn() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="p-6 rounded-xl border border-orange-400/40
-                       bg-neutral-950/70 backdrop-blur
+                       bg-content1 backdrop-blur
                        shadow-[0_0_40px_rgba(255,165,0,0.08)]"
           >
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-default-600 leading-relaxed">
               Validating execution under these conditions ensures the same
               system can operate reliably across global trade routes.
             </p>
 
-            <p className="mt-4 text-gray-400 leading-relaxed">
+            <p className="mt-4 text-default-500 leading-relaxed">
               A platform capable of handling domestic complexity is inherently
               prepared for international trade execution.
             </p>
@@ -132,7 +132,7 @@ export default function StartedIn() {
         >
           <div className="h-px w-full bg-gradient-to-r
                           from-orange-400/30 via-gray-700 to-green-500/30" />
-          <p className="mt-6 text-sm text-gray-400 max-w-3xl leading-relaxed">
+          <p className="mt-6 text-sm text-default-500 max-w-3xl leading-relaxed">
             A system proven in a high-complexity domestic market is structurally
             ready to support global commodity trade execution.
           </p>

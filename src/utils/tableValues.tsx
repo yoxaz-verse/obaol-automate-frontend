@@ -149,33 +149,33 @@ export const initialTableConfig: Record<
   {
     label: string;
     type:
-      | "text"
-      | "select"
-      | "multiselect"
-      | "multiselectValue"
-      | "file"
-      | "textarea"
-      | "boolean"
-      | "image"
-      | "action"
-      | "email"
-      | "date"
-      | "number"
-      | "time"
-      | "multiTime"
-      | "multiTimeRange"
-      | "link"
-      | "dateTime"
-      | "password"
-      | "week"; // Define specific types
+    | "text"
+    | "select"
+    | "multiselect"
+    | "multiselectValue"
+    | "file"
+    | "textarea"
+    | "boolean"
+    | "image"
+    | "action"
+    | "email"
+    | "date"
+    | "number"
+    | "time"
+    | "multiTime"
+    | "multiTimeRange"
+    | "link"
+    | "dateTime"
+    | "password"
+    | "week"; // Define specific types
 
     filterType?:
-      | "text"
-      | "select"
-      | "multiselect"
-      | "boolean"
-      | "date"
-      | "range";
+    | "text"
+    | "select"
+    | "multiselect"
+    | "boolean"
+    | "date"
+    | "range";
     key: string;
     inForm: boolean;
     inTable: boolean;
@@ -336,32 +336,7 @@ export const initialTableConfig: Record<
       inTable: true,
       required: true,
     },
-    {
-      label: "State",
-      type: "select",
-      filterType: "select",
-      key: "state",
-      values: [],
-      dynamicValuesFn: () => fetchDependentOptions("state"),
-      inForm: true,
-      inEdit: true,
-      inTable: true,
-      required: true,
-    },
-    {
-      label: "District",
-      type: "select",
-      key: "district",
-      filterType: "select",
-      dependsOn: "state",
-      values: [],
-      dynamicValuesFn: (stateId: string) =>
-        fetchDependentOptions("district", "state", stateId),
-      inEdit: true,
-      inForm: true,
-      inTable: true,
-      required: true,
-    },
+
     {
       label: "Working Hours",
       type: "multiTimeRange",
@@ -1738,7 +1713,7 @@ export const initialTableConfig: Record<
       key: "isLive",
       inForm: true,
       inTable: true,
-      inEdit: true,
+      inEdit: false,
     },
     {
       label: "Created At",

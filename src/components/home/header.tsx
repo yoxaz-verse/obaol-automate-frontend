@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+    <header className="sticky top-0 z-50 w-full border-b border-default-200  bg-background">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
-          
+
           {/* Logo */}
           <Link href="/" className="relative flex items-center">
             <Image
@@ -17,7 +18,7 @@ export default function Header() {
               width={110}
               height={32}
               priority
-              className="object-contain"
+              className="object-contain rounded-md"
             />
           </Link>
 
@@ -31,16 +32,11 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            {/* <Link
-              href="/auth"
-              className="text-sm text-gray-300 hover:text-white transition-colors"
-            >
-              Sign In
-            </Link> */}
+            <ThemeSwitcher />
 
             <Link
-            href="https://typebot.co/obaol-early-access"
-            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition-colors"
+              href="https://typebot.co/obaol-early-access"
+              className="rounded-md bg-warning px-4 py-2 text-sm font-medium text-warning-foreground hover:opacity-90 transition-opacity"
             >
               Want Early Access
             </Link>
@@ -61,7 +57,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="relative text-gray-300 transition-colors hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all hover:after:w-full"
+      className="relative text-default-600 transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-foreground after:transition-all hover:after:w-full"
     >
       {children}
     </Link>

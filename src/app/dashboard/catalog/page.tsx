@@ -2,10 +2,9 @@
 "use client";
 
 import React from "react";
-import { Spacer } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { ProductList } from "@/components/dashboard/Catalog/product-list";
 import CategoryDivision from "@/components/dashboard/Catalog/category-division";
-import { Button } from "@nextui-org/react";
 
 export default function Essentials() {
   const [selectedProduct, setSelectedProduct] = React.useState<any | null>(
@@ -36,7 +35,7 @@ export default function Essentials() {
                   >
                     Back to Category
                   </Button>{" "}
-                  <Spacer y={4} />
+                  <div className="h-4" />
                 </div>
                 <ProductList
                   product={selectedProduct}
@@ -61,7 +60,7 @@ export default function Essentials() {
               />
             </div>
           </div>
-          <Spacer y={4} />
+          <div className="h-4" />
         </div>
       </div>
     </div>

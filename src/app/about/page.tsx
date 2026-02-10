@@ -5,32 +5,29 @@ import FadeIn from "./FadeIn";
 import { Spacer } from "@nextui-org/react";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
-
-
+import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 
 export const metadata: Metadata = {
-    title: "About OBAOL Supreme",
-    description:
-"OBAOL Supreme is an execution-focused agro trade support system built for serious commodity traders and new market entrants."
+  title: "About OBAOL Supreme",
+  description:
+    "OBAOL Supreme is an execution-focused agro trade support system built for serious commodity traders and new market entrants."
 
 };
 export default function AboutPage() {
   return (
     <section>
-    <Header/>
- <section className="py-32 px-6 bg-black">
-      <div className="max-w-4xl mx-auto prose prose-invert">
+      <Header />
+      <ThemedContentWrapper>
         <FadeIn>
-        <AboutContent1 />
+          <AboutContent1 />
         </FadeIn>
 
-        <Spacer y={32}/>
+        <Spacer y={32} />
         <FadeIn>
-        <AboutContent2 />
+          <AboutContent2 />
         </FadeIn>
-      </div>
-      </section>
-      <Footer/>
-      </section>
+      </ThemedContentWrapper>
+      <Footer />
+    </section>
   );
 }

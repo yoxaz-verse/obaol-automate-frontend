@@ -1,239 +1,217 @@
 "use client";
 
-import React, { useState, useContext } from "react";
-import { Input, Button, Switch } from "@nextui-org/react";
+import React, { useState, useContext, useEffect } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+  Input,
+  Switch,
+  Tooltip,
+} from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosResponse } from "axios"; // or your own http client
-import AuthContext from "@/context/AuthContext"; // Example context for user
+import { AxiosResponse } from "axios";
+import AuthContext from "@/context/AuthContext";
 import { apiRoutesByRole } from "@/utils/tableValues";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 
-// Mock helper calls – in your real code, you'd import from your apiHandler
-// async function getData(url: string): Promise<AxiosResponse<any, any>> {
-//   return axios.get(url);
-// }
-// async function patchData(
-//   url: string,
-//   payload: any
-// ): Promise<AxiosResponse<any, any>> {
-//   return axios.patch(url, payload);
-// }
-// async function postData(
-//   url: string,
-//   payload: any
-// ): Promise<AxiosResponse<any, any>> {
-//   return axios.post(url, payload);
-// }
-
-// ---------------------
-//  Props / Interfaces
-// ---------------------
 interface SelectModalProps {
-  variantRate: any; // The variantRate object to be handled
-  refetchData?: () => void; // Optional callback to refresh parent
-}
-
-interface CommissionFormProps {
-  record: any; // The displayedRate or variantRate we are editing
-  isNewRecord: boolean; // If true => POST, else PATCH
-  initialCommission: number;
-  initialSelected: boolean;
-  endpoint: string;
-  userRole: string;
+  variantRate: any;
   refetchData?: () => void;
 }
 
-// ------------------------------------------------------------------------
-//  MAIN SelectModal COMPONENT
-// ------------------------------------------------------------------------
+const HeroModal = Modal as any;
+
 const SelectModal: React.FC<SelectModalProps> = ({
   variantRate,
   refetchData,
 }) => {
   const { user } = useContext(AuthContext);
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
 
   const userRole = user?.role;
   const associateId = user?.id;
 
-  // By default, for an Associate we want the displayedRate endpoint
+  // 1. Determine Endpoints
   let apiEndpoint = apiRoutesByRole["displayedRate"];
-
-  // If user is Admin => we do variantRate endpoint
   if (userRole === "Admin") {
     apiEndpoint = apiRoutesByRole["variantRate"];
   }
 
-  // If user is Associate, we might fetch existing displayedRate
-  // If user is Admin, we skip this fetch (just use variantRate directly).
-  const shouldFetch =
-    userRole === "Associate" && associateId && variantRate?._id;
-
-  const { data } = useQuery({
+  // 2. Fetch DisplayedRate if Associate
+  const shouldFetch = userRole === "Associate" && associateId && variantRate?._id;
+  const { data: fetchResult, isLoading: isFetching } = useQuery({
     queryKey: [apiEndpoint, variantRate._id, associateId],
     queryFn: async () => {
-      // e.g. /displayedRate?variantRate=xxx&associate=yyy
       const url = `${apiEndpoint}?variantRate=${variantRate._id}&associate=${associateId}`;
       return getData(url);
     },
-    enabled: !!shouldFetch, // only fetch if valid
+    enabled: !!shouldFetch && isOpen,
   });
 
-  // If user is Admin => no "displayedRate" data needed
+  // 3. Resolve Record to Use
   let displayedRateRecord: any = null;
   let newRecordNeeded = false;
 
   if (userRole === "Associate") {
-    // The API likely returns an array of displayedRates
-    const arr = data?.data?.data?.data || [];
-    // find the one whose variantRate._id matches
-
+    const arr = fetchResult?.data?.data?.data || [];
     displayedRateRecord = arr.find(
       (dr: any) =>
         (dr.variantRate && dr.variantRate._id === variantRate._id) ||
-        (dr.variantRate &&
-          variantRate.variantRate &&
-          dr.variantRate._id === variantRate.variantRate._id)
+        (dr.variantRate?._id === variantRate.variantRate?._id)
     );
-    newRecordNeeded = !displayedRateRecord; // if not found => we'll POST
+    newRecordNeeded = !displayedRateRecord;
   }
 
-  // Decide which record we'll pass to CommissionForm:
-  // Admin => the variantRate itself
-  // Associate => either the found displayedRate or (none, so we'll create one)
-  const recordToUse =
-    userRole === "Admin" ? variantRate : displayedRateRecord ?? variantRate;
-
-  // Are we updating or creating?
+  const recordToUse = userRole === "Admin" ? variantRate : displayedRateRecord ?? variantRate;
   const isNewRecord = userRole !== "Admin" && newRecordNeeded;
 
-  // Commission / selected from the record
-  const commissionVal = recordToUse?.commission ?? 0;
-  const selectedVal = recordToUse?.selected ?? false;
+  // 4. Form State
+  const [commission, setCommission] = useState<number>(0);
+
+  // Sync state when modal opens or data changes
+  useEffect(() => {
+    if (isOpen && recordToUse) {
+      setCommission(recordToUse.commission ?? 0);
+    }
+  }, [isOpen, recordToUse]);
+
+  // 5. Mutation
+  const mutation = useMutation<AxiosResponse<any, any>, Error, void>({
+    mutationFn: async () => {
+      const payload: any = {
+        commission,
+        selected: true, // Auto-select when saved
+      };
+
+      if (isNewRecord) {
+        payload.variantRate = variantRate?._id;
+        payload.associate = user?.id;
+        return postData(apiEndpoint, payload);
+      } else {
+        return patchData(`${apiEndpoint}/${recordToUse._id}`, payload);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint, variantRate._id, associateId] });
+      if (refetchData) refetchData();
+      onClose();
+    },
+  });
+
+  const isReadOnly = userRole === "Employee";
+  const canEdit = userRole === "Admin" || userRole === "Associate";
+
+  if (!canEdit && !isReadOnly) return null;
 
   return (
-    <div>
-      {/* If we are Admin or Associate, we show the form. Otherwise, no form. */}
-      {(userRole === "Admin" || userRole === "Associate") && (
-        <CommissionForm
-          record={recordToUse}
-          isNewRecord={isNewRecord}
-          initialCommission={commissionVal}
-          initialSelected={selectedVal}
-          endpoint={apiEndpoint}
-          userRole={userRole ?? ""}
-          refetchData={refetchData}
-        />
-      )}
-    </div>
+    <>
+      <Tooltip
+        content={isReadOnly ? "View Rates" : "Configure Commission"}
+        delay={0}
+        closeDelay={0}
+        color="foreground"
+        showArrow
+      >
+        <Button
+          isIconOnly
+          size="sm"
+          variant="flat"
+          color={recordToUse?.selected ? "warning" : "default"}
+          onPress={onOpen}
+          className="rounded-full shadow-sm"
+        >
+          {isReadOnly ? (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          )}
+        </Button>
+      </Tooltip>
+
+      <HeroModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        placement="center"
+        backdrop="blur"
+        classNames={{
+          base: "bg-background/80 backdrop-blur-lg border border-default-100",
+          header: "border-b border-default-100",
+          footer: "border-t border-default-100",
+        }}
+      >
+        <ModalContent>
+          {(onClose: any) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <h3 className="text-xl font-bold tracking-tight text-foreground">
+                  {isReadOnly ? "Rate Overview" : "Rate Configuration"}
+                </h3>
+                <p className="text-xs text-default-400 font-medium">
+                  {variantRate.productVariant?.name || "Product Variant"}
+                </p>
+              </ModalHeader>
+              <ModalBody className="py-10">
+                <div className="flex flex-col gap-6">
+                  <Input
+                    type="number"
+                    label="Commission (₹)"
+                    description="Enter the markup/commission for this variant"
+                    placeholder="0.00"
+                    variant="flat"
+                    labelPlacement="inside"
+                    size="lg"
+                    isDisabled={isReadOnly}
+                    value={commission.toString()}
+                    startContent={
+                      <div className="pointer-events-none flex items-center">
+                        <span className="text-default-400 text-lg">₹</span>
+                      </div>
+                    }
+                    classNames={{
+                      inputWrapper: "h-16 rounded-2xl bg-default-100/50 hover:bg-default-200/50 transition-background",
+                      label: "font-bold text-foreground/80 mb-2",
+                      description: "text-[10px] font-medium text-default-400",
+                    }}
+                    onValueChange={(val: any) => {
+                      const v = parseFloat(val);
+                      setCommission(isNaN(v) ? 0 : v);
+                    }}
+                  />
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" color="danger" onPress={onClose} radius="full" className="font-semibold">
+                  {isReadOnly ? "Close" : "Cancel"}
+                </Button>
+                {!isReadOnly && (
+                  <Button
+                    color="warning"
+                    className="font-bold shadow-lg shadow-warning/20 px-8 text-white"
+                    radius="full"
+                    onPress={() => mutation.mutate()}
+                    isLoading={mutation.isPending}
+                  >
+                    Save Changes
+                  </Button>
+                )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </HeroModal>
+    </>
   );
 };
 
 export default SelectModal;
-
-// ------------------------------------------------------------------------
-//  CommissionForm
-// ------------------------------------------------------------------------
-const CommissionForm: React.FC<CommissionFormProps> = ({
-  record,
-  isNewRecord,
-  initialCommission,
-  initialSelected,
-  endpoint,
-  userRole,
-  refetchData,
-}) => {
-  const { user } = useContext(AuthContext);
-  const queryClient = useQueryClient();
-
-  const [commission, setCommission] = useState<number>(initialCommission);
-  const [isSelected, setIsSelected] = useState<boolean>(initialSelected);
-  const [buttonStatus, setButtonStatus] = useState<
-    "Update" | "Updating" | "Updated" | "Failed"
-  >("Update");
-
-  // The actual mutation function
-  async function mutationFn(): Promise<AxiosResponse<any, any>> {
-    const payload: any = {
-      commission,
-      selected: isSelected,
-    };
-
-    if (isNewRecord) {
-      // user is Associate, we do POST => /displayedRate
-      // must also pass variantRate & associate
-      payload.variantRate = record?._id; // The actual variantRate ID
-      payload.associate = user?.id;
-      return postData(endpoint, payload);
-    } else {
-      // either patch the displayedRate or patch the variantRate
-      return patchData(`${endpoint}/${record._id}`, payload);
-    }
-  }
-
-  // useMutation with generics: <Return, Error, Variables?, Context?>
-  const updateMutation = useMutation<AxiosResponse<any, any>, Error, void>({
-    mutationFn,
-    onSuccess: () => {
-      setButtonStatus("Updated");
-      // Re-fetch the relevant query
-      queryClient.refetchQueries({
-        queryKey: [endpoint, record._id, user?.id],
-      });
-      if (refetchData) refetchData();
-    },
-    onError: () => {
-      setButtonStatus("Failed");
-    },
-  });
-
-  const handleSubmit = () => {
-    setButtonStatus("Updating");
-    updateMutation.mutate(); // no args => we typed "void" as input
-  };
-
-  return (
-    <div className="flex items-end  gap-2">
-      {/* Commission field */}
-      <Input
-        type="number"
-        label="Commission"
-        labelPlacement="outside"
-        placeholder="0.00"
-        size="sm"
-        className="w-20"
-        value={commission.toString()}
-        startContent={
-          <div className="pointer-events-none flex items-center">
-            <span className="text-default-400 text-small">₹</span>
-          </div>
-        }
-        onChange={(e) => {
-          const val = parseFloat(e.target.value);
-          setCommission(isNaN(val) ? 0.0 : val);
-          setButtonStatus("Update");
-        }}
-      />
-
-      {/* Selected switch */}
-      <Switch
-        color="warning"
-        isSelected={isSelected}
-        onChange={(e) => {
-          setIsSelected(e.target.checked);
-          setButtonStatus("Update");
-        }}
-      />
-
-      {/* Action button */}
-      <Button
-        size="sm"
-        color={buttonStatus === "Updated" ? "success" : "primary"}
-        variant="bordered"
-        onPress={handleSubmit}
-        disabled={buttonStatus === "Updating"}
-      >
-        {buttonStatus}
-      </Button>
-    </div>
-  );
-};

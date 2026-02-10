@@ -66,51 +66,51 @@ export default function BrokenTradeExperience() {
     offset: ["start end", "end start"],
   });
   const current = FAILURES[index];
-// SLOW, SOFT, CINEMATIC FADE
-const opacity = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [0, 1, 1, 0]
-);
+  // SLOW, SOFT, CINEMATIC FADE
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0, 1, 1, 0]
+  );
 
-// COMING FROM BACK → GOING BACK
-const y = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [200, 0, 0, -200]
-);
+  // COMING FROM BACK → GOING BACK
+  const y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [200, 0, 0, -200]
+  );
 
-// DEPTH FEEL
-const scale = useTransform(
-  scrollYProgress,
-  [0, 0.25, 0.75, 1],
-  [0.94, 1, 1, 0.94]
-);
+  // DEPTH FEEL
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.75, 1],
+    [0.94, 1, 1, 0.94]
+  );
   return (
-    <motion.section 
-    
-    ref={sectionRef}
-    style={{
-      opacity,
-      y,
-      scale,
-      willChange: "transform, opacity",
-    }}
-  className="py-20 sm:py-32 px-4 sm:px-6 border-t border-gray-800 bg-neutral-950">
+    <motion.section
+
+      ref={sectionRef}
+      style={{
+        opacity,
+        y,
+        scale,
+        willChange: "transform, opacity",
+      }}
+      className="py-20 sm:py-32 px-4 sm:px-6 border-t border-default-200 bg-content1">
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="max-w-3xl mb-12 sm:mb-20">
           <h2 className="text-2xl sm:text-3xl font-semibold">
             Why Commodity Trading Still Feels Broken
           </h2>
-          <p className="mt-4 sm:mt-6 text-gray-300 text-sm sm:text-base">
+          <p className="mt-4 sm:mt-6 text-default-600 text-sm sm:text-base">
             Let’s walk through a typical commodity trade — and see where it
             actually breaks down.
           </p>
         </div>
 
         {/* Trade Simulator */}
-        <div className="relative border border-gray-800 rounded-xl bg-black p-5 sm:p-10">
+        <div className="relative border border-default-200 rounded-xl bg-background p-5 sm:p-10">
           {/* Progress – mobile scroll, desktop static */}
           <div className="mb-8 sm:mb-10">
             {/* Mobile progress dots */}
@@ -118,14 +118,13 @@ const scale = useTransform(
               {FAILURES.map((_, i) => (
                 <div
                   key={i}
-                  className={`h-1 w-6 rounded-full ${
-                    i === index ? "bg-orange-400" : "bg-gray-700"
-                  }`}
+                  className={`h-1 w-6 rounded-full ${i === index ? "bg-orange-400" : "bg-default-200"
+                    }`}
                 />
               ))}
             </div>
             {/* Desktop Progress */}
-            <div className="hidden md:flex justify-between text-xs text-gray-500">
+            <div className="hidden md:flex justify-between text-xs text-default-400">
               {FAILURES.map((f, i) => (
                 <span
                   key={f.id}
@@ -162,11 +161,11 @@ const scale = useTransform(
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.25 }}
             >
-              <h3 className="text-lg sm:text-xl font-semibold text-white">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">
                 {current.failure}
               </h3>
 
-              <p className="mt-3 sm:mt-4 text-gray-300 text-sm sm:text-base leading-relaxed">
+              <p className="mt-3 sm:mt-4 text-default-600 text-sm sm:text-base leading-relaxed">
                 {current.detail}
               </p>
             </motion.div>
@@ -174,7 +173,7 @@ const scale = useTransform(
 
           {/* Controls */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <span className="text-xs sm:text-sm text-gray-500">
+            <span className="text-xs sm:text-sm text-default-400">
               Trade Stage {index + 1} of {FAILURES.length}
             </span>
 
@@ -185,7 +184,7 @@ const scale = useTransform(
                 )
               }
               className="w-full sm:w-auto px-6 py-3 rounded-md
-                         border border-gray-700 text-sm
+                         border border-default-200 text-sm
                          hover:border-orange-400 transition"
             >
               {index === FAILURES.length - 1
@@ -198,7 +197,7 @@ const scale = useTransform(
         {/* End Note */}
         {index === FAILURES.length - 1 && (
           <div className="mt-10 sm:mt-16 max-w-3xl">
-            <p className="text-xs sm:text-sm text-gray-400">
+            <p className="text-xs sm:text-sm text-default-500">
               This is not a rare failure — this is how most commodity trades
               operate today.
             </p>

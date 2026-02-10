@@ -6,31 +6,27 @@ import { Spacer } from "@nextui-org/react";
 import EndToEndSection from "@/components/home/endtoend";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
-
-
+import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 
 export const metadata: Metadata = {
-    title: "How OBAOL Works",
-    description:
-"How OBAOL supports commodity trade execution through verification, coordination, and closure."
+  title: "How OBAOL Works",
+  description:
+    "How OBAOL supports commodity trade execution through verification, coordination, and closure."
 };
 export default function AboutPage() {
   return (
     <section>
-    <Header/>
-
-  <section className="py-32 px-6 bg-black">
-      <div className="max-w-4xl mx-auto prose prose-invert">
+      <Header />
+      <ThemedContentWrapper>
         <FadeIn>
-        <Content1 />
+          <Content1 />
         </FadeIn>
-<EndToEndSection/>
-          <FadeIn>
-        <Content2 />
+        <EndToEndSection />
+        <FadeIn>
+          <Content2 />
         </FadeIn>
-      </div>
-    </section>
-    <Footer/>
+      </ThemedContentWrapper>
+      <Footer />
     </section>
   );
 }

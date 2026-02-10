@@ -2,7 +2,7 @@
 import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import Title from "@/components/titles";
-import {} from "@/core/api/apiRoutes";
+import { } from "@/core/api/apiRoutes";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import { Accordion, AccordionItem, Divider, Spacer } from "@heroui/react";
 import React, { useState } from "react";
@@ -56,7 +56,7 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
         <p className="text-white">{product.description}</p>
       )}
 
-      <Spacer y={6} />
+      <div className="h-6" />
 
       <QueryComponent
         api={apiRoutesByRole["productVariant"]}
@@ -71,7 +71,7 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
       >
         {(productVariantData: any) => {
           const productVariantFormFields = tableConfig["productVariant"];
-          const productVariantValue = productVariantData.data || [];
+          const productVariantValue = productVariantData?.data || [];
 
           return (
             <section>
@@ -85,10 +85,10 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
                   additionalVariable={{ product: product._id }}
                 />
               )}
-              <Spacer y={1} />
+              <div className="h-1" />
               {productVariantValue && (
                 <>
-                  <Accordion variant="splitted">
+                  <Accordion>
                     {productVariantValue.map((productVariantValue: any) => (
                       <AccordionItem
                         key={productVariantValue._id}
@@ -101,14 +101,14 @@ export const ProductList = ({ product, setProduct }: IProductList) => {
                             {productVariantValue.description}
                           </p>
                         )}
-                        <Spacer y={6} />
+                        <div className="h-6" />
                         <VariantRate
                           productVariant={productVariantValue}
                           rate="variantRate"
                         />
-                        <Spacer y={2} />
+                        <div className="h-2" />
                         <Divider />
-                        <Spacer y={5} />
+                        <div className="h-5" />
                         <div className="flex gap-5">
                           <p>{productVariantValue.name} actions</p>
                           <EditModal

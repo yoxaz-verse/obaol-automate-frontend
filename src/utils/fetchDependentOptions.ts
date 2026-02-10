@@ -262,7 +262,7 @@ const getOptions = async (
     if (lowerKey.includes("state")) {
       const res = await getData(stateRoutes.getAll, { limit: "1000" });
       return (
-        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
       );
     }
 
@@ -272,7 +272,7 @@ const getOptions = async (
         limit: "1000",
       });
       return (
-        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
       );
     }
 
@@ -282,7 +282,7 @@ const getOptions = async (
         limit: "1000",
       });
       return (
-        res?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
+        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
       );
     }
 
@@ -291,7 +291,7 @@ const getOptions = async (
         [parentKey]: parentValue,
       });
       return (
-        res?.data?.data?.map((p: any) => ({
+        res?.data?.data?.data?.map((p: any) => ({
           key: p._id,
           value: `${p.pincode} - ${p.officename}`,
         })) || []

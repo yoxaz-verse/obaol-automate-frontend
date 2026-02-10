@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer, Accordion, AccordionItem, Button } from "@heroui/react";
+import { Accordion, AccordionItem, Button, Divider } from "@heroui/react";
 // ^ Adjust if you're using a different UI library for your accordions
 import { getData } from "@/core/api/apiHandler";
 import { inventoryManagerRoutes } from "@/core/api/apiRoutes";
@@ -12,7 +12,6 @@ import UserDeleteModal from "@/components/CurdTable/delete";
 import Title from "@/components/titles";
 import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
-import { Divider } from "@nextui-org/react";
 import EditModal from "@/components/CurdTable/edit-model";
 
 // -- Adjust these interfaces to match your data shape --
@@ -75,7 +74,7 @@ export default function CategoryDivision({
         />
       )}
 
-      <Spacer y={2} />
+      <div className="h-2" />
 
       {/* 1) Fetch the main Category array. No "count" API – just normal listing. */}
       <QueryComponent
@@ -131,12 +130,10 @@ function CategoryList({
       const newMap: { [id: string]: number } = {};
       for (const cat of categories) {
         try {
-          // Normal listing: e.g. GET /subCategory?category=cat._id
           const response = await getData(
             `${apiRoutesByRole["subCategory"]}?category=${cat._id}`
           );
-          // Suppose that returns { data: subCategoryArray }
-          const subCats: ISubCategory[] = response?.data?.data || [];
+          const subCats: ISubCategory[] = response?.data?.data?.data || [];
           newMap[cat._id] = subCats.length;
         } catch (err) {
           console.error("Failed to fetch subCategories for cat", cat._id, err);
@@ -154,7 +151,7 @@ function CategoryList({
   }
 
   return (
-    <Accordion variant="splitted">
+    <Accordion {...({ variant: "splitted" } as any)}>
       {categories.map((cat) => {
         // If we haven't fetched yet, show "..."
         const subCount = subCatCountMap[cat._id] ?? "...";
@@ -168,7 +165,7 @@ function CategoryList({
             className="opacity-60 hover:opacity-100 "
           >
             {cat.description && <p>{cat.description}</p>}
-            <Spacer y={1} />
+            <div className="h-1" />
             {/* If you want an AddModal for subCategory creation */}
             {tableConfig["subCategory"] && (
               <AddModal
@@ -182,7 +179,7 @@ function CategoryList({
                 refetchData={refetchData}
               />
             )}
-            <Spacer y={1} />
+            <div className="h-1" />
             {/* 2) On expand, fetch subCategories again for actual usage */}
             <SubCategorySection
               categoryId={cat._id}
@@ -191,7 +188,7 @@ function CategoryList({
               setSelectedProduct={setSelectedProduct}
             />
             <Divider />
-            <Spacer y={4} />
+            <div className="h-4" />
             <div className="flex justify-around">
               <p>{cat.name} Actions</p>
               <EditModal
@@ -243,7 +240,7 @@ function SubCategorySection({
     >
       {(subCategoryData: any) => {
         // Suppose we get an array of subCategories
-        const subCategories: ISubCategory[] = subCategoryData.data || [];
+        const subCategories: ISubCategory[] = subCategoryData?.data || [];
         if (subCategories.length === 0) {
           return <p>No subcategories found.</p>;
         }
@@ -293,7 +290,7 @@ function SubCategoryList({
             `${apiRoutesByRole["product"]}?subCategory=${sub._id}`
           );
           // Suppose we get { data: productArray }
-          const products: IProduct[] = response?.data?.data || [];
+          const products: IProduct[] = response?.data?.data?.data || [];
           newMap[sub._id] = products.length;
         } catch (err) {
           console.error(
@@ -311,7 +308,7 @@ function SubCategoryList({
   }, [subCategories]);
 
   return (
-    <Accordion variant="shadow">
+    <Accordion {...({ variant: "shadow" } as any)}>
       {subCategories.map((sub) => {
         const productCount = productCountMap[sub._id] ?? "...";
 
@@ -324,7 +321,7 @@ function SubCategoryList({
             className="opacity-90 hover:opacity-100 "
           >
             <p>{sub.description}</p>
-            <Spacer y={1} />
+            <div className="h-1" />
 
             {/* If you want an AddModal for products */}
             {tableConfig["product"] && (
@@ -340,14 +337,14 @@ function SubCategoryList({
               />
             )}
 
-            <Spacer y={1} />
+            <div className="h-1" />
             {/* 3) On expand, fetch actual products for display */}
             <ProductSection
               subCategoryId={sub._id}
               setSelectedProduct={setSelectedProduct}
             />
             <Divider />
-            <Spacer y={4} />
+            <div className="h-4" />
             <div className="flex justify-around">
               <p>{sub.name} Actions</p>
               <EditModal

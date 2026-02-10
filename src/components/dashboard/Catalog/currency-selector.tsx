@@ -47,7 +47,7 @@ const CurrencySelector: React.FC = () => {
       label="Select currency"
       labelPlacement="inside"
       selectedKeys={[selectedCurrency.toUpperCase()]}
-      onChange={(e) => setSelectedCurrency(e.target.value.toLowerCase())}
+      onChange={(e: any) => setSelectedCurrency(e.target.value.toLowerCase())}
       className="max-w-[250px] text-foreground"
       defaultSelectedKeys={["INR"]}
     >

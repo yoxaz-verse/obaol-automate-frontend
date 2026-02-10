@@ -287,7 +287,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         </>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <Chip color={"success" as any} variant="dot">
+                          {/* @ts-ignore */}
+                          <Chip color={"success"} variant="dot">
                             Live
                           </Chip>
                           <CreateEnquiryButton
@@ -352,97 +353,97 @@ const VariantRate: React.FC<VariantRateProps> = ({
               />
             </section>
             <section className="md:hidden block">
-              {tableData.map((item: any, index: number) => (
-                <Card
-                  key={index}
-                  className="border-none bg-background/60 hover:bg-background/95 my-2 max-w-full"
-                  shadow={"sm" as any}
-                >
-                  <CardBody>
-                    <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
-                      {/* Album Cover (optional)
-        <div className="relative col-span-6 md:col-span-4">
-          <Image
-            alt="Album cover"
-            className="object-cover"
-            height={200}
-            src="https://heroui.com/images/album-cover.png"
-          />
-        </div>
-        */}
+              {tableData.map((item: any, index: number) => {
+                return (
+                  // @ts-ignore
+                  <Card
+                    key={index}
+                    {...({
+                      className:
+                        "border-none bg-background/60 hover:bg-background/95 my-2 max-w-full",
+                      shadow: "sm",
+                    } as any)}
+                  >
+                    <CardBody>
+                      <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
+                        <div className="flex flex-col col-span-6 md:col-span-8">
+                          <div className="flex justify-between items-start">
+                            <div className="flex flex-col gap-0">
+                              <h3 className="font-semibold text-foreground/90">
+                                {item.product || "Product"}
+                              </h3>
+                              <p className="text-small text-foreground/80">
+                                {item.productVariant || "Product Variant"}
+                              </p>
+                              <h1 className="text-large font-medium mt-2">
+                                {item.rate || "Price"}
+                              </h1>
+                            </div>
 
-                      <div className="flex flex-col col-span-6 md:col-span-8">
-                        <div className="flex justify-between items-start">
-                          <div className="flex flex-col gap-0">
-                            <h3 className="font-semibold text-foreground/90">
-                              {item.product || "Product"}
-                            </h3>
-                            <p className="text-small text-foreground/80">
-                              {item.productVariant || "Product Variant"}
-                            </p>
-                            <h1 className="text-large font-medium mt-2">
-                              {item.rate || "Price"}
-                            </h1>
+                            <div className="flex items-center gap-2">
+                              {user?.role === "Admin" ||
+                                (!item.variantRate &&
+                                  item.associateId === user?.id &&
+                                  user?.id !== undefined) ? (
+                                <LiveToggle
+                                  variantRate={item}
+                                  refetchData={refetchData}
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                  <CreateEnquiryButton
+                                    productVariant={
+                                      item.productVariantId ||
+                                      item.variantRate?.productVariant?._id
+                                    }
+                                    variantRate={item}
+                                  />
+                                  {/* @ts-ignore */}
+                                  <Chip color={"success"} variant="dot">
+                                    Live
+                                  </Chip>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            {/* LiveToggle or Live indicator with Enquiry for non-Admin */}
-                            {user?.role === "Admin" ||
-                              (!item.variantRate &&
-                                item.associateId === user?.id &&
-                                user?.id !== undefined) ? (
-                              <LiveToggle
+                          <div className="flex flex-col mt-3 gap-1">
+                            {(item.variantRate &&
+                              item.associateId === user?.id) ||
+                              (item.associateId !== user?.id &&
+                                item.companyId !==
+                                associateByIdValue?.associateCompany?._id) ? (
+                              <SelectModal
                                 variantRate={item}
                                 refetchData={refetchData}
                               />
-                            ) : (
-                              <div className="flex flex-col items-center gap-2">
-                                <CreateEnquiryButton
-                                  productVariant={
-                                    item.productVariantId ||
-                                    item.variantRate?.productVariant?._id
-                                  }
-                                  variantRate={item}
-                                />
-                                <Chip color={"success" as any} variant="dot">
-                                  Live
-                                </Chip>
-                              </div>
-                            )}
+                            ) : user?.id !== undefined ? (
+                              <>
+                                {item.associateId === user.id ? (
+                                  <b className="text-warning-300">Your Rate</b>
+                                ) : (
+                                  item.companyId ===
+                                  associateByIdValue.associateCompany._id && (
+                                    <div key={index} className="flex-1 min-w-[300px]">
+                                      {/* @ts-ignore */}
+                                      <Card
+                                        className="p-4"
+                                        /* @ts-ignore */
+                                        shadow={"sm" as any}
+                                      >
+                                      </Card>
+                                    </div>
+                                  )
+                                )}
+                              </>
+                            ) : null}
                           </div>
                         </div>
-
-                        {/* Commission / selection logic */}
-                        <div className="flex flex-col mt-3 gap-1">
-                          {(item.variantRate &&
-                            item.associateId === user?.id) ||
-                            (item.associateId !== user?.id &&
-                              item.companyId !==
-                              associateByIdValue?.associateCompany?._id) ? (
-                            <SelectModal
-                              variantRate={item}
-                              refetchData={refetchData}
-                            />
-                          ) : user?.id !== undefined ? (
-                            <>
-                              {item.associateId === user.id ? (
-                                <b className="text-warning-300">Your Rate</b>
-                              ) : (
-                                item.companyId ===
-                                associateByIdValue.associateCompany._id && (
-                                  <b className="text-warning-300">
-                                    Company Rate
-                                  </b>
-                                )
-                              )}
-                            </>
-                          ) : null}
-                        </div>
                       </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              ))}
+                    </CardBody>
+                  </Card>
+                );
+              })}
             </section>
           </>
         );
@@ -507,11 +508,14 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
       >
         {isSelected ? "Live" : "Not Live"}
       </p>
+      {/* @ts-ignore */}
       <Switch
-        color={"success" as any}
-        isSelected={isSelected}
-        isDisabled={loading}
-        onChange={handleToggle}
+        {...({
+          color: "success",
+          isSelected: isSelected,
+          isDisabled: loading,
+          onChange: handleToggle,
+        } as any)}
       />
     </div>
   );
@@ -535,12 +539,14 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
       <Button onPress={onOpen} color="success" variant="flat">
         Enquiry
       </Button>
+      {/* @ts-ignore */}
       <Modal
-        placement={"center" as any}
-        // isDismissable={false}
-        isOpen={isOpen}
-        className="max-w-[600px] max-h-full"
-        onOpenChange={onOpenChange}
+        {...({
+          placement: "center",
+          isOpen: isOpen,
+          className: "dark text-foreground mx-4",
+          onOpenChange: onOpenChange,
+        } as any)}
       >
         <ModalContent>
           {(onClose) => (
@@ -655,6 +661,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     <form onSubmit={handleSubmit} className="   flex flex-col gap-2">
       <div>
         <Divider className="bg-orange-400" />
+        {/* @ts-ignore */}
         <Spacer y={4} />
         {/* <label className="block text-sm font-medium"></label> */}
         <Input

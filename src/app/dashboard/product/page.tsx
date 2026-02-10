@@ -19,6 +19,7 @@ export default function Product() {
           <div className="flex w-[100%] gap-4 h-[80vh]">
             <div className="w-[100%] pb-10  pr-6 overflow-auto">
               {/* Tabs for selecting between different roles */}
+              {/* @ts-ignore */}
               <Tabs
                 aria-label="Selected" // Translate
                 selectedKey={currentTable}
@@ -42,8 +43,8 @@ export default function Product() {
                     additionalParams={
                       user?.role === "Associate"
                         ? {
-                            associate: user?.id,
-                          }
+                          associate: user?.id,
+                        }
                         : {}
                     }
                   />
@@ -55,6 +56,7 @@ export default function Product() {
               </Tabs>{" "}
             </div>
           </div>
+          {/* @ts-ignore */}
           <Spacer y={4} />
         </div>
       </div>

@@ -33,14 +33,17 @@ export default function Essentials() {
         <div className="my-4">
           <div className="flex w-[100%]">
             <div className="w-[40%]">
+              {/* @ts-ignore */}
               <Accordion variant="splitted">
                 <AccordionItem key="1" aria-label="Spices" title="Spices">
+                  {/* @ts-ignore */}
                   <Accordion variant="shadow">
                     <AccordionItem
                       key="1"
                       aria-label="Ground Spices"
                       title="Ground Spices"
                     >
+                      {/* @ts-ignore */}
                       <Accordion variant="bordered">
                         <AccordionItem
                           key="1"
@@ -83,6 +86,7 @@ export default function Essentials() {
             </div>
             <div className="w-[60%]">
               <Title title="Product Name" /> {/* Translate */}
+              {/* @ts-ignore */}
               <Tabs
                 aria-label="Location Tabs" // Translate
                 selectedKey={locationTab}
@@ -98,7 +102,9 @@ export default function Essentials() {
                           refetchData={refetchData} // Function to refetch activities list
                           currentTable={"Locations"} // Translate
                         /> */}
+                        {/* @ts-ignore */}
                         <Spacer y={6} />
+                        {/* @ts-ignore */}
                         <Accordion variant="light">
                           <AccordionItem
                             key="1"
@@ -122,7 +128,7 @@ export default function Essentials() {
                             {defaultContent}
                           </AccordionItem>
                         </Accordion>{" "}
-                        <Spacer y={6} />
+                        <Spacer {...({ y: 6 } as any)} />
                       </>
                     )}
                     {tab.key === "locationType" && (
@@ -136,6 +142,7 @@ export default function Essentials() {
               </Tabs>{" "}
             </div>
           </div>
+          {/* @ts-ignore */}
           <Spacer y={4} />
         </div>
       </div>

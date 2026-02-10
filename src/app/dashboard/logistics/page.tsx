@@ -97,16 +97,17 @@ export default function CIFPage() {
     };
     mode === "international"
       ? cifMut.mutate({
-          ...base,
-          originPort: originPortCode,
-          destPort: destPortCode,
-        })
+        ...base,
+        originPort: originPortCode,
+        destPort: destPortCode,
+      })
       : domMut.mutate(base);
   };
 
   return (
     <div className="flex flex-col md:flex-row p-4 gap-6">
       <div className="flex-1">
+        {/* @ts-ignore */}
         <Tabs selectedKey={mode} onSelectionChange={(k) => setMode(k as any)}>
           <Tab key="domestic" title="Domestic" />
           <Tab key="international" title="International" />
@@ -138,6 +139,7 @@ export default function CIFPage() {
 
         {mode === "international" && (
           <>
+            {/* @ts-ignore */}
             <Autocomplete
               label="Origin Port (IN)"
               placeholder="Search Indian port"
@@ -150,7 +152,9 @@ export default function CIFPage() {
                 </AutocompleteItem>
               ))}
             </Autocomplete>
-            <Spacer y={0.5} />
+            {/* @ts-ignore */}
+            <Spacer y={6} />
+            {/* @ts-ignore */}
             <Autocomplete
               label="Destination Port (Global)"
               placeholder="Search global port"

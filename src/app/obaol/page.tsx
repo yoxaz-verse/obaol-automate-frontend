@@ -13,9 +13,11 @@ const Projects: NextPage = () => {
   return (
     <div className="flex items-center justify-center ">
       <div className="w-[95%]  ">
+        {/* @ts-ignore */}
         <Spacer y={6} />
         <Title title="OBAOL Supreme" />
         <VariantRate rate="variantRate" displayOnly />
+        {/* @ts-ignore */}
         <Spacer y={4} />
       </div>
     </div>

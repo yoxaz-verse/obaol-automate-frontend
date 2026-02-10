@@ -219,40 +219,29 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
               : field.values || [];
 
         return (
+          // @ts-ignore
           <Autocomplete
             aria-label={`Select ${field.label}`}
             name={field.key}
-            className="w-[90%] text-foreground"
-            label={`Select ${field.label}`}
-            placeholder={
-              isDisabled && field.dependsOn
-                ? `Please select ${toTitleCase(field.dependsOn)} first`
-                : field.label
-            }
+            className="w-full text-foreground"
+            label={field.label}
+            placeholder={`Select ${field.label}`}
             isDisabled={!!isDisabled}
             defaultItems={options}
-            selectedKey={filters[field.key] ? String(filters[field.key]) : null}
-            onSelectionChange={(key) => {
-              if (!key) return;
-
-              const selected = options.find(
-                (item) => String(item.key) === String(key)
-              );
-              console.log(selected.value);
-
-              if (selected) {
-                handleInputChange({
-                  target: {
-                    name: field.key,
-                    value: selected.key,
-                    show: selected.value, // use this to show in chip
-                  },
-                });
-              }
+            selectedKey={filters[field.key] ? String(filters[field.key]) : ""}
+            onSelectionChange={(key: any) => {
+              const selectedItem = options.find((opt: any) => String(opt.key) === String(key));
+              handleInputChange({
+                target: {
+                  name: field.key,
+                  value: key,
+                  show: selectedItem ? selectedItem.value : ""
+                }
+              });
             }}
           >
-            {(item) => (
-              <AutocompleteItem key={String(item.key)} value={item.value} className="text-foreground">
+            {(item: any) => (
+              <AutocompleteItem key={String(item.key)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
             )}

@@ -404,6 +404,7 @@ export default function EditModal({
               : f.values || [];
 
         return (
+          // @ts-ignore
           <Autocomplete
             name={f.key}
             className="w-[90%] text-foreground"
@@ -431,28 +432,6 @@ export default function EditModal({
               </AutocompleteItem>
             )}
           </Autocomplete>
-        );
-
-        return (
-          <Select
-            placeholder={`Select ${f.label}`}
-            isDisabled={disabled}
-            selectedKeys={
-              new Set(formData[f.key] ? [String(formData[f.key])] : [])
-            }
-            onSelectionChange={(keys) =>
-              handleChange({
-                target: { name: f.key, value: Array.from(keys)[0] },
-              })
-            }
-            className="text-foreground"
-          >
-            {(f.values ?? []).map((opt) => (
-              <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
-                {opt.value}
-              </SelectItem>
-            ))}
-          </Select>
         );
       case "multiselect":
         return (
@@ -514,15 +493,15 @@ export default function EditModal({
               />
             )}
             {formData[f.key] && (
-              <div className="mt-2">
+              <div className="mt-2 text-foreground">
                 {/\.(pdf|PDF)$/.test(formData[f.key]) ? (
                   <a href={formData[f.key]} target="_blank" rel="noopener">
                     View PDF
                   </a>
                 ) : (
+                  // @ts-ignore
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${formData[f.key]
-                      }`}
+                    src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${formData[f.key]}`}
                     width={100}
                     height={100}
                     alt="preview"

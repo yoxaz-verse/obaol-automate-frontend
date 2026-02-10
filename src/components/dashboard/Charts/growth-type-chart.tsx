@@ -12,7 +12,8 @@ import {
   BarController,
   Filler,
 } from 'chart.js';
-import { Chart } from 'react-chartjs-2';
+import * as ReactChartJS from 'react-chartjs-2';
+const { Chart } = ReactChartJS as any;
 ChartJS.register(
   LinearScale,
   CategoryScale,

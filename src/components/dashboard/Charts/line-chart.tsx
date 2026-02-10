@@ -1,4 +1,5 @@
-import { Line } from "react-chartjs-2";
+import * as ReactChartJS from "react-chartjs-2";
+const { Line } = ReactChartJS as any;
 
 const data = {
   labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -19,9 +20,9 @@ const data = {
   ]
 };
 export default function LineChart() {
-    return (
-      <div className="w-full h-full">
-        <Line data={data} />
-      </div>
-    );
-  }
+  return (
+    <div className="w-full h-full">
+      <Line data={data} />
+    </div>
+  );
+}

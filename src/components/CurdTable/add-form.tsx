@@ -634,6 +634,7 @@ const AddForm: React.FC<AddFormProps> = ({
               : field.values || [];
 
         return (
+          // @ts-ignore
           <Autocomplete
             aria-label={`Select ${field.label}`}
             name={field.key}

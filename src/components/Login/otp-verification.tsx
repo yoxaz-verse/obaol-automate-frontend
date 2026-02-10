@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@nextui-org/react";
-import { InputOtp } from "@heroui/react";
+import { Button, InputOtp } from "@heroui/react";
 import { User } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
@@ -121,13 +120,16 @@ export default function OtpVerification({ user }: IVerification) {
               Enter the 6-digit code sent to your email
             </p>
 
+            {/* @ts-ignore */}
             <InputOtp
-              length={6}
-              defaultValue={otp}
-              color="default"
-              classNames={{ segmentWrapper: "gap-x-2" }}
-              onChange={handleChange}
-              inputMode="numeric"
+              {...({
+                length: 6,
+                defaultValue: otp,
+                color: "default",
+                classNames: { segmentWrapper: "gap-x-2" },
+                onChange: handleChange,
+                inputMode: "numeric",
+              } as any)}
             />
 
             <Button

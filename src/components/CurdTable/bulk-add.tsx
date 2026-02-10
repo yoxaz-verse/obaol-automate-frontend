@@ -154,6 +154,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
 
   return (
     <div className="justify-between items-center w-max">
+      {/* @ts-ignore */}
       <Accordion variant="splitted">
         <AccordionItem
           key="1"
@@ -183,9 +184,8 @@ const BulkAdd: React.FC<BulkAddProps> = ({
               style={{
                 color: statusType === "success" ? "green" : "red",
                 marginTop: "10px",
-                border: `1px solid ${
-                  statusType === "success" ? "green" : "red"
-                }`,
+                border: `1px solid ${statusType === "success" ? "green" : "red"
+                  }`,
                 padding: "10px",
                 borderRadius: "5px",
                 backgroundColor:

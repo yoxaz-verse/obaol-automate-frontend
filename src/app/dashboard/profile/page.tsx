@@ -22,6 +22,12 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 import dayjs from "dayjs";
 
+const formatDate = (date: any) => {
+  if (!date) return "N/A";
+  const d = dayjs(date);
+  return d.isValid() ? d.format("DD MMM YYYY") : "Invalid Date";
+};
+
 // 🕒 Helper to format working hours
 const formatWorkingHours = (hours: any[]) => {
   if (!Array.isArray(hours)) return "—";
@@ -67,7 +73,7 @@ const roleConfigs: Record<
           {
             key: "joiningDate",
             label: "Joining Date",
-            format: (v) => dayjs(v).format("DD MMM YYYY"),
+            format: (v) => formatDate(v),
           },
           { key: "jobRole.name", label: "Job Role" },
           { key: "jobType.name", label: "Job Type" },
@@ -90,7 +96,7 @@ const roleConfigs: Record<
           {
             key: "createdAt",
             label: "Member Since",
-            format: (v) => dayjs(v).format("DD MMM YYYY"),
+            format: (v) => formatDate(v),
           },
         ],
       },
@@ -143,7 +149,7 @@ const roleConfigs: Record<
           {
             key: "createdAt",
             label: "Created At",
-            format: (v) => dayjs(v).format("DD MMM YYYY, HH:mm"),
+            format: (v) => formatDate(v),
           },
         ],
       },
@@ -165,7 +171,7 @@ const roleConfigs: Record<
           {
             key: "createdAt",
             label: "Onboarded Date",
-            format: (v) => dayjs(v).format("DD MMM YYYY"),
+            format: (v) => formatDate(v),
           },
         ],
       },
@@ -186,7 +192,7 @@ const roleConfigs: Record<
           {
             key: "createdAt",
             label: "Member Since",
-            format: (v) => dayjs(v).format("DD MMM YYYY"),
+            format: (v) => formatDate(v),
           },
         ],
       },
@@ -251,7 +257,7 @@ export default function ProfilePage() {
                           className="font-bold uppercase text-[10px]"
                           size="sm"
                         >
-                          {user?.role}
+                          {user?.role?.toUpperCase()}
                         </Chip>
                       </div>
                       <div className="flex justify-between items-center px-4">

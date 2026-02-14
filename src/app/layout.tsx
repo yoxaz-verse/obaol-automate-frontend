@@ -152,7 +152,7 @@ export default function RootLayout({
               }}
             />
           </noscript>
-        )}
+        )}   
         <AuthProvider>
           <VerificationProvider>
             <Providers>{children}</Providers>

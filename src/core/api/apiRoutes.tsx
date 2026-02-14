@@ -237,8 +237,24 @@ export const researchedCompanyRoutes = createCRUDRoutes(
   BASE_PATHS.RESEARCHED_COMPANY
 );
 
+// Analytics Routes
+export const analyticsRoutes = {
+  enquiryTrends: `${BASE_PATHS.ACTIVITY}/analytics/trends/enquiries`, // Note: prefix logic handled in backend, here we map to full path relative to base API
+  // Correction: The backend mounts at /api/v1/web/analytics
+  // Let's define a new base for analytics
+};
+
+const ANALYTICS_BASE = "/analytics";
+
+export const dashboardRoutes = {
+  enquiryTrends: `${ANALYTICS_BASE}/trends/enquiries`,
+  productPerformance: `${ANALYTICS_BASE}/performance/products`,
+  systemMetrics: `${ANALYTICS_BASE}/metrics/system`,
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
+  analytics: dashboardRoutes,
   account: accountRoutes,
   user: userRoutes,
   employee: employeeRoutes,
@@ -268,6 +284,12 @@ export const apiRoutes = {
   displayedRate: displayedRateRoutes,
   inventoryManager: inventoryManagerRoutes,
   enquiry: enquiryRoutes,
+  orders: {
+    create: "/orders",
+    getAll: "/orders",
+    update: "/orders",
+    delete: "/orders",
+  },
   pincodeEntry: pincodeEntryRoutes,
   state: stateRoutes,
   district: districtRoutes,

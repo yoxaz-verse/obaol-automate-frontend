@@ -7,6 +7,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-default-200  bg-background">
+
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
 
@@ -27,6 +28,7 @@ export default function Header() {
             <NavLink href="/about">About</NavLink>
             <NavLink href="/why-obaol">Why OBAOL</NavLink>
             <NavLink href="/how-it-works">How It Works</NavLink>
+            <NavLink href="/product">Products</NavLink>
             <NavLink href="/faq">FAQ</NavLink>
           </nav>
 

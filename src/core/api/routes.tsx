@@ -6,11 +6,12 @@ const ROUTES = {
   BLOG: "/blog",
   TERMS_CONDITION: "/tnc",
   CONTACT: "/contact",
-  
+  PRODUCTS: "/products",
+
   // Other routes not mentioned in BeforeLoginRoutes or AfterLoginRoutes
   NOTIFICATION: "/notification",
   MY_PROFILE: "/myprofile",
-  SUBSCRIPTION:"/subscription"
+  SUBSCRIPTION: "/subscription"
 };
 const BeforeLoginRoutes = [
   {
@@ -40,6 +41,11 @@ const BeforeLoginRoutes = [
     name: "Contact",
     href: ROUTES.CONTACT,
     image: "/contact.png",
+  },
+  {
+    name: "Products",
+    href: ROUTES.CONTACT,
+    // image: "/contact.png",
   },
 ];
 

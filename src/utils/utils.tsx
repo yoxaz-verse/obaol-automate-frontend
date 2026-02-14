@@ -84,9 +84,9 @@ export const sidebarOptions = [
     link: "/dashboard/companyProduct",
   },
   {
-    name: "Enquires", //Translate
+    name: "Enquiries", //Translate
     icon: <RiFileAddLine />,
-    link: "/dashboard/enquires",
+    link: "/dashboard/enquiries",
   },
   {
     name: "Profile", //Translate

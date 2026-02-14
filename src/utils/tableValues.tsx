@@ -894,7 +894,16 @@ export const initialTableConfig: Record<
       inTable: true,
       required: true,
     },
-
+    {
+      label: "Assigned Overseer",
+      type: "select",
+      key: "assignedEmployee",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("employee"),
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
     {
       label: "Created At",
       type: "dateTime",

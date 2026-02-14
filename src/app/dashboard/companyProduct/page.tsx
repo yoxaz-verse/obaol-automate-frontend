@@ -31,12 +31,10 @@ interface Company {
   _id: string;
   name: string;
   assignedEmployee?: any;
-}
-
-interface VariantRateItem {
-  isLive?: boolean;
-  associateCompany?: { _id: string; name: string } | string | null;
-  associate?: { associateCompany?: { _id: string; name: string } | string | null };
+  stats?: {
+    totalProducts: number;
+    liveProducts: number;
+  };
 }
 
 export default function CompanyProductPage() {
@@ -50,11 +48,6 @@ export default function CompanyProductPage() {
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
     queryKey: ["companies"],
     queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 10000 }),
-  });
-
-  const { data: rateData, isLoading: loadingRates } = useQuery({
-    queryKey: ["variantRates"],
-    queryFn: () => getData(variantRateRoutes.getAll, { limit: 10000 }),
   });
 
   const { data: employeeData, isLoading: loadingEmployees } = useQuery({
@@ -80,10 +73,10 @@ export default function CompanyProductPage() {
     allEmployees,
   } = useMemo(() => {
     let allCompanies: Company[] = companyData?.data?.data?.data || [];
-    const variantRates: any[] = rateData?.data?.data?.data || [];
     const allEmployees: any[] = employeeData?.data?.data?.data || [];
 
     // Role-based filtering: Employees only see assigned companies
+    // Note: Backend hook also handles this, but frontend filtering is a nice double-layer for UX
     if (user?.role === "employee") {
       allCompanies = allCompanies.filter(c => {
         const assignedId = typeof c.assignedEmployee === "object" ? c.assignedEmployee?._id : c.assignedEmployee;
@@ -91,49 +84,16 @@ export default function CompanyProductPage() {
       });
     }
 
-    const liveCompanyIds = new Set<string>();
-    const hasProductCompanyIds = new Set<string>();
-
-    for (const item of variantRates) {
-      const direct = typeof item.associateCompany === "object" ? item.associateCompany?._id : item.associateCompany;
-      const fromAssociate = typeof item.associate?.associateCompany === "object" ? item.associate?.associateCompany?._id : item.associate?.associateCompany;
-      const coId = (direct || fromAssociate) as string;
-
-      if (coId) {
-        // Only keep if in the allowed company list
-        if (allCompanies.some(c => c._id === coId)) {
-          hasProductCompanyIds.add(coId);
-          if (item.isLive) {
-            liveCompanyIds.add(coId);
-          }
-        }
-      }
-    }
-
-    // Categorize
+    // Categorize using backend-provided stats
     const live = allCompanies
-      .filter((c) => liveCompanyIds.has(c._id))
-      .map(c => ({
-        ...c,
-        productCount: variantRates.filter(r => {
-          const d = typeof r.associateCompany === "object" ? r.associateCompany?._id : r.associateCompany;
-          const f = typeof r.associate?.associateCompany === "object" ? r.associate?.associateCompany?._id : r.associate?.associateCompany;
-          return (d === c._id || f === c._id) && r.isLive;
-        }).length
-      }));
+      .filter((c) => (c.stats?.liveProducts || 0) > 0)
+      .map(c => ({ ...c, productCount: c.stats?.liveProducts }));
 
     const active = allCompanies
-      .filter((c) => hasProductCompanyIds.has(c._id) && !liveCompanyIds.has(c._id))
-      .map(c => ({
-        ...c,
-        productCount: variantRates.filter(r => {
-          const d = typeof r.associateCompany === "object" ? r.associateCompany?._id : r.associateCompany;
-          const f = typeof r.associate?.associateCompany === "object" ? r.associate?.associateCompany?._id : r.associate?.associateCompany;
-          return (d === c._id || f === c._id);
-        }).length
-      }));
+      .filter((c) => (c.stats?.totalProducts || 0) > 0 && (c.stats?.liveProducts || 0) === 0)
+      .map(c => ({ ...c, productCount: c.stats?.totalProducts }));
 
-    const empty = allCompanies.filter((c) => !hasProductCompanyIds.has(c._id));
+    const empty = allCompanies.filter((c) => (c.stats?.totalProducts || 0) === 0);
 
     // Determine selection based on current tab
     const currentList =
@@ -150,9 +110,9 @@ export default function CompanyProductPage() {
       selectedCompany: selected,
       allEmployees,
     };
-  }, [companyData, rateData, employeeData, selectedCompanyId, activeTab, user]);
+  }, [companyData, employeeData, selectedCompanyId, activeTab, user]);
 
-  if (loadingCompanies || loadingRates) {
+  if (loadingCompanies) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-warning-500 animate-pulse font-medium">Loading company catalog...</div>

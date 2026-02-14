@@ -99,25 +99,30 @@ const EssentialTabContent = ({
                     : "Not Defined";
 
                 if (essentialName === "associateCompany") {
-                  return {
-                    ...rest,
-                    location: item.state
-                      ? item.district.name + ", " + item.state.name
-                      : "Unknown",
-                    companyType: item.companyType
-                      ? item.companyType.name
-                      : "Not Defined",
-                  };
+                  const locationParts = [
+                    item.district?.name,
+                    item.state?.name
+                  ].filter(Boolean);
 
-                  // Handle other user types similarly if needed
-                }
-                if (essentialName === "researchedCompany") {
                   return {
                     ...rest,
-                    location: item.state
-                      ? `${item.district?.name || ""}, ${
-                          item.state?.name || ""
-                        }`
+                    location: locationParts.length > 0
+                      ? locationParts.join(", ")
+                      : "Unknown",
+                    companyType: item.companyType?.name || "Not Defined",
+                  };
+                }
+
+                if (essentialName === "researchedCompany") {
+                  const locationParts = [
+                    item.district?.name,
+                    item.state?.name
+                  ].filter(Boolean);
+
+                  return {
+                    ...rest,
+                    location: locationParts.length > 0
+                      ? locationParts.join(", ")
                       : "Unknown",
                     companyType: item.companyType?.name || "Not Defined",
                     companyStage: item.companyStage?.name || "Not Defined",

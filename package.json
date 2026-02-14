@@ -51,6 +51,7 @@
     "react-icons": "^5.0.1",
     "react-leaflet": "^4.2.1",
     "react-toastify": "^10.0.5",
+    "recharts": "^3.7.0",
     "sonner": "^1.5.0",
     "tailwind-variants": "^0.2.0",
     "xlsx": "^0.18.5"

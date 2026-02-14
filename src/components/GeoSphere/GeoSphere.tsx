@@ -14,6 +14,7 @@ export interface MarkerData {
   source: "pinEntry" | "district" | "state";
   countryName?: string;
   functions?: string[];
+  statusName?: string;
 }
 
 interface GeoSphereProps {
@@ -96,8 +97,8 @@ const GeoSphere: React.FC<GeoSphereProps> = ({ markers }) => {
         source === "pinEntry"
           ? "green"
           : source === "district"
-          ? "blue"
-          : "red";
+            ? "blue"
+            : "red";
 
       const iconMarkup = renderToStaticMarkup(
         <FaMapMarkerAlt color={iconColor} size="16px" />
@@ -116,12 +117,13 @@ const GeoSphere: React.FC<GeoSphereProps> = ({ markers }) => {
       <div class="mb-2">
         <strong>${item.label}</strong><br/>
         <strong>Country:</strong> ${item.countryName || "N/A"}<br/>
+        <strong>Status:</strong> ${item.statusName || "N/A"}<br/>
         <hr/>
         <br/>
-        <div class="mb-4"> <strong >Functions:</strong> 
+        <div class="mb-4"> <strong>Functions:</strong> 
        <span style="color: #ffa500;">
        ${item.functions?.join(", ") || "N/A"}</span>
-     </div> </>
+     </div>
     `
         )
         .join("");

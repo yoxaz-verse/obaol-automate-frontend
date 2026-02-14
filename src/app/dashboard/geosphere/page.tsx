@@ -25,6 +25,7 @@ export default function UnLoCodeMapPage() {
 
             const functionNames = u.functions?.map((f: any) => f.name) || [];
             const countryName = u.country?.name || "Unknown";
+            const statusName = u.status?.description || "N/A";
 
             return [
               {
@@ -35,6 +36,7 @@ export default function UnLoCodeMapPage() {
                 source: "pinEntry",
                 countryName,
                 functions: functionNames,
+                statusName,
               },
             ];
           });

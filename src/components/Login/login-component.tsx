@@ -101,69 +101,78 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
   return (
     <AuthLayout title={role} subtitle="Login">
-      <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
         <Input
           value={email}
           className="w-full"
-          type="text"
-          variant="flat"
-          label="Email"
-          isInvalid={!isInvalidEmail}
-          isRequired={true}
-          color={!isInvalidEmail ? "danger" : "success"}
-          placeholder="Enter your email"
+          type="email"
+          variant="bordered"
+          label="Email Address"
+          labelPlacement="outside"
+          isInvalid={!isInvalidEmail && email.length > 0}
+          errorMessage={!isInvalidEmail && email.length > 0 ? "Please enter a valid email" : ""}
+          isRequired
+          placeholder="name@example.com"
           onValueChange={setEmail}
+          classNames={{
+            inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
+          }}
         />
+
         <Input
           value={password}
-          className="w-full pb-1"
+          className="w-full"
           label="Password"
-          placeholder="Enter your Password"
-          id="password"
-          required
+          labelPlacement="outside"
+          placeholder="Enter your password"
+          variant="bordered"
+          isRequired
           endContent={
-            isVisible ? (
-              <IoEye onClick={toggleVisibility} className="cursor-pointer text-default-400" />
-            ) : (
-              <IoEyeOff
-                onClick={toggleVisibility}
-                className="cursor-pointer text-default-400"
-              />
-            )
+            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+              {isVisible ? (
+                <IoEye className="text-2xl text-default-400 pointer-events-none" />
+              ) : (
+                <IoEyeOff className="text-2xl text-default-400 pointer-events-none" />
+              )}
+            </button>
           }
           type={isVisible ? "text" : "password"}
           onValueChange={setPassword}
+          classNames={{
+            inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
+          }}
         />
-        <div className="flex justify-between w-full px-1">
+
+        <div className="flex justify-between items-center w-full px-1">
           <p
             onClick={() => router.push("/auth/register")}
-            className="text-xs text-warning hover:text-warning-600 cursor-pointer transition-colors"
+            className="text-sm text-primary hover:underline cursor-pointer transition-all"
           >
             Create account
           </p>
           <p
             onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
-            className="text-xs text-warning hover:text-warning-600 cursor-pointer transition-colors"
+            className="text-sm text-default-500 hover:text-foreground cursor-pointer transition-colors"
           >
             Forgot password?
           </p>
         </div>
 
         {errorMessage && (
-          <p className="text-danger text-sm text-center">{errorMessage}</p>
+          <div className="p-3 rounded-lg bg-danger-50 text-danger text-sm text-center border border-danger-200">
+            {errorMessage}
+          </div>
         )}
 
-        <Spacer y={2} />
         <Button
-          className="w-full font-bold"
-          variant="ghost"
+          className="w-full font-bold shadow-lg shadow-warning/20"
           color="warning"
           type="submit"
-          disabled={isLoading}
           isLoading={isLoading}
           size="lg"
+          radius="lg"
         >
-          {isLoading ? "Loading..." : "Login"}
+          {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
     </AuthLayout>

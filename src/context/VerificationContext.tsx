@@ -21,7 +21,7 @@ interface VerificationContextType {
 
 const VerificationContext = createContext<VerificationContextType>({
   verified: {},
-  updateVerificationStatus: () => {},
+  updateVerificationStatus: () => { },
 });
 
 export const VerificationProvider = ({
@@ -81,7 +81,7 @@ export const VerificationProvider = ({
 
     const verificationRules: Record<string, VerificationTypes[]> = {
       "/dashboard": ["email"],
-      "/dashboard/settings": ["email", "phone", "gst"],
+      "/dashboard/settings": ["email"],
       "/dashboard/profile": [],
     };
 

@@ -124,6 +124,35 @@ export default function EditModal({
     setFormData(clone);
   }, [fetched, formFields]);
 
+  // 3.5) Pre-fetch dependent options when formData is populated
+  useEffect(() => {
+    if (Object.keys(formData).length === 0) return;
+
+    const fetchDependencies = async () => {
+      const updates: Record<string, any[]> = {};
+
+      for (const field of formFields) {
+        if (field.dependsOn && typeof field.dynamicValuesFn === "function") {
+          const parentValue = formData[field.dependsOn];
+          if (parentValue && !dynamicOptions[field.key]) {
+            try {
+              const updatedValues = await field.dynamicValuesFn(String(parentValue));
+              updates[field.key] = updatedValues;
+            } catch (err) {
+              console.error(`Error fetching dependency for ${field.key}:`, err);
+            }
+          }
+        }
+      }
+
+      if (Object.keys(updates).length > 0) {
+        setDynamicOptions((prev) => ({ ...prev, ...updates }));
+      }
+    };
+
+    fetchDependencies();
+  }, [formData, formFields, dynamicOptions]);
+
   // 4) Compute lock & unlock using raw = fetched.data.data
   const { isLocked, unlockAt } = useMemo(() => {
     const raw = fetched?.data?.data;
@@ -167,6 +196,7 @@ export default function EditModal({
     setLoading(true);
     mutation.mutate(formData);
   };
+
   const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -198,11 +228,7 @@ export default function EditModal({
       }
     });
   };
-  // 6) Input handlers
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
-  };
+
   const handleDate = (key: string, d: any) =>
     setFormData((p) => ({ ...p, [key]: d ? d.toString() : "" }));
   const handleBool = (key: string, v: boolean) =>
@@ -388,7 +414,7 @@ export default function EditModal({
             placeholder={f.label}
             className="py-2 px-3 border rounded-md w-full bg-transparent text-foreground"
             value={formData[f.key] || ""}
-            onChange={handleChange}
+            onChange={handleInputChange}
             disabled={disabled}
           />
         );
@@ -415,13 +441,13 @@ export default function EditModal({
                 : f.label
             }
             isDisabled={!!isDisabled}
-            defaultItems={options}
-            selectedKey={formData[f.key] ? String(formData[f.key]) : null}
+            items={options}
+            selectedKey={formData[f.key] ? String(formData[f.key]) : ""}
             onSelectionChange={(key: any) =>
               handleInputChange({
                 target: {
                   name: f.key,
-                  value: String(key),
+                  value: String(key || ""),
                 },
               })
             }
@@ -517,7 +543,7 @@ export default function EditModal({
             name={f.key}
             placeholder={f.label}
             value={formData[f.key] || ""}
-            onChange={handleChange}
+            onChange={handleInputChange}
             isDisabled={disabled}
           />
         );

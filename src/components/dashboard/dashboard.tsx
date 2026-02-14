@@ -8,12 +8,15 @@ import {
   productRoutes,
   projectRoutes,
   variantRateRoutes,
+  apiRoutes,
 } from "@/core/api/apiRoutes";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { routeRoles } from "@/utils/roleHelpers";
-import { Spacer, Tab, Tabs } from "@nextui-org/react";
+import { Spacer, Tab, Tabs, Card, Chip } from "@nextui-org/react";
 import EssentialTabContent from "./Essentials/essential-tab-content";
+import InsightCard from "./InsightCard";
+import TrendChart from "./TrendChart";
 
 const Dashboard: NextPage = () => {
   // Fetch project counts by status using the count-by-status API
@@ -48,40 +51,11 @@ const Dashboard: NextPage = () => {
     // Add more tabs if needed, e.g., "Archived Projects"
   ]; // Convert object to array
 
-  // const projectCounts: Status[] = projectCountsResponse
-  //   ? Object.values(projectCountsResponse.data.data)
-  //   : [];
-
-  // // Calculate total projects
-  // const totalProjects = projectCounts.reduce(
-  //   (sum, project) => sum + project.count,
-  //   0
-  // );
-
-  // Calculate open projects
-  // const openProjects =
-  //   projectCounts.find((project) => project.status === "Open")?.count || 0;
-
-  // Calculate open projects
-  // const closedProjects =
-  //   projectCounts.find((project) => project.status === "Closed")?.count || 0;
-
-  // Calculate the percentage of open projects
-  // const openPercentage =
-  //   totalProjects > 0 ? ((openProjects / totalProjects) * 100).toFixed(2) : "0";
-
-  // Calculate the percentage of open projects
-  // const closedPercentage =
-  //   totalProjects > 0
-  //     ? ((closedProjects / totalProjects) * 100).toFixed(2)
-  // : "0";
-
   const liveRate =
     rateValue && Array.isArray(rateValue?.data)
       ? rateValue?.data.filter((rate: any) => rate.isLive === true).length
       : "0";
 
-  console.log((liveRate / rateValue?.totalCount) * 100);
   // Step 1: Extract all associate IDs from rateValue where there's a linked product
   const associatesWithProductsSet = new Set(
     Array.isArray(rateValue?.data)
@@ -105,9 +79,26 @@ const Dashboard: NextPage = () => {
     ? ((associatesWithProductsCount / totalAssociates) * 100).toFixed(2)
     : "0";
 
+  // Fetch Analytics Data
+  const { data: trendData } = useQuery({
+    queryKey: ["enquiryTrends"],
+    queryFn: () => getData(apiRoutes.analytics.enquiryTrends, {}),
+  });
+
+  const { data: topProductsData } = useQuery({
+    queryKey: ["productPerformance"],
+    queryFn: () => getData(apiRoutes.analytics.productPerformance, { limit: 5 }),
+  });
+
+  const { data: systemMetricsData } = useQuery({
+    queryKey: ["systemMetrics"],
+    queryFn: () => getData(apiRoutes.analytics.systemMetrics, {}),
+  });
+
+  const systemMetrics = systemMetricsData?.data?.data || {};
+
   const { user } = useContext(AuthContext);
   let filteredOptions;
-  // Filter options based on the user's role
   if (user != null)
     filteredOptions = sidebarOptions.filter((option) => {
       const allowedRoles = routeRoles[option.link] || [];
@@ -115,88 +106,85 @@ const Dashboard: NextPage = () => {
     });
 
   return (
-    <div className="w-full">
-      <div className="px-4 py-5 ">
-        {(user?.role === "ActivityManager" || user?.role === "Worker") && (
-          <Tabs
-            aria-label="TimeSheet Tabs" // Translate
-            selectedKey={currentTable}
-            onSelectionChange={(key) => setCurrentTable(key as string)}
-          >
-            {tabs.map((tab) => (
-              <Tab key={tab.key} title={tab.title}>
-                <DashboardTile data={"GGG"} type="line charts" />
-              </Tab>
-            ))}
-          </Tabs>
-        )}
-      </div>
+    <div className="w-full p-6 space-y-6">
       {user?.id && user?.role === "Admin" && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 px-4 py-5">
-          <DashboardTile
-            heading={"Total Rates"}
-            data={rateValue?.totalCount ?? "0"}
-            type="details"
-          />
-          <DashboardTile
-            heading={"Live Rates"}
-            data={liveRate ?? "0"}
-            type="details"
-          />
-          <DashboardTile
-            heading={"Associates"}
-            data={associateValue?.totalCount ?? "0"}
-            type="details"
-          />
-          <DashboardTile
-            heading={"Total Products"}
-            data={productValue?.totalCount ?? "0"}
-            type="details"
-          />
-        </div>
-      )}
-      <div className="flex px-4 py-5 justify-between w-full flex-col lg:flex-row gap-2">
-        <div className="lg:w-[70%] grid grid-cols-2 md:grid-cols-3 gap-5">
-          {filteredOptions?.map((option, index) =>
-            option.name !== "Dashboard" ? (
-              <div key={index}>
-                <DashboardTile data={option} type="view" />
-              </div>
-            ) : null
-          )}
-        </div>
-        {/* Employee-specific section */}
-        {user?.id && user?.role === "Employee" && (
-          <EssentialTabContent
-            essentialName="researchedCompany"
-            filter={{ submittedBy: user.id }}
-            hideAdd={true}
-          />
-        )}
+        <>
+          {/* --- Insight Cards Section --- */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <InsightCard
+              title="Total Enquiries"
+              metric={systemMetrics.totalEnquiries?.toLocaleString() ?? "0"}
+              trend={{ value: `+${systemMetrics.newEnquiriesToday ?? 0} today`, isPositive: true }}
+              icon={<span className="text-xl">📩</span>}
+            />
+            <InsightCard
+              title="Live Rates"
+              metric={systemMetrics.totalLiveRates?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">⚡</span>}
+            />
+            <InsightCard
+              title="Total Associates"
+              metric={systemMetrics.totalAssociates?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">🤝</span>}
+            />
+            <InsightCard
+              title="Products"
+              metric={productValue?.totalCount?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">📦</span>}
+            />
+          </div>
 
-        <div className="flex flex-col lg:w-[23%] ">
-          <div className="flex flex-col"> </div>
-          {user?.id && user?.role === "Admin" && (
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-              {/* <div className="text-[#5F5F5F] font-medium pt-5">
-              Recent Projects</div> */}
-
-              <DashboardTile
-                type="percentage charts"
-                stats={
-                  ((liveRate / rateValue?.totalCount) * 100).toString() ?? "0"
-                }
-                heading="Live Rates"
-              />
-              <DashboardTile
-                type="percentage charts"
-                stats={percentageWithProducts.toString() ?? "0"}
-                heading="Associates with Products"
+          {/* --- Charts & Quick Actions Section --- */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 h-[350px]">
+              <TrendChart
+                title="Enquiry Trends (Last 30 Days)"
+                data={Array.isArray(trendData?.data?.data) ? trendData.data.data : []}
+                dataKey="count"
+                categoryKey="_id"
+                color="#f5a524" // Warning color to match theme
+                type="area"
               />
             </div>
-          )}
-        </div>
+            <div className="space-y-6">
+              <Card className="bg-content1/50 backdrop-blur-lg border-none shadow-sm p-4">
+                <h4 className="font-semibold text-foreground/90 mb-4">Top Performing Products</h4>
+                <div className="space-y-3">
+                  {(Array.isArray(topProductsData?.data?.data) ? topProductsData.data.data : []).map((prod: any, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center text-sm">
+                      <span className="text-default-600 truncate max-w-[70%]">{prod.name}</span>
+                      <Chip size="sm" variant="flat" color="warning">{prod.enquiryCount} leads</Chip>
+                    </div>
+                  ))}
+                  {(Array.isArray(topProductsData?.data?.data) ? topProductsData.data.data : []).length === 0 && (
+                    <div className="text-default-400 text-xs italic text-center">No data available</div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* --- Standard Grid (Existing Sidebar Options) --- */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {filteredOptions?.map((option, index) =>
+          option.name !== "Dashboard" ? (
+            <div key={index} className="aspect-square">
+              <DashboardTile data={option} type="view" />
+            </div>
+          ) : null
+        )}
       </div>
+
+      {/* Employee-specific section */}
+      {user?.id && user?.role === "Employee" && (
+        <EssentialTabContent
+          essentialName="researchedCompany"
+          filter={{ submittedBy: user.id }}
+          hideAdd={true}
+        />
+      )}
     </div>
   );
 };

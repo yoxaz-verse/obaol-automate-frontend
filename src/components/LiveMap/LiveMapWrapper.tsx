@@ -61,23 +61,27 @@ export default function LiveMapWrapper({ mappingValue }: LiveMapProps) {
     for (const item of mappingValue) {
       const label =
         item.productVariant?.product?.name +
-          " " +
-          item.productVariant?.name +
-          " - " +
-          item.rate || "Unknown";
+        " " +
+        item.productVariant?.name +
+        " - " +
+        item.rate || "Unknown";
 
       const description = `by: ${item.associateCompany?.name}`;
 
-      if (item.pinEntry?.latitude && item.pinEntry?.longitude) {
+      const pincodeEntry = item.pincodeEntry || item.associateCompany?.pincodeEntry;
+      const district = item.district || item.associateCompany?.district;
+      const state = item.state || item.associateCompany?.state;
+
+      if (pincodeEntry?.latitude && pincodeEntry?.longitude) {
         immediateMarkers.push({
-          latitude: item.pinEntry.latitude,
-          longitude: item.pinEntry.longitude,
+          latitude: pincodeEntry.latitude,
+          longitude: pincodeEntry.longitude,
           label,
           description,
           source: "pinEntry",
         });
-      } else if (item.district?.name && item.state?.name) {
-        const query = `${item.district.name}, ${item.state.name}, India`;
+      } else if (district?.name && state?.name) {
+        const query = `${district.name}, ${state.name}, India`;
         delayedQueue.push(async () => {
           const geo = await geocode(query);
           if (geo) {

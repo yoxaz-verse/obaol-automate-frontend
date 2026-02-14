@@ -16,11 +16,16 @@ import Image from "next/image";
 import { DetailsModalProps } from "@/data/interface-data";
 import StatusHistoryTabContent from "../StatusHistory/statusHistory";
 
+interface DetailsModalCustomProps extends DetailsModalProps {
+  customTrigger?: React.ReactNode;
+}
+
 export default function DetailsModal({
   currentTable,
   data,
   columns = [],
-}: DetailsModalProps) {
+  customTrigger,
+}: DetailsModalCustomProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   // List of fields you want to exclude from being displayed
@@ -152,8 +157,6 @@ export default function DetailsModal({
 
       case "multiselectValue":
         if (key === "locationManager") {
-          console.log(key);
-
           return (
             <ul className="list-disc list-inside">
               {Array.isArray(value) && value.length > 0 ? (
@@ -200,13 +203,22 @@ export default function DetailsModal({
         return "********"; // Password field, always return a masked string
 
       default:
+        // Safety check for objects
+        if (typeof value === 'object' && value !== null) {
+          // Try to extract a name or label if possible, otherwise stringify or ignore
+          return value.name || value.label || JSON.stringify(value);
+        }
         return value || "N/A"; // Return the value or N/A if undefined
     }
   };
 
   return (
     <>
-      <FiEye onClick={onOpen} className="cursor-pointer hover:text-green-600" />
+      {customTrigger ? (
+        <div onClick={onOpen}>{customTrigger}</div>
+      ) : (
+        <FiEye onClick={onOpen} className="cursor-pointer hover:text-green-600" />
+      )}
       <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

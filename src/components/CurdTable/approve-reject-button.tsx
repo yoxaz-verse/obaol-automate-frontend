@@ -1,4 +1,5 @@
-import { Button } from "@nextui-org/react";
+import { Button, Tooltip } from "@nextui-org/react";
+import { FiCheck, FiXCircle } from "react-icons/fi";
 import { apiRoutesByRole } from "@/utils/tableValues";
 import axios from "axios";
 
@@ -25,20 +26,22 @@ const ApproveRejectButtons = ({
     <div className="flex gap-2">
       {!item.isApproved && !item.isRejected && (
         <>
-          <Button
-            size="sm"
-            color="success"
-            onClick={() => handleAction("approve")}
-          >
-            Approve
-          </Button>
-          <Button
-            size="sm"
-            color="danger"
-            onClick={() => handleAction("reject")}
-          >
-            Reject
-          </Button>
+          <Tooltip content="Approve">
+            <span
+              onClick={() => handleAction("approve")}
+              className="text-lg text-success cursor-pointer active:opacity-50 hover:opacity-80 transition-opacity"
+            >
+              <FiCheck size={22} />
+            </span>
+          </Tooltip>
+          <Tooltip content="Reject">
+            <span
+              onClick={() => handleAction("reject")}
+              className="text-lg text-danger cursor-pointer active:opacity-50 hover:opacity-80 transition-opacity"
+            >
+              <FiXCircle size={22} />
+            </span>
+          </Tooltip>
         </>
       )}
 

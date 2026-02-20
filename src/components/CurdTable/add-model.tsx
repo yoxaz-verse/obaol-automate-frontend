@@ -7,7 +7,9 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Button,
 } from "@nextui-org/react";
+import { LuPlus } from "react-icons/lu";
 import { AddModalProps } from "@/data/interface-data";
 import AddForm from "./add-form";
 
@@ -25,13 +27,15 @@ const AddModal: React.FC<AddModalProps> = ({
 
   return (
     <>
-      <div className="flex justify-end">
-        <button
-          className="min-w-[120px] px-2 bg-warning-400 rounded-lg text-white h-[35px] text-sm shadow-sm shadow-warning-200"
-          onClick={openModal}
+      <div className="flex justify-end pr-2 group">
+        <Button
+          size="sm"
+          onPress={openModal}
+          className="bg-gradient-to-tr from-warning-500 to-orange-400 text-white shadow-lg shadow-warning-500/30 font-bold tracking-tight px-4 h-9 rounded-xl hover:scale-105 active:scale-95 transition-all duration-200"
+          startContent={<LuPlus className="text-lg font-black" />}
         >
-          Add {name ?? ""}
-        </button>
+          {name ? `Add ${name}` : `Create ${currentTable}`}
+        </Button>
       </div>
 
       <Modal

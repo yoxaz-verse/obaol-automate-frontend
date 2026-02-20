@@ -19,7 +19,9 @@ import {
   Spinner,
   AutocompleteItem,
   Autocomplete,
+  Tooltip,
 } from "@nextui-org/react";
+import { FiEdit2 } from "react-icons/fi";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
@@ -552,14 +554,15 @@ export default function EditModal({
 
   return (
     <>
-      <Button
-        color="warning"
-        className="text-white"
-        size="sm"
-        onClick={() => setOpen(true)}
-      >
-        Edit
-      </Button>
+      <Tooltip content="Edit">
+        <span
+          className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-warning-500 transition-colors"
+          onClick={() => setOpen(true)}
+        >
+          <FiEdit2 size={18} className="text-default-400 group-hover:text-warning-500" />
+          <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+        </span>
+      </Tooltip>
 
       <Modal
         isDismissable={false}

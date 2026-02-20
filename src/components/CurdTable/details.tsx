@@ -10,6 +10,7 @@ import {
   Button,
   useDisclosure,
   Spacer,
+  Tooltip,
 } from "@nextui-org/react";
 import { FiEye } from "react-icons/fi";
 import Image from "next/image";
@@ -215,9 +216,19 @@ export default function DetailsModal({
   return (
     <>
       {customTrigger ? (
-        <div onClick={onOpen}>{customTrigger}</div>
+        <div onClick={onOpen} className="cursor-pointer w-fit h-fit">
+          {customTrigger}
+        </div>
       ) : (
-        <FiEye onClick={onOpen} className="cursor-pointer hover:text-green-600" />
+        <Tooltip content="View">
+          <span
+            onClick={onOpen}
+            className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-primary transition-colors"
+          >
+            <FiEye size={18} className="text-default-400 group-hover:text-primary" />
+            <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+          </span>
+        </Tooltip>
       )}
       <Modal size="full" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>

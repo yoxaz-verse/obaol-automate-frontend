@@ -19,7 +19,11 @@ import {
   Spacer,
   Switch,
   useDisclosure,
+  Tooltip,
+  Spinner,
 } from "@heroui/react";
+import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
@@ -185,18 +189,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
         var variantRateFetchedData: any;
         const isMarketplace = additionalParams?.view === "marketplace";
 
+        // Helper: extract array from either a raw array OR a paginated wrapper
+        // QueryComponent returns data?.data?.data which is { data: [...], totalCount: N, ... }
+        // when the backend uses the generic CRUD engine with pagination.
+        const extractArray = (raw: any): any[] => {
+          if (Array.isArray(raw)) return raw;
+          if (raw?.data && Array.isArray(raw.data)) return raw.data;
+          return [];
+        };
+
         // DEBUGGING: Log Marketplace raw data
         if (isMarketplace) {
           console.log("=== MARKETPLACE DEBUG START ===");
           console.log("[1] Raw variantRateData:", variantRateData);
           console.log("[2] Is Array?:", Array.isArray(variantRateData));
-          console.log("[3] Array length:", Array.isArray(variantRateData) ? variantRateData.length : 'N/A');
+          console.log("[3] Has .data array?:", variantRateData?.data && Array.isArray(variantRateData?.data));
         }
 
         // For Marketplace, use ONLY raw VariantRate data (no merge with DisplayedRate)
-        // Note: QueryComponent already extracts data from the paginated response
         if (isMarketplace || rate === "catalogItem") {
-          variantRateFetchedData = Array.isArray(variantRateData) ? variantRateData : [];
+          variantRateFetchedData = extractArray(variantRateData);
           if (isMarketplace) {
             console.log("[4] variantRateFetchedData after extraction:", variantRateFetchedData);
             console.log("[5] variantRateFetchedData length:", variantRateFetchedData.length);
@@ -209,7 +221,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               variantResponse?.data.data.data // Personal (DisplayedRate)
             ) || [];
         } else {
-          variantRateFetchedData = Array.isArray(variantRateData) ? variantRateData : [];
+          variantRateFetchedData = extractArray(variantRateData);
         }
 
         // Inside your component, above the return:
@@ -222,7 +234,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             // 1) CatalogItem / DisplayedRate: assume current user owns it, show it.
             // 2) VariantRate (Marketplace): must have valid associate/company to show.
             (rate !== "variantRate") ||
-            (item.associate?.name || item.associateId || item.associateCompanyId)
+            (item.associate || item.associateCompany || item.associateId || item.associateCompanyId)
           )
           .map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -255,6 +267,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   " " +
                   (item.productVariant?.name || ""),
                 product: item.productVariant?.product?.name,
+                productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id,
 
                 // Column Mapping
@@ -280,7 +293,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
               return {
                 ...rest,
-                isLive: item.isLive,
+                isLive: item.isLive && (baseRate?.isLive !== false),
+                actualIsLive: item.isLive,
+                supplierIsLive: baseRate?.isLive !== false,
                 associate: item.associateCompanyId?.name || "My Company",
                 rate: convertRate(finalPrice),
                 associateId: item.associateId?._id || item.associateId,
@@ -288,12 +303,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 companyId: item.associateCompanyId?._id || item.associateCompanyId,
                 productVariant: item.productVariantId?.name,
                 product: item.productVariantId?.product?.name,
+                productId: item.productVariantId?.product?._id || item.productVariantId?.product,
+                productVariantId: item.productVariantId?._id,
                 rawBasePrice: (supplierRate + adminCommission),
                 rawCommission: mediatorMarkup,
                 customTitle: item.customTitle,
                 variantRate: item.baseRateId,
                 isCatalogView: true,
-                isAdded: true
+                isAdded: true,
+                isOwnerView: true
               };
             } else {
               // Row is a DisplayedRate (Personalized - fallback/old)
@@ -312,16 +330,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 companyId: item.associate?.associateCompany,
                 productVariant: item.variantRate?.productVariant?.name,
                 product: item.variantRate?.productVariant?.product?.name,
+                productId: item.variantRate?.productVariant?.product?._id || item.variantRate?.productVariant?.product,
+                productVariantId: item.variantRate?.productVariant?._id,
                 rawBasePrice: basePriceForUser,
                 rawCommission: associateMargin,
-                productVariantId: item.variantRate?.productVariant?._id,
                 variantRateId: item.variantRate?._id,
               };
             }
           });
 
         return (
-          <>
+          <div className="w-full max-w-full min-w-0 overflow-x-auto">
             <div className="flex justify-between">
               <CurrencySelector />
               {!displayOnly && rate === "variantRate" ? (
@@ -355,7 +374,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               )}
             </div>{" "}
             <div className="h-5" />
-            <section className="hidden md:block">
+            <section className="hidden md:block overflow-x-auto w-full max-w-full">
               <CommonTable
                 TableData={tableData}
                 columns={columns}
@@ -363,29 +382,43 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 otherModal={(rowItem: any) => {
                   if (rowItem.isMarketplaceView) {
                     return (
-                      <div className="flex w-full gap-8 items-end justify-end">
+                      <div className="flex items-center gap-2">
                         <AddToCatalogButton
                           rowItem={rowItem}
                           onSuccess={() => refetchData()}
                         />
+                        {user?.role === "Associate" && (
+                          <CreateEnquiryButton
+                            productVariant={rowItem.productVariantId}
+                            variantRate={rowItem}
+                          />
+                        )}
                       </div>
                     );
                   }
                   return (
-                    <div className="flex w-full gap-2 items-center justify-end">
+                    <div className="flex items-center justify-end">
                       {/* LiveToggle or Live Chip */}
-                      {(user?.role === "Admin" || rowItem.isOwnerView) ? (
-                        <LiveToggle
-                          variantRate={rowItem}
-                          refetchData={refetchData}
-                          apiEndpoint={apiRoutesByRole[rate]}
-                        />
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {rowItem.isLive ? (
-                            <>
+                      {(user?.role === "Admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <LiveToggle
+                            variantRate={rowItem}
+                            refetchData={refetchData}
+                            apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                          />
+                          {rowItem.isCatalogView && !rowItem.supplierIsLive && (
+                            <Tooltip content="Supplier rate is currently not live. This item will not be visible to customers.">
                               {/* @ts-ignore */}
-                              <Chip color={"success"} variant="dot">
+                              <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
+                            </Tooltip>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1">
+                          {rowItem.isLive ? (
+                            <div className="flex items-center gap-2">
+                              {/* @ts-ignore */}
+                              <Chip color={"success"} variant="dot" size="sm">
                                 Live
                               </Chip>
                               {!rowItem.isCatalogView && (
@@ -397,12 +430,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   variantRate={rowItem}
                                 />
                               )}
-                            </>
+                            </div>
                           ) : (
-                            <span className="text-default-400 text-tiny italic">
-                              {rowItem.isCatalogView ? "Hidden" : "Not Live"}
+                            <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
+                              Not Live
                             </span>
                           )}
+                          <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
                         </div>
                       )}
                     </div>
@@ -419,16 +453,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                     if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
                       return (
-                        <div className="flex w-full h-[50px] gap-8 items-end justify-end align-bottom">
-                          <EditModal
-                            _id={item._id}
-                            initialData={item}
-                            currentTable={rate}
-                            formFields={tableConfig[rate]}
-                            apiEndpoint={`${apiRoutesByRole[rate]}`}
-                            refetchData={refetchData}
-                          />
-                        </div>
+                        <EditModal
+                          _id={item._id}
+                          initialData={item}
+                          currentTable={rate}
+                          formFields={tableConfig[rate]}
+                          apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                          refetchData={refetchData}
+                        />
                       );
                     }
                   }
@@ -442,17 +474,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                   if (isAdmin || isOwner || isCatalog) {
                     return (
-                      <div className="flex w-full h-[50px] gap-8 items-end justify-end align-bottom">
-                        <DeleteModal
-                          _id={item._id}
-                          name={item.name || item.customTitle || item.productVariant}
-                          deleteApiEndpoint={apiRoutesByRole[rate]}
-                          refetchData={refetchData}
-                          triggerText={isCatalog ? "Remove from Catalog" : "Delete"}
-                          triggerColor="danger"
-                          useBody={true}
-                        />
-                      </div>
+                      <DeleteModal
+                        _id={item._id}
+                        name={item.name || item.customTitle || item.productVariant}
+                        deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                        refetchData={refetchData}
+                        useBody={true}
+                      />
                     );
                   }
                   return null;
@@ -476,13 +504,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         <div className="flex flex-col col-span-6 md:col-span-8">
                           <div className="flex justify-between items-start">
                             <div className="flex flex-col gap-0">
-                              <h3 className="font-semibold text-foreground/90">
+                              <h3 className="font-semibold text-foreground/90 truncate">
                                 {item.product || "Product"}
                               </h3>
-                              <p className="text-small text-foreground/80">
+                              <p className="text-small text-foreground/80 truncate">
                                 {item.productVariant || "Product Variant"}
                               </p>
-                              <h1 className="text-large font-medium mt-2">
+                              <h1 className="text-large font-medium mt-2 truncate">
                                 {item.rate || "Price"}
                               </h1>
                             </div>
@@ -495,10 +523,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <LiveToggle
                                   variantRate={item}
                                   refetchData={refetchData}
+                                  apiEndpoint={apiRoutesByRole[rate]}
                                 />
                               ) : (
                                 <div className="flex flex-col items-center gap-2">
-                                  {new Date(item.updatedAt).toDateString() === new Date().toDateString() ? (
+                                  {item.isLive ? (
                                     <>
                                       <CreateEnquiryButton
                                         productVariant={
@@ -513,7 +542,50 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       </Chip>
                                     </>
                                   ) : (
-                                    <span className="text-default-400 text-tiny italic">Not Live</span>
+                                    <span className="text-default-400 text-tiny italic">
+                                      Not Live
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              {item.isAdded && !item.supplierIsLive && (
+                                <Tooltip content="Supplier rate is currently not live. This item will not be visible to customers.">
+                                  {/* @ts-ignore */}
+                                  <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
+                                </Tooltip>
+                              )}
+                            </div>
+                            {/* Mobile Actions (Edit/Delete) */}
+                            <div className="flex items-center gap-4">
+                              {user?.role === "Admin" || item.isOwnerView ? (
+                                <div className="flex items-center gap-3">
+                                  <EditModal
+                                    _id={item._id}
+                                    initialData={item}
+                                    currentTable={rate}
+                                    formFields={tableConfig[rate]}
+                                    apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                                    refetchData={refetchData}
+                                  />
+                                  <DeleteModal
+                                    _id={item._id}
+                                    name={item.name || item.customTitle || item.productVariant}
+                                    deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                                    refetchData={refetchData}
+                                    useBody={true}
+                                  />
+                                </div>
+                              ) : item.isMarketplaceView && (
+                                <div className="flex items-center gap-2">
+                                  <AddToCatalogButton
+                                    rowItem={item}
+                                    onSuccess={() => refetchData()}
+                                  />
+                                  {user?.role === "Associate" && (
+                                    <CreateEnquiryButton
+                                      productVariant={item.productVariantId}
+                                      variantRate={item}
+                                    />
                                   )}
                                 </div>
                               )}
@@ -532,22 +604,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               />
                             ) : user?.id !== undefined ? (
                               <>
-                                {item.associateId === user.id ? (
-                                  <b className="text-warning-300">Your Rate</b>
-                                ) : (
-                                  item.companyId ===
-                                  associateByIdValue.associateCompany._id && (
-                                    <div key={index} className="flex-1 min-w-[300px]">
-                                      {/* @ts-ignore */}
-                                      <Card
-                                        className="p-4"
-                                        /* @ts-ignore */
-                                        shadow={"sm" as any}
-                                      >
-                                      </Card>
-                                    </div>
-                                  )
-                                )}
+                                {item.companyId ===
+                                  associateByIdValue?.associateCompany?._id && (
+                                    <div key={index} className="flex-1 min-w-[300px]" />
+                                  )}
                               </>
                             ) : null}
                           </div>
@@ -558,7 +618,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 );
               })}
             </section>
-          </>
+          </div>
         );
       }}
     </QueryComponent >
@@ -619,22 +679,23 @@ const LiveToggle: React.FC<LiveToggleProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <p
-        className={`text-small m-0 p-0 ${isSelected ? "text-green-500" : "text-red-500"
-          }`}
-      >
-        {isSelected ? "Live" : "Not Live"}
-      </p>
+    <div className="flex flex-col items-center gap-1 min-w-[60px]">
       {/* @ts-ignore */}
       <Switch
         {...({
+          size: "sm",
           color: "success",
           isSelected: isSelected,
           isDisabled: loading,
           onChange: handleToggle,
         } as any)}
       />
+      <p
+        className={`text-[10px] font-bold m-0 p-0 leading-none ${isSelected ? "text-success-500" : "text-danger-500"
+          }`}
+      >
+        {isSelected ? "LIVE" : "NOT LIVE"}
+      </p>
     </div>
   );
 };
@@ -654,9 +715,14 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2 ">
-      <Button onPress={onOpen} color="success" variant="flat">
-        Enquiry
-      </Button>
+      <Tooltip content="Create Enquiry">
+        <span
+          onClick={onOpen}
+          className="text-xl text-primary cursor-pointer active:opacity-50 hover:text-primary-600 transition-all duration-200 transform hover:scale-110"
+        >
+          <FiMessageSquare />
+        </span>
+      </Tooltip>
       {/* @ts-ignore */}
       <Modal
         {...({
@@ -664,31 +730,42 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
           isOpen: isOpen,
           className: "dark text-foreground mx-4",
           onOpenChange: onOpenChange,
+          size: "lg",
+          backdrop: "blur",
         } as any)}
       >
-        <ModalContent>
+        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider/50">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Enquiry for {variantRate.product}{" "}
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider/30 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                    <FiMessageSquare size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">New Enquiry</h3>
+                    <p className="text-xs text-default-500 font-normal">Send a request for {variantRate.product}</p>
+                  </div>
+                </div>
               </ModalHeader>
-              <ModalBody>
-                Variant: {variantRate.productVariant}
+              <ModalBody className="py-6">
+                <div className="mb-4 p-3 bg-primary/5 rounded-2xl border border-primary/20 flex flex-col gap-1">
+                  <div className="flex justify-between items-center text-xs font-semibold text-primary/70 uppercase tracking-wider">
+                    <span>Target Product</span>
+                    <span className="bg-primary/20 px-2 py-0.5 rounded-full text-[10px]">{variantRate.productVariant}</span>
+                  </div>
+                </div>
                 <AddEnquiryForm
                   productVariant={productVariant}
                   variantRate={variantRate}
                   onClose={onClose}
-                />{" "}
+                />
               </ModalBody>
-              <ModalFooter>
-                {/* <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button> */}
-                {/* <Button color="primary" onPress={onClose}>
-                  Action
-                </Button> */}
-                <div className="h-2" />
-                <p>Enquiry will be responded with 10 mins</p>
+              <ModalFooter className="flex flex-col gap-2 border-t border-divider/30 pt-4">
+                <div className="flex items-center gap-2 text-primary-500 bg-primary-500/10 px-4 py-2 rounded-2xl w-full">
+                  <FiInfo size={16} />
+                  <p className="text-sm font-medium">Our team will respond within 10 minutes</p>
+                </div>
               </ModalFooter>
             </>
           )}
@@ -716,56 +793,44 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const { user } = useContext(AuthContext);
-  console.log(variantRate);
+
+  // Robust Associate ID Fetching
+  const { data: associateDetail } = useQuery({
+    queryKey: ["associate-me", user?.id],
+    queryFn: () => getData(`${apiRoutesByRole["associate"]}/${user?.id}`),
+    enabled: !!user?.id,
+  });
+
+  const activeAssociateId = associateDetail?.data?._id || user?.id;
 
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
-      var payload: any;
-      if (variantRate.variantRate) {
-        // Adjust to your actual enquiry endpoint
-        payload = {
-          phoneNumber,
-          name,
-          quantity,
-          variantRate: variantRate.variantRate._id,
-          displayedRate: variantRate._id,
-          mediatorAssociate: variantRate.variantRate.associate._id,
-          productAssociate: user?.id,
-          productVariant: productVariant,
-        };
-      } else {
-        {
-          // Adjust to your actual enquiry endpoint
-          payload = {
-            phoneNumber,
-            name,
-            quantity,
-            variantRate: variantRate._id,
+      const payload = {
+        productId: variantRate.productId,
+        quantity: Number(quantity),
+        specifications: `Phone: ${phoneNumber}\nName: ${name}\nVariant: ${variantRate.productVariant}`,
+        buyerAssociateId: activeAssociateId,
+        sellerAssociateId: variantRate.associateId || variantRate.associate?._id || variantRate.associate,
+        mediatorAssociateId: variantRate.mediatorAssociateId || null,
+        notes: `Enquiry from Marketplace for ${variantRate.product} - ${variantRate.productVariant}`
+      };
 
-            productAssociate: user?.id,
-            productVariant: productVariant,
-          };
-        }
-      }
-      return postData("/enquiry", payload);
+      return postData(`${apiRoutesByRole["enquiry"]}`, payload);
     },
     onMutate: () => {
       setIsLoading(true);
     },
     onSuccess: () => {
-      alert("Enquiry created!");
       setIsLoading(false);
-      setPhoneNumber("");
-      setName("");
-      setQuantity("");
-      // optionally refetch or do something
+      setIsSuccess(true);
       queryClient.invalidateQueries();
-      onClose();
     },
-    onError: () => {
-      alert("Failed to create enquiry");
+    onError: (error: any) => {
+      console.error("Enquiry Error:", error);
+      alert(error?.response?.data?.message || "Something went wrong. Please try again.");
       setIsLoading(false);
     },
   });
@@ -775,51 +840,94 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     createEnquiryMutation.mutate();
   };
 
+  if (isSuccess) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center py-10 gap-6 text-center"
+      >
+        <div className="w-24 h-24 bg-success-500/10 rounded-full flex items-center justify-center text-success-500 shadow-lg shadow-success-500/20">
+          <FiCheckCircle size={50} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-2xl font-bold text-foreground">Request Sent!</h3>
+          <p className="text-default-500 max-w-[280px]">Your enquiry for {variantRate.product} has been successfully submitted.</p>
+        </div>
+        <Button
+          color="success"
+          variant="flat"
+          size="lg"
+          className="rounded-2xl font-bold mt-4"
+          onPress={onClose}
+        >
+          Got it, Thanks!
+        </Button>
+      </motion.div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="   flex flex-col gap-2">
-      <div>
-        <Divider className="bg-orange-400" />
-        {/* @ts-ignore */}
-        <Spacer y={4} />
-        {/* <label className="block text-sm font-medium"></label> */}
-        <Input
-          label={"Phone Number"}
-          variant="bordered"
-          type="number"
-          // labelPlacement="outside"
-          className=" px-2 py-1 w-full text-orange-400 "
-          value={phoneNumber}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
-          required
-        />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-center gap-3 bg-content2/10 p-4 rounded-3xl border border-divider/30">
+        <div className="bg-success-500/10 text-success-600 px-4 py-1.5 rounded-full border border-success-500/20 flex items-center gap-2">
+          <FiPackage className="text-lg" />
+          <span className="text-sm font-bold uppercase tracking-wider">Truck Load Supplier</span>
+        </div>
+        <p className="text-default-500 text-xs italic">Our suppliers primarily handle FTL (Full Truck Load) orders for efficiency.</p>
       </div>
-      <div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 px-1">
         <Input
-          label={"Name"}
-          // labelPlacement="outside"
+          label="Display Name"
           variant="bordered"
-          className=" px-2 py-1 w-full text-orange-400 "
+          labelPlacement="outside"
+          placeholder="Enter your name"
+          startContent={<FiUser className="text-default-400 mr-2" />}
+          className="w-full"
           value={name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <Input
+          label="Phone Number"
+          variant="bordered"
+          labelPlacement="outside"
+          placeholder="e.g. 9876543210"
+          type="tel"
+          startContent={<FiPhone className="text-default-400 mr-2" />}
+          className="w-full"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />
       </div>
-      <div>
+
+      <div className="bg-content2/20 p-6 rounded-[2.5rem] border border-divider/50 shadow-inner">
         <Input
-          label="Quantity in Tons"
-          variant="bordered"
-          // labelPlacement="outside"
-          className=" px-2 py-1 w-full text-orange-400 "
+          label="Quantity Required (Tons)"
+          placeholder="e.g. 30 Tons (Standard Truck Load)"
+          variant="flat"
+          labelPlacement="outside"
+          type="number"
+          startContent={<FiPackage className="text-primary-500 mr-3" size={20} />}
+          description="Most suppliers prefer orders of 20+ tons for better rates."
+          className="w-full font-semibold"
           value={quantity}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value)}
+          onChange={(e) => setQuantity(e.target.value)}
+          required
         />
       </div>
+
       <Button
         type="submit"
-        disabled={isLoading}
-        className="bg-warning-400 text-white px-3 py-1 "
+        isLoading={isLoading}
+        size="lg"
+        color="primary"
+        className="font-bold text-white shadow-2xl shadow-primary/30 h-16 rounded-[2rem] text-lg active:scale-95 transition-transform"
+        startContent={!isLoading && <FiMessageSquare size={22} />}
       >
-        {isLoading ? "Creating..." : "Create Enquiry"}
+        {isLoading ? "Submitting Request..." : "Send Request to Manufacturer"}
       </Button>
     </form>
   );
@@ -880,16 +988,14 @@ const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({ rowItem, onSucc
 
   return (
     <>
-      <Button
-        size="sm"
-        color={rowItem.isAdded ? "success" : "primary"}
-        variant="flat"
-        onPress={onOpen}
-        isDisabled={rowItem.isAdded}
-        startContent={<span className="text-lg">{rowItem.isAdded ? "✓" : "+"}</span>}
-      >
-        {rowItem.isAdded ? "Added" : "Add to Catalog"}
-      </Button>
+      <Tooltip content={rowItem.isAdded ? "Already in Catalog" : "Add to Catalog"}>
+        <span
+          onClick={!rowItem.isAdded ? onOpen : undefined}
+          className={`text-lg cursor-pointer active:opacity-50 transition-colors ${rowItem.isAdded ? "text-success cursor-default" : "text-primary hover:text-primary-600"}`}
+        >
+          {rowItem.isAdded ? <FiCheckCircle size={22} /> : <FiPlusCircle size={22} />}
+        </span>
+      </Tooltip>
 
       {isOpen && (
         <AddToCatalogModal

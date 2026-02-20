@@ -123,33 +123,11 @@ export default function CommonTable({
 
         case "action":
           return (
-            <div className="relative flex items-center gap-2">
-              {viewModal && (
-                <Tooltip content="View">
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    {viewModal(item)}
-                  </span>
-                </Tooltip>
-              )}
-              {editModal && (
-                <Tooltip content="Edit">
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    {editModal(item)}
-                  </span>
-                </Tooltip>
-              )}
-              {otherModal && (
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                  {otherModal(item)}
-                </span>
-              )}{" "}
-              {deleteModal && (
-                <Tooltip color="danger" content="Delete">
-                  <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    {deleteModal(item)}
-                  </span>
-                </Tooltip>
-              )}
+            <div className="relative flex items-center gap-3">
+              {viewModal && viewModal(item)}
+              {editModal && editModal(item)}
+              {otherModal && otherModal(item)}
+              {deleteModal && deleteModal(item)}
             </div>
           );
 
@@ -178,12 +156,16 @@ export default function CommonTable({
   return (
     <div className="w-full overflow-x-auto">
       <Table
-        isVirtualized
+        isHeaderSticky
         isStriped
-        isCompact
         color="warning"
+        className="min-w-full"
         classNames={{
-          th: ["bg-background", "text-foreground"],
+          base: "max-w-full overflow-x-auto",
+          table: "min-w-[600px]",
+          th: ["bg-default-100", "text-default-800", "font-bold", "text-[11px]", "uppercase", "tracking-wider", "border-b", "border-divider"],
+          td: ["py-3", "align-middle", "text-sm"],
+          tr: ["hover:bg-default-50/50", "transition-colors", "cursor-default"],
         }}
         bottomContent={
           <div className="flex w-full justify-center">

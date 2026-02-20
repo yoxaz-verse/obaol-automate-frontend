@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import { Button, Spacer } from "@heroui/react";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab, Tooltip } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 
@@ -57,7 +57,14 @@ export default function EnquiryPage() {
         limit={50}
       >
         {(enquiryResponse: any) => {
-          const enquiriesData = enquiryResponse?.data || [];
+          // Helper to extract array from paginated response
+          const extractArray = (raw: any): any[] => {
+            if (Array.isArray(raw)) return raw;
+            if (raw?.data && Array.isArray(raw.data)) return raw.data;
+            return [];
+          };
+
+          const enquiriesData = extractArray(enquiryResponse);
 
           const tableData = enquiriesData.map((item: any) => {
             const {
@@ -111,27 +118,36 @@ export default function EnquiryPage() {
 
             const dateInfo = getDateInfo(item.createdAt);
 
-            const getStatusName = (status: any) => {
+            const getStatusKey = (status: any) => {
               if (!status) return "Pending";
-              if (typeof status === 'string') return status;
-              return status.name || "Pending";
+              const statusName = typeof status === 'string' ? status : status.name;
+
+              const mapping: Record<string, string> = {
+                "NEW": "Pending",
+                "CONTACTED": "Pending",
+                "IN_DISCUSSION": "Pending",
+                "QUOTE_REQUIRED": "Quoted",
+                "CLOSED": "Completed",
+                "CANCELLED": "Cancelled"
+              };
+
+              return mapping[statusName as string] || "Pending";
             };
 
             return {
               ...data,
-              specification: item.specification || "No Spec",
-              product: item.productVariant?.product?.name,
-              productVariant: item.productVariant?.name,
-              productAssociate: item.productAssociate?.name,
-              associateCompany: item.productAssociate?.associateCompany?.name || "N/A",
-              assignedEmployee: getEmployeeName(item.variantRate?.associateCompany?.assignedEmployee) ||
-                getEmployeeName(item.productAssociate?.associateCompany?.assignedEmployee),
-              mediatorAssociate: item.mediatorAssociate?.name || "Direct",
-              commission:
-                item.commission ?? data.mediatorCommission ?? "Own Rate",
-              variantRate: getRate(item.variantRate),
+              specification: item.specifications || "No Spec",
+              product: item.productId?.name || "N/A",
+              productVariant: "N/A",
+              productAssociate: item.buyerAssociateId?.name || "N/A",
+              associateCompany: item.buyerAssociateId?.associateCompany?.name || "N/A",
+              assignedEmployee: getEmployeeName(item.assignedEmployeeId),
+              mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
+              commission: "N/A",
+              rate: "N/A",
+              variantRate: "N/A",
               dateColor: dateInfo.color,
-              status: getStatusName(item.status),
+              status: getStatusKey(item.status),
             };
           });
 
@@ -180,13 +196,14 @@ export default function EnquiryPage() {
                             <EnquiryCard
                               data={item}
                               action={
-                                <Button
-                                  className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-black h-9 rounded-xl shadow-lg hover:shadow-primary/20 transition-all text-[10px] uppercase tracking-wider px-3"
-                                  size="sm"
-                                  onPress={() => window.location.href = `/dashboard/enquiries/${item._id}`}
-                                >
-                                  View
-                                </Button>
+                                <Tooltip content="View Details">
+                                  <span
+                                    onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
+                                    className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
+                                  >
+                                    <FiArrowRight size={20} />
+                                  </span>
+                                </Tooltip>
                               }
                             />
                           </motion.div>

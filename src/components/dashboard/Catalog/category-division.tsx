@@ -2,12 +2,13 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Accordion, AccordionItem, Button, Divider } from "@heroui/react";
+import { Accordion, AccordionItem, Button, Divider, Chip } from "@heroui/react";
 // ^ Adjust if you're using a different UI library for your accordions
 import { getData } from "@/core/api/apiHandler";
 import { inventoryManagerRoutes } from "@/core/api/apiRoutes";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import UserDeleteModal from "@/components/CurdTable/delete";
+import AuthContext from "@/context/AuthContext";
 
 import Title from "@/components/titles";
 import AddModal from "@/components/CurdTable/add-model";
@@ -35,6 +36,7 @@ interface IProduct {
 interface ICategoryDivisionProps {
   selectedProduct: any | null;
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
+  myCatalogItems: any[];
 }
 
 /**
@@ -50,7 +52,9 @@ interface ICategoryDivisionProps {
 export default function CategoryDivision({
   selectedProduct,
   setSelectedProduct,
+  myCatalogItems,
 }: ICategoryDivisionProps) {
+  const { user } = React.useContext(AuthContext);
   // Make a local copy of your table config
   const tableConfig = { ...initialTableConfig };
 
@@ -64,7 +68,7 @@ export default function CategoryDivision({
       <Title title="Categories" />
 
       {/* Add a new Category, if needed */}
-      {tableConfig["category"] && (
+      {tableConfig["category"] && user?.role !== "Associate" && (
         <AddModal
           name="Category"
           currentTable="Category"
@@ -84,7 +88,8 @@ export default function CategoryDivision({
         limit={100}
       >
         {(categoryData: any) => {
-          const categoryArray: ICategory[] = categoryData?.data || [];
+          // QueryComponent already unwraps to data array when 'page' is provided
+          const categoryArray: ICategory[] = Array.isArray(categoryData) ? categoryData : (categoryData?.data || []);
 
           return (
             <CategoryList
@@ -92,6 +97,7 @@ export default function CategoryDivision({
               tableConfig={tableConfig}
               refetchData={refetchData}
               setSelectedProduct={setSelectedProduct}
+              myCatalogItems={myCatalogItems}
             />
           );
         }}
@@ -112,62 +118,61 @@ function CategoryList({
   tableConfig,
   refetchData,
   setSelectedProduct,
+  myCatalogItems,
 }: {
   categories: ICategory[];
   tableConfig: any;
   refetchData: () => void;
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
+  myCatalogItems: any[];
 }) {
-  // Store subCategory count in a map: { [categoryId]: number }
-  const [subCatCountMap, setSubCatCountMap] = React.useState<{
-    [catId: string]: number;
-  }>({});
-
-  React.useEffect(() => {
-    if (categories.length === 0) return;
-
-    const fetchSubCatCounts = async () => {
-      const newMap: { [id: string]: number } = {};
-      for (const cat of categories) {
-        try {
-          const response = await getData(
-            `${apiRoutesByRole["subCategory"]}?category=${cat._id}`
-          );
-          const subCats: ISubCategory[] = response?.data?.data?.data || [];
-          newMap[cat._id] = subCats.length;
-        } catch (err) {
-          console.error("Failed to fetch subCategories for cat", cat._id, err);
-          newMap[cat._id] = 0;
-        }
-      }
-      setSubCatCountMap(newMap);
-    };
-
-    fetchSubCatCounts();
-  }, [categories]);
-
+  // No longer need individual fetch effects for counts
   if (!categories || categories.length === 0) {
     return <p>No categories found.</p>;
   }
 
+  // Group my catalog items by category for instant lookup
+  const myItemsByCat = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    const items = Array.isArray(myCatalogItems) ? myCatalogItems : [];
+
+    items.forEach(item => {
+      const catId = item.productVariantId?.product?.subCategory?.category?._id ||
+        item.productVariantId?.product?.category?._id;
+      if (catId) map[catId] = (map[catId] || 0) + 1;
+    });
+    return map;
+  }, [myCatalogItems]);
+
+  const { user } = React.useContext(AuthContext);
+
   return (
-    <Accordion {...({ variant: "splitted" } as any)}>
+    <Accordion {...({ variant: "splitted" } as any)} className="px-0">
       {categories.map((cat) => {
-        // If we haven't fetched yet, show "..."
-        const subCount = subCatCountMap[cat._id] ?? "...";
+        const myCount = myItemsByCat[cat._id] || 0;
 
         return (
           <AccordionItem
             key={cat._id}
             aria-label={cat.name}
-            // e.g. "Fruits (3)"
-            title={`${cat.name} (${subCount})`}
-            className="opacity-60 hover:opacity-100 "
+            title={
+              <div className="flex items-center justify-between w-full pr-4">
+                <span className="font-medium text-foreground/90">{cat.name}</span>
+                <div className="flex gap-2">
+                  {myCount > 0 && (
+                    <span className="flex items-center px-2 py-0.5 rounded-full bg-success-100 text-success-700 text-[10px] font-bold border border-success-200 shadow-sm">
+                      {myCount} My Products
+                    </span>
+                  )}
+                </div>
+              </div>
+            }
+            className="group border-b border-divider/50 last:border-0"
           >
             {cat.description && <p>{cat.description}</p>}
             <div className="h-1" />
             {/* If you want an AddModal for subCategory creation */}
-            {tableConfig["subCategory"] && (
+            {tableConfig["subCategory"] && user?.role !== "Associate" && (
               <AddModal
                 name="Sub Category"
                 currentTable="Sub Category"
@@ -186,26 +191,29 @@ function CategoryList({
               tableConfig={tableConfig}
               refetchData={refetchData}
               setSelectedProduct={setSelectedProduct}
+              myCatalogItems={myCatalogItems}
             />
             <Divider />
             <div className="h-4" />
-            <div className="flex justify-around">
-              <p>{cat.name} Actions</p>
-              <EditModal
-                _id={cat._id}
-                initialData={cat}
-                currentTable="Category"
-                formFields={tableConfig["category"]}
-                apiEndpoint={apiRoutesByRole["category"]}
-                refetchData={refetchData}
-              />
-              <UserDeleteModal
-                _id={cat._id}
-                name={cat.name}
-                deleteApiEndpoint={apiRoutesByRole["category"]}
-                refetchData={refetchData}
-              />
-            </div>
+            {user?.role !== "Associate" && (
+              <div className="flex justify-around">
+                <p>{cat.name} Actions</p>
+                <EditModal
+                  _id={cat._id}
+                  initialData={cat}
+                  currentTable="Category"
+                  formFields={tableConfig["category"]}
+                  apiEndpoint={apiRoutesByRole["category"]}
+                  refetchData={refetchData}
+                />
+                <UserDeleteModal
+                  _id={cat._id}
+                  name={cat.name}
+                  deleteApiEndpoint={apiRoutesByRole["category"]}
+                  refetchData={refetchData}
+                />
+              </div>
+            )}
           </AccordionItem>
         );
       })}
@@ -224,11 +232,13 @@ function SubCategorySection({
   tableConfig,
   refetchData,
   setSelectedProduct,
+  myCatalogItems,
 }: {
   categoryId: string;
   tableConfig: any;
   refetchData: () => void;
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
+  myCatalogItems: any[];
 }) {
   return (
     <QueryComponent
@@ -239,8 +249,8 @@ function SubCategorySection({
       additionalParams={{ category: categoryId }}
     >
       {(subCategoryData: any) => {
-        // Suppose we get an array of subCategories
-        const subCategories: ISubCategory[] = subCategoryData?.data || [];
+        // QueryComponent already unwraps to data array when 'page' is provided
+        const subCategories: ISubCategory[] = Array.isArray(subCategoryData) ? subCategoryData : (subCategoryData?.data || []);
         if (subCategories.length === 0) {
           return <p>No subcategories found.</p>;
         }
@@ -250,6 +260,7 @@ function SubCategorySection({
             tableConfig={tableConfig}
             refetchData={refetchData}
             setSelectedProduct={setSelectedProduct}
+            myCatalogItems={myCatalogItems}
           />
         );
       }}
@@ -268,62 +279,54 @@ function SubCategoryList({
   tableConfig,
   refetchData,
   setSelectedProduct,
+  myCatalogItems,
 }: {
   subCategories: ISubCategory[];
   tableConfig: any;
   refetchData: () => void;
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
+  myCatalogItems: any[];
 }) {
-  const [productCountMap, setProductCountMap] = React.useState<{
-    [subId: string]: number;
-  }>({});
+  // Group my items by subcategory
+  const myItemsBySub = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    const items = Array.isArray(myCatalogItems) ? myCatalogItems : [];
 
-  React.useEffect(() => {
-    if (subCategories.length === 0) return;
+    items.forEach(item => {
+      const subId = item.productVariantId?.product?.subCategory?._id;
+      if (subId) map[subId] = (map[subId] || 0) + 1;
+    });
+    return map;
+  }, [myCatalogItems]);
 
-    const fetchProductCounts = async () => {
-      const newMap: { [id: string]: number } = {};
-      for (const sub of subCategories) {
-        try {
-          // Normal listing: GET /product?subCategory=sub._id
-          const response = await getData(
-            `${apiRoutesByRole["product"]}?subCategory=${sub._id}`
-          );
-          // Suppose we get { data: productArray }
-          const products: IProduct[] = response?.data?.data?.data || [];
-          newMap[sub._id] = products.length;
-        } catch (err) {
-          console.error(
-            "Failed to fetch products for subCategory",
-            sub._id,
-            err
-          );
-          newMap[sub._id] = 0;
-        }
-      }
-      setProductCountMap(newMap);
-    };
-
-    fetchProductCounts();
-  }, [subCategories]);
+  const { user } = React.useContext(AuthContext);
 
   return (
-    <Accordion {...({ variant: "shadow" } as any)}>
+    <Accordion {...({ variant: "light" } as any)} className="px-0">
       {subCategories.map((sub) => {
-        const productCount = productCountMap[sub._id] ?? "...";
+        const myCount = myItemsBySub[sub._id] || 0;
 
         return (
           <AccordionItem
             key={sub._id}
             aria-label={sub.name}
-            // e.g. "Citrus (5)"
-            title={`${sub.name} (${productCount})`}
-            className="opacity-90 hover:opacity-100 "
+            title={
+              <div className="flex items-center justify-between w-full pr-2">
+                <span className="text-sm font-medium text-foreground/80">{sub.name}</span>
+                {myCount > 0 && (
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[10px] font-bold border border-success-100">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                    {myCount} Added
+                  </span>
+                )}
+              </div>
+            }
+            className="px-2"
           >
             <p>{sub.description}</p>
             <div className="h-1" />
 
-            {/* If you want an AddModal for products */}
+            {/* Allow Add Product for everyone (including Associates) */}
             {tableConfig["product"] && (
               <AddModal
                 name="Product"
@@ -342,28 +345,31 @@ function SubCategoryList({
             <ProductSection
               subCategoryId={sub._id}
               setSelectedProduct={setSelectedProduct}
+              myCatalogItems={myCatalogItems}
             />
             <Divider />
             <div className="h-4" />
-            <div className="flex justify-around">
-              <p>{sub.name} Actions</p>
-              <EditModal
-                _id={sub._id}
-                initialData={sub}
-                currentTable="Sub Category"
-                formFields={tableConfig["subCategory"].filter(
-                  (f: any) => f.key !== "category"
-                )}
-                apiEndpoint={apiRoutesByRole["subCategory"]}
-                refetchData={refetchData}
-              />
-              <UserDeleteModal
-                _id={sub._id}
-                name={sub.name}
-                deleteApiEndpoint={apiRoutesByRole["subCategory"]}
-                refetchData={refetchData}
-              />
-            </div>
+            {user?.role !== "Associate" && (
+              <div className="flex justify-around">
+                <p>{sub.name} Actions</p>
+                <EditModal
+                  _id={sub._id}
+                  initialData={sub}
+                  currentTable="Sub Category"
+                  formFields={tableConfig["subCategory"].filter(
+                    (f: any) => f.key !== "category"
+                  )}
+                  apiEndpoint={apiRoutesByRole["subCategory"]}
+                  refetchData={refetchData}
+                />
+                <UserDeleteModal
+                  _id={sub._id}
+                  name={sub.name}
+                  deleteApiEndpoint={apiRoutesByRole["subCategory"]}
+                  refetchData={refetchData}
+                />
+              </div>
+            )}
           </AccordionItem>
         );
       })}
@@ -379,9 +385,11 @@ function SubCategoryList({
 function ProductSection({
   subCategoryId,
   setSelectedProduct,
+  myCatalogItems,
 }: {
   subCategoryId: string;
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
+  myCatalogItems: any[];
 }) {
   return (
     <QueryComponent
@@ -392,29 +400,43 @@ function ProductSection({
       additionalParams={{ subCategory: subCategoryId }}
     >
       {(productData: any) => {
-        const products: IProduct[] = productData?.data || [];
+        // QueryComponent already unwraps to data array when 'page' is provided
+        const products: IProduct[] = Array.isArray(productData) ? productData : (productData?.data || []);
         if (products.length === 0) {
           return <p>No products found.</p>;
         }
         return (
-          <div>
-            {products.map((p) => (
-              <div key={p._id}>
-                <div className="flex justify-between my-2">
-                  <b>{p.name}</b>
+          <div className="flex flex-col gap-2 p-1">
+            {products.map((p) => {
+              const safeItems = Array.isArray(myCatalogItems) ? myCatalogItems : [];
+              const myCount = safeItems.filter(item =>
+                item.productVariantId?.product?._id === p._id
+              ).length;
+
+              return (
+                <div
+                  key={p._id}
+                  className={`group flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-content2/50 ${myCount > 0 ? "border border-success-500/20 bg-success-500/5" : "border border-transparent"
+                    }`}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-foreground/90">{p.name}</span>
+                    {myCount > 0 && (
+                      <span className="text-[10px] text-success-600 font-bold uppercase tracking-tighter">In My Catalog ({myCount})</span>
+                    )}
+                  </div>
                   <Button
-                    onPress={() => {
-                      setSelectedProduct(p);
-                    }}
+                    onPress={() => setSelectedProduct(p)}
                     size="sm"
-                    color="primary"
+                    variant="shadow"
+                    color={myCount > 0 ? "success" : "primary"}
+                    className="min-w-[60px] h-8 rounded-xl font-medium"
                   >
                     View
                   </Button>
                 </div>
-                <Divider />
-              </div>
-            ))}
+              );
+            })}
           </div>
         );
       }}

@@ -9,14 +9,14 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
+  Tooltip,
 } from "@nextui-org/react";
-import { FiDelete } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 import { useMutation } from "@tanstack/react-query";
 import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { showToastMessage } from "@/utils/utils";
 import { DeleteModalProps } from "@/data/interface-data";
-import { RiDeleteBin6Line } from "react-icons/ri";
 
 export default function DeleteModal({
   _id,
@@ -71,10 +71,15 @@ export default function DeleteModal({
             {triggerText}
           </Button>
         ) : (
-          <RiDeleteBin6Line
-            onClick={onOpen}
-            className="text-[24px] text-gray-300 hover:text-red-600"
-          />
+          <Tooltip color="danger" content="Delete">
+            <span
+              onClick={onOpen}
+              className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-danger transition-colors"
+            >
+              <FiTrash2 size={18} className="text-default-400 group-hover:text-danger" />
+              <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+            </span>
+          </Tooltip>
         )}
       </div>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">

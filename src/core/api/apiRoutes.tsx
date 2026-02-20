@@ -32,7 +32,7 @@ const BASE_PATHS = {
   PRODUCT_VARIANT: "/product-variants",
   VARIANT_RATE: "/variant-rates",
   DISPLAYED_RATE: "/displayed-rates",
-  ENQUIRY: "/enquiries",
+  ENQUIRY: "/inquiries",
   PINCODE_ENTRY: "/pincode-entries",
   DIVISION: "/divisions",
   DISTRICT: "/districts",

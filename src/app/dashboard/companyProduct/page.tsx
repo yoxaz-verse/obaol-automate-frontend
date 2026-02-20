@@ -247,8 +247,8 @@ export default function CompanyProductPage() {
         </div>
 
         {/* --- Main Content (Detail) --- */}
-        <div className="flex-1 min-w-0">
-          <Card className="h-full bg-background/60 backdrop-blur-md border-none shadow-sm overflow-hidden flex flex-col">
+        <div className="flex-1 min-w-0 overflow-x-auto">
+          <Card className="h-full bg-background/60 backdrop-blur-md border-none shadow-sm overflow-hidden flex flex-col min-w-0 max-w-full">
             {selectedCompany ? (
               <>
                 <div className="p-6 border-b border-default-100 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -362,7 +362,7 @@ export default function CompanyProductPage() {
                   )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 pt-2 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-6 pt-2 custom-scrollbar min-w-0 max-w-full">
                   {activeTab !== "empty" ? (
                     <VariantRate
                       rate="variantRate"

@@ -35,11 +35,11 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
             <div className="text-warning-500 text-3xl group-hover:scale-110 transition-transform duration-300">
               {data.icon}
             </div>
-            <div className="font-medium text-foreground text-lg">
+            <div className="font-semibold text-foreground text-sm text-center line-clamp-2 px-2 h-10 flex items-center justify-center">
               {data.name}
             </div>
-            <div className="text-xs text-default-500 group-hover:text-warning-500 transition-colors">
-              Tap to View
+            <div className="text-[10px] text-default-400 group-hover:text-warning-500 transition-colors uppercase tracking-widest font-bold">
+              View
             </div>
           </Link>
         </Card>

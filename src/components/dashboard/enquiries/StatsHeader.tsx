@@ -8,12 +8,17 @@ interface StatsHeaderProps {
 
 const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
     const total = data.length;
-    // Assuming status has a 'name' field. Adjust logic based on actual data shape.
+    const getStatusName = (item: any) => {
+        if (!item.status) return "New";
+        if (typeof item.status === "string") return item.status;
+        return item.status.name || "New";
+    };
+
     const active = data.filter((item) =>
-        !["Completed", "Rejected", "Cancelled"].includes(item.status?.name)
+        !["Completed", "Rejected", "Cancelled"].includes(getStatusName(item))
     ).length;
-    const completed = data.filter((item) => item.status?.name === "Completed").length;
-    const newEnquiries = data.filter((item) => item.status?.name === "New" || !item.status).length;
+    const completed = data.filter((item) => getStatusName(item) === "Completed").length;
+    const newEnquiries = data.filter((item) => getStatusName(item) === "Pending" || getStatusName(item) === "New").length;
 
     // Conversion Rate: Completed / Total
     const conversionRate = total > 0 ? ((completed / total) * 100).toFixed(1) : "0.0";

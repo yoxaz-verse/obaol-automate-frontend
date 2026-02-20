@@ -211,6 +211,7 @@ export const variantRateRoutes = addCustomRoutes(
   }
 );
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
+export const catalogItemRoutes = createCRUDRoutes("/catalog-items");
 export const enquiryRoutes = createCRUDRoutes(BASE_PATHS.ENQUIRY);
 
 export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);
@@ -250,6 +251,16 @@ export const dashboardRoutes = {
   enquiryTrends: `${ANALYTICS_BASE}/trends/enquiries`,
   productPerformance: `${ANALYTICS_BASE}/performance/products`,
   systemMetrics: `${ANALYTICS_BASE}/metrics/system`,
+  associateMetrics: `${ANALYTICS_BASE}/metrics/associate`,
+};
+
+export const catalogRoutes = {
+  add: "/catalog/add",
+  update: "/catalog", // + /:id
+  remove: "/catalog", // + /:id
+  removeByVariantRate: "/catalog/variant-rate", // + /:variantRateId
+  public: "/catalog/public", // + /:companySlug
+  publicDetails: "/catalog/public", // + /:companySlug/:productSlug
 };
 
 // Optionally, group all routes into a single object for easier imports
@@ -282,6 +293,7 @@ export const apiRoutes = {
   productVariant: productVariantRoutes,
   variantRate: variantRateRoutes,
   displayedRate: displayedRateRoutes,
+  catalogItem: catalogItemRoutes,
   inventoryManager: inventoryManagerRoutes,
   enquiry: enquiryRoutes,
   orders: {
@@ -310,4 +322,5 @@ export const apiRoutes = {
   jobRole: jobRoleRoutes,
   jobType: jobTypeRoutes,
   language: languageRoutes,
+  catalog: catalogRoutes,
 };

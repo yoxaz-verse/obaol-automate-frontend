@@ -35,8 +35,8 @@ export default function Essentials() {
   ];
   return (
     <div className="flex items-center justify-center">
-      <div className="w-[95%]">
-        <div className="my-4">
+      <div className="w-full">
+        <div className="">
           <Tabs
             aria-label="Company Tabs" // Translate
             selectedKey={company}

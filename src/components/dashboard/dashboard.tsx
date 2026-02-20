@@ -98,6 +98,16 @@ const Dashboard: NextPage = () => {
   const systemMetrics = systemMetricsData?.data?.data || {};
 
   const { user } = useContext(AuthContext);
+
+  // Fetch Associate Metrics if user is an Associate
+  const { data: associateMetricsData } = useQuery({
+    queryKey: ["associateMetrics"],
+    queryFn: () => getData(apiRoutes.analytics.associateMetrics, {}),
+    enabled: !!user?.id && user?.role === "Associate",
+  });
+
+  const associateMetrics = associateMetricsData?.data?.data || {};
+
   let filteredOptions;
   if (user != null)
     filteredOptions = sidebarOptions.filter((option) => {
@@ -109,7 +119,7 @@ const Dashboard: NextPage = () => {
     <div className="w-full p-6 space-y-6">
       {user?.id && user?.role === "Admin" && (
         <>
-          {/* --- Insight Cards Section --- */}
+          {/* --- Admin View --- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <InsightCard
               title="Total Enquiries"
@@ -134,7 +144,7 @@ const Dashboard: NextPage = () => {
             />
           </div>
 
-          {/* --- Charts & Quick Actions Section --- */}
+          {/* --- Charts Section --- */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 h-[350px]">
               <TrendChart
@@ -142,7 +152,7 @@ const Dashboard: NextPage = () => {
                 data={Array.isArray(trendData?.data?.data) ? trendData.data.data : []}
                 dataKey="count"
                 categoryKey="_id"
-                color="#f5a524" // Warning color to match theme
+                color="#f5a524"
                 type="area"
               />
             </div>
@@ -162,6 +172,43 @@ const Dashboard: NextPage = () => {
                 </div>
               </Card>
             </div>
+          </div>
+        </>
+      )}
+
+      {user?.id && user?.role === "Associate" && (
+        <>
+          {/* --- Associate View --- */}
+          <div className="flex flex-col space-y-1">
+            <h2 className="text-3xl font-black text-foreground">{associateMetrics.companyName || "Your Company"}</h2>
+            <p className="text-default-500 font-medium tracking-tight">Welcome back, {associateMetrics.associateName || user.email}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <InsightCard
+              title="My Products"
+              metric={associateMetrics.myItemsCount?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">🏠</span>}
+              footer={<span className="text-xs text-default-400">Total variants in your personal list</span>}
+            />
+            <InsightCard
+              title="Obaol Catalog"
+              metric={associateMetrics.obaolCatalogCount?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">🌍</span>}
+              footer={<span className="text-xs text-default-400">Products currently listed on Obaol</span>}
+            />
+            <InsightCard
+              title="Leads Received"
+              metric={associateMetrics.totalInquiries?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">📩</span>}
+              footer={<span className="text-xs text-default-400">Total enquiries for your items</span>}
+            />
+            <InsightCard
+              title="Live Status"
+              metric={associateMetrics.liveProducts?.toLocaleString() ?? "0"}
+              icon={<span className="text-xl">⚡</span>}
+              footer={<span className="text-xs text-default-400">Active marketplace presence</span>}
+            />
           </div>
         </>
       )}

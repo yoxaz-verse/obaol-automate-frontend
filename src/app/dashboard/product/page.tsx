@@ -8,7 +8,7 @@ import { Tab, Tabs } from "@nextui-org/tabs";
 import AuthContext from "@/context/AuthContext";
 
 export default function Product() {
-  const [currentTable, setCurrentTable] = useState("selected"); // Default role set to 'manager'
+  const [currentTable, setCurrentTable] = useState("mine"); // Default to My Products
 
   const { user } = useContext(AuthContext);
 
@@ -25,34 +25,40 @@ export default function Product() {
                 selectedKey={currentTable}
                 onSelectionChange={(key) => setCurrentTable(key as string)}
               >
-                <Tab key={"selected"} title={"Products"}>
-                  {/* Render UserTabContent for the current table */}
-                  <VariantRate
-                    rate={
-                      user?.role === "Admin" ? "variantRate" : "displayedRate"
-                    }
-                    additionalParams={{
-                      selected: true,
-                    }}
-                  />
-                </Tab>
-                <Tab key={"mine"} title={"My Products"}>
-                  {/* Render UserTabContent for the current table */}
-                  <VariantRate
-                    rate="variantRate"
-                    additionalParams={
-                      user?.role === "Associate"
-                        ? {
-                          associate: user?.id,
-                        }
-                        : {}
-                    }
-                  />
-                </Tab>
-                <Tab key={"selectMore"} title={"More"}>
-                  {/* Render UserTabContent for the current table */}
-                  <VariantRate rate="variantRate" />
-                </Tab>
+                {user?.role === "Associate" ? (
+                  <>
+                    <Tab key={"mine"} title="My Products">
+                      <VariantRate
+                        rate="variantRate"
+                        additionalParams={{ associate: user?.id }}
+                      />
+                    </Tab>
+                    <Tab key={"catalog"} title="Added to Catalog">
+                      <VariantRate
+                        rate="catalogItem"
+                        additionalParams={{ associateId: user?.id }}
+                      />
+                    </Tab>
+                    <Tab key={"marketplace"} title="Marketplace">
+                      <VariantRate
+                        rate="variantRate"
+                        additionalParams={{ view: "marketplace" }}
+                      />
+                    </Tab>
+                  </>
+                ) : (
+                  <>
+                    <Tab key={"selected"} title="Products">
+                      <VariantRate
+                        rate="variantRate"
+                        additionalParams={{ selected: true }}
+                      />
+                    </Tab>
+                    <Tab key={"selectMore"} title={"More"}>
+                      <VariantRate rate="variantRate" />
+                    </Tab>
+                  </>
+                )}
               </Tabs>{" "}
             </div>
           </div>

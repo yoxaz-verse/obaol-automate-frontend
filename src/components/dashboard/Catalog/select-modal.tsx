@@ -12,6 +12,7 @@ import {
   Input,
   Switch,
   Tooltip,
+  Divider,
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -76,10 +77,14 @@ const SelectModal: React.FC<SelectModalProps> = ({
 
   // Sync state when modal opens or data changes
   useEffect(() => {
-    if (isOpen && recordToUse) {
-      setCommission(recordToUse.commission ?? 0);
+    if (isOpen) {
+      if (isNewRecord) {
+        setCommission(0);
+      } else if (recordToUse) {
+        setCommission(recordToUse.commission ?? 0);
+      }
     }
-  }, [isOpen, recordToUse]);
+  }, [isOpen, recordToUse, isNewRecord]);
 
   // 5. Mutation
   const mutation = useMutation<AxiosResponse<any, any>, Error, void>({
@@ -163,10 +168,28 @@ const SelectModal: React.FC<SelectModalProps> = ({
               </ModalHeader>
               <ModalBody className="py-10">
                 <div className="flex flex-col gap-6">
+                  {userRole === "Associate" && (
+                    <div className="bg-default-50 p-4 rounded-2xl border border-default-100 flex flex-col gap-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-default-500 font-medium">Base Price</span>
+                        <span className="text-foreground font-bold">₹{(Number(variantRate.rawBasePrice) || 0).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-default-500 font-medium">Your Commission</span>
+                        <span className="text-warning-500 font-bold">+ ₹{commission.toFixed(2)}</span>
+                      </div>
+                      <Divider className="my-1" />
+                      <div className="flex justify-between items-center">
+                        <span className="text-default-700 font-bold">Final Selling Price</span>
+                        <span className="text-success-600 font-black text-lg">₹{(Number(variantRate.rawBasePrice || 0) + Number(commission)).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <Input
                     type="number"
-                    label="Commission (₹)"
-                    description="Enter the markup/commission for this variant"
+                    label={userRole === "Associate" ? "Adjust Your Commission (₹)" : "Commission (₹)"}
+                    description={userRole === "Associate" ? "This margin is added to the base price" : "Enter the markup/commission for this variant"}
                     placeholder="0.00"
                     variant="flat"
                     labelPlacement="inside"

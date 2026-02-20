@@ -24,7 +24,10 @@ export default function DeleteModal({
   queryKey,
   deleteApiEndpoint,
   useBody = false,
-}: DeleteModalProps) {
+  triggerText,
+  triggerColor = "danger",
+  refetchData,
+}: DeleteModalProps & { triggerText?: string; triggerColor?: any; refetchData?: () => void }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +39,10 @@ export default function DeleteModal({
       queryClient.refetchQueries({
         queryKey,
       });
+      if (refetchData) refetchData();
       showToastMessage({
         type: "success",
-        message: `Deleted successfully`,
+        message: `Removed successfully`,
         position: "top-right",
       });
       onOpenChange();
@@ -62,10 +66,16 @@ export default function DeleteModal({
   return (
     <>
       <div className="flex items-center">
-        <RiDeleteBin6Line
-          onClick={onOpen}
-          className="text-[24px] text-gray-300 hover:text-red-600"
-        />
+        {triggerText ? (
+          <Button size="sm" color={triggerColor} variant="flat" onPress={onOpen}>
+            {triggerText}
+          </Button>
+        ) : (
+          <RiDeleteBin6Line
+            onClick={onOpen}
+            className="text-[24px] text-gray-300 hover:text-red-600"
+          />
+        )}
       </div>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
         <ModalContent>

@@ -182,6 +182,9 @@ export default function CommonTable({
         isStriped
         isCompact
         color="warning"
+        classNames={{
+          th: ["bg-background", "text-foreground"],
+        }}
         bottomContent={
           <div className="flex w-full justify-center">
             <Pagination

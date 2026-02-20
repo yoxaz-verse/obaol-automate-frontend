@@ -25,9 +25,10 @@ import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
 import SelectModal from "./select-modal"; // Commission logic
+import AddToCatalogModal from "./AddToCatalogModal";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
-import { associateRoutes, variantRateRoutes } from "@/core/api/apiRoutes";
+import { associateRoutes, variantRateRoutes, apiRoutes, displayedRateRoutes, catalogItemRoutes } from "@/core/api/apiRoutes";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -46,7 +47,7 @@ interface VariantRateProps {
   productVariant?: any;
   displayOnly?: boolean;
   VariantRateMixed?: boolean;
-  rate: "variantRate" | "displayedRate";
+  rate: "variantRate" | "displayedRate" | "catalogItem";
   refetchData?: () => void;
   additionalParams?: Record<string, any>;
 }
@@ -111,18 +112,37 @@ const VariantRate: React.FC<VariantRateProps> = ({
   };
 
   const { data: variantResponse } = useQuery({
-    queryKey: ["variantRate"],
+    queryKey: ["displayedRate", user?.id],
     queryFn: () =>
-      getData(variantRateRoutes.getAll, {
+      getData(displayedRateRoutes.getAll, {
+        associate: user?.id,
         ...(additionalParams || {}),
-        // ...(displayOnly && { selected: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),
       }),
-    enabled: VariantRateMixed === true,
+    enabled: VariantRateMixed === true && !!user?.id,
   });
 
+  // Fetch CatalogItems for the current user to handle "Added" state in Marketplace
+  const { data: catalogItemsResponse } = useQuery({
+    queryKey: ["catalogItems", user?.id],
+    queryFn: () => getData(catalogItemRoutes.getAll, { associateId: user?.id }),
+    enabled: !!user?.id && user?.role === "Associate",
+  });
+
+  const catalogItems = Array.isArray(catalogItemsResponse?.data?.data)
+    ? catalogItemsResponse?.data?.data
+    : (catalogItemsResponse?.data?.data?.data || []);
+
+  const addedRateIds = new Set(catalogItems.map((item: any) => item.baseRateId?._id || item.baseRateId));
+
   // Build the columns from table config
-  let columns = generateColumns(rate, tableConfig);
+  const currentTable = rate;
+
+  let columns = generateColumns(
+    currentTable,
+    tableConfig,
+    user?.role
+  );
 
   // Return the entire QueryComponent for data fetching
   return (
@@ -135,6 +155,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         additionalParams,
         refetchData,
         filters,
+        addedRateIds.size, // Refresh when catalog items change
       ]}
       page={1}
       limit={1000}
@@ -150,22 +171,45 @@ const VariantRate: React.FC<VariantRateProps> = ({
         // If we have associates, populate the "associate" field values for AddModal
         const refetchData = () => {
           refetch?.(); // Safely call refetch if it's available
+          // Also refetch catalog items if possible? 
+          // Actually, tanstack query will handle it if we invalidate the key.
         };
         let variantRateFormFields = tableConfig[rate];
         if (user?.role === "Associate") {
+          // Hide both associate and commission for associates
           variantRateFormFields = variantRateFormFields.filter(
-            (field: any) => field.key !== "associate"
+            (field: any) => field.key !== "associate" && field.key !== "commission"
           );
         }
+
         var variantRateFetchedData: any;
-        if (variantResponse?.data.data.data) {
+        const isMarketplace = additionalParams?.view === "marketplace";
+
+        // DEBUGGING: Log Marketplace raw data
+        if (isMarketplace) {
+          console.log("=== MARKETPLACE DEBUG START ===");
+          console.log("[1] Raw variantRateData:", variantRateData);
+          console.log("[2] Is Array?:", Array.isArray(variantRateData));
+          console.log("[3] Array length:", Array.isArray(variantRateData) ? variantRateData.length : 'N/A');
+        }
+
+        // For Marketplace, use ONLY raw VariantRate data (no merge with DisplayedRate)
+        // Note: QueryComponent already extracts data from the paginated response
+        if (isMarketplace || rate === "catalogItem") {
+          variantRateFetchedData = Array.isArray(variantRateData) ? variantRateData : [];
+          if (isMarketplace) {
+            console.log("[4] variantRateFetchedData after extraction:", variantRateFetchedData);
+            console.log("[5] variantRateFetchedData length:", variantRateFetchedData.length);
+          }
+        } else if (variantResponse?.data.data.data) {
+          // For My Products view, merge with DisplayedRate if available
           variantRateFetchedData =
             mergeVariantAndDisplayedOnce(
-              variantResponse?.data.data.data,
-              variantRateData?.data
+              variantRateData as any, // Global (VariantRate)
+              variantResponse?.data.data.data // Personal (DisplayedRate)
             ) || [];
         } else {
-          variantRateFetchedData = variantRateData?.data || [];
+          variantRateFetchedData = Array.isArray(variantRateData) ? variantRateData : [];
         }
 
         // Inside your component, above the return:
@@ -173,36 +217,105 @@ const VariantRate: React.FC<VariantRateProps> = ({
         const isCooling = (startTimestamp: string) =>
           new Date(startTimestamp).getTime() + FIFTEEN_MINUTES > Date.now();
         // Transform the rows if needed
-        const tableData = variantRateFetchedData
-          .filter((item: any) => item.associate?.name) // filters out items with no associate name
+        const tableData = (variantRateFetchedData || [])
+          .filter((item: any) =>
+            // 1) CatalogItem / DisplayedRate: assume current user owns it, show it.
+            // 2) VariantRate (Marketplace): must have valid associate/company to show.
+            (rate !== "variantRate") ||
+            (item.associate?.name || item.associateId || item.associateCompanyId)
+          )
           .map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
 
-            if (!item.variantRate?.rate) {
+            if (rate === "variantRate") {
+              // Row is a VariantRate (My Products OR Marketplace)
+              const isMarketplace = additionalParams?.view === "marketplace";
+              const isOwner = item.associate?._id === user?.id || item.associate === user?.id;
+
+              const supplierRate = item.rate || 0;
+              const adminCommission = item.commission || 0;
+              const totalRate = supplierRate + adminCommission;
+
+              // Rule: Owners see base rate only. Non-owners see final price (base + admin commission).
+              const displayedPrice = (isOwner && !isMarketplace)
+                ? supplierRate
+                : totalRate;
+
               return {
                 ...rest,
+                isLive: item.isLive,
                 associate:
-                  item.associate?._id === user?.id || user?.role === "Admin"
-                    ? item.associateCompany?.name
-                    : "OBAOL",
-                associateId: item.associate._id,
-                companyId: item.associate.associateCompany,
+                  isOwner
+                    ? (item.associateCompany?.name || "My Company")
+                    : (item.associateCompany?.name || "OBAOL"),
+                associateId: item.associate?._id || item.associate,
+                companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant:
-                  item.productVariant?.product?.name +
+                  (item.productVariant?.product?.name || "") +
                   " " +
-                  item.productVariant?.name,
+                  (item.productVariant?.name || ""),
                 product: item.productVariant?.product?.name,
                 productVariantId: item.productVariant?._id,
-                rate: convertRate(item.rate),
+
+                // Column Mapping
+                rate: user?.role === "Admin" ? convertRate(supplierRate) : convertRate(displayedPrice),
+                commission: adminCommission ? convertRate(adminCommission) : 0,
+                finalRate: convertRate(totalRate),
+
+                rawBasePrice: totalRate,
+                rawCommission: 0,
+                isMarketplaceView: isMarketplace,
+                isOwnerView: isOwner && !isMarketplace,
+                isAdded: addedRateIds.has(item._id)
               };
-            } else {
+            } else if (rate === "catalogItem") {
+              // Row is a CatalogItem (Added to Catalog)
+              const baseRate = item.baseRateId;
+              const supplierRate = baseRate?.rate || 0;
+              const adminCommission = baseRate?.commission || 0;
+              const mediatorMarkup = item.margin || 0;
+
+              // Rule: Mediator sees final display rate (Base + Admin + Mediator Markup)
+              const finalPrice = supplierRate + adminCommission + mediatorMarkup;
+
               return {
                 ...rest,
-                rate: convertRate(item.variantRate?.rate),
-                associateId: item.associate._id,
-                companyId: item.associate.associateCompany,
+                isLive: item.isLive,
+                associate: item.associateCompanyId?.name || "My Company",
+                rate: convertRate(finalPrice),
+                associateId: item.associateId?._id || item.associateId,
+                originalOwnerId: baseRate?.associate?._id || baseRate?.associate,
+                companyId: item.associateCompanyId?._id || item.associateCompanyId,
+                productVariant: item.productVariantId?.name,
+                product: item.productVariantId?.product?.name,
+                rawBasePrice: (supplierRate + adminCommission),
+                rawCommission: mediatorMarkup,
+                customTitle: item.customTitle,
+                variantRate: item.baseRateId,
+                isCatalogView: true,
+                isAdded: true
+              };
+            } else {
+              // Row is a DisplayedRate (Personalized - fallback/old)
+              const supplierRate = item.variantRate?.rate || 0;
+              const adminCommission = item.variantRate?.commission || 0;
+              const basePriceForUser = supplierRate + adminCommission;
+
+              const associateMargin = item.commission || 0;
+              const totalRate = basePriceForUser + associateMargin;
+              return {
+                ...rest,
+                isLive: item.isLive,
+                associate: item.associateCompany?.name || "My Company",
+                rate: convertRate(totalRate),
+                associateId: item.associate?._id,
+                companyId: item.associate?.associateCompany,
                 productVariant: item.variantRate?.productVariant?.name,
                 product: item.variantRate?.productVariant?.product?.name,
+                rawBasePrice: basePriceForUser,
+                rawCommission: associateMargin,
+                productVariantId: item.variantRate?.productVariant?._id,
+                variantRateId: item.variantRate?._id,
               };
             }
           });
@@ -248,56 +361,48 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 columns={columns}
                 isLoading={false}
                 otherModal={(rowItem: any) => {
+                  if (rowItem.isMarketplaceView) {
+                    return (
+                      <div className="flex w-full gap-8 items-end justify-end">
+                        <AddToCatalogButton
+                          rowItem={rowItem}
+                          onSuccess={() => refetchData()}
+                        />
+                      </div>
+                    );
+                  }
                   return (
-                    <div className="flex w-full gap-8 items-end justify-end">
-                      {/* Commission / selection logic */}
-
-                      {(rowItem.variantRate &&
-                        rowItem.associateId === user?.id) ||
-                        (rowItem.associateId !== user?.id &&
-                          rowItem.companyId !==
-                          associateByIdValue?.associateCompany?._id) ? (
-                        <SelectModal
+                    <div className="flex w-full gap-2 items-center justify-end">
+                      {/* LiveToggle or Live Chip */}
+                      {(user?.role === "Admin" || rowItem.isOwnerView) ? (
+                        <LiveToggle
                           variantRate={rowItem}
                           refetchData={refetchData}
+                          apiEndpoint={apiRoutesByRole[rate]}
                         />
-                      ) : user?.id !== undefined ? (
-                        <>
-                          {rowItem.associateId === user.id ? (
-                            <b className="text-warning-200">Own Rate</b>
-                          ) : (
-                            rowItem.companyId ===
-                            associateByIdValue?.associateCompany?._id && (
-                              <b className="text-warning-200">Company Rate</b>
-                            )
-                          )}
-                        </>
-                      ) : null}
-                      {/* LiveToggle or Live Chip + Enquiry Button */}
-                      {(!VariantRateMixed && user?.role === "Admin") ||
-                        (!rowItem.variantRate &&
-                          rowItem.associateId === user?.id &&
-                          user?.id !== undefined) ? (
-                        <>
-                          {" "}
-                          <LiveToggle
-                            variantRate={rowItem}
-                            refetchData={refetchData}
-                          />
-                        </>
                       ) : (
                         <div className="flex items-center gap-2">
-                          {/* @ts-ignore */}
-                          <Chip color={"success"} variant="dot">
-                            Live
-                          </Chip>
-                          <CreateEnquiryButton
-                            productVariant={
-                              rowItem.productVariantId ||
-                              rowItem.variantRate?.productVariant?._id
-                            }
-                            variantRate={rowItem}
-                          />
+                          {rowItem.isLive ? (
+                            <>
+                              {/* @ts-ignore */}
+                              <Chip color={"success"} variant="dot">
+                                Live
+                              </Chip>
+                              {!rowItem.isCatalogView && (
+                                <CreateEnquiryButton
+                                  productVariant={
+                                    rowItem.productVariantId ||
+                                    rowItem.variantRate?.productVariant?._id
+                                  }
+                                  variantRate={rowItem}
+                                />
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-default-400 text-tiny italic">
+                              {rowItem.isCatalogView ? "Hidden" : "Not Live"}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
@@ -305,53 +410,55 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 }}
                 editModal={(item: any) => {
                   if (!user) return null;
-
                   const isAdmin = user.role === "Admin";
-                  const isCoolingTime = isCooling(item.coolingStartTime);
-                  const isDifferentAssociate = item.associateId !== user.id;
+                  const isOwner = item.isOwnerView;
 
-                  if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
-                    return (
-                      <div className="flex w-full h-[50px]  gap-8 items-end justify-end align-bottom">
-                        <EditModal
-                          _id={item._id}
-                          initialData={item}
-                          currentTable={rate}
-                          formFields={tableConfig[rate]}
-                          apiEndpoint={`${apiRoutesByRole[rate]}`}
-                          refetchData={refetchData}
-                        />
-                      </div>
-                    );
+                  if (isAdmin || isOwner) {
+                    const isCoolingTime = isCooling(item.coolingStartTime);
+                    const isDifferentAssociate = item.associateId !== user.id;
+
+                    if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                      return (
+                        <div className="flex w-full h-[50px] gap-8 items-end justify-end align-bottom">
+                          <EditModal
+                            _id={item._id}
+                            initialData={item}
+                            currentTable={rate}
+                            formFields={tableConfig[rate]}
+                            apiEndpoint={`${apiRoutesByRole[rate]}`}
+                            refetchData={refetchData}
+                          />
+                        </div>
+                      );
+                    }
                   }
-
                   return null;
                 }}
                 deleteModal={(item: any) => {
                   if (!user) return null;
-
                   const isAdmin = user.role === "Admin";
-                  const isCoolingTime = isCooling(item.coolingStartTime);
-                  const isDifferentAssociate = item.associateId !== user.id;
+                  const isOwner = item.isOwnerView;
+                  const isCatalog = item.isCatalogView;
 
-                  if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                  if (isAdmin || isOwner || isCatalog) {
                     return (
-                      <div className="flex w-full h-[50px]  gap-8 items-end justify-end align-bottom">
+                      <div className="flex w-full h-[50px] gap-8 items-end justify-end align-bottom">
                         <DeleteModal
                           _id={item._id}
-                          name={item.name}
+                          name={item.name || item.customTitle || item.productVariant}
                           deleteApiEndpoint={apiRoutesByRole[rate]}
                           refetchData={refetchData}
+                          triggerText={isCatalog ? "Remove from Catalog" : "Delete"}
+                          triggerColor="danger"
                           useBody={true}
                         />
                       </div>
                     );
                   }
-
                   return null;
                 }}
               />
-            </section>
+            </section >
             <section className="md:hidden block">
               {tableData.map((item: any, index: number) => {
                 return (
@@ -391,17 +498,23 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 />
                               ) : (
                                 <div className="flex flex-col items-center gap-2">
-                                  <CreateEnquiryButton
-                                    productVariant={
-                                      item.productVariantId ||
-                                      item.variantRate?.productVariant?._id
-                                    }
-                                    variantRate={item}
-                                  />
-                                  {/* @ts-ignore */}
-                                  <Chip color={"success"} variant="dot">
-                                    Live
-                                  </Chip>
+                                  {new Date(item.updatedAt).toDateString() === new Date().toDateString() ? (
+                                    <>
+                                      <CreateEnquiryButton
+                                        productVariant={
+                                          item.productVariantId ||
+                                          item.variantRate?.productVariant?._id
+                                        }
+                                        variantRate={item}
+                                      />
+                                      {/* @ts-ignore */}
+                                      <Chip color={"success"} variant="dot">
+                                        Live
+                                      </Chip>
+                                    </>
+                                  ) : (
+                                    <span className="text-default-400 text-tiny italic">Not Live</span>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -448,7 +561,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
           </>
         );
       }}
-    </QueryComponent>
+    </QueryComponent >
   );
 };
 
@@ -460,17 +573,22 @@ export default VariantRate;
 interface LiveToggleProps {
   variantRate: any;
   refetchData?: () => void;
+  apiEndpoint?: string;
 }
 
 const LiveToggle: React.FC<LiveToggleProps> = ({
   variantRate,
   refetchData,
+  apiEndpoint: propApiEndpoint,
 }) => {
   const [isSelected, setIsSelected] = useState<boolean>(variantRate.isLive);
   const [loading, setLoading] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
-  const apiEndpoint = apiRoutesByRole["variantRate"];
+  useEffect(() => {
+    setIsSelected(variantRate.isLive);
+  }, [variantRate.isLive]);
+  const apiEndpoint = propApiEndpoint || apiRoutesByRole["variantRate"];
 
   const updateMutation = useMutation({
     mutationFn: async (newStatus: boolean) => {
@@ -725,20 +843,64 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
  */
 
 function mergeVariantAndDisplayedOnce(
-  variantRates: any[],
-  displayedRates: any[]
+  variantRates: any,
+  displayedRates: any
 ) {
-  // 1) Remove displayedRates whose variantRate._id is found in variantRates
-  const variantRateIds = new Set(variantRates.map((vr) => vr._id));
-  console.log(variantRateIds);
+  // Extract arrays if they are wrapped in a pagination object
+  const vrList = Array.isArray(variantRates) ? variantRates : (variantRates?.data || []);
+  const drList = Array.isArray(displayedRates) ? displayedRates : (displayedRates?.data || []);
 
-  const filteredDisplayedRates = displayedRates.filter(
-    (dr) => !variantRateIds.has(dr.variantRate?._id)
+  // 1) Identify all variantRate IDs that have a corresponding personalized displayedRate
+  const displayedVariantRateIds = new Set(
+    drList.map((dr: any) => dr.variantRate?._id || dr.variantRate)
   );
-  console.log(filteredDisplayedRates);
 
-  console.log([...variantRates, ...filteredDisplayedRates]);
+  // 2) Filter the global variantRates to remove those that are already personalized
+  const filteredVariantRates = vrList.filter(
+    (vr: any) => !displayedVariantRateIds.has(vr._id)
+  );
 
-  // 2) Combine remaining displayedRates with variantRates
-  return [...variantRates, ...filteredDisplayedRates];
+  // 3) Return the personalized rates plus the remaining global rates
+  return [...drList, ...filteredVariantRates];
 }
+
+/**
+ * Button to open AddToCatalogModal
+ */
+interface AddToCatalogButtonProps {
+  rowItem: any;
+  onSuccess?: () => void;
+}
+
+const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({ rowItem, onSuccess }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Construct product name from row data
+  const productName = rowItem.productVariant || "Product";
+
+  return (
+    <>
+      <Button
+        size="sm"
+        color={rowItem.isAdded ? "success" : "primary"}
+        variant="flat"
+        onPress={onOpen}
+        isDisabled={rowItem.isAdded}
+        startContent={<span className="text-lg">{rowItem.isAdded ? "✓" : "+"}</span>}
+      >
+        {rowItem.isAdded ? "Added" : "Add to Catalog"}
+      </Button>
+
+      {isOpen && (
+        <AddToCatalogModal
+          isOpen={isOpen}
+          onClose={onClose}
+          productVariantId={rowItem.productVariantId || rowItem.productVariant?._id}
+          baseRateId={rowItem._id}
+          basePrice={rowItem.rawBasePrice || rowItem.rate}
+          productName={productName}
+        />
+      )}
+    </>
+  );
+};

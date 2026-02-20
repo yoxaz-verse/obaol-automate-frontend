@@ -12,6 +12,8 @@ import {
   companyBusinessModelRoutes,
   companyStageRoutes,
   companyTypeRoutes,
+  catalogItemRoutes,
+  catalogRoutes,
   customerRoutes,
   designationRoutes,
   displayedRateRoutes,
@@ -40,13 +42,20 @@ import {
 import { fetchDependentOptions } from "./fetchDependentOptions";
 
 // Helper function to generate columns based on the current table
-export const generateColumns = (currentTable: string, tableConfig: any) => {
+export const generateColumns = (currentTable: string, tableConfig: any, userRole?: string) => {
   // Filter out the "Actions" column initially
-  const nonActionColumns = tableConfig[currentTable]
+  let nonActionColumns = tableConfig[currentTable]
     .filter(
       (field: any) =>
         field.inTable && field.type !== "select" && field.key !== "actions2"
     )
+    .filter((field: any) => {
+      // Hide commission and finalRate from non-admins
+      if (userRole !== "Admin" && (field.key === "commission" || field.key === "finalRate")) {
+        return false;
+      }
+      return true;
+    })
     .map((field: any) => ({
       name: field.label.toUpperCase(),
       uid: field.key,
@@ -81,6 +90,9 @@ export const generateColumns = (currentTable: string, tableConfig: any) => {
   } else if (currentTable === "variantRate") {
     nonActionColumns.push({ name: "Associate", uid: "associate" });
     nonActionColumns.push({ name: "Product", uid: "productVariant" });
+  } else if (currentTable === "displayedRate" || currentTable === "catalogItem") {
+    nonActionColumns.push({ name: "Associate", uid: "associate" });
+    nonActionColumns.push({ name: "Product", uid: "product" });
   } else if (
     currentTable === "projectManager" ||
     currentTable === "activityManager"
@@ -129,6 +141,7 @@ export const apiRoutesByRole: Record<string, string> = {
   productVariant: productVariantRoutes.getAll,
   variantRate: variantRateRoutes.getAll,
   displayedRate: displayedRateRoutes.getAll,
+  catalogItem: catalogItemRoutes.getAll,
   enquiry: enquiryRoutes.getAll,
   enquiryProcessStatus: enquiryProcessStatusRoutes.getAll,
   designation: designationRoutes.getAll,
@@ -1640,12 +1653,27 @@ export const initialTableConfig: Record<
   // Product Variant Rate
   variantRate: [
     {
-      label: "Rate",
+      label: "Price",
       type: "number",
       key: "rate",
       inForm: true,
       inTable: true,
       inEdit: true,
+    },
+    {
+      label: "Commission",
+      type: "number",
+      key: "commission",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Final Rate",
+      type: "number",
+      key: "finalRate",
+      inForm: false,
+      inTable: true,
     },
     {
       label: "Product Variant",
@@ -1763,13 +1791,66 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
     },
-    // {
-    //   label: "Actions",
-    //   type: "action",
-    //   key: "actions2",
-    //   inForm: false,
-    //   inTable: true,
-    // },
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  catalogItem: [
+    {
+      label: "Custom Title",
+      type: "text",
+      key: "customTitle",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Product",
+      type: "text",
+      key: "product",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Variant",
+      type: "text",
+      key: "productVariant",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Final Price",
+      type: "number",
+      key: "rate",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Live",
+      type: "boolean",
+      key: "isLive",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+    },
+    {
+      label: "Created At",
+      type: "date",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
     {
       label: "Actions",
       type: "action",

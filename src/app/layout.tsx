@@ -152,11 +152,11 @@ export default function RootLayout({
               }}
             />
           </noscript>
-        )}   
+        )}
         <AuthProvider>
-          <VerificationProvider>
-            <Providers>{children}</Providers>
-          </VerificationProvider>
+          {/* <VerificationProvider> */}
+          <Providers>{children}</Providers>
+          {/* </VerificationProvider> */}
         </AuthProvider>
         <script
           type="application/ld+json"

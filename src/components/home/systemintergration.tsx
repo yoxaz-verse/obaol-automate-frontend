@@ -52,11 +52,25 @@ export default function SystemIntergrationSection() {
         y,
         scale,
         willChange: "transform, opacity",
-      }} className="relative py-28 px-6 border-t border-default-200 bg-content1 overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-1/2 left-0 w-full h-96 bg-gradient-to-r from-orange-400/20 via-transparent to-transparent blur-3xl" />
+      }}
+      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
+    >
+      {/* Deep Space Grid & Ambient Glow */}
+      <div className="absolute inset-0 pointer-events-none" >
+        <div className="absolute top-1/2 left-0 w-full h-[500px] bg-gradient-to-r from-orange-400/10 via-orange-400/5 to-transparent blur-[120px] -translate-y-1/2" />
+        <div
+          className="absolute inset-0 opacity-[0.02] mix-blend-screen"
+          style={{
+            backgroundImage: `
+                linear-gradient(to right, #ffffff 1px, transparent 1px),
+                linear-gradient(to bottom, #ffffff 1px, transparent 1px)
+              `,
+            backgroundSize: "40px 40px",
+            maskImage: "linear-gradient(to right, black 20%, transparent 80%)",
+            WebkitMaskImage: "linear-gradient(to right, black 20%, transparent 80%)"
+          }}
+        />
       </div>
-
       <div className="max-w-6xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -76,10 +90,9 @@ export default function SystemIntergrationSection() {
               System Ready
             </motion.span>
 
-            <h2 className="mt-4 text-3xl md:text-4xl font-semibold leading-snug">
-              Built as Trading Infrastructure,
-              <br />
-              <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+            <h2 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
+              Built as Trading Infrastructure,<br />
+              <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent drop-shadow-sm">
                 Not Just a Platform
               </span>
             </h2>
@@ -114,24 +127,30 @@ export default function SystemIntergrationSection() {
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="p-8 rounded-xl border border-default-200 bg-background relative overflow-hidden"
+              className="p-8 md:p-10 rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-2xl relative overflow-hidden shadow-2xl"
             >
-              <div className="space-y-3 text-sm text-default-600 relative z-10">
-                <SystemLine label="Live Rates" highlight />
-                <SystemLine label="MCP" />
-                <SystemLine label="Automation Layer" />
-                <SystemLine label="Secure APIs" />
-                <SystemLine label="Enterprise Systems" />
+              {/* Internal grid glow */}
+              <div className="absolute inset-0 pointer-events-none opacity-20">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/30 blur-[60px]" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 blur-[60px]" />
+              </div>
+
+              <div className="space-y-4 text-sm text-default-600 relative z-10">
+                <SystemLine label="Live Rates API" highlight />
+                <SystemLine label="MCP Integration" />
+                <SystemLine label="Automation Layer / Workflows" />
+                <SystemLine label="Secure Connectivity" />
+                <SystemLine label="Enterprise Webhooks" />
               </div>
 
               {/* Animated Background */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-orange-400/5 to-transparent"
+                className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none"
                 animate={{
-                  opacity: [0.3, 0.6, 0.3],
+                  opacity: [0.2, 0.5, 0.2],
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 4,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
@@ -140,7 +159,7 @@ export default function SystemIntergrationSection() {
 
             {/* Subtle Glow */}
             <motion.div
-              className="absolute inset-0 rounded-xl border border-orange-400/20 shadow-[0_0_60px_rgba(255,165,0,0.15)] pointer-events-none"
+              className="absolute inset-0 rounded-3xl border border-orange-500/30 shadow-[0_0_80px_rgba(251,146,60,0.1)] pointer-events-none"
               animate={{
                 boxShadow: [
                   "0_0_60px_rgba(255,165,0,0.15)",
@@ -175,17 +194,17 @@ function SystemLine({
     <motion.div
       whileHover={{ x: 5, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400 }}
-      className={`flex items-center justify-between px-4 py-3 rounded-lg border transition-all duration-300 cursor-default
+      className={`flex items-center justify-between px-5 py-4 rounded-xl border transition-all duration-300 backdrop-blur-sm cursor-default
         ${highlight
-          ? "border-orange-400/50 text-orange-300 bg-orange-400/5"
-          : "border-default-200 text-default-500 hover:border-default-300 hover:text-default-600"
+          ? "border-orange-500/40 text-orange-400 bg-orange-500/10 shadow-[0_0_20px_rgba(251,146,60,0.1)]"
+          : "border-white/5 text-default-400 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 hover:text-default-300"
         }`}
     >
       <span className="font-medium">{label}</span>
       <motion.span
-        className={`text-xs px-2 py-1 rounded-full ${highlight
-          ? "bg-orange-400/20 text-orange-300"
-          : "bg-default-100 text-default-400"
+        className={`text-xs px-3 py-1.5 font-bold tracking-widest uppercase rounded-lg ${highlight
+          ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+          : "bg-white/5 text-default-500 border border-transparent"
           }`}
         animate={highlight ? { opacity: [1, 0.7, 1] } : {}}
         transition={

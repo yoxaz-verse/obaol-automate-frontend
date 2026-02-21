@@ -7,6 +7,7 @@ import Footer from "@/components/home/footer";
 import Header from "@/components/home/header";
 
 import HeroSection from "@/components/home/herosection";
+import StatementSection from "@/components/home/statementsection";
 import ProcurementSpecialistSection from "@/components/home/procurementprocess";
 import StartedIn from "@/components/home/startedin";
 import SystemIntergrationSection from "@/components/home/systemintergration";
@@ -47,9 +48,11 @@ export default function HomePage() {
       {/* HERO */}
       <Header />
       <HeroSection />
-      {/* CLARITY */}
-      {/* COMMODITY FOCUS SECTION */}
 
+      {/* STATEMENT — Bold positioning */}
+      <StatementSection />
+
+      {/* COMMODITY FOCUS SECTION */}
       <CommodityServicesSection />
       <TradeOperatingLayer />
       <BrokenTradeSystemSection />

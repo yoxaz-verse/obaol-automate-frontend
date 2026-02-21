@@ -56,16 +56,25 @@ export default function ProcurementSpecialistSection() {
         scale,
         willChange: "transform, opacity",
       }}
-      className="relative py-32 px-6 border-t border-default-200 bg-background overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
+    >
+      {/* Cinematic Background Ambient Glows & Grid */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Glows */}
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-orange-500/5 blur-[120px] rounded-full -translate-x-1/2" />
+        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-indigo-500/5 blur-[150px] rounded-full translate-x-1/3" />
+
+        {/* Subtle Tech Grid */}
         <div
-          className="w-full h-full"
+          className="w-full h-full opacity-[0.03] mix-blend-screen"
           style={{
             backgroundImage: `
-                radial-gradient(circle at 2px 2px, white 1px, transparent 0)
+                linear-gradient(to right, #ffffff 1px, transparent 1px),
+                linear-gradient(to bottom, #ffffff 1px, transparent 1px)
               `,
-            backgroundSize: "40px 40px",
+            backgroundSize: "60px 60px",
+            maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)"
           }}
         />
       </div>
@@ -76,18 +85,19 @@ export default function ProcurementSpecialistSection() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mb-20"
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mb-24 md:mb-32 text-center mx-auto"
         >
-          <h2 className="text-3xl md:text-4xl font-semibold">
-            Procurement Execution — Step by Step
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
+            Procurement Execution <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">— Step by Step</span>
           </h2>
-          <p className="mt-6 text-lg text-default-600 leading-relaxed">
+          <p className="mt-8 text-lg md:text-xl text-default-500 leading-relaxed max-w-3xl mx-auto">
             Once order confirmation and supplier assignment are completed,
             OBAOL executes procurement as a third-party on-ground
             representative.
-            <br />
-            <span className="text-foreground font-medium">
+            <br className="hidden sm:block" />
+            <span className="text-foreground font-medium mt-4 block">
               This is a structured, sequential process — not ad-hoc
               coordination.
             </span>
@@ -95,9 +105,9 @@ export default function ProcurementSpecialistSection() {
         </motion.div>
 
         {/* Flow */}
-        <div className="relative">
-          {/* Vertical Line */}
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-orange-400/40 via-gray-700 to-transparent" />
+        <div className="relative max-w-5xl mx-auto">
+          {/* Glowing Vertical Line */}
+          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-orange-500/0 via-orange-500/30 to-orange-500/0 md:-translate-x-1/2" />
 
           <div className="space-y-20">
             {[
@@ -164,19 +174,17 @@ export default function ProcurementSpecialistSection() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-20 grid md:grid-cols-2 gap-6"
+          transition={{ duration: 0.8 }}
+          className="mt-32 max-w-5xl mx-auto grid md:grid-cols-2 gap-8"
         >
           <ContextCard
             title="First-Time Suppliers"
-            text="All steps are executed end-to-end to establish trust,
-        validate stock, and ensure smooth execution."
+            text="All steps are executed end-to-end to establish trust, validate stock, and ensure flawless execution."
           />
 
           <ContextCard
             title="Recurring Suppliers"
-            text="Several steps are streamlined while maintaining
-        verification and execution control."
+            text="Several steps are streamlined via automation while maintaining strict verification and execution control."
           />
         </motion.div>
       </div>
@@ -202,49 +210,49 @@ function FlowStep({
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        x: fromLeft ? -80 : 80,
-      }}
-      whileInView={{
-        opacity: 1,
-        x: 0,
-      }}
-      viewport={{
-        once: true,
-        margin: "-120px",
-      }}
-      transition={{
-        duration: 0.7,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className={`
-        relative
-        flex
-        ${fromLeft ? "justify-start" : "justify-end"}
+        relative flex flex-col md:flex-row w-full mb-12 last:mb-0
+        ${fromLeft ? "md:justify-start" : "md:justify-end"}
       `}
     >
+      {/* Desktop Connection Dot (Hidden on Mobile, acts as center anchor) */}
+      <div className="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-background border-2 border-orange-500/50 z-10 shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
+
       {/* Card */}
-      <div className="relative w-full md:w-[520px] pl-16">
-        {/* Step Indicator */}
+      <div className={`relative w-full pl-20 md:pl-0 md:w-[45%] ${fromLeft ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"}`}>
+
+        {/* Step Indicator (Mobile: Absolute Left, Desktop: Integrated into layout) */}
         <div
-          className={`absolute left-0 top-1 flex items-center justify-center
-          w-10 h-10 rounded-full text-sm font-bold
+          className={`absolute left-0 top-2 md:top-auto md:relative md:inline-flex items-center justify-center
+          w-12 h-12 rounded-full text-base font-black tracking-widest backdrop-blur-md border border-white/10
+          ${fromLeft ? "md:ml-auto md:mb-4 md:float-right" : "md:mr-auto md:mb-4"}
           ${highlight
-              ? "bg-orange-400 text-black shadow-[0_0_20px_rgba(255,165,0,0.6)]"
-              : "bg-content2 text-default-600"
+              ? "bg-gradient-to-br from-orange-400 to-red-500 text-white shadow-[0_0_30px_rgba(251,146,60,0.6)] border-orange-400/50"
+              : "bg-white/[0.03] text-default-400 shadow-xl"
             }`}
         >
           {step}
         </div>
 
-        <h3 className="text-lg md:text-xl font-semibold text-foreground">
-          {title}
-        </h3>
+        {/* Content Container */}
+        <div className={`md:clear-both p-6 rounded-2xl backdrop-blur-xl border transition-all duration-500
+          ${highlight
+            ? "bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.1)]"
+            : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+          }`}
+        >
+          <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
+            {title}
+          </h3>
 
-        <p className="mt-3 text-sm md:text-base text-default-600 leading-relaxed">
-          {desc}
-        </p>
+          <p className="mt-3 text-base text-default-500 leading-relaxed">
+            {desc}
+          </p>
+        </div>
       </div>
     </motion.div>
   );
@@ -255,10 +263,13 @@ function ContextCard({ title, text }: { title: string; text: string }) {
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: "spring", stiffness: 300 }}
-      className="p-6 rounded-xl border border-default-200 bg-content1 hover:border-default-300 transition-all duration-300"
+      className="p-8 md:p-10 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 group relative overflow-hidden"
     >
-      <h4 className="font-semibold text-lg text-foreground">{title}</h4>
-      <p className="mt-3 text-sm text-default-600 leading-relaxed">{text}</p>
+      {/* Hover ambient glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      <h4 className="font-bold text-xl md:text-2xl text-foreground tracking-tight">{title}</h4>
+      <p className="mt-4 text-base text-default-500 leading-relaxed">{text}</p>
     </motion.div>
   );
 }

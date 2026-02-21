@@ -166,10 +166,12 @@ export default function ResponsibilityTransferSection() {
         willChange: "transform, opacity",
       }} className="relative py-40 px-6 bg-background border-t border-default-200 overflow-hidden"
     >
-      {/* Soft background continuity */}
+      {/* Soft background continuity & Futuristic ambient glows */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-orange-400/10 blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-orange-400/15 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px]" />
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
       </div>
 
       <div className="relative max-w-7xl mx-auto">
@@ -178,17 +180,13 @@ export default function ResponsibilityTransferSection() {
 
         {/* Heading */}
         <div className="max-w-3xl mb-12">
-          <span className="text-xs uppercase tracking-widest text-default-400">
-            Who we are
-          </span>
-
-          <h2 className="mt-4 text-3xl md:text-4xl font-semibold leading-snug">
-            Not a Marketplace.
-            <br />
-            <span className="text-orange-400">
-              A Complete Trading System.
-            </span>
+          <h2 className="text-3xl md:text-5xl font-bold leading-snug tracking-tight">
+            <span className="text-orange-400">Who</span> are we?
           </h2>
+
+          <p className="mt-6 text-default-500 text-lg leading-relaxed">
+            We <span className="text-foreground font-medium">list</span>. We <span className="text-foreground font-medium">match</span>. We <span className="text-orange-400 font-semibold">execute</span>.
+          </p>
         </div>
         {/* Differentiation Panel */}
         <div className="mt-12 mb-32">
@@ -203,15 +201,21 @@ export default function ResponsibilityTransferSection() {
             </p>
 
             {/* Desktop Table */}
-            <div className="hidden md:block border border-default-200 rounded-lg overflow-hidden">
-              <div className="grid grid-cols-3 bg-content1">
-                <div className="p-4 text-sm font-medium text-default-500">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="hidden md:block rounded-2xl overflow-hidden backdrop-blur-xl bg-white/[0.02] border border-white/10 shadow-2xl"
+            >
+              <div className="grid grid-cols-3 bg-white/[0.04] border-b border-white/10">
+                <div className="p-5 text-sm font-semibold tracking-wider uppercase text-default-400">
                   Aspect
                 </div>
-                <div className="p-4 text-sm font-medium text-default-500">
+                <div className="p-5 text-sm font-semibold tracking-wider uppercase text-default-400">
                   Traditional B2B Platforms
                 </div>
-                <div className="p-4 text-sm font-medium text-orange-400">
+                <div className="p-5 text-sm font-bold tracking-wider uppercase text-orange-400">
                   OBAOL – Trade Execution System
                 </div>
               </div>
@@ -219,21 +223,21 @@ export default function ResponsibilityTransferSection() {
               {COMPARISON_ROWS.map((row, i) => (
                 <div
                   key={row.label}
-                  className={`grid grid-cols-3 border-t border-default-200 ${i % 2 === 0 ? "bg-background" : "bg-content1"
+                  className={`grid grid-cols-3 border-b border-white/5 transition-all duration-300 hover:bg-white/[0.06] ${i % 2 === 0 ? "bg-transparent" : "bg-white/[0.01]"
                     }`}
                 >
-                  <div className="p-4 text-sm text-default-600">
+                  <div className="p-5 text-sm font-medium text-default-300">
                     {row.label}
                   </div>
-                  <div className="p-4 text-sm text-default-500">
+                  <div className="p-5 text-sm text-default-500">
                     {row.traditional}
                   </div>
-                  <div className="p-4 text-sm text-foreground">
+                  <div className="p-5 text-sm text-foreground font-medium">
                     {row.obaol}
                   </div>
                 </div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Mobile (Stacked) */}
             <div className="md:hidden space-y-6">
@@ -285,20 +289,20 @@ export default function ResponsibilityTransferSection() {
                   <div
                     key={stage.id}
                     onClick={() => toggle(stage.id)}
-                    className={`cursor-pointer px-5 py-4 border-l-2 transition-all duration-300
+                    className={`cursor-pointer px-5 py-4 border-l-2 backdrop-blur-md transition-all duration-500 rounded-r-xl
                       ${active
-                        ? "border-orange-400 bg-content2"
-                        : "border-default-200 bg-content1 hover:border-default-300"
+                        ? "border-orange-400 bg-orange-400/10 shadow-[inset_4px_0_20px_rgba(251,146,60,0.15)]"
+                        : "border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/30"
                       }`}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-foreground">
+                      <span className={`text-sm tracking-wide ${active ? "text-foreground font-semibold" : "text-default-400"}`}>
                         {stage.label}
                       </span>
                       <span
-                        className={`text-xs tracking-wide ${active
-                          ? "text-orange-400"
-                          : "text-default-400"
+                        className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-sm transition-colors ${active
+                          ? "bg-orange-400/20 text-orange-400"
+                          : "bg-white/5 text-default-500"
                           }`}
                       >
                         {active ? "Executed by OBAOL" : "Executed by You"}
@@ -311,34 +315,42 @@ export default function ResponsibilityTransferSection() {
           </div>
 
           {/* RIGHT */}
-          <div className="p-8 border border-default-200 bg-content1">
-            <h3 className="font-semibold text-foreground">
+          <div className="p-8 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400/10 blur-[80px] pointer-events-none" />
+
+            <h3 className="font-semibold text-lg text-foreground tracking-tight flex items-center gap-3">
+              <span className="w-8 h-px bg-orange-400/50 inline-block" />
               Execution Responsibility
             </h3>
 
             {obaolHandles.length === 0 ? (
-              <p className="mt-6 text-sm text-default-400">
+              <p className="mt-8 text-sm text-default-400 h-full flex items-center justify-center opacity-70">
                 Select any stage to delegate execution to OBAOL.
               </p>
             ) : (
-              <ul className="mt-6 space-y-6">
+              <ul className="mt-8 space-y-6 relative z-10">
                 {obaolHandles.map((id) => {
                   const stage = STAGES.find((s) => s.id === id);
                   return (
-                    <li key={id}>
-                      <p className="text-sm font-medium text-foreground">
+                    <motion.li
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      key={id}
+                      className="border-l border-orange-400/30 pl-4 py-1"
+                    >
+                      <p className="text-sm font-semibold text-foreground tracking-wide">
                         {stage?.label}
                       </p>
-                      <p className="mt-1 text-xs text-default-600 leading-relaxed">
+                      <p className="mt-2 text-sm text-default-400 leading-relaxed">
                         {stage?.obaolDesc}
                       </p>
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ul>
             )}
 
-            <p className="mt-8 text-xs text-default-400">
+            <p className="mt-12 text-xs font-medium uppercase tracking-widest text-default-500">
               You remain in control. OBAOL executes selected responsibilities.
             </p>
           </div>

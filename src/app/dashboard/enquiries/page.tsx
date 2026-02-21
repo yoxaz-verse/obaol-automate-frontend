@@ -25,7 +25,8 @@ import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
  * The main Enquiry page
  */
 export default function EnquiryPage() {
-  const [selectedTab, setSelectedTab] = React.useState<string>("All");
+  const [selectedType, setSelectedType] = React.useState<string>("All");
+  const [selectedStage, setSelectedStage] = React.useState<string>("All");
   const tableConfig = { ...initialTableConfig };
   const filteredStatusOptions = useFilteredStatusOptions();
 
@@ -66,7 +67,7 @@ export default function EnquiryPage() {
 
           const enquiriesData = extractArray(enquiryResponse);
 
-          const tableData = enquiriesData.map((item: any) => {
+          const tableData = enquiriesData.map((item: any, index: number) => {
             const {
               isDeleted,
               isActive,
@@ -134,13 +135,33 @@ export default function EnquiryPage() {
               return mapping[statusName as string] || "Pending";
             };
 
+            const isBuying = (item.buyerAssociateId?._id || item.buyerAssociateId)?.toString() === user?.id?.toString();
+            const isSelling = (item.sellerAssociateId?._id || item.sellerAssociateId)?.toString() === user?.id?.toString();
+
+            if (index === 0) {
+              console.log("DEBUG ROLE DETECTION:", {
+                buying: isBuying,
+                selling: isSelling,
+                buyerId: (item.buyerAssociateId?._id || item.buyerAssociateId)?.toString(),
+                sellerId: (item.sellerAssociateId?._id || item.sellerAssociateId)?.toString(),
+                userId: user?.id?.toString(),
+                buyerObj: item.buyerAssociateId
+              });
+            }
+
+            const typeValue = isBuying ? "Buying" : (isSelling ? "Selling" : "Mediated");
+
             return {
               ...data,
+              type: typeValue,
+              isBuying,
+              isSelling,
               specification: item.specifications || "No Spec",
               product: item.productId?.name || "N/A",
               productVariant: "N/A",
-              productAssociate: item.buyerAssociateId?.name || "N/A",
-              associateCompany: item.buyerAssociateId?.associateCompany?.name || "N/A",
+              counterparty: isBuying ? (item.sellerAssociateId?.name || "Multiple Sellers") : (item.buyerAssociateId?.name || "Direct Buyer"),
+              counterpartyLabel: isBuying ? "Seller" : "Buyer",
+              associateCompany: isBuying ? (item.sellerAssociateId?.associateCompany?.name || "N/A") : (item.buyerAssociateId?.associateCompany?.name || "N/A"),
               assignedEmployee: getEmployeeName(item.assignedEmployeeId),
               mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
               commission: "N/A",
@@ -151,15 +172,21 @@ export default function EnquiryPage() {
             };
           });
 
+          const filteredData = tableData.filter((item: any) => {
+            const matchesType = selectedType === "All" || item.type === selectedType;
+            const matchesStage = selectedStage === "All" || item.status === selectedStage;
+            return matchesType && matchesStage;
+          });
+
           return (
             <div className="flex items-center justify-center w-full">
               <div className="w-[95%]">
                 <StatsHeader data={enquiriesData} />
 
-                <div className="flex justify-between items-center mb-10 overflow-x-auto pb-2">
+                <div className="flex justify-between items-center mb-6 overflow-x-auto pb-2">
                   <Tabs
-                    selectedKey={selectedTab}
-                    onSelectionChange={(key) => setSelectedTab(key as string)}
+                    selectedKey={selectedType}
+                    onSelectionChange={(key) => setSelectedType(key as string)}
                     classNames={{
                       tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider",
                       cursor: "w-full bg-primary h-[3px] shadow-[0_-2px_10px_rgba(6,182,212,0.5)]",
@@ -169,6 +196,24 @@ export default function EnquiryPage() {
                     variant="underlined"
                   >
                     <Tab key="All" title="All" />
+                    <Tab key="Buying" title="My Purchases" />
+                    <Tab key="Selling" title="Received" />
+                  </Tabs>
+                </div>
+
+                <div className="flex justify-between items-center mb-10 overflow-x-auto pb-2">
+                  <Tabs
+                    selectedKey={selectedStage}
+                    onSelectionChange={(key) => setSelectedStage(key as string)}
+                    classNames={{
+                      tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider",
+                      cursor: "w-full bg-primary h-[3px] shadow-[0_-2px_10px_rgba(6,182,212,0.5)]",
+                      tab: "max-w-fit px-0 h-10",
+                      tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[11px]"
+                    }}
+                    variant="underlined"
+                  >
+                    <Tab key="All" title="All Stages" />
                     <Tab key="Pending" title="New" />
                     <Tab key="Quoted" title="Quoted" />
                     <Tab key="Converted" title="Converted" />
@@ -183,35 +228,33 @@ export default function EnquiryPage() {
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                   >
                     <AnimatePresence mode="popLayout">
-                      {tableData
-                        .filter((item: any) => selectedTab === "All" || item.status === selectedTab)
-                        .map((item: any, index: number) => (
-                          <motion.div
-                            key={item._id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.4, delay: index * 0.05 }}
-                          >
-                            <EnquiryCard
-                              data={item}
-                              action={
-                                <Tooltip content="View Details">
-                                  <span
-                                    onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
-                                    className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
-                                  >
-                                    <FiArrowRight size={20} />
-                                  </span>
-                                </Tooltip>
-                              }
-                            />
-                          </motion.div>
-                        ))}
+                      {filteredData.map((item: any, index: number) => (
+                        <motion.div
+                          key={item._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.4, delay: index * 0.05 }}
+                        >
+                          <EnquiryCard
+                            data={item}
+                            action={
+                              <Tooltip content="View Details">
+                                <span
+                                  onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
+                                  className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
+                                >
+                                  <FiArrowRight size={20} />
+                                </span>
+                              </Tooltip>
+                            }
+                          />
+                        </motion.div>
+                      ))}
                     </AnimatePresence>
                   </motion.div>
 
-                  {tableData.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
+                  {filteredData.length === 0 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -221,7 +264,7 @@ export default function EnquiryPage() {
                         <div className="w-16 h-16 rounded-full bg-default-100 flex items-center justify-center">
                           <FiArrowRight className="rotate-90 text-default-300" size={24} />
                         </div>
-                        <p className="font-bold uppercase tracking-widest text-xs">No enquiries found in this stage</p>
+                        <p className="font-bold uppercase tracking-widest text-xs">No {selectedType !== "All" ? selectedType.toLowerCase() : ""} enquiries found in this stage</p>
                       </div>
                     </motion.div>
                   )}

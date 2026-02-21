@@ -42,6 +42,16 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                 <CardHeader className="flex flex-col items-start pb-0 px-5 pt-5 space-y-1">
                     <div className="flex justify-between w-full items-start gap-4">
                         <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm ${data.type === "Buying"
+                                        ? "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 border border-primary-200/50"
+                                        : data.type === "Selling"
+                                            ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50"
+                                            : "bg-default-100 text-default-600 border border-default-200/50"
+                                    }`}>
+                                    {data.type === "Buying" ? "PURCHASE" : data.type === "Selling" ? "SALE" : "MEDIATED"}
+                                </span>
+                            </div>
                             <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight tracking-tight group-hover:text-primary transition-colors">
                                 {productName}
                             </h4>
@@ -93,8 +103,8 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 <span className="text-primary-600 dark:text-primary-400 font-bold truncate">{data.assignedEmployee || "Not Assigned"}</span>
                             </div>
                             <div className="flex flex-col items-end min-w-0">
-                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 whitespace-nowrap text-right">Associate</span>
-                                <span className="text-slate-600 dark:text-slate-400 font-bold text-right text-xs line-clamp-1">{associate}</span>
+                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 whitespace-nowrap text-right">{data.counterpartyLabel || "Associate"}</span>
+                                <span className="text-slate-600 dark:text-slate-400 font-bold text-right text-xs line-clamp-1">{data.counterparty || "Direct"}</span>
                             </div>
                         </div>
                     </div>

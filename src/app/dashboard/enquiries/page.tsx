@@ -75,16 +75,24 @@ export default function EnquiryPage() {
               __v,
               commission,
               mediatorCommission,
+              adminCommission,
+              rate,
               ...rest
             } = item;
 
-            const isAdmin = user?.role === "Admin";
-            const data: any = { ...rest };
+            const isAdmin = user?.role === "Admin" || user?.role === "Employee";
+            const data: any = { ...rest, rate: rate || "N/A" };
 
-            if (!isAdmin) {
-              delete data.commission;
-              if (item.productAssociate?._id === user?.id)
-                delete data.mediatorCommission;
+            // Determine if the user is the mediator
+            const isMediator = item.mediatorAssociateId?._id
+              ? item.mediatorAssociateId._id.toString() === user?.id?.toString()
+              : item.mediatorAssociateId === user?.id?.toString();
+
+            if (isAdmin) {
+              data.adminCommission = adminCommission || commission || 0;
+              data.mediatorCommission = mediatorCommission || 0;
+            } else if (isMediator) {
+              data.mediatorCommission = mediatorCommission || 0;
             }
 
             const getRate = (rateVal: any) => {
@@ -164,9 +172,6 @@ export default function EnquiryPage() {
               associateCompany: isBuying ? (item.sellerAssociateId?.associateCompany?.name || "N/A") : (item.buyerAssociateId?.associateCompany?.name || "N/A"),
               assignedEmployee: getEmployeeName(item.assignedEmployeeId),
               mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
-              commission: "N/A",
-              rate: "N/A",
-              variantRate: "N/A",
               dateColor: dateInfo.color,
               status: getStatusKey(item.status),
             };

@@ -44,10 +44,10 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm ${data.type === "Buying"
-                                        ? "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 border border-primary-200/50"
-                                        : data.type === "Selling"
-                                            ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50"
-                                            : "bg-default-100 text-default-600 border border-default-200/50"
+                                    ? "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 border border-primary-200/50"
+                                    : data.type === "Selling"
+                                        ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50"
+                                        : "bg-default-100 text-default-600 border border-default-200/50"
                                     }`}>
                                     {data.type === "Buying" ? "PURCHASE" : data.type === "Selling" ? "SALE" : "MEDIATED"}
                                 </span>
@@ -84,12 +84,27 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                     </div>
 
                     {/* Value Module */}
-                    <div className="grid grid-cols-2 gap-3 bg-gradient-to-br from-default-100/50 to-transparent p-4 rounded-2xl border border-default-200/50">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gradient-to-br from-default-100/50 to-transparent p-4 rounded-2xl border border-default-200/50">
                         <div className="flex flex-col">
                             <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Indicative Rate</span>
                             <span className="text-md font-black text-success-600 dark:text-success-400 tabular-nums">₹ {rate}</span>
                         </div>
-                        <div className="flex flex-col items-end">
+
+                        {data.adminCommission !== undefined && (
+                            <div className="flex flex-col">
+                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">OBAOL Comm.</span>
+                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">₹ {data.adminCommission}</span>
+                            </div>
+                        )}
+
+                        {data.mediatorCommission !== undefined && (
+                            <div className="flex flex-col">
+                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Mediator Comm.</span>
+                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">₹ {data.mediatorCommission}</span>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col items-end md:col-start-4">
                             <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Contact</span>
                             <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{phone}</span>
                         </div>

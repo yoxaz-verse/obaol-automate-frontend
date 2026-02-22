@@ -737,22 +737,25 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider/50">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider/30 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-xl text-primary">
-                    <FiMessageSquare size={24} />
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider/10 pb-6 px-8">
+                <div className="flex items-center gap-4 pt-2">
+                  <div className="p-3 bg-primary/10 rounded-2xl text-primary-500 shadow-sm shadow-primary/10">
+                    <FiMessageSquare size={26} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">New Enquiry</h3>
-                    <p className="text-xs text-default-500 font-normal">Send a request for {variantRate.product}</p>
+                    <h3 className="text-2xl font-black tracking-tight text-foreground">New Enquiry</h3>
+                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Direct Manufacturer Protocol</p>
                   </div>
                 </div>
               </ModalHeader>
               <ModalBody className="py-6">
-                <div className="mb-4 p-3 bg-primary/5 rounded-2xl border border-primary/20 flex flex-col gap-1">
-                  <div className="flex justify-between items-center text-xs font-semibold text-primary/70 uppercase tracking-wider">
-                    <span>Target Product</span>
-                    <span className="bg-primary/20 px-2 py-0.5 rounded-full text-[10px]">{variantRate.productVariant}</span>
+                <div className="mb-8 p-5 bg-default-100/50 rounded-3xl border border-divider/30 flex justify-between items-center shadow-sm">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">Target Product</span>
+                    <span className="text-sm font-bold text-foreground">{variantRate.product}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-primary/10 text-primary-600 rounded-2xl text-xs font-black border border-primary/20 shadow-inner">
+                    {variantRate.productVariant || "Standard"}
                   </div>
                 </div>
                 <AddEnquiryForm
@@ -806,17 +809,30 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const activeAssociateId = associateDetail?.data?._id || user?.id;
 
+  // Auto-fill user details when available
+  useEffect(() => {
+    if (associateDetail?.data) {
+      if (!name) setName(associateDetail.data.name || "");
+      if (!phoneNumber) setPhoneNumber(associateDetail.data.phone || associateDetail.data.phoneNumber || "");
+    }
+  }, [associateDetail?.data]);
+
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
       const payload = {
-        productId: variantRate.productId,
-        quantity: Number(quantity),
-        specifications: `Phone: ${phoneNumber}\nName: ${name}\nVariant: ${variantRate.productVariant}`,
-        buyerAssociateId: activeAssociateId,
+        productId: variantRate.productId || variantRate.product?._id || variantRate.product,
+        quantity: Number(quantity) || 1,
+        specifications: `Phone: ${phoneNumber}\nName: ${name}\nVariant: ${variantRate.productVariant || "Standard"}`,
+        buyerAssociateId: activeAssociateId || undefined,
         sellerAssociateId: variantRate.associateId || variantRate.associate?._id || variantRate.associate,
         mediatorAssociateId: variantRate.mediatorAssociateId || null,
+        rate: variantRate.rawBasePrice || (typeof variantRate.rate === 'number' ? variantRate.rate : 0),
+        adminCommission: variantRate.rawCommission || (typeof variantRate.adminCommission === 'number' ? variantRate.adminCommission : 0),
+        mediatorCommission: variantRate.mediatorCommission || 0,
         notes: `Enquiry from Marketplace for ${variantRate.product} - ${variantRate.productVariant}`
       };
+
+      console.log("Submitting Enquiry Payload:", payload);
 
       return postData(`${apiRoutesByRole["enquiry"]}`, payload);
     },
@@ -829,8 +845,9 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       queryClient.invalidateQueries();
     },
     onError: (error: any) => {
-      console.error("Enquiry Error:", error);
-      alert(error?.response?.data?.message || "Something went wrong. Please try again.");
+      console.error("Enquiry submission failed:", error);
+      console.error("Error Response:", error?.response?.data);
+      alert(error?.response?.data?.message || error?.message || "Something went wrong. Please try again.");
       setIsLoading(false);
     },
   });
@@ -877,46 +894,66 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         <p className="text-default-500 text-xs italic">Our suppliers primarily handle FTL (Full Truck Load) orders for efficiency.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 px-1">
-        <Input
-          label="Display Name"
-          variant="bordered"
-          labelPlacement="outside"
-          placeholder="Enter your name"
-          startContent={<FiUser className="text-default-400 mr-2" />}
-          className="w-full"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Input
-          label="Phone Number"
-          variant="bordered"
-          labelPlacement="outside"
-          placeholder="e.g. 9876543210"
-          type="tel"
-          startContent={<FiPhone className="text-default-400 mr-2" />}
-          className="w-full"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          required
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 px-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Your Name</label>
+          <Input
+            variant="bordered"
+            labelPlacement="outside"
+            placeholder="Enter full name"
+            startContent={<FiUser className="text-primary-500 mr-1" />}
+            className="w-full"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            classNames={{
+              input: "font-bold",
+              inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Contact Number</label>
+          <Input
+            variant="bordered"
+            labelPlacement="outside"
+            placeholder="9876543210"
+            type="tel"
+            startContent={<FiPhone className="text-primary-500 mr-1" />}
+            className="w-full"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            required
+            classNames={{
+              input: "font-bold",
+              inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
+            }}
+          />
+        </div>
       </div>
 
-      <div className="bg-content2/20 p-6 rounded-[2.5rem] border border-divider/50 shadow-inner">
-        <Input
-          label="Quantity Required (Tons)"
-          placeholder="e.g. 30 Tons (Standard Truck Load)"
-          variant="flat"
-          labelPlacement="outside"
-          type="number"
-          startContent={<FiPackage className="text-primary-500 mr-3" size={20} />}
-          description="Most suppliers prefer orders of 20+ tons for better rates."
-          className="w-full font-semibold"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          required
-        />
+      <div className="w-full px-2">
+        <div className="flex flex-col gap-2 bg-content2/10 p-6 rounded-[2.5rem] border border-divider/30 shadow-inner">
+          <label className="text-[11px] font-black text-primary-500 uppercase tracking-widest pl-2 mb-1">Quantity Required (Tons)</label>
+          <Input
+            placeholder="e.g. 30"
+            variant="bordered"
+            labelPlacement="outside"
+            type="number"
+            startContent={<FiPackage className="text-primary-500 mr-2" size={22} />}
+            className="w-full"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            required
+            classNames={{
+              input: "text-xl font-black",
+              inputWrapper: "h-20 rounded-3xl border-2 group-data-[focus=true]:border-primary bg-background/50 backdrop-blur-sm"
+            }}
+          />
+          <p className="text-[10px] text-default-400 font-bold uppercase tracking-tight pl-2 mt-2">
+            Tip: Most suppliers prefer FTL (Full Truck Load) orders of 20+ tons.
+          </p>
+        </div>
       </div>
 
       <Button

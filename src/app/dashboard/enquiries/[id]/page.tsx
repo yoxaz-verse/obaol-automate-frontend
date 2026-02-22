@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
+import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes"; // meaningful abstraction
 import {
     Card,
@@ -32,6 +33,7 @@ export default function EnquiryDetailsPage() {
     const queryClient = useQueryClient();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [conversionNote, setConversionNote] = useState("");
+    const { user } = useContext(AuthContext);
 
     // Fetch Enquiry Data
     const { data: enquiry, isLoading } = useQuery({
@@ -116,10 +118,17 @@ export default function EnquiryDetailsPage() {
     // Financial Calculations
     const quantity = enquiry.quantity || 0;
     const rate = enquiry.rate || enquiry.variantRate?.rate || 0;
-    const commission = enquiry.commission || enquiry.variantRate?.commission || 0;
+
+    const adminCommission = enquiry.adminCommission || enquiry.commission || 0;
+    const mediatorCommission = enquiry.mediatorCommission || 0;
+
+    const isAdmin = user?.role === "Admin" || user?.role === "Employee";
+    const isMediator = enquiry?.mediatorAssociateId?._id
+        ? enquiry?.mediatorAssociateId?._id.toString() === user?.id?.toString()
+        : enquiry?.mediatorAssociateId?.toString() === user?.id?.toString();
 
     const tradeVolume = (quantity * rate).toLocaleString();
-    const estimatedProfit = (quantity * commission).toLocaleString();
+    const estimatedProfit = (quantity * adminCommission).toLocaleString();
 
     return (
         <div className="w-full p-6 flex flex-col gap-6 max-w-7xl mx-auto">
@@ -268,14 +277,23 @@ export default function EnquiryDetailsPage() {
                             <span className="text-[10px] uppercase font-bold text-default-400">Trade Volume</span>
                             <span className="font-bold text-xl text-primary">₹ {tradeVolume}</span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-bold text-default-400">Estimated Profit</span>
-                            <span className="font-bold text-xl text-success">₹ {estimatedProfit}</span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-bold text-default-400">Own Margin (Commission)</span>
-                            <span className="font-medium">₹ {commission} / Unit</span>
-                        </div>
+                        {isAdmin && (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-bold text-default-400">OBAOL Margin (Comm.)</span>
+                                <span className="font-bold text-xl text-success">₹ {estimatedProfit} <span className="text-sm font-medium text-default-500">(₹ {adminCommission}/Unit)</span></span>
+                            </div>
+                        )}
+                        {(isAdmin || isMediator) && mediatorCommission > 0 && (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Mediator Margin</span>
+                                <span className="font-medium text-lg">₹ {mediatorCommission * quantity} <span className="text-sm text-default-500">(₹ {mediatorCommission}/Unit)</span></span>
+                            </div>
+                        )}
+                        {!isAdmin && !isMediator && (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-sm font-medium text-default-500 mt-2">Financial metrics are secured.</span>
+                            </div>
+                        )}
                     </CardBody>
                 </Card>
 

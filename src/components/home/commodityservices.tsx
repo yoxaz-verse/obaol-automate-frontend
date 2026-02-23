@@ -274,84 +274,155 @@ export default function ResponsibilityTransferSection() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid md:grid-cols-2 gap-16">
-          {/* LEFT */}
-          <div>
-            <h3 className="text-xs uppercase tracking-wider text-default-400 mb-6">
-              Trade Lifecycle
-            </h3>
+        <div className="grid md:grid-cols-2 gap-10 items-start">
 
-            <div className="space-y-2">
-              {STAGES.map((stage) => {
+          {/* LEFT — Stage Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xs uppercase tracking-widest text-default-400 font-bold">
+                Trade Lifecycle
+              </h3>
+              {/* Hint pill — tells user it's interactive */}
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-orange-400/70 border border-orange-400/20 rounded-full px-3 py-1 bg-orange-400/5 animate-pulse">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
+                </svg>
+                Click to assign
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              {STAGES.map((stage, i) => {
                 const active = obaolHandles.includes(stage.id);
 
                 return (
                   <div
                     key={stage.id}
                     onClick={() => toggle(stage.id)}
-                    className={`cursor-pointer px-5 py-4 border-l-2 backdrop-blur-md transition-all duration-500 rounded-r-xl
+                    className={`group relative cursor-pointer flex items-center justify-between gap-4 px-5 py-4 rounded-xl border-l-[3px] transition-all duration-200 select-none
                       ${active
-                        ? "border-orange-400 bg-orange-400/10 shadow-[inset_4px_0_20px_rgba(251,146,60,0.15)]"
-                        : "border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/30"
+                        ? "border-orange-400 bg-orange-400/10 shadow-[inset_0_0_30px_rgba(251,146,60,0.08)] ring-1 ring-orange-400/20"
+                        : "border-transparent bg-foreground/[0.04] hover:bg-foreground/[0.07] hover:border-orange-400/40 hover:ring-1 hover:ring-orange-400/10"
                       }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <span className={`text-sm tracking-wide ${active ? "text-foreground font-semibold" : "text-default-400"}`}>
-                        {stage.label}
-                      </span>
-                      <span
-                        className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-sm transition-colors ${active
-                          ? "bg-orange-400/20 text-orange-400"
-                          : "bg-white/5 text-default-500"
-                          }`}
-                      >
-                        {active ? "Executed by OBAOL" : "Executed by You"}
-                      </span>
+                    {/* Step number */}
+                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-colors duration-300
+                      ${active ? "bg-orange-400 text-black" : "bg-foreground/10 text-default-500 group-hover:bg-orange-400/20 group-hover:text-orange-400"}`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+
+                    {/* Label */}
+                    <span className={`flex-1 text-sm font-medium tracking-wide transition-colors duration-300
+                      ${active ? "text-foreground" : "text-default-400 group-hover:text-foreground/70"}`}>
+                      {stage.label}
+                    </span>
+
+                    {/* Toggle pill */}
+                    <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 flex-shrink-0
+                      ${active
+                        ? "bg-orange-400/20 text-orange-400 border border-orange-400/30"
+                        : "bg-foreground/5 text-default-500 border border-foreground/10 group-hover:border-orange-400/20 group-hover:text-orange-400/60"
+                      }`}>
+                      {/* Dot indicator */}
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-300
+                        ${active ? "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.8)]" : "bg-default-500"}`} />
+                      {active ? "OBAOL" : "You"}
                     </div>
+
+                    {/* Chevron */}
+                    <svg
+                      className={`w-4 h-4 flex-shrink-0 transition-all duration-300
+                        ${active ? "text-orange-400 rotate-90" : "text-default-600 group-hover:text-orange-400/50"}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="p-8 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          {/* RIGHT — Responsibility Panel */}
+          <div className="sticky top-28 p-8 rounded-2xl border border-foreground/10 bg-foreground/[0.02] backdrop-blur-xl shadow-2xl relative overflow-hidden h-[480px] flex flex-col">
+            {/* Ambient glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400/10 blur-[80px] pointer-events-none" />
-
-            <h3 className="font-semibold text-lg text-foreground tracking-tight flex items-center gap-3">
-              <span className="w-8 h-px bg-orange-400/50 inline-block" />
-              Execution Responsibility
-            </h3>
-
-            {obaolHandles.length === 0 ? (
-              <p className="mt-8 text-sm text-default-400 h-full flex items-center justify-center opacity-70">
-                Select any stage to delegate execution to OBAOL.
-              </p>
-            ) : (
-              <ul className="mt-8 space-y-6 relative z-10">
-                {obaolHandles.map((id) => {
-                  const stage = STAGES.find((s) => s.id === id);
-                  return (
-                    <motion.li
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      key={id}
-                      className="border-l border-orange-400/30 pl-4 py-1"
-                    >
-                      <p className="text-sm font-semibold text-foreground tracking-wide">
-                        {stage?.label}
-                      </p>
-                      <p className="mt-2 text-sm text-default-400 leading-relaxed">
-                        {stage?.obaolDesc}
-                      </p>
-                    </motion.li>
-                  );
-                })}
-              </ul>
+            {/* Active glow — visible when something is selected */}
+            {obaolHandles.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 bg-gradient-to-br from-orange-400/5 via-transparent to-transparent pointer-events-none"
+              />
             )}
 
-            <p className="mt-12 text-xs font-medium uppercase tracking-widest text-default-500">
-              You remain in control. OBAOL executes selected responsibilities.
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <h3 className="font-semibold text-base text-foreground tracking-tight flex items-center gap-3">
+                <span className="w-6 h-px bg-orange-400/50 inline-block" />
+                OBAOL Handles
+              </h3>
+              {obaolHandles.length > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center justify-center w-7 h-7 rounded-full bg-orange-400 text-black text-xs font-black shadow-[0_0_12px_rgba(251,146,60,0.6)]"
+                >
+                  {obaolHandles.length}
+                </motion.span>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 relative z-10 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(251,146,60,0.3)_transparent]">
+              {obaolHandles.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="h-full flex flex-col items-center justify-center text-center gap-4 py-8"
+                >
+                  {/* Arrow pointing left to hint clicking */}
+                  <div className="flex items-center gap-2 text-default-500/50">
+                    <svg className="w-6 h-6 animate-bounce -rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                    <span className="text-sm text-default-500 font-medium">
+                      Select stages to delegate
+                    </span>
+                  </div>
+                  <p className="text-xs text-default-600 max-w-[200px] leading-relaxed">
+                    Click any stage on the left to assign execution to OBAOL.
+                  </p>
+                </motion.div>
+              ) : (
+                <ul className="space-y-3">
+                  {obaolHandles.map((id) => {
+                    const stage = STAGES.find((s) => s.id === id);
+                    return (
+                      <motion.li
+                        key={id}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="flex gap-3 p-3 rounded-xl bg-orange-400/5 border border-orange-400/15"
+                      >
+                        <span className="w-1 flex-shrink-0 rounded-full bg-gradient-to-b from-orange-400 to-yellow-400 self-stretch" />
+                        <div>
+                          <p className="text-sm font-bold text-foreground tracking-wide">
+                            {stage?.label}
+                          </p>
+                          <p className="mt-1.5 text-xs text-default-400 leading-relaxed">
+                            {stage?.obaolDesc}
+                          </p>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs font-medium uppercase tracking-widest text-default-600 relative z-10 border-t border-foreground/5 pt-4 flex-shrink-0">
+              You remain in control. OBAOL executes selected steps.
             </p>
           </div>
         </div>

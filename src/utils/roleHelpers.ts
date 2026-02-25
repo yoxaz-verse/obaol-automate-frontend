@@ -35,6 +35,14 @@ export const routeRoles: { [key: string]: string[] } = {
     "Worker",
   ],
   "/dashboard/rsForm": ["Admin", "Employee"],
+  "/dashboard/marketplace": [
+    "Admin",
+    "Customer",
+    "Associate",
+    "ProjectManager",
+    "Worker",
+    "Employee",
+  ],
 };
 
 export const getAllowedRoles = (pathname: string): string[] => {

@@ -93,7 +93,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
     }, []);
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-[#050505] relative text-foreground font-sans selection:bg-warning-500/30">
+        <div className="flex h-screen w-full overflow-hidden bg-background relative text-foreground font-sans selection:bg-warning-500/30">
             {/* Interactive Background Layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 {/* Mouse Follower Gradient */}
@@ -107,7 +107,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
                 />
 
                 {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#88888810_1px,transparent_1px),linear-gradient(to_bottom,#88888810_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 dark:opacity-40" />
 
                 {/* Floating Particles */}
                 {[...Array(30)].map((_, i) => (
@@ -120,7 +120,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
 
                 {/* Left Side: Branding (Hidden on Mobile) */}
                 <motion.div
-                    className="hidden lg:flex w-5/12 flex-col justify-center px-12 xl:px-20 relative border-r border-white/5 bg-black/20 backdrop-blur-sm"
+                    className="hidden lg:flex w-5/12 flex-col justify-center px-12 xl:px-20 relative border-r border-default-100 bg-content1/20 backdrop-blur-sm"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
@@ -138,7 +138,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
                             />
                         </div>
 
-                        <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-white mb-6 leading-[0.95]">
+                        <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
                             OBAOL <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block h-[1.2em]">
                                 <TypewriterEffect
@@ -185,12 +185,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
                             </div>
 
                             {/* Glass Card */}
-                            <div className="relative bg-[#0a0a0a]/60 border border-white/10 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden">
+                            <div className="relative bg-content2/60 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden">
                                 {/* Card Highlight */}
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-warning-500/50 to-transparent opacity-50" />
 
                                 <div className="mb-8">
-                                    <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                                    <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
                                         {title}
                                     </h2>
                                     <p className="text-default-400 text-sm">

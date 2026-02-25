@@ -114,7 +114,7 @@ const RegisterPage = () => {
                     startContent={<IoPerson className="text-default-400 pointer-events-none flex-shrink-0" />}
                     classNames={{
                         inputWrapper: "bg-default-50/50 border-default-200 group-data-[focus=true]:border-warning-500",
-                        label: "text-default-300 group-data-[filled-within=true]:text-default-300"
+                        label: "text-default-600 group-data-[filled-within=true]:text-default-600"
                     }}
                 />
 
@@ -132,7 +132,7 @@ const RegisterPage = () => {
                     startContent={<IoMail className="text-default-400 pointer-events-none flex-shrink-0" />}
                     classNames={{
                         inputWrapper: "bg-default-50/50 border-default-200 group-data-[focus=true]:border-warning-500",
-                        label: "text-default-300 group-data-[filled-within=true]:text-default-300"
+                        label: "text-default-600 group-data-[filled-within=true]:text-default-600"
                     }}
                 />
 
@@ -159,7 +159,7 @@ const RegisterPage = () => {
                     }
                     classNames={{
                         inputWrapper: "bg-default-50/50 border-default-200 group-data-[focus=true]:border-warning-500",
-                        label: "text-default-300 group-data-[filled-within=true]:text-default-300"
+                        label: "text-default-600 group-data-[filled-within=true]:text-default-600"
                     }}
                 />
 
@@ -196,7 +196,7 @@ const RegisterPage = () => {
                     }
                     classNames={{
                         inputWrapper: "bg-default-50/50 border-default-200 group-data-[focus=true]:border-warning-500",
-                        label: "text-default-300 group-data-[filled-within=true]:text-default-300"
+                        label: "text-default-600 group-data-[filled-within=true]:text-default-600"
                     }}
                 />
 
@@ -207,7 +207,7 @@ const RegisterPage = () => {
                 )}
 
                 <Button
-                    className="w-full font-bold bg-warning-500 text-black shadow-lg shadow-warning-500/20"
+                    className="w-full font-bold bg-warning-500 text-warning-50 shadow-lg shadow-warning-500/20 dark:text-black"
                     size="lg"
                     type="submit"
                     isLoading={isLoading}

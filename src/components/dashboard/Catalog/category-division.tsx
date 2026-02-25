@@ -65,7 +65,12 @@ export default function CategoryDivision({
 
   return (
     <section>
-      <Title title="Categories" />
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-3">
+          <span className="w-8 h-px bg-orange-500/50 inline-block" />
+          Catalog
+        </h2>
+      </div>
 
       {/* Add a new Category, if needed */}
       {tableConfig["category"] && user?.role !== "Associate" && (
@@ -126,11 +131,6 @@ function CategoryList({
   setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
   myCatalogItems: any[];
 }) {
-  // No longer need individual fetch effects for counts
-  if (!categories || categories.length === 0) {
-    return <p>No categories found.</p>;
-  }
-
   // Group my catalog items by category for instant lookup
   const myItemsByCat = React.useMemo(() => {
     const map: Record<string, number> = {};
@@ -146,6 +146,10 @@ function CategoryList({
 
   const { user } = React.useContext(AuthContext);
 
+  if (!categories || categories.length === 0) {
+    return <p>No categories found.</p>;
+  }
+
   return (
     <Accordion {...({ variant: "splitted" } as any)} className="px-0">
       {categories.map((cat) => {
@@ -156,43 +160,63 @@ function CategoryList({
             key={cat._id}
             aria-label={cat.name}
             title={
-              <div className="flex items-center justify-between w-full pr-4">
-                <span className="font-medium text-foreground/90">{cat.name}</span>
+              <div className="flex items-center justify-between w-full pr-2 py-2">
+                <span className="font-semibold text-base tracking-wide text-foreground/90 group-hover:text-orange-400 transition-colors">{cat.name}</span>
                 <div className="flex gap-2">
                   {myCount > 0 && (
-                    <span className="flex items-center px-2 py-0.5 rounded-full bg-success-100 text-success-700 text-[10px] font-bold border border-success-200 shadow-sm">
-                      {myCount} My Products
+                    <span className="flex items-center px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-bold border border-orange-500/20 shadow-[0_0_10px_rgba(251,146,60,0.1)]">
+                      {myCount} Products
                     </span>
                   )}
                 </div>
               </div>
             }
-            className="group border-b border-divider/50 last:border-0"
+            className="group mb-3 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(251,146,60,0.05)]"
           >
-            {cat.description && <p>{cat.description}</p>}
-            <div className="h-1" />
-            {/* If you want an AddModal for subCategory creation */}
-            {tableConfig["subCategory"] && user?.role !== "Associate" && (
-              <AddModal
-                name="Sub Category"
-                currentTable="Sub Category"
-                formFields={tableConfig["subCategory"].filter(
-                  (f: any) => f.key !== "category"
-                )}
-                apiEndpoint={apiRoutesByRole["subCategory"]}
-                additionalVariable={{ category: cat._id }}
-                refetchData={refetchData}
-              />
-            )}
-            <div className="h-1" />
-            {/* 2) On expand, fetch subCategories again for actual usage */}
-            <SubCategorySection
-              categoryId={cat._id}
-              tableConfig={tableConfig}
-              refetchData={refetchData}
-              setSelectedProduct={setSelectedProduct}
-              myCatalogItems={myCatalogItems}
-            />
+            <div className="pl-6 ml-4 border-l-2 border-orange-500/10 pb-4">
+              {cat.description && <p className="text-sm text-default-400 mb-4 px-2">{cat.description}</p>}
+              {/* If you want an AddModal for subCategory creation */}
+              {tableConfig["subCategory"] && user?.role !== "Associate" && (
+                <div className="mb-4 px-2">
+                  <AddModal
+                    name="Sub Category"
+                    currentTable="Sub Category"
+                    formFields={tableConfig["subCategory"].filter(
+                      (f: any) => f.key !== "category"
+                    )}
+                    apiEndpoint={apiRoutesByRole["subCategory"]}
+                    additionalVariable={{ category: cat._id }}
+                    refetchData={refetchData}
+                  />
+                </div>
+              )}
+
+              {/* 2) On expand, fetch subCategories again for actual usage */}
+              <QueryComponent
+                api={apiRoutesByRole["subCategory"]}
+                queryKey={["subCategory", cat._id]}
+                page={1}
+                limit={100}
+                additionalParams={{ category: cat._id }}
+              >
+                {(subCatData: any) => {
+                  // QueryComponent already unwraps to data array when 'page' is provided
+                  const subCategories: ISubCategory[] = Array.isArray(subCatData) ? subCatData : (subCatData?.data || []);
+                  if (subCategories.length === 0) {
+                    return <p className="px-2">No subcategories found.</p>;
+                  }
+                  return (
+                    <SubCategoryList
+                      subCategories={subCategories}
+                      tableConfig={tableConfig}
+                      refetchData={refetchData}
+                      setSelectedProduct={setSelectedProduct}
+                      myCatalogItems={myCatalogItems}
+                    />
+                  );
+                }}
+              </QueryComponent>
+            </div>
             <Divider />
             <div className="h-4" />
             {user?.role !== "Associate" && (
@@ -221,52 +245,7 @@ function CategoryList({
   );
 }
 
-/**
- * SubCategorySection:
- * - When user expands a Category, we do a normal subCategory listing for that category.
- * - We pass the resulting array to <SubCategoryList>,
- *   which in turn fetches Products for counting.
- */
-function SubCategorySection({
-  categoryId,
-  tableConfig,
-  refetchData,
-  setSelectedProduct,
-  myCatalogItems,
-}: {
-  categoryId: string;
-  tableConfig: any;
-  refetchData: () => void;
-  setSelectedProduct: React.Dispatch<React.SetStateAction<any | null>>;
-  myCatalogItems: any[];
-}) {
-  return (
-    <QueryComponent
-      api={apiRoutesByRole["subCategory"]}
-      queryKey={["subCategory", categoryId]}
-      page={1}
-      limit={100}
-      additionalParams={{ category: categoryId }}
-    >
-      {(subCategoryData: any) => {
-        // QueryComponent already unwraps to data array when 'page' is provided
-        const subCategories: ISubCategory[] = Array.isArray(subCategoryData) ? subCategoryData : (subCategoryData?.data || []);
-        if (subCategories.length === 0) {
-          return <p>No subcategories found.</p>;
-        }
-        return (
-          <SubCategoryList
-            subCategories={subCategories}
-            tableConfig={tableConfig}
-            refetchData={refetchData}
-            setSelectedProduct={setSelectedProduct}
-            myCatalogItems={myCatalogItems}
-          />
-        );
-      }}
-    </QueryComponent>
-  );
-}
+
 
 /**
  * SubCategoryList:
@@ -311,42 +290,44 @@ function SubCategoryList({
             key={sub._id}
             aria-label={sub.name}
             title={
-              <div className="flex items-center justify-between w-full pr-2">
-                <span className="text-sm font-medium text-foreground/80">{sub.name}</span>
+              <div className="flex items-center justify-between w-full px-2 py-1">
+                <span className="text-sm font-semibold tracking-wide text-foreground/80 group-hover:text-orange-400 transition-colors">{sub.name}</span>
                 {myCount > 0 && (
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[10px] font-bold border border-success-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                  <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-bold border border-orange-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_6px_rgba(251,146,60,0.8)]" />
                     {myCount} Added
                   </span>
                 )}
               </div>
             }
-            className="px-2"
+            className="group mb-2 border border-foreground/5 bg-foreground/[0.01] hover:bg-foreground/[0.03] rounded-xl transition-all data-[open=true]:border-orange-500/20 data-[open=true]:bg-orange-500/[0.02]"
           >
-            <p>{sub.description}</p>
-            <div className="h-1" />
+            <div className="pl-6 ml-4 border-l-2 border-orange-500/10 pb-3 px-2">
+              <p className="text-xs text-default-400 mb-4 px-2">{sub.description}</p>
 
-            {/* Allow Add Product for everyone (including Associates) */}
-            {tableConfig["product"] && (
-              <AddModal
-                name="Product"
-                currentTable="Product"
-                formFields={tableConfig["product"].filter(
-                  (f: any) => f.key !== "subCategory"
-                )}
-                apiEndpoint={apiRoutesByRole["product"]}
-                additionalVariable={{ subCategory: sub._id }}
-                refetchData={refetchData}
+              {/* Allow Add Product for everyone (including Associates) */}
+              {tableConfig["product"] && (
+                <div className="mb-4 px-2">
+                  <AddModal
+                    name="Product"
+                    currentTable="Product"
+                    formFields={tableConfig["product"].filter(
+                      (f: any) => f.key !== "subCategory"
+                    )}
+                    apiEndpoint={apiRoutesByRole["product"]}
+                    additionalVariable={{ subCategory: sub._id }}
+                    refetchData={refetchData}
+                  />
+                </div>
+              )}
+
+              {/* 3) On expand, fetch actual products for display */}
+              <ProductSection
+                subCategoryId={sub._id}
+                setSelectedProduct={setSelectedProduct}
+                myCatalogItems={myCatalogItems}
               />
-            )}
-
-            <div className="h-1" />
-            {/* 3) On expand, fetch actual products for display */}
-            <ProductSection
-              subCategoryId={sub._id}
-              setSelectedProduct={setSelectedProduct}
-              myCatalogItems={myCatalogItems}
-            />
+            </div>
             <Divider />
             <div className="h-4" />
             {user?.role !== "Associate" && (
@@ -406,7 +387,7 @@ function ProductSection({
           return <p>No products found.</p>;
         }
         return (
-          <div className="flex flex-col gap-2 p-1">
+          <div className="flex flex-col gap-2 p-0 px-2">
             {products.map((p) => {
               const safeItems = Array.isArray(myCatalogItems) ? myCatalogItems : [];
               const myCount = safeItems.filter(item =>
@@ -416,30 +397,35 @@ function ProductSection({
               return (
                 <div
                   key={p._id}
-                  className={`group flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-content2/50 ${myCount > 0 ? "border border-success-500/20 bg-success-500/5" : "border border-transparent"
+                  className={`group flex items-center justify-between pl-4 py-4 pr-0 rounded-xl transition-all duration-300 cursor-pointer ${myCount > 0
+                    ? "bg-orange-500/5 border border-orange-500/20 shadow-[inset_0_0_12px_rgba(251,146,60,0.05)] hover:bg-orange-500/10 hover:border-orange-500/30"
+                    : "bg-foreground/[0.02] border border-foreground/5 hover:bg-foreground/[0.05] hover:border-foreground/20 hover:shadow-lg"
                     }`}
+                  onClick={() => setSelectedProduct(p)}
                 >
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-foreground/90">{p.name}</span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-bold tracking-wide text-foreground/90 group-hover:text-foreground transition-colors">{p.name}</span>
                     {myCount > 0 && (
-                      <span className="text-[10px] text-success-600 font-bold uppercase tracking-tighter">In My Catalog ({myCount})</span>
+                      <span className="text-[9px] text-orange-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-orange-500" />
+                        In My Catalog ({myCount})
+                      </span>
                     )}
                   </div>
-                  <Button
-                    onPress={() => setSelectedProduct(p)}
-                    size="sm"
-                    variant="shadow"
-                    color={myCount > 0 ? "success" : "primary"}
-                    className="min-w-[60px] h-8 rounded-xl font-medium"
-                  >
-                    View
-                  </Button>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${myCount > 0
+                    ? "bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-black group-hover:shadow-[0_0_12px_rgba(251,146,60,0.5)]"
+                    : "bg-foreground/5 text-default-500 group-hover:bg-foreground/10 group-hover:text-foreground"
+                    }`}>
+                    <svg className="w-4 h-4 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
               );
             })}
           </div>
         );
       }}
-    </QueryComponent>
+    </QueryComponent >
   );
 }

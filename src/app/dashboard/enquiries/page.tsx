@@ -81,18 +81,35 @@ export default function EnquiryPage() {
             } = item;
 
             const isAdmin = user?.role === "Admin" || user?.role === "Employee";
-            const data: any = { ...rest, rate: rate || "N/A" };
+            const data: any = { ...rest, rate: rate || 0 };
 
             // Determine if the user is the mediator
             const isMediator = item.mediatorAssociateId?._id
               ? item.mediatorAssociateId._id.toString() === user?.id?.toString()
               : item.mediatorAssociateId === user?.id?.toString();
+            const isBuying = (item.buyerAssociateId?._id || item.buyerAssociateId)?.toString() === user?.id?.toString();
+            const isSelling = (item.sellerAssociateId?._id || item.sellerAssociateId)?.toString() === user?.id?.toString();
 
             if (isAdmin) {
               data.adminCommission = adminCommission || commission || 0;
               data.mediatorCommission = mediatorCommission || 0;
             } else if (isMediator) {
+              // Mediator sees their own commission but not OBAOL commission
               data.mediatorCommission = mediatorCommission || 0;
+              // Fold admin commission into the displayed rate
+              data.rate = (rate || 0) + (adminCommission || commission || 0) + (mediatorCommission || 0);
+            } else {
+              // Regular associate:
+              //  - Buyer: sees full market rate (base + all commissions)
+              //  - Seller: sees only base supplier rate (no commissions)
+              const totalComm = (adminCommission || commission || 0) + (mediatorCommission || 0);
+              if (isBuying) {
+                data.rate = (rate || 0) + totalComm;
+              } else if (isSelling) {
+                data.rate = rate || 0;
+              } else {
+                data.rate = (rate || 0) + totalComm;
+              }
             }
 
             const getRate = (rateVal: any) => {
@@ -103,11 +120,14 @@ export default function EnquiryPage() {
             };
 
             const getEmployeeName = (employee: any) => {
-              if (!employee) return null;
+              if (!employee) return "OBAOL Desk";
               if (typeof employee === 'object' && employee !== null) {
-                return employee.name || "Unknown Employee";
+                return employee.name || employee.firstName || employee.email || "OBAOL Desk";
               }
-              return employee;
+              if (typeof employee === "string" && /^[a-f0-9]{24}$/i.test(employee)) {
+                return "Assigned team member";
+              }
+              return employee || "OBAOL Desk";
             };
 
             const getDateInfo = (dateString: string | undefined) => {
@@ -135,16 +155,13 @@ export default function EnquiryPage() {
                 "NEW": "Pending",
                 "CONTACTED": "Pending",
                 "IN_DISCUSSION": "Pending",
-                "QUOTE_REQUIRED": "Quoted",
+                "QUOTE_REQUIRED": "Pending",
                 "CLOSED": "Completed",
                 "CANCELLED": "Cancelled"
               };
 
               return mapping[statusName as string] || "Pending";
             };
-
-            const isBuying = (item.buyerAssociateId?._id || item.buyerAssociateId)?.toString() === user?.id?.toString();
-            const isSelling = (item.sellerAssociateId?._id || item.sellerAssociateId)?.toString() === user?.id?.toString();
 
             if (index === 0) {
               console.log("DEBUG ROLE DETECTION:", {
@@ -159,6 +176,16 @@ export default function EnquiryPage() {
 
             const typeValue = isBuying ? "Buying" : (isSelling ? "Selling" : "Mediated");
 
+            let counterpartyStr = "";
+            let counterpartyLabelStr = "";
+            let companyStr = "";
+
+            if (isAdmin) {
+              counterpartyStr = `B: ${item.buyerAssociateId?.name || "N/A"} | S: ${item.sellerAssociateId?.name || "N/A"}`;
+              counterpartyLabelStr = "Buyer / Supplier";
+              companyStr = `B: ${item.buyerAssociateId?.associateCompany?.name || "N/A"} | S: ${item.sellerAssociateId?.associateCompany?.name || "N/A"}`;
+            }
+
             return {
               ...data,
               type: typeValue,
@@ -167,13 +194,18 @@ export default function EnquiryPage() {
               specification: item.specifications || "No Spec",
               product: item.productId?.name || "N/A",
               productVariant: "N/A",
-              counterparty: isBuying ? (item.sellerAssociateId?.name || "Multiple Sellers") : (item.buyerAssociateId?.name || "Direct Buyer"),
-              counterpartyLabel: isBuying ? "Seller" : "Buyer",
-              associateCompany: isBuying ? (item.sellerAssociateId?.associateCompany?.name || "N/A") : (item.buyerAssociateId?.associateCompany?.name || "N/A"),
+              counterparty: counterpartyStr,
+              counterpartyLabel: counterpartyLabelStr,
+              associateCompany: companyStr,
               assignedEmployee: getEmployeeName(item.assignedEmployeeId),
               mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
               dateColor: dateInfo.color,
               status: getStatusKey(item.status),
+              quantity: item.quantity || null,
+              isAdmin,
+              supplierPhone: item.sellerAssociateId?.phone || "N/A",
+              buyerPhone: item.buyerAssociateId?.phone || "N/A",
+              employeePhone: item.assignedEmployeeId?.phone || "+917306096941",
             };
           });
 
@@ -220,7 +252,6 @@ export default function EnquiryPage() {
                   >
                     <Tab key="All" title="All Stages" />
                     <Tab key="Pending" title="New" />
-                    <Tab key="Quoted" title="Quoted" />
                     <Tab key="Converted" title="Converted" />
                     <Tab key="Completed" title="Completed" />
                     <Tab key="Cancelled" title="Cancelled" />

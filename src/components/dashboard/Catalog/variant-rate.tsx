@@ -9,6 +9,7 @@ import {
   Chip,
   Divider,
   Input,
+  Textarea,
   Modal,
   ModalBody,
   ModalContent,
@@ -234,6 +235,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             // 1) CatalogItem / DisplayedRate: assume current user owns it, show it.
             // 2) VariantRate (Marketplace): must have valid associate/company to show.
             (rate !== "variantRate") ||
+            (user?.role?.toLowerCase() === "admin") ||
             (item.associate || item.associateCompany || item.associateId || item.associateCompanyId)
           )
           .map((item: any) => {
@@ -271,7 +273,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 productVariantId: item.productVariant?._id,
 
                 // Column Mapping
-                rate: user?.role === "Admin" ? convertRate(supplierRate) : convertRate(displayedPrice),
+                rate: user?.role?.toLowerCase() === "admin" ? convertRate(supplierRate) : convertRate(displayedPrice),
                 commission: adminCommission ? convertRate(adminCommission) : 0,
                 finalRate: convertRate(totalRate),
 
@@ -399,7 +401,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   return (
                     <div className="flex items-center justify-end">
                       {/* LiveToggle or Live Chip */}
-                      {(user?.role === "Admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
+                      {(user?.role?.toLowerCase() === "admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
                         <div className="flex flex-col items-center gap-1">
                           <LiveToggle
                             variantRate={rowItem}
@@ -444,7 +446,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 }}
                 editModal={(item: any) => {
                   if (!user) return null;
-                  const isAdmin = user.role === "Admin";
+                  const isAdmin = user.role?.toLowerCase() === "admin";
                   const isOwner = item.isOwnerView;
 
                   if (isAdmin || isOwner) {
@@ -468,7 +470,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 }}
                 deleteModal={(item: any) => {
                   if (!user) return null;
-                  const isAdmin = user.role === "Admin";
+                  const isAdmin = user.role?.toLowerCase() === "admin";
                   const isOwner = item.isOwnerView;
                   const isCatalog = item.isCatalogView;
 
@@ -516,7 +518,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {user?.role === "Admin" ||
+                              {user?.role?.toLowerCase() === "admin" ||
                                 (!item.variantRate &&
                                   item.associateId === user?.id &&
                                   user?.id !== undefined) ? (
@@ -557,7 +559,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             </div>
                             {/* Mobile Actions (Edit/Delete) */}
                             <div className="flex items-center gap-4">
-                              {user?.role === "Admin" || item.isOwnerView ? (
+                              {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
                                 <div className="flex items-center gap-3">
                                   <EditModal
                                     _id={item._id}
@@ -795,6 +797,8 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [preferredIncotermId, setPreferredIncotermId] = useState<string>("");
+  const [specification, setSpecification] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -809,27 +813,45 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const activeAssociateId = associateDetail?.data?._id || user?.id;
 
-  // Auto-fill user details when available
   useEffect(() => {
     if (associateDetail?.data) {
       if (!name) setName(associateDetail.data.name || "");
       if (!phoneNumber) setPhoneNumber(associateDetail.data.phone || associateDetail.data.phoneNumber || "");
     }
-  }, [associateDetail?.data]);
+  }, [associateDetail?.data, name, phoneNumber]);
+
+  // Load available incoterms from essentials
+  const { data: incotermResponse } = useQuery({
+    queryKey: ["incoterms"],
+    queryFn: () => getData(apiRoutesByRole["incoterm"]),
+  });
+
+  const incotermOptions = Array.isArray(incotermResponse?.data)
+    ? incotermResponse?.data
+    : incotermResponse?.data?.data || [];
 
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
+      const baseSpecification = `Variant: ${variantRate.productVariant || "Standard"}`;
+      const finalSpecification =
+        specification?.trim().length > 0
+          ? `${baseSpecification}\n\nNotes: ${specification.trim()}`
+          : baseSpecification;
+
       const payload = {
         productId: variantRate.productId || variantRate.product?._id || variantRate.product,
         quantity: Number(quantity) || 1,
-        specifications: `Phone: ${phoneNumber}\nName: ${name}\nVariant: ${variantRate.productVariant || "Standard"}`,
+        specifications: finalSpecification,
         buyerAssociateId: activeAssociateId || undefined,
         sellerAssociateId: variantRate.associateId || variantRate.associate?._id || variantRate.associate,
         mediatorAssociateId: variantRate.mediatorAssociateId || null,
-        rate: variantRate.rawBasePrice || (typeof variantRate.rate === 'number' ? variantRate.rate : 0),
-        adminCommission: variantRate.rawCommission || (typeof variantRate.adminCommission === 'number' ? variantRate.adminCommission : 0),
-        mediatorCommission: variantRate.mediatorCommission || 0,
-        notes: `Enquiry from Marketplace for ${variantRate.product} - ${variantRate.productVariant}`
+        variantRateId: variantRate.isCatalogView ? null : variantRate._id,
+        catalogItemId: variantRate.isCatalogView ? variantRate._id : null,
+        preferredIncoterm: preferredIncotermId || null,
+        // Optional name/phone if they were overridden in the form
+        ...(name && name !== associateDetail?.data?.name && { name }),
+        ...(phoneNumber && phoneNumber !== (associateDetail?.data?.phone || associateDetail?.data?.phoneNumber) && { phoneNumber }),
+        notes: `Enquiry for ${variantRate.product} - ${variantRate.productVariant}`
       };
 
       console.log("Submitting Enquiry Payload:", payload);
@@ -894,41 +916,49 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         <p className="text-default-500 text-xs italic">Our suppliers primarily handle FTL (Full Truck Load) orders for efficiency.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 px-2">
-        <div className="flex flex-col gap-2">
-          <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Your Name</label>
-          <Input
-            variant="bordered"
-            labelPlacement="outside"
-            placeholder="Enter full name"
-            startContent={<FiUser className="text-primary-500 mr-1" />}
-            className="w-full"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            classNames={{
-              input: "font-bold",
-              inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
-            }}
-          />
+      <div className="flex flex-col gap-6 px-2">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="h-px flex-1 bg-divider/10" />
+          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] whitespace-nowrap">Personal Identity</span>
+          <div className="h-px flex-1 bg-divider/10" />
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Contact Number</label>
-          <Input
-            variant="bordered"
-            labelPlacement="outside"
-            placeholder="9876543210"
-            type="tel"
-            startContent={<FiPhone className="text-primary-500 mr-1" />}
-            className="w-full"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-            classNames={{
-              input: "font-bold",
-              inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
-            }}
-          />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+          <div className="flex flex-col gap-2">
+            <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Your Name</label>
+            <Input
+              variant="bordered"
+              labelPlacement="outside"
+              placeholder="Enter full name"
+              startContent={<FiUser className="text-primary-500 mr-1" />}
+              className="w-full"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required={!user}
+              classNames={{
+                input: "font-bold",
+                inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">Contact Number</label>
+            <Input
+              variant="bordered"
+              labelPlacement="outside"
+              placeholder="9876543210"
+              type="tel"
+              startContent={<FiPhone className="text-primary-500 mr-1" />}
+              className="w-full"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required={!user}
+              classNames={{
+                input: "font-bold",
+                inputWrapper: "h-14 rounded-2xl border-2 group-data-[focus=true]:border-primary"
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -953,6 +983,57 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           <p className="text-[10px] text-default-400 font-bold uppercase tracking-tight pl-2 mt-2">
             Tip: Most suppliers prefer FTL (Full Truck Load) orders of 20+ tons.
           </p>
+        </div>
+      </div>
+
+      <div className="w-full px-2 flex flex-col gap-6">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="h-px flex-1 bg-divider/10" />
+          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] whitespace-nowrap">Trade Preferences</span>
+          <div className="h-px flex-1 bg-divider/10" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-2">
+            <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">
+              Preferred Incoterm
+            </label>
+            <Select
+              selectedKeys={preferredIncotermId ? [preferredIncotermId] : []}
+              onSelectionChange={(keys) => {
+                const keyArr = Array.from(keys as Set<string>);
+                setPreferredIncotermId(keyArr[0] || "");
+              }}
+              placeholder="Select preferred incoterm"
+              variant="bordered"
+              className="w-full"
+            >
+              {incotermOptions.map((item: any) => (
+                <SelectItem key={item._id} value={item._id}>
+                  {item.code} — {item.name}
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[11px] font-black text-default-400 uppercase tracking-widest pl-1">
+              Specification (Optional)
+            </label>
+            <Textarea
+              minRows={3}
+              variant="bordered"
+              labelPlacement="outside"
+              placeholder="Any specific quality, packaging, delivery notes..."
+              value={specification}
+              onChange={(e) => setSpecification(e.target.value)}
+              className="w-full"
+              classNames={{
+                input: "font-medium text-sm",
+                inputWrapper: "rounded-2xl border-2 group-data-[focus=true]:border-primary",
+              }}
+            />
+          </div>
         </div>
       </div>
 

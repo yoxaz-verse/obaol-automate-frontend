@@ -76,7 +76,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
     };
 
     return (
-        <Card className="max-w-[400px] w-full bg-black/40 backdrop-blur-md border border-white/20 text-white shadow-2xl">
+        <Card className="max-w-[400px] w-full bg-content2/40 backdrop-blur-md border border-default-200/50 text-foreground shadow-2xl">
             <CardHeader className="flex flex-col items-center pb-0 pt-6">
                 <div className="flex w-full justify-between items-center px-4">
                     {step !== "SUCCESS" && (
@@ -93,28 +93,28 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                     </h4>
                     <div className="w-10" />
                 </div>
-                <p className="text-tiny text-white/50 mt-1 uppercase tracking-widest">{role} Account</p>
+                <p className="text-tiny text-default-500 mt-1 uppercase tracking-widest">{role} Account</p>
             </CardHeader>
 
             <CardBody className="py-8 px-8">
                 {step === "REQUEST" && (
                     <form onSubmit={handleRequestOtp} className="space-y-6">
-                        <p className="text-sm text-center text-white/70">
+                        <p className="text-sm text-center text-default-600">
                             Enter your email address and we will send you an OTP to reset your password.
                         </p>
                         <Input
                             label="Email Address"
                             placeholder="name@example.com"
                             labelPlacement="outside"
-                            startContent={<IoMail className="text-white/40" />}
+                            startContent={<IoMail className="text-default-400" />}
                             value={email}
                             onValueChange={setEmail}
                             isRequired
                             variant="bordered"
                             classNames={{
-                                label: "text-white/70",
-                                input: "text-white",
-                                inputWrapper: "border-white/20 hover:border-orange-500/50 focus-within:!border-orange-500",
+                                label: "text-default-700 font-medium",
+                                input: "text-foreground",
+                                inputWrapper: "bg-default-50/50 border-default-200 hover:border-orange-500/50 focus-within:!border-orange-500",
                             }}
                         />
                         <Button
@@ -131,7 +131,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                 {step === "VERIFY" && (
                     <form onSubmit={handleVerifyOtp} className="flex flex-col items-center space-y-8">
                         <div className="text-center">
-                            <p className="text-sm text-white/70">Enter the 6-digit code sent to</p>
+                            <p className="text-sm text-default-600">Enter the 6-digit code sent to</p>
                             <p className="text-sm font-bold text-orange-400">{email}</p>
                         </div>
 
@@ -141,7 +141,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                             color="warning"
                             variant="bordered"
                             classNames={{
-                                segment: "text-white border-white/20",
+                                segment: "text-foreground border-default-200",
                                 segmentWrapper: "gap-2",
                             }}
                         />
@@ -159,7 +159,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                         <Button
                             variant="light"
                             size="sm"
-                            className="text-white/50"
+                            className="text-default-500"
                             onClick={(e) => handleRequestOtp(e as any)}
                         >
                             Resend Code
@@ -169,7 +169,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
 
                 {step === "RESET" && (
                     <form onSubmit={handleResetPassword} className="space-y-6">
-                        <p className="text-sm text-center text-white/70 italic">
+                        <p className="text-sm text-center text-default-500 italic">
                             Verification successful. Please enter your new password.
                         </p>
                         <div className="space-y-4">
@@ -178,15 +178,15 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 placeholder="********"
                                 labelPlacement="outside"
                                 type="password"
-                                startContent={<IoLockClosed className="text-white/40" />}
+                                startContent={<IoLockClosed className="text-default-400" />}
                                 value={newPassword}
                                 onValueChange={setNewPassword}
                                 isRequired
                                 variant="bordered"
                                 classNames={{
-                                    label: "text-white/70",
-                                    input: "text-white",
-                                    inputWrapper: "border-white/20 hover:border-orange-500/50 focus-within:!border-orange-500",
+                                    label: "text-default-700 font-medium",
+                                    input: "text-foreground",
+                                    inputWrapper: "bg-default-50/50 border-default-200 hover:border-orange-500/50 focus-within:!border-orange-500",
                                 }}
                             />
                             <Input
@@ -194,15 +194,15 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 placeholder="********"
                                 labelPlacement="outside"
                                 type="password"
-                                startContent={<IoLockClosed className="text-white/40" />}
+                                startContent={<IoLockClosed className="text-default-400" />}
                                 value={confirmPassword}
                                 onValueChange={setConfirmPassword}
                                 isRequired
                                 variant="bordered"
                                 classNames={{
-                                    label: "text-white/70",
-                                    input: "text-white",
-                                    inputWrapper: "border-white/20 hover:border-orange-500/50 focus-within:!border-orange-500",
+                                    label: "text-default-700 font-medium",
+                                    input: "text-foreground",
+                                    inputWrapper: "bg-default-50/50 border-default-200 hover:border-orange-500/50 focus-within:!border-orange-500",
                                 }}
                             />
                         </div>
@@ -219,12 +219,12 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
 
                 {step === "SUCCESS" && (
                     <div className="flex flex-col items-center py-6 space-y-6">
-                        <div className="w-20 h-20 bg-success/20 rounded-full flex items-center justify-center border border-success/30">
+                        <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center border border-success/20">
                             <IoCheckmarkCircle className="text-5xl text-success" />
                         </div>
                         <div className="text-center space-y-2">
                             <h4 className="text-xl font-bold">Success!</h4>
-                            <p className="text-sm text-white/60">Your password has been reset successfully.</p>
+                            <p className="text-sm text-default-500">Your password has been reset successfully.</p>
                         </div>
                         <Button
                             color="warning"

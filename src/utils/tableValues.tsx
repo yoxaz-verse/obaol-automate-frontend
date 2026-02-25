@@ -21,6 +21,7 @@ import {
   enquiryProcessStatusRoutes,
   enquiryRoutes,
   generalIntentRoutes,
+  incotermRoutes,
   inventoryManagerRoutes,
   jobRoleRoutes,
   jobTypeRoutes,
@@ -144,6 +145,7 @@ export const apiRoutesByRole: Record<string, string> = {
   catalogItem: catalogItemRoutes.getAll,
   enquiry: enquiryRoutes.getAll,
   enquiryProcessStatus: enquiryProcessStatusRoutes.getAll,
+  incoterm: incotermRoutes.getAll,
   designation: designationRoutes.getAll,
   companyType: companyTypeRoutes.getAll,
   certification: certificationRoutes.getAll,
@@ -1411,6 +1413,49 @@ export const initialTableConfig: Record<
     },
   ],
   // End of Company & Essentials
+
+  incoterm: [
+    {
+      label: "Code",
+      type: "text",
+      key: "code",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Description",
+      type: "textarea",
+      key: "description",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
 
   // Category
   category: [

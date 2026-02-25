@@ -34,9 +34,15 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
 
   return product ? (
     <section>
-      {/* <Title title={isDeleted ? "DSsd" : "aaaaaaaaaaaaaaaa"} /> */}
-      <div className="flex justify-between">
-        <Title title={product.name} />
+      <div className="flex justify-between items-start border-b border-foreground/10 pb-6 mb-8">
+        <div>
+          <h2 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+            {product.name}
+          </h2>
+          {product.description && (
+            <p className="text-default-400 mt-2 text-sm max-w-2xl leading-relaxed">{product.description}</p>
+          )}
+        </div>
         {user?.role !== "Associate" && (
           <div className="flex gap-2 items-center">
             <EditModal
@@ -58,11 +64,6 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
           </div>
         )}
       </div>
-      {product.description && (
-        <p className="text-white">{product.description}</p>
-      )}
-
-      <div className="h-6" />
 
       <QueryComponent
         api={apiRoutesByRole["productVariant"]}
@@ -94,7 +95,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
               <div className="h-1" />
               {productVariantValue && (
                 <>
-                  <Accordion key={product._id}>
+                  <Accordion key={product._id} className="px-0 ml-4">
                     {productVariantValue.map((variant: any) => {
                       const safeItems = Array.isArray(myCatalogItems) ? myCatalogItems : [];
                       const isAdded = safeItems.some(item =>
@@ -106,20 +107,20 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                           key={variant._id}
                           aria-label={variant.name}
                           title={
-                            <div className="flex items-center justify-between w-full pr-4">
-                              <span className="font-medium">{variant.name}</span>
+                            <div className="flex items-center justify-between w-full px-2 py-2">
+                              <span className="font-bold text-lg tracking-wide text-foreground/90">{variant.name}</span>
                               {isAdded && (
-                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-success-500 text-white text-[10px] font-bold shadow-sm">
-                                  <FiCheckCircle size={10} />
+                                <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-bold shadow-[0_0_12px_rgba(251,146,60,0.15)] border border-orange-500/20">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
                                   IN MY CATALOG
                                 </span>
                               )}
                             </div>
                           }
-                          className={`opacity-90 hover:opacity-100 ${isAdded ? "border-l-4 border-success-500 bg-success-500/5" : ""}`}
+                          className={`group mb-4 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(251,146,60,0.05)] ${isAdded ? "border-l-4 !border-l-orange-500" : ""}`}
                         >
                           {variant.description && (
-                            <p className="text-gray-700">
+                            <p className="text-default-700">
                               {variant.description}
                             </p>
                           )}
@@ -127,42 +128,46 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                           <div className="space-y-6">
                             {user?.role === "Associate" ? (
                               <>
-                                {/* 1. My Added Rates (Specific to this Associate) */}
-                                {isAdded && (
-                                  <section className="bg-success-50/30 p-4 rounded-2xl border border-success-100">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-success-600 mb-3 flex items-center gap-2">
-                                      <FiCheckCircle size={14} /> My Added Rates
+                                <div className="p-1">
+                                  {isAdded && (
+                                    <section className="bg-orange-500/5 p-5 rounded-2xl border border-orange-500/20 mb-6">
+                                      <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-orange-500" /> My Added Rates
+                                      </p>
+                                      <VariantRate
+                                        productVariant={variant}
+                                        rate="catalogItem"
+                                        additionalParams={{
+                                          associateId: user?.id,
+                                          productVariantId: variant._id
+                                        }}
+                                      />
+                                    </section>
+                                  )}
+
+                                  <section className="bg-foreground/[0.02] p-5 rounded-2xl border border-foreground/10">
+                                    <p className="text-xs font-bold uppercase tracking-widest text-default-500 mb-4 flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-default-500" /> Marketplace Rates
                                     </p>
                                     <VariantRate
                                       productVariant={variant}
-                                      rate="catalogItem"
-                                      additionalParams={{
-                                        associateId: user?.id,
-                                        productVariantId: variant._id
-                                      }}
+                                      rate="variantRate"
+                                      additionalParams={{ view: "marketplace" }}
                                     />
                                   </section>
-                                )}
-
-                                {/* 2. Marketplace Rates */}
-                                <section className="bg-content1/50 p-4 rounded-2xl border border-divider/50">
-                                  <p className="text-xs font-bold uppercase tracking-widest text-default-500 mb-3">Marketplace Rates</p>
-                                  <VariantRate
-                                    productVariant={variant}
-                                    rate="variantRate"
-                                    additionalParams={{ view: "marketplace" }}
-                                  />
-                                </section>
+                                </div>
                               </>
                             ) : (
                               /* Standard View for Admin/Others (No filtering) */
-                              <section className="bg-content1/50 p-4 rounded-2xl border border-divider/50">
-                                <p className="text-xs font-bold uppercase tracking-widest text-primary-500 mb-3">All Rates</p>
-                                <VariantRate
-                                  productVariant={variant}
-                                  rate="variantRate"
-                                />
-                              </section>
+                              <div className="p-1">
+                                <section className="bg-foreground/[0.02] p-5 rounded-2xl border border-foreground/10">
+                                  <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">All Rates</p>
+                                  <VariantRate
+                                    productVariant={variant}
+                                    rate="variantRate"
+                                  />
+                                </section>
+                              </div>
                             )}
                           </div>
                           {user?.role !== "Associate" && (
@@ -204,9 +209,17 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
             </section>
           );
         }}
-      </QueryComponent>
-    </section>
+      </QueryComponent >
+    </section >
   ) : (
-    <Title title="Select Any Product" />
+    <div className="h-full flex flex-col items-center justify-center text-center gap-4 text-default-400">
+      <div className="w-20 h-20 rounded-full bg-foreground/5 flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold text-foreground">No Product Selected</h3>
+      <p className="text-sm max-w-[250px] leading-relaxed">Select a product from the catalog on the left to view its variants and rates.</p>
+    </div>
   );
 };

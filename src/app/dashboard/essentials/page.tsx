@@ -32,6 +32,7 @@ export default function Essentials() {
   ];
   const enquiryTabs = [
     { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
+    { key: "incoterm", title: "Incoterms" }, // Preferred trade terms
   ];
   return (
     <div className="flex items-center justify-center">
@@ -75,6 +76,17 @@ export default function Essentials() {
             ))}
           </Tabs>
           <Spacer y={4} />
+          <Tabs
+            aria-label="Enquiry Essentials Tabs"
+            selectedKey={enquiryTabs[0].key}
+          >
+            {enquiryTabs.map((tab) => (
+              <Tab key={tab.key} title={tab.title}>
+                <Title title={tab.title} />
+                <EssentialTabContent essentialName={tab.key} />
+              </Tab>
+            ))}
+          </Tabs>
         </div>
       </div>
     </div>

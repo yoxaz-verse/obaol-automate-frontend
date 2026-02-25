@@ -39,12 +39,6 @@ export default function Product() {
                         additionalParams={{ associateId: user?.id }}
                       />
                     </Tab>
-                    <Tab key={"marketplace"} title="Marketplace">
-                      <VariantRate
-                        rate="variantRate"
-                        additionalParams={{ view: "marketplace" }}
-                      />
-                    </Tab>
                   </>
                 ) : (
                   <>
@@ -53,9 +47,6 @@ export default function Product() {
                         rate="variantRate"
                         additionalParams={{ selected: true }}
                       />
-                    </Tab>
-                    <Tab key={"selectMore"} title={"More"}>
-                      <VariantRate rate="variantRate" />
                     </Tab>
                   </>
                 )}

@@ -119,7 +119,7 @@ const roleConfigs: Record<
           { key: "associateCompany.state.name", label: "State" },
           { key: "associateCompany.district.name", label: "District" },
           { key: "associateCompany.division.name", label: "Division" },
-          { key: "associateCompany.pincodeEntry.name", label: "Pin Code" },
+          { key: "associateCompany.pincodeEntry.pincode", label: "Pin Code" },
         ],
       },
       {
@@ -129,6 +129,15 @@ const roleConfigs: Record<
           { key: "email", label: "Login Email" },
           { key: "phone", label: "Contact Phone" },
           { key: "designation.name", label: "Designation" },
+        ],
+      },
+      {
+        title: "Verification Status & Activity",
+        fields: [
+          { key: "isEmailVerified", label: "Email Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
+          { key: "isPhoneVerified", label: "Phone Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
+          { key: "isOneToOneVerified", label: "One-to-One Chat", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
+          { key: "isCompanyVerified", label: "Company Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
         ],
       },
     ],
@@ -219,7 +228,8 @@ export default function ProfilePage() {
         api={`${apiRoutesByRole[roleKey]}/${user?.id}`}
         queryKey={[roleKey, user?.id]}
       >
-        {(profile: any) => {
+        {(response: any) => {
+          const profile = response?.data || response;
           const formFields = initialTableConfig[roleKey];
 
           return (

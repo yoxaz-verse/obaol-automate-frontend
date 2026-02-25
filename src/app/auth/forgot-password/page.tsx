@@ -10,10 +10,10 @@ function ForgotPasswordContent() {
     const role = searchParams.get("role") || "Customer";
 
     return (
-        <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden bg-[#0a0a0a]">
+        <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col overflow-hidden bg-background">
             {/* Background elements for "amazing" UI */}
-            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/5 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="z-10 w-full flex flex-col items-center">
                 <Image
@@ -31,7 +31,7 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
     return (
-        <Suspense fallback={<div className="h-screen w-full bg-[#0a0a0a] flex items-center justify-center text-white">Loading...</div>}>
+        <Suspense fallback={<div className="h-screen w-full bg-background flex items-center justify-center text-foreground font-mono">Loading...</div>}>
             <ForgotPasswordContent />
         </Suspense>
     );

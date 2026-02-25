@@ -53,6 +53,7 @@ const BASE_PATHS = {
   JOB_ROLE: "/job-roles",
   JOB_TYPE: "/job-types",
   LANGUAGE: "/languages",
+  INCOTERM: "/incoterms",
 };
 
 // Define account-related routes separately
@@ -230,6 +231,7 @@ export const companyBusinessModelRoutes = createCRUDRoutes(
 export const jobRoleRoutes = createCRUDRoutes(BASE_PATHS.JOB_ROLE);
 export const jobTypeRoutes = createCRUDRoutes(BASE_PATHS.JOB_TYPE);
 export const languageRoutes = createCRUDRoutes(BASE_PATHS.LANGUAGE);
+export const incotermRoutes = createCRUDRoutes(BASE_PATHS.INCOTERM);
 
 export const generalIntentRoutes = createCRUDRoutes(BASE_PATHS.GENERAL_INTENT);
 export const companyStageRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_STAGE);
@@ -322,5 +324,6 @@ export const apiRoutes = {
   jobRole: jobRoleRoutes,
   jobType: jobTypeRoutes,
   language: languageRoutes,
+  incoterm: incotermRoutes,
   catalog: catalogRoutes,
 };

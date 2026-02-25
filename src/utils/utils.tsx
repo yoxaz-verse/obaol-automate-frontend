@@ -14,6 +14,7 @@ import { GoOrganization } from "react-icons/go";
 import { GiShipWheel } from "react-icons/gi";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
+import { LuWarehouse } from "react-icons/lu";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -72,6 +73,11 @@ export const sidebarOptions = [
     name: "Products", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
+  },
+  {
+    name: "Marketplace",
+    icon: <LuWarehouse />,
+    link: "/dashboard/marketplace",
   },
   {
     name: "Catalog", //Translate

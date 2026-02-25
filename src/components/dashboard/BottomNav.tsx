@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
+import { LuWarehouse } from "react-icons/lu";
 
 const BottomNav = () => {
     const router = useRouter();
@@ -20,6 +21,11 @@ const BottomNav = () => {
             name: "Products",
             icon: <AiOutlineProduct size={24} />,
             link: "/dashboard/product",
+        },
+        {
+            name: "Marketplace",
+            icon: <LuWarehouse size={24} />,
+            link: "/dashboard/marketplace",
         },
         {
             name: "Enquiries",

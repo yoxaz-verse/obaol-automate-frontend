@@ -265,9 +265,15 @@ export const catalogRoutes = {
   publicDetails: "/catalog/public", // + /:companySlug/:productSlug
 };
 
+export const brandPublicRoutes = {
+  details: "/brand/details", // + /:slug
+  products: "/brand/products", // + /:companyId
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
+  brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,
   employee: employeeRoutes,

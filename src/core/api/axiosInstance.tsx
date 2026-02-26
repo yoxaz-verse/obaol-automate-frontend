@@ -6,9 +6,9 @@ export const baseUrl =
   // process.env.NEXT_PUBLIC_API_BASE_URL
   // "http://localhost:5001/api/v1/web";
   "https://automate-backend.infra.obaol.com/api/v1/web";
-
-  // ||"backend.obaol.com/api/v1/web"
-  // "https://backend.obaol.com/api/v1/web";
+// 
+// ||"backend.obaol.com/api/v1/web"
+// "https://backend.obaol.com/api/v1/web";
 
 const instance = axios.create({
   baseURL: baseUrl,

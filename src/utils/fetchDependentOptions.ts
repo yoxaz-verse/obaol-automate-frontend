@@ -67,7 +67,11 @@ const getOptions = async (
     }
 
     if (lowerKey === "product") {
-      const res = await getData(productRoutes.getAll, { limit: "1000" });
+      let params: any = { limit: "1000" };
+      if (parentKey && parentValue) {
+        params[parentKey] = parentValue;
+      }
+      const res = await getData(productRoutes.getAll, params);
       return (
         res?.data?.data?.data?.map((d: any) => ({
           key: d._id,
@@ -77,7 +81,11 @@ const getOptions = async (
     }
 
     if (lowerKey === "productvariant") {
-      const res = await getData(productVariantRoutes.getAll, { limit: "1000" });
+      let params: any = { limit: "1000" };
+      if (parentKey && parentValue) {
+        params[parentKey] = parentValue;
+      }
+      const res = await getData(productVariantRoutes.getAll, params);
       return (
         res?.data?.data?.data?.map((d: any) => ({
           key: d._id,
@@ -87,7 +95,11 @@ const getOptions = async (
     }
 
     if (lowerKey === "subcategory") {
-      const res = await getData(subCategoryRoutes.getAll, { limit: "1000" });
+      let params: any = { limit: "1000" };
+      if (parentKey && parentValue) {
+        params[parentKey] = parentValue;
+      }
+      const res = await getData(subCategoryRoutes.getAll, params);
       return (
         res?.data?.data?.data?.map((d: any) => ({
           key: d._id,

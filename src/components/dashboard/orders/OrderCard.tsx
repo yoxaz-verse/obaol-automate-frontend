@@ -9,14 +9,19 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
+    const ownerLabelMap: Record<string, string> = {
+        buyer: "Buyer",
+        seller: "Supplier",
+        obaol: "OBAOL Team",
+    };
     // Extract data safely
     const product = data.enquiry?.productVariant?.product?.name || "Product";
     const variant = data.enquiry?.productVariant?.name || "Variant";
     const customer = data.enquiry?.name || "Customer";
     const company = data.enquiry?.associateCompany?.name || "Direct";
-    const employee = data.enquiry?.associateCompany?.assignedEmployee?.name || "Unassigned";
     const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "Recent";
     const status = data.status || "Procuring";
+    const procurementOwner = ownerLabelMap[data.responsibilities?.procurementBy] || "Not set";
     const vehicleNo = data.logistics?.vehicleNo || "No Vehicle Info";
     const transportCompany = data.logistics?.transportCompany || "In-house";
 
@@ -64,10 +69,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
 
                 {/* Handling Details */}
                 <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-default-400 uppercase tracking-wider font-bold">Assigned Handler</div>
+                    <div className="text-[10px] text-default-400 uppercase tracking-wider font-bold">Procurement Owner</div>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-success-500" />
-                        <span className="text-xs font-bold text-primary-600">{employee}</span>
+                        <span className="text-xs font-bold text-primary-600">{procurementOwner}</span>
                     </div>
                 </div>
             </CardBody>

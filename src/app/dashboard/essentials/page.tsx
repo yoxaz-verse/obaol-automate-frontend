@@ -30,6 +30,8 @@ export default function Essentials() {
     { key: "jobType", title: "Job Type" }, // Translate Title
     { key: "language", title: "Language" }, // Translate Title
   ];
+  const [enquiryEssentials, setEnquiryEssentials] = React.useState("designenquiryProcessStatusation");
+
   const enquiryTabs = [
     { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
     { key: "incoterm", title: "Incoterms" }, // Preferred trade terms
@@ -78,7 +80,9 @@ export default function Essentials() {
           <Spacer y={4} />
           <Tabs
             aria-label="Enquiry Essentials Tabs"
-            selectedKey={enquiryTabs[0].key}
+            selectedKey={enquiryEssentials}
+            onSelectionChange={(key) => setEnquiryEssentials(key as string)}
+
           >
             {enquiryTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>

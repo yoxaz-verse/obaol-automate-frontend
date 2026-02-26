@@ -3,12 +3,14 @@
 import React from "react";
 import { Button } from "@heroui/react";
 import { Tabs, Tab } from "@nextui-org/react";
+import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
 
 export default function OrdersPage() {
+    const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string>("All");
 
     return (
@@ -22,7 +24,22 @@ export default function OrdersPage() {
                 limit={50}
             >
                 {(orderResponse: any) => {
-                    const ordersData = orderResponse?.data || [];
+                    const extractOrders = (raw: any): any[] => {
+                        const candidates = [
+                            raw,
+                            raw?.data,
+                            raw?.data?.data,
+                            raw?.data?.data?.data,
+                            raw?.results,
+                            raw?.items,
+                        ];
+                        const found = candidates.find((it) => Array.isArray(it));
+                        if (!Array.isArray(found)) return [];
+                        return found
+                            .map((row: any) => row?.data?.data || row?.data || row)
+                            .filter((row: any) => row && typeof row === "object");
+                    };
+                    const ordersData = extractOrders(orderResponse);
 
                     return (
                         <div className="flex items-center justify-center w-full">
@@ -54,21 +71,27 @@ export default function OrdersPage() {
                                 <section className="py-2 w-full">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                         {ordersData
-                                            .filter((item: any) => selectedTab === "All" || (item.status === selectedTab))
+                                            .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
                                             .map((item: any) => (
+                                                (() => {
+                                                    const orderId = item?._id || item?.id || item?.orderId;
+                                                    if (!orderId) return null;
+                                                    return (
                                                 <OrderCard
-                                                    key={item._id}
+                                                    key={orderId}
                                                     data={item}
                                                     action={
                                                         <Button
                                                             className="bg-secondary text-white font-medium shadow-sm h-8"
                                                             size="sm"
-                                                            onPress={() => window.location.href = `/dashboard/orders/${item._id}`}
+                                                            onPress={() => router.push(`/dashboard/orders/${String(orderId)}`)}
                                                         >
                                                             Manage
                                                         </Button>
                                                     }
                                                 />
+                                                    );
+                                                })()
                                             ))}
                                     </div>
 

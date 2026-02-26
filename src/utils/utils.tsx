@@ -15,6 +15,7 @@ import { GiShipWheel } from "react-icons/gi";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse } from "react-icons/lu";
+import { FiShoppingBag } from "react-icons/fi";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -93,6 +94,11 @@ export const sidebarOptions = [
     name: "Enquiries", //Translate
     icon: <RiFileAddLine />,
     link: "/dashboard/enquiries",
+  },
+  {
+    name: "Orders",
+    icon: <FiShoppingBag />,
+    link: "/dashboard/orders",
   },
   {
     name: "Profile", //Translate

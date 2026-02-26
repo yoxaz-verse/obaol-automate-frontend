@@ -138,6 +138,56 @@ export default function RootLayout({
             }}
           />
         )}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+          /* Aggressive Google Translate UI Hiding */
+          .goog-te-banner-frame,
+          .goog-te-banner-frame.skiptranslate,
+          iframe.goog-te-banner-frame,
+          .goog-te-balloon-frame,
+          .goog-te-menu-frame,
+          .goog-te-menu2-frame,
+          .goog-te-gadget-icon,
+          .goog-te-spinner-pos,
+          #goog-gt-tt,
+          .goog-tooltip,
+          .goog-tooltip:hover {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
+          }
+
+          /* Force body and html to stay at the top */
+          html, body {
+            top: 0px !important;
+            position: relative !important;
+            margin-top: 0px !important;
+            padding-top: 0px !important;
+          }
+
+          /* Hide the 'Show Original' text on hover */
+          .goog-text-highlight {
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
+          /* General gadget hiding */
+          .skiptranslate.goog-te-gadget {
+            display: none !important;
+          }
+          
+          /* Prevent the 'translated' bar from appearing or overlapping */
+          .translated-ltr body, .translated-rtl body {
+             padding-top: 40px !important;
+          }
+          .translated-ltr, .translated-rtl {
+             margin-top: 0px !important;
+          }
+        `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
         {GTM_ID && (

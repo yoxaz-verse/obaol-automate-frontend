@@ -15,7 +15,6 @@ import {
     Select,
     SelectItem,
     Input,
-    Textarea,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -33,21 +32,55 @@ const ORDER_STATUSES = [
     "Cancelled",
 ];
 
+const OWNER_OPTIONS = [
+    { key: "buyer", label: "Buyer" },
+    { key: "seller", label: "Supplier" },
+    { key: "obaol", label: "OBAOL Team" },
+] as const;
+
 export default function OrderDetailsPage() {
     const { id } = useParams();
     const orderId = Array.isArray(id) ? id[0] : id;
     const queryClient = useQueryClient();
     const [logisticsList, setLogisticsList] = useState<any[]>([]);
     const [trackingId, setTrackingId] = useState("");
+    const [responsibilities, setResponsibilities] = useState<any>({
+        procurementBy: "",
+        certificateBy: "",
+        transportBy: "",
+        shippingBy: "",
+        packagingBy: "",
+        qualityTestingBy: "",
+    });
 
     // Fetch Order Data
     const { data: order, isLoading } = useQuery({
         queryKey: ["order", orderId],
-        queryFn: () => getData(`${apiRoutes.orders.getAll}/${orderId}`),
+        queryFn: async () => {
+            try {
+                const byId = await getData(`${apiRoutes.orders.getAll}/${orderId}`);
+                return byId;
+            } catch {
+                const listRes = await getData(apiRoutes.orders.getAll, { page: 1, limit: 100, sort: "createdAt:desc" });
+                const rows = Array.isArray(listRes?.data?.data?.data)
+                    ? listRes.data.data.data
+                    : Array.isArray(listRes?.data?.data)
+                        ? listRes.data.data
+                        : Array.isArray(listRes?.data)
+                            ? listRes.data
+                            : [];
+                const matched = rows.find((row: any) => {
+                    const rowOrderId = (row?._id || row?.id || row?.orderId || "").toString();
+                    const enquiryId = (row?.enquiry?._id || row?.enquiry || "").toString();
+                    return rowOrderId === String(orderId) || enquiryId === String(orderId);
+                });
+                if (!matched?._id) throw new Error("Order not found");
+                return { data: { data: matched } } as any;
+            }
+        },
         select: (res) => res?.data?.data,
         enabled: !!orderId,
     });
-
     // Update Status Mutation
     const updateMutation = useMutation({
         mutationFn: async (payload: any) => {
@@ -64,6 +97,14 @@ export default function OrderDetailsPage() {
         if (order) {
             setLogisticsList(order.logistics || []);
             setTrackingId(order.trackingId || "");
+            setResponsibilities({
+                procurementBy: order?.responsibilities?.procurementBy || "obaol",
+                certificateBy: order?.responsibilities?.certificateBy || "obaol",
+                transportBy: order?.responsibilities?.transportBy || "obaol",
+                shippingBy: order?.responsibilities?.shippingBy || "obaol",
+                packagingBy: order?.responsibilities?.packagingBy || "obaol",
+                qualityTestingBy: order?.responsibilities?.qualityTestingBy || "obaol",
+            });
         }
     }, [order]);
 
@@ -72,8 +113,9 @@ export default function OrderDetailsPage() {
     };
 
     const handleGeneralUpdate = () => {
-        updateMutation.mutate({ logistics: logisticsList, trackingId });
+        updateMutation.mutate({ logistics: logisticsList, trackingId, responsibilities });
     }
+    const getOwnerLabel = (val: string) => OWNER_OPTIONS.find((item) => item.key === val)?.label || "Not set";
 
     const addTruck = () => {
         setLogisticsList([...logisticsList, {
@@ -145,6 +187,98 @@ export default function OrderDetailsPage() {
                         <Button color="primary" variant="shadow" className="mt-2" onClick={handleGeneralUpdate} isLoading={updateMutation.isPending}>
                             Save Changes
                         </Button>
+                    </CardBody>
+                </Card>
+
+                {/* Responsibility Owners */}
+                <Card className="lg:col-span-2">
+                    <CardHeader className="font-bold text-lg">Order Responsibilities</CardHeader>
+                    <Divider />
+                    <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Select
+                            label={`Procurement (${getOwnerLabel(order?.responsibilities?.procurementBy)})`}
+                            selectedKeys={responsibilities.procurementBy ? [responsibilities.procurementBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, procurementBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                        <Select
+                            label={`Certificates (${getOwnerLabel(order?.responsibilities?.certificateBy)})`}
+                            selectedKeys={responsibilities.certificateBy ? [responsibilities.certificateBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, certificateBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                        <Select
+                            label={`Transportation (${getOwnerLabel(order?.responsibilities?.transportBy)})`}
+                            selectedKeys={responsibilities.transportBy ? [responsibilities.transportBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, transportBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                        <Select
+                            label={`Shipping (${getOwnerLabel(order?.responsibilities?.shippingBy)})`}
+                            selectedKeys={responsibilities.shippingBy ? [responsibilities.shippingBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, shippingBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                        <Select
+                            label={`Packaging (${getOwnerLabel(order?.responsibilities?.packagingBy)})`}
+                            selectedKeys={responsibilities.packagingBy ? [responsibilities.packagingBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, packagingBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                        <Select
+                            label={`Quality Testing & Assurance (${getOwnerLabel(order?.responsibilities?.qualityTestingBy)})`}
+                            selectedKeys={responsibilities.qualityTestingBy ? [responsibilities.qualityTestingBy] : []}
+                            onSelectionChange={(keys) => {
+                                const arr = Array.from(keys as Set<string>);
+                                setResponsibilities((prev: any) => ({ ...prev, qualityTestingBy: arr[0] || "" }));
+                            }}
+                        >
+                            {OWNER_OPTIONS.map((item) => (
+                                <SelectItem key={item.key} value={item.key}>
+                                    {item.label}
+                                </SelectItem>
+                            ))}
+                        </Select>
                     </CardBody>
                 </Card>
 

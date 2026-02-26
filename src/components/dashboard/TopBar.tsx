@@ -12,6 +12,7 @@ import {
 import React, { useContext } from "react";
 import { CiMenuBurger } from "react-icons/ci";
 import { ThemeSwitcher } from "../ThemeSwitcher";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -90,6 +91,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
 
       {/* Right Section: Theme Toggle & User Profile */}
       <div className="flex items-center gap-2 md:gap-3">
+        <LanguageSwitcher />
         <ThemeSwitcher />
 
         <Dropdown placement="bottom-end">

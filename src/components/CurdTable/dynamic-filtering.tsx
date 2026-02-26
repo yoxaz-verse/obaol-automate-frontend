@@ -345,18 +345,30 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         onOpenChange={onOpenChange}
         scrollBehavior="inside"
         isDismissable={false}
+        size="2xl"
+        backdrop="blur"
         className={"z-100"}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>{capitalize(currentTable)} Filters</ModalHeader>
-              <ModalBody>
+              <ModalHeader className="flex flex-col gap-1 border-b border-default-100 pb-4">
+                <h2 className="text-xl font-bold">{capitalize(currentTable)} Filters</h2>
+                <p className="text-sm text-default-500 font-normal mt-1">
+                  Refine your search results. Dropdowns grouped hierarchically (like Category and Product) will unlock sequentially automatically.
+                </p>
+              </ModalHeader>
+              <ModalBody className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 py-6">
                 {formFields.map((field) => (
-                  <div key={field.key}>{renderFilter(field)}</div>
+                  <div
+                    key={field.key}
+                    className={`w-full ${field.filterType === 'date' || field.filterType === 'range' ? 'md:col-span-2' : ''}`}
+                  >
+                    {renderFilter(field)}
+                  </div>
                 ))}
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="border-t border-default-100 pt-4">
                 <Button color="danger" variant="light" onPress={onClose}>
                   Cancel
                 </Button>

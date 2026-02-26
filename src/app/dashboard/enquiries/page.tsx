@@ -179,11 +179,31 @@ export default function EnquiryPage() {
             let counterpartyStr = "";
             let counterpartyLabelStr = "";
             let companyStr = "";
+            const buyerObj = typeof item.buyerAssociateId === "object" ? item.buyerAssociateId : null;
+            const sellerObj = typeof item.sellerAssociateId === "object" ? item.sellerAssociateId : null;
+            const extractCompanyName = (associate: any, fallbackField: string) =>
+              associate?.associateCompany?.name ||
+              associate?.associateCompanyId?.name ||
+              associate?.company?.name ||
+              item?.[fallbackField] ||
+              "N/A";
+            const buyerName =
+              buyerObj?.name ||
+              item.buyerAssociateName ||
+              item.buyerName ||
+              (typeof item.buyerAssociateId === "string" ? `Associate (${item.buyerAssociateId.slice(-6)})` : "N/A");
+            const sellerName =
+              sellerObj?.name ||
+              item.sellerAssociateName ||
+              item.sellerName ||
+              (typeof item.sellerAssociateId === "string" ? `Associate (${item.sellerAssociateId.slice(-6)})` : "N/A");
+            const buyerCompany = extractCompanyName(buyerObj, "buyerAssociateCompanyName");
+            const sellerCompany = extractCompanyName(sellerObj, "sellerAssociateCompanyName");
 
             if (isAdmin) {
-              counterpartyStr = `B: ${item.buyerAssociateId?.name || "N/A"} | S: ${item.sellerAssociateId?.name || "N/A"}`;
+              counterpartyStr = `B: ${buyerName} | S: ${sellerName}`;
               counterpartyLabelStr = "Buyer / Supplier";
-              companyStr = `B: ${item.buyerAssociateId?.associateCompany?.name || "N/A"} | S: ${item.sellerAssociateId?.associateCompany?.name || "N/A"}`;
+              companyStr = `B: ${buyerCompany} | S: ${sellerCompany}`;
             }
 
             return {

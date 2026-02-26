@@ -1,15 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
 import { LuWarehouse } from "react-icons/lu";
+import { FiShoppingBag } from "react-icons/fi";
+import AuthContext from "@/context/AuthContext";
+import { routeRoles } from "@/utils/roleHelpers";
 
 const BottomNav = () => {
     const router = useRouter();
     const pathname = usePathname();
+    const { user } = useContext(AuthContext);
 
     const navItems = [
         {
@@ -30,7 +34,12 @@ const BottomNav = () => {
         {
             name: "Enquiries",
             icon: <RiFileAddLine size={24} />,
-            link: "/dashboard/enquires",
+            link: "/dashboard/enquiries",
+        },
+        {
+            name: "Orders",
+            icon: <FiShoppingBag size={24} />,
+            link: "/dashboard/orders",
         },
         {
             name: "Profile",
@@ -39,10 +48,15 @@ const BottomNav = () => {
         },
     ];
 
+    const filteredNavItems = navItems.filter((item) => {
+        const allowedRoles = routeRoles[item.link] || [];
+        return user?.role ? allowedRoles.includes(user.role) : false;
+    });
+
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-content1 border-t border-default-200 px-4 py-2 md:hidden">
             <div className="flex justify-between items-center max-w-md mx-auto">
-                {navItems.map((item) => {
+                {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
                     return (
                         <button

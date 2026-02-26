@@ -48,6 +48,12 @@ export default function Product() {
                         additionalParams={{ selected: true }}
                       />
                     </Tab>
+                    <Tab key={"live"} title="Live Products">
+                      <VariantRate
+                        rate="variantRate"
+                        additionalParams={{ isLive: true }}
+                      />
+                    </Tab>
                   </>
                 )}
               </Tabs>{" "}

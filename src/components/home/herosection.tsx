@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef } from "react";
 import Image from "next/image";
 import ParticleNetwork from "@/components/ui/particle-network";
@@ -39,7 +39,32 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  const yOffset = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  const upperLineY = useSpring(useTransform(scrollYProgress, [0, 1], [0, -36]), {
+    stiffness: 70,
+    damping: 18,
+    mass: 0.5,
+  });
+  const lowerLineY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 36]), {
+    stiffness: 70,
+    damping: 18,
+    mass: 0.5,
+  });
+  const bgLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 28]), {
+    stiffness: 70,
+    damping: 24,
+    mass: 0.6,
+  });
+  const gridLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 14]), {
+    stiffness: 75,
+    damping: 24,
+    mass: 0.6,
+  });
+  const dockLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 40]), {
+    stiffness: 70,
+    damping: 24,
+    mass: 0.6,
+  });
+  const particleOpacity = useTransform(scrollYProgress, [0, 1], [0.9, 0.72]);
 
   return (
     <section
@@ -49,26 +74,28 @@ export default function HeroSection() {
       {/* ================= AMBIENT BACKGROUNDS ================= */}
 
       {/* Ambient blobs — softer in light mode via lower opacity */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      <motion.div style={{ y: bgLayerY }} className="absolute inset-0 pointer-events-none z-0">
         {/* Top-left: primary hue */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-400/10 dark:bg-primary-500/10 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-300/16 dark:bg-primary-500/10 blur-[120px] rounded-full" />
         {/* Bottom-right: warm orange */}
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-orange-400/8 dark:bg-orange-500/10 blur-[150px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-amber-300/14 dark:bg-orange-500/10 blur-[150px] rounded-full" />
         {/* Center subtle accent — barely visible in light */}
-        <div className="absolute top-[40%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[80%] h-[80%] bg-emerald-500/3 dark:bg-emerald-500/5 blur-[150px] rounded-full" />
+        <div className="absolute top-[40%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[80%] h-[80%] bg-emerald-500/5 dark:bg-emerald-500/5 blur-[150px] rounded-full" />
         {/* Light mode: clean top gradient wash */}
-        <div className="absolute inset-0 dark:hidden bg-gradient-to-b from-orange-50/60 via-transparent to-transparent" />
-      </div>
+        <div className="absolute inset-0 dark:hidden bg-gradient-to-b from-orange-50/80 via-amber-50/35 to-transparent" />
+        <div className="absolute inset-0 dark:hidden bg-[radial-gradient(circle_at_50%_22%,rgba(251,146,60,0.13),transparent_52%)]" />
+      </motion.div>
 
       {/* Particle Network */}
-      <div className="absolute inset-0 z-0 opacity-20 dark:opacity-40">
+      <motion.div style={{ opacity: particleOpacity }} className="absolute inset-0 z-0 opacity-15 dark:opacity-35">
         <ParticleNetwork />
-      </div>
+      </motion.div>
 
       {/* High-Tech Geometric Grid — theme-aware color */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none opacity-[0.06] dark:opacity-[0.07] [mask-image:linear-gradient(to_bottom,black_20%,transparent_80%)]"
+      <motion.div
+        className="absolute inset-0 z-0 pointer-events-none opacity-[0.045] dark:opacity-[0.07] [mask-image:linear-gradient(to_bottom,black_20%,transparent_80%)]"
         style={{
+          y: gridLayerY,
           backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px),
                             linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
           backgroundSize: "3rem 3rem",
@@ -76,7 +103,7 @@ export default function HeroSection() {
       />
 
       {/* Subtle Dock Image overlay at the bottom */}
-      <div className="absolute bottom-0 w-full h-[60vh] pointer-events-none z-0">
+      <motion.div style={{ y: dockLayerY }} className="absolute bottom-0 w-full h-[60vh] pointer-events-none z-0">
         <Image
           src="/images/hero_dock.png"
           alt="Global commodity trading infrastructure"
@@ -84,14 +111,13 @@ export default function HeroSection() {
           priority
           className="object-cover object-bottom opacity-10 dark:opacity-20 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]"
         />
-      </div>
+      </motion.div>
 
       {/* Bottom fade to next section */}
       <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
 
       {/* ================= CONTENT CONTAINER ================= */}
       <motion.div
-        style={{ y: yOffset }}
         className="relative z-20 w-full max-w-7xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center"
       >
 
@@ -118,18 +144,23 @@ export default function HeroSection() {
           {/* 1️⃣ HEADLINE */}
           <motion.h1
             variants={itemVariants}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.05] tracking-tight"
+            className="relative text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[0.98] md:leading-[0.82] tracking-tight"
           >
-            <span className="text-foreground">The Operating System</span>
-            {" "}
-            <span className="text-foreground/40 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-normal">for</span>
-            <br />
-            <span className="relative inline-block mt-2">
+            <motion.span style={{ y: upperLineY }} className="relative z-10 block text-foreground">
+              The Operating System
+            </motion.span>
+            <span className="relative z-30 block text-foreground/55 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-none mt-0 sm:mt-1 md:-mt-6 mb-0 sm:mb-1 md:-mb-6">
+              for
+            </span>
+            <motion.span
+              style={{ y: lowerLineY }}
+              className="relative z-20 block mt-0 sm:mt-1 md:-mt-10"
+            >
               {/* Orange gradient text — looks great in both modes */}
               <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-500 dark:from-orange-200 dark:via-orange-400 dark:to-yellow-500 bg-clip-text text-transparent [filter:drop-shadow(0_0_14px_rgba(251,146,60,0.4))]">
                 Agro Commodity Trade.
               </span>
-            </span>
+            </motion.span>
           </motion.h1>
 
           {/* 2️⃣ SUBTITLE */}

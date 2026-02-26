@@ -24,6 +24,8 @@ import {
     Textarea,
     Select,
     SelectItem,
+    Autocomplete,
+    AutocompleteItem,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -47,6 +49,26 @@ type ResponsibilityPlan = {
     shippingBy: "buyer" | "seller" | "obaol" | "";
     packagingBy: "buyer" | "seller" | "obaol" | "";
     qualityTestingBy: "buyer" | "seller" | "obaol" | "";
+    cargoInsuranceBy: "buyer" | "seller" | "obaol" | "";
+    exportCustomsBy: "buyer" | "seller" | "obaol" | "";
+    importCustomsBy: "buyer" | "obaol" | "";
+    dutiesTaxesBy: "buyer" | "";
+    portHandlingBy: "buyer" | "obaol" | "";
+    destinationInlandTransportBy: "buyer" | "obaol" | "";
+    destinationInspectionBy: "buyer" | "obaol" | "";
+    finalDeliveryConfirmationBy: "obaol" | "";
+};
+type ExecutionContext = {
+    tradeType: "DOMESTIC" | "INTERNATIONAL";
+    originCountry: string;
+    originState: string;
+    originDistrict: string;
+    originPort: string;
+    destinationCountry: string;
+    destinationState: string;
+    destinationDistrict: string;
+    destinationPort: string;
+    routeNotes: string;
 };
 
 const OWNER_OPTIONS = [
@@ -59,6 +81,12 @@ const sanitizeOwner = (value: any): "buyer" | "seller" | "obaol" => {
     const raw = String(value || "").toLowerCase();
     return VALID_OWNER_KEYS.has(raw as any) ? (raw as "buyer" | "seller" | "obaol") : "obaol";
 };
+const sanitizeBuyerOrObaol = (value: any): "buyer" | "obaol" => {
+    const raw = String(value || "").toLowerCase();
+    return raw === "obaol" ? "obaol" : "buyer";
+};
+const sanitizeBuyerOnly = (_value: any): "buyer" => "buyer";
+const sanitizeObaolOnly = (_value: any): "obaol" => "obaol";
 
 export default function EnquiryDetailsPage() {
     const { id } = useParams();
@@ -73,6 +101,18 @@ export default function EnquiryDetailsPage() {
     const [buyerSpecification, setBuyerSpecification] = useState<string>("");
     const [specSavedAt, setSpecSavedAt] = useState<string>("");
     const [responsibilitySavedAt, setResponsibilitySavedAt] = useState<string>("");
+    const [executionContext, setExecutionContext] = useState<ExecutionContext>({
+        tradeType: "DOMESTIC",
+        originCountry: "",
+        originState: "",
+        originDistrict: "",
+        originPort: "",
+        destinationCountry: "",
+        destinationState: "",
+        destinationDistrict: "",
+        destinationPort: "",
+        routeNotes: "",
+    });
     const [responsibilityPlan, setResponsibilityPlan] = useState<ResponsibilityPlan>({
         procurementBy: "",
         certificateBy: "",
@@ -80,6 +120,14 @@ export default function EnquiryDetailsPage() {
         shippingBy: "",
         packagingBy: "",
         qualityTestingBy: "",
+        cargoInsuranceBy: "",
+        exportCustomsBy: "",
+        importCustomsBy: "",
+        dutiesTaxesBy: "",
+        portHandlingBy: "",
+        destinationInlandTransportBy: "",
+        destinationInspectionBy: "",
+        finalDeliveryConfirmationBy: "",
     });
 
     // Fetch Enquiry Data
@@ -114,6 +162,38 @@ export default function EnquiryDetailsPage() {
         queryKey: ["incoterms"],
         queryFn: () => getData(apiRoutes.incoterm.getAll),
     });
+    const { data: statesResponse } = useQuery({
+        queryKey: ["states"],
+        queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 5000 }),
+    });
+    const { data: districtsResponse } = useQuery({
+        queryKey: ["districts"],
+        queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 50000 }),
+    });
+    const { data: countriesResponse } = useQuery({
+        queryKey: ["countries"],
+        queryFn: () => getData(apiRoutes.country.getAll, { page: 1, limit: 1000 }),
+    });
+    const { data: originPortsResponse } = useQuery({
+        queryKey: ["sea-ports", "origin", executionContext.originCountry],
+        queryFn: () =>
+            getData(apiRoutes.enquiry.seaPorts, {
+                country: executionContext.originCountry,
+                page: 1,
+                limit: 1000,
+            }),
+        enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.originCountry),
+    });
+    const { data: destinationPortsResponse } = useQuery({
+        queryKey: ["sea-ports", "destination", executionContext.destinationCountry],
+        queryFn: () =>
+            getData(apiRoutes.enquiry.seaPorts, {
+                country: executionContext.destinationCountry,
+                page: 1,
+                limit: 1000,
+            }),
+        enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.destinationCountry),
+    });
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
     useEffect(() => {
         setBuyerSpecification(enquirySpecificationValue);
@@ -121,15 +201,49 @@ export default function EnquiryDetailsPage() {
     useEffect(() => {
         if (!enquiry) return;
         const savedPlan = (enquiry as any)?.responsibilityPlan || {};
+        const savedCtx = (enquiry as any)?.executionContext || {};
         setResponsibilityPlan({
             procurementBy: sanitizeOwner(savedPlan.procurementBy),
-            certificateBy: sanitizeOwner(savedPlan.certificateBy),
+            certificateBy: sanitizeOwner(savedPlan.certificateBy || savedPlan.exportCustomsBy),
             transportBy: sanitizeOwner(savedPlan.transportBy),
             shippingBy: sanitizeOwner(savedPlan.shippingBy),
             packagingBy: sanitizeOwner(savedPlan.packagingBy),
             qualityTestingBy: sanitizeOwner(savedPlan.qualityTestingBy),
+            cargoInsuranceBy: sanitizeOwner(savedPlan.cargoInsuranceBy),
+            exportCustomsBy: sanitizeOwner(savedPlan.exportCustomsBy || savedPlan.certificateBy),
+            importCustomsBy: sanitizeBuyerOrObaol(savedPlan.importCustomsBy),
+            dutiesTaxesBy: sanitizeBuyerOnly(savedPlan.dutiesTaxesBy),
+            portHandlingBy: sanitizeBuyerOrObaol(savedPlan.portHandlingBy),
+            destinationInlandTransportBy: sanitizeBuyerOrObaol(savedPlan.destinationInlandTransportBy),
+            destinationInspectionBy: sanitizeBuyerOrObaol(savedPlan.destinationInspectionBy),
+            finalDeliveryConfirmationBy: sanitizeObaolOnly(savedPlan.finalDeliveryConfirmationBy),
+        });
+        setExecutionContext({
+            tradeType: String(savedCtx.tradeType || "DOMESTIC").toUpperCase() === "INTERNATIONAL" ? "INTERNATIONAL" : "DOMESTIC",
+            originCountry: savedCtx.originCountry || "",
+            originState: savedCtx.originState || "",
+            originDistrict: savedCtx.originDistrict || "",
+            originPort: savedCtx.originPort || "",
+            destinationCountry: savedCtx.destinationCountry || "",
+            destinationState: savedCtx.destinationState || "",
+            destinationDistrict: savedCtx.destinationDistrict || "",
+            destinationPort: savedCtx.destinationPort || "",
+            routeNotes: savedCtx.routeNotes || "",
         });
     }, [enquiry]);
+    useEffect(() => {
+        setResponsibilityPlan((prev) => {
+            const next = { ...prev };
+            if (!next.dutiesTaxesBy) next.dutiesTaxesBy = "buyer";
+            if (!next.finalDeliveryConfirmationBy) next.finalDeliveryConfirmationBy = "obaol";
+            if (!next.importCustomsBy) next.importCustomsBy = "buyer";
+            if (!next.portHandlingBy) next.portHandlingBy = "buyer";
+            if (!next.destinationInlandTransportBy) next.destinationInlandTransportBy = "buyer";
+            if (!next.destinationInspectionBy) next.destinationInspectionBy = "buyer";
+            if (!next.exportCustomsBy) next.exportCustomsBy = (next.certificateBy as any) || "obaol";
+            return next;
+        });
+    }, [executionContext.tradeType]);
 
     // Convert to Order Mutation
     const convertMutation = useMutation({
@@ -137,11 +251,19 @@ export default function EnquiryDetailsPage() {
             const enquiryId = Array.isArray(id) ? id[0] : id;
             const normalizedPlan = {
                 procurementBy: sanitizeOwner(responsibilityPlan.procurementBy),
-                certificateBy: sanitizeOwner(responsibilityPlan.certificateBy),
+                certificateBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
                 transportBy: sanitizeOwner(responsibilityPlan.transportBy),
                 shippingBy: sanitizeOwner(responsibilityPlan.shippingBy),
                 packagingBy: sanitizeOwner(responsibilityPlan.packagingBy),
                 qualityTestingBy: sanitizeOwner(responsibilityPlan.qualityTestingBy),
+                cargoInsuranceBy: sanitizeOwner(responsibilityPlan.shippingBy || responsibilityPlan.cargoInsuranceBy),
+                exportCustomsBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
+                importCustomsBy: sanitizeBuyerOrObaol(responsibilityPlan.importCustomsBy),
+                dutiesTaxesBy: sanitizeBuyerOnly(responsibilityPlan.dutiesTaxesBy),
+                portHandlingBy: sanitizeBuyerOrObaol(responsibilityPlan.portHandlingBy),
+                destinationInlandTransportBy: sanitizeBuyerOrObaol(responsibilityPlan.destinationInlandTransportBy),
+                destinationInspectionBy: sanitizeBuyerOrObaol(responsibilityPlan.destinationInspectionBy),
+                finalDeliveryConfirmationBy: sanitizeObaolOnly(responsibilityPlan.finalDeliveryConfirmationBy),
             };
             const orderRes = await postData(apiRoutes.orders.create, {
                 enquiry: enquiryId,
@@ -160,18 +282,18 @@ export default function EnquiryDetailsPage() {
                     qualityTestingBy: normalizedPlan.qualityTestingBy,
                 },
             });
-            let orderId =
-                orderRes?.data?.data?._id ||
-                orderRes?.data?._id ||
-                orderRes?._id;
+            const resBody = (orderRes as any)?.data;
+            let orderId = resBody?.data?._id || resBody?._id;
+
             if (!orderId || !/^[a-f0-9]{24}$/i.test(String(orderId))) {
                 const listRes = await getData(apiRoutes.orders.getAll, { page: 1, limit: 100, sort: "createdAt:desc" });
-                const rows = Array.isArray(listRes?.data?.data?.data)
-                    ? listRes.data.data.data
-                    : Array.isArray(listRes?.data?.data)
-                        ? listRes.data.data
-                        : Array.isArray(listRes?.data)
-                            ? listRes.data
+                const listBody = (listRes as any)?.data;
+                const rows = Array.isArray(listBody?.data?.data)
+                    ? listBody.data.data
+                    : Array.isArray(listBody?.data)
+                        ? listBody.data
+                        : Array.isArray(listBody)
+                            ? listBody
                             : [];
                 const matched = rows.find((row: any) => {
                     const rowEnquiryId = (row?.enquiry?._id || row?.enquiry || "").toString();
@@ -192,13 +314,65 @@ export default function EnquiryDetailsPage() {
         onError: () => { toast.error("Failed to convert enquiry."); },
     });
     const employeeOptions = Array.isArray(employees) ? employees : [];
-    const hasFullResponsibilityPlan =
-        VALID_OWNER_KEYS.has((responsibilityPlan.procurementBy || "") as any) &&
-        VALID_OWNER_KEYS.has((responsibilityPlan.certificateBy || "") as any) &&
-        VALID_OWNER_KEYS.has((responsibilityPlan.transportBy || "") as any) &&
-        VALID_OWNER_KEYS.has((responsibilityPlan.shippingBy || "") as any) &&
-        VALID_OWNER_KEYS.has((responsibilityPlan.packagingBy || "") as any) &&
-        VALID_OWNER_KEYS.has((responsibilityPlan.qualityTestingBy || "") as any);
+    const countryRowsForCheck = Array.isArray(countriesResponse?.data?.data?.data)
+        ? countriesResponse.data.data.data
+        : Array.isArray(countriesResponse?.data?.data?.docs)
+            ? countriesResponse.data.data.docs
+            : Array.isArray(countriesResponse?.data?.data)
+                ? countriesResponse.data.data
+                : Array.isArray(countriesResponse?.data?.docs)
+                    ? countriesResponse.data.docs
+                    : Array.isArray(countriesResponse?.data)
+                        ? countriesResponse.data
+                        : Array.isArray(countriesResponse)
+                            ? countriesResponse
+                            : [];
+    const getCountryNameById = (countryId: string) =>
+        countryRowsForCheck.find((c: any) => String(c?._id || c?.id || "") === String(countryId || ""))?.name || "";
+    const isIndiaName = (name: string) => String(name || "").trim().toLowerCase() === "india";
+    const isFromIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.originCountry));
+    const isToIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.destinationCountry));
+    const allowedResponsibilityValues: Record<string, Set<string>> = {
+        procurementBy: new Set(["buyer", "seller", "obaol"]),
+        qualityTestingBy: new Set(["buyer", "seller", "obaol"]),
+        packagingBy: new Set(["buyer", "seller", "obaol"]),
+        transportBy: new Set(["buyer", "seller", "obaol"]),
+        shippingBy: new Set(["buyer", "seller", "obaol"]),
+        cargoInsuranceBy: new Set(["buyer", "seller", "obaol"]),
+        exportCustomsBy: new Set(["buyer", "seller", "obaol"]),
+        importCustomsBy: new Set(["buyer", "obaol"]),
+        dutiesTaxesBy: new Set(["buyer"]),
+        portHandlingBy: new Set(["buyer", "obaol"]),
+        destinationInlandTransportBy: new Set(["buyer", "obaol"]),
+        destinationInspectionBy: new Set(["buyer", "obaol"]),
+        finalDeliveryConfirmationBy: new Set(["obaol"]),
+    };
+    const domesticRequiredResponsibilities = [
+        "procurementBy",
+        "qualityTestingBy",
+        "packagingBy",
+        "transportBy",
+    ];
+    const internationalRequiredResponsibilities = [
+        "shippingBy",
+        ...(isFromIndia ? ["exportCustomsBy"] : []),
+        ...(isToIndia
+            ? [
+                "importCustomsBy",
+                "dutiesTaxesBy",
+                "portHandlingBy",
+                "destinationInlandTransportBy",
+                "destinationInspectionBy",
+                "finalDeliveryConfirmationBy",
+            ]
+            : []),
+    ];
+    const requiredResponsibilityKeys = executionContext.tradeType === "INTERNATIONAL"
+        ? [...domesticRequiredResponsibilities, ...internationalRequiredResponsibilities]
+        : domesticRequiredResponsibilities;
+    const hasFullResponsibilityPlan = requiredResponsibilityKeys.every((key) =>
+        allowedResponsibilityValues[key]?.has(String((responsibilityPlan as any)[key] || ""))
+    );
 
     // Update Status Mutation
     const assignEmployeeMutation = useMutation({
@@ -256,6 +430,17 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to confirm enquiry.");
         },
     });
+    const finalizeResponsibilitiesMutation = useMutation({
+        mutationFn: async () =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}/finalize-responsibilities`, { executionContext }),
+        onSuccess: () => {
+            toast.success("Responsibilities finalized and execution inquiries generated.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: () => {
+            toast.error("Failed to finalize responsibilities.");
+        },
+    });
 
     const updateStatusMutation = useMutation({
         mutationFn: (newStatus: string) =>
@@ -307,19 +492,28 @@ export default function EnquiryDetailsPage() {
             const variantName = enquiry?.productVariant?.name || enquiry?.variantId?.name || "Unknown Variant";
             const normalizedPlan = {
                 procurementBy: sanitizeOwner(responsibilityPlan.procurementBy),
-                certificateBy: sanitizeOwner(responsibilityPlan.certificateBy),
+                certificateBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
                 transportBy: sanitizeOwner(responsibilityPlan.transportBy),
                 shippingBy: sanitizeOwner(responsibilityPlan.shippingBy),
                 packagingBy: sanitizeOwner(responsibilityPlan.packagingBy),
                 qualityTestingBy: sanitizeOwner(responsibilityPlan.qualityTestingBy),
+                cargoInsuranceBy: sanitizeOwner(responsibilityPlan.shippingBy || responsibilityPlan.cargoInsuranceBy),
+                exportCustomsBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
+                importCustomsBy: sanitizeBuyerOrObaol(responsibilityPlan.importCustomsBy),
+                dutiesTaxesBy: sanitizeBuyerOnly(responsibilityPlan.dutiesTaxesBy),
+                portHandlingBy: sanitizeBuyerOrObaol(responsibilityPlan.portHandlingBy),
+                destinationInlandTransportBy: sanitizeBuyerOrObaol(responsibilityPlan.destinationInlandTransportBy),
+                destinationInspectionBy: sanitizeBuyerOrObaol(responsibilityPlan.destinationInspectionBy),
+                finalDeliveryConfirmationBy: sanitizeObaolOnly(responsibilityPlan.finalDeliveryConfirmationBy),
             };
             return patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
                 responsibilityPlan: normalizedPlan,
+                executionContext,
                 history: [
                     ...(enquiry.history || []),
                     {
                         status: enquiry.status || "Pending",
-                        note: `Responsibility plan updated by ${actor} for ${productName} - ${variantName}: ${JSON.stringify(oldPlan)} -> ${JSON.stringify(normalizedPlan)}`,
+                        note: `Responsibility plan updated by ${actor} for ${productName} - ${variantName}: ${JSON.stringify(oldPlan)} -> ${JSON.stringify(normalizedPlan)} | Context: ${JSON.stringify(executionContext)}`,
                         timestamp: new Date(),
                     },
                 ],
@@ -341,21 +535,15 @@ export default function EnquiryDetailsPage() {
     const normalizedStatus = String(enquiry.status || "").toUpperCase();
     const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt);
     const hasBuyerConfirmed = Boolean(enquiry.buyerConfirmedAt);
+    const hasResponsibilitiesFinalized = Boolean((enquiry as any).responsibilitiesFinalizedAt);
     const isCancelled = normalizedStatus === "CANCELLED";
     const isCompletedFlow = normalizedStatus === "COMPLETED" || normalizedStatus === "CLOSED";
     const isConvertedFlow = normalizedStatus === "CONVERTED";
     const initialPlan = (enquiry as any)?.responsibilityPlan || {};
-    const hasSavedResponsibilityPlan =
-        VALID_OWNER_KEYS.has((initialPlan.procurementBy || "") as any) &&
-        VALID_OWNER_KEYS.has((initialPlan.certificateBy || "") as any) &&
-        VALID_OWNER_KEYS.has((initialPlan.transportBy || "") as any) &&
-        VALID_OWNER_KEYS.has((initialPlan.shippingBy || "") as any) &&
-        VALID_OWNER_KEYS.has((initialPlan.packagingBy || "") as any) &&
-        VALID_OWNER_KEYS.has((initialPlan.qualityTestingBy || "") as any);
     const currentStepIndex = (() => {
         if (isCompletedFlow) return STATUS_STEPS.indexOf("Completed");
         if (isConvertedFlow) return STATUS_STEPS.indexOf("Converted");
-        if (hasSavedResponsibilityPlan && hasBuyerConfirmed) return STATUS_STEPS.indexOf("Responsibilities Finalized");
+        if (hasResponsibilitiesFinalized) return STATUS_STEPS.indexOf("Responsibilities Finalized");
         if (hasBuyerConfirmed) return STATUS_STEPS.indexOf("Buyer Confirmed");
         if (hasSellerAccepted) return STATUS_STEPS.indexOf("Supplier Accepted");
         return STATUS_STEPS.indexOf("Pending");
@@ -412,22 +600,79 @@ export default function EnquiryDetailsPage() {
             if (isBuyer) return "Action pending from buyer: click 'Mark All Good to Go'.";
             return "Waiting for buyer confirmation.";
         }
-        if (!hasSavedResponsibilityPlan) return "Waiting for buyer and supplier to finalize the responsibility event.";
+        if (!hasResponsibilitiesFinalized) return "Waiting for responsibility finalization to generate execution inquiries.";
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
         return "Enquiry is converted. Order execution is now in progress.";
     })();
-    const canEditResponsibilityPlan = isAdmin || isBuyer || isSeller;
+    const isAssociateResponsibilityLocked = hasResponsibilitiesFinalized && !isAdmin;
+    const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked;
+    const transportOwner = sanitizeOwner(responsibilityPlan.transportBy || initialPlan.transportBy || "obaol");
+    const buyerHandlesTransport = transportOwner === "buyer";
+    const sellerHandlesTransport = transportOwner === "seller";
+    const showOriginLogisticsFields = isAdmin || (isSeller && sellerHandlesTransport);
+    const showDestinationLogisticsFields = isAdmin || (isBuyer && buyerHandlesTransport);
+    const canEditOriginLogistics = showOriginLogisticsFields && canEditResponsibilityPlan;
+    const canEditDestinationLogistics = showDestinationLogisticsFields && canEditResponsibilityPlan;
+    const canEditRouteNotes = canEditResponsibilityPlan && (isAdmin || (isBuyer && buyerHandlesTransport) || (isSeller && sellerHandlesTransport));
+    const hasExecutionContext = executionContext.tradeType === "DOMESTIC"
+        ? Boolean(executionContext.originState.trim()) &&
+        Boolean(executionContext.originDistrict.trim()) &&
+        Boolean(executionContext.destinationState.trim()) &&
+        Boolean(executionContext.destinationDistrict.trim())
+        : Boolean(executionContext.originCountry.trim()) &&
+        Boolean(executionContext.originPort.trim()) &&
+        Boolean(executionContext.destinationCountry.trim()) &&
+        Boolean(executionContext.destinationPort.trim());
     const canConvert =
         hasFullResponsibilityPlan &&
         hasSellerAccepted &&
-        hasBuyerConfirmed;
+        hasBuyerConfirmed &&
+        hasResponsibilitiesFinalized;
+    const initialExecutionContext = (() => {
+        const raw = (enquiry as any)?.executionContext || {};
+        return {
+            tradeType: String(raw.tradeType || "DOMESTIC").toUpperCase() === "INTERNATIONAL" ? "INTERNATIONAL" : "DOMESTIC",
+            originCountry: String(raw.originCountry || ""),
+            originState: String(raw.originState || ""),
+            originDistrict: String(raw.originDistrict || ""),
+            originPort: String(raw.originPort || ""),
+            destinationCountry: String(raw.destinationCountry || ""),
+            destinationState: String(raw.destinationState || ""),
+            destinationDistrict: String(raw.destinationDistrict || ""),
+            destinationPort: String(raw.destinationPort || ""),
+            routeNotes: String(raw.routeNotes || ""),
+        } as ExecutionContext;
+    })();
+    const normalizeExecutionContext = (ctx: ExecutionContext): ExecutionContext => ({
+        tradeType: ctx.tradeType === "INTERNATIONAL" ? "INTERNATIONAL" : "DOMESTIC",
+        originCountry: String(ctx.originCountry || ""),
+        originState: String(ctx.originState || ""),
+        originDistrict: String(ctx.originDistrict || ""),
+        originPort: String(ctx.originPort || ""),
+        destinationCountry: String(ctx.destinationCountry || ""),
+        destinationState: String(ctx.destinationState || ""),
+        destinationDistrict: String(ctx.destinationDistrict || ""),
+        destinationPort: String(ctx.destinationPort || ""),
+        routeNotes: String(ctx.routeNotes || ""),
+    });
     const isResponsibilityPlanChanged =
         (responsibilityPlan.procurementBy || "") !== (initialPlan.procurementBy || "") ||
         (responsibilityPlan.certificateBy || "") !== (initialPlan.certificateBy || "") ||
         (responsibilityPlan.transportBy || "") !== (initialPlan.transportBy || "") ||
         (responsibilityPlan.shippingBy || "") !== (initialPlan.shippingBy || "") ||
         (responsibilityPlan.packagingBy || "") !== (initialPlan.packagingBy || "") ||
-        (responsibilityPlan.qualityTestingBy || "") !== (initialPlan.qualityTestingBy || "");
+        (responsibilityPlan.qualityTestingBy || "") !== (initialPlan.qualityTestingBy || "") ||
+        (responsibilityPlan.exportCustomsBy || "") !== (initialPlan.exportCustomsBy || initialPlan.certificateBy || "") ||
+        (responsibilityPlan.importCustomsBy || "") !== (initialPlan.importCustomsBy || "") ||
+        (responsibilityPlan.dutiesTaxesBy || "") !== (initialPlan.dutiesTaxesBy || "") ||
+        (responsibilityPlan.portHandlingBy || "") !== (initialPlan.portHandlingBy || "") ||
+        (responsibilityPlan.destinationInlandTransportBy || "") !== (initialPlan.destinationInlandTransportBy || "") ||
+        (responsibilityPlan.destinationInspectionBy || "") !== (initialPlan.destinationInspectionBy || "") ||
+        (responsibilityPlan.finalDeliveryConfirmationBy || "") !== (initialPlan.finalDeliveryConfirmationBy || "");
+    const isExecutionContextChanged =
+        JSON.stringify(normalizeExecutionContext(executionContext)) !==
+        JSON.stringify(normalizeExecutionContext(initialExecutionContext));
+    const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged;
     const productNameLabel = enquiry?.productId?.name || enquiry?.productVariant?.product?.name || "Unknown Product";
     const variantNameLabel = enquiry?.productVariant?.name || enquiry?.variantId?.name || "Unknown Variant";
     // ─── Financial Calculations ───────────────────────────────────────────────
@@ -464,6 +709,25 @@ export default function EnquiryDetailsPage() {
             : Array.isArray(incotermResponse?.data)
                 ? incotermResponse.data
                 : [];
+    const parseMasterRows = (raw: any): any[] => {
+        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
+        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
+        if (Array.isArray(raw?.data?.data)) return raw.data.data;
+        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw)) return raw;
+        return [];
+    };
+    const getEntityId = (value: any): string => String(value?._id || value?.id || value || "");
+    const states = parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted);
+    const districts = parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted);
+    const countries = parseMasterRows(countriesResponse).filter((item: any) => !item?.isDeleted);
+    const originSeaPorts = parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted);
+    const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
+    const originDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.originState);
+    const destinationDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.destinationState);
+    const originPortOptions = originSeaPorts;
+    const destinationPortOptions = destinationSeaPorts;
     const preferredIncoterm = (() => {
         const raw = (enquiry as any)?.preferredIncoterm || (enquiry as any)?.preferredIncotermId;
         if (!raw) return null;
@@ -481,15 +745,36 @@ export default function EnquiryDetailsPage() {
     const specChangeHistory = (enquiry.history || []).filter((h: any) =>
         String(h?.note || "").toLowerCase().includes("specification updated")
     );
+    const ownerLabelByKey: Record<string, string> = {
+        buyer: "Buyer",
+        seller: "Supplier",
+        obaol: "Our Team",
+    };
+    const getOwnerOptions = (allowedKeys: string[]) =>
+        allowedKeys.map((key) => ({ key, label: ownerLabelByKey[key] || key }));
+    const responsibilityFieldConfig = [
+        { key: "procurementBy", label: "Procurement / Sourcing", allowed: ["buyer", "seller", "obaol"], show: true },
+        { key: "qualityTestingBy", label: "Quality Testing", allowed: ["buyer", "seller", "obaol"], show: true },
+        { key: "packagingBy", label: "Packaging & Labelling", allowed: ["buyer", "seller", "obaol"], show: true },
+        { key: "transportBy", label: "Inland Transportation", allowed: ["buyer", "seller", "obaol"], show: true },
+        { key: "shippingBy", label: "Freight Forwarding & Shipping", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" },
+        { key: "exportCustomsBy", label: "Export Customs Clearance", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isFromIndia },
+        { key: "importCustomsBy", label: "Import Customs Clearance", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+        { key: "dutiesTaxesBy", label: "Duties & Taxes", allowed: ["buyer"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+        { key: "portHandlingBy", label: "Port Handling", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+        { key: "destinationInlandTransportBy", label: "Inland Transport (Port → Warehouse)", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+        { key: "destinationInspectionBy", label: "Destination Inspection", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+        { key: "finalDeliveryConfirmationBy", label: "Final Delivery Confirmation", allowed: ["obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia },
+    ].filter((f) => f.show);
 
     return (
-        <div className="w-full p-6 flex flex-col gap-6 max-w-7xl mx-auto">
+        <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0">
             {/* Header & Status */}
             <Card className="w-full shadow-md border-none bg-gradient-to-r from-content1 to-default-50">
-                <CardHeader className="flex justify-between items-start px-6 py-6">
+                <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 md:px-6 py-4 md:py-6">
                     <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-extrabold tracking-tight">Enquiry #{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}</h1>
+                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-all">Enquiry #{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}</h1>
                             <Chip
                                 color={enquiry.status === "Converted" ? "success" : enquiry.status === "Cancelled" ? "danger" : "warning"}
                                 variant="shadow" size="sm" className="font-bold"
@@ -503,11 +788,12 @@ export default function EnquiryDetailsPage() {
                     </div>
 
                     {/* Role-based action buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto md:justify-end">
                         {isSeller && !enquiry.sellerAcceptedAt && (
                             <Button
                                 color="success"
                                 variant="flat"
+                                className="w-full sm:w-auto"
                                 isLoading={sellerAcceptMutation.isPending}
                                 onPress={() => sellerAcceptMutation.mutate()}
                             >
@@ -518,6 +804,7 @@ export default function EnquiryDetailsPage() {
                             <Button
                                 color="primary"
                                 variant="flat"
+                                className="w-full sm:w-auto"
                                 isLoading={buyerConfirmMutation.isPending}
                                 onPress={() => buyerConfirmMutation.mutate()}
                             >
@@ -528,6 +815,7 @@ export default function EnquiryDetailsPage() {
                             <Button
                                 color="success"
                                 variant="flat"
+                                className="w-full sm:w-auto"
                                 isLoading={sellerAcceptMutation.isPending}
                                 onPress={() => sellerAcceptMutation.mutate()}
                             >
@@ -538,6 +826,7 @@ export default function EnquiryDetailsPage() {
                             <Button
                                 color="primary"
                                 variant="flat"
+                                className="w-full sm:w-auto"
                                 isLoading={buyerConfirmMutation.isPending}
                                 onPress={() => buyerConfirmMutation.mutate()}
                             >
@@ -547,18 +836,37 @@ export default function EnquiryDetailsPage() {
                         {isAdmin && (
                             <>
                                 {!isConvertedFlow && !isCompletedFlow && !isCancelled && enquiry.sellerAcceptedAt && enquiry.buyerConfirmedAt && (
-                                    <Button color="primary" variant="shadow" onPress={onOpen}>
-                                        Convert to Order
-                                    </Button>
+                                    <>
+                                        {!hasResponsibilitiesFinalized && (
+                                            <Button
+                                                color="warning"
+                                                variant="shadow"
+                                                className="w-full sm:w-auto"
+                                                isLoading={finalizeResponsibilitiesMutation.isPending}
+                                                isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan}
+                                                onPress={() => finalizeResponsibilitiesMutation.mutate()}
+                                            >
+                                                Finalize Responsibilities
+                                            </Button>
+                                        )}
+                                        <Button color="primary" variant="shadow" className="w-full sm:w-auto" onPress={onOpen} isDisabled={!hasResponsibilitiesFinalized}>
+                                            Convert to Order
+                                        </Button>
+                                        {hasResponsibilitiesFinalized && (
+                                            <Button color="secondary" variant="flat" className="w-full sm:w-auto" onPress={() => router.push("/dashboard/execution-enquiries")}>
+                                                Open Execution Panel
+                                            </Button>
+                                        )}
+                                    </>
                                 )}
                                 {enquiry.status === "Converted" && (
-                                    <div className="flex gap-2">
-                                        <Button color="success" variant="flat"
+                                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                                        <Button color="success" variant="flat" className="w-full sm:w-auto"
                                             onPress={() => updateStatusMutation.mutate("Completed")}
                                             isLoading={updateStatusMutation.isPending}>
                                             Complete Enquiry
                                         </Button>
-                                        <Button color="secondary" variant="shadow"
+                                        <Button color="secondary" variant="shadow" className="w-full sm:w-auto"
                                             isDisabled={!enquiryOrderId}
                                             onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}>
                                             View Order
@@ -566,7 +874,7 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 )}
                                 {enquiry.status !== "Cancelled" && enquiry.status !== "Completed" && (
-                                    <Button color="danger" variant="light"
+                                    <Button color="danger" variant="light" className="w-full sm:w-auto"
                                         onPress={() => updateStatusMutation.mutate("Cancelled")}
                                         isLoading={updateStatusMutation.isPending}>
                                         Cancel
@@ -577,7 +885,7 @@ export default function EnquiryDetailsPage() {
                     </div>
                 </CardHeader>
                 <Divider />
-                <CardBody className="px-6 py-10">
+                <CardBody className="px-4 md:px-6 py-6 md:py-10">
                     {/* Status Stepper */}
                     <div className="flex flex-wrap items-center gap-2 mb-5">
                         {STATUS_STEPS.map((step, index) => {
@@ -614,114 +922,111 @@ export default function EnquiryDetailsPage() {
 
             {/* ── Market State Tracker (only buyer & admin see price-change insights) ───────────────── */}
             {(isAdmin || isBuyer) && (
-            <Card className="w-full shadow-sm border border-default-200/50">
-                <CardHeader className="flex justify-between items-center px-6 pt-5 pb-0">
-                    <div className="flex flex-col gap-1">
-                        <span className="font-bold text-lg">Market State</span>
-                        <span className="text-[10px] uppercase font-black tracking-wider text-default-400">Live product tracking</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {liveRate ? (
-                            isLive ? (
-                                <span className="flex items-center gap-1.5 text-success text-xs font-black uppercase tracking-widest bg-success/10 px-3 py-1 rounded-full">
-                                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> LIVE
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-1.5 text-danger text-xs font-black uppercase tracking-widest bg-danger/10 px-3 py-1 rounded-full">
-                                    <span className="w-2 h-2 rounded-full bg-danger" /> OFF MARKET
-                                </span>
-                            )
-                        ) : (
-                            <span className="text-xs text-default-400 font-medium">No live rate linked</span>
-                        )}
-                    </div>
-                </CardHeader>
-                <Divider className="mt-4" />
-                <CardBody className="px-6 py-5">
-                    <div className="flex justify-end mb-3">
-                        <CurrencySelector />
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {/* Enquiry Rate */}
+                <Card className="w-full shadow-sm border border-default-200/50">
+                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-4 md:px-6 pt-4 md:pt-5 pb-0">
                         <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Enquiry Rate</span>
-                            <span className="font-black text-xl text-primary">{convertRate(netRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
-                            <span className="text-xs text-default-400">At time of enquiry</span>
+                            <span className="font-bold text-lg">Market State</span>
+                            <span className="text-[10px] uppercase font-black tracking-wider text-default-400">Live product tracking</span>
                         </div>
-
-                        {/* Current Market Rate */}
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Current Rate</span>
-                            {liveRate ? (
-                                <span className="font-black text-xl text-foreground">{convertRate(liveNetRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
-                            ) : (
-                                <span className="font-bold text-default-400 text-lg">—</span>
-                            )}
-                            {lastRateUpdate && <span className="text-xs text-default-400">Updated {lastRateUpdate}</span>}
-                        </div>
-
-                        {/* Price Delta */}
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Price Change</span>
-                            {liveRate ? (
-                                <span className={`flex items-center gap-1.5 font-black text-xl ${priceDelta > 0 ? "text-danger" : priceDelta < 0 ? "text-success" : "text-default-500"}`}>
-                                    {priceDelta > 0 ? <FiTrendingUp size={18} /> : priceDelta < 0 ? <FiTrendingDown size={18} /> : null}
-                                    {priceDelta > 0 ? "+" : ""}{convertRate(Math.abs(priceDelta))} <span className="text-xs font-bold text-default-400">({priceDeltaPct}%)</span>
-                                </span>
-                            ) : (
-                                <span className="font-bold text-default-400 text-lg">—</span>
-                            )}
-                        </div>
-
-                        {/* Stock Availability */}
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Stock Status</span>
+                        <div className="flex items-center gap-2">
                             {liveRate ? (
                                 isLive ? (
-                                    <span className="flex items-center gap-1.5 font-bold text-success">
-                                        <FiCheckCircle size={16} /> Available
+                                    <span className="flex items-center gap-1.5 text-success text-xs font-black uppercase tracking-widest bg-success/10 px-3 py-1 rounded-full">
+                                        <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> LIVE
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-1.5 font-bold text-danger">
-                                        <FiAlertCircle size={16} /> Unavailable
+                                    <span className="flex items-center gap-1.5 text-danger text-xs font-black uppercase tracking-widest bg-danger/10 px-3 py-1 rounded-full">
+                                        <span className="w-2 h-2 rounded-full bg-danger" /> OFF MARKET
                                     </span>
                                 )
                             ) : (
-                                <span className="flex items-center gap-1.5 font-bold text-default-400">
-                                    <FiPackage size={16} /> Not Tracked
-                                </span>
-                            )}
-                            {liveRate?.stockNote && (
-                                <span className="text-xs text-default-500 mt-1">{liveRate.stockNote}</span>
+                                <span className="text-xs text-default-400 font-medium">No live rate linked</span>
                             )}
                         </div>
-                    </div>
+                    </CardHeader>
+                    <Divider className="mt-4" />
+                    <CardBody className="px-4 md:px-6 py-4 md:py-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                            {/* Enquiry Rate */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Enquiry Rate</span>
+                                <span className="font-black text-xl text-primary">{convertRate(netRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
+                                <span className="text-xs text-default-400">At time of enquiry</span>
+                            </div>
 
-                    {/* Price movement alert */}
-                    {liveRate && Math.abs(priceDelta) > 0 && (
-                        <div className={`mt-4 flex items-start gap-3 p-3 rounded-xl border text-sm font-medium ${priceDelta > 0
-                            ? "bg-danger/5 border-danger/20 text-danger-700"
-                            : "bg-success/5 border-success/20 text-success-700"}`}>
-                            {priceDelta > 0 ? <FiTrendingUp size={16} className="mt-0.5 flex-shrink-0" /> : <FiTrendingDown size={16} className="mt-0.5 flex-shrink-0" />}
-                            <span>
-                                Market price has {priceDelta > 0 ? "increased" : "decreased"} by {convertRate(Math.abs(priceDelta))}/KG ({Math.abs(Number(priceDeltaPct))}%) since this enquiry was created.
-                                {priceDelta > 0 ? " Costs may be higher than quoted." : " You may be able to negotiate a better price."}
-                            </span>
+                            {/* Current Market Rate */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Current Rate</span>
+                                {liveRate ? (
+                                    <span className="font-black text-xl text-foreground">{convertRate(liveNetRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
+                                ) : (
+                                    <span className="font-bold text-default-400 text-lg">—</span>
+                                )}
+                                {lastRateUpdate && <span className="text-xs text-default-400">Updated {lastRateUpdate}</span>}
+                            </div>
+
+                            {/* Price Delta */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Price Change</span>
+                                {liveRate ? (
+                                    <span className={`flex items-center gap-1.5 font-black text-xl ${priceDelta > 0 ? "text-danger" : priceDelta < 0 ? "text-success" : "text-default-500"}`}>
+                                        {priceDelta > 0 ? <FiTrendingUp size={18} /> : priceDelta < 0 ? <FiTrendingDown size={18} /> : null}
+                                        {priceDelta > 0 ? "+" : ""}{convertRate(Math.abs(priceDelta))} <span className="text-xs font-bold text-default-400">({priceDeltaPct}%)</span>
+                                    </span>
+                                ) : (
+                                    <span className="font-bold text-default-400 text-lg">—</span>
+                                )}
+                            </div>
+
+                            {/* Stock Availability */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Stock Status</span>
+                                {liveRate ? (
+                                    isLive ? (
+                                        <span className="flex items-center gap-1.5 font-bold text-success">
+                                            <FiCheckCircle size={16} /> Available
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1.5 font-bold text-danger">
+                                            <FiAlertCircle size={16} /> Unavailable
+                                        </span>
+                                    )
+                                ) : (
+                                    <span className="flex items-center gap-1.5 font-bold text-default-400">
+                                        <FiPackage size={16} /> Not Tracked
+                                    </span>
+                                )}
+                                {liveRate?.stockNote && (
+                                    <span className="text-xs text-default-500 mt-1">{liveRate.stockNote}</span>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </CardBody>
-            </Card>
+
+                        {/* Price movement alert */}
+                        {liveRate && Math.abs(priceDelta) > 0 && (
+                            <div className={`mt-4 flex items-start gap-3 p-3 rounded-xl border text-sm font-medium ${priceDelta > 0
+                                ? "bg-danger/5 border-danger/20 text-danger-700"
+                                : "bg-success/5 border-success/20 text-success-700"}`}>
+                                {priceDelta > 0 ? <FiTrendingUp size={16} className="mt-0.5 flex-shrink-0" /> : <FiTrendingDown size={16} className="mt-0.5 flex-shrink-0" />}
+                                <span>
+                                    Market price has {priceDelta > 0 ? "increased" : "decreased"} by {convertRate(Math.abs(priceDelta))}/KG ({Math.abs(Number(priceDeltaPct))}%) since this enquiry was created.
+                                    {priceDelta > 0 ? " Costs may be higher than quoted." : " You may be able to negotiate a better price."}
+                                </span>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
             )}
 
             {/* Details Grid */}
-            <div className={`grid grid-cols-1 ${isAdmin || isMediator ? "md:grid-cols-3" : "md:grid-cols-2"} gap-6`}>
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Parties Involved */}
                 {(isAdmin || isMediator) && (
-                <Card className="md:col-span-1 shadow-sm border-none">
-                    <CardHeader className="font-bold text-lg px-6 pt-6">Parties Involved</CardHeader>
-                    <Divider className="my-2" />
-                    <CardBody className="flex flex-col gap-4 px-6 pb-6">
-                        <div className="grid grid-cols-1 gap-3">
+                    <Card className="md:col-span-1 shadow-sm border-none">
+                        <CardHeader className="font-semibold text-base px-4 md:px-6 pt-4 md:pt-6">Parties Involved</CardHeader>
+                        <Divider className="my-2" />
+                        <CardBody className="flex flex-col gap-4 px-4 md:px-6 pb-4 md:pb-6">
+                            <div className="grid grid-cols-1 gap-3">
                                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
                                     <span className="font-semibold text-base">{buyerAssociateName}</span>
@@ -748,16 +1053,16 @@ export default function EnquiryDetailsPage() {
                                         </span>
                                     )}
                                 </div>
-                        </div>
-                    </CardBody>
-                </Card>
+                            </div>
+                        </CardBody>
+                    </Card>
                 )}
 
                 {/* Product Info */}
                 <Card className="md:col-span-1 shadow-sm border-none">
-                    <CardHeader className="font-bold text-lg px-6 pt-6">Product Details</CardHeader>
+                    <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Product Details</CardHeader>
                     <Divider className="my-2" />
-                    <CardBody className="flex flex-col gap-5 px-6 pb-6">
+                    <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] uppercase font-bold text-default-400">Product</span>
                             <span className="font-semibold text-lg">{enquiry.productId?.name || "N/A"}</span>
@@ -826,12 +1131,12 @@ export default function EnquiryDetailsPage() {
 
                 {/* Pricing Scenario */}
                 <Card className="md:col-span-1 shadow-sm border-none bg-success-50/30">
-                    <CardHeader className="flex flex-col items-start gap-1 px-6 pt-6 pb-2">
+                    <CardHeader className="flex flex-col items-start gap-1 px-4 md:px-6 pt-4 md:pt-6 pb-2">
                         <span className="font-bold text-lg">Pricing Scenario</span>
                         <span className="text-[10px] uppercase font-black tracking-wider text-success-600">Excludes GST & Transportation</span>
                     </CardHeader>
                     <Divider className="my-2" />
-                    <CardBody className="flex flex-col gap-5 px-6 pb-6">
+                    <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
                         <div className="flex justify-end">
                             <CurrencySelector />
                         </div>
@@ -891,98 +1196,262 @@ export default function EnquiryDetailsPage() {
                 </Card>
 
                 {/* Responsibility Arena */}
-                <Card className="md:col-span-1 shadow-sm border-none">
-                    <CardHeader className="font-bold text-lg px-6 pt-6">Responsibility Event</CardHeader>
+                <Card className="md:col-span-2 order-12 shadow-sm border-none md:min-h-[560px]">
+                    <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Responsibility Event</CardHeader>
                     <Divider className="my-2" />
-                    <CardBody className="flex flex-col gap-4 px-6 pb-6">
+                    <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-8">
                         <p className="text-sm text-default-600">
                             Buyer and supplier finalize who owns each execution step before order conversion.
                         </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Select
-                                size="sm"
-                                label="Procurement"
-                                selectedKeys={responsibilityPlan.procurementBy ? [responsibilityPlan.procurementBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, procurementBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                size="sm"
-                                label="Certificates"
-                                selectedKeys={responsibilityPlan.certificateBy ? [responsibilityPlan.certificateBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, certificateBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                size="sm"
-                                label="Transportation"
-                                selectedKeys={responsibilityPlan.transportBy ? [responsibilityPlan.transportBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, transportBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                size="sm"
-                                label="Shipping"
-                                selectedKeys={responsibilityPlan.shippingBy ? [responsibilityPlan.shippingBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, shippingBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                size="sm"
-                                label="Packaging"
-                                selectedKeys={responsibilityPlan.packagingBy ? [responsibilityPlan.packagingBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, packagingBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                size="sm"
-                                label="Quality Testing & Assurance"
-                                selectedKeys={responsibilityPlan.qualityTestingBy ? [responsibilityPlan.qualityTestingBy] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilityPlan((prev) => ({ ...prev, qualityTestingBy: (arr[0] as any) || "" }));
-                                }}
-                                isDisabled={!canEditResponsibilityPlan}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
-                                ))}
-                            </Select>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {responsibilityFieldConfig.map((field) => {
+                                const selectedValue = (responsibilityPlan as any)[field.key] || "";
+                                const allowedOptions = getOwnerOptions(field.allowed);
+                                return (
+                                    <Select
+                                        key={field.key}
+                                        size="sm"
+                                        label={field.label}
+                                        selectedKeys={selectedValue ? [selectedValue] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            const nextValue = String(arr[0] || "");
+                                            setResponsibilityPlan((prev) => ({ ...prev, [field.key]: nextValue as any }));
+                                        }}
+                                        isDisabled={!canEditResponsibilityPlan || allowedOptions.length === 1}
+                                    >
+                                        {allowedOptions.map((item) => (
+                                            <SelectItem key={item.key} value={item.key}>{item.label}</SelectItem>
+                                        ))}
+                                    </Select>
+                                );
+                            })}
+                        </div>
+                        {executionContext.tradeType === "INTERNATIONAL" && (
+                            <div className="rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                Cargo Insurance is auto-assigned to the same owner who handles Freight Forwarding & Shipping.
+                            </div>
+                        )}
+                        <div className="rounded-lg border border-default-200 p-4 bg-default-50">
+                            <p className="text-xs font-bold uppercase tracking-wider text-default-500 mb-2">Execution Context</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <Select
+                                    size="sm"
+                                    label="Trade Type"
+                                    selectedKeys={[executionContext.tradeType]}
+                                    onSelectionChange={(keys) => {
+                                        const arr = Array.from(keys as Set<string>);
+                                        const value = (arr[0] === "INTERNATIONAL" ? "INTERNATIONAL" : "DOMESTIC") as "DOMESTIC" | "INTERNATIONAL";
+                                        setExecutionContext((prev) => ({
+                                            ...prev,
+                                            tradeType: value,
+                                            ...(value === "DOMESTIC"
+                                                ? { originCountry: "", destinationCountry: "", originPort: "", destinationPort: "" }
+                                                : { originState: "", destinationState: "", originDistrict: "", destinationDistrict: "" }),
+                                        }));
+                                    }}
+                                    isDisabled={!isAdmin || !canEditResponsibilityPlan}
+                                >
+                                    <SelectItem key="DOMESTIC" value="DOMESTIC">Domestic</SelectItem>
+                                    <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">International</SelectItem>
+                                </Select>
+                                {executionContext.tradeType === "DOMESTIC" ? (
+                                    <>
+                                        {showOriginLogisticsFields && (
+                                            <>
+                                                <Select
+                                                    size="sm"
+                                                    label="From State"
+                                                    selectedKeys={executionContext.originState ? [executionContext.originState] : []}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        const value = (arr[0] as string) || "";
+                                                        setExecutionContext((prev) => ({
+                                                            ...prev,
+                                                            originState: value,
+                                                            originDistrict: "",
+                                                        }));
+                                                    }}
+                                                    isDisabled={!canEditOriginLogistics}
+                                                >
+                                                    {states.map((item: any) => (
+                                                        <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                    ))}
+                                                </Select>
+                                                <Select
+                                                    size="sm"
+                                                    label="From District"
+                                                    selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        setExecutionContext((prev) => ({ ...prev, originDistrict: (arr[0] as string) || "" }));
+                                                    }}
+                                                    isDisabled={!canEditOriginLogistics || !executionContext.originState}
+                                                >
+                                                    {originDistrictOptions.map((item: any) => (
+                                                        <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                    ))}
+                                                </Select>
+                                            </>
+                                        )}
+                                        {showDestinationLogisticsFields && (
+                                            <>
+                                                <Select
+                                                    size="sm"
+                                                    label="To State"
+                                                    selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        const value = (arr[0] as string) || "";
+                                                        setExecutionContext((prev) => ({
+                                                            ...prev,
+                                                            destinationState: value,
+                                                            destinationDistrict: "",
+                                                        }));
+                                                    }}
+                                                    isDisabled={!canEditDestinationLogistics}
+                                                >
+                                                    {states.map((item: any) => (
+                                                        <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                    ))}
+                                                </Select>
+                                                <Select
+                                                    size="sm"
+                                                    label="To District"
+                                                    selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        setExecutionContext((prev) => ({ ...prev, destinationDistrict: (arr[0] as string) || "" }));
+                                                    }}
+                                                    isDisabled={!canEditDestinationLogistics || !executionContext.destinationState}
+                                                >
+                                                    {destinationDistrictOptions.map((item: any) => (
+                                                        <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                    ))}
+                                                </Select>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {showOriginLogisticsFields && (
+                                            <>
+                                                <Autocomplete
+                                                    size="sm"
+                                                    label="From Country"
+                                                    selectedKey={executionContext.originCountry || null}
+                                                    onSelectionChange={(key) => {
+                                                        const value = String(key || "");
+                                                        setExecutionContext((prev) => ({
+                                                            ...prev,
+                                                            originCountry: value,
+                                                            originPort: "",
+                                                        }));
+                                                    }}
+                                                    defaultItems={countries}
+                                                    isDisabled={!canEditOriginLogistics}
+                                                >
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} value={item._id}>{item.name}</AutocompleteItem>
+                                                    )}
+                                                </Autocomplete>
+                                                <Autocomplete
+                                                    size="sm"
+                                                    label="From Port"
+                                                    selectedKey={executionContext.originPort || null}
+                                                    onSelectionChange={(key) => {
+                                                        setExecutionContext((prev) => ({ ...prev, originPort: String(key || "") }));
+                                                    }}
+                                                    defaultItems={originPortOptions}
+                                                    isDisabled={!canEditOriginLogistics || !executionContext.originCountry}
+                                                >
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} value={item._id}>{item.loCode} - {item.name}</AutocompleteItem>
+                                                    )}
+                                                </Autocomplete>
+                                            </>
+                                        )}
+                                        {showDestinationLogisticsFields && (
+                                            <>
+                                                <Autocomplete
+                                                    size="sm"
+                                                    label="To Country"
+                                                    selectedKey={executionContext.destinationCountry || null}
+                                                    onSelectionChange={(key) => {
+                                                        const value = String(key || "");
+                                                        setExecutionContext((prev) => ({
+                                                            ...prev,
+                                                            destinationCountry: value,
+                                                            destinationPort: "",
+                                                        }));
+                                                    }}
+                                                    defaultItems={countries}
+                                                    isDisabled={!canEditDestinationLogistics}
+                                                >
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} value={item._id}>{item.name}</AutocompleteItem>
+                                                    )}
+                                                </Autocomplete>
+                                                <Autocomplete
+                                                    size="sm"
+                                                    label="To Port"
+                                                    selectedKey={executionContext.destinationPort || null}
+                                                    onSelectionChange={(key) => {
+                                                        setExecutionContext((prev) => ({ ...prev, destinationPort: String(key || "") }));
+                                                    }}
+                                                    defaultItems={destinationPortOptions}
+                                                    isDisabled={!canEditDestinationLogistics || !executionContext.destinationCountry}
+                                                >
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} value={item._id}>{item.loCode} - {item.name}</AutocompleteItem>
+                                                    )}
+                                                </Autocomplete>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                                {!isAdmin && !buyerHandlesTransport && !sellerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Route details are managed by the assigned logistics owner.
+                                    </div>
+                                )}
+                                {!isAdmin && isBuyer && !buyerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Buyer can edit only destination logistics when transportation is assigned to buyer.
+                                    </div>
+                                )}
+                                {!isAdmin && isSeller && !sellerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Supplier can edit only origin logistics when transportation is assigned to supplier.
+                                    </div>
+                                )}
+                                <Input
+                                    size="sm"
+                                    className="md:col-span-2"
+                                    label="Route Notes"
+                                    value={executionContext.routeNotes}
+                                    onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
+                                    isDisabled={!canEditRouteNotes}
+                                />
+                            </div>
+                            <p className="text-xs text-default-500 mt-2">
+                                Domestic: choose state and district. International: choose country and port.
+                            </p>
+                            {executionContext.tradeType === "INTERNATIONAL" && (
+                                <p className="text-xs text-warning-600 mt-1">
+                                    International trade will include additional cost components such as inland-to-port movement, packaging, freight forwarding, shipping, and customs clearance.
+                                </p>
+                            )}
+                            {executionContext.tradeType === "INTERNATIONAL" && (
+                                <p className="text-xs text-primary-600 mt-1">
+                                    Current support scope: Export from India and Import to India. Import-side responsibilities apply to import-to-India flows.
+                                </p>
+                            )}
+                            {isAssociateResponsibilityLocked && (
+                                <p className="text-xs text-danger-500 mt-1">
+                                    Responsibility and execution context are locked after finalization. Only admin can edit now.
+                                </p>
+                            )}
                         </div>
                         {canEditResponsibilityPlan && (
                             <Button
@@ -991,7 +1460,7 @@ export default function EnquiryDetailsPage() {
                                 variant="flat"
                                 onPress={() => updateResponsibilityPlanMutation.mutate()}
                                 isLoading={updateResponsibilityPlanMutation.isPending}
-                                isDisabled={!isResponsibilityPlanChanged}
+                                isDisabled={!isResponsibilityEventChanged}
                             >
                                 Save Responsibility Event
                             </Button>
@@ -1008,11 +1477,34 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
 
+                {/* Execution Inquiries */}
+                {Array.isArray((enquiry as any)?.executionInquiries) && (enquiry as any).executionInquiries.length > 0 && (
+                    <Card className="md:col-span-1 shadow-sm border-none">
+                        <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Generated Execution Inquiries</CardHeader>
+                        <Divider className="my-2" />
+                        <CardBody className="flex flex-col gap-2 px-4 md:px-6 pb-4 md:pb-6">
+                            {(enquiry as any).executionInquiries.map((task: any, idx: number) => (
+                                <div key={`${task.type}-${idx}`} className="rounded-lg border border-default-200 px-3 py-2 bg-default-50">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-sm font-semibold">{task.title || task.type}</span>
+                                        <Chip size="sm" variant="flat" color={task.status === "COMPLETED" ? "success" : "warning"}>
+                                            {task.status || "OPEN"}
+                                        </Chip>
+                                    </div>
+                                    <div className="text-xs text-default-500 mt-1">
+                                        Owner: {String(task.ownerBy || "obaol").toUpperCase()}
+                                    </div>
+                                </div>
+                            ))}
+                        </CardBody>
+                    </Card>
+                )}
+
                 {/* Handling & Associates */}
-                <Card className="md:col-span-1 shadow-sm border-none">
-                    <CardHeader className="font-bold text-lg px-6 pt-6">Handling & Assignment</CardHeader>
+                <Card className="md:col-span-1 order-11 shadow-sm border-none">
+                    <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Handling & Assignment</CardHeader>
                     <Divider className="my-2" />
-                    <CardBody className="flex flex-col gap-5 px-6 pb-6">
+                    <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] uppercase font-bold text-default-400">Assigned Employee</span>
                             <div className="flex items-center gap-2">
@@ -1103,12 +1595,29 @@ export default function EnquiryDetailsPage() {
                             <ModalBody>
                                 <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Procurement: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Certificates: <b>{responsibilityPlan.certificateBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Packaging: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing & Assurance: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
+                                    {executionContext.tradeType === "INTERNATIONAL" && (
+                                        <>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                            {isFromIndia && (
+                                                <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
+                                            )}
+                                            {isToIndia && (
+                                                <>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                                 <Input
                                     label="Initial Notes"

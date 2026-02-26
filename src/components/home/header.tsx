@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -29,15 +29,15 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
             ? "py-2"
-            : "py-4"
+            : "py-3"
           }`}
       >
         {/* Glassmorphic pill container */}
         <div className={`mx-auto max-w-7xl px-4 transition-all duration-500`}>
           <div
             className={`flex items-center justify-between rounded-2xl px-4 md:px-6 transition-all duration-500 ${scrolled
-                ? "h-14 bg-background/80 backdrop-blur-2xl border border-foreground/10 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.3)]"
-                : "h-16 bg-transparent"
+                ? "h-14 bg-background/72 backdrop-blur-2xl border border-foreground/15 shadow-[0_10px_32px_-10px_rgba(0,0,0,0.35)]"
+                : "h-15 md:h-16 bg-background/68 backdrop-blur-2xl border border-foreground/15 shadow-[0_10px_28px_-12px_rgba(0,0,0,0.32)]"
               }`}
           >
             {/* ── LOGO ── */}

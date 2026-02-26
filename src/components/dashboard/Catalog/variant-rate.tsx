@@ -44,7 +44,6 @@ import EditModal from "@/components/CurdTable/edit-model";
 import DeleteModal from "@/components/CurdTable/delete";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import { useCurrency } from "@/context/CurrencyContext";
-import CurrencySelector from "./currency-selector";
 
 /**
  * Props for your existing VariantRate component
@@ -100,7 +99,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
   });
 
   // Step 3: Final filtered field list
-  const filterVariantRateFormFields = Array.from(fieldMap.values());
+  let filterVariantRateFormFields = Array.from(fieldMap.values());
+
+  if (user?.role === "Associate") {
+    filterVariantRateFormFields = filterVariantRateFormFields.filter(
+      (field) =>
+        field.key !== "associate" &&
+        field.key !== "associateCompany" &&
+        field.key !== "district" &&
+        field.key !== "division" &&
+        field.key !== "pincodeEntry"
+    );
+  }
 
   const { convertRate } = useCurrency();
 
@@ -298,7 +308,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 rawCommission: 0,
                 isMarketplaceView: isMarketplace,
                 isOwnerView: isOwner && !isMarketplace,
-                isAdded: addedRateIds.has(item._id)
+                isAdded: addedRateIds.has(item._id),
+                lastLiveDate: item.lastLiveDate || item.updatedAt || item.createdAt
               };
             } else if (rate === "catalogItem") {
               // Row is a CatalogItem (Added to Catalog)
@@ -330,7 +341,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 variantRate: item.baseRateId,
                 isCatalogView: true,
                 isAdded: true,
-                isOwnerView: true
+                isOwnerView: true,
+                lastLiveDate: item.lastLiveDate || item.updatedAt || item.createdAt
               };
             } else {
               // Row is a DisplayedRate (Personalized - fallback/old)
@@ -360,22 +372,23 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <div className="w-full max-w-full min-w-0 overflow-x-auto">
-            <div className="flex justify-between items-start gap-3">
-              <CurrencySelector />
+            <div className="flex justify-between items-center gap-4 mb-4">
               {!displayOnly && rate === "variantRate" ? (
                 <>
-                  <div className="flex flex-col items-end gap-2">
-                    {!hasFixedProductVariant && (
-                      <span className="text-[11px] text-default-500">
-                        Select product variant while adding rate.
-                      </span>
-                    )}
+                  <div className="flex items-center gap-3">
                     <DynamicFilter
                       currentTable={"variantRate"}
                       formFields={filterVariantRateFormFields}
-                      onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
-                    />{" "}
-                    <div className="h-2" />
+                      onApply={handleFiltersUpdate}
+                    />
+                    {!hasFixedProductVariant && (
+                      <span className="text-[11px] text-default-400 hidden sm:inline">
+                        Select product variant while adding rate.
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1">
                     <AddModal
                       name="Rate"
                       currentTable={rate}
@@ -394,9 +407,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   </div>
                 </>
               ) : (
-                "Add Associates for Variant rates"
+                <div className="flex items-center justify-between w-full">
+                  <DynamicFilter
+                    currentTable={"variantRate"}
+                    formFields={filterVariantRateFormFields}
+                    onApply={handleFiltersUpdate}
+                  />
+                  <span className="text-sm font-semibold text-default-500">
+                    Product Catalog
+                  </span>
+                </div>
               )}
-            </div>{" "}
+            </div>
             <div className="h-5" />
             <section className="hidden md:block overflow-x-auto w-full max-w-full">
               <CommonTable
@@ -922,16 +944,6 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     e.preventDefault();
     createEnquiryMutation.mutate();
   };
-  const getFirstSelectionKey = (keys: any): string => {
-    if (!keys) return "";
-    if (keys === "all") return "";
-    if (keys instanceof Set) {
-      const first = Array.from(keys)[0];
-      return first ? String(first) : "";
-    }
-    if (Array.isArray(keys)) return keys[0] ? String(keys[0]) : "";
-    return String(keys);
-  };
 
   if (isSuccess) {
     return (
@@ -963,74 +975,72 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Card className="border border-default-200 bg-content1 shadow-sm">
-        <CardBody className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            variant="bordered"
-            label="Full Name"
-            labelPlacement="outside"
-            placeholder="Enter full name"
-            startContent={<FiUser className="text-default-400" />}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required={!user}
-            classNames={{ inputWrapper: "rounded-lg min-h-12" }}
-          />
-          <Input
-            variant="bordered"
-            label="Phone Number"
-            labelPlacement="outside"
-            placeholder="9876543210"
-            type="tel"
-            startContent={<FiPhone className="text-default-400" />}
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required={!user}
-            classNames={{ inputWrapper: "rounded-lg min-h-12" }}
-          />
-          <Input
-            variant="bordered"
-            label="Quantity (Ton)"
-            labelPlacement="outside"
-            placeholder="e.g. 30"
-            type="number"
-            startContent={<FiPackage className="text-default-400" />}
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            required
-            className="md:col-span-1"
-            classNames={{ inputWrapper: "rounded-lg min-h-12" }}
-          />
-          <Select
-            label="Preferred Incoterm"
-            labelPlacement="outside"
-            selectedKeys={preferredIncotermId ? [preferredIncotermId] : []}
-            onSelectionChange={(keys) => setPreferredIncotermId(getFirstSelectionKey(keys))}
-            placeholder={incotermOptions.length > 0 ? "Select incoterm" : "No incoterms configured"}
-            variant="bordered"
-            className="md:col-span-1"
-            isDisabled={incotermOptions.length === 0}
-            classNames={{ trigger: "rounded-lg min-h-12" }}
-          >
-            {(Array.isArray(incotermOptions) ? incotermOptions : []).map((item: any) => {
-              const id = String(item?._id || "");
-              return (
-                <SelectItem key={id} value={id}>
-                  {item?.code || "NA"} - {item?.name || "Incoterm"}
-                </SelectItem>
-              );
-            })}
-          </Select>
-          <Textarea
-            minRows={3}
-            variant="bordered"
-            label="Specification (Optional)"
-            labelPlacement="outside"
-            placeholder="Quality, packaging, delivery notes..."
-            value={specification}
-            onChange={(e) => setSpecification(e.target.value)}
-            className="md:col-span-2"
-            classNames={{ inputWrapper: "rounded-lg" }}
-          />
+        <CardBody className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-default-600">Full Name</label>
+              <input
+                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required={!user}
+                autoComplete="name"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-default-600">Phone Number</label>
+              <input
+                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required={!user}
+                autoComplete="tel"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-default-600">Quantity (Ton)</label>
+              <input
+                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-default-600">Preferred Incoterm</label>
+              <select
+                value={preferredIncotermId}
+                onChange={(e) => setPreferredIncotermId(e.target.value)}
+                disabled={incotermOptions.length === 0}
+                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors disabled:opacity-60"
+              >
+                <option value="">Choose incoterm</option>
+                {(Array.isArray(incotermOptions) ? incotermOptions : []).map((item: any) => {
+                  const id = String(item?._id || "");
+                  return (
+                    <option key={id} value={id}>
+                      {item?.code || "NA"} - {item?.name || "Incoterm"}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2">
+            <label className="text-xs font-semibold text-default-600">Specification (Optional)</label>
+            <textarea
+              className="w-full rounded-md border border-default-300 bg-content1 text-foreground min-h-[110px] px-3 py-2 text-sm outline-none focus:border-primary transition-colors resize-y"
+              value={specification}
+              onChange={(e) => setSpecification(e.target.value)}
+            />
+          </div>
         </CardBody>
       </Card>
 

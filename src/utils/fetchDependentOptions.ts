@@ -32,289 +32,161 @@ import {
 const getOptions = async (
   fieldKey: string,
   parentKey?: string,
-  parentValue?: string
+  parentValue?: string | string[]
 ): Promise<{ key: string; value: string }[]> => {
   const lowerKey = fieldKey.toLowerCase();
 
+  const extractArray = (raw: any): any[] => {
+    if (Array.isArray(raw)) return raw;
+    if (raw?.data && Array.isArray(raw.data)) return raw.data;
+    if (raw?.data?.data && Array.isArray(raw.data.data)) return raw.data.data;
+    if (raw?.data?.data?.data && Array.isArray(raw.data.data.data)) return raw.data.data.data;
+    return [];
+  };
+
   const query = async () => {
+    let params: any = { limit: "1000" };
+    if (parentKey && parentValue) {
+      // If parentValue is an array (multi-select), usually the backend generic CRUD 
+      // handles it if passed as multiple params or special format. 
+      // For now, let's pass it as is, and let the API handler/axios deal with it.
+      params[parentKey] = parentValue;
+    }
+
     if (lowerKey.includes("admin")) {
-      const res = await getData(adminRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(adminRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "employee") {
-      const res = await getData(employeeRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(employeeRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey === "category") {
-      const res = await getData(categoryRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(categoryRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "product") {
-      let params: any = { limit: "1000" };
-      if (parentKey && parentValue) {
-        params[parentKey] = parentValue;
-      }
       const res = await getData(productRoutes.getAll, params);
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "productvariant") {
-      let params: any = { limit: "1000" };
-      if (parentKey && parentValue) {
-        params[parentKey] = parentValue;
-      }
       const res = await getData(productVariantRoutes.getAll, params);
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "subcategory") {
-      let params: any = { limit: "1000" };
-      if (parentKey && parentValue) {
-        params[parentKey] = parentValue;
-      }
       const res = await getData(subCategoryRoutes.getAll, params);
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "inventorymanager") {
-      const res = await getData(inventoryManagerRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(inventoryManagerRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "associatecompany") {
-      const res = await getData(associateCompanyRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(associateCompanyRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "country") {
-      const res = await getData(countryRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(countryRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "generalintent") {
-      const res = await getData(generalIntentRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(generalIntentRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey === "subintent") {
-      const res = await getData(subIntentRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(subIntentRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey === "certification") {
-      const res = await getData(certificationRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(certificationRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey === "companybusinessmodel") {
-      const res = await getData(companyBusinessModelRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(companyBusinessModelRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey === "companystage") {
-      const res = await getData(companyStageRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(companyStageRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
+
     if (lowerKey.includes("associate")) {
-      const res = await getData(associateRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(associateRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "companytype") {
-      const res = await getData(companyTypeRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(companyTypeRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "jobrole") {
-      const res = await getData(jobRoleRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(jobRoleRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "jobtype") {
-      const res = await getData(jobTypeRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(jobTypeRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "language") {
-      const res = await getData(languageRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(languageRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "designation") {
-      const res = await getData(designationRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(designationRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey === "enquiryprocessstatus") {
-      const res = await getData(enquiryProcessStatusRoutes.getAll, {
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data.map((d: any) => ({
-          key: d._id,
-          value: d.name,
-        })) || []
-      );
+      const res = await getData(enquiryProcessStatusRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
     if (lowerKey.includes("state")) {
-      const res = await getData(stateRoutes.getAll, { limit: "1000" });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
-      );
+      const res = await getData(stateRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
-    if (parentKey && lowerKey.includes("district")) {
-      const res = await getData(districtRoutes.getAll, {
-        [parentKey]: parentValue,
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
-      );
+    if (lowerKey.includes("district")) {
+      const res = await getData(districtRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
-    if (parentKey && lowerKey.includes("division")) {
-      const res = await getData(divisionRoutes.getAll, {
-        [parentKey]: parentValue,
-        limit: "1000",
-      });
-      return (
-        res?.data?.data?.data?.map((d: any) => ({ key: d._id, value: d.name })) || []
-      );
+    if (lowerKey.includes("division")) {
+      const res = await getData(divisionRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
-    if (parentKey && lowerKey.includes("pincodeentry")) {
-      const res = await getData(pincodeEntryRoutes.getAll, {
-        [parentKey]: parentValue,
-      });
-      return (
-        res?.data?.data?.data?.map((p: any) => ({
-          key: p._id,
-          value: `${p.pincode} - ${p.officename}`,
-        })) || []
-      );
+    if (lowerKey.includes("pincodeentry")) {
+      const res = await getData(pincodeEntryRoutes.getAll, params);
+      return extractArray(res).map((p: any) => ({
+        key: p._id,
+        value: `${p.pincode} - ${p.officename}`,
+      }));
     }
 
     return [];
   };
 
   // cache key includes dependencies
-  const queryKey = [fieldKey, parentKey, parentValue];
+  // JSON.stringify handled arrays in cache key
+  const queryKey = [fieldKey, parentKey, JSON.stringify(parentValue)];
 
   // fetch or return cached data
   return queryClient.fetchQuery({

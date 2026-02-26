@@ -3,6 +3,7 @@ import { Card, CardBody, CardFooter, CardHeader, Button, Divider } from "@heroui
 import { FiPhone, FiArrowRight, FiPackage, FiUser, FiClock } from "react-icons/fi";
 import EnquiryStatus from "./EnquiryStatus";
 import { motion } from "framer-motion";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface EnquiryCardProps {
     data: any;
@@ -10,6 +11,7 @@ interface EnquiryCardProps {
 }
 
 const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
+    const { convertRate } = useCurrency();
     // Extract data safely
     const productName = data.product || 'Unknown Product';
     const clientName = data.counterparty;
@@ -110,14 +112,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                         const mediatorComm = data.mediatorCommission || 0;
                                         return (
                                             <>
-                                                ₹ {base + adminComm + mediatorComm}
+                                                {convertRate(base + adminComm + mediatorComm)}
                                                 <span className="text-[10px] font-bold text-default-400 ml-1">/KG</span>
                                             </>
                                         );
                                     }
                                     return (
                                         <>
-                                            ₹ {data.rate || 0}
+                                            {convertRate(data.rate || 0)}
                                             <span className="text-[10px] font-bold text-default-400 ml-1">/KG</span>
                                         </>
                                     );
@@ -128,14 +130,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                         {data.adminCommission !== undefined && data.isAdmin && (
                             <div className="flex flex-col border-l border-default-200/60 pl-4 md:pl-6">
                                 <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">OBAOL Comm.</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">₹ {data.adminCommission}</span>
+                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{convertRate(data.adminCommission)}</span>
                             </div>
                         )}
 
                         {data.mediatorCommission !== undefined && data.type === "Mediated" && data.isAdmin && (
                             <div className="flex flex-col border-l border-default-200/60 pl-4 md:pl-6">
                                 <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Mediator Comm.</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">₹ {data.mediatorCommission}</span>
+                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{convertRate(data.mediatorCommission)}</span>
                             </div>
                         )}
                     </div>

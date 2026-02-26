@@ -16,6 +16,7 @@ import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse } from "react-icons/lu";
 import { FiShoppingBag } from "react-icons/fi";
+import { FiClipboard } from "react-icons/fi";
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -99,6 +100,11 @@ export const sidebarOptions = [
     name: "Orders",
     icon: <FiShoppingBag />,
     link: "/dashboard/orders",
+  },
+  {
+    name: "Execution Panel",
+    icon: <FiClipboard />,
+    link: "/dashboard/execution-enquiries",
   },
   {
     name: "Profile", //Translate

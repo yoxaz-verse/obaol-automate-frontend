@@ -89,10 +89,14 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
     nonActionColumns.push({ name: "Activity Status", uid: "activityStatus" });
     nonActionColumns.push({ name: "Activity Type", uid: "activityType" });
   } else if (currentTable === "variantRate") {
-    nonActionColumns.push({ name: "Associate", uid: "associate" });
+    if (userRole !== "Associate") {
+      nonActionColumns.push({ name: "Associate", uid: "associate" });
+    }
     nonActionColumns.push({ name: "Product", uid: "productVariant" });
   } else if (currentTable === "displayedRate" || currentTable === "catalogItem") {
-    nonActionColumns.push({ name: "Associate", uid: "associate" });
+    if (userRole !== "Associate") {
+      nonActionColumns.push({ name: "Associate", uid: "associate" });
+    }
     nonActionColumns.push({ name: "Product", uid: "product" });
   } else if (
     currentTable === "projectManager" ||
@@ -1540,7 +1544,7 @@ export const initialTableConfig: Record<
     {
       label: "Category",
       type: "select",
-      filterType: "select",
+      filterType: "multiselect",
       key: "category",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("category"),
@@ -1596,7 +1600,7 @@ export const initialTableConfig: Record<
     {
       label: "Sub Category",
       type: "select",
-      filterType: "select",
+      filterType: "multiselect",
       key: "subCategory",
       dependsOn: "category",
       values: [],
@@ -1673,7 +1677,7 @@ export const initialTableConfig: Record<
     {
       label: "Product",
       type: "select",
-      filterType: "select",
+      filterType: "multiselect",
       key: "product",
       dependsOn: "subCategory",
       values: [],
@@ -1725,7 +1729,7 @@ export const initialTableConfig: Record<
     {
       label: "Product Variant",
       type: "select",
-      filterType: "select",
+      filterType: "multiselect",
       key: "productVariant",
       values: [],
       dependsOn: "product",
@@ -1737,7 +1741,7 @@ export const initialTableConfig: Record<
     {
       label: "Associate Name",
       type: "select",
-      filterType: "select",
+      filterType: "multiselect",
       key: "associate",
       dynamicValuesFn: () => fetchDependentOptions("associate"),
       values: [],
@@ -1750,7 +1754,7 @@ export const initialTableConfig: Record<
       label: "State",
       type: "select",
       key: "state",
-      filterType: "select",
+      filterType: "multiselect",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("state"),
       inForm: true,
@@ -1761,7 +1765,7 @@ export const initialTableConfig: Record<
       label: "District",
       type: "select",
       key: "district",
-      filterType: "select",
+      filterType: "multiselect",
       dependsOn: "state",
       values: [],
       dynamicValuesFn: (stateId: string) =>
@@ -1773,6 +1777,7 @@ export const initialTableConfig: Record<
     {
       label: "Division",
       type: "select",
+      filterType: "multiselect",
       key: "division",
       dependsOn: "district", // 👈
       dynamicValuesFn: (districtId: string) =>
@@ -1784,6 +1789,7 @@ export const initialTableConfig: Record<
     {
       label: "PinCode",
       type: "select",
+      filterType: "multiselect",
       key: "pincodeEntry",
       dependsOn: "division", // 👈
       dynamicValuesFn: (divisionId: string) =>
@@ -1801,9 +1807,9 @@ export const initialTableConfig: Record<
       inEdit: false,
     },
     {
-      label: "Created At",
+      label: "Last Live Date",
       type: "date",
-      key: "createdAt",
+      key: "lastLiveDate",
       inForm: false,
       inTable: true,
     },
@@ -1893,9 +1899,9 @@ export const initialTableConfig: Record<
       inEdit: true,
     },
     {
-      label: "Created At",
+      label: "Last Live Date",
       type: "date",
-      key: "createdAt",
+      key: "lastLiveDate",
       inForm: false,
       inTable: true,
     },

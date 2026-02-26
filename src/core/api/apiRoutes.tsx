@@ -213,7 +213,9 @@ export const variantRateRoutes = addCustomRoutes(
 );
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
 export const catalogItemRoutes = createCRUDRoutes("/catalog-items");
-export const enquiryRoutes = createCRUDRoutes(BASE_PATHS.ENQUIRY);
+export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY), {
+  seaPorts: `${BASE_PATHS.ENQUIRY}/sea-ports`,
+});
 
 export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);
 export const unLoCodeRoutes = createCRUDRoutes(BASE_PATHS.UN_LO_CODE);

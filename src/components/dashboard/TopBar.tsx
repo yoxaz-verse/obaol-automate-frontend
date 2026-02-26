@@ -20,6 +20,7 @@ import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import Image from "next/image";
+import CurrencySelector from "./Catalog/currency-selector";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
@@ -91,6 +92,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
 
       {/* Right Section: Theme Toggle & User Profile */}
       <div className="flex items-center gap-2 md:gap-3">
+        <CurrencySelector />
         <LanguageSwitcher />
         <ThemeSwitcher />
 

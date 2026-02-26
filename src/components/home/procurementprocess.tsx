@@ -1,13 +1,61 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-type Stage = {
-  id: string;
-  label: string;
-  obaolDesc: string;
-};
+const PROCUREMENT_STEPS = [
+  {
+    step: "01",
+    title: "Procurement Specialist Assigned",
+    desc: "A nearby OBAOL procurement specialist is assigned based on supplier location, reducing travel time and delays.",
+  },
+  {
+    step: "02",
+    title: "On-Site Visit & Presence",
+    desc: "Our representative visits the supplier location and acts on your behalf throughout the procurement process.",
+  },
+  {
+    step: "03",
+    title: "Stock Quantity Verification",
+    desc: "Before transportation arrives, we verify that the promised quantity is physically available to prevent short loading.",
+  },
+  {
+    step: "04",
+    title: "Quality Inspection",
+    desc: "Product quality is checked against agreed specifications to ensure readiness for dispatch.",
+  },
+  {
+    step: "05",
+    title: "Photo & Video Confirmation",
+    desc: "Photos and videos of stock, packaging, and readiness are shared to provide real-time visibility.",
+  },
+  {
+    step: "06",
+    title: "Packaging Validation",
+    desc: "Packaging is confirmed to meet requirements before goods are prepared for transportation.",
+  },
+  {
+    step: "07",
+    title: "Transport Readiness Check",
+    desc: "We confirm that the transport vehicle has arrived, is suitable, and ready for loading.",
+  },
+  {
+    step: "08",
+    title: "Loading Supervision",
+    desc: "Goods are supervised during loading to ensure correct handling and dispatch.",
+  },
+  {
+    step: "09",
+    title: "Payment Checkpoint",
+    desc: "If payment is linked to dispatch, we ensure required payments are received before release.",
+  },
+  {
+    step: "10",
+    title: "Handover to Logistics",
+    desc: "Once loading is complete, the shipment is handed over to the designated logistics partner.",
+    highlight: true,
+  },
+];
 
 
 
@@ -29,34 +77,15 @@ export default function ProcurementSpecialistSection() {
     [0, 0.25, 0.75, 1],
     [0, 1, 1, 0]
   );
-
-  // COMING FROM BACK → GOING BACK
-  const y = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.75, 1],
-    [200, 0, 0, -200]
-  );
-
-  // DEPTH FEEL
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.75, 1],
-    [0.94, 1, 1, 0.94]
-  );
-
-
-
   return (
 
     <motion.section
       ref={sectionRef}
       style={{
         opacity,
-        y,
-        scale,
-        willChange: "transform, opacity",
+        willChange: "opacity",
       }}
-      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
+      className="relative py-20 md:py-40 px-4 sm:px-6 border-t border-white/5 bg-background overflow-hidden"
     >
       {/* Cinematic Background Ambient Glows & Grid */}
       <div className="absolute inset-0 pointer-events-none">
@@ -86,7 +115,7 @@ export default function ProcurementSpecialistSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="max-w-4xl mb-24 md:mb-32 text-center mx-auto"
+          className="max-w-4xl mb-16 md:mb-24 text-center mx-auto"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
             Procurement Execution <br className="hidden sm:block" />
@@ -107,62 +136,10 @@ export default function ProcurementSpecialistSection() {
         {/* Flow */}
         <div className="relative max-w-5xl mx-auto">
           {/* Glowing Vertical Line */}
-          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-orange-500/0 via-orange-500/30 to-orange-500/0 md:-translate-x-1/2" />
+          <div className="absolute left-5 sm:left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-orange-500/0 via-orange-500/25 to-orange-500/0 md:-translate-x-1/2" />
 
-          <div className="space-y-20">
-            {[
-              {
-                step: "01",
-                title: "Procurement Specialist Assigned",
-                desc: "A nearby OBAOL procurement specialist is assigned based on supplier location, reducing travel time and delays.",
-              },
-              {
-                step: "02",
-                title: "On-Site Visit & Presence",
-                desc: "Our representative visits the supplier location and acts on your behalf throughout the procurement process.",
-              },
-              {
-                step: "03",
-                title: "Stock Quantity Verification",
-                desc: "Before transportation arrives, we verify that the promised quantity is physically available to prevent short loading.",
-              },
-              {
-                step: "04",
-                title: "Quality Inspection",
-                desc: "Product quality is checked against agreed specifications to ensure readiness for dispatch.",
-              },
-              {
-                step: "05",
-                title: "Photo & Video Confirmation",
-                desc: "Photos and videos of stock, packaging, and readiness are shared to provide real-time visibility.",
-              },
-              {
-                step: "06",
-                title: "Packaging Validation",
-                desc: "Packaging is confirmed to meet requirements before goods are prepared for transportation.",
-              },
-              {
-                step: "07",
-                title: "Transport Readiness Check",
-                desc: "We confirm that the transport vehicle has arrived, is suitable, and ready for loading.",
-              },
-              {
-                step: "08",
-                title: "Loading Supervision",
-                desc: "Goods are supervised during loading to ensure correct handling and dispatch.",
-              },
-              {
-                step: "09",
-                title: "Payment Checkpoint",
-                desc: "If payment is linked to dispatch, we ensure required payments are received before release.",
-              },
-              {
-                step: "10",
-                title: "Handover to Logistics",
-                desc: "Once loading is complete, the shipment is handed over to the designated logistics partner.",
-                highlight: true,
-              },
-            ].map((item, index) => (
+          <div className="space-y-12 sm:space-y-16 md:space-y-20">
+            {PROCUREMENT_STEPS.map((item, index) => (
               <FlowStep key={item.step} index={index} {...item} />
             ))}
           </div>
@@ -175,7 +152,7 @@ export default function ProcurementSpecialistSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mt-32 max-w-5xl mx-auto grid md:grid-cols-2 gap-8"
+          className="mt-20 md:mt-32 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8"
         >
           <ContextCard
             title="First-Time Suppliers"
@@ -223,12 +200,12 @@ function FlowStep({
       <div className="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-background border-2 border-orange-500/50 z-10 shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
 
       {/* Card */}
-      <div className={`relative w-full pl-20 md:pl-0 md:w-[45%] ${fromLeft ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"}`}>
+      <div className={`relative w-full pl-14 sm:pl-16 md:pl-0 md:w-[45%] ${fromLeft ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"}`}>
 
         {/* Step Indicator (Mobile: Absolute Left, Desktop: Integrated into layout) */}
         <div
-          className={`absolute left-0 top-2 md:top-auto md:relative md:inline-flex items-center justify-center
-          w-12 h-12 rounded-full text-base font-black tracking-widest backdrop-blur-md border border-white/10
+          className={`absolute left-0 sm:left-0 top-2 md:top-auto md:relative md:inline-flex flex items-center justify-center text-center
+          w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full text-sm sm:text-base font-black tracking-widest backdrop-blur-md border border-white/10
           ${fromLeft ? "md:ml-auto md:mb-4 md:float-right" : "md:mr-auto md:mb-4"}
           ${highlight
               ? "bg-gradient-to-br from-orange-400 to-red-500 text-white shadow-[0_0_30px_rgba(251,146,60,0.6)] border-orange-400/50"
@@ -239,17 +216,17 @@ function FlowStep({
         </div>
 
         {/* Content Container */}
-        <div className={`md:clear-both p-6 rounded-2xl backdrop-blur-xl border transition-all duration-500
+        <div className={`md:clear-both p-4 sm:p-5 md:p-6 rounded-2xl backdrop-blur-xl border transition-all duration-500
           ${highlight
             ? "bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.1)]"
             : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
           }`}
         >
-          <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight">
             {title}
           </h3>
 
-          <p className="mt-3 text-base text-default-500 leading-relaxed">
+          <p className="mt-2.5 md:mt-3 text-sm sm:text-base text-default-500 leading-relaxed">
             {desc}
           </p>
         </div>
@@ -273,6 +250,3 @@ function ContextCard({ title, text }: { title: string; text: string }) {
     </motion.div>
   );
 }
-
-
-

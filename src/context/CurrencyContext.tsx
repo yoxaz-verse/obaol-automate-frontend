@@ -16,8 +16,19 @@ const CurrencyContext = createContext<CurrencyContextProps | undefined>(
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [selectedCurrency, setSelectedCurrency] = useState("inr");
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("obaol_currency") || "inr";
+    }
+    return "inr";
+  });
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("obaol_currency", selectedCurrency);
+    }
+  }, [selectedCurrency]);
 
   useEffect(() => {
     const fetchExchangeRates = async () => {

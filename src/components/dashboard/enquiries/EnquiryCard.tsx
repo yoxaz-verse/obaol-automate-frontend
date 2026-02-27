@@ -40,19 +40,19 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                     }}
                 />
 
-                <CardHeader className="flex flex-col items-start pb-0 px-4 pt-4 space-y-2">
+                <CardHeader className="flex flex-col items-start pb-0 px-3 sm:px-4 pt-4 space-y-2">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-start gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm ${data.type === "Buying"
-                                    ? "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 border border-primary-200/50"
+                                    ? "bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-200 border border-primary-300/60 dark:border-primary-400/40"
                                     : data.type === "Selling"
-                                        ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50"
-                                        : "bg-default-100 text-default-600 border border-default-200/50"
+                                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200 border border-emerald-300/60 dark:border-emerald-400/40"
+                                        : "bg-default-100 text-default-700 dark:bg-default-700/30 dark:text-default-100 border border-default-300/60 dark:border-default-400/30"
                                     }`}>
                                     {data.type === "Buying" ? "PURCHASE" : data.type === "Selling" ? "SALE" : "MEDIATED"}
                                 </span>
-                                <div className="sm:hidden flex items-center gap-1 text-[10px] font-black text-default-400 uppercase tracking-widest bg-default-100 px-2 py-0.5 rounded">
+                                <div className="sm:hidden flex items-center gap-1 text-[10px] font-black text-default-600 dark:text-default-200 uppercase tracking-widest bg-default-100 dark:bg-default-700/40 px-2 py-0.5 rounded border border-default-200 dark:border-default-500/30">
                                     <FiClock size={10} />
                                     {date}
                                 </div>
@@ -78,7 +78,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                             </div>
                         </div>
                         <div className="hidden sm:flex flex-col items-end gap-1 flex-shrink-0">
-                            <div className="flex items-center gap-1 text-[10px] font-black text-default-400 uppercase tracking-widest bg-default-100 px-2 py-0.5 rounded">
+                            <div className="flex items-center gap-1 text-[10px] font-black text-default-600 dark:text-default-200 uppercase tracking-widest bg-default-100 dark:bg-default-700/40 px-2 py-0.5 rounded border border-default-200 dark:border-default-500/30">
                                 <FiClock size={10} />
                                 {date}
                             </div>
@@ -144,15 +144,15 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
 
                     {/* Handling Insight */}
                     <div className="flex flex-col space-y-3">
-                        <div className="flex justify-between items-start gap-4">
-                            <div className="flex flex-col gap-1.5 min-w-0">
-                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 whitespace-nowrap">Assigned To</span>
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+                            <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5">Assigned To</span>
                                 <span className="text-primary-600 dark:text-primary-400 font-bold text-sm truncate">{data.assignedEmployee || "OBAOL Desk"}</span>
                             </div>
                             {!data.isAdmin && clientName && (
-                                <div className="flex flex-col items-end min-w-0">
-                                    <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 whitespace-nowrap text-right">{data.counterpartyLabel}</span>
-                                    <span className="text-slate-600 dark:text-slate-400 font-bold text-right text-xs line-clamp-1">{clientName}</span>
+                                <div className="flex flex-col sm:items-end min-w-0 flex-1">
+                                    <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 sm:text-right">{data.counterpartyLabel}</span>
+                                    <span className="text-slate-600 dark:text-slate-400 font-bold sm:text-right text-xs line-clamp-1">{clientName}</span>
                                 </div>
                             )}
                         </div>

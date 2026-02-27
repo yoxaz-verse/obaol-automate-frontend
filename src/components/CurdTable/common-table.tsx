@@ -110,9 +110,9 @@ export default function CommonTable({
               <Image
                 src={imageURL}
                 alt={item.name}
-                width={1000}
-                height={1000}
-                style={{ objectFit: "cover" }}
+                width={72}
+                height={72}
+                className="w-18 h-18 rounded-lg object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/fallback.jpg";
                 }}
@@ -123,7 +123,7 @@ export default function CommonTable({
 
         case "action":
           return (
-            <div className="relative flex items-center gap-3">
+            <div className="relative flex flex-wrap items-center justify-center md:justify-start gap-2">
               {viewModal && viewModal(item)}
               {editModal && editModal(item)}
               {otherModal && otherModal(item)}
@@ -132,7 +132,7 @@ export default function CommonTable({
           );
 
         default:
-          return cellValue || "N/A"; //Translate
+          return String(cellValue || "N/A");
       }
     },
     [viewModal, deleteModal, editModal, columns, otherModal] // Ensure columns is included in the dependency array
@@ -154,18 +154,20 @@ export default function CommonTable({
   }
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="relative w-full max-w-full overflow-x-auto overscroll-x-contain pb-1">
       <Table
         {...({
+          removeWrapper: true,
           isHeaderSticky: true,
           isStriped: true,
           color: "warning",
-          className: "max-w-full",
+          className: "min-w-[1200px] w-max",
           classNames: {
-            base: "max-w-full overflow-x-auto no-scrollbar",
-            table: "min-w-max w-full",
+            base: "w-max min-w-[1200px]",
+            wrapper: "p-0 bg-transparent shadow-none overflow-visible",
+            table: "w-max min-w-[1200px] table-auto",
             th: ["bg-default-100", "text-default-800", "font-bold", "text-[11px]", "uppercase", "tracking-wider", "border-b", "border-divider"],
-            td: ["py-3", "align-middle", "text-sm"],
+            td: ["py-3", "align-middle", "text-sm", "whitespace-nowrap"],
             tr: ["hover:bg-default-50/50", "transition-colors", "cursor-default"],
           }
         } as any)}

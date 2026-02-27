@@ -8,7 +8,7 @@ interface OrderStatusProps {
 const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     const getStatusConfig = (s: string) => {
         const normalize = s?.toLowerCase() || "procuring";
-        if (normalize.includes("procuring")) return { color: "primary", step: 1, label: "Procuring" };
+        if (normalize.includes("procuring")) return { color: "secondary", step: 1, label: "Procuring" };
         if (normalize.includes("loaded")) return { color: "warning", step: 2, label: "Loaded" };
         if (normalize.includes("transit")) return { color: "secondary", step: 3, label: "In Transit" };
         if (normalize.includes("arrived")) return { color: "success", step: 4, label: "Arrived" };
@@ -21,21 +21,21 @@ const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     const config = getStatusConfig(status);
 
     return (
-        <div className="flex flex-col gap-1 min-w-[120px]">
+        <div className="flex flex-col gap-1.5 min-w-[100px] sm:min-w-[120px]">
             <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold text-${config.color === "default" ? "default-500" : config.color + "-500"}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest text-${config.color === "default" ? "default-500" : config.color + (config.color === 'secondary' ? '' : '-500')}`}>
                     {config.label}
                 </span>
             </div>
 
             {config.step > 0 && (
-                <div className="flex gap-1 h-1.5 w-full">
+                <div className="flex gap-1 h-1 w-full max-w-[140px]">
                     {[1, 2, 3, 4, 5, 6].map((step) => (
                         <div
                             key={step}
-                            className={`flex-1 rounded-full transition-all duration-500 ${step <= config.step
-                                ? `bg-${config.color}-500 shadow-[0_0_8px_rgba(0,0,0,0.2)]`
-                                : "bg-default-100"
+                            className={`flex-1 rounded-full transition-all duration-700 ${step <= config.step
+                                ? `bg-${config.color}${config.color === 'secondary' ? '' : '-500'} shadow-[0_0_8px_rgba(0,0,0,0.1)]`
+                                : "bg-default-200/50"
                                 }`}
                         />
                     ))}

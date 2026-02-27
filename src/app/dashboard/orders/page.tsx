@@ -43,9 +43,9 @@ export default function OrdersPage() {
 
                     return (
                         <div className="flex flex-col items-center w-full">
-                            <div className="w-full px-4 md:px-0 md:w-[95%]">
+                            <div className="w-full px-2 sm:px-4 md:px-0 md:w-[95%]">
                                 {/* Status Tabs */}
-                                <div className="flex justify-between items-center mb-4 overflow-x-auto no-scrollbar">
+                                <div className="flex justify-between items-center mb-6 overflow-x-auto no-scrollbar touch-pan-x pb-2">
                                     <Tabs
                                         aria-label="Order Stages"
                                         color="secondary"
@@ -53,10 +53,10 @@ export default function OrdersPage() {
                                         selectedKey={selectedTab}
                                         onSelectionChange={(key) => setSelectedTab(key as string)}
                                         classNames={{
-                                            tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                            cursor: "w-full bg-secondary",
-                                            tab: "max-w-fit px-0 h-12",
-                                            tabContent: "group-data-[selected=true]:text-secondary"
+                                            tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                                            cursor: "w-full bg-secondary h-[3px]",
+                                            tab: "max-w-fit px-0 h-10",
+                                            tabContent: "group-data-[selected=true]:text-secondary font-black uppercase tracking-widest text-[11px]"
                                         }}
                                     >
                                         <Tab key="All" title="All Orders" />

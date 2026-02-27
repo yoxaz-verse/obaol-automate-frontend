@@ -19,73 +19,104 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
     const variant = data.enquiry?.productVariant?.name || "Variant";
     const customer = data.enquiry?.name || "Customer";
     const company = data.enquiry?.associateCompany?.name || "Direct";
-    const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "Recent";
+    const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "Recent";
     const status = data.status || "Procuring";
     const procurementOwner = ownerLabelMap[data.responsibilities?.procurementBy] || "Not set";
     const vehicleNo = data.logistics?.vehicleNo || "No Vehicle Info";
     const transportCompany = data.logistics?.transportCompany || "In-house";
 
+    // Dynamic color for the accent bar based on status
+    const getAccentColor = (s: string) => {
+        const norm = s?.toLowerCase() || "";
+        if (norm.includes("complete")) return "bg-success";
+        if (norm.includes("cancel")) return "bg-danger";
+        if (norm.includes("transit") || norm.includes("loaded")) return "bg-warning";
+        return "bg-primary";
+    };
+
     return (
-        <Card className="w-full bg-content1 border border-default-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="flex flex-col items-start pb-0 px-4 pt-4">
-                <div className="flex flex-col sm:flex-row justify-between w-full mb-2 items-start gap-2">
-                    <div className="flex flex-col min-w-0">
-                        <h4 className="text-medium font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">{product}</h4>
-                        <span className="text-tiny text-default-500 mt-0.5 truncate">{variant}</span>
+        <Card className="h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-lg overflow-hidden group">
+            {/* Visual Accent Top Bar */}
+            <div className={`h-1.5 w-full ${getAccentColor(status)} shadow-sm opacity-80`} />
+
+            <CardHeader className="flex flex-col items-start pb-0 px-4 pt-4 space-y-2">
+                <div className="flex flex-col sm:flex-row justify-between w-full items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-base font-black text-slate-800 dark:text-slate-100 leading-tight truncate group-hover:text-secondary transition-colors">
+                                {product}
+                            </h4>
+                        </div>
+                        <span className="text-[10px] font-bold text-default-500 uppercase tracking-widest truncate block">
+                            {variant}
+                        </span>
                     </div>
-                    <div className="text-[10px] bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full font-black border border-primary-200 uppercase whitespace-nowrap self-start sm:self-center">
+                    <div className="text-[10px] bg-secondary-100 text-secondary-700 dark:bg-secondary-500/20 dark:text-secondary-100 px-2.5 py-1 rounded font-black border border-secondary-300/60 dark:border-secondary-400/40 uppercase tracking-tighter whitespace-nowrap self-start">
                         {date}
                     </div>
                 </div>
-                <Divider className="my-1 opacity-50" />
             </CardHeader>
 
-            <CardBody className="px-4 py-3 gap-3">
-                {/* Customer Info */}
-                <div className="flex items-start gap-3">
+            <CardBody className="px-4 py-4 space-y-4">
+                {/* Customer Identity */}
+                <div className="flex items-center gap-3">
                     <Avatar
-                        radius="sm"
+                        radius="full"
                         size="sm"
                         name={customer[0]}
-                        className="bg-primary-100 text-primary-600 font-bold"
+                        className="bg-secondary-50 text-secondary-600 font-black border border-secondary-100 shadow-sm"
                     />
-                    <div>
-                        <p className="text-sm font-bold text-foreground leading-tight">{customer}</p>
-                        <p className="text-tiny text-default-500">{company}</p>
+                    <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-tight truncate">{customer}</p>
+                        <p className="text-[10px] font-semibold text-default-400 uppercase tracking-wider truncate">{company}</p>
                     </div>
                 </div>
 
-                {/* Logistics Info */}
-                <div className="bg-default-50 rounded-xl p-3 flex flex-col gap-2 border border-default-100">
-                    <div className="flex items-center gap-2 text-default-600">
-                        <FiTruck size={14} className="text-primary-500" />
-                        <span className="text-xs font-semibold">{vehicleNo}</span>
+                {/* Logistics Module */}
+                <div className="bg-gradient-to-br from-default-100/60 to-transparent p-3 rounded-xl border border-default-200/60 space-y-2">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                        <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                            <FiTruck size={14} />
+                        </div>
+                        <span className="text-xs font-black uppercase tracking-wide truncate">{vehicleNo}</span>
                     </div>
                     <div className="flex items-center gap-2 text-default-500">
-                        <FiBox size={14} className="text-default-400" />
-                        <span className="text-tiny italic">{transportCompany}</span>
+                        <div className="w-6 h-6 rounded-lg bg-default-200/50 flex items-center justify-center">
+                            <FiBox size={14} />
+                        </div>
+                        <span className="text-[11px] font-bold italic truncate">{transportCompany}</span>
                     </div>
                 </div>
 
-                {/* Handling Details */}
-                <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-default-400 uppercase tracking-wider font-bold">Procurement Owner</div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-success-500" />
-                        <span className="text-xs font-bold text-primary-600">{procurementOwner}</span>
+                {/* Handling Status */}
+                <div className="flex flex-col gap-1.5 pt-1">
+                    <span className="text-[10px] text-default-400 uppercase font-black tracking-widest px-0.5">Procurement Owner</span>
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-secondary-500 animate-pulse" />
+                        <span className="text-xs font-bold text-secondary-600 dark:text-secondary-400 flex items-center gap-2">
+                            {procurementOwner}
+                        </span>
                     </div>
                 </div>
             </CardBody>
 
-            <CardFooter className="gap-3 pt-0 px-4 pb-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center">
-                <div className="flex justify-between items-center sm:justify-start gap-4">
+            <Divider className="opacity-30" />
+
+            <CardFooter className="px-4 py-3 flex flex-col items-stretch gap-3">
+                <div className="flex justify-between items-center w-full">
                     <OrderStatus status={status} />
-                </div>
-                <div className="flex gap-2 justify-end">
-                    <Button size="sm" isIconOnly variant="flat" color="primary" className="rounded-full flex-shrink-0">
-                        <FiPhone size={14} />
-                    </Button>
-                    {action}
+                    <div className="flex items-center gap-2 ml-4">
+                        <Button
+                            size="sm"
+                            isIconOnly
+                            variant="flat"
+                            color="secondary"
+                            className="rounded-xl w-9 h-9 bg-secondary/10 hover:bg-secondary hover:text-white transition-all shadow-sm"
+                        >
+                            <FiPhone size={16} />
+                        </Button>
+                        {action}
+                    </div>
                 </div>
             </CardFooter>
         </Card>

@@ -25,17 +25,17 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
 
     const StatCard = ({ title, value, icon, color, subtext }: any) => (
         <Card className="border-none bg-content1 shadow-sm custom-shadow rounded-xl">
-            <CardBody className="flex flex-row items-center justify-between p-4 px-5">
-                <div>
-                    <p className="text-default-500 text-xs font-semibold uppercase tracking-wider mb-1">
+            <CardBody className="flex flex-row items-center justify-between p-3 sm:p-4 px-3 sm:px-5">
+                <div className="min-w-0 flex-1">
+                    <p className="text-default-500 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1 truncate">
                         {title}
                     </p>
-                    <div className="flex items-baseline gap-2">
-                        <h3 className="text-2xl font-bold text-foreground">{value}</h3>
-                        {subtext && <span className="text-xs text-success-500 font-medium">{subtext}</span>}
+                    <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
+                        <h3 className="text-xl sm:text-2xl font-bold text-foreground">{value}</h3>
+                        {subtext && <span className="text-[10px] sm:text-xs text-success-500 font-medium truncate">{subtext}</span>}
                     </div>
                 </div>
-                <div className={`p-3 rounded-xl bg-${color}-500/10 text-${color}-500`}>
+                <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-${color}-500/10 text-${color}-500 flex-shrink-0 ml-2`}>
                     {icon}
                 </div>
             </CardBody>
@@ -43,7 +43,7 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
     );
 
     return (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
             <StatCard
                 title="Total Enquiries"
                 value={total}

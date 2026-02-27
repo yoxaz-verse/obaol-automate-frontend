@@ -2,7 +2,6 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import {
   Button,
   Card,
@@ -113,6 +112,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
   }
 
   const { convertRate } = useCurrency();
+  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
+  const isMarketplaceView = additionalParams?.view === "marketplace";
+  const { view: _uiView, ...apiAdditionalParams } = additionalParams || {};
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: associateByIdResponse } = useQuery({
@@ -168,7 +170,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         rate,
         apiRoutesByRole[rate],
         productVariantValue?._id,
-        additionalParams,
+        apiAdditionalParams,
         refetchData,
         filters,
         addedRateIds.size, // Refresh when catalog items change
@@ -177,7 +179,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
       limit={1000}
       additionalParams={{
         ...(filters || {}),
-        ...(additionalParams || {}),
+        ...(apiAdditionalParams || {}),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),
@@ -215,7 +217,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         }
 
         var variantRateFetchedData: any;
-        const isMarketplace = additionalParams?.view === "marketplace";
+        const isMarketplace = isMarketplaceView;
 
         // Helper: extract array from either a raw array OR a paginated wrapper
         // QueryComponent returns data?.data?.data which is { data: [...], totalCount: N, ... }
@@ -270,12 +272,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
             if (rate === "variantRate") {
               // Row is a VariantRate (My Products OR Marketplace)
-              const isMarketplace = additionalParams?.view === "marketplace";
+              const isMarketplace = isMarketplaceView;
               const isOwner = item.associate?._id === user?.id || item.associate === user?.id;
 
               const supplierRate = item.rate || 0;
               const adminCommission = item.commission || 0;
               const totalRate = supplierRate + adminCommission;
+              const isCommissionAdded = Number(adminCommission) > 0;
 
               // Rule: Owners see base rate only. Non-owners see final price (base + admin commission).
               const displayedPrice = (isOwner && !isMarketplace)
@@ -300,8 +303,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 productVariantId: item.productVariant?._id,
 
                 // Column Mapping
-                rate: user?.role?.toLowerCase() === "admin" ? convertRate(supplierRate) : convertRate(displayedPrice),
-                commission: adminCommission ? convertRate(adminCommission) : 0,
+                rate: isAdminUser && isMarketplace
+                  ? convertRate(totalRate)
+                  : user?.role?.toLowerCase() === "admin"
+                    ? convertRate(supplierRate)
+                    : convertRate(displayedPrice),
+                commission: isAdminUser && isMarketplace
+                  ? (isCommissionAdded ? convertRate(adminCommission) : "-")
+                  : adminCommission
+                    ? convertRate(adminCommission)
+                    : 0,
+                commissionStatus: isCommissionAdded ? "+" : "-",
                 finalRate: convertRate(totalRate),
 
                 rawBasePrice: totalRate,
@@ -420,6 +432,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
               )}
             </div>
             <div className="h-5" />
+            {tableData.length === 0 && (
+              <div className="rounded-xl border border-default-200 bg-default-50/60 px-4 py-6 text-center text-sm text-default-500">
+                No rates found for the selected marketplace view.
+              </div>
+            )}
             <section className="hidden md:block w-full">
               <CommonTable
                 TableData={tableData}
@@ -429,11 +446,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   if (rowItem.isMarketplaceView) {
                     return (
                       <div className="flex items-center gap-2">
-                        <AddToCatalogButton
-                          rowItem={rowItem}
-                          onSuccess={() => refetchData()}
-                        />
-                        {user?.role === "Associate" && (
+                        {!isAdminUser && (
+                          <AddToCatalogButton
+                            rowItem={rowItem}
+                            onSuccess={() => refetchData()}
+                          />
+                        )}
+                        {(user?.role === "Associate" || isAdminUser) && (
                           <CreateEnquiryButton
                             productVariant={rowItem.productVariantId}
                             variantRate={rowItem}
@@ -533,134 +552,152 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 }}
               />
             </section >
-            <section className="md:hidden block">
+            <section className="md:hidden space-y-4">
               {tableData.map((item: any, index: number) => {
+                const isLive = item.isLive;
                 return (
-                  // @ts-ignore
-                  <Card
+                  <motion.div
                     key={index}
-                    {...({
-                      className:
-                        "border-none bg-background/60 hover:bg-background/95 my-2 max-w-full",
-                      shadow: "sm",
-                    } as any)}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                   >
-                    <CardBody>
-                      <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
-                        <div className="flex flex-col col-span-6 md:col-span-8">
-                          <div className="flex justify-between items-start">
-                            <div className="flex flex-col gap-0">
-                              <h3 className="font-semibold text-foreground/90 truncate">
-                                {item.product || "Product"}
-                              </h3>
-                              <p className="text-small text-foreground/80 truncate">
-                                {item.productVariant || "Product Variant"}
-                              </p>
-                              <h1 className="text-large font-medium mt-2 truncate">
-                                {item.rate || "Price"}
-                              </h1>
+                    <Card
+                      {...({
+                        className: "border-none bg-white/70 dark:bg-slate-900/40 backdrop-blur-md shadow-sm border border-divider/50",
+                        shadow: "sm",
+                      } as any)}
+                    >
+                      <CardBody className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-black text-xs text-primary-500 uppercase tracking-widest mb-1 truncate">
+                              {item.product || "Product"}
+                            </h3>
+                            <h2 className="text-lg font-bold text-foreground leading-tight truncate mb-1">
+                              {item.productVariant || "Variant"}
+                            </h2>
+                            <div className="flex items-center gap-1.5 text-default-500">
+                              <FiUser size={12} className="shrink-0" />
+                              <span className="text-[11px] font-bold truncate">{item.associate || "N/A"}</span>
                             </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            {isLive ? (
+                              <Chip
+                                {...({
+                                  size: "sm",
+                                  variant: "flat",
+                                  color: "success",
+                                  startContent: <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse mx-1" />,
+                                  className: "h-6 text-[10px] font-black uppercase tracking-widest px-2"
+                                } as any)}
+                              >
+                                Live
+                              </Chip>
+                            ) : (
+                              <Chip
+                                {...({
+                                  size: "sm",
+                                  variant: "flat",
+                                  color: "default",
+                                  className: "h-6 text-[10px] font-black uppercase tracking-widest px-2"
+                                } as any)}
+                              >
+                                Offline
+                              </Chip>
+                            )}
+                            {item.isAdded && !item.supplierIsLive && (
+                              <Tooltip content="Supplier rate is currently not live.">
+                                <Chip
+                                  {...({
+                                    size: "sm",
+                                    color: "danger",
+                                    variant: "flat",
+                                    className: "h-5 text-[9px] font-bold"
+                                  } as any)}
+                                >
+                                  Supplier Off
+                                </Chip>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </div>
 
-                            <div className="flex items-center gap-2">
-                              {user?.role?.toLowerCase() === "admin" ||
-                                (!item.variantRate &&
-                                  item.associateId === user?.id &&
-                                  user?.id !== undefined) ? (
-                                <LiveToggle
-                                  variantRate={item}
-                                  refetchData={refetchData}
-                                  apiEndpoint={apiRoutesByRole[rate]}
-                                />
-                              ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  {item.isLive ? (
-                                    <>
-                                      <CreateEnquiryButton
-                                        productVariant={
-                                          item.productVariantId ||
-                                          item.variantRate?.productVariant?._id
-                                        }
-                                        variantRate={item}
-                                      />
-                                      {/* @ts-ignore */}
-                                      <Chip color={"success"} variant="dot">
-                                        Live
-                                      </Chip>
-                                    </>
-                                  ) : (
-                                    <span className="text-default-400 text-tiny italic">
-                                      Not Live
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              {item.isAdded && !item.supplierIsLive && (
-                                <Tooltip content="Supplier rate is currently not live. This item will not be visible to customers.">
-                                  {/* @ts-ignore */}
-                                  <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
-                                </Tooltip>
-                              )}
+                        <Divider className="my-3 opacity-50" />
+
+                        <div className="flex justify-between items-end">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-0.5">Indicative Rate</span>
+                            <div className="text-2xl font-black text-foreground flex items-baseline gap-1">
+                              {item.rate || "N/A"}
                             </div>
-                            {/* Mobile Actions (Edit/Delete) */}
-                            <div className="flex items-center gap-4">
-                              {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
-                                <div className="flex items-center gap-3">
-                                  <EditModal
-                                    _id={item._id}
-                                    initialData={item}
-                                    currentTable={rate}
-                                    formFields={tableConfig[rate]}
-                                    apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
-                                    refetchData={refetchData}
-                                  />
-                                  <DeleteModal
-                                    _id={item._id}
-                                    name={item.name || item.customTitle || item.productVariant}
-                                    deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                                    refetchData={refetchData}
-                                    useBody={true}
-                                  />
-                                </div>
-                              ) : item.isMarketplaceView && (
-                                <div className="flex items-center gap-2">
+                            {isAdminUser && item.isMarketplaceView && (
+                              <span className={`mt-1 text-[10px] font-bold uppercase tracking-wide ${String(item.commissionStatus || "") === "+" ? "text-success-600" : "text-warning-600"}`}>
+                                {item.commissionStatus || "-"}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {/* Action Buttons */}
+                            {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
+                              <div className="flex items-center gap-2">
+                                <EditModal
+                                  _id={item._id}
+                                  initialData={item}
+                                  currentTable={rate}
+                                  formFields={tableConfig[rate]}
+                                  apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                                  refetchData={refetchData}
+                                />
+                                <DeleteModal
+                                  _id={item._id}
+                                  name={item.name || item.customTitle || item.productVariant}
+                                  deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                                  refetchData={refetchData}
+                                  useBody={true}
+                                />
+                              </div>
+                            ) : item.isMarketplaceView ? (
+                              <div className="flex items-center gap-2">
+                                {!isAdminUser && (
                                   <AddToCatalogButton
                                     rowItem={item}
                                     onSuccess={() => refetchData()}
                                   />
-                                  {user?.role === "Associate" && (
-                                    <CreateEnquiryButton
-                                      productVariant={item.productVariantId}
-                                      variantRate={item}
-                                    />
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col mt-3 gap-1">
-                            {(item.variantRate &&
-                              item.associateId === user?.id) ||
-                              (item.associateId !== user?.id &&
-                                item.companyId !==
-                                associateByIdValue?.associateCompany?._id) ? (
-                              <SelectModal
-                                variantRate={item}
-                                refetchData={refetchData}
-                              />
-                            ) : user?.id !== undefined ? (
-                              <>
-                                {item.companyId ===
-                                  associateByIdValue?.associateCompany?._id && (
-                                    <div key={index} className="flex-1 min-w-[300px]" />
-                                  )}
-                              </>
-                            ) : null}
+                                )}
+                                {(user?.role === "Associate" || isAdminUser) && (
+                                  <CreateEnquiryButton
+                                    productVariant={item.productVariantId}
+                                    variantRate={item}
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              !item.isCatalogView && isLive && (
+                                <CreateEnquiryButton
+                                  productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
+                                  variantRate={item}
+                                />
+                              )
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </CardBody>
-                  </Card>
+
+                        {(user?.role?.toLowerCase() === "admin" || (item.isOwnerView && !item.isCatalogView)) && (
+                          <div className="mt-4 pt-3 border-t border-divider/30 flex justify-between items-center">
+                            <span className="text-[11px] font-bold text-default-400">Visibility Status</span>
+                            <LiveToggle
+                              variantRate={item}
+                              refetchData={refetchData}
+                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                            />
+                          </div>
+                        )}
+                      </CardBody>
+                    </Card>
+                  </motion.div>
                 );
               })}
             </section>
@@ -837,17 +874,18 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   productVariant,
   onClose,
 }) => {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [preferredIncotermId, setPreferredIncotermId] = useState<string>("");
   const [specification, setSpecification] = useState("");
+  const [buyerAssociateId, setBuyerAssociateId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { user } = useContext(AuthContext);
+  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
 
   // Robust Associate ID Fetching
   const { data: associateDetail } = useQuery({
@@ -861,6 +899,21 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     ? associateRaw[0]
     : associateRaw?.data || associateRaw?.data?.data || associateRaw || null;
   const activeAssociateId = associateProfile?._id || user?.id;
+  const defaultSellerAssociateId = variantRate.associateId || variantRate.associate?._id || variantRate.associate || "";
+
+  const { data: associatesResponse } = useQuery({
+    queryKey: ["associates-list-for-enquiry"],
+    queryFn: () => getData(apiRoutesByRole["associate"], { page: 1, limit: 1000 }),
+    enabled: isAdminUser,
+  });
+
+  const associateOptions = (() => {
+    const raw = associatesResponse?.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw?.data?.data)) return raw.data.data;
+    return [];
+  })();
 
   useEffect(() => {
     if (!name) {
@@ -898,6 +951,40 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
+      let resolvedProductId: any =
+        variantRate.productId ||
+        variantRate.product?._id ||
+        variantRate.productVariant?.product?._id ||
+        variantRate.productVariant?.product ||
+        variantRate.variantRate?.productVariant?.product?._id ||
+        variantRate.baseRateId?.productVariant?.product?._id;
+      const resolvedProductVariantId =
+        productVariant ||
+        variantRate.productVariantId ||
+        variantRate.productVariant?._id ||
+        variantRate.variantRate?.productVariant?._id ||
+        variantRate.baseRateId?.productVariant?._id;
+
+      if (!resolvedProductId && resolvedProductVariantId) {
+        const pvRes: any = await getData(`${apiRoutesByRole["productVariant"]}/${resolvedProductVariantId}`);
+        const pv = pvRes?.data?.data || pvRes?.data || pvRes;
+        resolvedProductId = pv?.product?._id || pv?.product || null;
+      }
+      const resolvedSellerAssociateId = defaultSellerAssociateId;
+      const resolvedBuyerAssociateId = isAdminUser
+        ? buyerAssociateId
+        : activeAssociateId;
+
+      if (!resolvedProductId) {
+        throw new Error("Product is missing for this rate. Please refresh and try again.");
+      }
+      if (!resolvedBuyerAssociateId) {
+        throw new Error("Buyer associate is required.");
+      }
+      if (!resolvedSellerAssociateId) {
+        throw new Error("Seller associate is required.");
+      }
+
       const baseSpecification = `Variant: ${variantRate.productVariant || "Standard"}`;
       const finalSpecification =
         specification?.trim().length > 0
@@ -905,11 +992,11 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           : baseSpecification;
 
       const payload = {
-        productId: variantRate.productId || variantRate.product?._id || variantRate.product,
+        productId: resolvedProductId,
         quantity: Number(quantity) || 1,
         specifications: finalSpecification,
-        buyerAssociateId: activeAssociateId || undefined,
-        sellerAssociateId: variantRate.associateId || variantRate.associate?._id || variantRate.associate,
+        buyerAssociateId: resolvedBuyerAssociateId,
+        sellerAssociateId: resolvedSellerAssociateId,
         mediatorAssociateId: variantRate.mediatorAssociateId || null,
         variantRateId: variantRate.isCatalogView ? null : variantRate._id,
         catalogItemId: variantRate.isCatalogView ? variantRate._id : null,
@@ -935,13 +1022,20 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     onError: (error: any) => {
       console.error("Enquiry submission failed:", error);
       console.error("Error Response:", error?.response?.data);
-      alert(error?.response?.data?.message || error?.message || "Something went wrong. Please try again.");
+      const backendMessage = error?.response?.data?.message;
+      const validationMessage = error?.response?.data?.error?.message;
+      const fallback = error?.message || "Something went wrong. Please try again.";
+      alert(backendMessage || validationMessage || fallback);
       setIsLoading(false);
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAdminUser && !buyerAssociateId) {
+      alert("Please select a buyer associate.");
+      return;
+    }
     createEnquiryMutation.mutate();
   };
 
@@ -977,6 +1071,30 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       <Card className="border border-default-200 bg-content1 shadow-sm">
         <CardBody className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {isAdminUser && (
+              <>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-default-600">Buyer Associate</label>
+                  <select
+                    value={buyerAssociateId}
+                    onChange={(e) => setBuyerAssociateId(e.target.value)}
+                    className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                    required
+                  >
+                    <option value="">Select buyer</option>
+                    {associateOptions.map((item: any) => {
+                      const id = String(item?._id || "");
+                      return (
+                        <option key={id} value={id}>
+                          {item?.name || item?.email || "Associate"}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </>
+            )}
+
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-default-600">Full Name</label>
               <input

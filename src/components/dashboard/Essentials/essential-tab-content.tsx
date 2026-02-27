@@ -57,8 +57,8 @@ const EssentialTabContent = ({
   let formFields = tableConfig[essentialName];
 
   return (
-    <div className="w-full">
-      <div className="">
+    <div className="w-full max-w-full min-w-0">
+      <div className="min-w-0">
         <div className="my-4">
           <div className="flex items-center justify-between  gap-3">
             {!hideAdd && (

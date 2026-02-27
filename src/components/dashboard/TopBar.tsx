@@ -7,8 +7,9 @@ import {
   DropdownMenu,
   DropdownTrigger,
   User,
-  Button
-} from "@nextui-org/react";
+  Button,
+  Divider
+} from "@heroui/react";
 import React, { useContext } from "react";
 import { CiMenuBurger } from "react-icons/ci";
 import { ThemeSwitcher } from "../ThemeSwitcher";
@@ -21,6 +22,7 @@ import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import Image from "next/image";
 import CurrencySelector from "./Catalog/currency-selector";
+import { FiSettings } from "react-icons/fi";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
@@ -33,7 +35,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 bg-content1 border border-default-200  rounded-2xl transition-all duration-300">
+    <div className="flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 rounded-2xl border border-default-200/70 bg-gradient-to-r from-content1/95 via-content1/80 to-content1/95 backdrop-blur-xl shadow-[0_10px_30px_-18px_rgba(0,0,0,0.45)] transition-all duration-300">
       {/* Left Section: Mobile Menu & Panel Identity */}
       <div className="flex gap-4 items-center">
         {/* Hamburger - Mobile only */}
@@ -45,10 +47,12 @@ const TopBar = ({ username, role }: TopbarProps) => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu
-              aria-label="Sidebar Options"
-              disallowEmptySelection
-              selectionMode="single"
-              className="text-foreground"
+              {...({
+                "aria-label": "Sidebar Options",
+                disallowEmptySelection: true,
+                selectionMode: "single",
+                className: "text-foreground",
+              } as any)}
             >
               {filteredOptions.map((option) => (
                 <DropdownItem key={option.name}>
@@ -90,13 +94,11 @@ const TopBar = ({ username, role }: TopbarProps) => {
         />
       </div>
 
-      {/* Right Section: Theme Toggle & User Profile */}
+      {/* Right Section: Utilities & User Profile */}
       <div className="flex items-center gap-2 md:gap-3">
         <CurrencySelector />
-        <LanguageSwitcher />
-        <ThemeSwitcher />
 
-        <Dropdown placement="bottom-end">
+        <Dropdown {...({ placement: "bottom-end" } as any)}>
           <DropdownTrigger>
             <User
               as="button"
@@ -115,7 +117,14 @@ const TopBar = ({ username, role }: TopbarProps) => {
               }}
             />
           </DropdownTrigger>
-          <DropdownMenu aria-label="User Actions" variant="flat" className="text-foreground">
+          <DropdownMenu
+            {...({
+              "aria-label": "User Actions",
+              variant: "flat",
+              className: "text-foreground min-w-[290px]",
+              itemClasses: { base: "rounded-lg data-[hover=true]:bg-default-100" },
+            } as any)}
+          >
             <DropdownItem key="profile" className="h-14 gap-2 ">
               <p className="font-semibold">Signed in as</p>
               <p className="font-semibold text-warning-500">{username}</p>
@@ -125,6 +134,27 @@ const TopBar = ({ username, role }: TopbarProps) => {
               onClick={() => router.push("/dashboard/profile")}
             >
               My Profile
+            </DropdownItem>
+            <DropdownItem key="prefs-header" isReadOnly textValue="Preferences">
+              <div className="flex items-center gap-2 text-default-500 text-xs font-semibold uppercase tracking-wide">
+                <FiSettings size={13} />
+                Preferences
+              </div>
+            </DropdownItem>
+            <DropdownItem key="prefs-divider" isReadOnly className="p-0 h-auto" textValue="Divider">
+              <Divider />
+            </DropdownItem>
+            <DropdownItem key="language-control" closeOnSelect={false} textValue="Language control">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-default-600">Language</span>
+                <LanguageSwitcher />
+              </div>
+            </DropdownItem>
+            <DropdownItem key="theme-control" closeOnSelect={false} textValue="Theme control">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-default-600">Theme</span>
+                <ThemeSwitcher />
+              </div>
             </DropdownItem>
             <DropdownItem
               key="logout"

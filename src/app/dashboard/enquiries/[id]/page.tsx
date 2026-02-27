@@ -37,7 +37,7 @@ const STATUS_STEPS = [
     "Pending",
     "Supplier Accepted",
     "Buyer Confirmed",
-    "Responsibilities Finalized",
+    "Execution Plan Finalized",
     "Converted",
     "Completed",
 ];
@@ -444,13 +444,7 @@ export default function EnquiryDetailsPage() {
 
     const updateStatusMutation = useMutation({
         mutationFn: (newStatus: string) =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
-                status: newStatus,
-                history: [
-                    ...(enquiry.history || []),
-                    { status: newStatus, note: `Status changed to ${newStatus}`, timestamp: new Date() },
-                ],
-            }),
+            patchData(`${apiRoutes.enquiry.getAll}/${id}/status`, { status: String(newStatus || "").toUpperCase() }),
         onSuccess: () => {
             toast.success("Status updated successfully!");
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
@@ -536,6 +530,16 @@ export default function EnquiryDetailsPage() {
     const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt);
     const hasBuyerConfirmed = Boolean(enquiry.buyerConfirmedAt);
     const hasResponsibilitiesFinalized = Boolean((enquiry as any).responsibilitiesFinalizedAt);
+    const hasExecutionContextForStage = executionContext.tradeType === "DOMESTIC"
+        ? Boolean(executionContext.originState.trim()) &&
+        Boolean(executionContext.originDistrict.trim()) &&
+        Boolean(executionContext.destinationState.trim()) &&
+        Boolean(executionContext.destinationDistrict.trim())
+        : Boolean(executionContext.originCountry.trim()) &&
+        Boolean(executionContext.originPort.trim()) &&
+        Boolean(executionContext.destinationCountry.trim()) &&
+        Boolean(executionContext.destinationPort.trim());
+    const hasExecutionPlanReady = hasResponsibilitiesFinalized || (hasBuyerConfirmed && hasExecutionContextForStage && hasFullResponsibilityPlan);
     const isCancelled = normalizedStatus === "CANCELLED";
     const isCompletedFlow = normalizedStatus === "COMPLETED" || normalizedStatus === "CLOSED";
     const isConvertedFlow = normalizedStatus === "CONVERTED";
@@ -543,7 +547,7 @@ export default function EnquiryDetailsPage() {
     const currentStepIndex = (() => {
         if (isCompletedFlow) return STATUS_STEPS.indexOf("Completed");
         if (isConvertedFlow) return STATUS_STEPS.indexOf("Converted");
-        if (hasResponsibilitiesFinalized) return STATUS_STEPS.indexOf("Responsibilities Finalized");
+        if (hasExecutionPlanReady) return STATUS_STEPS.indexOf("Execution Plan Finalized");
         if (hasBuyerConfirmed) return STATUS_STEPS.indexOf("Buyer Confirmed");
         if (hasSellerAccepted) return STATUS_STEPS.indexOf("Supplier Accepted");
         return STATUS_STEPS.indexOf("Pending");
@@ -600,7 +604,7 @@ export default function EnquiryDetailsPage() {
             if (isBuyer) return "Action pending from buyer: click 'Mark All Good to Go'.";
             return "Waiting for buyer confirmation.";
         }
-        if (!hasResponsibilitiesFinalized) return "Waiting for responsibility finalization to generate execution inquiries.";
+        if (!hasExecutionPlanReady) return "Waiting for execution plan finalization to generate execution inquiries.";
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
         return "Enquiry is converted. Order execution is now in progress.";
     })();
@@ -609,20 +613,12 @@ export default function EnquiryDetailsPage() {
     const transportOwner = sanitizeOwner(responsibilityPlan.transportBy || initialPlan.transportBy || "obaol");
     const buyerHandlesTransport = transportOwner === "buyer";
     const sellerHandlesTransport = transportOwner === "seller";
-    const showOriginLogisticsFields = isAdmin || (isSeller && sellerHandlesTransport);
-    const showDestinationLogisticsFields = isAdmin || (isBuyer && buyerHandlesTransport);
+    const showOriginLogisticsFields = isAdmin || isSeller || (isBuyer && buyerHandlesTransport);
+    const showDestinationLogisticsFields = isAdmin || isBuyer || (isSeller && sellerHandlesTransport);
     const canEditOriginLogistics = showOriginLogisticsFields && canEditResponsibilityPlan;
     const canEditDestinationLogistics = showDestinationLogisticsFields && canEditResponsibilityPlan;
-    const canEditRouteNotes = canEditResponsibilityPlan && (isAdmin || (isBuyer && buyerHandlesTransport) || (isSeller && sellerHandlesTransport));
-    const hasExecutionContext = executionContext.tradeType === "DOMESTIC"
-        ? Boolean(executionContext.originState.trim()) &&
-        Boolean(executionContext.originDistrict.trim()) &&
-        Boolean(executionContext.destinationState.trim()) &&
-        Boolean(executionContext.destinationDistrict.trim())
-        : Boolean(executionContext.originCountry.trim()) &&
-        Boolean(executionContext.originPort.trim()) &&
-        Boolean(executionContext.destinationCountry.trim()) &&
-        Boolean(executionContext.destinationPort.trim());
+    const canEditRouteNotes = canEditResponsibilityPlan && (isAdmin || isBuyer || isSeller);
+    const hasExecutionContext = hasExecutionContextForStage;
     const canConvert =
         hasFullResponsibilityPlan &&
         hasSellerAccepted &&
@@ -776,7 +772,7 @@ export default function EnquiryDetailsPage() {
                         <div className="flex flex-wrap items-center gap-2 md:gap-3">
                             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-all">Enquiry #{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}</h1>
                             <Chip
-                                color={enquiry.status === "Converted" ? "success" : enquiry.status === "Cancelled" ? "danger" : "warning"}
+                                color={normalizedStatus === "CONVERTED" ? "success" : normalizedStatus === "CANCELLED" ? "danger" : "warning"}
                                 variant="shadow" size="sm" className="font-bold"
                             >
                                 {enquiry.status}
@@ -859,10 +855,10 @@ export default function EnquiryDetailsPage() {
                                         )}
                                     </>
                                 )}
-                                {enquiry.status === "Converted" && (
+                                {normalizedStatus === "CONVERTED" && (
                                     <div className="flex flex-wrap gap-2 w-full md:w-auto">
                                         <Button color="success" variant="flat" className="w-full sm:w-auto"
-                                            onPress={() => updateStatusMutation.mutate("Completed")}
+                                            onPress={() => updateStatusMutation.mutate("CLOSED")}
                                             isLoading={updateStatusMutation.isPending}>
                                             Complete Enquiry
                                         </Button>
@@ -873,9 +869,9 @@ export default function EnquiryDetailsPage() {
                                         </Button>
                                     </div>
                                 )}
-                                {enquiry.status !== "Cancelled" && enquiry.status !== "Completed" && (
+                                {normalizedStatus !== "CANCELLED" && normalizedStatus !== "COMPLETED" && normalizedStatus !== "CLOSED" && (
                                     <Button color="danger" variant="light" className="w-full sm:w-auto"
-                                        onPress={() => updateStatusMutation.mutate("Cancelled")}
+                                        onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                         isLoading={updateStatusMutation.isPending}>
                                         Cancel
                                     </Button>
@@ -887,9 +883,16 @@ export default function EnquiryDetailsPage() {
                 <Divider />
                 <CardBody className="px-4 md:px-6 py-6 md:py-10">
                     {/* Status Stepper */}
+                    <Progress
+                        size="sm"
+                        radius="full"
+                        value={(currentStepIndex / (STATUS_STEPS.length - 1)) * 100}
+                        color={isCompletedFlow ? "success" : "primary"}
+                        className="mb-4"
+                    />
                     <div className="flex flex-wrap items-center gap-2 mb-5">
                         {STATUS_STEPS.map((step, index) => {
-                            const isCompleted = index <= currentStepIndex;
+                            const isCompleted = index < currentStepIndex;
                             const isCurrent = index === currentStepIndex;
                             return (
                                 <React.Fragment key={step}>
@@ -1250,11 +1253,16 @@ export default function EnquiryDetailsPage() {
                                                 : { originState: "", destinationState: "", originDistrict: "", destinationDistrict: "" }),
                                         }));
                                     }}
-                                    isDisabled={!isAdmin || !canEditResponsibilityPlan}
+                                    isDisabled={!(isBuyer || isAdmin) || !canEditResponsibilityPlan}
                                 >
                                     <SelectItem key="DOMESTIC" value="DOMESTIC">Domestic</SelectItem>
                                     <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">International</SelectItem>
                                 </Select>
+                                {!isBuyer && !isAdmin && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Trade type can be selected by buyer or admin.
+                                    </div>
+                                )}
                                 {executionContext.tradeType === "DOMESTIC" ? (
                                     <>
                                         {showOriginLogisticsFields && (
@@ -1412,17 +1420,17 @@ export default function EnquiryDetailsPage() {
                                 )}
                                 {!isAdmin && !buyerHandlesTransport && !sellerHandlesTransport && (
                                     <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                                        Route details are managed by the assigned logistics owner.
+                                        Origin is maintained by supplier and destination is maintained by buyer.
                                     </div>
                                 )}
                                 {!isAdmin && isBuyer && !buyerHandlesTransport && (
                                     <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                                        Buyer can edit only destination logistics when transportation is assigned to buyer.
+                                        Buyer always manages destination. Origin becomes visible to buyer only when inland transportation is assigned to buyer.
                                     </div>
                                 )}
                                 {!isAdmin && isSeller && !sellerHandlesTransport && (
                                     <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                                        Supplier can edit only origin logistics when transportation is assigned to supplier.
+                                        Supplier always manages origin. Destination becomes visible to supplier only when inland transportation is assigned to supplier.
                                     </div>
                                 )}
                                 <Input

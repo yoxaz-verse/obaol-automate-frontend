@@ -30,7 +30,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   };
 
   return (
-    <>
+    <div className="w-full max-w-full min-w-0">
       <QueryComponent
         api={apiRoutesByRole[currentTable]}
         queryKey={[
@@ -135,7 +135,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           );
         }}
       </QueryComponent>
-    </>
+    </div>
   );
 };
 

@@ -12,7 +12,7 @@ import {
   Tooltip,
   Pagination,
   Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Image from "next/image";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
@@ -154,29 +154,33 @@ export default function CommonTable({
   }
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full max-w-full overflow-hidden">
       <Table
-        isHeaderSticky
-        isStriped
-        color="warning"
-        className="min-w-full"
-        classNames={{
-          base: "max-w-full overflow-x-auto",
-          table: "min-w-[600px]",
-          th: ["bg-default-100", "text-default-800", "font-bold", "text-[11px]", "uppercase", "tracking-wider", "border-b", "border-divider"],
-          td: ["py-3", "align-middle", "text-sm"],
-          tr: ["hover:bg-default-50/50", "transition-colors", "cursor-default"],
-        }}
+        {...({
+          isHeaderSticky: true,
+          isStriped: true,
+          color: "warning",
+          className: "max-w-full",
+          classNames: {
+            base: "max-w-full overflow-x-auto no-scrollbar",
+            table: "min-w-max w-full",
+            th: ["bg-default-100", "text-default-800", "font-bold", "text-[11px]", "uppercase", "tracking-wider", "border-b", "border-divider"],
+            td: ["py-3", "align-middle", "text-sm"],
+            tr: ["hover:bg-default-50/50", "transition-colors", "cursor-default"],
+          }
+        } as any)}
         bottomContent={
           <div className="flex w-full justify-center">
             <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="warning"
-              page={page}
-              total={pages}
-              onChange={(page) => setPage(page)}
+              {...({
+                isCompact: true,
+                showControls: true,
+                showShadow: true,
+                color: "warning",
+                page: page,
+                total: pages,
+                onChange: (page: number) => setPage(page),
+              } as any)}
             />
           </div>
         }

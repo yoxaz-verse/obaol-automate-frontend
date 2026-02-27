@@ -17,6 +17,7 @@ import {
   employeeRoutes,
   enquiryProcessStatusRoutes,
   generalIntentRoutes,
+  incotermRoutes,
   inventoryManagerRoutes,
   jobRoleRoutes,
   jobTypeRoutes,
@@ -156,6 +157,13 @@ const getOptions = async (
     if (lowerKey === "enquiryprocessstatus") {
       const res = await getData(enquiryProcessStatusRoutes.getAll, params);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+    }
+    if (lowerKey === "incoterm") {
+      const res = await getData(incotermRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({
+        key: d._id,
+        value: [d.code, d.name].filter(Boolean).join(" - ") || d.name || d.code || "Incoterm",
+      }));
     }
 
     if (lowerKey.includes("state")) {

@@ -42,10 +42,10 @@ export default function OrdersPage() {
                     const ordersData = extractOrders(orderResponse);
 
                     return (
-                        <div className="flex items-center justify-center w-full">
-                            <div className="w-[95%]">
+                        <div className="flex flex-col items-center w-full">
+                            <div className="w-full px-4 md:px-0 md:w-[95%]">
                                 {/* Status Tabs */}
-                                <div className="flex justify-between items-center mb-6 overflow-x-auto">
+                                <div className="flex justify-between items-center mb-4 overflow-x-auto no-scrollbar">
                                     <Tabs
                                         aria-label="Order Stages"
                                         color="secondary"
@@ -77,19 +77,19 @@ export default function OrdersPage() {
                                                     const orderId = item?._id || item?.id || item?.orderId;
                                                     if (!orderId) return null;
                                                     return (
-                                                <OrderCard
-                                                    key={orderId}
-                                                    data={item}
-                                                    action={
-                                                        <Button
-                                                            className="bg-secondary text-white font-medium shadow-sm h-8"
-                                                            size="sm"
-                                                            onPress={() => router.push(`/dashboard/orders/${String(orderId)}`)}
-                                                        >
-                                                            Manage
-                                                        </Button>
-                                                    }
-                                                />
+                                                        <OrderCard
+                                                            key={orderId}
+                                                            data={item}
+                                                            action={
+                                                                <Button
+                                                                    className="bg-secondary text-white font-medium shadow-sm h-8"
+                                                                    size="sm"
+                                                                    onPress={() => router.push(`/dashboard/orders/${String(orderId)}`)}
+                                                                >
+                                                                    Manage
+                                                                </Button>
+                                                            }
+                                                        />
                                                     );
                                                 })()
                                             ))}

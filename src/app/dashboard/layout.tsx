@@ -74,7 +74,7 @@ export default function DashboardLayout({
             )}
 
             <div className="flex-1 w-full min-w-0 overflow-y-auto px-4 md:px-0 pb-20 md:pb-0">
-              <div className="max-w-[100%] mx-auto w-full p-4 md:p-6">
+              <div className="max-w-full mx-auto w-full p-4 md:p-6 min-w-0">
                 <Template>
                   {children}
                 </Template>

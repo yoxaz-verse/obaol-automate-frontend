@@ -28,12 +28,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
     return (
         <Card className="w-full bg-content1 border border-default-200 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardHeader className="flex flex-col items-start pb-0 px-4 pt-4">
-                <div className="flex justify-between w-full mb-2 items-start">
-                    <div className="flex flex-col">
-                        <h4 className="text-medium font-bold text-foreground leading-tight">{product}</h4>
-                        <span className="text-tiny text-default-500 mt-0.5">{variant}</span>
+                <div className="flex flex-col sm:flex-row justify-between w-full mb-2 items-start gap-2">
+                    <div className="flex flex-col min-w-0">
+                        <h4 className="text-medium font-bold text-slate-800 dark:text-slate-100 leading-tight truncate">{product}</h4>
+                        <span className="text-tiny text-default-500 mt-0.5 truncate">{variant}</span>
                     </div>
-                    <div className="text-[10px] bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full font-bold border border-primary-200 uppercase whitespace-nowrap ml-2">
+                    <div className="text-[10px] bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full font-black border border-primary-200 uppercase whitespace-nowrap self-start sm:self-center">
                         {date}
                     </div>
                 </div>
@@ -77,10 +77,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
                 </div>
             </CardBody>
 
-            <CardFooter className="gap-3 pt-0 px-4 pb-4 flex justify-between items-center">
-                <OrderStatus status={status} />
-                <div className="flex gap-2">
-                    <Button size="sm" isIconOnly variant="flat" color="primary" className="rounded-full">
+            <CardFooter className="gap-3 pt-0 px-4 pb-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center">
+                <div className="flex justify-between items-center sm:justify-start gap-4">
+                    <OrderStatus status={status} />
+                </div>
+                <div className="flex gap-2 justify-end">
+                    <Button size="sm" isIconOnly variant="flat" color="primary" className="rounded-full flex-shrink-0">
                         <FiPhone size={14} />
                     </Button>
                     {action}

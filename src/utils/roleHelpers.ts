@@ -39,6 +39,7 @@ export const routeRoles: { [key: string]: string[] } = {
   ],
   "/dashboard/rsForm": ["Admin", "Employee"],
   "/dashboard/marketplace": [
+    "Admin",
     "Customer",
     "Associate",
     "ProjectManager",

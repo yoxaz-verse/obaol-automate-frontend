@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useContext } from "react";
-import { Button, Spacer } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { Tabs, Tab, Tooltip } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 import Title from "@/components/titles";
 import AddModal from "@/components/CurdTable/add-model";
@@ -27,6 +28,7 @@ import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 export default function EnquiryPage() {
   const [selectedType, setSelectedType] = React.useState<string>("All");
   const [selectedStage, setSelectedStage] = React.useState<string>("All");
+  const router = useRouter();
   const tableConfig = { ...initialTableConfig };
   const filteredStatusOptions = useFilteredStatusOptions();
 
@@ -35,6 +37,7 @@ export default function EnquiryPage() {
     (col: any) => col.key !== "commission" && col.key !== "mediatorCommission"
   );
   const { user } = useContext(AuthContext);
+  const canCreateFromEnquiryPage = user?.role === "Admin";
 
   const refetchData = React.useCallback(() => {
     // e.g. queryClient.invalidateQueries(["enquiry"]);
@@ -44,12 +47,28 @@ export default function EnquiryPage() {
     <section className="">
       <Title title="Enquiry" />
 
-      <AddModal
-        currentTable="Enquiry"
-        formFields={tableConfig["enquiry"]}
-        apiEndpoint={apiRoutesByRole["enquiry"]}
-        refetchData={refetchData}
-      />
+      {canCreateFromEnquiryPage ? (
+        <AddModal
+          currentTable="Enquiry"
+          formFields={tableConfig["enquiry"]}
+          apiEndpoint={apiRoutesByRole["enquiry"]}
+          refetchData={refetchData}
+        />
+      ) : (
+        <div className="mx-3 md:mx-6 mb-4 rounded-xl border border-danger-200/60 bg-danger-50/50 dark:bg-danger-900/20 px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <p className="text-sm font-medium text-danger-700 dark:text-danger-300">
+            Enquiry creation is managed by admin from this page. Select a product from Marketplace to continue.
+          </p>
+          <Button
+            color="danger"
+            variant="flat"
+            onPress={() => router.push("/dashboard/marketplace")}
+            className="w-full md:w-auto"
+          >
+            Go to Marketplace
+          </Button>
+        </div>
+      )}
 
       <QueryComponent
         api={apiRoutesByRole["enquiry"]}
@@ -236,11 +255,11 @@ export default function EnquiryPage() {
           });
 
           return (
-            <div className="flex items-center justify-center w-full">
-              <div className="w-[95%]">
+            <div className="flex flex-col items-center w-full">
+              <div className="w-full px-4 md:px-0 md:w-[95%]">
                 <StatsHeader data={enquiriesData} />
 
-                <div className="flex justify-between items-center mb-6 overflow-x-auto pb-2">
+                <div className="flex justify-between items-center mb-4 overflow-x-auto pb-2 no-scrollbar">
                   <Tabs
                     selectedKey={selectedType}
                     onSelectionChange={(key) => setSelectedType(key as string)}

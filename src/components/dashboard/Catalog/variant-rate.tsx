@@ -371,7 +371,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
           });
 
         return (
-          <div className="w-full max-w-full min-w-0 overflow-x-auto">
+          <div className="w-full max-w-full min-w-0">
             <div className="flex justify-between items-center gap-4 mb-4">
               {!displayOnly && rate === "variantRate" ? (
                 <>
@@ -420,7 +420,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               )}
             </div>
             <div className="h-5" />
-            <section className="hidden md:block overflow-x-auto w-full max-w-full">
+            <section className="hidden md:block w-full">
               <CommonTable
                 TableData={tableData}
                 columns={columns}

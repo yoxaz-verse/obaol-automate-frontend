@@ -17,7 +17,7 @@ export default function Product() {
       <div className="w-[95%]  ">
         <div className=" ">
           <div className="flex w-[100%] gap-4 h-[80vh]">
-            <div className="w-[100%] pb-10  pr-6 overflow-auto">
+            <div className="w-[100%] min-w-0 pb-10">
               {/* Tabs for selecting between different roles */}
               {/* @ts-ignore */}
               <Tabs

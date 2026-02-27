@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useContext } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
@@ -11,7 +12,6 @@ import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 
 const BottomNav = () => {
-    const router = useRouter();
     const pathname = usePathname();
     const { user } = useContext(AuthContext);
 
@@ -59,9 +59,9 @@ const BottomNav = () => {
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
                     return (
-                        <button
+                        <Link
                             key={item.name}
-                            onClick={() => router.push(item.link)}
+                            href={item.link}
                             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${isActive ? "text-warning-500" : "text-default-500 hover:text-foreground"
                                 }`}
                         >
@@ -69,7 +69,7 @@ const BottomNav = () => {
                                 {item.icon}
                             </div>
                             <span className="text-[10px] font-medium">{item.name}</span>
-                        </button>
+                        </Link>
                     );
                 })}
             </div>

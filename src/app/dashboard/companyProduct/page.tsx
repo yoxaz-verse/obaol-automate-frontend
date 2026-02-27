@@ -328,7 +328,7 @@ export default function CompanyProductPage() {
         </div>
 
         {/* --- Main Content (Detail) --- */}
-        <div className="flex-1 min-w-0 overflow-x-auto">
+        <div className="flex-1 min-w-0">
           <Card className="h-full bg-background/60 backdrop-blur-md border-none shadow-sm overflow-hidden flex flex-col min-w-0 max-w-full">
             {selectedCompany ? (
               <>

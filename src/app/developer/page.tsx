@@ -183,6 +183,13 @@ export default function DeveloperIndexPage() {
         className="mx-auto mt-8 max-w-6xl rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 md:p-8 px-4"
       >
         <h2 className="text-xl font-semibold text-default-900 dark:text-white">API Capability Snapshot</h2>
+        <div className="mt-4 rounded-xl border border-default-200 dark:border-white/15 bg-default-50 dark:bg-[#0c1118] p-4">
+          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Base URL</p>
+          <p className="mt-1 font-mono text-sm text-default-900 dark:text-white">https://api.obaol.com</p>
+          <p className="mt-2 text-xs text-default-600 dark:text-white/70">
+            Use this base URL in n8n, MCP tools, ChatGPT connectors, and custom apps.
+          </p>
+        </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[700px] text-left text-sm">
             <thead>
@@ -194,12 +201,12 @@ export default function DeveloperIndexPage() {
             </thead>
             <tbody className="text-default-700 dark:text-white/80">
               <tr className="border-b border-default-100 dark:border-white/10">
-                <td className="py-3 pr-4 font-mono">GET /v1/products/live</td>
+                <td className="py-3 pr-4 font-mono">GET https://api.obaol.com/v1/products/live</td>
                 <td className="py-3 pr-4">Use live product signals in outreach and automation flows</td>
                 <td className="py-3">API key required</td>
               </tr>
               <tr className="border-b border-default-100 dark:border-white/10">
-                <td className="py-3 pr-4 font-mono">GET /v1/products/all</td>
+                <td className="py-3 pr-4 font-mono">GET https://api.obaol.com/v1/products/all</td>
                 <td className="py-3 pr-4">Build full catalog and matching automations</td>
                 <td className="py-3">API key required</td>
               </tr>
@@ -210,6 +217,13 @@ export default function DeveloperIndexPage() {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div className="mt-5 rounded-xl border border-default-200 dark:border-white/15 p-4">
+          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Quick cURL</p>
+          <pre className="mt-2 overflow-x-auto text-xs md:text-sm text-default-800 dark:text-white/85">
+{`curl -X GET "https://api.obaol.com/v1/products/live" \\
+  -H "Authorization: Bearer <API_KEY>"`}
+          </pre>
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link

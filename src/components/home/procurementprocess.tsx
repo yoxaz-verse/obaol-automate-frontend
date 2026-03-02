@@ -119,7 +119,7 @@ export default function ProcurementSpecialistSection() {
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
             Procurement Execution <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">— Step by Step</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400">— Step by Step</span>
           </h2>
           <p className="mt-8 text-lg md:text-xl text-default-500 leading-relaxed max-w-3xl mx-auto">
             Once order confirmation and supplier assignment are completed,

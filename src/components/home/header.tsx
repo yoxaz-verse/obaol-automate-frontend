@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthContext from "@/context/AuthContext";
 
 const NAV_LINKS = [
   { href: "/about", label: "About" },
   { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Products" },
-  { href: "/export-resources", label: "Export Resources" },
-  { href: "/developer/login", label: "Developer" },
   { href: "/faq", label: "FAQ" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -38,9 +38,9 @@ export default function Header() {
         <div className={`mx-auto max-w-7xl px-4 transition-all duration-500`}>
           <div
             className={`flex items-center justify-between rounded-2xl px-4 md:px-6 transition-all duration-500 ${scrolled
-              ? "h-14 bg-background/80 backdrop-blur-2xl border border-default-200/50 shadow-sm"
-              : "h-15 md:h-16 bg-background/40 backdrop-blur-2xl border border-default-100 shadow-none"
-              }`}
+              ? "h-14"
+              : "h-15 md:h-16"
+              } bg-background/80 backdrop-blur-2xl border border-default-200/50 shadow-sm`}
           >
             {/* ── LOGO ── */}
             <Link href="/" className="relative flex items-center gap-2.5 group flex-shrink-0">
@@ -74,17 +74,28 @@ export default function Header() {
                 <ThemeSwitcher />
               </div>
 
+
+              <Link
+                href="/developer"
+                className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/15 bg-foreground/[0.03] text-foreground/75 hover:text-foreground hover:bg-foreground/[0.08] transition-colors"
+                aria-label="Developer Mode"
+                title="Developer Mode"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                </svg>
+              </Link>
+
               {/* CTA */}
               <Link
-                href="https://typebot.co/obaol-early-access"
-                target="_blank"
+                href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
                 className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold overflow-hidden transition-all duration-300
                   bg-orange-500 hover:bg-orange-600 text-white
                   shadow-none hover:scale-[1.03] active:scale-[0.97]"
               >
                 {/* Shimmer */}
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 skew-x-12" />
-                <span className="relative">Early Access</span>
+                <span className="relative">{!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}</span>
                 <svg className="relative w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
@@ -130,15 +141,26 @@ export default function Header() {
                 </Link>
               ))}
 
+
+              <Link
+                href="/developer"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-foreground/[0.06] transition-all duration-200 group"
+              >
+                <span>Developer Mode</span>
+                <svg className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+
               {/* Mobile CTA + theme */}
               <div className="mt-3 pt-3 border-t border-foreground/10 flex items-center gap-3">
                 <Link
-                  href="https://typebot.co/obaol-early-access"
-                  target="_blank"
+                  href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 text-white text-sm font-bold shadow-[0_0_20px_-4px_rgba(251,146,60,0.5)] hover:brightness-110 transition-all"
                 >
-                  Get Early Access
+                  {!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>

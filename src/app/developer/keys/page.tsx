@@ -95,27 +95,27 @@ export default function DeveloperKeysPage() {
   };
 
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-black px-4 py-10">
+    <main className="min-h-screen bg-default-50 dark:bg-[#07090f] px-4 py-10">
       <section className="mx-auto max-w-6xl space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold text-default-900 dark:text-default-100">Developer API Keys</h1>
-            <p className="text-sm text-default-600 dark:text-default-300">Create API keys and use them as Bearer tokens when calling OBAOL APIs.</p>
+            <h1 className="text-2xl font-semibold text-default-900 dark:text-white">Developer API Keys</h1>
+            <p className="text-sm text-default-600 dark:text-white/80">Create API keys and use them as Bearer tokens when calling OBAOL APIs.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/developer/usage" className="rounded-lg border border-default-300 px-3 py-2 text-sm dark:border-default-100/30">Usage</Link>
-            <button onClick={handleSignOut} className="rounded-lg border border-default-300 px-3 py-2 text-sm dark:border-default-100/30">Sign out</button>
+            <Link href="/developer/usage" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Usage</Link>
+            <button onClick={handleSignOut} className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Sign out</button>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4 md:p-6">
-          <h2 className="text-lg font-medium text-default-900 dark:text-default-100">Create API Key</h2>
+        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+          <h2 className="text-lg font-medium text-default-900 dark:text-white">Create API Key</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <input value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm dark:border-default-100/30" placeholder="Key label" />
-            <select value={preset} onChange={(e) => setPreset(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm dark:border-default-100/30">
+            <input value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Key label" />
+            <select value={preset} onChange={(e) => setPreset(e.target.value)} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5">
               {Object.keys(presets).length === 0 ? <option value="automation_basic">automation_basic</option> : Object.keys(presets).map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
-            <input type="number" min={10} max={5000} value={rateLimit} onChange={(e) => setRateLimit(Number(e.target.value || 120))} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm dark:border-default-100/30" placeholder="Rate limit/min" />
+            <input type="number" min={10} max={5000} value={rateLimit} onChange={(e) => setRateLimit(Number(e.target.value || 120))} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Rate limit/min" />
           </div>
           <div className="mt-4">
             <button disabled={isCreating} onClick={handleCreate} className="rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-black disabled:opacity-60">
@@ -131,14 +131,14 @@ export default function DeveloperKeysPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4 md:p-6 overflow-x-auto">
-          <h2 className="text-lg font-medium text-default-900 dark:text-default-100">Your Keys</h2>
+        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6 overflow-x-auto">
+          <h2 className="text-lg font-medium text-default-900 dark:text-white">Your Keys</h2>
           {isLoading ? (
-            <p className="mt-4 text-sm text-default-600 dark:text-default-300">Loading keys...</p>
+            <p className="mt-4 text-sm text-default-600 dark:text-white/75">Loading keys...</p>
           ) : (
-            <table className="mt-4 min-w-[980px] w-full text-sm">
+            <table className="mt-4 min-w-[980px] w-full text-sm text-default-800 dark:text-white/90">
               <thead>
-                <tr className="text-left text-default-600 dark:text-default-300">
+                <tr className="text-left text-default-600 dark:text-white/70">
                   <th className="py-2">Label</th>
                   <th className="py-2">Prefix</th>
                   <th className="py-2">Permissions</th>
@@ -150,7 +150,7 @@ export default function DeveloperKeysPage() {
               </thead>
               <tbody>
                 {keys.map((k) => (
-                  <tr key={k.id} className="border-t border-default-200/70 dark:border-default-100/20">
+                  <tr key={k.id} className="border-t border-default-200/70 dark:border-white/10">
                     <td className="py-3">{k.label}</td>
                     <td className="py-3 font-mono">{k.key_prefix}...</td>
                     <td className="py-3">{k.permissions.join(", ")}</td>
@@ -173,12 +173,12 @@ export default function DeveloperKeysPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4 md:p-6">
-          <h2 className="text-lg font-medium text-default-900 dark:text-default-100">Usage Snippet</h2>
-          <p className="mt-2 text-sm text-default-600 dark:text-default-300">Authorization header format:</p>
-          <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-sm dark:bg-white/10">Authorization: Bearer &lt;API_KEY&gt;</code>
-          <code className="mt-3 block rounded bg-black/5 px-3 py-2 text-xs dark:bg-white/10">GET /v1/products/live</code>
-          <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-xs dark:bg-white/10">GET /v1/products/all</code>
+        <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+          <h2 className="text-lg font-medium text-default-900 dark:text-white">Usage Snippet</h2>
+          <p className="mt-2 text-sm text-default-600 dark:text-white/80">Authorization header format:</p>
+          <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-sm dark:bg-white/10 dark:text-white/95">Authorization: Bearer &lt;API_KEY&gt;</code>
+          <code className="mt-3 block rounded bg-black/5 px-3 py-2 text-xs dark:bg-white/10 dark:text-white/90">GET /v1/products/live</code>
+          <code className="mt-2 block rounded bg-black/5 px-3 py-2 text-xs dark:bg-white/10 dark:text-white/90">GET /v1/products/all</code>
         </div>
 
         {error && (

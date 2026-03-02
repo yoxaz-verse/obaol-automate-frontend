@@ -92,7 +92,7 @@ export default function SystemIntergrationSection() {
 
             <h2 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
               Built as Trading Infrastructure,<br />
-              <span className="bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent drop-shadow-sm">
+              <span className="bg-gradient-to-r from-orange-400 to-orange-400 bg-clip-text text-transparent drop-shadow-sm">
                 Not Just a Platform
               </span>
             </h2>

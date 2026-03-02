@@ -33,6 +33,7 @@ const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const AutocompleteAny = Autocomplete as any;
   const [currentStep, setCurrentStep] = useState<StepKey>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -590,7 +591,7 @@ export default function RegisterPage() {
           message: response.data?.message || "Registration submitted for review.",
           position: "top-right",
         });
-        router.push("/auth/login?role=Associate");
+        router.push("/auth/register/success");
       }
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || "Registration failed.";
@@ -802,12 +803,12 @@ export default function RegisterPage() {
 
                       {formData.companyMode === "existing" && (
                         <div className="space-y-3">
-                          <Autocomplete
+                          <AutocompleteAny
                             label="Select Existing Company"
                             labelPlacement="outside"
                             defaultItems={existingCompanies}
                             selectedKey={formData.associateCompanyId || null}
-                            onSelectionChange={(key) => setField("associateCompanyId", String(key || ""))}
+                            onSelectionChange={(key: any) => setField("associateCompanyId", String(key || ""))}
                             placeholder={existingCompanies.length ? "Search your company" : "No existing companies found"}
                             isInvalid={!!errors.associateCompanyId}
                             errorMessage={errors.associateCompanyId}
@@ -818,7 +819,7 @@ export default function RegisterPage() {
                                 {item.name}
                               </AutocompleteItem>
                             )}
-                          </Autocomplete>
+                          </AutocompleteAny>
                           <div className="rounded-xl border border-default-200/70 bg-default-50/40 dark:bg-default-100/5 p-3">
                             <div className="text-xs uppercase tracking-wide text-default-500 mb-2">Company Functions (Read Only)</div>
                             {selectedExistingCompanyInterests.length > 0 ? (
@@ -1264,7 +1265,7 @@ export default function RegisterPage() {
                     value={formData.contactNotes}
                     onValueChange={(v) => setField("contactNotes", v)}
                   />
-                  <div className="rounded-xl border border-warning-200 bg-warning-50/40 dark:bg-warning-900/15 p-4 text-sm text-warning-800 dark:text-warning-200 leading-relaxed font-medium text-center">
+                  <div className="rounded-xl border border-warning-400/80 bg-warning-100/95 dark:border-warning-300/70 dark:bg-warning-500/20 p-4 text-sm text-warning-900 dark:text-warning-100 leading-relaxed font-semibold text-center shadow-sm">
                     As we only deal with registered and authenticated users, your details have been forwarded for verification. Our team will contact you soon and will reach out to you when your account is validated.
                   </div>
 

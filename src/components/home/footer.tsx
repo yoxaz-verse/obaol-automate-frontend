@@ -89,6 +89,11 @@ export default function Footer() {
                   FAQs
                 </Link>
               </li>
+              <li>
+                <Link href="/export-resources" className="hover:text-foreground">
+                  Export Resources
+                </Link>
+              </li>
               {/* <li>
                 <Link href="/blog" className="hover:text-foreground">
                   Insights & Articles
@@ -101,9 +106,9 @@ export default function Footer() {
               </li> */}
               <li>
                 <Link
-                  href="https://typebot.co/obaol-early-access"
+                  href="/auth"
                   className="hover:text-foreground">
-                  Contact
+                  Sign In
                 </Link>
               </li>
             </ul>

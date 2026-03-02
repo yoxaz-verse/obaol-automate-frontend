@@ -57,7 +57,7 @@ export default function EndToEndSection() {
       {/* Deep Space Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-400/5 rounded-full blur-[150px] -translate-y-1/2" />
-        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-yellow-400/5 rounded-full blur-[120px] translate-x-1/2" />
+        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-orange-400/5 rounded-full blur-[120px] translate-x-1/2" />
         <div className="absolute top-1/2 left-1/2 w-[1000px] h-[500px] bg-indigo-500/5 blur-[150px] -translate-x-1/2 -translate-y-1/2" />
       </div>
 
@@ -72,7 +72,7 @@ export default function EndToEndSection() {
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
             Trade Execution, <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">Explained by Process — Not Promises</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400">Explained by Process — Not Promises</span>
           </h2>
           <p className="mt-8 text-lg md:text-xl text-default-500 leading-relaxed max-w-3xl">
             The difference between delayed trades and fast execution is not

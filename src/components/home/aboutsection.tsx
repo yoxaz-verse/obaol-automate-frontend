@@ -25,7 +25,7 @@ export default function AboutSection() {
                         Our Vision
                     </span>
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground tracking-tight leading-tight mb-8">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 drop-shadow-sm">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400 drop-shadow-sm">
                             Who We Are
                         </span>
                     </h2>

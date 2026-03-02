@@ -51,18 +51,18 @@ export default function DeveloperUsagePage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-black px-4 py-10">
+    <main className="min-h-screen bg-default-50 dark:bg-[#07090f] px-4 py-10">
       <section className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-default-900 dark:text-default-100">Developer Usage</h1>
-            <p className="text-sm text-default-600 dark:text-default-300">Track API usage by endpoint and API key.</p>
+            <h1 className="text-2xl font-semibold text-default-900 dark:text-white">Developer Usage</h1>
+            <p className="text-sm text-default-600 dark:text-white/80">Track API usage by endpoint and API key.</p>
           </div>
-          <Link href="/developer/keys" className="rounded-lg border border-default-300 px-3 py-2 text-sm dark:border-default-100/30">Back to Keys</Link>
+          <Link href="/developer/keys" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Back to Keys</Link>
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-6 text-sm text-default-600 dark:text-default-300">Loading usage data...</div>
+          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 text-sm text-default-600 dark:text-white/80">Loading usage data...</div>
         ) : data ? (
           <>
             <div className="grid gap-3 md:grid-cols-5">
@@ -74,14 +74,14 @@ export default function DeveloperUsagePage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4 md:p-6">
-                <h2 className="text-lg font-medium text-default-900 dark:text-default-100">Top Routes</h2>
+              <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+                <h2 className="text-lg font-medium text-default-900 dark:text-white">Top Routes</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   {data.topRoutes.length === 0 ? (
-                    <li className="text-default-500">No data yet.</li>
+                    <li className="text-default-500 dark:text-white/60">No data yet.</li>
                   ) : (
                     data.topRoutes.map((row, idx) => (
-                      <li key={`${row.method}-${row.route}-${idx}`} className="flex items-center justify-between gap-2 border-b border-default-200/60 pb-2 dark:border-default-100/20">
+                      <li key={`${row.method}-${row.route}-${idx}`} className="flex items-center justify-between gap-2 border-b border-default-200/60 pb-2 text-default-800 dark:text-white/90 dark:border-white/10">
                         <span className="truncate"><strong>{row.method}</strong> {row.route}</span>
                         <span className="font-medium">{row.count}</span>
                       </li>
@@ -90,14 +90,14 @@ export default function DeveloperUsagePage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4 md:p-6">
-                <h2 className="text-lg font-medium text-default-900 dark:text-default-100">Per Key (30d)</h2>
+              <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6">
+                <h2 className="text-lg font-medium text-default-900 dark:text-white">Per Key (30d)</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   {data.perKey.length === 0 ? (
-                    <li className="text-default-500">No data yet.</li>
+                    <li className="text-default-500 dark:text-white/60">No data yet.</li>
                   ) : (
                     data.perKey.map((row) => (
-                      <li key={row.apiKeyId} className="flex items-center justify-between gap-2 border-b border-default-200/60 pb-2 dark:border-default-100/20">
+                      <li key={row.apiKeyId} className="flex items-center justify-between gap-2 border-b border-default-200/60 pb-2 text-default-800 dark:text-white/90 dark:border-white/10">
                         <span className="truncate">{row.label} {row.key_prefix ? `(${row.key_prefix}...)` : ""}</span>
                         <span className="font-medium">{row.requests30d}</span>
                       </li>
@@ -108,7 +108,7 @@ export default function DeveloperUsagePage() {
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-6 text-sm text-default-600 dark:text-default-300">No usage data found.</div>
+          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 text-sm text-default-600 dark:text-white/80">No usage data found.</div>
         )}
 
         {error && (
@@ -123,9 +123,9 @@ export default function DeveloperUsagePage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-default-200 dark:border-default-100/20 bg-white dark:bg-default-50/5 p-4">
-      <p className="text-xs text-default-500 dark:text-default-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-default-900 dark:text-default-100">{value}</p>
+    <div className="rounded-xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4">
+      <p className="text-xs text-default-500 dark:text-white/70">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-default-900 dark:text-white">{value}</p>
     </div>
   );
 }

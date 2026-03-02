@@ -171,24 +171,30 @@ export default function ApprovalsPage() {
                   <td className="px-3 py-2">{formatDate(row.createdAt)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-2">
-                      <Button
-                        size="sm"
-                        color="success"
-                        variant="flat"
-                        isLoading={actionMutation.isPending}
-                        onPress={() => actionMutation.mutate({ id: row._id, action: "APPROVE" })}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        color="danger"
-                        variant="flat"
-                        isLoading={actionMutation.isPending}
-                        onPress={() => actionMutation.mutate({ id: row._id, action: "REJECT" })}
-                      >
-                        Reject
-                      </Button>
+                      {row.registrationStatus === "PENDING_REVIEW" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            color="success"
+                            variant="flat"
+                            isLoading={actionMutation.isPending}
+                            onPress={() => actionMutation.mutate({ id: row._id, action: "APPROVE" })}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            color="danger"
+                            variant="flat"
+                            isLoading={actionMutation.isPending}
+                            onPress={() => actionMutation.mutate({ id: row._id, action: "REJECT" })}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="text-default-400">-</span>
+                      )}
                     </div>
                   </td>
                 </tr>

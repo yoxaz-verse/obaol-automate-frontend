@@ -34,7 +34,7 @@ export default function StatementSection() {
 
             {/* Secondary subtle glow */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-full bg-yellow-400/3 blur-[100px]" />
+                <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-full bg-orange-400/3 blur-[100px]" />
                 <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-orange-500/3 blur-[100px]" />
             </div>
 
@@ -78,7 +78,7 @@ export default function StatementSection() {
                 >
                     A Complete{" "}
                     <span className="relative inline-block">
-                        <span className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-orange-500 via-orange-500 to-orange-500 bg-clip-text text-transparent">
                             Trading System.
                         </span>
                     </span>

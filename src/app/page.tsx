@@ -80,11 +80,10 @@ export default function HomePage() {
 
         <div className="mt-8 flex justify-center gap-4">
           <Link
-            href="https://typebot.co/obaol-early-access"
-            target="_blank"
+            href="/auth"
             className="px-6 py-3 rounded-md bg-warning text-warning-foreground font-medium hover:opacity-90 transition-opacity"
           >
-            Apply for Early Access
+            Sign In
           </Link>
         </div>
       </section>

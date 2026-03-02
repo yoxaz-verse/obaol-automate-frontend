@@ -405,7 +405,7 @@ export default function ResponsibilityTransferSection() {
                         exit={{ opacity: 0, y: -8 }}
                         className="flex gap-3 p-3 rounded-xl bg-orange-400/5 border border-orange-400/15"
                       >
-                        <span className="w-1 flex-shrink-0 rounded-full bg-gradient-to-b from-orange-400 to-yellow-400 self-stretch" />
+                        <span className="w-1 flex-shrink-0 rounded-full bg-gradient-to-b from-orange-400 to-orange-400 self-stretch" />
                         <div>
                           <p className="text-sm font-bold text-foreground tracking-wide">
                             {stage?.label}

@@ -68,11 +68,11 @@ export default function HeroSection() {
         {/* Top-left: primary hue */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-300/16 dark:bg-primary-500/10 blur-[120px] rounded-full" />
         {/* Bottom-right: warm orange */}
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-amber-300/14 dark:bg-orange-500/10 blur-[150px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-orange-300/14 dark:bg-orange-500/10 blur-[150px] rounded-full" />
         {/* Center subtle accent — barely visible in light */}
         <div className="absolute top-[40%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[80%] h-[80%] bg-emerald-500/5 dark:bg-emerald-500/5 blur-[150px] rounded-full" />
         {/* Light mode: clean top gradient wash */}
-        <div className="absolute inset-0 dark:hidden bg-gradient-to-b from-orange-50/80 via-amber-50/35 to-transparent" />
+        <div className="absolute inset-0 dark:hidden bg-gradient-to-b from-orange-50/80 via-orange-50/35 to-transparent" />
         <div className="absolute inset-0 dark:hidden bg-[radial-gradient(circle_at_50%_22%,rgba(251,146,60,0.13),transparent_52%)]" />
       </motion.div>
 
@@ -145,7 +145,7 @@ export default function HeroSection() {
               className="relative z-20 block mt-0 sm:mt-1 md:-mt-10"
             >
               {/* Orange gradient text — looks great in both modes */}
-              <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-500 dark:from-orange-200 dark:via-orange-400 dark:to-yellow-500 bg-clip-text text-transparent">
+              <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-orange-500 dark:from-orange-200 dark:via-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
                 Agro Commodity Trade.
               </span>
             </motion.span>
@@ -173,8 +173,7 @@ export default function HeroSection() {
             {/* Minimalist CTA */}
 
             <Link
-              href="https://typebot.co/obaol-early-access"
-              target="_blank"
+              href="/auth"
               className={[
                 "relative flex items-center justify-center gap-3 px-10 py-5 rounded-2xl overflow-hidden",
                 "transition-all duration-300 group-hover:scale-[1.03]",
@@ -195,7 +194,7 @@ export default function HeroSection() {
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-orange-100/30 dark:via-white/10 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
 
               <span className="relative z-10 text-foreground font-bold tracking-wide text-lg">
-                Enter The Network
+                Sign In
               </span>
 
               {/* Arrow */}

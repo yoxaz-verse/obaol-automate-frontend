@@ -22,6 +22,14 @@ export default function DeveloperLoginPage() {
     () => process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL || "",
     []
   );
+  const devApiOrigin = useMemo(() => {
+    if (!devApiBase) return "";
+    try {
+      return new URL(devApiBase).origin;
+    } catch (_error) {
+      return "";
+    }
+  }, [devApiBase]);
   const googleClientId = useMemo(
     () => process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
     []
@@ -41,9 +49,8 @@ export default function DeveloperLoginPage() {
     }
 
     try {
-      const apiOrigin = new URL(devApiBase).origin;
       const appOrigin = window.location.origin;
-      if (apiOrigin === appOrigin) {
+      if (devApiOrigin && devApiOrigin === appOrigin) {
         setConfigWarning(
           "Developer OAuth must target dedicated obaol-api host, not same frontend origin."
         );
@@ -118,7 +125,7 @@ export default function DeveloperLoginPage() {
     return () => {
       document.body.removeChild(script);
     };
-  }, [devApiBase, googleClientId, router]);
+  }, [devApiBase, devApiOrigin, googleClientId, router]);
 
   const handleBackendOAuthStart = () => {
     if (!devApiBase) {
@@ -128,7 +135,13 @@ export default function DeveloperLoginPage() {
       return;
     }
     try {
-      if (new URL(devApiBase).origin === window.location.origin) {
+      if (!devApiOrigin) {
+        setError(
+          "NEXT_PUBLIC_OBAOL_API_BASE_URL is invalid. Use full origin, e.g. http://localhost:5002."
+        );
+        return;
+      }
+      if (devApiOrigin === window.location.origin) {
         setError(
           "Developer OAuth must target dedicated obaol-api host. Set NEXT_PUBLIC_OBAOL_API_BASE_URL to a different origin (e.g. http://localhost:5002)."
         );
@@ -141,7 +154,7 @@ export default function DeveloperLoginPage() {
       return;
     }
     const redirectUri = `${window.location.origin}/developer/login`;
-    const startUrl = `${devApiBase}/api/developer/auth/google/start?redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const startUrl = `${devApiOrigin}/api/developer/auth/google/start?redirect_uri=${encodeURIComponent(redirectUri)}`;
     window.location.href = startUrl;
   };
 

@@ -42,7 +42,9 @@ import {
 import EditModal from "@/components/CurdTable/edit-model";
 import DeleteModal from "@/components/CurdTable/delete";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import TableFrame from "@/components/CurdTable/table-frame";
 import { useCurrency } from "@/context/CurrencyContext";
+import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 
 /**
  * Props for your existing VariantRate component
@@ -198,15 +200,64 @@ const VariantRate: React.FC<VariantRateProps> = ({
         // Reuse the same Add Rate flow across Marketplace/Products/Catalog:
         // if no variant is preselected, allow selecting Product Variant in the form.
         if (rate === "variantRate") {
-          variantRateFormFields = (variantRateFormFields || []).map((field: any) => {
-            if (field.key !== "productVariant") return field;
-            return {
-              ...field,
-              inForm: !hasFixedProductVariant,
-              required: !hasFixedProductVariant,
-              label: "Product Variant",
-            };
-          });
+          if (!hasFixedProductVariant) {
+            // Inject Category -> SubCategory -> Product hierarchy if not fixed
+            const hierarchicalFields = [
+              {
+                label: "Category",
+                type: "select",
+                key: "category",
+                values: [],
+                dynamicValuesFn: () => fetchDependentOptions("category"),
+                inForm: true,
+                required: true,
+              },
+              {
+                label: "Sub Category",
+                type: "select",
+                key: "subCategory",
+                dependsOn: "category",
+                values: [],
+                dynamicValuesFn: (categoryId: string) => fetchDependentOptions("subCategory", "category", categoryId),
+                inForm: true,
+                required: true,
+              },
+              {
+                label: "Product",
+                type: "select",
+                key: "product",
+                dependsOn: "subCategory",
+                values: [],
+                dynamicValuesFn: (subCategoryId: string) => fetchDependentOptions("product", "subCategory", subCategoryId),
+                inForm: true,
+                required: true,
+              }
+            ];
+
+            // Prepend hierarchical fields and update productVariant dependency
+            variantRateFormFields = [
+              ...hierarchicalFields,
+              ...(variantRateFormFields || []).map((field: any) => {
+                if (field.key !== "productVariant") return field;
+                return {
+                  ...field,
+                  inForm: true,
+                  required: true,
+                  label: "Product Variant",
+                  dependsOn: "product",
+                  dynamicValuesFn: (productId: string) => fetchDependentOptions("productVariant", "product", productId),
+                };
+              })
+            ];
+          } else {
+            // If fixed, just ensure productVariant is in correct state (usually it's hidden or disabled since we pass it in additionalVariable)
+            variantRateFormFields = (variantRateFormFields || []).map((field: any) => {
+              if (field.key === "productVariant") {
+                return { ...field, inForm: false }; // Hide it as it's pre-selected
+              }
+              return field;
+            });
+          }
         }
 
         if (user?.role === "Associate") {
@@ -384,319 +435,238 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <div className="w-full max-w-full min-w-0">
-            <div className="flex justify-between items-center gap-4 mb-4">
-              {!displayOnly && rate === "variantRate" ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <DynamicFilter
-                      currentTable={"variantRate"}
-                      formFields={filterVariantRateFormFields}
-                      onApply={handleFiltersUpdate}
-                    />
-                    {!hasFixedProductVariant && (
-                      <span className="text-[11px] text-default-400 hidden sm:inline">
-                        Select product variant while adding rate.
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    <AddModal
-                      name="Rate"
-                      currentTable={rate}
-                      formFields={variantRateFormFields}
-                      apiEndpoint={apiRoutesByRole[rate]}
-                      refetchData={refetchData}
-                      additionalVariable={{
-                        ...(productVariantValue && {
-                          productVariant: productVariantValue._id,
-                        }),
-                        ...(user?.role === "Associate" && {
-                          associate: user?.id,
-                        }),
-                      }}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center justify-between w-full">
-                  <DynamicFilter
-                    currentTable={"variantRate"}
-                    formFields={filterVariantRateFormFields}
-                    onApply={handleFiltersUpdate}
-                  />
-                  <span className="text-sm font-semibold text-default-500">
-                    Product Catalog
-                  </span>
-                </div>
+            <div className="flex justify-between items-center gap-3 mb-4">
+              <DynamicFilter
+                currentTable={"variantRate"}
+                formFields={filterVariantRateFormFields}
+                onApply={handleFiltersUpdate}
+              />
+              {!displayOnly && rate === "variantRate" && (
+                <AddModal
+                  name="Rate"
+                  currentTable={rate}
+                  formFields={variantRateFormFields}
+                  apiEndpoint={apiRoutesByRole[rate]}
+                  refetchData={refetchData}
+                  additionalVariable={{
+                    ...(productVariantValue && { productVariant: productVariantValue._id }),
+                    ...(user?.role === "Associate" && { associate: user?.id }),
+                  }}
+                />
               )}
             </div>
             <div className="h-5" />
-            {tableData.length === 0 && (
-              <div className="rounded-xl border border-default-200 bg-default-50/60 px-4 py-6 text-center text-sm text-default-500">
-                No rates found for the selected marketplace view.
-              </div>
-            )}
-            <section className="hidden md:block w-full">
-              <CommonTable
-                TableData={tableData}
-                columns={columns}
-                isLoading={false}
-                otherModal={(rowItem: any) => {
-                  if (rowItem.isMarketplaceView) {
+            <section className="hidden md:block w-full min-w-0 max-w-full overflow-hidden">
+              <TableFrame>
+                <CommonTable
+                  TableData={tableData}
+                  columns={columns}
+                  isLoading={false}
+                  otherModal={(rowItem: any) => {
+                    if (rowItem.isMarketplaceView) {
+                      return (
+                        <div className="flex items-center gap-2">
+                          {!isAdminUser && (
+                            <AddToCatalogButton
+                              rowItem={rowItem}
+                              onSuccess={() => refetchData()}
+                            />
+                          )}
+                          {(user?.role === "Associate" || isAdminUser) && (
+                            <CreateEnquiryButton
+                              productVariant={rowItem.productVariantId}
+                              variantRate={rowItem}
+                            />
+                          )}
+                        </div>
+                      );
+                    }
                     return (
-                      <div className="flex items-center gap-2">
-                        {!isAdminUser && (
-                          <AddToCatalogButton
-                            rowItem={rowItem}
-                            onSuccess={() => refetchData()}
-                          />
-                        )}
-                        {(user?.role === "Associate" || isAdminUser) && (
-                          <CreateEnquiryButton
-                            productVariant={rowItem.productVariantId}
-                            variantRate={rowItem}
-                          />
+                      <div className="flex items-center justify-end">
+                        {/* LiveToggle or Live Chip */}
+                        {(user?.role?.toLowerCase() === "admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <LiveToggle
+                              variantRate={rowItem}
+                              refetchData={refetchData}
+                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                            />
+                            {rowItem.isCatalogView && !rowItem.supplierIsLive && (
+                              <Tooltip content="Supplier rate is currently not live. This item will not be visible to buyers.">
+                                {/* @ts-ignore */}
+                                <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
+                              </Tooltip>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1">
+                            {rowItem.isLive ? (
+                              <div className="flex items-center gap-2">
+                                {/* @ts-ignore */}
+                                <Chip color={"success"} variant="dot" size="sm">
+                                  Live
+                                </Chip>
+                                {!rowItem.isCatalogView && (
+                                  <CreateEnquiryButton
+                                    productVariant={
+                                      rowItem.productVariantId ||
+                                      rowItem.variantRate?.productVariant?._id
+                                    }
+                                    variantRate={rowItem}
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
+                                Not Live
+                              </span>
+                            )}
+                            <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
+                          </div>
                         )}
                       </div>
                     );
-                  }
-                  return (
-                    <div className="flex items-center justify-end">
-                      {/* LiveToggle or Live Chip */}
-                      {(user?.role?.toLowerCase() === "admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <LiveToggle
-                            variantRate={rowItem}
+                  }}
+                  editModal={(item: any) => {
+                    if (!user) return null;
+                    const isAdmin = user.role?.toLowerCase() === "admin";
+                    const isOwner = item.isOwnerView;
+
+                    if (isAdmin || isOwner) {
+                      const isCoolingTime = isCooling(item.coolingStartTime);
+                      const isDifferentAssociate = item.associateId !== user.id;
+
+                      if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                        return (
+                          <EditModal
+                            _id={item._id}
+                            initialData={item}
+                            currentTable={rate}
+                            formFields={tableConfig[rate]}
+                            apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
                             refetchData={refetchData}
-                            apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
                           />
-                          {rowItem.isCatalogView && !rowItem.supplierIsLive && (
-                            <Tooltip content="Supplier rate is currently not live. This item will not be visible to customers.">
-                              {/* @ts-ignore */}
-                              <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
-                            </Tooltip>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-1">
-                          {rowItem.isLive ? (
-                            <div className="flex items-center gap-2">
-                              {/* @ts-ignore */}
-                              <Chip color={"success"} variant="dot" size="sm">
-                                Live
-                              </Chip>
-                              {!rowItem.isCatalogView && (
-                                <CreateEnquiryButton
-                                  productVariant={
-                                    rowItem.productVariantId ||
-                                    rowItem.variantRate?.productVariant?._id
-                                  }
-                                  variantRate={rowItem}
-                                />
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
-                              Not Live
-                            </span>
-                          )}
-                          <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }}
-                editModal={(item: any) => {
-                  if (!user) return null;
-                  const isAdmin = user.role?.toLowerCase() === "admin";
-                  const isOwner = item.isOwnerView;
+                        );
+                      }
+                    }
+                    return null;
+                  }}
+                  deleteModal={(item: any) => {
+                    if (!user) return null;
+                    const isAdmin = user.role?.toLowerCase() === "admin";
+                    const isOwner = item.isOwnerView;
+                    const isCatalog = item.isCatalogView;
 
-                  if (isAdmin || isOwner) {
-                    const isCoolingTime = isCooling(item.coolingStartTime);
-                    const isDifferentAssociate = item.associateId !== user.id;
-
-                    if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                    if (isAdmin || isOwner || isCatalog) {
                       return (
-                        <EditModal
+                        <DeleteModal
                           _id={item._id}
-                          initialData={item}
-                          currentTable={rate}
-                          formFields={tableConfig[rate]}
-                          apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                          name={item.name || item.customTitle || item.productVariant}
+                          deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
                           refetchData={refetchData}
+                          useBody={true}
                         />
                       );
                     }
-                  }
-                  return null;
-                }}
-                deleteModal={(item: any) => {
-                  if (!user) return null;
-                  const isAdmin = user.role?.toLowerCase() === "admin";
-                  const isOwner = item.isOwnerView;
-                  const isCatalog = item.isCatalogView;
-
-                  if (isAdmin || isOwner || isCatalog) {
-                    return (
-                      <DeleteModal
-                        _id={item._id}
-                        name={item.name || item.customTitle || item.productVariant}
-                        deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                        refetchData={refetchData}
-                        useBody={true}
-                      />
-                    );
-                  }
-                  return null;
-                }}
-              />
+                    return null;
+                  }}
+                />
+              </TableFrame>
             </section >
-            <section className="md:hidden space-y-4">
+            <section className="md:hidden space-y-2">
               {tableData.map((item: any, index: number) => {
                 const isLive = item.isLive;
                 return (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.04 }}
+                    className="rounded-2xl border border-foreground/[0.07] bg-foreground/[0.02] px-4 py-3"
                   >
-                    <Card
-                      {...({
-                        className: "border-none bg-white/70 dark:bg-slate-900/40 backdrop-blur-md shadow-sm border border-divider/50",
-                        shadow: "sm",
-                      } as any)}
-                    >
-                      <CardBody className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-black text-xs text-primary-500 uppercase tracking-widest mb-1 truncate">
-                              {item.product || "Product"}
-                            </h3>
-                            <h2 className="text-lg font-bold text-foreground leading-tight truncate mb-1">
-                              {item.productVariant || "Variant"}
-                            </h2>
-                            <div className="flex items-center gap-1.5 text-default-500">
-                              <FiUser size={12} className="shrink-0" />
-                              <span className="text-[11px] font-bold truncate">{item.associate || "N/A"}</span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            {isLive ? (
-                              <Chip
-                                {...({
-                                  size: "sm",
-                                  variant: "flat",
-                                  color: "success",
-                                  startContent: <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse mx-1" />,
-                                  className: "h-6 text-[10px] font-black uppercase tracking-widest px-2"
-                                } as any)}
-                              >
-                                Live
-                              </Chip>
-                            ) : (
-                              <Chip
-                                {...({
-                                  size: "sm",
-                                  variant: "flat",
-                                  color: "default",
-                                  className: "h-6 text-[10px] font-black uppercase tracking-widest px-2"
-                                } as any)}
-                              >
-                                Offline
-                              </Chip>
-                            )}
-                            {item.isAdded && !item.supplierIsLive && (
-                              <Tooltip content="Supplier rate is currently not live.">
-                                <Chip
-                                  {...({
-                                    size: "sm",
-                                    color: "danger",
-                                    variant: "flat",
-                                    className: "h-5 text-[9px] font-bold"
-                                  } as any)}
-                                >
-                                  Supplier Off
-                                </Chip>
-                              </Tooltip>
-                            )}
-                          </div>
+                    {/* Top row: product info + live badge */}
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <p className="text-[10px] font-semibold text-warning-500 uppercase tracking-widest truncate mb-0.5">
+                          {item.product || "Product"}
+                        </p>
+                        <p className="text-sm font-bold text-foreground truncate">
+                          {item.productVariant || "Variant"}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <FiUser size={10} className="shrink-0 text-default-400" />
+                          <span className="text-[10px] text-default-400 truncate">{item.associate || "N/A"}</span>
                         </div>
-
-                        <Divider className="my-3 opacity-50" />
-
-                        <div className="flex justify-between items-end">
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-0.5">Indicative Rate</span>
-                            <div className="text-2xl font-black text-foreground flex items-baseline gap-1">
-                              {item.rate || "N/A"}
-                            </div>
-                            {isAdminUser && item.isMarketplaceView && (
-                              <span className={`mt-1 text-[10px] font-bold uppercase tracking-wide ${String(item.commissionStatus || "") === "+" ? "text-success-600" : "text-warning-600"}`}>
-                                {item.commissionStatus || "-"}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {/* Action Buttons */}
-                            {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
-                              <div className="flex items-center gap-2">
-                                <EditModal
-                                  _id={item._id}
-                                  initialData={item}
-                                  currentTable={rate}
-                                  formFields={tableConfig[rate]}
-                                  apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
-                                  refetchData={refetchData}
-                                />
-                                <DeleteModal
-                                  _id={item._id}
-                                  name={item.name || item.customTitle || item.productVariant}
-                                  deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                                  refetchData={refetchData}
-                                  useBody={true}
-                                />
-                              </div>
-                            ) : item.isMarketplaceView ? (
-                              <div className="flex items-center gap-2">
-                                {!isAdminUser && (
-                                  <AddToCatalogButton
-                                    rowItem={item}
-                                    onSuccess={() => refetchData()}
-                                  />
-                                )}
-                                {(user?.role === "Associate" || isAdminUser) && (
-                                  <CreateEnquiryButton
-                                    productVariant={item.productVariantId}
-                                    variantRate={item}
-                                  />
-                                )}
-                              </div>
-                            ) : (
-                              !item.isCatalogView && isLive && (
-                                <CreateEnquiryButton
-                                  productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
-                                  variantRate={item}
-                                />
-                              )
-                            )}
-                          </div>
-                        </div>
-
-                        {(user?.role?.toLowerCase() === "admin" || (item.isOwnerView && !item.isCatalogView)) && (
-                          <div className="mt-4 pt-3 border-t border-divider/30 flex justify-between items-center">
-                            <span className="text-[11px] font-bold text-default-400">Visibility Status</span>
-                            <LiveToggle
-                              variantRate={item}
-                              refetchData={refetchData}
-                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
-                            />
-                          </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${isLive
+                          ? "text-success-600 bg-success-500/10"
+                          : "text-default-400 bg-foreground/5"
+                          }`}>
+                          {isLive ? "● Live" : "○ Off"}
+                        </span>
+                        {item.isAdded && !item.supplierIsLive && (
+                          <span className="text-[9px] text-danger-400 font-bold">Supplier Off</span>
                         )}
-                      </CardBody>
-                    </Card>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: rate + actions */}
+                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-foreground/[0.06]">
+                      <div>
+                        <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest">Rate</p>
+                        <p className="text-xl font-black text-foreground">{item.rate || "—"}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
+                          <>
+                            <EditModal
+                              _id={item._id}
+                              initialData={item}
+                              currentTable={rate}
+                              formFields={tableConfig[rate]}
+                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                              refetchData={refetchData}
+                            />
+                            <DeleteModal
+                              _id={item._id}
+                              name={item.name || item.customTitle || item.productVariant}
+                              deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                              refetchData={refetchData}
+                              useBody={true}
+                            />
+                          </>
+                        ) : item.isMarketplaceView ? (
+                          <>
+                            {!isAdminUser && (
+                              <AddToCatalogButton rowItem={item} onSuccess={() => refetchData()} />
+                            )}
+                            {(user?.role === "Associate" || isAdminUser) && (
+                              <CreateEnquiryButton productVariant={item.productVariantId} variantRate={item} />
+                            )}
+                          </>
+                        ) : (
+                          !item.isCatalogView && isLive && (
+                            <CreateEnquiryButton
+                              productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
+                              variantRate={item}
+                            />
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    {(user?.role?.toLowerCase() === "admin" || (item.isOwnerView && !item.isCatalogView)) && (
+                      <div className="flex justify-between items-center mt-2 pt-2 border-t border-foreground/[0.05]">
+                        <span className="text-[10px] text-default-400">Visibility</span>
+                        <LiveToggle
+                          variantRate={item}
+                          refetchData={refetchData}
+                          apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                        />
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
@@ -811,16 +781,16 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         {...({
           placement: "center",
           isOpen: isOpen,
-          className: "dark text-foreground mx-4",
+          className: "text-foreground mx-4",
           onOpenChange: onOpenChange,
           size: "lg",
           backdrop: "blur",
         } as any)}
       >
-        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider/50 max-h-[90vh] overflow-hidden">
+        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider/10 pb-4 px-6">
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
                 <div className="flex items-center gap-4 pt-2">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary-500 shadow-sm shadow-primary/10">
                     <FiMessageSquare size={22} />
@@ -847,7 +817,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
                   onClose={onClose}
                 />
               </ModalBody>
-              <ModalFooter className="flex flex-col gap-2 border-t border-divider/30 py-3 px-6">
+              <ModalFooter className="flex flex-col gap-2 border-t border-divider py-3 px-6">
                 <div className="flex items-center gap-2 text-primary-500 bg-primary-500/10 px-3 py-2 rounded-xl w-full">
                   <FiInfo size={16} />
                   <p className="text-xs font-medium">Our team will respond within 10 minutes</p>
@@ -951,6 +921,8 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
+      const roleLower = String(user?.role || "").toLowerCase();
+      const isEmployeeCreator = roleLower === "employee";
       let resolvedProductId: any =
         variantRate.productId ||
         variantRate.product?._id ||
@@ -1001,6 +973,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         variantRateId: variantRate.isCatalogView ? null : variantRate._id,
         catalogItemId: variantRate.isCatalogView ? variantRate._id : null,
         preferredIncoterm: preferredIncotermId || null,
+        ...(isEmployeeCreator && user?.id ? { assignedEmployeeId: user.id } : {}),
         // Optional name/phone if they were overridden in the form
         ...(name && name !== associateProfile?.name && { name }),
         ...(phoneNumber && phoneNumber !== (associateProfile?.phone || associateProfile?.phoneNumber) && { phoneNumber }),

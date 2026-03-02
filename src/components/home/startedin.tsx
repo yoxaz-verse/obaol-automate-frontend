@@ -64,8 +64,8 @@ export default function StartedIn() {
           className="max-w-4xl mb-20 md:mb-24"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-foreground">
-            <span className="text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.3)]">Started</span> in the{" "}
-            <span className="text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]">Indian Market</span>.<br />
+            <span className="text-orange-500">Started</span> in the{" "}
+            <span className="text-green-500">Indian Market</span>.<br />
             Designed for Domestic & Global Trade.
           </h2>
 
@@ -82,7 +82,7 @@ export default function StartedIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="p-8 md:p-10 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500"
+            className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] transition-all duration-500"
           >
             <p className="text-base md:text-lg text-default-400 leading-relaxed">
               We began by building and validating the system in India — not
@@ -101,7 +101,7 @@ export default function StartedIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="p-8 md:p-10 rounded-3xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 to-transparent backdrop-blur-2xl shadow-[0_0_50px_rgba(251,146,60,0.1)] hover:border-orange-500/40 hover:shadow-[0_0_60px_rgba(251,146,60,0.15)] transition-all duration-500"
+            className="p-8 md:p-10 rounded-3xl border border-orange-500/20 bg-orange-500/[0.03] backdrop-blur-2xl shadow-none hover:border-orange-500/40 transition-all duration-500"
           >
             <p className="text-base md:text-lg text-foreground font-medium leading-relaxed">
               Validating execution under these conditions ensures the same
@@ -123,8 +123,8 @@ export default function StartedIn() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mt-20 md:mt-24 relative"
         >
-          <div className="h-px w-full bg-gradient-to-r from-orange-500/0 via-orange-500/50 to-green-500/0" />
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-48 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-50 blur-[2px]" />
+          <div className="h-px w-full bg-gradient-to-r from-orange-500/0 via-orange-500/30 to-green-500/0" />
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-48 h-px bg-gradient-to-r from-transparent via-default-200 to-transparent opacity-30" />
           <p className="mt-8 text-sm md:text-base font-medium text-default-400 max-w-3xl leading-relaxed text-center sm:text-left">
             A system proven in a high-complexity domestic market is structurally
             ready to support global commodity trade execution.

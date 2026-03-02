@@ -14,7 +14,7 @@ export default function StatementSection() {
     // Parallax background glow
     const glowY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
     const glowScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.2, 0.9]);
-    const glowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [0, 0.15, 0.15, 0]);
+    const glowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [0, 0.08, 0.08, 0]);
 
     return (
         <section
@@ -65,8 +65,7 @@ export default function StatementSection() {
                     transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     className="mx-auto mt-10 mb-10 h-[2px] w-32 origin-center relative"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-400 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-400 to-transparent blur-sm" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
                 </motion.div>
 
                 {/* Line 2 — Grand reveal with scale */}
@@ -79,17 +78,9 @@ export default function StatementSection() {
                 >
                     A Complete{" "}
                     <span className="relative inline-block">
-                        <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
                             Trading System.
                         </span>
-                        {/* Underline glow accent */}
-                        <motion.span
-                            initial={{ scaleX: 0, opacity: 0 }}
-                            whileInView={{ scaleX: 1, opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="absolute -bottom-2 left-0 right-0 h-[3px] origin-left bg-gradient-to-r from-orange-400/80 via-yellow-400/60 to-transparent rounded-full"
-                        />
                     </span>
                 </motion.h2>
 

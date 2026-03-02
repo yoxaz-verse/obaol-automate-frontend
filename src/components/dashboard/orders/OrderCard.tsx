@@ -17,7 +17,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
     // Extract data safely
     const product = data.enquiry?.productVariant?.product?.name || "Product";
     const variant = data.enquiry?.productVariant?.name || "Variant";
-    const customer = data.enquiry?.name || "Customer";
+    const clientName = data.enquiry?.name || "Client";
     const company = data.enquiry?.associateCompany?.name || "Direct";
     const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "Recent";
     const status = data.status || "Procuring";
@@ -58,16 +58,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action }) => {
             </CardHeader>
 
             <CardBody className="px-4 py-4 space-y-4">
-                {/* Customer Identity */}
+                {/* Client Identity */}
                 <div className="flex items-center gap-3">
                     <Avatar
                         radius="full"
                         size="sm"
-                        name={customer[0]}
+                        name={clientName[0]}
                         className="bg-secondary-50 text-secondary-600 font-black border border-secondary-100 shadow-sm"
                     />
                     <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-tight truncate">{customer}</p>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-tight truncate">{clientName}</p>
                         <p className="text-[10px] font-semibold text-default-400 uppercase tracking-wider truncate">{company}</p>
                     </div>
                 </div>

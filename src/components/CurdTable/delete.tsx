@@ -27,8 +27,14 @@ export default function DeleteModal({
   triggerText,
   triggerColor = "danger",
   refetchData,
+  isOpen: controlledOpen,
+  onClose: controlledClose,
 }: DeleteModalProps & { triggerText?: string; triggerColor?: any; refetchData?: () => void }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: disclosureOpen, onOpen, onOpenChange: disclosureOnOpenChange } = useDisclosure();
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : disclosureOpen;
+  const onOpenChange = isControlled ? controlledClose : disclosureOnOpenChange;
+
   const [loading, setLoading] = useState(false);
 
   const deleteItem = useMutation({
@@ -65,23 +71,25 @@ export default function DeleteModal({
 
   return (
     <>
-      <div className="flex items-center">
-        {triggerText ? (
-          <Button size="sm" color={triggerColor} variant="flat" onPress={onOpen}>
-            {triggerText}
-          </Button>
-        ) : (
-          <Tooltip color="danger" content="Delete">
-            <span
-              onClick={onOpen}
-              className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-danger transition-colors"
-            >
-              <FiTrash2 size={18} className="text-default-400 group-hover:text-danger" />
-              <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
-            </span>
-          </Tooltip>
-        )}
-      </div>
+      {!isControlled && (
+        <div className="flex items-center">
+          {triggerText ? (
+            <Button size="sm" color={triggerColor} variant="flat" onPress={onOpen}>
+              {triggerText}
+            </Button>
+          ) : (
+            <Tooltip color="danger" content="Delete">
+              <span
+                onClick={onOpen}
+                className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-danger transition-colors"
+              >
+                <FiTrash2 size={18} className="text-default-400 group-hover:text-danger" />
+                <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+              </span>
+            </Tooltip>
+          )}
+        </div>
+      )}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
         <ModalContent>
           {(onClose) => (

@@ -16,7 +16,7 @@ export default function Product() {
     <div className="flex flex-col items-center w-full">
       <div className="w-full px-4 md:px-0 md:w-[95%]">
         <div className="min-h-[70vh] pb-10">
-          <div className="flex justify-between items-center mb-4 overflow-x-auto pb-2 no-scrollbar">
+          <div className="mb-4">
             {/* Tabs for selecting between different roles */}
             {/* @ts-ignore */}
             <Tabs
@@ -24,10 +24,11 @@ export default function Product() {
               selectedKey={currentTable}
               onSelectionChange={(key) => setCurrentTable(key as string)}
               variant="underlined"
+              className="w-full"
               classNames={{
-                tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider",
+                tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider flex-nowrap overflow-x-auto no-scrollbar",
                 cursor: "w-full bg-primary h-[3px]",
-                tab: "max-w-fit px-0 h-10",
+                tab: "max-w-fit px-0 h-10 flex-shrink-0",
                 tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[11px]"
               }}
             >

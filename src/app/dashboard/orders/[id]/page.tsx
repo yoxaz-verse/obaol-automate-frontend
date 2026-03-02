@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -20,6 +21,7 @@ import {
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import AuthContext from "@/context/AuthContext";
 
 dayjs.extend(relativeTime);
 
@@ -63,6 +65,7 @@ const MILESTONE_LABELS: Record<string, string> = {
 };
 
 export default function OrderDetailsPage() {
+    const { user } = useContext(AuthContext);
     const { id } = useParams();
     const orderId = Array.isArray(id) ? id[0] : id;
     const queryClient = useQueryClient();
@@ -256,6 +259,23 @@ export default function OrderDetailsPage() {
 
     if (isLoading) return <div>Loading...</div>;
     if (!order) return <div>Order not found</div>;
+    const roleLower = String(user?.role || "").toLowerCase();
+    const isEmployeeUser = roleLower === "employee";
+    const assignedEmployeeId = (
+        (linkedEnquiry as any)?.assignedEmployeeId?._id ||
+        (linkedEnquiry as any)?.assignedEmployeeId ||
+        (order as any)?.enquiry?.assignedEmployeeId?._id ||
+        (order as any)?.enquiry?.assignedEmployeeId ||
+        ""
+    ).toString();
+    if (isEmployeeUser && (!user?.id || assignedEmployeeId !== String(user.id))) {
+        return (
+            <div className="p-10 text-center">
+                <p className="text-lg font-semibold">Access restricted</p>
+                <p className="text-default-500 mt-2">This order is not assigned to you.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full p-6 flex flex-col gap-6">

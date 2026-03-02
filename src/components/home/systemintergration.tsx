@@ -125,15 +125,12 @@ export default function SystemIntergrationSection() {
             className="relative"
           >
             <motion.div
-              whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="p-8 md:p-10 rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-2xl relative overflow-hidden shadow-2xl"
+              className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl relative overflow-hidden shadow-none"
             >
               {/* Internal grid glow */}
-              <div className="absolute inset-0 pointer-events-none opacity-20">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/30 blur-[60px]" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 blur-[60px]" />
-              </div>
+              {/* Internal cleaned up card */}
+
 
               <div className="space-y-4 text-sm text-default-600 relative z-10">
                 <SystemLine label="Live Rates API" highlight />
@@ -143,36 +140,12 @@ export default function SystemIntergrationSection() {
                 <SystemLine label="Enterprise Webhooks" />
               </div>
 
-              {/* Animated Background */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none"
-                animate={{
-                  opacity: [0.2, 0.5, 0.2],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+              {/* Static background */}
+              <div className="absolute inset-0 bg-orange-500/[0.02] pointer-events-none" />
             </motion.div>
 
-            {/* Subtle Glow */}
-            <motion.div
-              className="absolute inset-0 rounded-3xl border border-orange-500/30 shadow-[0_0_80px_rgba(251,146,60,0.1)] pointer-events-none"
-              animate={{
-                boxShadow: [
-                  "0_0_60px_rgba(255,165,0,0.15)",
-                  "0_0_80px_rgba(255,165,0,0.25)",
-                  "0_0_60px_rgba(255,165,0,0.15)",
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+            {/* Subtle border accent */}
+            <div className="absolute inset-0 rounded-3xl border border-orange-500/20 pointer-events-none" />
           </motion.div>
         </motion.div>
       </div>
@@ -201,24 +174,14 @@ function SystemLine({
         }`}
     >
       <span className="font-medium">{label}</span>
-      <motion.span
+      <span
         className={`text-xs px-3 py-1.5 font-bold tracking-widest uppercase rounded-lg ${highlight
-          ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-          : "bg-white/5 text-default-500 border border-transparent"
+          ? "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+          : "bg-default-100 text-default-500 border border-transparent"
           }`}
-        animate={highlight ? { opacity: [1, 0.7, 1] } : {}}
-        transition={
-          highlight
-            ? {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }
-            : {}
-        }
       >
         {highlight ? "Active" : "Available"}
-      </motion.span>
+      </span>
     </motion.div>
   );
 }

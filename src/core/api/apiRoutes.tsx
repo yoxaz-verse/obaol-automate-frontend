@@ -19,7 +19,6 @@ const BASE_PATHS = {
   PROJECT_TYPE: "/project-types",
   PROJECT_STATUS: "/project-statuses",
   TIME_SHEET: "/time-sheets",
-  CUSTOMER: "/customers",
   WORKER: "/workers",
   STATUS: "/statuses",
   STATUS_HISTORY: "/status-histories",
@@ -54,6 +53,9 @@ const BASE_PATHS = {
   JOB_TYPE: "/job-types",
   LANGUAGE: "/languages",
   INCOTERM: "/incoterms",
+  COMPANY_FUNCTION: "/company-functions",
+  COMPANY_SUB_FUNCTION: "/company-sub-functions",
+  COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
 };
 
 // Define account-related routes separately
@@ -61,7 +63,6 @@ export const accountRoutes = {
   superAdminLogin: "/superadmin/login",
   adminLogin: "/admin/login",
   managerLogin: "/manager/login",
-  customerLogin: "/customer/login",
   servicesLogin: "/services/login",
   workerLogin: "/worker/login",
 };
@@ -157,12 +158,6 @@ export const projectStatusRoutes = addCustomRoutes(
     // If you have other custom routes for projectType, add them here
   }
 );
-export const customerRoutes = addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.CUSTOMER),
-  {
-    // If you have other custom routes for customer, add them here
-  }
-);
 export const workerRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.WORKER),
   {
@@ -234,6 +229,9 @@ export const jobRoleRoutes = createCRUDRoutes(BASE_PATHS.JOB_ROLE);
 export const jobTypeRoutes = createCRUDRoutes(BASE_PATHS.JOB_TYPE);
 export const languageRoutes = createCRUDRoutes(BASE_PATHS.LANGUAGE);
 export const incotermRoutes = createCRUDRoutes(BASE_PATHS.INCOTERM);
+export const companyFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION);
+export const companySubFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_SUB_FUNCTION);
+export const companyFunctionMappingRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION_MAPPING);
 
 export const generalIntentRoutes = createCRUDRoutes(BASE_PATHS.GENERAL_INTENT);
 export const companyStageRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_STAGE);
@@ -258,6 +256,13 @@ export const dashboardRoutes = {
   associateMetrics: `${ANALYTICS_BASE}/metrics/associate`,
 };
 
+export const approvalRoutes = {
+  associatesList: "/approvals/associates",
+  associateAction: "/approvals/associates",
+  companiesList: "/approvals/companies",
+  companyAction: "/approvals/companies",
+};
+
 export const catalogRoutes = {
   add: "/catalog/add",
   update: "/catalog", // + /:id
@@ -275,6 +280,7 @@ export const brandPublicRoutes = {
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
+  approvals: approvalRoutes,
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,
@@ -286,7 +292,6 @@ export const apiRoutes = {
   activityFile: activityFileRoutes,
   projectType: projectTypeRoutes,
   projectStatus: projectStatusRoutes,
-  customer: customerRoutes,
   worker: workerRoutes,
   status: statusRoutes,
   subStatus: subStatusRoutes,
@@ -333,5 +338,8 @@ export const apiRoutes = {
   jobType: jobTypeRoutes,
   language: languageRoutes,
   incoterm: incotermRoutes,
+  companyFunction: companyFunctionRoutes,
+  companySubFunction: companySubFunctionRoutes,
+  companyFunctionMapping: companyFunctionMappingRoutes,
   catalog: catalogRoutes,
 };

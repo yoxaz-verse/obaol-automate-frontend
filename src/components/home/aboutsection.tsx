@@ -61,7 +61,7 @@ export default function AboutSection() {
                     whileInView={{ opacity: 1, scale: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative h-[400px] md:h-[600px] w-full rounded-3xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.5)] backdrop-blur-3xl group"
+                    className="relative h-[400px] md:h-[600px] w-full rounded-3xl overflow-hidden bg-black/5 border border-default-200/50 flex items-center justify-center shadow-none backdrop-blur-3xl group"
                 >
                     <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 via-transparent to-indigo-500/10 opacity-30 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
 

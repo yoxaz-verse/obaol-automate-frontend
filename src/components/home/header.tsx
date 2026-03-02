@@ -11,6 +11,8 @@ const NAV_LINKS = [
   { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Products" },
+  { href: "/export-resources", label: "Export Resources" },
+  { href: "/developer/login", label: "Developer" },
   { href: "/faq", label: "FAQ" },
 ];
 
@@ -28,16 +30,16 @@ export default function Header() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-            ? "py-2"
-            : "py-3"
+          ? "py-2"
+          : "py-3"
           }`}
       >
         {/* Glassmorphic pill container */}
         <div className={`mx-auto max-w-7xl px-4 transition-all duration-500`}>
           <div
             className={`flex items-center justify-between rounded-2xl px-4 md:px-6 transition-all duration-500 ${scrolled
-                ? "h-14 bg-background/72 backdrop-blur-2xl border border-foreground/15 shadow-[0_10px_32px_-10px_rgba(0,0,0,0.35)]"
-                : "h-15 md:h-16 bg-background/68 backdrop-blur-2xl border border-foreground/15 shadow-[0_10px_28px_-12px_rgba(0,0,0,0.32)]"
+              ? "h-14 bg-background/80 backdrop-blur-2xl border border-default-200/50 shadow-sm"
+              : "h-15 md:h-16 bg-background/40 backdrop-blur-2xl border border-default-100 shadow-none"
               }`}
           >
             {/* ── LOGO ── */}
@@ -52,8 +54,7 @@ export default function Header() {
               />
               {/* Live status dot */}
               <span className="relative flex h-2 w-2 flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500/80" />
               </span>
             </Link>
 
@@ -78,9 +79,8 @@ export default function Header() {
                 href="https://typebot.co/obaol-early-access"
                 target="_blank"
                 className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold overflow-hidden transition-all duration-300
-                  bg-orange-500 hover:bg-orange-500 text-white
-                  shadow-[0_0_20px_-4px_rgba(251,146,60,0.6)] hover:shadow-[0_0_28px_-2px_rgba(251,146,60,0.8)]
-                  hover:scale-[1.03] active:scale-[0.97]"
+                  bg-orange-500 hover:bg-orange-600 text-white
+                  shadow-none hover:scale-[1.03] active:scale-[0.97]"
               >
                 {/* Shimmer */}
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 skew-x-12" />

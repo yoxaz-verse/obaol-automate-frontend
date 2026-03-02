@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 interface Particle {
     x: number;
@@ -15,8 +14,16 @@ interface Particle {
 export default function ParticleNetwork() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { theme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
+
         const canvas = canvasRef.current;
         const container = containerRef.current;
         if (!canvas || !container) return;
@@ -31,9 +38,16 @@ export default function ParticleNetwork() {
         let containerWidth = container.clientWidth;
         let containerHeight = container.clientHeight;
 
+        const currentTheme = resolvedTheme || theme;
+        const isDark = currentTheme === "dark";
+
         const PARTICLE_COUNT = 80;
         const CONNECTION_DISTANCE = 120;
         const MOUSE_INFLUENCE_RADIUS = 150;
+
+        // Colors based on theme
+        const particleBaseColor = isDark ? "200, 200, 200" : "150, 150, 150";
+        const lineBaseColor = isDark ? "255, 255, 255" : "100, 100, 100";
 
         // Initialize Canvas Size
         const handleResize = () => {
@@ -62,11 +76,6 @@ export default function ParticleNetwork() {
         const drawParticles = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Gradient Line Style
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0.05)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0.2)");
-
             particles.forEach((p, index) => {
                 // Update position
                 p.x += p.vx * p.z; // Parallax effect
@@ -91,8 +100,8 @@ export default function ParticleNetwork() {
 
                 // Draw Particle
                 ctx.beginPath();
-                const opacity = 0.2 * p.z;
-                ctx.fillStyle = `rgba(200, 200, 200, ${opacity})`;
+                const opacity = (isDark ? 0.2 : 0.4) * p.z;
+                ctx.fillStyle = `rgba(${particleBaseColor}, ${opacity})`;
                 ctx.arc(p.x, p.y, p.size * (p.z * 0.6), 0, Math.PI * 2);
                 ctx.fill();
 
@@ -105,8 +114,8 @@ export default function ParticleNetwork() {
 
                     if (dist < CONNECTION_DISTANCE) {
                         ctx.beginPath();
-                        const lineOpacity = (1 - dist / CONNECTION_DISTANCE) * 0.15;
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${lineOpacity})`;
+                        const lineOpacity = (1 - dist / CONNECTION_DISTANCE) * (isDark ? 0.15 : 0.25);
+                        ctx.strokeStyle = `rgba(${lineBaseColor}, ${lineOpacity})`;
                         ctx.lineWidth = 0.5;
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -142,14 +151,15 @@ export default function ParticleNetwork() {
             canvas.removeEventListener("mouseleave", handleMouseLeave);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    }, [mounted, theme, resolvedTheme]);
+
+    if (!mounted) return <div className="w-full h-full relative overflow-hidden" />;
 
     return (
-        <div ref={containerRef} className="w-full h-full relative bg-gray-900 overflow-hidden">
+        <div ref={containerRef} className="w-full h-full relative overflow-hidden">
             <canvas ref={canvasRef} className="absolute inset-0 block" />
-            {/* Optional Overlay Text or Label if needed */}
             <div className="absolute bottom-4 left-4 pointer-events-none">
-                <p className="text-[10px] text-gray-600 tracking-widest uppercase">Global Trade Network</p>
+                <p className="text-[10px] text-default-400 tracking-widest uppercase font-bold opacity-50">Global Trade Network</p>
             </div>
         </div>
     );

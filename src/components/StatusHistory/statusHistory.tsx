@@ -7,6 +7,7 @@ import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
 import { statusHistoryRoutes } from "@/core/api/apiRoutes";
 import CommonTable from "../CurdTable/common-table";
+import TableFrame from "../CurdTable/table-frame";
 import { generateColumns, initialTableConfig } from "@/utils/tableValues";
 
 interface StatusHistoryTabContentProps {
@@ -88,11 +89,13 @@ const StatusHistoryTabContent: React.FC<StatusHistoryTabContentProps> = ({
     <>
       <Spacer y={5} />
       {tableData.length > 0 ? (
-        <CommonTable
-          TableData={tableData}
-          columns={columns}
-          isLoading={!historyData}
-        />
+        <TableFrame>
+          <CommonTable
+            TableData={tableData}
+            columns={columns}
+            isLoading={!historyData}
+          />
+        </TableFrame>
       ) : (
         <div>{""}</div>
       )}

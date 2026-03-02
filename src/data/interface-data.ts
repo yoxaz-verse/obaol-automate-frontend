@@ -113,6 +113,8 @@ export interface EditModalProps {
   apiEndpoint: string;
   refetchData: () => void;
   initialData?: any; // Existing data to populate the form
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export interface QueryComponentProps<T> {
@@ -143,6 +145,8 @@ export interface DeleteModalProps {
   deleteApiEndpoint: string;
   refetchData: () => void;
   useBody?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 export interface DetailsModalProps {
   currentTable: string;
@@ -152,7 +156,14 @@ export interface DetailsModalProps {
 
 export interface TableProps {
   TableData?: any[]; // Optional, with a default fallback
-  columns: { name: string; uid: string; type?: string }[];
+  columns: {
+    name: string;
+    uid: string;
+    type?: string;
+    maxWidth?: string;
+    allowWrap?: boolean;
+    align?: "start" | "center" | "end";
+  }[];
   viewModal?: (item: any) => React.ReactNode;
   deleteModal?: (item: any) => React.ReactNode;
   editModal?: (item: any) => React.ReactNode;
@@ -175,7 +186,7 @@ export interface AddModalProps {
 }
 
 export interface AddFormProps {
-  grid?:string
+  grid?: string
   name?: string;
   currentTable: string;
   formFields: FormField[];
@@ -187,7 +198,7 @@ export interface AddFormProps {
 
 export interface FormField {
   label: string;
-  type: string; // e.g., "text", "email", "select", "multiselect", "file", "textarea"
+  type: string; // e.g., "text", "email", "phone", "select", "multiselect", "file", "textarea"
   filterType?: string;
   key: string;
   inForm: boolean;

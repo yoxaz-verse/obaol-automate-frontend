@@ -8,10 +8,14 @@ import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
+import AuthContext from "@/context/AuthContext";
 
 export default function OrdersPage() {
     const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string>("All");
+    const { user } = React.useContext(AuthContext);
+    const roleLower = String(user?.role || "").toLowerCase();
+    const isEmployeeUser = roleLower === "employee";
 
     return (
         <section className="">
@@ -40,6 +44,15 @@ export default function OrdersPage() {
                             .filter((row: any) => row && typeof row === "object");
                     };
                     const ordersData = extractOrders(orderResponse);
+                    const scopedOrders = ordersData.filter((item: any) => {
+                        if (!isEmployeeUser) return true;
+                        const assignedEmployeeId = (
+                            item?.enquiry?.assignedEmployeeId?._id ||
+                            item?.enquiry?.assignedEmployeeId ||
+                            ""
+                        ).toString();
+                        return Boolean(user?.id && assignedEmployeeId === String(user.id));
+                    });
 
                     return (
                         <div className="flex flex-col items-center w-full">
@@ -72,6 +85,15 @@ export default function OrdersPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                         {ordersData
                                             .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
+                                            .filter((item: any) => {
+                                                if (!isEmployeeUser) return true;
+                                                const assignedEmployeeId = (
+                                                    item?.enquiry?.assignedEmployeeId?._id ||
+                                                    item?.enquiry?.assignedEmployeeId ||
+                                                    ""
+                                                ).toString();
+                                                return Boolean(user?.id && assignedEmployeeId === String(user.id));
+                                            })
                                             .map((item: any) => (
                                                 (() => {
                                                     const orderId = item?._id || item?.id || item?.orderId;
@@ -95,7 +117,7 @@ export default function OrdersPage() {
                                             ))}
                                     </div>
 
-                                    {ordersData.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
+                                    {scopedOrders.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
                                         <div className="text-center py-20 text-default-400 font-medium">
                                             No orders found in this stage.
                                         </div>

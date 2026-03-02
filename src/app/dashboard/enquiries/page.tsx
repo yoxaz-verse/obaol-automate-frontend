@@ -27,6 +27,7 @@ import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 export default function EnquiryPage() {
   const [selectedType, setSelectedType] = React.useState<string>("All");
   const [selectedStage, setSelectedStage] = React.useState<string>("All");
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
   const router = useRouter();
   const tableConfig = { ...initialTableConfig };
   const filteredStatusOptions = useFilteredStatusOptions();
@@ -36,6 +37,9 @@ export default function EnquiryPage() {
     (col: any) => col.key !== "commission" && col.key !== "mediatorCommission"
   );
   const { user } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isSystemAdmin = roleLower === "admin";
+  const isEmployeeUser = roleLower === "employee";
 
   return (
     <section className="">
@@ -49,7 +53,7 @@ export default function EnquiryPage() {
           color="primary"
           variant="flat"
           onPress={() => router.push("/dashboard/marketplace")}
-          className="w-full md:w-auto"
+          className="w-full md:w-auto font-bold tracking-tight rounded-xl"
         >
           Go to Marketplace
         </Button>
@@ -86,7 +90,11 @@ export default function EnquiryPage() {
               ...rest
             } = item;
 
-            const isAdmin = user?.role === "Admin" || user?.role === "Employee";
+            const assignedEmployeeId = (item.assignedEmployeeId?._id || item.assignedEmployeeId || "").toString();
+            const isAssignedEmployee = Boolean(isEmployeeUser && user?.id && assignedEmployeeId === String(user.id));
+            const createdById = (item.createdBy?._id || item.createdBy || "").toString();
+            const isCreatedByEmployee = Boolean(isEmployeeUser && user?.id && createdById === String(user.id));
+            const isAdmin = isSystemAdmin || isAssignedEmployee;
             const data: any = { ...rest, rate: rate || 0 };
 
             // Determine if the user is the mediator
@@ -234,10 +242,17 @@ export default function EnquiryPage() {
               supplierPhone: item.sellerAssociateId?.phone || "N/A",
               buyerPhone: item.buyerAssociateId?.phone || "N/A",
               employeePhone: item.assignedEmployeeId?.phone || "+917306096941",
+              isAssignedEmployee,
+              isCreatedByEmployee,
             };
           });
 
-          const filteredData = tableData.filter((item: any) => {
+          const scopedData = tableData.filter((item: any) => {
+            if (!isEmployeeUser) return true;
+            return Boolean(item.isAssignedEmployee || item.isCreatedByEmployee);
+          });
+
+          const filteredData = scopedData.filter((item: any) => {
             const matchesType = selectedType === "All" || item.type === selectedType;
             const matchesStage = selectedStage === "All" || item.status === selectedStage;
             return matchesType && matchesStage;
@@ -251,12 +266,16 @@ export default function EnquiryPage() {
                 <div className="flex justify-between items-center mb-4 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
                   <Tabs
                     selectedKey={selectedType}
-                    onSelectionChange={(key) => setSelectedType(key as string)}
+                    onSelectionChange={(key) => {
+                      setIsTransitioning(true);
+                      setSelectedType(key as string);
+                      setTimeout(() => setIsTransitioning(false), 400);
+                    }}
                     classNames={{
-                      tabList: "gap-4 sm:gap-8 w-full relative rounded-none p-0 border-b border-divider",
-                      cursor: "w-full bg-primary h-[3px] shadow-[0_-2px_10px_rgba(6,182,212,0.5)]",
+                      tabList: "gap-4 sm:gap-8 w-full relative rounded-none p-0 border-b border-divider shadow-none",
+                      cursor: "w-full bg-primary h-[2px]",
                       tab: "max-w-fit px-0 h-10",
-                      tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[11px]"
+                      tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[10px] opacity-70 group-data-[selected=true]:opacity-100"
                     }}
                     variant="underlined"
                   >
@@ -273,12 +292,16 @@ export default function EnquiryPage() {
                     color="primary"
                     variant="underlined"
                     selectedKey={selectedStage}
-                    onSelectionChange={(key) => setSelectedStage(key as string)}
+                    onSelectionChange={(key) => {
+                      setIsTransitioning(true);
+                      setSelectedStage(key as string);
+                      setTimeout(() => setIsTransitioning(false), 400);
+                    }}
                     classNames={{
-                      tabList: "gap-4 sm:gap-8 w-full relative rounded-none p-0 border-b border-divider",
-                      cursor: "w-full bg-primary h-[3px]",
+                      tabList: "gap-4 sm:gap-8 w-full relative rounded-none p-0 border-b border-divider shadow-none",
+                      cursor: "w-full bg-primary h-[2px]",
                       tab: "max-w-fit px-0 h-10",
-                      tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[11px]"
+                      tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[10px] opacity-70 group-data-[selected=true]:opacity-100"
                     }}
                   >
                     <Tab key="All" title="All Stages" />
@@ -289,42 +312,63 @@ export default function EnquiryPage() {
                   </Tabs>
                 </div>
 
-                <section className="py-2 w-full min-h-[400px]">
-                  <motion.div
-                    layout
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {filteredData.map((item: any, index: number) => (
-                        <motion.div
-                          key={item._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.4, delay: index * 0.05 }}
-                        >
-                          <EnquiryCard
-                            data={item}
-                            action={
-                              <Tooltip
-                                content="View Details"
-                                classNames={{
-                                  content: "bg-content1 text-foreground border border-default-200 shadow-lg"
-                                }}
-                              >
-                                <span
-                                  onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
-                                  className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
+                <section className="py-2 w-full min-h-[400px] relative">
+                  <AnimatePresence mode="wait">
+                    {isTransitioning ? (
+                      <motion.div
+                        key="transition-loader"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/20 backdrop-blur-[2px] rounded-2xl"
+                      >
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary animate-pulse">
+                            Filtering Insights
+                          </p>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key={`${selectedType}-${selectedStage}`}
+                        layout
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.3 }}
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                      >
+                        {filteredData.map((item: any, index: number) => (
+                          <motion.div
+                            key={item._id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: index * 0.02 }}
+                          >
+                            <EnquiryCard
+                              data={item}
+                              action={
+                                <Tooltip
+                                  content="View Details"
+                                  classNames={{
+                                    content: "bg-content1 text-foreground border border-default-200 shadow-none"
+                                  }}
                                 >
-                                  <FiArrowRight size={20} />
-                                </span>
-                              </Tooltip>
-                            }
-                          />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
+                                  <span
+                                    onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
+                                    className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
+                                  >
+                                    <FiArrowRight size={20} />
+                                  </span>
+                                </Tooltip>
+                              }
+                            />
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {filteredData.length === 0 && (
                     <motion.div

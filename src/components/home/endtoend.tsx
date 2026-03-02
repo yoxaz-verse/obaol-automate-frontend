@@ -272,9 +272,8 @@ function TimeCompare({
       <div className="grid md:grid-cols-2 gap-6">
         {/* Traditional */}
         <motion.div
-          whileHover={{ scale: 1.02, y: -4 }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="p-8 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.04] transition-all duration-300 relative overflow-hidden"
+          className="p-8 rounded-2xl border border-default-200/50 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.04] transition-all duration-300 relative overflow-hidden"
         >
           <span className="text-xs uppercase tracking-widest text-default-500 font-bold block mb-2">
             Traditional Method
@@ -301,28 +300,15 @@ function TimeCompare({
 
         {/* OBAOL */}
         <motion.div
-          whileHover={{ scale: 1.02, y: -4 }}
           transition={{ type: "spring", stiffness: 300 }}
-          className={`p-8 rounded-2xl backdrop-blur-xl border transition-all duration-500 relative overflow-hidden group/obaol shadow-2xl
+          className={`p-8 rounded-2xl backdrop-blur-xl border transition-all duration-500 relative overflow-hidden group/obaol shadow-none
             ${highlight
-              ? "bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.15)]"
-              : "border-white/10 bg-white/[0.03] hover:border-orange-400/50 hover:bg-orange-500/5"
+              ? "bg-orange-500/[0.03] border-orange-500/30"
+              : "border-default-200/50 bg-white/[0.03] hover:bg-orange-500/[0.02] hover:border-orange-500/20"
             }`}
         >
-          {/* Glow effect */}
-          {highlight && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-400/10 to-orange-400/0 opacity-0 group-hover/obaol:opacity-100 transition-opacity duration-500"
-              animate={{
-                x: ["-100%", "100%"],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-          )}
+          {/* Cleaned up OBAOL card */}
+
 
           <span className="text-xs uppercase tracking-widest font-bold relative z-10 text-default-400 block mb-2">
             With
@@ -339,10 +325,10 @@ function TimeCompare({
                 className="flex items-center justify-between text-sm md:text-base text-default-300 py-3 border-b border-orange-500/10 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                   <span className="font-medium">{s.label}</span>
                 </div>
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 whitespace-nowrap ml-4 text-base md:text-lg tracking-tight drop-shadow-sm">{s.time}</span>
+                <span className="font-bold text-foreground whitespace-nowrap ml-4 text-base md:text-lg tracking-tight">{s.time}</span>
               </motion.li>
             ))}
           </ul>
@@ -376,26 +362,14 @@ function TotalTimeCard({
 }) {
   return (
     <motion.div
-      whileHover={{ scale: 1.03, y: -5 }}
       transition={{ type: "spring", stiffness: 300, duration: 0.8 }}
       className={`relative p-8 md:p-12 rounded-3xl border overflow-hidden backdrop-blur-xl transition-all duration-500 ${highlight
-        ? "border-orange-500/40 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent shadow-[0_0_60px_rgba(251,146,60,0.2)]"
-        : "border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
+        ? "border-orange-500/40 bg-orange-500/[0.02] shadow-sm"
+        : "border-default-200/50 bg-white/[0.02] hover:bg-white/[0.04]"
         }`}
     >
-      {highlight && (
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-400/5 to-orange-400/0"
-          animate={{
-            x: ["-100%", "100%"],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-      )}
+      {/* Minimalist total time card */}
+
       <div className="relative z-10 flex flex-col items-center text-center">
         <h4 className="text-sm md:text-base tracking-widest uppercase font-bold text-default-400 mb-6">{title}</h4>
         <motion.p
@@ -403,7 +377,7 @@ function TotalTimeCard({
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
           transition={{ type: "spring", stiffness: 200 }}
-          className={`text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter ${highlight ? "text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 drop-shadow-xl" : "text-foreground"
+          className={`text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter ${highlight ? "text-orange-500" : "text-foreground"
             }`}
         >
           {time}

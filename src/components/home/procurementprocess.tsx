@@ -197,7 +197,7 @@ function FlowStep({
       `}
     >
       {/* Desktop Connection Dot (Hidden on Mobile, acts as center anchor) */}
-      <div className="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-background border-2 border-orange-500/50 z-10 shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
+      <div className="hidden md:flex absolute top-6 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-background border-2 border-orange-500/30 z-10 shadow-none" />
 
       {/* Card */}
       <div className={`relative w-full pl-14 sm:pl-16 md:pl-0 md:w-[45%] ${fromLeft ? "md:pr-16 md:text-right" : "md:pl-16 md:text-left"}`}>
@@ -208,8 +208,8 @@ function FlowStep({
           w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full text-sm sm:text-base font-black tracking-widest backdrop-blur-md border border-white/10
           ${fromLeft ? "md:ml-auto md:mb-4 md:float-right" : "md:mr-auto md:mb-4"}
           ${highlight
-              ? "bg-gradient-to-br from-orange-400 to-red-500 text-white shadow-[0_0_30px_rgba(251,146,60,0.6)] border-orange-400/50"
-              : "bg-white/[0.03] text-default-400 shadow-xl"
+              ? "bg-orange-500 text-white border-orange-400"
+              : "bg-default-100 text-default-500 shadow-none border-default-200"
             }`}
         >
           {step}
@@ -218,8 +218,8 @@ function FlowStep({
         {/* Content Container */}
         <div className={`md:clear-both p-4 sm:p-5 md:p-6 rounded-2xl backdrop-blur-xl border transition-all duration-500
           ${highlight
-            ? "bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.1)]"
-            : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+            ? "bg-orange-500/[0.03] border-orange-500/30 shadow-none"
+            : "bg-white/[0.02] border-default-100/50 hover:bg-white/[0.04] hover:border-default-200"
           }`}
         >
           <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight">

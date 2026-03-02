@@ -24,7 +24,7 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
     const conversionRate = total > 0 ? ((completed / total) * 100).toFixed(1) : "0.0";
 
     const StatCard = ({ title, value, icon, color, subtext }: any) => (
-        <Card className="border-none bg-content1 shadow-sm custom-shadow rounded-xl">
+        <Card className="border border-default-100 bg-content1 shadow-none rounded-xl">
             <CardBody className="flex flex-row items-center justify-between p-3 sm:p-4 px-3 sm:px-5">
                 <div className="min-w-0 flex-1">
                     <p className="text-default-500 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1 truncate">

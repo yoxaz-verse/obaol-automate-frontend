@@ -16,6 +16,9 @@ export interface User {
   id: string;
   email: string;
   role: string;
+  associateCompanyId?: string | null;
+  companyInterestsConfigured?: boolean;
+  companyInterests?: string[];
   verified: {
     email: boolean;
     phone?: boolean;

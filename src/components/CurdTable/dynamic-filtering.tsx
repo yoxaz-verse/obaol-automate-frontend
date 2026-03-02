@@ -298,9 +298,9 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         isKeyboardDismissDisabled={true}
         classNames={{
           backdrop: "bg-black/50 backdrop-blur-sm",
-          base: "bg-background/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2.5rem]",
-          header: "border-b border-white/5 pb-4",
-          footer: "border-t border-white/5 pt-4",
+          base: "bg-background/80 backdrop-blur-xl border border-divider shadow-2xl rounded-[2.5rem]",
+          header: "border-b border-divider pb-4",
+          footer: "border-t border-divider pt-4",
         }}
       >
         <ModalContent>

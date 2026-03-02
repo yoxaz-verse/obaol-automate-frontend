@@ -91,7 +91,7 @@ export default function WhoCanUseObaol() {
         {/* ROLE / PARTICIPANT FLOWS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 relative">
           {/* Subtle line connecting cards */}
-          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent -translate-x-1/2" />
+          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-px bg-default-200/20 -translate-x-1/2" />
 
           {/* NEW ENTRANTS – PRIMARY AUDIENCE */}
           <BenefitRow
@@ -190,7 +190,7 @@ export default function WhoCanUseObaol() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="max-w-4xl mt-32 mx-auto text-center p-8 rounded-2xl bg-white/[0.01] border border-white/5"
+          className="max-w-4xl mt-32 mx-auto text-center p-8 rounded-2xl bg-default-50/[0.03] border border-default-200/30"
         >
           <p className="text-default-400 text-sm leading-relaxed">
             <span className="text-orange-400/80 font-semibold uppercase tracking-widest block mb-2 text-xs">The OBAOL Standard</span>
@@ -225,10 +225,10 @@ function BenefitRow({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="group p-8 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-xl hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 relative overflow-hidden"
+      className="group p-8 rounded-3xl bg-white/[0.02] border border-default-200/50 backdrop-blur-xl hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden"
     >
-      {/* Subtle hover glow inside card */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-400/0 max-w-full rounded-full blur-[50px] group-hover:bg-orange-400/10 transition-colors duration-700 pointer-events-none" />
+      {/* Subtle border accent */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/[0.02] max-w-full rounded-full blur-[40px] pointer-events-none" />
 
       {/* HEADER */}
       <div className="mb-6 relative z-10">

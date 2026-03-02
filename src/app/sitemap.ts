@@ -11,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/how-it-works`, priority: 0.9 },
     { url: `${baseUrl}/procurement`, priority: 0.8 },
     { url: `${baseUrl}/verification`, priority: 0.8 },
+    { url: `${baseUrl}/export-resources`, priority: 0.8 },
+    { url: `${baseUrl}/developer/login`, priority: 0.8 },
     { url: `${baseUrl}/faq`, priority: 0.7 },
     { url: `${baseUrl}/privacy-policy`, priority: 0.5 },
     { url: `${baseUrl}/terms`, priority: 0.5 },

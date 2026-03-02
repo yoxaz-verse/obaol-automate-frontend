@@ -59,11 +59,11 @@ export default function DashboardLayout({
   if (!isMounted) return <div className="bg-content1 min-h-screen" />;
 
   return (
-    <section className="w-full h-full flex overflow-hidden bg-content1 relative">
+    <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative">
       <PrivateRoute allowedRoles={allowedRoles}>
         <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
 
-        <div className={`flex-1 flex flex-col transition-all duration-300 min-h-screen ${isCollapsed ? "md:ml-[80px]" : "md:ml-[280px]"}`}>
+        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 min-h-screen ${isCollapsed ? "md:ml-[80px]" : "md:ml-[280px]"}`}>
           <div className="w-full lg:h-screen overflow-hidden flex flex-col relative">
             {/* Check if user data is available before rendering TopBar */}
             {user && (
@@ -73,13 +73,17 @@ export default function DashboardLayout({
               />
             )}
 
-            <div className="flex-1 w-full min-w-0 overflow-y-auto px-4 md:px-0 pb-20 md:pb-0">
+            <div
+              className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden px-4 md:px-0"
+              style={{
+                paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))"
+              }}
+            >
               <div className="max-w-full mx-auto w-full p-4 md:p-6 min-w-0">
                 <Template>
                   {children}
                 </Template>
               </div>
-              <div className="h-10" />
             </div>
           </div>
         </div>

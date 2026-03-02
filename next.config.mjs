@@ -3,6 +3,15 @@ import createMDX from "@next/mdx";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
+  async rewrites() {
+    const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || "http://localhost:5001";
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendOrigin}/api/:path*`,
+      },
+    ];
+  },
 
   images: {
     remotePatterns: [

@@ -8,6 +8,14 @@ interface AuthLayoutProps {
     title: string;
     subtitle?: string;
     children: React.ReactNode;
+    cardMaxWidthClass?: string;
+    leftPanel?: {
+        headline: string;
+        highlight?: string;
+        description?: string;
+        points?: string[];
+        footer?: string;
+    };
 }
 
 const FloatingPixel = ({ delay }: { delay: number }) => (
@@ -77,7 +85,7 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
     );
 };
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, cardMaxWidthClass = "max-w-[440px]", leftPanel }) => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -138,31 +146,57 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
                             />
                         </div>
 
-                        <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
-                            OBAOL <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block h-[1.2em]">
-                                <TypewriterEffect
-                                    words={[
-                                        "AUTOMATION",
-                                        "LOGISTICS",
-                                        "SUPPLY CHAIN",
-                                        "INVENTORY",
-                                        "AGRO-TRADE"
-                                    ]}
-                                />
-                            </span>
-                        </h1>
+                        {leftPanel ? (
+                            <>
+                                <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
+                                    {leftPanel.headline} <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block">
+                                        {leftPanel.highlight || "ASSOCIATE NETWORK"}
+                                    </span>
+                                </h1>
+                                <p className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
+                                    {leftPanel.description || "Join a trusted network for structured agro commodity trade."}
+                                </p>
+                                {!!leftPanel.points?.length && (
+                                    <div className="mt-8 space-y-3 max-w-md">
+                                        {leftPanel.points.map((point, idx) => (
+                                            <div key={`${point}-${idx}`} className="text-sm text-default-300 flex gap-3 items-start">
+                                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
+                                                <span>{point}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
+                                    OBAOL <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block h-[1.2em]">
+                                        <TypewriterEffect
+                                            words={[
+                                                "AUTOMATION",
+                                                "LOGISTICS",
+                                                "SUPPLY CHAIN",
+                                                "INVENTORY",
+                                                "AGRO-TRADE"
+                                            ]}
+                                        />
+                                    </span>
+                                </h1>
 
-                        <p className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
-                            Empowering your business with intelligent, automated solutions.
-                        </p>
+                                <p className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
+                                    Empowering your business with intelligent, automated solutions.
+                                </p>
+                            </>
+                        )}
                     </div>
 
                     {/* Tech Decorators */}
                     <div className="absolute bottom-12 left-12 flex gap-6 text-[10px] font-mono text-default-500 uppercase tracking-widest">
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-success-500 rounded-full animate-pulse" />
-                            System_Online
+                            {leftPanel?.footer || "System_Online"}
                         </div>
                         <div>Secured_Connection_v3</div>
                     </div>
@@ -172,7 +206,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) =>
                 <div className="w-full lg:w-7/12 flex flex-col h-full bg-transparent overflow-y-auto custom-scrollbar">
                     <div className="flex-grow flex items-center justify-center p-6 py-12">
                         <motion.div
-                            className="w-full max-w-[440px] relative"
+                            className={`w-full ${cardMaxWidthClass} relative`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}

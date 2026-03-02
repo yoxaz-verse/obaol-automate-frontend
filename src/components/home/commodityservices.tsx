@@ -206,7 +206,7 @@ export default function ResponsibilityTransferSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="hidden md:block rounded-2xl overflow-hidden backdrop-blur-xl bg-white/[0.02] border border-white/10 shadow-2xl"
+              className="hidden md:block rounded-2xl overflow-hidden backdrop-blur-xl bg-white/[0.02] border border-default-200/50 shadow-sm"
             >
               <div className="grid grid-cols-3 bg-white/[0.04] border-b border-white/10">
                 <div className="p-5 text-sm font-semibold tracking-wider uppercase text-default-400">
@@ -223,7 +223,7 @@ export default function ResponsibilityTransferSection() {
               {COMPARISON_ROWS.map((row, i) => (
                 <div
                   key={row.label}
-                  className={`grid grid-cols-3 border-b border-white/5 transition-all duration-300 hover:bg-white/[0.06] ${i % 2 === 0 ? "bg-transparent" : "bg-white/[0.01]"
+                  className={`grid grid-cols-3 border-b border-default-100/30 transition-all duration-300 ${i % 2 === 0 ? "bg-transparent" : "bg-white/[0.01]"
                     }`}
                 >
                   <div className="p-5 text-sm font-medium text-default-300">
@@ -283,7 +283,7 @@ export default function ResponsibilityTransferSection() {
                 Trade Lifecycle
               </h3>
               {/* Hint pill — tells user it's interactive */}
-              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-orange-400/70 border border-orange-400/20 rounded-full px-3 py-1 bg-orange-400/5 animate-pulse">
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-orange-400/80 border border-orange-400/20 rounded-full px-3 py-1 bg-orange-400/5">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
                 </svg>
@@ -301,8 +301,8 @@ export default function ResponsibilityTransferSection() {
                     onClick={() => toggle(stage.id)}
                     className={`group relative cursor-pointer flex items-center justify-between gap-4 px-5 py-4 rounded-xl border-l-[3px] transition-all duration-200 select-none
                       ${active
-                        ? "border-orange-400 bg-orange-400/10 shadow-[inset_0_0_30px_rgba(251,146,60,0.08)] ring-1 ring-orange-400/20"
-                        : "border-transparent bg-foreground/[0.04] hover:bg-foreground/[0.07] hover:border-orange-400/40 hover:ring-1 hover:ring-orange-400/10"
+                        ? "border-orange-400 bg-orange-400/5 ring-1 ring-orange-400/10"
+                        : "border-transparent bg-foreground/[0.03] hover:bg-foreground/[0.05] hover:border-orange-400/30"
                       }`}
                   >
                     {/* Step number */}
@@ -325,7 +325,7 @@ export default function ResponsibilityTransferSection() {
                       }`}>
                       {/* Dot indicator */}
                       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-300
-                        ${active ? "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.8)]" : "bg-default-500"}`} />
+                        ${active ? "bg-orange-500" : "bg-default-400"}`} />
                       {active ? "OBAOL" : "You"}
                     </div>
 
@@ -343,7 +343,7 @@ export default function ResponsibilityTransferSection() {
           </div>
 
           {/* RIGHT — Responsibility Panel */}
-          <div className="sticky top-28 p-8 rounded-2xl border border-foreground/10 bg-foreground/[0.02] backdrop-blur-xl shadow-2xl relative overflow-hidden h-[480px] flex flex-col">
+          <div className="sticky top-28 p-8 rounded-2xl border border-default-200/50 bg-foreground/[0.02] backdrop-blur-xl shadow-none relative overflow-hidden h-[480px] flex flex-col">
             {/* Ambient glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400/10 blur-[80px] pointer-events-none" />
             {/* Active glow — visible when something is selected */}
@@ -365,7 +365,7 @@ export default function ResponsibilityTransferSection() {
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center justify-center w-7 h-7 rounded-full bg-orange-400 text-black text-xs font-black shadow-[0_0_12px_rgba(251,146,60,0.6)]"
+                  className="flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-black text-xs font-black shadow-none whitespace-nowrap"
                 >
                   {obaolHandles.length}
                 </motion.span>

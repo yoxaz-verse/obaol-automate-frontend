@@ -33,8 +33,8 @@ export default function MarketplacePage() {
 
                 <div className="bg-content1 rounded-3xl border border-default-200 shadow-sm overflow-hidden">
                     <div className="p-6">
-                        <div className="flex w-full gap-4 h-[75vh]">
-                            <div className="w-full min-w-0 pb-10 overflow-auto">
+                        <div className="flex w-full gap-4">
+                            <div className="w-full min-w-0 pb-10 overflow-x-auto">
                                 <Tabs
                                     aria-label="Marketplace Tabs"
                                     selectedKey={currentTable}

@@ -52,3 +52,20 @@ h6 {
 h1 {
   letter-spacing: -0.03em;
 }
+
+.scrollbar-gutter-stable {
+  scrollbar-gutter: stable both-edges;
+}
+
+.scrollbar-gutter-stable::-webkit-scrollbar {
+  height: 10px;
+}
+
+.scrollbar-gutter-stable::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.45);
+  border-radius: 9999px;
+}
+
+.scrollbar-gutter-stable::-webkit-scrollbar-track {
+  background: rgba(120, 120, 120, 0.12);
+}

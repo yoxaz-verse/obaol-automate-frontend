@@ -7,10 +7,9 @@ function Template({ children }: { children: React.ReactNode }) {
     <AnimatePresence>
       <motion.div
         key={usePathname()}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        // exit={{ y: -50, opacity: 0 }}
-        transition={{ duration: 1, delay: 0.3, ease: "easeIn" }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         {children}
       </motion.div>

@@ -39,16 +39,6 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  const upperLineY = useSpring(useTransform(scrollYProgress, [0, 1], [0, -36]), {
-    stiffness: 70,
-    damping: 18,
-    mass: 0.5,
-  });
-  const lowerLineY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 36]), {
-    stiffness: 70,
-    damping: 18,
-    mass: 0.5,
-  });
   const bgLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 28]), {
     stiffness: 70,
     damping: 24,
@@ -126,11 +116,10 @@ export default function HeroSection() {
           initial={{ opacity: 0, scale: 0.8, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full border border-orange-500/30 bg-orange-500/10 backdrop-blur-md shadow-[0_0_20px_rgba(255,165,0,0.12)]"
+          className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full border border-orange-500/30 bg-orange-500/10 backdrop-blur-md shadow-none"
         >
           <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500 shadow-[0_0_8px_rgba(255,165,0,0.7)]" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500/80" />
           </span>
           <span className="text-xs font-bold text-orange-500 dark:text-orange-400 tracking-widest uppercase">System Protocol Active</span>
         </motion.div>
@@ -146,18 +135,17 @@ export default function HeroSection() {
             variants={itemVariants}
             className="relative text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[0.98] md:leading-[0.82] tracking-tight"
           >
-            <motion.span style={{ y: upperLineY }} className="relative z-10 block text-foreground">
+            <motion.span className="relative z-10 block text-foreground">
               The Operating System
             </motion.span>
             <span className="relative z-30 block text-foreground/55 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-none mt-0 sm:mt-1 md:-mt-6 mb-0 sm:mb-1 md:-mb-6">
               for
             </span>
             <motion.span
-              style={{ y: lowerLineY }}
               className="relative z-20 block mt-0 sm:mt-1 md:-mt-10"
             >
               {/* Orange gradient text — looks great in both modes */}
-              <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-500 dark:from-orange-200 dark:via-orange-400 dark:to-yellow-500 bg-clip-text text-transparent [filter:drop-shadow(0_0_14px_rgba(251,146,60,0.4))]">
+              <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-500 dark:from-orange-200 dark:via-orange-400 dark:to-yellow-500 bg-clip-text text-transparent">
                 Agro Commodity Trade.
               </span>
             </motion.span>
@@ -182,8 +170,7 @@ export default function HeroSection() {
 
           {/* 4️⃣ CTA — Premium Glassmorphic Button */}
           <motion.div variants={itemVariants} className="mt-14 relative group inline-flex justify-center">
-            {/* Soft bloom underneath — light + dark */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-orange-500/30 blur-2xl rounded-full opacity-70 group-hover:opacity-100 group-hover:w-full transition-all duration-500" />
+            {/* Minimalist CTA */}
 
             <Link
               href="https://typebot.co/obaol-early-access"
@@ -195,10 +182,10 @@ export default function HeroSection() {
                 "bg-white/70 dark:bg-white/5",
                 "border border-orange-400/40 dark:border-orange-500/20",
                 "backdrop-blur-xl",
-                "shadow-[0_2px_20px_-4px_rgba(251,146,60,0.25)] dark:shadow-[0_8px_32px_-8px_rgba(251,146,60,0.3)]",
+                "shadow-none",
                 "group-hover:border-orange-500/60 dark:group-hover:border-orange-500/50",
                 "group-hover:bg-white/90 dark:group-hover:bg-white/10",
-                "group-hover:shadow-[0_4px_32px_-4px_rgba(251,146,60,0.5)] dark:group-hover:shadow-[0_12px_40px_-8px_rgba(251,146,60,0.6)]",
+                "group-hover:shadow-sm",
               ].join(" ")}
             >
               {/* Radial inner glow on hover */}

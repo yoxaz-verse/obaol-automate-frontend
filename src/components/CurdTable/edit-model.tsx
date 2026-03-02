@@ -34,6 +34,8 @@ import { parseDate, parseTime, Time, CalendarDate } from "@internationalized/dat
 import { EditModalProps, FormField } from "@/data/interface-data";
 import { toTitleCase } from "../titles";
 import { Key } from "@react-types/shared";
+import PhoneField from "../form/PhoneField";
+import { parsePhoneValue } from "@/utils/phone";
 
 export default function EditModal({
   _id,
@@ -41,8 +43,22 @@ export default function EditModal({
   formFields,
   apiEndpoint,
   refetchData,
+  initialData,
+  isOpen: controlledOpen,
+  onClose: controlledClose,
 }: EditModalProps) {
   const [open, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const isOpenActual = isControlled ? controlledOpen : open;
+
+  const handleClose = () => {
+    if (isControlled && controlledClose) {
+      controlledClose();
+    } else {
+      setOpen(false);
+    }
+  };
+
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const uppyRef = useRef<Uppy | null>(null);
@@ -54,7 +70,7 @@ export default function EditModal({
   const { data: fetched } = useQuery({
     queryKey: [apiEndpoint, _id],
     queryFn: () => getData(`${apiEndpoint}/${_id}`),
-    enabled: open,
+    enabled: isOpenActual,
     refetchOnWindowFocus: false,
   });
 
@@ -82,7 +98,7 @@ export default function EditModal({
       const fetchOptionsPromises = formFields
         .filter(
           (field) =>
-            field.type === "select" &&
+            (field.type === "select" || field.type === "multiselect") &&
             !field.dependsOn && // only fields with no dependency
             typeof field.dynamicValuesFn === "function"
         )
@@ -299,6 +315,39 @@ export default function EditModal({
   // 7) Render fields, disabling everything but `isLive` when locked
   const renderField = (f: FormField) => {
     const disabled = isLocked && f.key !== "isLive";
+    const isPhoneLikeField =
+      f.type === "phone" ||
+      (/phone/i.test(f.key) && ["number", "text", "tel", "phone"].includes(String(f.type || "").toLowerCase()));
+
+    if (isPhoneLikeField) {
+      const countryCodeKey = `${f.key}CountryCode`;
+      const nationalKey = `${f.key}National`;
+      const parsed = parsePhoneValue({
+        raw: formData[f.key],
+        countryCode: formData[countryCodeKey],
+        national: formData[nationalKey],
+      });
+      return (
+        <PhoneField
+          name={f.key}
+          label={f.label}
+          value={parsed.e164}
+          countryCodeValue={parsed.countryCode}
+          nationalValue={parsed.national}
+          disabled={disabled}
+          className="w-full"
+          onChange={(next) =>
+            setFormData((prev) => ({
+              ...prev,
+              [f.key]: next.e164,
+              [countryCodeKey]: next.countryCode,
+              [nationalKey]: next.national,
+            }))
+          }
+        />
+      );
+    }
+
     switch (f.type) {
       case "date": {
         const val = formData[f.key]
@@ -461,7 +510,13 @@ export default function EditModal({
             )}
           </Autocomplete>
         );
-      case "multiselect":
+      case "multiselect": {
+        const multiOptions =
+          f.dependsOn && dynamicOptions[f.key]
+            ? dynamicOptions[f.key]
+            : f.dynamicValuesFn
+              ? dynamicOptions[f.key] || []
+              : f.values || [];
         return (
           <>
             <Select
@@ -473,7 +528,7 @@ export default function EditModal({
               }
               placeholder={`Select ${f.label}`}
             >
-              {(f.values ?? []).map((opt) => (
+              {multiOptions.map((opt: any) => (
                 <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
                   {opt.value}
                 </SelectItem>
@@ -481,13 +536,7 @@ export default function EditModal({
             </Select>
             <div className="flex gap-2 mt-2 flex-wrap">
               {(formData[f.key] || []).map((val: string) => {
-                const options =
-                  f.dependsOn && dynamicOptions[f.key]
-                    ? dynamicOptions[f.key]
-                    : f.dynamicValuesFn
-                      ? dynamicOptions[f.key] || []
-                      : f.values || [];
-                const label = options.find((opt: any) => String(opt.key) === String(val))?.value || val;
+                const label = multiOptions.find((opt: any) => String(opt.key) === String(val))?.value || val;
                 return (
                   <Chip
                     isDisabled={disabled}
@@ -507,6 +556,7 @@ export default function EditModal({
             </div>
           </>
         );
+      }
       case "file":
       case "image":
         return (
@@ -554,21 +604,26 @@ export default function EditModal({
 
   return (
     <>
-      <Tooltip content="Edit">
-        <span
-          className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-warning-500 transition-colors"
-          onClick={() => setOpen(true)}
-        >
-          <FiEdit2 size={18} className="text-default-400 group-hover:text-warning-500" />
-          <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
-        </span>
-      </Tooltip>
+      {!isControlled && (
+        <Tooltip content="Edit">
+          <span
+            className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-warning-500 transition-colors"
+            onClick={() => setOpen(true)}
+          >
+            <FiEdit2 size={18} className="text-default-400 group-hover:text-warning-500" />
+            <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+          </span>
+        </Tooltip>
+      )}
 
       <Modal
         isDismissable={false}
-        isOpen={open}
-        onClose={() => setOpen(false)}
+        isOpen={isOpenActual}
+        onClose={handleClose}
         size="lg"
+        classNames={{
+          closeButton: "text-foreground-500 hover:bg-default-100 active:bg-default-200",
+        }}
         scrollBehavior="inside"
       >
         <ModalContent>

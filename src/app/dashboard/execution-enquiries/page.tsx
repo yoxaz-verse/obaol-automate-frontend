@@ -14,10 +14,26 @@ export default function ExecutionEnquiriesPage() {
   const queryClient = useQueryClient();
   const [bidMap, setBidMap] = useState<Record<string, string>>({});
   const [noteMap, setNoteMap] = useState<Record<string, string>>({});
+  const [activeType, setActiveType] = useState<string>("ALL");
+
+  const typeFilters = [
+    { key: "ALL", label: "All" },
+    { key: "PROCUREMENT", label: "Procurement" },
+    { key: "CERTIFICATION", label: "Certification" },
+    { key: "TRANSPORTATION", label: "Transportation" },
+    { key: "SHIPPING", label: "Shipping" },
+    { key: "PACKAGING", label: "Packaging" },
+    { key: "QUALITY_TESTING", label: "Quality Testing" },
+  ];
 
   const { data: enquiryRes, isLoading } = useQuery({
     queryKey: ["execution-enquiries"],
     queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 200, sort: "createdAt:desc" }),
+  });
+  const { data: interestsStatusRes } = useQuery({
+    queryKey: ["company-interests-status"],
+    queryFn: () => getData("/auth/company-interests/status"),
+    enabled: !!user?.id,
   });
 
   const enquiries = useMemo(() => {
@@ -29,19 +45,50 @@ export default function ExecutionEnquiriesPage() {
 
   const rows = useMemo(() => {
     const userId = user?.id?.toString();
+    const roleLower = String(user?.role || "").toLowerCase();
+    const userCompanyId = String(
+      (user as any)?.associateCompany?._id ||
+      (user as any)?.associateCompany ||
+      (user as any)?.associateCompanyId ||
+      ""
+    );
+    const configuredInterests = Array.isArray((interestsStatusRes as any)?.data?.data?.companyInterests)
+      ? (interestsStatusRes as any).data.data.companyInterests.map((x: any) => String(x || "").toUpperCase())
+      : Array.isArray((user as any)?.companyInterests)
+        ? (user as any).companyInterests.map((x: any) => String(x || "").toUpperCase())
+        : [];
+    const isSystemAdmin = roleLower === "admin";
+    const isEmployeeUser = roleLower === "employee";
+    const isProviderAssociate = roleLower === "associate";
     return enquiries.flatMap((enq: any) => {
       const buyerId = (enq?.buyerAssociateId?._id || enq?.buyerAssociateId || "").toString();
       const sellerId = (enq?.sellerAssociateId?._id || enq?.sellerAssociateId || "").toString();
       const isBuyer = userId && buyerId === userId;
       const isSeller = userId && sellerId === userId;
-      const isObaol = user?.role === "Admin" || user?.role === "Employee";
+      const assignedEmployeeId = (enq?.assignedEmployeeId?._id || enq?.assignedEmployeeId || "").toString();
+      const isAssignedEmployee = Boolean(isEmployeeUser && userId && assignedEmployeeId === userId);
+      const createdById = String(enq?.createdBy?._id || enq?.createdBy || "");
+      const isCreatedByEmployee = Boolean(isEmployeeUser && userId && createdById === userId);
+      const canSeeEnquiry = isSystemAdmin || !isEmployeeUser || isAssignedEmployee || isCreatedByEmployee;
+      if (!canSeeEnquiry) return [];
 
       return (Array.isArray(enq?.executionInquiries) ? enq.executionInquiries : []).map((task: any, idx: number) => {
         const owner = String(task?.ownerBy || "");
+        const candidates = Array.isArray(task?.candidateProviders) ? task.candidateProviders : [];
+        const providerCandidate = Boolean(
+          userCompanyId &&
+          candidates.some((c: any) => String(c?._id || c || "") === userCompanyId)
+        );
         const canAct =
-          isObaol ||
+          isSystemAdmin ||
+          isAssignedEmployee ||
+          providerCandidate ||
           (owner === "buyer" && isBuyer) ||
           (owner === "seller" && isSeller);
+        const typeUpper = String(task?.type || "").toUpperCase();
+        const matchesInterest = configuredInterests.length === 0 || configuredInterests.includes(typeUpper);
+        const shouldShowByDefault = isSystemAdmin || isAssignedEmployee || !isProviderAssociate || (providerCandidate && matchesInterest);
+        if (!shouldShowByDefault) return null;
         const productName = enq?.productId?.name || enq?.productVariant?.product?.name || "Unknown Product";
         const variantName = enq?.productVariant?.name || enq?.variantId?.name || "Unknown Variant";
         const buyerName = enq?.buyerAssociateId?.name || enq?.buyerAssociateName || "Buyer";
@@ -62,15 +109,24 @@ export default function ExecutionEnquiriesPage() {
           bidAmount: task?.bidAmount,
           commitNote: task?.commitNote,
           details: task?.details || {},
+          candidateCount: candidates.length,
+          providerCandidate,
+          bids: Array.isArray(task?.bids) ? task.bids : [],
           canAct,
+          matchesInterest,
         };
-      });
+      }).filter(Boolean) as any[];
     });
-  }, [enquiries, user]);
+  }, [enquiries, user, interestsStatusRes]);
+
+  const filteredRows = useMemo(() => {
+    if (activeType === "ALL") return rows;
+    return rows.filter((row: any) => String(row?.type || "").toUpperCase() === activeType);
+  }, [rows, activeType]);
 
   const enquiriesWithTasks = useMemo(() => {
     const grouped: Record<string, any> = {};
-    for (const row of rows) {
+    for (const row of filteredRows) {
       const key = String(row.enquiryId || "");
       if (!grouped[key]) {
         grouped[key] = {
@@ -90,7 +146,7 @@ export default function ExecutionEnquiriesPage() {
       grouped[key].tasks.push(row);
     }
     return Object.values(grouped);
-  }, [rows]);
+  }, [filteredRows]);
 
   const updateTaskMutation = useMutation({
     mutationFn: async (payload: { enquiryId: string; type: string; bidAmount?: number; commitNote?: string; status?: string }) => {
@@ -114,6 +170,19 @@ export default function ExecutionEnquiriesPage() {
   return (
     <section>
       <Title title="Execution Enquiries Panel" />
+      <div className="mt-3 flex flex-wrap gap-2">
+        {typeFilters.map((item) => (
+          <Chip
+            key={item.key}
+            variant={activeType === item.key ? "solid" : "flat"}
+            color={activeType === item.key ? "warning" : "default"}
+            className="cursor-pointer"
+            onClick={() => setActiveType(item.key)}
+          >
+            {item.label}
+          </Chip>
+        ))}
+      </div>
       <div className="mt-4 flex flex-col gap-5">
         {enquiriesWithTasks.map((enq: any) => (
           <Card key={enq.enquiryId} className="border border-default-200 shadow-sm">
@@ -139,6 +208,7 @@ export default function ExecutionEnquiriesPage() {
                       <div>
                         <div className="font-semibold">{row.title}</div>
                         <div className="text-xs text-default-500">Owner: {String(row.ownerBy || "obaol").toUpperCase()}</div>
+                        <div className="text-[10px] text-default-400">Providers: {row.candidateCount || 0}</div>
                       </div>
                       <Chip size="sm" color={row.status === "COMPLETED" ? "success" : row.status === "IN_PROGRESS" ? "warning" : "default"} variant="flat">
                         {row.status}
@@ -147,6 +217,7 @@ export default function ExecutionEnquiriesPage() {
                     <CardBody className="flex flex-col gap-3">
                       <div className="rounded-md bg-default-100 p-2 text-xs text-default-600">
                         {row.details?.routeNotes ? <div>Notes: {row.details.routeNotes}</div> : <div>No additional notes.</div>}
+                        {row.providerCandidate ? <div className="mt-1 text-success">You are eligible to bid for this inquiry.</div> : null}
                       </div>
                       <Input
                         size="sm"

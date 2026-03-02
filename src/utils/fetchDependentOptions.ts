@@ -8,6 +8,8 @@ import {
   categoryRoutes,
   certificationRoutes,
   companyBusinessModelRoutes,
+  companyFunctionRoutes,
+  companySubFunctionRoutes,
   companyStageRoutes,
   companyTypeRoutes,
   countryRoutes,
@@ -116,6 +118,16 @@ const getOptions = async (
 
     if (lowerKey === "companybusinessmodel") {
       const res = await getData(companyBusinessModelRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+    }
+    if (lowerKey === "companyfunction") {
+      const res = await getData(companyFunctionRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+    }
+    if (lowerKey === "companysubfunction") {
+      const functionId = typeof parentValue === "string" ? parentValue : undefined;
+      const subParams = functionId ? { ...params, functionId } : params;
+      const res = await getData(companySubFunctionRoutes.getAll, subParams);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 

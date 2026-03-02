@@ -153,6 +153,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
           base: "bg-background/80 backdrop-blur-lg border border-default-100",
           header: "border-b border-default-100",
           footer: "border-t border-default-100",
+          closeButton: "text-foreground-500 hover:bg-default-100 active:bg-default-200",
         }}
       >
         <ModalContent>

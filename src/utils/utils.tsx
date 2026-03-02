@@ -11,12 +11,13 @@ import { GiBookAura } from "react-icons/gi";
 import { GiBeamsAura } from "react-icons/gi";
 import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
-import { GiShipWheel } from "react-icons/gi";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse } from "react-icons/lu";
 import { FiShoppingBag } from "react-icons/fi";
 import { FiClipboard } from "react-icons/fi";
+import { FiCheckSquare } from "react-icons/fi";
+
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
 export const useEmailValidation = (value: string): boolean =>
@@ -87,7 +88,7 @@ export const sidebarOptions = [
     link: "/dashboard/catalog",
   },
   {
-    name: "Companies Product", //Translate
+    name: "Companies", //Translate
     icon: <GoOrganization />,
     link: "/dashboard/companyProduct",
   },
@@ -107,6 +108,11 @@ export const sidebarOptions = [
     link: "/dashboard/execution-enquiries",
   },
   {
+    name: "Approvals",
+    icon: <FiCheckSquare />,
+    link: "/dashboard/approvals",
+  },
+  {
     name: "Profile", //Translate
     icon: <RiUser2Fill />,
     link: "/dashboard/profile",
@@ -120,11 +126,6 @@ export const sidebarOptions = [
     name: "Geo Sphere", //Translate
     icon: <BsGlobeCentralSouthAsia />,
     link: "/dashboard/geosphere",
-  },
-  {
-    name: "Logistics", //Translate
-    icon: <GiShipWheel />,
-    link: "/dashboard/logistics",
   },
   {
     name: "RS Form", //Translate

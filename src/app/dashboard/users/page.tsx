@@ -11,14 +11,13 @@ export default function Page() {
     { key: "inventoryManager", title: "Inventory Managers" }, // Translate Title
     { key: "associate", title: "Associates" }, // Translate Title
     { key: "admin", title: "Admins" }, // Translate Title
-    { key: "customer", title: "Customers" }, // Translate Title
     { key: "employee", title: "Employee" }, // Translate Title
     // { key: "worker", title: "Staff" },// Translate Title
   ];
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-[95%]">
+    <div className="flex items-center justify-center w-full min-w-0 max-w-full">
+      <div className="w-full min-w-0 max-w-full">
         <div className="my-4">
           {/* Tabs for selecting between different roles */}
           <Tabs

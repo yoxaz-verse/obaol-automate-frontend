@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import Image from "next/image";
 import AuthLayout from "../Auth/AuthLayout";
+import CompanyInterestsModal from "./company-interests-modal";
 
 interface ILoginProps {
   role: string;
@@ -26,15 +27,27 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const isInvalidEmail = useEmailValidation(email);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInterestsModal, setShowInterestsModal] = useState(false);
+  const [interestsSetupDone, setInterestsSetupDone] = useState(false);
 
   const router = useRouter();
-  const { isAuthenticated, loading, login } = useContext(AuthContext);
+  const { isAuthenticated, loading, login, user } = useContext(AuthContext);
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
+      const roleLower = String(user?.role || "").toLowerCase();
+      const requiresInterestsSetup =
+        (roleLower === "associate" || roleLower === "employee" || roleLower === "team") &&
+        user?.associateCompanyId &&
+        user?.companyInterestsConfigured === false &&
+        !interestsSetupDone;
+      if (requiresInterestsSetup) {
+        setShowInterestsModal(true);
+        return;
+      }
       router.push("/dashboard");
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, user, interestsSetupDone]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -175,6 +188,15 @@ const LoginComponent = ({ role }: ILoginProps) => {
           {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
+      <CompanyInterestsModal
+        open={showInterestsModal}
+        associateCompanyId={user?.associateCompanyId}
+        onSaved={() => {
+          setShowInterestsModal(false);
+          setInterestsSetupDone(true);
+          router.push("/dashboard");
+        }}
+      />
     </AuthLayout>
   );
 };

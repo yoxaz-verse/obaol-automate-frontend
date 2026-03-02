@@ -70,19 +70,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
       </Button>
 
       {/* Header / Logo */}
-      <div className={`flex items-center px-4 py-8 overflow-hidden ${isCollapsed ? "justify-center" : "justify-start gap-3"}`}>
-        <div className="min-w-[40px] flex justify-center">
+      <div className={`flex items-center px-4 py-8 overflow-hidden ${isCollapsed ? "justify-center" : "justify-start gap-4"}`}>
+        <div className="min-w-[48px] flex justify-center transform transition-transform duration-300 hover:scale-110">
           <Image
             src={"/logo.png"}
-            width={40}
-            height={40}
+            width={48}
+            height={48}
             alt="Obaol"
-            className="rounded-lg object-contain"
+            className="rounded-xl object-contain shadow-sm"
           />
         </div>
         {!isCollapsed && (
-          <span className="font-bold text-xl tracking-tight text-foreground whitespace-nowrap">
-            OBAOL <span className="text-warning-500 text-xs align-top">SUPREME</span>
+          <span className="font-black text-sm tracking-[0.3em] text-foreground/80 whitespace-nowrap uppercase">
+            SUPREME
           </span>
         )}
       </div>
@@ -97,16 +97,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             <div
               key={index}
               onClick={() => handleOptionClick(option.link, option.name)}
-              className={`group flex items-center px-3 py-3 cursor-pointer rounded-xl transition-all duration-200 ${isActive
-                  ? "bg-warning-500 text-warning-foreground shadow-lg shadow-warning-500/20"
-                  : "text-default-500 hover:bg-default-100 hover:text-foreground"
+              className={`group relative flex items-center px-4 py-3 cursor-pointer rounded-xl transition-all duration-200 ${isActive
+                ? "bg-default-100/80 text-warning-500"
+                : "text-default-500 hover:bg-default-100 hover:text-foreground"
                 } ${isCollapsed ? "justify-center" : "gap-4"}`}
             >
-              <div className={`text-xl flex-shrink-0 transition-transform duration-200 ${isActive ? "" : "group-hover:scale-110"}`}>
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-warning-500 rounded-r-full" />
+              )}
+              <div className={`text-xl flex-shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}>
                 {option.icon}
               </div>
               {!isCollapsed && (
-                <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className={`font-bold whitespace-nowrap overflow-hidden text-ellipsis tracking-tight ${isActive ? "text-foreground" : ""}`}>
                   {option.name}
                 </span>
               )}

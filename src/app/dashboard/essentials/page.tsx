@@ -14,6 +14,8 @@ export default function Essentials() {
     { key: "subIntent", title: "Sub Intent" }, // Translate Title
     { key: "companyBusinessModel", title: "Business Model" }, // Translate Title
     { key: "certification", title: "Certifications" }, // Translate Title
+    { key: "companyFunction", title: "Company Functions" },
+    { key: "companySubFunction", title: "Company Sub-Functions" },
   ];
   const [company, setCompany] = React.useState("associateCompany");
   const companyTabs = [
@@ -37,8 +39,8 @@ export default function Essentials() {
     { key: "incoterm", title: "Incoterms" }, // Preferred trade terms
   ];
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-full">
+    <div className="flex items-center justify-center w-full min-w-0 max-w-full">
+      <div className="w-full min-w-0 max-w-full">
         <div className="">
           <Tabs
             aria-label="Company Tabs" // Translate
@@ -61,7 +63,14 @@ export default function Essentials() {
             {companyEssentialsTabs.map((tab) => (
               <Tab key={tab.key} title={tab.title}>
                 <Title title={tab.title} />
-                <EssentialTabContent essentialName={tab.key} />
+                <EssentialTabContent
+                  essentialName={tab.key}
+                  filter={
+                    tab.key === "companyFunction" || tab.key === "companySubFunction"
+                      ? { activeOnly: false }
+                      : undefined
+                  }
+                />
               </Tab>
             ))}
           </Tabs>

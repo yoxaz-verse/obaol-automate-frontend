@@ -135,7 +135,7 @@ export default function BrokenTradeExperience() {
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="relative rounded-3xl backdrop-blur-2xl bg-white/[0.02] border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.3)] p-6 sm:p-12 overflow-hidden min-h-[400px] flex flex-col justify-between"
+          className="relative rounded-3xl backdrop-blur-2xl bg-white/[0.02] border border-default-200/50 shadow-none p-6 sm:p-12 overflow-hidden min-h-[400px] flex flex-col justify-between"
         >
           {/* Subtle warning glow tied to progress */}
           <div className="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
@@ -157,8 +157,8 @@ export default function BrokenTradeExperience() {
                 const isPast = i < index;
                 return (
                   <div key={f.id} className="relative flex flex-col items-center">
-                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 ${isActive ? "bg-red-400 border-red-400 shadow-[0_0_15px_rgba(248,113,113,0.8)]" :
-                      isPast ? "bg-orange-400 border-orange-400" : "bg-background border-white/20"
+                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 ${isActive ? "bg-red-500 border-red-500" :
+                      isPast ? "bg-orange-500/60 border-orange-500/60" : "bg-background border-default-200"
                       }`} />
                     <span
                       className={`absolute top-6 whitespace-nowrap text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${isActive ? "text-red-400" :
@@ -177,7 +177,7 @@ export default function BrokenTradeExperience() {
               {FAILURES.map((_, i) => (
                 <div
                   key={i}
-                  className={`h-1.5 w-8 rounded-full transition-all duration-300 ${i === index ? "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]" : i < index ? "bg-orange-400/50" : "bg-white/10"
+                  className={`h-1.5 w-8 rounded-full transition-all duration-300 ${i === index ? "bg-red-500" : i < index ? "bg-orange-500/40" : "bg-default-200"
                     }`}
                 />
               ))}
@@ -241,8 +241,8 @@ export default function BrokenTradeExperience() {
                 )
               }
               className={`w-full sm:w-auto px-8 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 ${index === FAILURES.length - 1
-                ? "bg-white/5 text-default-300 hover:bg-white/10 hover:text-white border border-white/10"
-                : "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]"
+                ? "bg-default-100 text-default-600 hover:bg-default-200 border border-default-200/50"
+                : "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20"
                 }`}
             >
               {index === FAILURES.length - 1

@@ -54,7 +54,10 @@ const BottomNav = () => {
     });
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-content1 border-t border-default-200 px-4 py-2 md:hidden">
+        <div
+            className="fixed bottom-0 left-0 right-0 z-50 bg-content1 border-t border-default-200 px-4 pt-2 md:hidden"
+            style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+        >
             <div className="flex justify-between items-center max-w-md mx-auto">
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;

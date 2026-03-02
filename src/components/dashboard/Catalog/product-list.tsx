@@ -120,7 +120,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                           className={`group mb-4 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(251,146,60,0.05)] ${isAdded ? "border-l-4 !border-l-orange-500" : ""}`}
                         >
                           {variant.description && (
-                            <p className="text-default-700">
+                            <p className="text-default-500 text-sm px-4 pt-1 pb-2 leading-relaxed">
                               {variant.description}
                             </p>
                           )}
@@ -128,11 +128,11 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                           <div className="space-y-6">
                             {user?.role === "Associate" ? (
                               <>
-                                <div className="p-1">
+                                <div className="px-4 pb-5 pt-2 space-y-6">
                                   {isAdded && (
-                                    <section className="bg-orange-500/5 p-5 rounded-2xl border border-orange-500/20 mb-6">
-                                      <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-orange-500" /> My Added Rates
+                                    <div>
+                                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 mb-3 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500" /> My Added Rates
                                       </p>
                                       <VariantRate
                                         productVariant={variant}
@@ -142,31 +142,29 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                                           productVariantId: variant._id
                                         }}
                                       />
-                                    </section>
+                                    </div>
                                   )}
 
-                                  <section className="bg-foreground/[0.02] p-5 rounded-2xl border border-foreground/10">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-default-500 mb-4 flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-default-500" /> Marketplace Rates
+                                  <div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-3 flex items-center gap-2">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-default-400" /> Marketplace Rates
                                     </p>
                                     <VariantRate
                                       productVariant={variant}
                                       rate="variantRate"
                                       additionalParams={{ view: "marketplace" }}
                                     />
-                                  </section>
+                                  </div>
                                 </div>
                               </>
                             ) : (
                               /* Standard View for Admin/Others (No filtering) */
-                              <div className="p-1">
-                                <section className="bg-foreground/[0.02] p-5 rounded-2xl border border-foreground/10">
-                                  <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">All Rates</p>
-                                  <VariantRate
-                                    productVariant={variant}
-                                    rate="variantRate"
-                                  />
-                                </section>
+                              <div className="px-4 pb-5 pt-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 mb-3">All Rates</p>
+                                <VariantRate
+                                  productVariant={variant}
+                                  rate="variantRate"
+                                />
                               </div>
                             )}
                           </div>

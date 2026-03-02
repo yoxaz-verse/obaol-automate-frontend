@@ -28,7 +28,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="h-full"
         >
-            <Card className="h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-lg overflow-hidden group">
+            <Card className="h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-default-200/50 dark:border-slate-800/80 shadow-none overflow-hidden group">
                 {/* Visual Accent Top Bar */}
                 <div
                     className="h-1.5 w-full bg-gradient-to-r"
@@ -71,8 +71,8 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 )}
                                 {variantName && (
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-1 h-1 rounded-full bg-default-300" />
-                                        <span className="text-xs font-semibold text-default-500 uppercase tracking-wider truncate max-w-[120px]">{variantName}</span>
+                                        <span className="w-1.5 h-1.5 rounded-full bg-default-400" />
+                                        <span className="text-xs font-bold text-default-600 dark:text-slate-300 uppercase tracking-wider truncate max-w-[120px]">{variantName}</span>
                                     </div>
                                 )}
                             </div>
@@ -94,16 +94,16 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                     <FiUser size={14} />
                                 </div>
-                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 antialiased">{clientName}</p>
+                                <p className="text-sm font-black text-slate-700 dark:text-slate-200 antialiased">{clientName}</p>
                             </div>
-                            {companyName && <p className="text-xs font-semibold text-default-400 ml-8">{companyName}</p>}
+                            {companyName && <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 ml-8 uppercase tracking-wide">{companyName}</p>}
                         </div>
                     )}
 
                     {/* Value Module */}
                     <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 bg-gradient-to-br from-default-100/50 to-transparent p-3 rounded-xl border border-default-200/50">
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Indicative Rate</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">Indicative Rate</span>
                             <span className="text-sm font-black text-success-600 dark:text-success-400 tabular-nums">
                                 {(() => {
                                     if (data.isAdmin) {
@@ -129,15 +129,15 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
 
                         {data.adminCommission !== undefined && data.isAdmin && (
                             <div className="flex flex-col sm:border-l border-default-200/60 sm:pl-4 md:pl-6">
-                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">OBAOL Comm.</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{convertRate(data.adminCommission)}</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">OBAOL Comm.</span>
+                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{convertRate(data.adminCommission)}</span>
                             </div>
                         )}
 
                         {data.mediatorCommission !== undefined && data.type === "Mediated" && data.isAdmin && (
                             <div className="flex flex-col sm:border-l border-default-200/60 sm:pl-4 md:pl-6">
-                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Mediator Comm.</span>
-                                <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{convertRate(data.mediatorCommission)}</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">Mediator Comm.</span>
+                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{convertRate(data.mediatorCommission)}</span>
                             </div>
                         )}
                     </div>
@@ -146,13 +146,13 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                     <div className="flex flex-col space-y-3">
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
                             <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-                                <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5">Assigned To</span>
-                                <span className="text-primary-600 dark:text-primary-400 font-bold text-sm truncate">{data.assignedEmployee || "OBAOL Desk"}</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-0.5">Assigned To</span>
+                                <span className="text-primary-600 dark:text-primary-300 font-bold text-sm truncate">{data.assignedEmployee || "OBAOL Desk"}</span>
                             </div>
                             {!data.isAdmin && clientName && (
                                 <div className="flex flex-col sm:items-end min-w-0 flex-1">
-                                    <span className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-0.5 sm:text-right">{data.counterpartyLabel}</span>
-                                    <span className="text-slate-600 dark:text-slate-400 font-bold sm:text-right text-xs line-clamp-1">{clientName}</span>
+                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-0.5 sm:text-right">{data.counterpartyLabel}</span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-bold sm:text-right text-xs line-clamp-1">{clientName}</span>
                                 </div>
                             )}
                         </div>
@@ -167,7 +167,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 size="sm"
                                 variant="flat"
                                 color="secondary"
-                                className="flex-1 bg-secondary/10 hover:bg-secondary hover:text-white transition-all shadow-sm font-bold text-[10px] tracking-widest uppercase py-4"
+                                className="flex-1 font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-secondary hover:text-white transition-all shadow-none"
                                 onPress={() => window.location.href = `tel:${data.supplierPhone}`}
                             >
                                 <FiPhone size={14} className="flex-shrink-0" /> <span className="truncate">Supplier</span>
@@ -176,7 +176,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 size="sm"
                                 variant="flat"
                                 color="primary"
-                                className="flex-1 bg-primary/10 hover:bg-primary hover:text-white transition-all shadow-sm font-bold text-[10px] tracking-widest uppercase py-4"
+                                className="flex-1 font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-primary hover:text-white transition-all shadow-none"
                                 onPress={() => window.location.href = `tel:${data.buyerPhone}`}
                             >
                                 <FiPhone size={14} className="flex-shrink-0" /> <span className="truncate">Buyer</span>
@@ -187,7 +187,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                             size="sm"
                             variant="flat"
                             color="primary"
-                            className="bg-primary/10 hover:bg-primary hover:text-white transition-all shadow-sm font-bold text-[10px] tracking-widest uppercase py-4"
+                            className="font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-primary hover:text-white transition-all shadow-none w-full"
                             onPress={() => window.location.href = `tel:${data.employeePhone}`}
                         >
                             <FiPhone size={14} className="flex-shrink-0" /> Contact

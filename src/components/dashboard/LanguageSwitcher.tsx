@@ -1,149 +1,106 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem,
-    Button,
-} from "@nextui-org/react";
-import { LuLanguages, LuChevronDown } from "react-icons/lu";
-
-const languages = [
-    { code: "en", name: "English", flag: "🇺🇸" },
-    { code: "ar", name: "Arabic", flag: "🇦🇪" },
-    { code: "ta", name: "Tamil", flag: "🇮🇳" },
-    { code: "ml", name: "Malayalam", flag: "🇮🇳" },
-    { code: "kn", name: "Kannada", flag: "🇮🇳" },
-    { code: "ur", name: "Urdu", flag: "🇮🇳" },
-    { code: "pa", name: "Punjabi", flag: "🇮🇳" },
-    { code: "raj", name: "Rajasthani", flag: "🇮🇳" },
-    { code: "te", name: "Telugu", flag: "🇮🇳" },
-    { code: "mr", name: "Marathi", flag: "🇮🇳" },
-    { code: "gu", name: "Gujarati", flag: "🇮🇳" },
-    { code: "bn", name: "Bengali", flag: "🇮🇳" },
-    { code: "hi", name: "Hindi", flag: "🇮🇳" },
-    { code: "ru", name: "Russian", flag: "🇷🇺" },
-    { code: "es", name: "Spanish", flag: "🇪🇸" },
-    { code: "it", name: "Italian", flag: "🇮🇹" },
-    { code: "de", name: "German", flag: "🇩🇪" },
-];
-
-declare global {
-    interface Window {
-        googleTranslateElementInit: () => void;
-        google: any;
-    }
-}
+import { LuLanguages, LuChevronDown, LuCheck } from "react-icons/lu";
+import { languages } from "@/data/languages";
 
 export const LanguageSwitcher = () => {
     const [currentLang, setCurrentLang] = useState("en");
 
     useEffect(() => {
-        // Define the Google Translate initialization function
-        window.googleTranslateElementInit = () => {
-            if (window.google && window.google.translate) {
-                new window.google.translate.TranslateElement(
-                    {
-                        pageLanguage: "en",
-                        includedLanguages: languages.map((l) => l.code).join(","),
-                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                        autoDisplay: false,
-                    },
-                    "google_translate_element"
-                );
-            }
-        };
-
-        // Add the Google Translate script
-        const addScript = document.createElement("script");
-        addScript.id = "google-translate-script";
-        addScript.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        document.body.appendChild(addScript);
-
         // Sync initial state from cookie
         const checkCookie = setInterval(() => {
-            const googtrans = document.cookie.split('; ').find(row => row.startsWith('googtrans='));
+            const googtrans = document.cookie.split("; ").find((row) => row.startsWith("googtrans="));
             if (googtrans) {
-                const lang = googtrans.split('/').pop();
-                if (lang && lang !== currentLang && languages.some(l => l.code === lang)) {
+                const lang = googtrans.split("/").pop();
+                if (lang && lang !== currentLang && languages.some((l) => l.code === lang)) {
                     setCurrentLang(lang);
-                    clearInterval(checkCookie);
                 }
+            } else if (currentLang !== "en") {
+                setCurrentLang("en");
             }
         }, 1000);
 
         return () => clearInterval(checkCookie);
-    }, []);
+    }, [currentLang]);
 
     const changeLanguage = (langCode: string) => {
-        // Set cookies for all variations
         const domain = window.location.hostname;
-        const cookieVal = `/en/${langCode}`;
+        const selectedLang = languages.find(l => l.code === langCode);
 
-        document.cookie = `googtrans=${cookieVal}; path=/`;
-        document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}`;
-        if (domain.includes(".")) {
-            document.cookie = `googtrans=${cookieVal}; path=/; domain=.${domain}`;
+        // Dispatch start event for the overlay
+        window.dispatchEvent(new CustomEvent("translation-start", {
+            detail: { name: selectedLang?.name || "Language" }
+        }));
+
+        if (langCode === "en") {
+            // Clear the cookie when switching back to the default language
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+            if (domain.includes(".")) {
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
+            }
+            window.location.reload();
+            return;
+        } else {
+            const cookieVal = `/en/${langCode}`;
+            document.cookie = `googtrans=${cookieVal}; path=/`;
+            document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}`;
+            if (domain.includes(".")) {
+                document.cookie = `googtrans=${cookieVal}; path=/; domain=.${domain}`;
+            }
         }
 
-        // Trigger Google Translate engine
-        const triggerGoogle = () => {
+        // Trigger Google Translate manually for non-English
+        const triggerGoogle = (attempts = 0) => {
             const select = document.querySelector(".goog-te-combo") as HTMLSelectElement;
             if (select) {
                 select.value = langCode;
                 select.dispatchEvent(new Event("change"));
+                select.dispatchEvent(new Event("click"));
                 setCurrentLang(langCode);
+                // Hide overlay after a short delay to let translation apply
+                setTimeout(() => {
+                    window.dispatchEvent(new Event("translation-end"));
+                }, 2000);
+            } else if (attempts < 10) {
+                setTimeout(() => triggerGoogle(attempts + 1), 500);
             } else {
-                // If not ready, we might need a reload for the cookie to take effect
-                console.log("Translation engine not ready, reloading...");
                 window.location.reload();
             }
         };
 
-        // Try triggering, or wait a bit if the script is still loading
-        if (window.google && window.google.translate) {
-            triggerGoogle();
-        } else {
-            console.log("Waiting for Google Translate to load...");
-            setTimeout(triggerGoogle, 500);
-        }
+        triggerGoogle();
     };
 
     const currentLangName = languages.find((l) => l.code === currentLang)?.name || "Language";
 
     return (
         <div className="flex items-center">
-            <div id="google_translate_element"></div>
-            <Dropdown placement="bottom-end" classNames={{ content: "bg-content1 border border-default-200" }}>
-                <DropdownTrigger>
-                    <Button
-                        variant="light"
-                        radius="full"
-                        className="flex items-center gap-2 px-3 min-w-[120px] bg-default-100/50 hover:bg-default-200/50 border border-transparent hover:border-default-200 transition-all font-medium text-xs h-10"
-                    >
-                        <LuLanguages className="text-warning-500 w-4 h-4" />
-                        <span className="hidden sm:inline">{currentLangName}</span>
-                        <LuChevronDown className="text-default-400 w-3 h-3" />
-                    </Button>
-                </DropdownTrigger>
-                <DropdownMenu
+            <div className="relative group">
+                <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-warning-500 w-4 h-4 z-10 pointer-events-none" />
+                <select
+                    className="appearance-none w-[150px] bg-default-100 hover:bg-default-200 transition-colors cursor-pointer text-foreground font-bold text-[11px] uppercase tracking-wider h-10 pl-9 pr-8 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20"
+                    value={currentLang}
+                    onChange={(e: any) => changeLanguage(e.target.value)}
                     aria-label="Select Language"
-                    className="max-h-[300px] overflow-y-auto"
-                    onAction={(key) => changeLanguage(key as string)}
                 >
                     {languages.map((lang) => (
-                        <DropdownItem
+                        <option
                             key={lang.code}
-                            startContent={<span className="text-lg">{lang.flag}</span>}
-                            className={currentLang === lang.code ? "text-warning-500 font-bold" : "text-foreground"}
+                            value={lang.code}
+                            className="text-base font-medium text-foreground bg-content1 py-2"
                         >
-                            {lang.name}
-                        </DropdownItem>
+                            {lang.flag} {lang.name}
+                        </option>
                     ))}
-                </DropdownMenu>
-            </Dropdown>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-default-400 group-hover:text-default-600 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
         </div>
     );
 };

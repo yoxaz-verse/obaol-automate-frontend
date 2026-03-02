@@ -61,6 +61,7 @@ interface Company {
 
 export default function CompanyProductPage() {
   const { user } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
   const queryClient = useQueryClient();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty"
@@ -84,7 +85,7 @@ export default function CompanyProductPage() {
   const { data: employeeData, isLoading: loadingEmployees } = useQuery({
     queryKey: ["employees"],
     queryFn: () => getData(employeeRoutes.getAll, { limit: 10000 }),
-    enabled: user?.role === "admin",
+    enabled: roleLower === "admin",
   });
 
   const assignMutation = useMutation({
@@ -158,10 +159,10 @@ export default function CompanyProductPage() {
 
     // Role-based filtering: Employees only see assigned companies
     // Note: Backend hook also handles this, but frontend filtering is a nice double-layer for UX
-    if (user?.role === "employee") {
+    if (roleLower === "employee") {
       allCompanies = allCompanies.filter(c => {
         const assignedId = typeof c.assignedEmployee === "object" ? c.assignedEmployee?._id : c.assignedEmployee;
-        return assignedId === user?.id;
+        return String(assignedId || "") === String(user?.id || "");
       });
     }
 
@@ -191,7 +192,7 @@ export default function CompanyProductPage() {
       selectedCompany: selected,
       allEmployees,
     };
-  }, [companyData, employeeData, selectedCompanyId, activeTab, user]);
+  }, [companyData, employeeData, selectedCompanyId, activeTab, user, roleLower]);
 
   if (loadingCompanies) {
     return (
@@ -217,7 +218,7 @@ export default function CompanyProductPage() {
         {/* --- Sidebar (Master) --- */}
         <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col gap-4">
           <Card className="p-4 bg-background/60 backdrop-blur-md border-none shadow-sm h-full overflow-hidden">
-            <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Catalog Companies</h2>
+            <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Companies</h2>
 
             <CompanySearch
               defaultSelected={selectedCompanyId}
@@ -245,7 +246,7 @@ export default function CompanyProductPage() {
                 cursor: "w-full bg-warning-500",
                 tab: "max-w-fit px-0 h-10",
                 tabContent:
-                  "group-data-[selected=true]:text-warning-500 group-data-[selected=true]:font-bold text-xs font-medium text-default-500 dark:text-default-400",
+                  "group-data-[selected=true]:text-warning-500 group-data-[selected=true]:font-bold text-xs font-medium text-default-600 dark:text-default-400",
               }}
             >
               <Tab
@@ -360,18 +361,14 @@ export default function CompanyProductPage() {
                   </div>
 
                   {/* --- Employee Assignment Section (Admin Only) --- */}
-                  {user?.role === "admin" && (
+                  {roleLower === "admin" && (
                     <div className="flex flex-col items-end gap-2">
                       <div className="text-[10px] font-bold text-default-400 uppercase">Assigned Overseer</div>
                       {!isAssigning ? (
                         <div className="flex items-center gap-2">
                           {selectedCompany.assignedEmployee ? (
                             <div className="flex items-center gap-2 bg-default-100 px-3 py-1.5 rounded-full">
-                              <Avatar
-                                size="xs"
-                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee.name : 'Unknown')}&background=random`}
-                              />
-                              <span className="text-xs font-semibold text-foreground/80">
+                              <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
                                 {typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee.name : 'Unknown'}
                               </span>
                             </div>
@@ -405,8 +402,7 @@ export default function CompanyProductPage() {
                             {allEmployees.map((emp) => (
                               <SelectItem key={emp._id} textValue={emp.name}>
                                 <div className="flex items-center gap-2">
-                                  <Avatar size="xs" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random`} />
-                                  <span>{emp.name}</span>
+                                  <span className="text-sm font-medium">{emp.name}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -432,7 +428,7 @@ export default function CompanyProductPage() {
                   )}
 
                   {/* --- Assigned Overseer (Employee View) --- */}
-                  {user?.role === "employee" && selectedCompany.assignedEmployee && (
+                  {roleLower === "employee" && selectedCompany.assignedEmployee && (
                     <div className="flex flex-col items-end gap-1">
                       <div className="text-[10px] font-bold text-default-400 uppercase">Your Assignment</div>
                       <div className="flex items-center gap-2 bg-success-50 px-3 py-1 rounded-full border border-success-100">
@@ -456,7 +452,7 @@ export default function CompanyProductPage() {
                         tabList: "bg-default-200/50 dark:bg-default-100/50 p-1",
                         cursor: "bg-warning-500 shadow-sm",
                         tab: "h-8",
-                        tabContent: "group-data-[selected=true]:text-white font-bold text-xs",
+                        tabContent: "group-data-[selected=true]:text-white font-bold text-xs text-default-600 dark:text-default-400",
                       }}
                     >
                       <Tab key="products" title="Products" />

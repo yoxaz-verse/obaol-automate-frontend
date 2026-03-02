@@ -13,6 +13,7 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import TableFrame from "@/components/CurdTable/table-frame";
 
 interface UserTabContentProps {
   currentTable: string;
@@ -64,14 +65,20 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 languageKnown: joinNames(item.languageKnown),
               };
             } else if (currentTable === "associate") {
+              const designationId =
+                item.designationId ||
+                (typeof item.designation === "object" ? item.designation?._id : item.designation);
+              const designationName =
+                item.designationName ||
+                (typeof item.designation === "object" ? item.designation?.name : "") ||
+                (typeof item.designation === "string" && item.designation.length > 0 ? item.designation : "");
               return {
                 ...rest,
                 associateCompany: item.associateCompany
                   ? item.associateCompany.name
                   : "N/A",
-                designation: item.designation
-                  ? item.designation.name
-                  : "Unknown",
+                designation: designationName || "Unknown",
+                designationId: designationId || "",
               };
             }
             // Handle other user types similarly if needed
@@ -97,37 +104,42 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
               </div>
               <Spacer y={5} />
               {tableData.length > 0 ? (
-                <CommonTable
-                  TableData={tableData}
-                  columns={columns}
-                  isLoading={false}
-                  viewModal={(item: any) => (
-                    <DetailsModal
-                      currentTable={currentTable}
-                      columns={columns}
-                      data={item}
-                    />
-                  )}
-                  editModal={(item: any) => (
-                    <EditModal
-                      _id={item._id}
-                      initialData={item}
-                      currentTable={currentTable}
-                      formFields={formFields}
-                      apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
-                      refetchData={refetchData}
-                    />
-                  )}
-                  deleteModal={(item: any) => (
-                    <DeleteModal
-                      _id={item._id}
-                      name={item.name}
-                      deleteApiEndpoint={apiRoutesByRole[currentTable]}
-                      refetchData={refetchData}
-                      useBody={true}
-                    />
-                  )}
-                />
+                <TableFrame>
+                  <CommonTable
+                    TableData={tableData}
+                    columns={columns}
+                    isLoading={false}
+                    viewModal={(item: any) => (
+                      <DetailsModal
+                        currentTable={currentTable}
+                        columns={columns}
+                        data={item}
+                      />
+                    )}
+                    editModal={(item: any) => (
+                      <EditModal
+                        _id={item._id}
+                        initialData={{
+                          ...item,
+                          designation: item.designationId || item.designation,
+                        }}
+                        currentTable={currentTable}
+                        formFields={formFields}
+                        apiEndpoint={apiRoutesByRole[currentTable]} // Assuming API endpoint for update
+                        refetchData={refetchData}
+                      />
+                    )}
+                    deleteModal={(item: any) => (
+                      <DeleteModal
+                        _id={item._id}
+                        name={item.name}
+                        deleteApiEndpoint={apiRoutesByRole[currentTable]}
+                        refetchData={refetchData}
+                        useBody={true}
+                      />
+                    )}
+                  />
+                </TableFrame>
               ) : (
                 <div>No data available</div> // Translate
               )}

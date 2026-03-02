@@ -35,6 +35,8 @@ import { AddFormProps, AddModalProps, FormField } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { showToastMessage } from "@/utils/utils";
 import { toTitleCase } from "../titles";
+import PhoneField from "../form/PhoneField";
+import { parsePhoneValue } from "@/utils/phone";
 
 const AddForm: React.FC<AddFormProps> = ({
   name,
@@ -480,7 +482,43 @@ const AddForm: React.FC<AddFormProps> = ({
   };
 
   // Helper function to render form fields based on type
+  const isPhoneLikeField = (field: FormField) =>
+    field.type === "phone" ||
+    (/phone/i.test(field.key) && ["number", "text", "tel", "phone"].includes(String(field.type || "").toLowerCase()));
+
+  const getPhoneMetaKeys = (baseKey: string) => ({
+    countryCodeKey: `${baseKey}CountryCode`,
+    nationalKey: `${baseKey}National`,
+  });
+
   const renderFormField = (field: FormField) => {
+    if (isPhoneLikeField(field)) {
+      const { countryCodeKey, nationalKey } = getPhoneMetaKeys(field.key);
+      const parsed = parsePhoneValue({
+        raw: formData[field.key],
+        countryCode: formData[countryCodeKey],
+        national: formData[nationalKey],
+      });
+      return (
+        <PhoneField
+          name={field.key}
+          label={field.label}
+          value={parsed.e164}
+          countryCodeValue={parsed.countryCode}
+          nationalValue={parsed.national}
+          className="w-full"
+          onChange={(next) => {
+            setFormData((prev) => ({
+              ...prev,
+              [field.key]: next.e164,
+              [countryCodeKey]: next.countryCode,
+              [nationalKey]: next.national,
+            }));
+          }}
+        />
+      );
+    }
+
     switch (field.type) {
       case "textarea":
         return (
@@ -620,7 +658,7 @@ const AddForm: React.FC<AddFormProps> = ({
         );
       }
 
-      case "select":
+      case "select": {
         const dependsOnValue = field.dependsOn
           ? formData[field.dependsOn]
           : null;
@@ -632,6 +670,13 @@ const AddForm: React.FC<AddFormProps> = ({
             : field.dynamicValuesFn
               ? dynamicOptions[field.key] || []
               : field.values || [];
+
+        // Find the label for the currently selected key so the Autocomplete
+        // shows the right text in the input box even when it's pre-populated.
+        const currentKey = formData[field.key] ? String(formData[field.key]) : null;
+        const currentLabel = currentKey
+          ? (options.find((o: any) => String(o.key) === currentKey)?.value ?? "")
+          : "";
 
         return (
           // @ts-ignore
@@ -647,17 +692,21 @@ const AddForm: React.FC<AddFormProps> = ({
             }
             isDisabled={!!isDisabled}
             items={options}
-            selectedKey={
-              formData[field.key] ? String(formData[field.key]) : null
-            }
-            onSelectionChange={(key: any) =>
-              handleInputChange({
-                target: {
-                  name: field.key,
-                  value: String(key),
-                },
-              })
-            }
+            selectedKey={currentKey}
+            // defaultInputValue feeds the visible text on first render
+            defaultInputValue={currentLabel}
+            allowsCustomValue={false}
+            onSelectionChange={(key: any) => {
+              // Only update when the user has actually picked an item (key is non-null)
+              if (key != null) {
+                handleInputChange({
+                  target: {
+                    name: field.key,
+                    value: String(key),
+                  },
+                });
+              }
+            }}
           >
             {(item: any) => (
               <AutocompleteItem key={String(item.key)} className="text-foreground">
@@ -666,7 +715,7 @@ const AddForm: React.FC<AddFormProps> = ({
             )}
           </Autocomplete>
         );
-
+      }
       case "multiselect": {
         const dependsOnValue = field.dependsOn
           ? formData[field.dependsOn]
@@ -772,20 +821,79 @@ const AddForm: React.FC<AddFormProps> = ({
     <>
       <div className="w-full ">
         {success ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            {/* ✅ Tick Animation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-16 px-8 text-center relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)]"
+          >
+            {/* Celebratory Particles */}
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 0, x: 0 }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  y: [0, (i % 2 === 0 ? -100 : -80)],
+                  x: [0, (i < 3 ? -40 : 40)],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeOut",
+                }}
+                className="absolute w-2 h-2 rounded-full bg-warning-400/40"
+              />
+            ))}
+
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1, rotate: 360 }}
-              transition={{ duration: 0.5 }}
-              className="w-20 h-20 flex items-center justify-center rounded-full bg-green-500 text-white text-4xl"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                delay: 0.1,
+              }}
+              className="w-24 h-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-warning-400 to-orange-500 text-white shadow-[0_20px_50px_rgba(251,146,60,0.3)] mb-8"
             >
-              ✓
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <motion.path
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  d="M20 6L9 17l-5-5"
+                />
+              </svg>
             </motion.div>
-            <p className="mt-4 text-green-600 font-semibold text-lg">
-              {name ?? "Form"} Submitted Successfully!
-            </p>
-          </div>
+
+            <motion.h3
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl font-black tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70"
+            >
+              All Set!
+            </motion.h3>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-3 text-default-500 font-medium text-lg max-w-xs"
+            >
+              The {name ?? currentTable} has been added to the network.
+            </motion.p>
+          </motion.div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div

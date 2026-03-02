@@ -40,8 +40,8 @@ export default async function ProductPage() {
     const products = productsResponse?.data || [];
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <div className="w-[95%] max-w-7xl py-12">
+        <div className="bg-background">
+            <div className="w-[95%] max-w-7xl mx-auto py-12">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold mb-4">Our Products</h1>
                     <p className="text-default-500 max-w-2xl mx-auto">

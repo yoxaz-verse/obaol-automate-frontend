@@ -112,6 +112,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
+            className="w-full min-w-0 max-w-full"
           >
             {children(responseData as T, refetch)}
           </motion.div>

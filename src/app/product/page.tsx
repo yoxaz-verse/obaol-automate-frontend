@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     description: "Explore our wide range of agricultural and industrial products. Verified quality, transparent rates.",
 };
 
+export const dynamic = "force-dynamic";
+
 async function getProducts() {
     // Fetch from the new public endpoint
     // Note: Adjust localhost URL if needed for production environment variable
@@ -68,6 +70,7 @@ export default async function ProductPage() {
                                     <p className="text-default-500 text-sm line-clamp-3">
                                         {product.description}
                                     </p>
+                                    {/* @ts-ignore */}
                                     <Spacer y={2} />
                                     {/* If we had images, we'd put them here. For now, description key. */}
                                 </CardBody>
@@ -76,6 +79,7 @@ export default async function ProductPage() {
                     </div>
                 )}
 
+                {/* @ts-ignore */}
                 <Spacer y={12} />
             </div>
         </div>

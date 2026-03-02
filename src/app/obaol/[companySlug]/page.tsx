@@ -38,7 +38,7 @@ const PublicCatalogPage = () => {
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
                 <h1 className="text-2xl font-bold text-danger">Catalog Not Found</h1>
                 <p className="text-default-500">
-                    We couldn't find a catalog for "{companySlug}". Check the URL or try again later.
+                    We couldn&apos;t find a catalog for &quot;{companySlug}&quot;. Check the URL or try again later.
                 </p>
                 <Button as={Link} href="/obaol" color="primary" variant="flat">
                     Browse All Products

@@ -65,7 +65,7 @@ export default function BrandPage() {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center">
                 <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">404 • Lost in Space</h1>
-                <p className="text-default-400 mb-8 max-w-md">This brand experience is either under construction or doesn't exist in our galaxy yet.</p>
+                <p className="text-default-400 mb-8 max-w-md">This brand experience is either under construction or doesn&apos;t exist in our galaxy yet.</p>
                 <Button color="warning" variant="flat" onClick={() => window.location.href = "/"}>Back to OBAOL Cosmos</Button>
             </div>
         );
@@ -223,7 +223,7 @@ export default function BrandPage() {
                         <div className="text-center py-40 border border-dashed border-white/10 rounded-[40px]">
                             <LuShoppingBag className="w-16 h-16 mx-auto mb-6 text-white/20" />
                             <h3 className="text-xl font-bold mb-2">Marketplace Empty</h3>
-                            <p className="text-white/40">This brand hasn't allocated any products to the live marketplace yet.</p>
+                            <p className="text-white/40">This brand hasn&apos;t allocated any products to the live marketplace yet.</p>
                         </div>
                     )}
                 </div>
@@ -252,7 +252,7 @@ export default function BrandPage() {
             {/* Cyberpunk Footer */}
             <footer className="py-12 border-t border-white/5">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                    <div>© {new Date().getFullYear()} {company.name} // ALL RIGHTS RESERVED</div>
+                    <div>© {new Date().getFullYear()} {company.name} | ALL RIGHTS RESERVED</div>
                     <div className="flex items-center gap-2">
                         DESIGNED & SECURED BY <span className="text-warning-500">OBAOL CORE</span>
                     </div>

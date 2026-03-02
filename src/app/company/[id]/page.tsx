@@ -4,7 +4,7 @@ import React from "react";
 import { NextPage } from "next";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer, Card, CardBody, User, Chip, Skeleton, Divider } from "@heroui/react";
+import { Spacer, Card, CardBody, User, Chip, Skeleton, Divider, Tooltip } from "@heroui/react";
 import { associateCompanyRoutes, apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";

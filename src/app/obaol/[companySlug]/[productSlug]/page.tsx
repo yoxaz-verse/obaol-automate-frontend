@@ -48,7 +48,7 @@ const PublicProductPage = () => {
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
                 <h1 className="text-2xl font-bold text-danger">Product Not Found</h1>
                 <p className="text-default-500">
-                    We couldn't find this product in {companyInfo.name}'s catalog.
+                    We couldn&apos;t find this product in {companyInfo.name}&apos;s catalog.
                 </p>
                 <Button as={Link} href={`/obaol/${companySlug}`} color="primary" variant="flat">
                     Back to Catalog

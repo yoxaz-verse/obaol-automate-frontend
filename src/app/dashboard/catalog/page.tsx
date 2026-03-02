@@ -325,7 +325,7 @@ export default function CatalogPage() {
               <FiSearch className="text-warning-500" size={16} />
               <span className="text-sm font-semibold text-default-500">
                 Searching across all levels for{" "}
-                <span className="text-warning-500 font-black">"{search}"</span>
+                <span className="text-warning-500 font-black">&quot;{search}&quot;</span>
               </span>
               <button
                 onClick={() => setSearch("")}
@@ -434,7 +434,7 @@ export default function CatalogPage() {
                                   </div>
                                   <h3 className="text-2xl font-bold text-foreground">No Items Found</h3>
                                   <p className="max-w-md mx-auto text-sm leading-relaxed">
-                                    We couldn't find any results here. Try searching or navigate back.
+                                    We couldn&apos;t find any results here. Try searching or navigate back.
                                   </p>
                                 </div>
                               )}
@@ -481,4 +481,3 @@ export default function CatalogPage() {
     </div>
   );
 }
-

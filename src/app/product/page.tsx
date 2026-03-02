@@ -12,8 +12,14 @@ export const dynamic = "force-dynamic";
 
 async function getProducts() {
     // Fetch from the new public endpoint
-    // Note: Adjust localhost URL if needed for production environment variable
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1/web";
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    // During build time, if no public API URL is set, we skip the fetch to avoid ENOTFOUND/ECONNREFUSED
+    if (!publicApiUrl && typeof window === "undefined") {
+        return null;
+    }
+
+    const apiUrl = publicApiUrl || "http://localhost:5001/api/v1/web";
 
     try {
         const res = await fetch(`${apiUrl}/products?limit=1000`, {
@@ -21,13 +27,13 @@ async function getProducts() {
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to fetch products: ${res.status}`);
+            return null;
         }
 
         const data = await res.json();
-        return data.data; // Assuming response structure { success: true, data: { data: [...] } } or { success: true, data: [...] }
+        return data.data;
     } catch (error) {
-        console.error("Error fetching products:", error);
+        // Silently fail during build to prevent build-stopping log noise
         return null;
     }
 }

@@ -1,0 +1,89 @@
+
+> obaol-supreme@0.1.0 build
+> next build
+
+   ▲ Next.js 14.1.3
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/48) ...
+   Generating static pages (12/48) 
+   Generating static pages (24/48) 
+   Generating static pages (36/48) 
+ ✓ Generating static pages (48/48) 
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size     First Load JS
+┌ ○ /                                        17.3 kB         221 kB
+├ ○ /_not-found                              0 B                0 B
+├ ○ /about                                   3.64 kB         523 kB
+├ ○ /auth                                    367 B           286 kB
+├ ○ /auth/admin                              454 B           286 kB
+├ ○ /auth/associate                          457 B           286 kB
+├ ○ /auth/employee                           446 B           286 kB
+├ ○ /auth/forgot-password                    7.38 kB         242 kB
+├ ○ /auth/register                           15 kB           313 kB
+├ ○ /auth/register/success                   4.42 kB         168 kB
+├ λ /brand/[slug]                            23.3 kB         197 kB
+├ ○ /companies                               13.6 kB         225 kB
+├ λ /company/[id]                            8.04 kB         661 kB
+├ ○ /dashboard                               185 kB          823 kB
+├ ○ /dashboard/approvals                     18.1 kB         289 kB
+├ ○ /dashboard/bulk                          127 kB          309 kB
+├ ○ /dashboard/catalog                       17.6 kB         685 kB
+├ ○ /dashboard/companyProduct                12.1 kB         725 kB
+├ ○ /dashboard/enquiries                     26 kB           301 kB
+├ λ /dashboard/enquiries/[id]                29.6 kB         289 kB
+├ ○ /dashboard/essentials                    5.52 kB         640 kB
+├ ○ /dashboard/execution-enquiries           20.4 kB         179 kB
+├ ○ /dashboard/geosphere                     9.11 kB         170 kB
+├ ○ /dashboard/map                           8.42 kB         371 kB
+├ ○ /dashboard/marketplace                   6.09 kB         665 kB
+├ ○ /dashboard/orders                        22.8 kB         278 kB
+├ λ /dashboard/orders/[id]                   19.2 kB         251 kB
+├ ○ /dashboard/product                       5.96 kB         665 kB
+├ ○ /dashboard/profile                       23 kB           548 kB
+├ ○ /dashboard/rates                         11 kB           663 kB
+├ ○ /dashboard/rsForm                        10.2 kB         592 kB
+├ ○ /dashboard/users                         4.68 kB         640 kB
+├ ○ /developer                               2.97 kB         201 kB
+├ ○ /developer/keys                          2.76 kB        94.7 kB
+├ ○ /developer/login                         3.15 kB        95.1 kB
+├ ○ /developer/usage                         2.03 kB        93.9 kB
+├ ○ /disclaimer                              174 B           201 kB
+├ ○ /export-resources                        5.41 kB         203 kB
+├ ○ /faq                                     173 B           201 kB
+├ ○ /how-it-works                            3.14 kB         207 kB
+├ ○ /obaol                                   5.67 kB         658 kB
+├ λ /obaol/[companySlug]                     18.8 kB         198 kB
+├ λ /obaol/[companySlug]/[productSlug]       15.6 kB         194 kB
+├ λ /obaol/product/[product]                 5.77 kB         658 kB
+├ λ /obaol/subcategory/[subcategory]         5.77 kB         658 kB
+├ λ /pricing/[id]                            5.09 kB         658 kB
+├ λ /pricing/[id]/product/[product]          5.77 kB         658 kB
+├ λ /pricing/[id]/subcategory/[subcategory]  5.78 kB         658 kB
+├ ○ /privacy-policy                          174 B           201 kB
+├ ○ /procurement                             5.61 kB         207 kB
+├ λ /product                                 122 kB          491 kB
+├ ○ /robots.txt                              0 B                0 B
+├ ○ /sitemap.xml                             0 B                0 B
+├ ○ /terms-and-conditions                    174 B           201 kB
+├ ○ /verification                            3.64 kB         523 kB
+├ ○ /verification-pending                    13 kB           215 kB
+└ ○ /why-obaol                               3.64 kB         523 kB
++ First Load JS shared by all                85 kB
+  ├ chunks/8069-c48372aaa96e8fd9.js          29.2 kB
+  ├ chunks/fd9d1056-c7327feac2204f30.js      53.4 kB
+  └ other shared chunks (total)              2.45 kB
+
+
+ƒ Middleware                                 27.6 kB
+
+○  (Static)   prerendered as static content
+λ  (Dynamic)  server-rendered on demand using Node.js
+

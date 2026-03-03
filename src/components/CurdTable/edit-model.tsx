@@ -502,6 +502,11 @@ export default function EditModal({
                 },
               })
             }
+            classNames={{
+              base: "w-[90%]",
+              listboxWrapper: "text-foreground",
+              popoverContent: "bg-content1 text-foreground",
+            }}
           >
             {(item: any) => (
               <AutocompleteItem key={String(item.key)} className="text-foreground">
@@ -527,6 +532,12 @@ export default function EditModal({
                 setFormData((p) => ({ ...p, [f.key]: Array.from(keys as Set<string>) }))
               }
               placeholder={`Select ${f.label}`}
+              classNames={{
+                trigger: "text-foreground",
+                value: "text-foreground",
+                popoverContent: "bg-content1 text-foreground",
+                listbox: "text-foreground",
+              }}
             >
               {multiOptions.map((opt: any) => (
                 <SelectItem key={opt.key} value={String(opt.key)} className="text-foreground">
@@ -648,7 +659,7 @@ export default function EditModal({
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
-                  .filter((f) => f.inEdit)
+                  .filter((f) => f.inEdit && f.type !== "password")
                   .map((f, i) => (
                     <div key={i} className="mb-4">
                       {renderField(f)}

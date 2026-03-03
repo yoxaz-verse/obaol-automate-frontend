@@ -8,6 +8,7 @@ import { languages } from "@/data/languages";
 declare global {
     interface Window {
         googleTranslateElementInit: () => void;
+        // @ts-ignore
         google: any;
     }
 }
@@ -47,7 +48,7 @@ export const TranslationEngine = () => {
         if (!document.getElementById("google-translate-script")) {
             const addScript = document.createElement("script");
             addScript.id = "google-translate-script";
-            addScript.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+            addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
             document.body.appendChild(addScript);
         }
 

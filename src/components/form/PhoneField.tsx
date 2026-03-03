@@ -36,8 +36,8 @@ export default function PhoneField({
   );
 
   return (
-    <div className={`w-full rounded-xl border border-default-200/50 bg-content1/30 px-3 py-3 ${className || ""}`}>
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[170px_minmax(0,1fr)] xl:items-end">
+    <div className={`w-full rounded-xl border border-default-200/40 bg-content1/50 px-3 py-3 ${className || ""}`}>
+      <div className="grid grid-cols-1 gap-3">
         <Autocomplete
           aria-label={`${label} country code`}
           label="Country Code"
@@ -47,6 +47,8 @@ export default function PhoneField({
           classNames={{
             base: "w-full",
             selectorButton: "text-default-500",
+            listboxWrapper: "text-foreground",
+            popoverContent: "bg-content1 text-foreground",
           }}
           defaultItems={COMMON_DIAL_CODES}
           selectedKey={parsed.countryCode || null}
@@ -82,6 +84,7 @@ export default function PhoneField({
             className="w-full"
             classNames={{
               inputWrapper: "bg-default-100/70",
+              input: "text-foreground",
             }}
             onValueChange={(next) => {
               const national = String(next || "").replace(/\D/g, "");

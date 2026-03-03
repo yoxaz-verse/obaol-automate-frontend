@@ -696,6 +696,11 @@ const AddForm: React.FC<AddFormProps> = ({
             // defaultInputValue feeds the visible text on first render
             defaultInputValue={currentLabel}
             allowsCustomValue={false}
+            classNames={{
+              base: "w-[90%]",
+              listboxWrapper: "text-foreground",
+              popoverContent: "bg-content1 text-foreground",
+            }}
             onSelectionChange={(key: any) => {
               // Only update when the user has actually picked an item (key is non-null)
               if (key != null) {
@@ -748,6 +753,12 @@ const AddForm: React.FC<AddFormProps> = ({
               selectionMode="multiple"
               isDisabled={!!isDisabled}
               selectedKeys={selectedKeys}
+              classNames={{
+                trigger: "text-foreground",
+                value: "text-foreground",
+                popoverContent: "bg-content1 text-foreground",
+                listbox: "text-foreground",
+              }}
               onSelectionChange={(keys) => {
                 const values = Array.from(keys as Set<Key>).map(String);
                 setFormData((prev) => ({

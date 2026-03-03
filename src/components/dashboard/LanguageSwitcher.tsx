@@ -44,10 +44,30 @@ export const LanguageSwitcher = () => {
             return;
         } else {
             const cookieVal = `/en/${langCode}`;
-            document.cookie = `googtrans=${cookieVal}; path=/`;
-            document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}`;
-            if (domain.includes(".")) {
-                document.cookie = `googtrans=${cookieVal}; path=/; domain=.${domain}`;
+            const isSecure = window.location.protocol === "https:";
+            const secureAttr = isSecure ? "; Secure" : "";
+            const sameSiteAttr = "; SameSite=Lax";
+
+            // Root domain strategy for cookies
+            const domainParts = domain.split(".");
+            let rootDomain = domain;
+            if (domainParts.length >= 2) {
+                // Get last two parts (e.g., obaol.com)
+                rootDomain = domainParts.slice(-2).join(".");
+            }
+
+            // Set on current domain
+            document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}${secureAttr}${sameSiteAttr}`;
+
+            // Set on root domain preceded by dot for all subdomains
+            if (rootDomain !== domain) {
+                document.cookie = `googtrans=${cookieVal}; path=/; domain=.${rootDomain}${secureAttr}${sameSiteAttr}`;
+                document.cookie = `googtrans=${cookieVal}; path=/; domain=${rootDomain}${secureAttr}${sameSiteAttr}`;
+            }
+
+            // Fallback for localhost or direct IP
+            if (domain === "localhost") {
+                document.cookie = `googtrans=${cookieVal}; path=/; SameSite=Lax`;
             }
         }
 

@@ -1,15 +1,23 @@
 import "../styles/global.css";
 import type { Metadata } from "next";
 import { Providers } from "./provider";
-import { IBM_Plex_Sans, Inter } from "next/font/google";
+import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { VerificationProvider } from "@/context/VerificationContext";
 import Script from "next/script";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const devanagariFont = Noto_Sans_Devanagari({
+  subsets: ["devanagari"],
+  weight: ["400", "500", "600"],
+  variable: "--font-devanagari",
   display: "swap",
 });
 // app/layout.tsx
@@ -125,7 +133,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${font.className}  text-foreground`}
+      className={`${font.variable} ${devanagariFont.variable} text-foreground`}
     >
 
       <head>

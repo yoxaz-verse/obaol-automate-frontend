@@ -33,7 +33,7 @@ body {
 
 /* Default body text */
 body {
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body), var(--font-devanagari), system-ui, sans-serif;
   line-height: 1.6;
 }
 

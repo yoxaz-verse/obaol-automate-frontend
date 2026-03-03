@@ -64,25 +64,31 @@ const Dashboard: NextPage = () => {
   const { data: trendData } = useQuery({
     queryKey: ["enquiryTrends"],
     queryFn: () => getData(apiRoutes.analytics.enquiryTrends, {}),
-    enabled: !!user?.id && (isAdmin || isEmployee),
+    enabled: !!user?.id && isAdmin,
   });
 
   const { data: topProductsData } = useQuery({
     queryKey: ["productPerformance"],
     queryFn: () => getData(apiRoutes.analytics.productPerformance, { limit: 5 }),
-    enabled: !!user?.id && (isAdmin || isEmployee),
+    enabled: !!user?.id && isAdmin,
   });
 
   const { data: systemMetricsData } = useQuery({
     queryKey: ["systemMetrics"],
     queryFn: () => getData(apiRoutes.analytics.systemMetrics, {}),
-    enabled: !!user?.id && (isAdmin || isEmployee),
+    enabled: !!user?.id && isAdmin,
   });
 
   const { data: associateMetricsData } = useQuery({
     queryKey: ["associateMetrics"],
     queryFn: () => getData(apiRoutes.analytics.associateMetrics, {}),
     enabled: !!user?.id && isAssociate,
+  });
+
+  const { data: employeeMetricsData } = useQuery({
+    queryKey: ["employeeMetrics", user?.id],
+    queryFn: () => getData(apiRoutes.analytics.employeeMetrics, {}),
+    enabled: !!user?.id && isEmployee,
   });
 
   const extractList = (raw: any): any[] => {
@@ -130,6 +136,7 @@ const Dashboard: NextPage = () => {
   const orderCompletionPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
 
   const associateMetrics = associateMetricsData?.data?.data || {};
+  const employeeMetrics = employeeMetricsData?.data?.data || {};
   const systemMetrics = systemMetricsData?.data?.data || {};
   const userId = user?.id?.toString() || "";
 
@@ -207,82 +214,105 @@ const Dashboard: NextPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <InsightCard
               title="Total Enquiries"
-              metric={(systemMetrics.totalEnquiries ?? totalEnquiries).toLocaleString()}
-              trend={{ value: `${systemMetrics.newEnquiriesToday ?? 0} today`, isPositive: true }}
+              metric={(
+                isEmployee
+                  ? (employeeMetrics.totalAssignedEnquiries ?? totalEnquiries)
+                  : (systemMetrics.totalEnquiries ?? totalEnquiries)
+              ).toLocaleString()}
+              trend={{
+                value: `${
+                  isEmployee
+                    ? (employeeMetrics.newAssignedEnquiriesToday ?? 0)
+                    : (systemMetrics.newEnquiriesToday ?? 0)
+                } today`,
+                isPositive: true
+              }}
               icon={<FiActivity size={18} />}
-              footer={<span className="text-xs text-default-500">All-time inbound enquiry volume</span>}
+              footer={<span className="text-xs text-default-500">{isEmployee ? "Assigned enquiry volume" : "All-time inbound enquiry volume"}</span>}
             />
             <InsightCard
-              title="Pending Actions"
-              metric={adminActionRequired.toLocaleString()}
-              icon={<FiClock size={18} />}
-              footer={<span className="text-xs text-default-500">Need acceptance/confirmation/conversion</span>}
+              title={isEmployee ? "Assigned Companies" : "Pending Actions"}
+              metric={(
+                isEmployee
+                  ? (employeeMetrics.assignedCompanies ?? 0)
+                  : adminActionRequired
+              ).toLocaleString()}
+              icon={isEmployee ? <FiUsers size={18} /> : <FiClock size={18} />}
+              footer={<span className="text-xs text-default-500">{isEmployee ? "Associate companies mapped to you" : "Need acceptance/confirmation/conversion"}</span>}
             />
             <InsightCard
-              title="Orders In Progress"
-              metric={activeOrders.toLocaleString()}
-              icon={<FiShoppingBag size={18} />}
-              footer={<span className="text-xs text-default-500">Operational orders currently active</span>}
+              title={isEmployee ? "Assigned Products Live" : "Orders In Progress"}
+              metric={(
+                isEmployee
+                  ? `${employeeMetrics.liveAssignedProducts ?? 0}/${employeeMetrics.totalAssignedProducts ?? 0}`
+                  : activeOrders.toLocaleString()
+              )}
+              icon={isEmployee ? <FiTrendingUp size={18} /> : <FiShoppingBag size={18} />}
+              footer={<span className="text-xs text-default-500">{isEmployee ? "Live products out of total products in your assigned companies" : "Operational orders currently active"}</span>}
             />
             <InsightCard
-              title="Completion Rate"
-              metric={`${orderCompletionPct}%`}
-              icon={<FiCheckCircle size={18} />}
-              footer={<span className="text-xs text-default-500">Completed orders out of all created orders</span>}
+              title={isEmployee ? "Live Activation Rate" : "Completion Rate"}
+              metric={`${isEmployee ? (employeeMetrics.liveProductPercentage ?? 0) : orderCompletionPct}%`}
+              icon={isEmployee ? <FiCheckCircle size={18} /> : <FiCheckCircle size={18} />}
+              footer={<span className="text-xs text-default-500">{isEmployee ? "Share of assigned products currently live" : "Completed orders out of all created orders"}</span>}
             />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 h-[350px]">
-              <TrendChart
-                title="Enquiry Trends (Last 30 Days)"
-                data={Array.isArray(trendList) ? trendList : []}
-                dataKey="count"
-                categoryKey="_id"
-                color="#06b6d4"
-                type="area"
-              />
-            </div>
-            <div className="space-y-4">
+            {!isEmployee && (
+              <div className="lg:col-span-2 h-[350px]">
+                <TrendChart
+                  title="Enquiry Trends (Last 30 Days)"
+                  data={Array.isArray(trendList) ? trendList : []}
+                  dataKey="count"
+                  categoryKey="_id"
+                  color="#06b6d4"
+                  type="area"
+                />
+              </div>
+            )}
+            <div className={`space-y-4 ${isEmployee ? "lg:col-span-3" : ""}`}>
               <Card className="bg-content1/70 border border-default-100 shadow-sm">
                 <CardHeader className="pb-2">
-                  <h4 className="font-semibold text-foreground">System Snapshot</h4>
+                  <h4 className="font-semibold text-foreground">{isEmployee ? "My Assignment Snapshot" : "System Snapshot"}</h4>
                 </CardHeader>
                 <CardBody className="pt-0 space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-default-500 flex items-center gap-2"><FiUsers size={14} /> Associates</span>
-                    <span className="font-semibold">{(systemMetrics.totalAssociates ?? totalAssociates).toLocaleString()}</span>
+                    <span className="text-default-500 flex items-center gap-2"><FiUsers size={14} /> {isEmployee ? "Assigned Companies" : "Associates"}</span>
+                    <span className="font-semibold">{(isEmployee ? (employeeMetrics.assignedCompanies ?? 0) : (systemMetrics.totalAssociates ?? totalAssociates)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-default-500 flex items-center gap-2"><FiBox size={14} /> Products</span>
-                    <span className="font-semibold">{totalProducts.toLocaleString()}</span>
+                    <span className="text-default-500 flex items-center gap-2"><FiBox size={14} /> {isEmployee ? "Assigned Products" : "Products"}</span>
+                    <span className="font-semibold">{(isEmployee ? (employeeMetrics.totalAssignedProducts ?? 0) : totalProducts).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-default-500 flex items-center gap-2"><FiTrendingUp size={14} /> Live Rates</span>
-                    <span className="font-semibold">{(systemMetrics.totalLiveRates ?? liveRates).toLocaleString()}</span>
+                    <span className="text-default-500 flex items-center gap-2"><FiTrendingUp size={14} /> {isEmployee ? "Live Assigned Products" : "Live Rates"}</span>
+                    <span className="font-semibold">{(isEmployee ? (employeeMetrics.liveAssignedProducts ?? 0) : (systemMetrics.totalLiveRates ?? liveRates)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-default-500 flex items-center gap-2"><FiLayers size={14} /> Converted Enquiries</span>
-                    <span className="font-semibold">{convertedEnquiries.toLocaleString()}</span>
+                    <span className="text-default-500 flex items-center gap-2"><FiLayers size={14} /> {isEmployee ? "Pending Assigned Enquiries" : "Converted Enquiries"}</span>
+                    <span className="font-semibold">{(isEmployee ? (employeeMetrics.pendingAssignedEnquiries ?? 0) : convertedEnquiries).toLocaleString()}</span>
                   </div>
                 </CardBody>
               </Card>
-              <Card className="bg-content1/70 border border-default-100 shadow-sm">
-                <CardHeader className="pb-2">
-                  <h4 className="font-semibold text-foreground">Top Performing Products</h4>
-                </CardHeader>
-                <CardBody className="pt-0 space-y-3">
-                  {(Array.isArray(topProducts) ? topProducts : []).slice(0, 5).map((prod: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between text-sm">
-                      <span className="truncate max-w-[70%] text-default-600">{prod?.name || "Unknown Product"}</span>
-                      <Chip size="sm" variant="flat" color="primary">{prod?.enquiryCount || 0}</Chip>
-                    </div>
-                  ))}
-                  {(!Array.isArray(topProducts) || topProducts.length === 0) && (
-                    <div className="text-xs text-default-400">No product analytics available yet.</div>
-                  )}
-                </CardBody>
-              </Card>
+              {!isEmployee && (
+                <Card className="bg-content1/70 border border-default-100 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <h4 className="font-semibold text-foreground">Top Performing Products</h4>
+                  </CardHeader>
+                  <CardBody className="pt-0 space-y-3">
+                    {(Array.isArray(topProducts) ? topProducts : []).slice(0, 5).map((prod: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <span className="truncate max-w-[70%] text-default-600">{prod?.name || "Unknown Product"}</span>
+                        <Chip size="sm" variant="flat" color="primary">{prod?.enquiryCount || 0}</Chip>
+                      </div>
+                    ))}
+                    {(!Array.isArray(topProducts) || topProducts.length === 0) && (
+                      <div className="text-xs text-default-400">No product analytics available yet.</div>
+                    )}
+                  </CardBody>
+                </Card>
+              )}
             </div>
           </div>
         </>

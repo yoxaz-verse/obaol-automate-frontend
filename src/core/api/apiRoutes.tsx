@@ -254,6 +254,7 @@ export const dashboardRoutes = {
   productPerformance: `${ANALYTICS_BASE}/performance/products`,
   systemMetrics: `${ANALYTICS_BASE}/metrics/system`,
   associateMetrics: `${ANALYTICS_BASE}/metrics/associate`,
+  employeeMetrics: `${ANALYTICS_BASE}/metrics/employee`,
 };
 
 export const approvalRoutes = {

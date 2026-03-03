@@ -124,6 +124,7 @@ export const viewport = {
 const GTM_ID = "G-F4YK8H3Q4L";
 
 import NavigationProgressBar from "@/components/NavigationProgressBar";
+import { TranslationEngine } from "@/components/dashboard/TranslationEngine";
 
 export default function RootLayout({
   children,
@@ -217,7 +218,10 @@ export default function RootLayout({
         )}
         <AuthProvider>
           {/* <VerificationProvider> */}
-          <Providers>{children}</Providers>
+          <Providers>
+            <TranslationEngine />
+            {children}
+          </Providers>
           {/* </VerificationProvider> */}
         </AuthProvider>
         <script

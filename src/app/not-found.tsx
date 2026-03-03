@@ -5,6 +5,7 @@
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation"; // For Next.js 13+
 import AuthContext from "@/context/AuthContext"; // Adjust the import path as necessary
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 const NotFound = () => {
   const { isAuthenticated, loading } = useContext(AuthContext); // Access authentication state
@@ -23,11 +24,7 @@ const NotFound = () => {
 
   if (loading) {
     // While authentication status is being determined, show a loading indicator
-    return (
-      <div className="flex h-screen justify-center items-center">
-        <p>Loading...</p>
-      </div>
-    );
+    return <BrandedLoader fullScreen message="Loading destination" />;
   }
 
   // Optionally, return null since redirection will occur

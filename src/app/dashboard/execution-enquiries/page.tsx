@@ -8,6 +8,7 @@ import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import AuthContext from "@/context/AuthContext";
 import { toast } from "react-toastify";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 export default function ExecutionEnquiriesPage() {
   const { user } = useContext(AuthContext);
@@ -165,7 +166,7 @@ export default function ExecutionEnquiriesPage() {
     },
   });
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (isLoading) return <BrandedLoader message="Loading execution enquiries" />;
 
   return (
     <section>

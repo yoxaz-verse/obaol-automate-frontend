@@ -4,6 +4,7 @@ import React, { Suspense } from "react";
 import ForgotPasswordComponent from "@/components/Login/forgot-password";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 function ForgotPasswordContent() {
     const searchParams = useSearchParams();
@@ -31,7 +32,7 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
     return (
-        <Suspense fallback={<div className="h-screen w-full bg-background flex items-center justify-center text-foreground font-mono">Loading...</div>}>
+        <Suspense fallback={<BrandedLoader fullScreen message="Loading password recovery" className="bg-background" />}>
             <ForgotPasswordContent />
         </Suspense>
     );

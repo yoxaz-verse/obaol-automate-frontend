@@ -526,7 +526,7 @@ const AddForm: React.FC<AddFormProps> = ({
             aria-label={`Select ${field.label}`}
             name={field.key}
             placeholder={field.label}
-            className="py-2 border rounded-md w-[90%]"
+            className="py-2 border rounded-md w-full"
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
@@ -539,7 +539,7 @@ const AddForm: React.FC<AddFormProps> = ({
             showMonthAndYearPickers
             name={field.key}
             label={field.label}
-            className="w-[90%]"
+            className="w-full"
             defaultValue={formData[field.key] || null} // Set the initial date if it exists in formData
             onChange={(date) => handleDateChange(field.key, date)} // Use handleDateChange to update state
           />
@@ -571,7 +571,7 @@ const AddForm: React.FC<AddFormProps> = ({
         const timeValues: any[] = formData[field.key] || [];
 
         return (
-          <div className="flex flex-col gap-3 w-[90%]">
+          <div className="flex flex-col gap-3 w-full">
             <label className="font-medium">{field.label}</label>
 
             {timeValues.map((time, index) => (
@@ -608,7 +608,7 @@ const AddForm: React.FC<AddFormProps> = ({
           formData[field.key] || [];
 
         return (
-          <div className="flex flex-col gap-3 w-[90%]">
+          <div className="flex flex-col gap-3 w-full">
             <label className="font-medium">{field.label}</label>
             {timeRanges.map((range, index) => (
               <div key={index} className="flex items-center gap-1">
@@ -670,12 +670,16 @@ const AddForm: React.FC<AddFormProps> = ({
             : field.dynamicValuesFn
               ? dynamicOptions[field.key] || []
               : field.values || [];
+        const normalizedOptions = (Array.isArray(options) ? options : []).map((o: any) => ({
+          key: String(o?.key ?? o?._id ?? o?.value ?? ""),
+          value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
+        }));
 
         // Find the label for the currently selected key so the Autocomplete
         // shows the right text in the input box even when it's pre-populated.
         const currentKey = formData[field.key] ? String(formData[field.key]) : null;
         const currentLabel = currentKey
-          ? (options.find((o: any) => String(o.key) === currentKey)?.value ?? "")
+          ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
           : "";
 
         return (
@@ -683,7 +687,7 @@ const AddForm: React.FC<AddFormProps> = ({
           <Autocomplete
             aria-label={`Select ${field.label}`}
             name={field.key}
-            className="w-[90%] text-foreground"
+            className="w-full text-foreground"
             label={`Select ${field.label}`}
             placeholder={
               isDisabled && field.dependsOn
@@ -691,13 +695,16 @@ const AddForm: React.FC<AddFormProps> = ({
                 : field.label
             }
             isDisabled={!!isDisabled}
-            items={options}
+            items={normalizedOptions}
             selectedKey={currentKey}
             // defaultInputValue feeds the visible text on first render
             defaultInputValue={currentLabel}
             allowsCustomValue={false}
+            defaultFilter={(textValue, inputValue) =>
+              String(textValue || "").toLowerCase().includes(String(inputValue || "").toLowerCase())
+            }
             classNames={{
-              base: "w-[90%]",
+              base: "w-full",
               listboxWrapper: "text-foreground",
               popoverContent: "bg-content1 text-foreground",
             }}
@@ -714,7 +721,7 @@ const AddForm: React.FC<AddFormProps> = ({
             }}
           >
             {(item: any) => (
-              <AutocompleteItem key={String(item.key)} className="text-foreground">
+              <AutocompleteItem key={String(item.key)} textValue={String(item.value)} className="text-foreground">
                 {item.value}
               </AutocompleteItem>
             )}
@@ -733,13 +740,17 @@ const AddForm: React.FC<AddFormProps> = ({
             : field.dynamicValuesFn
               ? dynamicOptions[field.key] || []
               : field.values || [];
+        const normalizedOptions = (Array.isArray(options) ? options : []).map((o: any) => ({
+          key: String(o?.key ?? o?._id ?? o?.value ?? ""),
+          value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
+        }));
 
         // Ensure formData is always stored as an array of strings
         const selectedValues: string[] = formData[field.key] || [];
         const selectedKeys = new Set(selectedValues);
 
         return (
-          <div className="w-[90%] text-foreground">
+          <div className="w-full text-foreground">
             <Select
               aria-label={`Select ${field.label}`}
               name={field.key}
@@ -767,7 +778,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 }));
               }}
             >
-              {options.map((option) => (
+              {normalizedOptions.map((option) => (
                 <SelectItem key={String(option.key)} className="text-foreground">{option.value}</SelectItem>
               ))}
             </Select>
@@ -785,7 +796,7 @@ const AddForm: React.FC<AddFormProps> = ({
                   }}
                   variant="flat"
                 >
-                  {options.find((option) => option.key === item)?.value || item}
+                  {normalizedOptions.find((option) => option.key === item)?.value || item}
                 </Chip>
               ))}
             </div>
@@ -820,7 +831,7 @@ const AddForm: React.FC<AddFormProps> = ({
             type={field.type}
             label={field.label}
             placeholder={"Enter the " + field.label}
-            className=" w-[90%]"
+            className="w-full"
             value={formData[field.key] || ""}
             onChange={handleInputChange}
           />
@@ -908,13 +919,16 @@ const AddForm: React.FC<AddFormProps> = ({
         ) : (
           <form onSubmit={handleSubmit}>
             <div
-              className="w-full grid grid-cols-1 overflow-auto md:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+              className="w-full grid grid-cols-1 gap-y-3 md:gap-x-4 md:gap-y-4 overflow-auto md:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
               style={{ ["--cols" as any]: grid }}
             >
               {formFields
                 .filter((field) => field.inForm)
                 .map((field, index) => (
-                  <div key={index} className="mb-4 text-foreground">
+                  <div
+                    key={index}
+                    className={`text-foreground w-full ${isPhoneLikeField(field) ? "md:col-span-2" : ""}`}
+                  >
                     {renderFormField(field)}
                   </div>
                 ))}

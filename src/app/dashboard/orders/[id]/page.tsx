@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import AuthContext from "@/context/AuthContext";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 dayjs.extend(relativeTime);
 
@@ -257,7 +258,7 @@ export default function OrderDetailsPage() {
         setLogisticsList(logisticsList.filter((_, i) => i !== index));
     };
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <BrandedLoader message="Loading order details" />;
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
     const isEmployeeUser = roleLower === "employee";

@@ -1,6 +1,7 @@
 import AuthContext from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 const PrivateRoute = ({
   children,
@@ -26,11 +27,7 @@ const PrivateRoute = ({
   }, [isAuthenticated, loading, user, allowedRoles, router]);
 
   if (loading) {
-    return (
-      <div className="flex h-screen justify-center items-center">
-        <p>Loading...</p> {/* Translate */}
-      </div>
-    );
+    return <BrandedLoader fullScreen message="Loading your workspace" />;
   }
 
   if (

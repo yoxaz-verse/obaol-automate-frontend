@@ -479,12 +479,20 @@ export default function EditModal({
             : f.dynamicValuesFn
               ? dynamicOptions[f.key] || []
               : f.values || [];
+        const normalizedOptions = (Array.isArray(options) ? options : []).map((o: any) => ({
+          key: String(o?.key ?? o?._id ?? o?.value ?? ""),
+          value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
+        }));
+        const currentKey = formData[f.key] ? String(formData[f.key]) : null;
+        const currentLabel = currentKey
+          ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
+          : "";
 
         return (
           // @ts-ignore
           <Autocomplete
             name={f.key}
-            className="w-[90%] text-foreground"
+            className="w-full text-foreground"
             label={`Select ${f.label}`}
             placeholder={
               isDisabled && f.dependsOn
@@ -492,8 +500,15 @@ export default function EditModal({
                 : f.label
             }
             isDisabled={!!isDisabled}
-            items={options}
-            selectedKey={formData[f.key] ? String(formData[f.key]) : ""}
+            items={normalizedOptions}
+            selectedKey={currentKey}
+            defaultInputValue={currentLabel}
+            allowsCustomValue={false}
+            defaultFilter={(textValue, inputValue) =>
+              String(textValue || "")
+                .toLowerCase()
+                .includes(String(inputValue || "").toLowerCase())
+            }
             onSelectionChange={(key: any) =>
               handleInputChange({
                 target: {
@@ -503,13 +518,17 @@ export default function EditModal({
               })
             }
             classNames={{
-              base: "w-[90%]",
+              base: "w-full",
               listboxWrapper: "text-foreground",
               popoverContent: "bg-content1 text-foreground",
             }}
           >
             {(item: any) => (
-              <AutocompleteItem key={String(item.key)} className="text-foreground">
+              <AutocompleteItem
+                key={String(item.key)}
+                textValue={String(item.value)}
+                className="text-foreground"
+              >
                 {item.value}
               </AutocompleteItem>
             )}

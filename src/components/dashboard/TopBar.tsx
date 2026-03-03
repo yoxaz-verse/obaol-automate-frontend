@@ -14,7 +14,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { CiMenuBurger } from "react-icons/ci";
 import { ThemeSwitcher } from "../ThemeSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { TranslationEngine } from "./TranslationEngine";
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -69,7 +68,6 @@ const TopBar = ({ username, role }: TopbarProps) => {
 
   return (
     <div className="relative flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 rounded-2xl border border-default-200/50 bg-gradient-to-r from-content1/95 via-content1/80 to-content1/95 backdrop-blur-xl shadow-none transition-all duration-300">
-      <TranslationEngine />
       {/* Left Section: Mobile Menu & Panel Identity */}
       <div className="flex gap-4 items-center">
         {/* Hamburger - Mobile only */}
@@ -147,7 +145,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
             )}
           </Button>
           {isNotificationOpen && (
-            <div className="fixed right-3 md:right-8 top-[76px] md:top-[92px] z-[9999]">
+            <div className="fixed right-3 md:right-8 top-[76px] md:top-[92px] z-[100000]">
               <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
             </div>
           )}

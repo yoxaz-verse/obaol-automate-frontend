@@ -44,25 +44,29 @@ const AddModal: React.FC<AddModalProps> = ({
         isOpen={open}
         onClose={closeModal}
         placement="top-center"
-        size="xl"
-        className="!max-h-[90vh] sm:!max-h-[80vh] overflow-hidden"
+        size="3xl"
+        className="!max-h-[92vh] overflow-hidden"
         classNames={{
+          base: "border border-default-200/20 bg-content1/95 backdrop-blur-xl",
+          header: "px-6 pt-5 pb-3 border-b border-default-200/20",
+          body: "px-6 py-4",
+          footer: "px-6 pb-4",
           closeButton: "text-foreground-500 hover:bg-default-100 active:bg-default-200",
         }}
         scrollBehavior="inside"
         isDismissable={false}
       >
         <ModalContent>
-          <ModalHeader className="flex flex-col">
-            <h5 className="font-extrabold text-yellow-500 text-[42px] m-0 p-0 opacity-20">
-              Add new
+          <ModalHeader className="flex flex-col gap-1">
+            <h5 className="m-0 p-0 text-xl md:text-2xl font-bold text-foreground tracking-tight">
+              Add New {currentTable}
             </h5>
-            <h5 className="font-extrabold text-yellow-500 text-[54px] mt-2 p-0 opacity-40">
-              {currentTable}
-            </h5>
+            <p className="m-0 p-0 text-sm text-default-500">
+              Fill the required details and save to continue.
+            </p>
           </ModalHeader>
           <ModalBody>
-            <div className=" w-full ">
+            <div className="w-full">
               <AddForm
                 name={name}
                 currentTable={currentTable}

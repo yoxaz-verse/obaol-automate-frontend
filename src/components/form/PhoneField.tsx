@@ -36,12 +36,11 @@ export default function PhoneField({
   );
 
   return (
-    <div className={`w-full rounded-xl border border-default-200/40 bg-content1/50 px-3 py-3 ${className || ""}`}>
-      <div className="grid grid-cols-1 gap-3">
+    <div className={`w-full ${className || ""}`}>
+      <div className="mb-1.5 text-sm font-medium text-foreground/90">{label}</div>
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
         <Autocomplete
           aria-label={`${label} country code`}
-          label="Country Code"
-          labelPlacement="outside"
           size="sm"
           className="w-full"
           classNames={{
@@ -54,7 +53,7 @@ export default function PhoneField({
           selectedKey={parsed.countryCode || null}
           isDisabled={disabled}
           allowsCustomValue={false}
-          placeholder="Search country code"
+          placeholder="Country code"
           onSelectionChange={(keys) => {
             const selected = String(keys || "+91");
             onChange({
@@ -74,12 +73,10 @@ export default function PhoneField({
           <Input
             aria-label={label}
             name={name}
-            label={label}
-            labelPlacement="outside"
             size="sm"
             type="tel"
             isDisabled={disabled}
-            placeholder="Enter phone number"
+            placeholder="Phone number"
             value={parsed.national}
             className="w-full"
             classNames={{

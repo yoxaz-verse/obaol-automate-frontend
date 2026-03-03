@@ -27,6 +27,7 @@ export const routeRoles: { [key: string]: string[] } = {
   "/dashboard/orders": ["Admin", "Associate", "Employee", "ProjectManager", "Worker", "Customer"],
   "/dashboard/orders/:id": ["Admin", "Associate", "Employee", "ProjectManager", "Worker", "Customer"],
   "/dashboard/execution-enquiries": ["Admin", "Associate", "Employee"],
+  "/dashboard/notifications": ["Admin", "Associate", "Employee", "Customer", "ProjectManager", "Worker"],
   "/dashboard/approvals": ["Admin"],
   "/export-resources": [
     "Admin",

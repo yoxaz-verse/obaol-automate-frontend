@@ -248,7 +248,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                 color="warning"
                 size="sm"
                 onClose={() => removeFilter(key)}
-                className="bg-warning-50/50 backdrop-blur-md border border-warning-100/20"
+                className="bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/25"
               >
                 <span className="font-semibold opacity-70 mr-1">{field?.label}:</span>
                 {Array.isArray(value) ? `${value.length} selected` : String(value)}
@@ -276,7 +276,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           variant="flat"
           size="md"
           color="warning"
-          className="bg-warning-50/50 backdrop-blur-md border border-warning-200/30 font-semibold"
+          className="bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-semibold"
           startContent={<IoFilterOutline className="text-lg" />}
         >
           Filters
@@ -298,7 +298,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         isKeyboardDismissDisabled={true}
         classNames={{
           backdrop: "bg-black/50 backdrop-blur-sm",
-          base: "bg-background/80 backdrop-blur-xl border border-divider shadow-2xl rounded-[2.5rem]",
+          base: "bg-content1/95 text-foreground backdrop-blur-xl border border-default-200 shadow-2xl rounded-[2.5rem]",
           header: "border-b border-divider pb-4",
           footer: "border-t border-divider pt-4",
         }}
@@ -312,7 +312,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                     <IoFilterOutline className="text-warning-500 text-xl" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight">
+                    <h2 className="text-xl font-bold tracking-tight text-foreground">
                       {capitalize(currentTable)} Filters
                     </h2>
                     <p className="text-xs text-default-500">

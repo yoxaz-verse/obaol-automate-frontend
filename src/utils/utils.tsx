@@ -17,6 +17,7 @@ import { LuWarehouse } from "react-icons/lu";
 import { FiShoppingBag } from "react-icons/fi";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
+import { FiBell } from "react-icons/fi";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -106,6 +107,11 @@ export const sidebarOptions = [
     name: "Execution Panel",
     icon: <FiClipboard />,
     link: "/dashboard/execution-enquiries",
+  },
+  {
+    name: "Notifications",
+    icon: <FiBell />,
+    link: "/dashboard/notifications",
   },
   {
     name: "Approvals",

@@ -1358,10 +1358,12 @@ export default function EnquiryDetailsPage() {
                                     <>
                                         {showOriginLogisticsFields && (
                                             <>
+                                                {/* @ts-ignore */}
                                                 <Autocomplete
                                                     size="sm"
                                                     label="From Country"
                                                     selectedKey={executionContext.originCountry || null}
+                                                    items={countries}
                                                     onSelectionChange={(key) => {
                                                         const value = String(key || "");
                                                         setExecutionContext((prev) => ({
@@ -1371,30 +1373,38 @@ export default function EnquiryDetailsPage() {
                                                         }));
                                                     }}
                                                 >
-                                                    {countries.map((item: any) => (
-                                                        <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
-                                                    ))}
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} textValue={item.name}>
+                                                            {item.name}
+                                                        </AutocompleteItem>
+                                                    )}
                                                 </Autocomplete>
+                                                {/* @ts-ignore */}
                                                 <Autocomplete
                                                     size="sm"
                                                     label="From Port"
                                                     selectedKey={executionContext.originPort || null}
+                                                    items={originPortOptions}
                                                     onSelectionChange={(key) => {
                                                         setExecutionContext((prev) => ({ ...prev, originPort: String(key || "") }));
                                                     }}
                                                 >
-                                                    {originPortOptions.map((item: any) => (
-                                                        <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>{item.loCode} - {item.name}</AutocompleteItem>
-                                                    ))}
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
+                                                            {item.loCode} - {item.name}
+                                                        </AutocompleteItem>
+                                                    )}
                                                 </Autocomplete>
                                             </>
                                         )}
                                         {showDestinationLogisticsFields && (
                                             <>
+                                                {/* @ts-ignore */}
                                                 <Autocomplete
                                                     size="sm"
                                                     label="To Country"
                                                     selectedKey={executionContext.destinationCountry || null}
+                                                    items={countries}
                                                     onSelectionChange={(key) => {
                                                         const value = String(key || "");
                                                         setExecutionContext((prev) => ({
@@ -1404,263 +1414,269 @@ export default function EnquiryDetailsPage() {
                                                         }));
                                                     }}
                                                 >
-                                                    {countries.map((item: any) => (
-                                                        <AutocompleteItem key={item._id} textValue={item.name}>{item.name}</AutocompleteItem>
-                                                    ))}
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} textValue={item.name}>
+                                                            {item.name}
+                                                        </AutocompleteItem>
+                                                    )}
                                                 </Autocomplete>
+                                                {/* @ts-ignore */}
                                                 <Autocomplete
                                                     size="sm"
                                                     label="To Port"
                                                     selectedKey={executionContext.destinationPort || null}
+                                                    items={destinationPortOptions}
                                                     onSelectionChange={(key) => {
                                                         setExecutionContext((prev) => ({ ...prev, destinationPort: String(key || "") }));
                                                     }}
                                                 >
-                                                    {destinationPortOptions.map((item: any) => (
-                                                        <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>{item.loCode} - {item.name}</AutocompleteItem>
-                                                    ))}
+                                                    {(item: any) => (
+                                                        <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
+                                                            {item.loCode} - {item.name}
+                                                        </AutocompleteItem>
+                                                    )}
                                                 </Autocomplete>
                                             </>
                                         )}
                                     </>
                                 )}
-                {!isAdmin && !buyerHandlesTransport && !sellerHandlesTransport && (
-                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                        Origin is maintained by supplier and destination is maintained by buyer.
-                    </div>
-                )}
-                {!isAdmin && isBuyer && !buyerHandlesTransport && (
-                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                        Buyer always manages destination. Origin becomes visible to buyer only when inland transportation is assigned to buyer.
-                    </div>
-                )}
-                {!isAdmin && isSeller && !sellerHandlesTransport && (
-                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
-                        Supplier always manages origin. Destination becomes visible to supplier only when inland transportation is assigned to supplier.
-                    </div>
-                )}
-                <Input
-                    size="sm"
-                    className="md:col-span-2"
-                    label="Route Notes"
-                    value={executionContext.routeNotes}
-                    onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
-                    isDisabled={!canEditRouteNotes}
-                />
-            </div>
-            <p className="text-xs text-default-500 mt-2">
-                Domestic: choose state and district. International: choose country and port.
-            </p>
-            {executionContext.tradeType === "INTERNATIONAL" && (
-                <p className="text-xs text-warning-600 mt-1">
-                    International trade will include additional cost components such as inland-to-port movement, packaging, freight forwarding, shipping, and customs clearance.
-                </p>
-            )}
-            {executionContext.tradeType === "INTERNATIONAL" && (
-                <p className="text-xs text-primary-600 mt-1">
-                    Current support scope: Export from India and Import to India. Import-side responsibilities apply to import-to-India flows.
-                </p>
-            )}
-            {isAssociateResponsibilityLocked && (
-                <p className="text-xs text-danger-500 mt-1">
-                    Responsibility and execution context are locked after finalization. Only admin can edit now.
-                </p>
-            )}
-        </div>
+                                {!isAdmin && !buyerHandlesTransport && !sellerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Origin is maintained by supplier and destination is maintained by buyer.
+                                    </div>
+                                )}
+                                {!isAdmin && isBuyer && !buyerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Buyer always manages destination. Origin becomes visible to buyer only when inland transportation is assigned to buyer.
+                                    </div>
+                                )}
+                                {!isAdmin && isSeller && !sellerHandlesTransport && (
+                                    <div className="md:col-span-2 rounded-md border border-default-200 bg-default-100/60 px-3 py-2 text-xs text-default-600">
+                                        Supplier always manages origin. Destination becomes visible to supplier only when inland transportation is assigned to supplier.
+                                    </div>
+                                )}
+                                <Input
+                                    size="sm"
+                                    className="md:col-span-2"
+                                    label="Route Notes"
+                                    value={executionContext.routeNotes}
+                                    onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
+                                    isDisabled={!canEditRouteNotes}
+                                />
+                            </div>
+                            <p className="text-xs text-default-500 mt-2">
+                                Domestic: choose state and district. International: choose country and port.
+                            </p>
+                            {executionContext.tradeType === "INTERNATIONAL" && (
+                                <p className="text-xs text-warning-600 mt-1">
+                                    International trade will include additional cost components such as inland-to-port movement, packaging, freight forwarding, shipping, and customs clearance.
+                                </p>
+                            )}
+                            {executionContext.tradeType === "INTERNATIONAL" && (
+                                <p className="text-xs text-primary-600 mt-1">
+                                    Current support scope: Export from India and Import to India. Import-side responsibilities apply to import-to-India flows.
+                                </p>
+                            )}
+                            {isAssociateResponsibilityLocked && (
+                                <p className="text-xs text-danger-500 mt-1">
+                                    Responsibility and execution context are locked after finalization. Only admin can edit now.
+                                </p>
+                            )}
+                        </div>
                         {
-        canEditResponsibilityPlan && (
-            <Button
-                size="sm"
-                color="primary"
-                variant="flat"
-                onPress={() => updateResponsibilityPlanMutation.mutate()}
-                isLoading={updateResponsibilityPlanMutation.isPending}
-                isDisabled={!isResponsibilityEventChanged}
-            >
-                Save Responsibility Event
-            </Button>
-        )
-    }
-    {
-        canEditResponsibilityPlan && (
-            <span className="text-xs text-default-500">
-                {updateResponsibilityPlanMutation.isPending
-                    ? `Saving responsibility event for ${productNameLabel} - ${variantNameLabel}...`
-                    : responsibilitySavedAt
-                        ? `Saved at ${dayjs(responsibilitySavedAt).format("DD MMM YYYY, hh:mm A")} for ${productNameLabel} - ${variantNameLabel}`
-                        : `Ready to save for ${productNameLabel} - ${variantNameLabel}`}
-            </span>
-        )
-    }
+                            canEditResponsibilityPlan && (
+                                <Button
+                                    size="sm"
+                                    color="primary"
+                                    variant="flat"
+                                    onPress={() => updateResponsibilityPlanMutation.mutate()}
+                                    isLoading={updateResponsibilityPlanMutation.isPending}
+                                    isDisabled={!isResponsibilityEventChanged}
+                                >
+                                    Save Responsibility Event
+                                </Button>
+                            )
+                        }
+                        {
+                            canEditResponsibilityPlan && (
+                                <span className="text-xs text-default-500">
+                                    {updateResponsibilityPlanMutation.isPending
+                                        ? `Saving responsibility event for ${productNameLabel} - ${variantNameLabel}...`
+                                        : responsibilitySavedAt
+                                            ? `Saved at ${dayjs(responsibilitySavedAt).format("DD MMM YYYY, hh:mm A")} for ${productNameLabel} - ${variantNameLabel}`
+                                            : `Ready to save for ${productNameLabel} - ${variantNameLabel}`}
+                                </span>
+                            )
+                        }
                     </CardBody >
                 </Card >
 
-        {/* Execution Inquiries */ }
-    {
-        Array.isArray((enquiry as any)?.executionInquiries) && (enquiry as any).executionInquiries.length > 0 && (
-            <Card className="md:col-span-1 shadow-sm border-none">
-                <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Generated Execution Inquiries</CardHeader>
-                <Divider className="my-2" />
-                <CardBody className="flex flex-col gap-2 px-4 md:px-6 pb-4 md:pb-6">
-                    {(enquiry as any).executionInquiries.map((task: any, idx: number) => (
-                        <div key={`${task.type}-${idx}`} className="rounded-lg border border-default-200 px-3 py-2 bg-default-50">
-                            <div className="flex items-center justify-between gap-2">
-                                <span className="text-sm font-semibold">{task.title || task.type}</span>
-                                <Chip size="sm" variant="flat" color={task.status === "COMPLETED" ? "success" : "warning"}>
-                                    {task.status || "OPEN"}
-                                </Chip>
-                            </div>
-                            <div className="text-xs text-default-500 mt-1">
-                                Owner: {String(task.ownerBy || "obaol").toUpperCase()}
+                {/* Execution Inquiries */}
+                {
+                    Array.isArray((enquiry as any)?.executionInquiries) && (enquiry as any).executionInquiries.length > 0 && (
+                        <Card className="md:col-span-1 shadow-sm border-none">
+                            <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Generated Execution Inquiries</CardHeader>
+                            <Divider className="my-2" />
+                            <CardBody className="flex flex-col gap-2 px-4 md:px-6 pb-4 md:pb-6">
+                                {(enquiry as any).executionInquiries.map((task: any, idx: number) => (
+                                    <div key={`${task.type}-${idx}`} className="rounded-lg border border-default-200 px-3 py-2 bg-default-50">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-sm font-semibold">{task.title || task.type}</span>
+                                            <Chip size="sm" variant="flat" color={task.status === "COMPLETED" ? "success" : "warning"}>
+                                                {task.status || "OPEN"}
+                                            </Chip>
+                                        </div>
+                                        <div className="text-xs text-default-500 mt-1">
+                                            Owner: {String(task.ownerBy || "obaol").toUpperCase()}
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardBody>
+                        </Card>
+                    )
+                }
+
+                {/* Handling & Associates */}
+                <Card className="md:col-span-1 order-11 shadow-sm border-none">
+                    <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Handling & Assignment</CardHeader>
+                    <Divider className="my-2" />
+                    <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase font-bold text-default-400">Assigned Employee</span>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${assignedEmployeeName === "OBAOL Desk" ? "bg-default-400" : "bg-primary animate-pulse"}`} />
+                                <span className={`font-bold ${assignedEmployeeName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedEmployeeName}</span>
                             </div>
                         </div>
-                    ))}
-                </CardBody>
-            </Card>
-        )
-    }
-
-    {/* Handling & Associates */ }
-    <Card className="md:col-span-1 order-11 shadow-sm border-none">
-        <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Handling & Assignment</CardHeader>
-        <Divider className="my-2" />
-        <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
-            <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-bold text-default-400">Assigned Employee</span>
-                <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${assignedEmployeeName === "OBAOL Desk" ? "bg-default-400" : "bg-primary animate-pulse"}`} />
-                    <span className={`font-bold ${assignedEmployeeName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedEmployeeName}</span>
-                </div>
-            </div>
-            {isAdmin && (
-                <div className="flex flex-col gap-2">
-                    <span className="text-[10px] uppercase font-bold text-default-400">Assign / Reassign Employee</span>
-                    <div className="flex gap-2">
-                        <Select
-                            size="sm"
-                            selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setSelectedEmployeeId(arr[0] || "");
-                            }}
-                            className="flex-1"
-                            placeholder="Select employee"
-                        >
-                            {employeeOptions.map((emp: any) => (
-                                <SelectItem key={emp._id} value={emp._id}>
-                                    {emp.name || emp.firstName || emp.email}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                        <Button
-                            size="sm"
-                            color="primary"
-                            isLoading={assignEmployeeMutation.isPending}
-                            onPress={() => assignEmployeeMutation.mutate()}
-                            isDisabled={!selectedEmployeeId}
-                        >
-                            Save
-                        </Button>
-                    </div>
-                </div>
-            )}
-            {enquiry.supplierCommitUntil && (
-                <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase font-bold text-default-400">Supplier Commit Until</span>
-                    <span className="text-sm font-medium text-default-600">
-                        {dayjs(enquiry.supplierCommitUntil).format("DD MMM YYYY")}
-                    </span>
-                </div>
-            )}
-            {isSeller && (
-                <div className="flex flex-col gap-2">
-                    <span className="text-[10px] uppercase font-bold text-default-400">Set Commit Until Date</span>
-                    <div className="flex gap-2 items-center">
-                        <Input
-                            type="date"
-                            size="sm"
-                            value={commitUntil}
-                            onChange={(e) => setCommitUntil(e.target.value)}
-                            className="flex-1"
-                        />
-                        <Button
-                            size="sm"
-                            color="secondary"
-                            variant="flat"
-                            isLoading={commitUntilMutation.isPending}
-                            onPress={() => commitUntilMutation.mutate()}
-                            isDisabled={!commitUntil}
-                        >
-                            Commit
-                        </Button>
-                    </div>
-                </div>
-            )}
-            {enquiry.mediatorAssociateId && (
-                <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase font-bold text-default-400">Mediator</span>
-                    <span className="font-medium text-warning-600">{enquiry.mediatorAssociateId?.name || "N/A"}</span>
-                </div>
-            )}
-        </CardBody>
-    </Card>
+                        {isAdmin && (
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Assign / Reassign Employee</span>
+                                <div className="flex gap-2">
+                                    <Select
+                                        size="sm"
+                                        selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedEmployeeId(arr[0] || "");
+                                        }}
+                                        className="flex-1"
+                                        placeholder="Select employee"
+                                    >
+                                        {employeeOptions.map((emp: any) => (
+                                            <SelectItem key={emp._id} value={emp._id}>
+                                                {emp.name || emp.firstName || emp.email}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <Button
+                                        size="sm"
+                                        color="primary"
+                                        isLoading={assignEmployeeMutation.isPending}
+                                        onPress={() => assignEmployeeMutation.mutate()}
+                                        isDisabled={!selectedEmployeeId}
+                                    >
+                                        Save
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        {enquiry.supplierCommitUntil && (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Supplier Commit Until</span>
+                                <span className="text-sm font-medium text-default-600">
+                                    {dayjs(enquiry.supplierCommitUntil).format("DD MMM YYYY")}
+                                </span>
+                            </div>
+                        )}
+                        {isSeller && (
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Set Commit Until Date</span>
+                                <div className="flex gap-2 items-center">
+                                    <Input
+                                        type="date"
+                                        size="sm"
+                                        value={commitUntil}
+                                        onChange={(e) => setCommitUntil(e.target.value)}
+                                        className="flex-1"
+                                    />
+                                    <Button
+                                        size="sm"
+                                        color="secondary"
+                                        variant="flat"
+                                        isLoading={commitUntilMutation.isPending}
+                                        onPress={() => commitUntilMutation.mutate()}
+                                        isDisabled={!commitUntil}
+                                    >
+                                        Commit
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        {enquiry.mediatorAssociateId && (
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Mediator</span>
+                                <span className="font-medium text-warning-600">{enquiry.mediatorAssociateId?.name || "N/A"}</span>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
             </div >
 
-        {/* Conversion Modal */ }
-        < Modal isOpen = { isOpen } onOpenChange = { onOpenChange } >
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader className="flex flex-col gap-1">Convert to Order</ModalHeader>
-                        <ModalBody>
-                            <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
-                                <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
-                                <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
-                                <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
-                                {executionContext.tradeType === "INTERNATIONAL" && (
-                                    <>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                        {isFromIndia && (
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
-                                        )}
-                                        {isToIndia && (
-                                            <>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                            <Input
-                                label="Initial Notes"
-                                placeholder="Any specific instructions..."
-                                value={conversionNote}
-                                onValueChange={setConversionNote}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>Cancel</Button>
-                            <Button
-                                color="primary"
-                                onPress={() => convertMutation.mutate()}
-                                isLoading={convertMutation.isPending}
-                                isDisabled={!canConvert}
-                            >
-                                Confirm Conversion
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-            </Modal >
+            {/* Conversion Modal */}
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Convert to Order</ModalHeader>
+                            <ModalBody>
+                                <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
+                                    {executionContext.tradeType === "INTERNATIONAL" && (
+                                        <>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                            {isFromIndia && (
+                                                <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
+                                            )}
+                                            {isToIndia && (
+                                                <>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                                <Input
+                                    label="Initial Notes"
+                                    placeholder="Any specific instructions..."
+                                    value={conversionNote}
+                                    onValueChange={setConversionNote}
+                                />
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>Cancel</Button>
+                                <Button
+                                    color="primary"
+                                    onPress={() => convertMutation.mutate()}
+                                    isLoading={convertMutation.isPending}
+                                    isDisabled={!canConvert}
+                                >
+                                    Confirm Conversion
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div >
     );
 }

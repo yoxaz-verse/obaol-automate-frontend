@@ -8,9 +8,10 @@ import { useCurrency } from "@/context/CurrencyContext";
 interface EnquiryCardProps {
     data: any;
     action?: React.ReactNode;
+    onCardClick?: () => void;
 }
 
-const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
+const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) => {
     const { convertRate } = useCurrency();
     // Extract data safely
     const productName = data.product || 'Unknown Product';
@@ -26,7 +27,16 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
         <motion.div
             whileHover={{ y: -3, scale: 1.01 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="h-full"
+            className="h-full cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onClick={() => onCardClick?.()}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onCardClick?.();
+                }
+            }}
         >
             <Card className="h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-default-200/50 dark:border-slate-800/80 shadow-none overflow-hidden group">
                 {/* Visual Accent Top Bar */}
@@ -168,6 +178,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 variant="flat"
                                 color="secondary"
                                 className="flex-1 font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-secondary hover:text-white transition-all shadow-none"
+                                onClick={(e) => e.stopPropagation()}
                                 onPress={() => window.location.href = `tel:${data.supplierPhone}`}
                             >
                                 <FiPhone size={14} className="flex-shrink-0" /> <span className="truncate">Supplier</span>
@@ -177,6 +188,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                                 variant="flat"
                                 color="primary"
                                 className="flex-1 font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-primary hover:text-white transition-all shadow-none"
+                                onClick={(e) => e.stopPropagation()}
                                 onPress={() => window.location.href = `tel:${data.buyerPhone}`}
                             >
                                 <FiPhone size={14} className="flex-shrink-0" /> <span className="truncate">Buyer</span>
@@ -188,6 +200,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                             variant="flat"
                             color="primary"
                             className="font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-primary hover:text-white transition-all shadow-none w-full"
+                            onClick={(e) => e.stopPropagation()}
                             onPress={() => window.location.href = `tel:${data.employeePhone}`}
                         >
                             <FiPhone size={14} className="flex-shrink-0" /> Contact
@@ -196,7 +209,12 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action }) => {
                     {/* Status + Action row */}
                     <div className="flex justify-between items-center">
                         <EnquiryStatus status={status} />
-                        {action}
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                        >
+                            {action}
+                        </div>
                     </div>
                 </CardFooter>
             </Card>

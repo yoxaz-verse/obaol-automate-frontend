@@ -23,8 +23,9 @@ import {
   Tooltip,
   Spinner,
 } from "@heroui/react";
-import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo } from "react-icons/fi";
+import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
@@ -206,6 +207,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               {
                 label: "Category",
                 type: "select",
+                filterType: "multiselect",
                 key: "category",
                 values: [],
                 dynamicValuesFn: () => fetchDependentOptions("category"),
@@ -215,6 +217,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               {
                 label: "Sub Category",
                 type: "select",
+                filterType: "multiselect",
                 key: "subCategory",
                 dependsOn: "category",
                 values: [],
@@ -225,6 +228,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               {
                 label: "Product",
                 type: "select",
+                filterType: "multiselect",
                 key: "product",
                 dependsOn: "subCategory",
                 values: [],
@@ -327,6 +331,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const isOwner = item.associate?._id === user?.id || item.associate === user?.id;
 
               const supplierRate = item.rate || 0;
+              const quantityValue = item.quantity;
               const adminCommission = item.commission || 0;
               const totalRate = supplierRate + adminCommission;
               const isCommissionAdded = Number(adminCommission) > 0;
@@ -366,6 +371,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     : 0,
                 commissionStatus: isCommissionAdded ? "+" : "-",
                 finalRate: convertRate(totalRate),
+                quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
+                  ? `${quantityValue} MT`
+                  : "-",
+                quantityRaw: quantityValue,
 
                 rawBasePrice: totalRate,
                 rawCommission: 0,
@@ -378,6 +387,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               // Row is a CatalogItem (Added to Catalog)
               const baseRate = item.baseRateId;
               const supplierRate = baseRate?.rate || 0;
+              const quantityValue = baseRate?.quantity;
               const adminCommission = baseRate?.commission || 0;
               const mediatorMarkup = item.margin || 0;
 
@@ -391,6 +401,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 supplierIsLive: baseRate?.isLive !== false,
                 associate: item.associateCompanyId?.name || "My Company",
                 rate: convertRate(finalPrice),
+                quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
+                  ? `${quantityValue} MT`
+                  : "-",
+                quantityRaw: quantityValue,
                 associateId: item.associateId?._id || item.associateId,
                 originalOwnerId: baseRate?.associate?._id || baseRate?.associate,
                 companyId: item.associateCompanyId?._id || item.associateCompanyId,
@@ -410,6 +424,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             } else {
               // Row is a DisplayedRate (Personalized - fallback/old)
               const supplierRate = item.variantRate?.rate || 0;
+              const quantityValue = item.variantRate?.quantity;
               const adminCommission = item.variantRate?.commission || 0;
               const basePriceForUser = supplierRate + adminCommission;
 
@@ -420,6 +435,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isLive: item.isLive,
                 associate: item.associateCompany?.name || "My Company",
                 rate: convertRate(totalRate),
+                quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
+                  ? `${quantityValue} MT`
+                  : "-",
+                quantityRaw: quantityValue,
                 associateId: item.associate?._id,
                 companyId: item.associate?.associateCompany,
                 productVariant: item.variantRate?.productVariant?.name,
@@ -540,7 +559,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         return (
                           <EditModal
                             _id={item._id}
-                            initialData={item}
+                            initialData={{
+                              ...item,
+                              quantity: item.quantityRaw
+                            }}
                             currentTable={rate}
                             formFields={tableConfig[rate]}
                             apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
@@ -623,7 +645,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           <>
                             <EditModal
                               _id={item._id}
-                              initialData={item}
+                              initialData={{
+                                ...item,
+                                quantity: item.quantityRaw
+                              }}
                               currentTable={rate}
                               formFields={tableConfig[rate]}
                               apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
@@ -844,6 +869,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   productVariant,
   onClose,
 }) => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
@@ -853,6 +879,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [buyerAssociateId, setBuyerAssociateId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [createdEnquiryId, setCreatedEnquiryId] = useState<string | null>(null);
 
   const { user } = useContext(AuthContext);
   const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
@@ -987,8 +1014,14 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     onMutate: () => {
       setIsLoading(true);
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       setIsLoading(false);
+      const createdId =
+        response?.data?.data?._id ||
+        response?.data?._id ||
+        response?._id ||
+        null;
+      setCreatedEnquiryId(createdId ? String(createdId) : null);
       setIsSuccess(true);
       queryClient.invalidateQueries();
     },
@@ -1017,24 +1050,60 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-10 gap-6 text-center"
+        className="flex flex-col items-center justify-center py-8 gap-5 text-center"
       >
-        <div className="w-24 h-24 bg-success-500/10 rounded-full flex items-center justify-center text-success-500 shadow-lg shadow-success-500/20">
+        <div className="w-20 h-20 bg-success-500/10 rounded-2xl flex items-center justify-center text-success-500 shadow-lg shadow-success-500/20 border border-success-500/20">
           <FiCheckCircle size={50} />
         </div>
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-foreground">Request Sent!</h3>
-          <p className="text-default-500 max-w-[280px]">Your enquiry for {variantRate.product} has been successfully submitted.</p>
+        <div className="space-y-1.5">
+          <h3 className="text-2xl font-black tracking-tight text-foreground">Enquiry Created</h3>
+          <p className="text-default-500 max-w-[360px] text-sm leading-relaxed">
+            Your enquiry for {variantRate.product} was created successfully. Continue to enquiry details to proceed with responses, negotiation, and execution.
+          </p>
         </div>
-        <Button
-          color="success"
-          variant="flat"
-          size="lg"
-          className="rounded-2xl font-bold mt-4"
-          onPress={onClose}
-        >
-          Got it, Thanks!
-        </Button>
+        <div className="w-full max-w-[420px] rounded-2xl border border-primary-300/35 bg-primary-500/10 px-4 py-3 text-left">
+          <p className="text-[11px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-300">Next Step</p>
+          <p className="text-sm text-foreground mt-1">Open enquiry details now to continue the transaction flow.</p>
+        </div>
+        <div className="mt-1 flex w-full max-w-[420px] flex-col gap-2.5">
+          <Button
+            color="primary"
+            size="lg"
+            className="rounded-2xl font-black tracking-wide shadow-md"
+            isDisabled={!createdEnquiryId}
+            onPress={() => {
+              if (!createdEnquiryId) return;
+              onClose?.();
+              router.push(`/dashboard/enquiries/${createdEnquiryId}`);
+            }}
+            endContent={<FiArrowRight size={16} />}
+          >
+            Open Enquiry Details
+          </Button>
+          <Button
+            color="default"
+            variant="flat"
+            size="lg"
+            className="rounded-2xl font-semibold border border-default-300/60"
+            onPress={() => {
+              onClose?.();
+              router.push("/dashboard/enquiries");
+            }}
+            startContent={<FiList size={16} />}
+          >
+            Go to Enquiries
+          </Button>
+          <Button
+            color="default"
+            variant="light"
+            size="sm"
+            className="rounded-xl font-medium text-default-500"
+            onPress={onClose}
+            startContent={<FiX size={14} />}
+          >
+            Close
+          </Button>
+        </div>
       </motion.div>
     );
   }

@@ -263,6 +263,13 @@ export const approvalRoutes = {
   companyAction: "/approvals/companies",
 };
 
+export const notificationRoutes = {
+  list: "/notifications",
+  unreadCount: "/notifications/unread-count",
+  readOne: (id: string) => `/notifications/${id}/read`,
+  readAll: "/notifications/read-all",
+};
+
 export const catalogRoutes = {
   add: "/catalog/add",
   update: "/catalog", // + /:id
@@ -281,6 +288,7 @@ export const brandPublicRoutes = {
 export const apiRoutes = {
   analytics: dashboardRoutes,
   approvals: approvalRoutes,
+  notifications: notificationRoutes,
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,

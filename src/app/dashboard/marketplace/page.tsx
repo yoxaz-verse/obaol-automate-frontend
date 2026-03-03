@@ -45,7 +45,7 @@ export default function MarketplacePage() {
                                         tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
                                         cursor: "w-full bg-warning-500",
                                         tab: "max-w-fit px-0 h-12",
-                                        tabContent: "group-data-[selected=true]:text-warning-500 font-semibold"
+                                        tabContent: "text-default-600 dark:text-default-300 group-data-[selected=true]:text-warning-500 font-semibold"
                                     }}
                                 >
                                     <Tab key={"marketplace-live"} title="Marketplace (Live)">

@@ -5,6 +5,8 @@ import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef } from "react";
 import Image from "next/image";
 import ParticleNetwork from "@/components/ui/particle-network";
+import { useContext } from "react";
+import AuthContext from "@/context/AuthContext";
 
 /* ================= CONTAINER REVEAL ================= */
 
@@ -32,6 +34,7 @@ const itemVariants = {
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
   /* ===== Parallax Scroll ===== */
   const { scrollYProgress } = useScroll({
@@ -173,7 +176,7 @@ export default function HeroSection() {
             {/* Minimalist CTA */}
 
             <Link
-              href="/auth"
+              href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
               className={[
                 "relative flex items-center justify-center gap-3 px-10 py-5 rounded-2xl overflow-hidden",
                 "transition-all duration-300 group-hover:scale-[1.03]",
@@ -194,7 +197,7 @@ export default function HeroSection() {
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-orange-100/30 dark:via-white/10 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
 
               <span className="relative z-10 text-foreground font-bold tracking-wide text-lg">
-                Sign In
+                {!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
               </span>
 
               {/* Arrow */}

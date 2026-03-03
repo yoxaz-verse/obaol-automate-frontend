@@ -128,7 +128,7 @@ export default function ApprovalsPage() {
         />
       </div>
 
-      <div className="mt-5 rounded-xl border border-default-200 overflow-x-auto">
+      <div className="mt-5 rounded-xl border border-default-200 bg-content1 overflow-x-auto">
         {listQuery.isLoading ? (
           <div className="p-8 flex items-center justify-center">
             <Spinner />
@@ -136,39 +136,39 @@ export default function ApprovalsPage() {
         ) : rows.length === 0 ? (
           <div className="p-8 text-center text-default-500">No records found for current filters.</div>
         ) : (
-          <table className="w-full min-w-[980px] text-sm">
-            <thead className="bg-default-100">
+          <table className="w-full min-w-[980px] text-sm text-foreground">
+            <thead className="bg-default-100/80">
               <tr>
-                <th className="text-left px-3 py-2">Name</th>
-                <th className="text-left px-3 py-2">Email</th>
-                <th className="text-left px-3 py-2">Phone</th>
+                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Name</th>
+                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Email</th>
+                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Phone</th>
                 {tab === "associates" ? (
-                  <th className="text-left px-3 py-2">Company</th>
+                  <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Company</th>
                 ) : (
-                  <th className="text-left px-3 py-2">GST</th>
+                  <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">GST</th>
                 )}
-                <th className="text-left px-3 py-2">Status</th>
-                <th className="text-left px-3 py-2">Created At</th>
-                <th className="text-center px-3 py-2">Actions</th>
+                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Status</th>
+                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Created At</th>
+                <th className="text-center px-3 py-2 text-default-700 dark:text-default-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row: any) => (
-                <tr key={row._id} className="border-t border-default-200">
-                  <td className="px-3 py-2">{row.name || "-"}</td>
-                  <td className="px-3 py-2">{row.email || "-"}</td>
-                  <td className="px-3 py-2">{row.phone || "-"}</td>
+                <tr key={row._id} className="border-t border-default-200 hover:bg-default-50 dark:hover:bg-default-100/10 transition-colors">
+                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.name || "-"}</td>
+                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.email || "-"}</td>
+                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.phone || "-"}</td>
                   {tab === "associates" ? (
-                    <td className="px-3 py-2">{row.associateCompany?.name || "-"}</td>
+                    <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.associateCompany?.name || "-"}</td>
                   ) : (
-                    <td className="px-3 py-2">{row.gstin || "-"}</td>
+                    <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.gstin || "-"}</td>
                   )}
                   <td className="px-3 py-2">
                     <Chip size="sm" color={formatStatusColor(row.registrationStatus) as any} variant="flat">
                       {row.registrationStatus || "PENDING_REVIEW"}
                     </Chip>
                   </td>
-                  <td className="px-3 py-2">{formatDate(row.createdAt)}</td>
+                  <td className="px-3 py-2 text-default-700 dark:text-default-300">{formatDate(row.createdAt)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-2">
                       {row.registrationStatus === "PENDING_REVIEW" ? (

@@ -140,7 +140,7 @@ export default function DeveloperIndexPage() {
               href="#api-capabilities"
               className="inline-flex items-center rounded-xl border border-default-300 dark:border-white/25 px-5 py-2.5 text-sm font-semibold text-default-800 dark:text-white hover:bg-default-100 dark:hover:bg-white/10"
             >
-              Explore API Capabilities
+              Explore API Link & Capabilities
             </a>
           </div>
         </div>
@@ -185,7 +185,14 @@ export default function DeveloperIndexPage() {
         <h2 className="text-xl font-semibold text-default-900 dark:text-white">API Capability Snapshot</h2>
         <div className="mt-4 rounded-xl border border-default-200 dark:border-white/15 bg-default-50 dark:bg-[#0c1118] p-4">
           <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Base URL</p>
-          <p className="mt-1 font-mono text-sm text-default-900 dark:text-white">https://api.obaol.com</p>
+          <a
+            href="https://api.obaol.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block font-mono text-sm text-primary-500 hover:underline"
+          >
+            https://api.obaol.com
+          </a>
           <p className="mt-2 text-xs text-default-600 dark:text-white/70">
             Use this base URL in n8n, MCP tools, ChatGPT connectors, and custom apps.
           </p>
@@ -221,7 +228,7 @@ export default function DeveloperIndexPage() {
         <div className="mt-5 rounded-xl border border-default-200 dark:border-white/15 p-4">
           <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Quick cURL</p>
           <pre className="mt-2 overflow-x-auto text-xs md:text-sm text-default-800 dark:text-white/85">
-{`curl -X GET "https://api.obaol.com/v1/products/live" \\
+            {`curl -X GET "https://api.obaol.com/v1/products/live" \\
   -H "Authorization: Bearer <API_KEY>"`}
           </pre>
         </div>

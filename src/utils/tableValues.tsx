@@ -1884,6 +1884,15 @@ export const initialTableConfig: Record<
       inEdit: true,
     },
     {
+      label: "Quantity (MT)",
+      type: "number",
+      key: "quantity",
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+      required: false,
+    },
+    {
       label: "Commission",
       type: "number",
       key: "commission",
@@ -1951,7 +1960,7 @@ export const initialTableConfig: Record<
       type: "select",
       filterType: "multiselect",
       key: "division",
-      dependsOn: "district", // 👈
+      dependsOn: "district",
       dynamicValuesFn: (districtId: string) =>
         fetchDependentOptions("division", "district", districtId),
       values: [],
@@ -1963,7 +1972,7 @@ export const initialTableConfig: Record<
       type: "select",
       filterType: "multiselect",
       key: "pincodeEntry",
-      dependsOn: "division", // 👈
+      dependsOn: "division",
       dynamicValuesFn: (divisionId: string) =>
         fetchDependentOptions("pincodeEntry", "division", divisionId),
       values: [],
@@ -2018,6 +2027,13 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
+      label: "Quantity (MT)",
+      type: "text",
+      key: "quantity",
+      inForm: false,
+      inTable: true,
+    },
+    {
       label: "Live",
       type: "boolean",
       key: "isLive",
@@ -2059,6 +2075,13 @@ export const initialTableConfig: Record<
       label: "Final Price",
       type: "number",
       key: "rate",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Quantity (MT)",
+      type: "text",
+      key: "quantity",
       inForm: false,
       inTable: true,
     },

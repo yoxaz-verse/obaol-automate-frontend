@@ -348,6 +348,7 @@ export default function EnquiryPage() {
                           >
                             <EnquiryCard
                               data={item}
+                              onCardClick={() => router.push(`/dashboard/enquiries/${item._id}`)}
                               action={
                                 <Tooltip
                                   content="View Details"
@@ -356,7 +357,10 @@ export default function EnquiryPage() {
                                   }}
                                 >
                                   <span
-                                    onClick={() => window.location.href = `/dashboard/enquiries/${item._id}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      router.push(`/dashboard/enquiries/${item._id}`);
+                                    }}
                                     className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl"
                                   >
                                     <FiArrowRight size={20} />

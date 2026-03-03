@@ -12,10 +12,8 @@ import ProcurementSpecialistSection from "@/components/home/procurementprocess";
 import StartedIn from "@/components/home/startedin";
 import SystemIntergrationSection from "@/components/home/systemintergration";
 import TradeOperatingLayer from "@/components/home/tradeoperatinglayer";
+import CTASection from "@/components/home/ctasection";
 import { Metadata } from "next";
-import Link from "next/link";
-
-
 
 export const metadata: Metadata = {
   title: "OBAOL Supreme | Commodity & Agro Trading Platform",
@@ -73,20 +71,7 @@ export default function HomePage() {
       <AboutSection />
 
       {/* CTA */}
-      <section className="py-24 px-6 border-t border-default-200 text-center">
-        <h2 className="text-3xl font-semibold">
-          Trade Faster. Trade Smarter. Trade Securely.
-        </h2>
-
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            href="/auth"
-            className="px-6 py-3 rounded-md bg-warning text-warning-foreground font-medium hover:opacity-90 transition-opacity"
-          >
-            Sign In
-          </Link>
-        </div>
-      </section>
+      <CTASection />
       <Footer />
     </main>
   );

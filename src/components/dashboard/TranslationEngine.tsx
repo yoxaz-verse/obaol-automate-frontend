@@ -77,19 +77,20 @@ export const TranslationEngine = () => {
     }, []);
 
     const overlay = isSwitching ? (
-        <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background/40 backdrop-blur-2xl animate-in fade-in duration-500">
-            <div className="flex flex-col items-center gap-8 p-12 rounded-[40px] bg-content1/80 border border-default-200/50 shadow-sm scale-in-center max-w-[90vw] backdrop-blur-xl">
+        <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background backdrop-blur-3xl animate-in fade-in duration-500">
+            <div className="flex flex-col items-center gap-8 p-12 rounded-[40px] bg-content1 border border-default-200 shadow-2xl scale-in-center max-w-[90vw] backdrop-blur-xl">
                 <div className="relative">
-                    <LuLanguages className="text-warning-500 w-20 h-20 relative" />
+                    <LuLanguages className="text-warning-500 w-24 h-24 relative" />
+                    <div className="absolute inset-0 bg-warning-500/20 blur-3xl rounded-full -z-10 animate-pulse"></div>
                 </div>
-                <div className="text-center space-y-3">
-                    <h2 className="text-3xl font-black tracking-tight text-foreground uppercase">Translating</h2>
-                    <p className="text-xl text-default-600 font-medium">
-                        Optimizing experience for <span className="text-warning-500 font-bold underline decoration-warning-500/30 underline-offset-8">{targetLang}</span>
+                <div className="text-center space-y-4">
+                    <h2 className="text-4xl font-black tracking-tight text-foreground uppercase italic underline decoration-warning-500 selection:bg-warning-500/30">Translating</h2>
+                    <p className="text-2xl text-default-600 font-bold">
+                        Optimizing for <span className="text-warning-500 font-black decoration-warning-500/30 underline-offset-[12px]">{targetLang}</span>
                     </p>
                 </div>
-                <div className="w-64 h-1.5 bg-default-100 rounded-full overflow-hidden border border-default-200/50">
-                    <div className="h-full bg-warning-500 animate-progress origin-left"></div>
+                <div className="w-80 h-2 bg-default-100 rounded-full overflow-hidden border border-default-200 shadow-inner">
+                    <div className="h-full bg-warning-500 animate-progress origin-left shadow-[0_0_20px_rgba(251,146,60,0.5)]"></div>
                 </div>
             </div>
             <style>{`

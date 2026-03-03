@@ -168,22 +168,14 @@ export default function RootLayout({
             pointer-events: none !important;
             height: 0 !important;
             width: 0 !important;
-            }
-  
-            /* Force body and html to stay at the top */
-            html, body {
-              top: 0px !important;
-              position: relative !important;
-              margin-top: 0px !important;
-              padding-top: 0px !important;
-            }
-  
-            /* Hide the 'Show Original' text on hover */
-            .goog-text-highlight {
-              background-color: transparent !important;
-              box-shadow: none !important;
-              border: none !important;
-            }
+          }
+
+          /* Hide the 'Show Original' text on hover and highlights */
+          .goog-text-highlight {
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
   
             /* General gadget hiding */
             .skiptranslate.goog-te-gadget {
@@ -192,10 +184,11 @@ export default function RootLayout({
             
             /* Prevent the 'translated' bar from appearing or overlapping */
             .translated-ltr body, .translated-rtl body {
-               padding-top: 40px !important;
+               padding-top: 0px !important;
             }
             .translated-ltr, .translated-rtl {
                margin-top: 0px !important;
+               top: 0px !important;
             }
           `}} />
       </head>

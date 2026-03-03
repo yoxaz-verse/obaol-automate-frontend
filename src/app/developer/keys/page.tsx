@@ -100,7 +100,12 @@ export default function DeveloperKeysPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-default-900 dark:text-white">Developer API Keys</h1>
-            <p className="text-sm text-default-600 dark:text-white/80">Create API keys and use them as Bearer tokens when calling OBAOL APIs.</p>
+            <p className="text-sm text-default-600 dark:text-white/80">
+              Create API keys and use them as Bearer tokens when calling OBAOL APIs at{" "}
+              <a href="https://api.obaol.com" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline font-mono">
+                https://api.obaol.com
+              </a>.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/developer/usage" className="rounded-lg border border-default-300 px-3 py-2 text-sm text-default-800 dark:text-white dark:border-white/30 dark:bg-[#11151f]">Usage</Link>

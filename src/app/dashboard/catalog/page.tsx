@@ -14,6 +14,8 @@ import EditModal from "@/components/CurdTable/edit-model";
 import UserDeleteModal from "@/components/CurdTable/delete";
 import { motion, AnimatePresence } from "framer-motion";
 
+const CATALOG_FETCH_LIMIT = 5000;
+
 // ─── Deep Search Result Card ─────────────────────────────────────────────────
 function DeepSearchResult({
   item,
@@ -88,6 +90,8 @@ function DeepSearchPanel({
       <QueryComponent
         api={apiRoutesByRole["category"]}
         queryKey={["search-category", search]}
+        page={1}
+        limit={CATALOG_FETCH_LIMIT}
         additionalParams={{ search }}
       >
         {(data: any) => {
@@ -112,6 +116,8 @@ function DeepSearchPanel({
       <QueryComponent
         api={apiRoutesByRole["subCategory"]}
         queryKey={["search-subCategory", search]}
+        page={1}
+        limit={CATALOG_FETCH_LIMIT}
         additionalParams={{ search }}
       >
         {(data: any) => {
@@ -142,6 +148,8 @@ function DeepSearchPanel({
       <QueryComponent
         api={apiRoutesByRole["product"]}
         queryKey={["search-product", search]}
+        page={1}
+        limit={CATALOG_FETCH_LIMIT}
         additionalParams={{ search }}
       >
         {(data: any) => {
@@ -359,6 +367,8 @@ export default function CatalogPage() {
                 <QueryComponent
                   api={apiRoutesByRole["catalogItem"]}
                   queryKey={["my-catalog-items", refreshKey]}
+                  page={1}
+                  limit={CATALOG_FETCH_LIMIT}
                 >
                   {(catalogItemsData: any) => {
                     const myItems = Array.isArray(catalogItemsData)
@@ -395,6 +405,8 @@ export default function CatalogPage() {
                       <QueryComponent
                         api={api}
                         queryKey={[...queryKey]}
+                        page={1}
+                        limit={CATALOG_FETCH_LIMIT}
                         additionalParams={params}
                       >
                         {(data: any) => {

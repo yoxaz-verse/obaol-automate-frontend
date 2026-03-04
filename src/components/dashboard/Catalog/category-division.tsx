@@ -15,6 +15,8 @@ import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import EditModal from "@/components/CurdTable/edit-model";
 
+const CATALOG_FETCH_LIMIT = 5000;
+
 // -- Adjust these interfaces to match your data shape --
 interface ICategory {
   _id: string;
@@ -90,7 +92,7 @@ export default function CategoryDivision({
         api={apiRoutesByRole["category"]}
         queryKey={["category"]}
         page={1}
-        limit={100}
+        limit={CATALOG_FETCH_LIMIT}
       >
         {(categoryData: any) => {
           // QueryComponent already unwraps to data array when 'page' is provided
@@ -196,7 +198,7 @@ function CategoryList({
                 api={apiRoutesByRole["subCategory"]}
                 queryKey={["subCategory", cat._id]}
                 page={1}
-                limit={100}
+                limit={CATALOG_FETCH_LIMIT}
                 additionalParams={{ category: cat._id }}
               >
                 {(subCatData: any) => {
@@ -377,7 +379,7 @@ function ProductSection({
       api={apiRoutesByRole["product"]}
       queryKey={["product", subCategoryId]}
       page={1}
-      limit={100}
+      limit={CATALOG_FETCH_LIMIT}
       additionalParams={{ subCategory: subCategoryId }}
     >
       {(productData: any) => {

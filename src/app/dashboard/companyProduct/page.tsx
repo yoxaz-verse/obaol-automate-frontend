@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useContext } from "react";
+import React, { useMemo, useState, useContext, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -23,6 +23,7 @@ const Select = HeroSelect as any;
 const Switch = HeroSwitch as any;
 import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo } from "react-icons/lu";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
+import AddModal from "@/components/CurdTable/add-model";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData } from "@/core/api/apiHandler";
 import {
@@ -33,6 +34,8 @@ import {
 } from "@/core/api/apiRoutes";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { FormField } from "@/data/interface-data";
+import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 
 interface Company {
   _id: string;
@@ -65,15 +68,30 @@ export default function CompanyProductPage() {
   const roleLower = String(user?.role || "").toLowerCase();
   const queryClient = useQueryClient();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty"
+  const [activeTab, setActiveTab] = useState<string>("all"); // "all", "live", "active", "empty"
   const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
   const [isAssigning, setIsAssigning] = useState(false);
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [webFields, setWebFields] = useState<any>({});
 
+  const employeeAssociateFormFields: FormField[] = [
+    { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
+    { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
+    { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
+    { label: "Password", type: "password", key: "password", inForm: true, inTable: false, required: true },
+  ];
+
+  const employeeCompanyFormFields: FormField[] = [
+    { label: "Company Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
+    { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
+    { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
+    { label: "Phone Secondary", type: "number", key: "phoneSecondary", inForm: true, inTable: false, required: true },
+    { label: "Address", type: "text", key: "address", inForm: true, inTable: false, required: false },
+  ];
+
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
-    queryKey: ["companies"],
+    queryKey: ["associateCompany", associateCompanyRoutes.getAll],
     queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 10000 }),
   });
 
@@ -149,6 +167,7 @@ export default function CompanyProductPage() {
   };
 
   const {
+    allCompanies,
     liveCompanies,
     activeCompanies,
     emptyCompanies,
@@ -187,6 +206,7 @@ export default function CompanyProductPage() {
     const selected = currentList.find(c => c._id === selectedCompanyId) || null;
 
     return {
+      allCompanies,
       liveCompanies: live,
       activeCompanies: active,
       emptyCompanies: empty,
@@ -195,6 +215,27 @@ export default function CompanyProductPage() {
     };
   }, [companyData, employeeData, selectedCompanyId, activeTab, user, roleLower]);
 
+  useEffect(() => {
+    const currentList =
+      activeTab === "all"
+        ? allCompanies
+        : activeTab === "live"
+          ? liveCompanies
+          : activeTab === "active"
+            ? activeCompanies
+            : emptyCompanies;
+
+    if (!currentList.length) {
+      if (selectedCompanyId) setSelectedCompanyId(null);
+      return;
+    }
+
+    const existsInCurrentList = currentList.some((c: any) => c._id === selectedCompanyId);
+    if (!existsInCurrentList) {
+      setSelectedCompanyId(currentList[0]._id);
+    }
+  }, [activeTab, allCompanies, liveCompanies, activeCompanies, emptyCompanies, selectedCompanyId]);
+
   if (loadingCompanies) {
     return (
       <BrandedLoader message="Loading company catalog" />
@@ -202,12 +243,23 @@ export default function CompanyProductPage() {
   }
 
   const displayedCompanies =
-    activeTab === "live" ? liveCompanies :
+    activeTab === "all" ? allCompanies :
+      activeTab === "live" ? liveCompanies :
       activeTab === "active" ? activeCompanies :
         emptyCompanies;
 
   const handleAssign = () => {
     assignMutation.mutate(selectedEmployeeId);
+  };
+
+  const resolvePresence = (person: any) => {
+    const lastSeenAt = person?.lastSeenAt || null;
+    const status = person?.presenceStatus || getPresenceStatus(lastSeenAt);
+    return {
+      status,
+      lastSeenLabel: formatLastSeen(lastSeenAt),
+      online: isOnline(lastSeenAt),
+    };
   };
 
   return (
@@ -218,6 +270,36 @@ export default function CompanyProductPage() {
         <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col gap-4">
           <Card className="p-4 bg-background/60 backdrop-blur-md border-none shadow-sm h-full overflow-hidden">
             <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Companies</h2>
+            {roleLower === "employee" && (
+              <div className="mb-4 flex flex-col gap-2">
+                {selectedCompanyId ? (
+                  <AddModal
+                    buttonLabel="Add Associate to Company"
+                    currentTable="associate"
+                    formFields={employeeAssociateFormFields}
+                    apiEndpoint={associateRoutes.getAll}
+                    additionalVariable={{
+                      associateCompany: selectedCompanyId,
+                      hasCompany: true,
+                      companyMode: "existing",
+                    }}
+                  />
+                ) : (
+                  <Button size="sm" color="warning" variant="flat" className="font-bold rounded-xl" isDisabled>
+                    Add Associate to Company
+                  </Button>
+                )}
+                <AddModal
+                  buttonLabel="Add Company"
+                  currentTable="associateCompany"
+                  formFields={employeeCompanyFormFields}
+                  apiEndpoint={associateCompanyRoutes.getAll}
+                  additionalVariable={{
+                    assignedEmployee: user?.id,
+                  }}
+                />
+              </div>
+            )}
 
             <CompanySearch
               defaultSelected={selectedCompanyId}
@@ -248,6 +330,17 @@ export default function CompanyProductPage() {
                   "group-data-[selected=true]:text-warning-500 group-data-[selected=true]:font-bold text-xs font-medium text-default-600 dark:text-default-400",
               }}
             >
+              <Tab
+                key="all"
+                title={
+                  <div className="flex items-center space-x-1 whitespace-nowrap">
+                    <span>All</span>
+                    <div className="bg-primary-50 text-primary-600 px-1 py-0.5 rounded text-[10px] font-bold">
+                      {allCompanies.length}
+                    </div>
+                  </div>
+                }
+              />
               <Tab
                 key="live"
                 title={
@@ -367,9 +460,20 @@ export default function CompanyProductPage() {
                         <div className="flex items-center gap-2">
                           {selectedCompany.assignedEmployee ? (
                             <div className="flex items-center gap-2 bg-default-100 px-3 py-1.5 rounded-full">
-                              <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
-                                {typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee.name : 'Unknown'}
-                              </span>
+                              {(() => {
+                                const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
+                                const presence = resolvePresence(employeeObj);
+                                return (
+                                  <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
+                                      {employeeObj?.name || "Unknown"}
+                                    </span>
+                                    <span className={`text-[10px] ${presence.online ? "text-success-600" : "text-default-500"}`}>
+                                      {presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           ) : (
                             <span className="text-xs text-default-400 italic">No one assigned</span>
@@ -431,8 +535,18 @@ export default function CompanyProductPage() {
                     <div className="flex flex-col items-end gap-1">
                       <div className="text-[10px] font-bold text-default-400 uppercase">Your Assignment</div>
                       <div className="flex items-center gap-2 bg-success-50 px-3 py-1 rounded-full border border-success-100">
-                        <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
-                        <span className="text-[10px] font-bold text-success-700">Under your supervision</span>
+                        {(() => {
+                          const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
+                          const presence = resolvePresence(employeeObj);
+                          return (
+                            <>
+                              <div className={`w-1.5 h-1.5 rounded-full ${presence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
+                              <span className="text-[10px] font-bold text-success-700">
+                                {presence.online ? "Under your supervision • Online" : `Under your supervision • Last seen ${presence.lastSeenLabel}`}
+                              </span>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
@@ -545,6 +659,7 @@ export default function CompanyProductPage() {
                       {(associatesData?.data?.data?.data || []).length > 0 ? (
                         (associatesData.data.data.data as any[]).map((associate) => {
                           const isSupervisor = (selectedCompany as any).supervisor === associate._id || (selectedCompany as any).supervisor?._id === associate._id;
+                          const presence = resolvePresence(associate);
                           return (
                             <Card key={associate._id} className="p-4 border-none bg-default-50 shadow-none flex flex-row items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -558,8 +673,18 @@ export default function CompanyProductPage() {
                                     {isSupervisor && (
                                       <Chip size="sm" color="success" variant="flat" className="h-5 text-[9px] font-black uppercase">Supervisor</Chip>
                                     )}
+                                    <Chip
+                                      size="sm"
+                                      variant="flat"
+                                      color={presence.online ? "success" : "default"}
+                                      className="h-5 text-[9px] font-bold uppercase"
+                                    >
+                                      {presence.online ? "Online" : "Offline"}
+                                    </Chip>
                                   </div>
-                                  <div className="text-[10px] text-default-400">{associate.email} • {associate.phone}</div>
+                                  <div className="text-[10px] text-default-400">
+                                    {associate.email} • {associate.phone} • Last seen {presence.lastSeenLabel}
+                                  </div>
                                 </div>
                               </div>
                               <Button

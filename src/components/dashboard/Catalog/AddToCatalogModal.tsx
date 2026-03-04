@@ -20,6 +20,7 @@ interface AddToCatalogModalProps {
     baseRateId: string;
     basePrice: number;
     productName: string;
+    isPersonalCatalogMode?: boolean;
 }
 
 const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
@@ -29,6 +30,7 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
     baseRateId,
     basePrice,
     productName,
+    isPersonalCatalogMode = false,
 }) => {
     const [loading, setLoading] = useState(false);
     const [margin, setMargin] = useState<number>(0);
@@ -47,7 +49,11 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
             const response = await postData(apiRoutes.catalog.add, payload);
 
             if (response.data.success) {
-                toast.success("Product added to your catalog!");
+                toast.success(
+                    isPersonalCatalogMode
+                        ? "Product added to your personal catalog!"
+                        : "Product added to your catalog!"
+                );
                 onClose();
             } else {
                 toast.error(response.data.message || "Failed to add product");
@@ -88,6 +94,12 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
                                 description="Add your own profit margin"
                             />
                         </div>
+
+                        <p className="text-xs text-default-500">
+                            {isPersonalCatalogMode
+                                ? "This will be saved in your personal catalog until you link a company."
+                                : "This will be saved in your company catalog."}
+                        </p>
 
                         <div className="p-3 bg-primary-50 rounded-lg border border-primary-100">
                             <p className="text-tiny text-primary-600 font-medium">Final Selling Price</p>

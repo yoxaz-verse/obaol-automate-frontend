@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+    // NOTE: Language selection is client-driven via cookies (language/googtrans).
+    // Middleware should not mutate language cookies during rewrites.
     const url = request.nextUrl;
     const hostname = request.headers.get("host") || "";
 

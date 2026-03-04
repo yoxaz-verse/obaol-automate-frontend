@@ -3,29 +3,34 @@
 import React, { useEffect, useState } from "react";
 import { LuLanguages, LuChevronDown, LuCheck } from "react-icons/lu";
 import { languages } from "@/data/languages";
+import {
+    clearLanguageCookies,
+    getLanguageCookie,
+    setLanguageCookies,
+} from "@/utils/languageCookie";
 
 export const LanguageSwitcher = () => {
     const [currentLang, setCurrentLang] = useState("en");
 
     useEffect(() => {
-        // Sync initial state from cookie
-        const checkCookie = setInterval(() => {
-            const googtrans = document.cookie.split("; ").find((row) => row.startsWith("googtrans="));
-            if (googtrans) {
-                const lang = googtrans.split("/").pop();
-                if (lang && lang !== currentLang && languages.some((l) => l.code === lang)) {
-                    setCurrentLang(lang);
-                }
-            } else if (currentLang !== "en") {
+        const syncFromCookie = () => {
+            const lang = getLanguageCookie();
+            if (languages.some((l) => l.code === lang)) {
+                setCurrentLang(lang);
+            } else {
                 setCurrentLang("en");
             }
-        }, 1000);
+        };
 
-        return () => clearInterval(checkCookie);
-    }, [currentLang]);
+        syncFromCookie();
+        const handleVisibility = () => {
+            if (!document.hidden) syncFromCookie();
+        };
+        document.addEventListener("visibilitychange", handleVisibility);
+        return () => document.removeEventListener("visibilitychange", handleVisibility);
+    }, []);
 
     const changeLanguage = (langCode: string) => {
-        const domain = window.location.hostname;
         const selectedLang = languages.find(l => l.code === langCode);
 
         // Dispatch start event for the overlay
@@ -34,48 +39,15 @@ export const LanguageSwitcher = () => {
         }));
 
         if (langCode === "en") {
-            // Clear the cookies when switching back to the default language
-            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
-            document.cookie = `language=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            if (domain.includes(".")) {
-                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
-                document.cookie = `language=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
-            }
+            clearLanguageCookies();
+            setCurrentLang("en");
+            window.dispatchEvent(new Event("translation-end"));
             window.location.reload();
             return;
-        } else {
-            const cookieVal = `/en/${langCode}`;
-            const isSecure = window.location.protocol === "https:";
-            const secureAttr = isSecure ? "; Secure" : "";
-            const sameSiteAttr = "; SameSite=Lax";
-
-            // Root domain strategy for cookies
-            const domainParts = domain.split(".");
-            let rootDomain = domain;
-            if (domainParts.length >= 2) {
-                // Get last two parts (e.g., obaol.com)
-                rootDomain = domainParts.slice(-2).join(".");
-            }
-
-            // Set on current domain
-            document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}${secureAttr}${sameSiteAttr}`;
-            document.cookie = `language=${langCode}; path=/; domain=${domain}${secureAttr}${sameSiteAttr}`;
-
-            // Set on root domain preceded by dot for all subdomains
-            if (rootDomain !== domain) {
-                document.cookie = `googtrans=${cookieVal}; path=/; domain=.${rootDomain}${secureAttr}${sameSiteAttr}`;
-                document.cookie = `googtrans=${cookieVal}; path=/; domain=${rootDomain}${secureAttr}${sameSiteAttr}`;
-                document.cookie = `language=${langCode}; path=/; domain=.${rootDomain}${secureAttr}${sameSiteAttr}`;
-                document.cookie = `language=${langCode}; path=/; domain=${rootDomain}${secureAttr}${sameSiteAttr}`;
-            }
-
-            // Fallback for localhost or direct IP
-            if (domain === "localhost") {
-                document.cookie = `googtrans=${cookieVal}; path=/; SameSite=Lax`;
-                document.cookie = `language=${langCode}; path=/; SameSite=Lax`;
-            }
         }
+
+        setLanguageCookies(langCode);
+        setCurrentLang(langCode);
 
         // Trigger Google Translate manually for non-English
         const triggerGoogle = (attempts = 0) => {
@@ -84,7 +56,6 @@ export const LanguageSwitcher = () => {
                 select.value = langCode;
                 select.dispatchEvent(new Event("change"));
                 select.dispatchEvent(new Event("click"));
-                setCurrentLang(langCode);
                 // Hide overlay after a short delay to let translation apply
                 setTimeout(() => {
                     window.dispatchEvent(new Event("translation-end"));

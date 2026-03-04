@@ -116,6 +116,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const { convertRate } = useCurrency();
   const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
+  const isAssociateUser = user?.role?.toLowerCase() === "associate";
+  const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
+  const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
   const { view: _uiView, ...apiAdditionalParams } = additionalParams || {};
 
@@ -460,9 +463,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 formFields={filterVariantRateFormFields}
                 onApply={handleFiltersUpdate}
               />
-              {!displayOnly && rate === "variantRate" && (
+              {!displayOnly && rate === "variantRate" && canAddOwnRate && (
                 <AddModal
-                  name="Rate"
+                  buttonLabel="Add"
                   currentTable={rate}
                   formFields={variantRateFormFields}
                   apiEndpoint={apiRoutesByRole[rate]}
@@ -474,6 +477,31 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 />
               )}
             </div>
+            {!displayOnly && rate === "variantRate" && isAssociateUser && !hasLinkedCompany && (
+              <Card className="mb-4 border border-warning-300/30 bg-warning-500/10">
+                <CardBody className="py-3 px-4">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-warning-700 dark:text-warning-300">
+                        Link a company to add your own rates
+                      </p>
+                      <p className="text-xs text-warning-700/80 dark:text-warning-200/90">
+                        You can still add marketplace products to your personal catalog.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      color="warning"
+                      variant="flat"
+                      endContent={<FiArrowRight size={14} />}
+                      onPress={() => window.location.assign("/dashboard/profile")}
+                    >
+                      Link Company
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
             <div className="h-5" />
             <section className="hidden md:block w-full min-w-0 max-w-full overflow-hidden">
               <TableFrame>
@@ -488,6 +516,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           {!isAdminUser && (
                             <AddToCatalogButton
                               rowItem={rowItem}
+                              isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
                               onSuccess={() => refetchData()}
                             />
                           )}
@@ -665,7 +694,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         ) : item.isMarketplaceView ? (
                           <>
                             {!isAdminUser && (
-                              <AddToCatalogButton rowItem={item} onSuccess={() => refetchData()} />
+                              <AddToCatalogButton
+                                rowItem={item}
+                                isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
+                                onSuccess={() => refetchData()}
+                              />
                             )}
                             {(user?.role === "Associate" || isAdminUser) && (
                               <CreateEnquiryButton productVariant={item.productVariantId} variantRate={item} />
@@ -1266,10 +1299,15 @@ function mergeVariantAndDisplayedOnce(
  */
 interface AddToCatalogButtonProps {
   rowItem: any;
+  isPersonalCatalogMode?: boolean;
   onSuccess?: () => void;
 }
 
-const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({ rowItem, onSuccess }) => {
+const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({
+  rowItem,
+  isPersonalCatalogMode = false,
+  onSuccess
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // Construct product name from row data
@@ -1294,6 +1332,7 @@ const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({ rowItem, onSucc
           baseRateId={rowItem._id}
           basePrice={rowItem.rawBasePrice || rowItem.rate}
           productName={productName}
+          isPersonalCatalogMode={isPersonalCatalogMode}
         />
       )}
     </>

@@ -14,6 +14,7 @@ import {
 } from "@/utils/tableValues";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import TableFrame from "@/components/CurdTable/table-frame";
+import { formatLastSeen, getPresenceStatus } from "@/utils/presence";
 
 interface UserTabContentProps {
   currentTable: string;
@@ -59,10 +60,13 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 : "Not Defined";
 
             if (currentTable === "employee") {
+              const presenceStatus = item.presenceStatus || getPresenceStatus(item.lastSeenAt);
               return {
                 ...rest,
                 admin: item.admin ? item.admin.name : "N/A",
                 languageKnown: joinNames(item.languageKnown),
+                presenceStatus,
+                lastSeenAt: formatLastSeen(item.lastSeenAt),
               };
             } else if (currentTable === "associate") {
               const designationId =
@@ -72,6 +76,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 item.designationName ||
                 (typeof item.designation === "object" ? item.designation?.name : "") ||
                 (typeof item.designation === "string" && item.designation.length > 0 ? item.designation : "");
+              const presenceStatus = item.presenceStatus || getPresenceStatus(item.lastSeenAt);
               return {
                 ...rest,
                 associateCompany: item.associateCompany
@@ -79,6 +84,8 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   : "N/A",
                 designation: designationName || "Unknown",
                 designationId: designationId || "",
+                presenceStatus,
+                lastSeenAt: formatLastSeen(item.lastSeenAt),
               };
             }
             // Handle other user types similarly if needed

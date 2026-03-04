@@ -181,6 +181,7 @@ export interface BulkAddProps {
 }
 export interface AddModalProps {
   name?: string;
+  buttonLabel?: string;
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;

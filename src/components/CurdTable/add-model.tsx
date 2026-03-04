@@ -15,9 +15,11 @@ import AddForm from "./add-form";
 
 const AddModal: React.FC<AddModalProps> = ({
   name,
+  buttonLabel,
   currentTable,
   formFields,
   apiEndpoint,
+  refetchData,
   additionalVariable,
 }) => {
   const [open, setOpen] = useState(false);
@@ -36,7 +38,7 @@ const AddModal: React.FC<AddModalProps> = ({
           className="font-bold tracking-tight px-4 h-9 rounded-xl hover:bg-warning-500 hover:text-white transition-all duration-200"
           startContent={<LuPlus className="text-lg font-black" />}
         >
-          {name ? `Add ${name}` : `Create ${currentTable}`}
+          {buttonLabel || (name ? `Add ${name}` : `Create ${currentTable}`)}
         </Button>
       </div>
 
@@ -72,6 +74,7 @@ const AddModal: React.FC<AddModalProps> = ({
                 currentTable={currentTable}
                 formFields={formFields}
                 apiEndpoint={apiEndpoint}
+                refetchData={refetchData}
                 additionalVariable={additionalVariable}
                 onSuccess={closeModal}
               />

@@ -190,6 +190,8 @@ export default function CatalogPage() {
   const { user } = useContext(AuthContext);
   const tableConfig = { ...initialTableConfig };
   const isAdmin = user?.role !== "Associate";
+  const isAssociateUser = user?.role === "Associate";
+  const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
 
   const [navigation, setNavigation] = useState<{ id: string | null; name: string }[]>([
     { id: null, name: "Catalog" }
@@ -276,6 +278,16 @@ export default function CatalogPage() {
             <p className="text-default-400 text-sm font-medium tracking-wide">
               Browse through our premium selection of commodities and variants.
             </p>
+            {isAssociateUser && !hasLinkedCompany && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Chip size="sm" color="warning" variant="flat">
+                  Personal Catalog Mode
+                </Chip>
+                <Chip size="sm" variant="bordered" className="border-warning-400/50 text-warning-700 dark:text-warning-300">
+                  Own rates require company linkage
+                </Chip>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="w-full md:w-[380px] relative">

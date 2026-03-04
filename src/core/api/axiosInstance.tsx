@@ -1,7 +1,7 @@
 // src/core/api/axiosInstance.js
 
 import axios from "axios";
-import Cookies from "js-cookie";
+import { getLanguageCookie } from "@/utils/languageCookie";
 
 export const baseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -36,7 +36,7 @@ const instance = axios.create({
 // Add request interceptor to include language header
 instance.interceptors.request.use(
   (config) => {
-    const lang = Cookies.get("language") || "en";
+    const lang = getLanguageCookie();
     config.headers["X-Language"] = lang;
     return config;
   },

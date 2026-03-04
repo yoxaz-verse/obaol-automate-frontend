@@ -271,6 +271,10 @@ export const notificationRoutes = {
   readAll: "/notifications/read-all",
 };
 
+export const presenceRoutes = {
+  ping: "/presence/ping",
+};
+
 export const catalogRoutes = {
   add: "/catalog/add",
   update: "/catalog", // + /:id
@@ -290,6 +294,7 @@ export const apiRoutes = {
   analytics: dashboardRoutes,
   approvals: approvalRoutes,
   notifications: notificationRoutes,
+  presence: presenceRoutes,
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,

@@ -9,6 +9,8 @@ import PrivateRoute from "@/components/Login/private-route";
 import { usePathname } from "next/navigation";
 import { getAllowedRoles } from "@/utils/roleHelpers";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { postData } from "@/core/api/apiHandler";
+import { apiRoutes } from "@/core/api/apiRoutes";
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [
@@ -55,6 +57,40 @@ export default function DashboardLayout({
 
   const allowedRoles = getAllowedRoles(pathname);
   const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let mounted = true;
+
+    const pingPresence = async () => {
+      if (!mounted || document.visibilityState !== "visible") return;
+      try {
+        await postData(apiRoutes.presence.ping, {});
+      } catch {
+        // Presence ping is best effort; ignore transient failures.
+      }
+    };
+
+    void pingPresence();
+    timer = setInterval(() => {
+      void pingPresence();
+    }, 60 * 1000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void pingPresence();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      mounted = false;
+      if (timer) clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [user?.id]);
 
   if (!isMounted) {
     return (

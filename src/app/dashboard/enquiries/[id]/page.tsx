@@ -33,6 +33,7 @@ import dayjs from "dayjs";
 import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone } from "react-icons/fi";
 import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
+import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 
 const STATUS_STEPS = [
     "Pending",
@@ -604,6 +605,21 @@ export default function EnquiryDetailsPage() {
     const sellerCompanyName = extractAssociateCompanyName(sellerAssociateObj, "sellerAssociateCompanyName");
     const buyerPhone = buyerAssociateObj?.phone || (enquiry as any)?.buyerPhone || null;
     const sellerPhone = sellerAssociateObj?.phone || (enquiry as any)?.sellerPhone || null;
+    const buyerPresence = {
+        online: isOnline(buyerAssociateObj?.lastSeenAt),
+        status: getPresenceStatus(buyerAssociateObj?.lastSeenAt),
+        lastSeenLabel: formatLastSeen(buyerAssociateObj?.lastSeenAt),
+    };
+    const sellerPresence = {
+        online: isOnline(sellerAssociateObj?.lastSeenAt),
+        status: getPresenceStatus(sellerAssociateObj?.lastSeenAt),
+        lastSeenLabel: formatLastSeen(sellerAssociateObj?.lastSeenAt),
+    };
+    const assignedPresence = {
+        online: isOnline(assignedEmployeeObj?.lastSeenAt),
+        status: getPresenceStatus(assignedEmployeeObj?.lastSeenAt),
+        lastSeenLabel: formatLastSeen(assignedEmployeeObj?.lastSeenAt),
+    };
     const userIdStr = user?.id?.toString();
     const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
@@ -1047,6 +1063,9 @@ export default function EnquiryDetailsPage() {
                                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
                                     <span className="font-semibold text-base">{buyerAssociateName}</span>
+                                    <span className={`text-xs font-semibold ${buyerPresence.online ? "text-success-600" : "text-default-500"}`}>
+                                        {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
+                                    </span>
                                     <span className="text-sm text-default-500 font-medium">{buyerCompanyName}</span>
                                     {buyerPhone && isAdmin && (
                                         <span
@@ -1060,6 +1079,9 @@ export default function EnquiryDetailsPage() {
                                 <div className="rounded-xl border border-success/20 bg-success/5 p-3 flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-success-700">Supplier</span>
                                     <span className="font-semibold text-base">{sellerAssociateName}</span>
+                                    <span className={`text-xs font-semibold ${sellerPresence.online ? "text-success-600" : "text-default-500"}`}>
+                                        {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
+                                    </span>
                                     <span className="text-sm text-default-500 font-medium">{sellerCompanyName}</span>
                                     {sellerPhone && isAdmin && (
                                         <span
@@ -1544,9 +1566,14 @@ export default function EnquiryDetailsPage() {
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] uppercase font-bold text-default-400">Assigned Employee</span>
                             <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${assignedEmployeeName === "OBAOL Desk" ? "bg-default-400" : "bg-primary animate-pulse"}`} />
+                                <div className={`w-2 h-2 rounded-full ${assignedEmployeeName === "OBAOL Desk" ? "bg-default-400" : assignedPresence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
                                 <span className={`font-bold ${assignedEmployeeName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedEmployeeName}</span>
                             </div>
+                            {assignedEmployeeName !== "OBAOL Desk" && (
+                                <span className={`text-xs ${assignedPresence.online ? "text-success-600" : "text-default-500"}`}>
+                                    {assignedPresence.online ? "Online" : `Last seen ${assignedPresence.lastSeenLabel}`}
+                                </span>
+                            )}
                         </div>
                         {isAdmin && (
                             <div className="flex flex-col gap-2">

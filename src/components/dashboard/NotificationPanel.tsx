@@ -9,6 +9,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { FiBell, FiCheckCircle, FiCircle, FiClock, FiExternalLink } from "react-icons/fi";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
+import { motion, useReducedMotion } from "framer-motion";
+import { panelTransition } from "@/lib/motion/variants";
 
 dayjs.extend(relativeTime);
 
@@ -35,6 +37,7 @@ const getBucket = (createdAt: string) => {
 };
 
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
+  const reducedMotion = useReducedMotion();
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -76,8 +79,16 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
 
   const order = ["Today", "Yesterday", "Earlier"];
 
+  const panelMotion = panelTransition(Boolean(reducedMotion));
+
   return (
-    <div className="w-[380px] max-w-[calc(100vw-24px)] rounded-2xl border border-white/35 bg-content1/93 backdrop-blur-xl shadow-2xl shadow-black/30 overflow-hidden">
+    <motion.div
+      initial={panelMotion.initial}
+      animate={panelMotion.animate}
+      exit={panelMotion.exit}
+      transition={panelMotion.transition}
+      className="w-[380px] max-w-[calc(100vw-24px)] rounded-2xl border border-default-200/80 bg-content1/98 backdrop-blur-lg shadow-2xl shadow-black/35 overflow-hidden"
+    >
       <div className="flex items-center justify-between px-4 py-3 border-b border-default-200/60">
         <div className="flex items-center gap-2">
           <FiBell className="text-warning-500" size={16} />
@@ -176,7 +187,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
           Close
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

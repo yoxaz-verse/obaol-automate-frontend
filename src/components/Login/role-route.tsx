@@ -5,6 +5,7 @@
 import React, { useContext, useEffect } from 'react';
 import AuthContext from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 interface RoleRouteProps {
   children: React.ReactNode;
@@ -12,20 +13,25 @@ interface RoleRouteProps {
 }
 
 const RoleRoute: React.FC<RoleRouteProps> = ({ children, allowedRoles }) => {
-  const { isAuthenticated, user } = useContext(AuthContext);
+  const { isAuthenticated, user, loading } = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
+    if (loading) return;
     if (isAuthenticated && user && !allowedRoles.includes(user.role)) {
       // Redirect to unauthorized page or dashboard
       router.push('/unauthorized');
     } else if (!isAuthenticated) {
-      router.push('/login');
+      router.push('/auth');
     }
-  }, [isAuthenticated, user, allowedRoles, router]);
+  }, [isAuthenticated, user, allowedRoles, router, loading]);
+
+  if (loading) {
+    return <BrandedLoader fullScreen message="Checking access" variant="compact" />;
+  }
 
   if (!isAuthenticated || (user && !allowedRoles.includes(user.role))) {
-    return null; // Or a loading spinner
+    return <BrandedLoader fullScreen message="Redirecting" variant="compact" />;
   }
 
   return <>{children}</>;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { devUsageOverview } from "@/utils/developerApi";
 import { clearDeveloperToken, getDeveloperToken } from "@/utils/developerSession";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 type UsageData = {
   requests24h: number;
@@ -62,7 +63,9 @@ export default function DeveloperUsagePage() {
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 text-sm text-default-600 dark:text-white/80">Loading usage data...</div>
+          <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6">
+            <PageSkeleton sections={3} />
+          </div>
         ) : data ? (
           <>
             <div className="grid gap-3 md:grid-cols-5">

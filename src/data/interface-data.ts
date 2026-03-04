@@ -119,12 +119,15 @@ export interface EditModalProps {
 
 export interface QueryComponentProps<T> {
   api: string;
-  queryKey: string[];
+  queryKey: any[];
   children: (data: T, refetch?: () => void) => React.ReactNode; // Added refetch as a parameter
   page?: number; // Optional for paginated data
   limit?: number; // Optional for paginated data
   search?: string | null;
   additionalParams?: Record<string, any>; // Dynamic additional parameters
+  loadingVariant?: "inline" | "skeleton" | "branded";
+  loadingMessage?: string;
+  emptyState?: React.ReactNode;
 }
 
 export interface StatusUpdateProps {

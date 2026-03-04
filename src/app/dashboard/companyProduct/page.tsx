@@ -32,6 +32,7 @@ import {
   associateRoutes,
 } from "@/core/api/apiRoutes";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 interface Company {
   _id: string;
@@ -196,9 +197,7 @@ export default function CompanyProductPage() {
 
   if (loadingCompanies) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-warning-500 animate-pulse font-medium">Loading company catalog...</div>
-      </div>
+      <BrandedLoader message="Loading company catalog" />
     );
   }
 

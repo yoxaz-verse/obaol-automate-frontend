@@ -60,7 +60,7 @@ export default function Header() {
             </Link>
 
             {/* ── DESKTOP NAV ── */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map((link) => (
                 <NavLink key={link.href} href={link.href}>
                   {link.label}
@@ -71,14 +71,14 @@ export default function Header() {
             {/* ── ACTIONS ── */}
             <div className="flex items-center gap-3">
               {/* Theme switcher */}
-              <div className="hidden sm:block">
+              <div className="hidden lg:block">
                 <ThemeSwitcher />
               </div>
 
 
               <Link
                 href="/developer"
-                className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/15 bg-foreground/[0.03] text-foreground/75 hover:text-foreground hover:bg-foreground/[0.08] transition-colors"
+                className="hidden lg:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/15 bg-foreground/[0.03] text-foreground/75 hover:text-foreground hover:bg-foreground/[0.08] transition-colors"
                 aria-label="Developer Mode"
                 title="Developer Mode"
               >
@@ -87,7 +87,7 @@ export default function Header() {
                 </svg>
               </Link>
 
-              <div className="hidden sm:block">
+              <div className="hidden lg:block">
                 <LanguageSwitcher />
               </div>
 
@@ -109,7 +109,7 @@ export default function Header() {
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors"
+                className="lg:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] hover:bg-foreground/[0.08] transition-colors"
                 aria-label="Toggle menu"
               >
                 <span className={`w-4 h-px bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-[5px] rotate-45" : ""}`} />
@@ -186,7 +186,7 @@ export default function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-30 md:hidden"
+            className="fixed inset-0 z-30 lg:hidden"
           />
         )}
       </AnimatePresence>

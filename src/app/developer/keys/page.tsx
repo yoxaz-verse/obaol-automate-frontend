@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { devCreateKey, devGetKeyPresets, devListKeys, devRevokeKey } from "@/utils/developerApi";
 import { clearDeveloperToken, getDeveloperToken } from "@/utils/developerSession";
+import SectionSkeleton from "@/components/ui/SectionSkeleton";
 
 type DevKey = {
   id: string;
@@ -139,7 +140,7 @@ export default function DeveloperKeysPage() {
         <div className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-4 md:p-6 overflow-x-auto">
           <h2 className="text-lg font-medium text-default-900 dark:text-white">Your Keys</h2>
           {isLoading ? (
-            <p className="mt-4 text-sm text-default-600 dark:text-white/75">Loading keys...</p>
+            <SectionSkeleton rows={5} className="mt-4" />
           ) : (
             <table className="mt-4 min-w-[980px] w-full text-sm text-default-800 dark:text-white/90">
               <thead>

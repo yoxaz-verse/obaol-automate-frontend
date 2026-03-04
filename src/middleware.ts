@@ -24,11 +24,15 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // Exclude shared routes from subdomain rewrites
+    const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password"];
+    const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));
+
     // If it's a main domain, handle subdomains
     if (mainDomains.some(domain => hostname.includes(domain))) {
         const parts = hostname.split(".");
         // pattern: slug.obaol.com (3 parts) or slug.company.obaol.com (4 parts)
-        if (parts.length >= 3 && parts[0] !== "www") {
+        if (parts.length >= 3 && parts[0] !== "www" && !isSharedRoute) {
             const slug = parts[0];
             return NextResponse.rewrite(
                 new URL(`/brand/${slug}${url.pathname}`, request.url)
@@ -38,8 +42,8 @@ export function middleware(request: NextRequest) {
     }
 
     // If we reach here and it's not a localhost/internal domain, 
-    // treat it as a custom domain rewrite
-    if (!hostname.includes("localhost") && !hostname.includes(".local")) {
+    // treat it as a custom domain rewrite (unless it's a shared route)
+    if (!hostname.includes("localhost") && !hostname.includes(".local") && !isSharedRoute) {
         return NextResponse.rewrite(
             new URL(`/brand/${hostname}${url.pathname}`, request.url)
         );

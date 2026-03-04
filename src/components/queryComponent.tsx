@@ -2,25 +2,30 @@
 import React, { useMemo } from "react";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { Spinner } from "@nextui-org/react";
 import { loadingFacts } from "@/data/loading-facts";
-
-interface QueryComponentProps<T> {
-  api: string;
-  queryKey: any[];
-  children: (data: T, refetch?: () => void) => React.ReactNode;
-  page?: number;
-  limit?: number;
-  search?: string | null;
-  additionalParams?: Record<string, any>;
-}
+import BrandedLoader from "@/components/ui/BrandedLoader";
+import InlineLoader from "@/components/ui/InlineLoader";
+import SectionSkeleton from "@/components/ui/SectionSkeleton";
+import { QueryComponentProps } from "@/data/interface-data";
+import { useReducedMotion } from "framer-motion";
+import { sectionTransition } from "@/lib/motion/variants";
 
 function QueryComponent<T>(props: QueryComponentProps<T>) {
-  const { api, queryKey, children, page, limit, search, additionalParams } =
+  const {
+    api,
+    queryKey,
+    children,
+    page,
+    limit,
+    search,
+    additionalParams,
+    loadingVariant = "branded",
+    loadingMessage = "Loading",
+    emptyState,
+  } =
     props;
+  const reducedMotion = useReducedMotion();
   const randomFact = useMemo(() => {
     return loadingFacts[Math.floor(Math.random() * loadingFacts.length)];
   }, []);
@@ -39,58 +44,50 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
 
   const responseData = page ? data?.data?.data : data?.data;
 
+  const renderLoading = () => {
+    if (loadingVariant === "inline") {
+      return <InlineLoader message={loadingMessage} className="py-8 justify-center" />;
+    }
+    if (loadingVariant === "skeleton") {
+      return <SectionSkeleton rows={4} className="py-4" />;
+    }
+
+    return (
+      <div className="flex h-full py-6 w-full justify-center items-center flex-col rounded-md px-6 text-center">
+        <BrandedLoader variant="compact" size="md" message={loadingMessage} />
+        <motion.span
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.2 }}
+          className="mt-3 text-xs uppercase tracking-widest text-default-500"
+        >
+          Industry Insight
+        </motion.span>
+        <motion.p
+          key={randomFact}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ delay: reducedMotion ? 0 : 0.15, duration: reducedMotion ? 0 : 0.25 }}
+          className="mt-3 text-lg text-foreground max-w-sm leading-relaxed"
+        >
+          {randomFact}
+        </motion.p>
+      </div>
+    );
+  };
+
   return (
     <AnimatePresence mode="wait">
       {isLoading ? (
         <motion.div
           key="loading"
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.3 }}
-          className="flex h-full py-6 w-full justify-center items-center flex-col rounded-md px-6 text-center"
+          initial={sectionTransition(Boolean(reducedMotion)).initial}
+          animate={sectionTransition(Boolean(reducedMotion)).animate}
+          transition={sectionTransition(Boolean(reducedMotion)).transition}
+          className="w-full"
         >
-          {/* Logo */}
-          <motion.div
-            animate={{ opacity: [0.4, 1, 0.4] }}
-            transition={{
-              duration: 2.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-
-            <Image
-              src="/logo.png"
-              priority
-              width={100}
-              height={100}
-              alt="Obaol Supreme"
-              className="rounded-md"
-            />
-          </motion.div>
-
-          {/* Context Label */}
-          <motion.span
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mt-6 text-xs uppercase tracking-widest text-neutral-500"
-          >
-            Industry Insight
-          </motion.span>
-
-          {/* Fact */}
-          <motion.p
-            key={randomFact}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="mt-3 text-lg text-foreground max-w-sm leading-relaxed"
-          >
-            {randomFact}
-          </motion.p>
+          {renderLoading()}
         </motion.div>
 
 
@@ -101,17 +98,20 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-red-500 text-center p-4"
+            className="text-center p-4"
           >
-            <p>❌ Failed to fetch data.</p>
+            {emptyState || (
+              <div className="rounded-xl border border-danger-300/50 bg-danger-500/10 px-4 py-3 text-danger-600 dark:text-danger-300">
+                Failed to fetch data.
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
             key="data"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={sectionTransition(Boolean(reducedMotion)).initial}
+            animate={sectionTransition(Boolean(reducedMotion)).animate}
+            transition={sectionTransition(Boolean(reducedMotion)).transition}
             className="w-full min-w-0 max-w-full"
           >
             {children(responseData as T, refetch)}

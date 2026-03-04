@@ -27,6 +27,7 @@ import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
+import { AnimatePresence } from "framer-motion";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
@@ -144,11 +145,13 @@ const TopBar = ({ username, role }: TopbarProps) => {
               </span>
             )}
           </Button>
-          {isNotificationOpen && (
-            <div className="fixed right-3 md:right-8 top-[76px] md:top-[92px] z-[100000]">
-              <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
-            </div>
-          )}
+          <AnimatePresence>
+            {isNotificationOpen && (
+              <div className="fixed right-3 md:right-8 top-[76px] md:top-[92px] z-[100000]">
+                <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
+              </div>
+            )}
+          </AnimatePresence>
         </div>
 
         <Dropdown {...({ placement: "bottom-end" } as any)}>

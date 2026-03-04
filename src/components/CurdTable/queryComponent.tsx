@@ -2,12 +2,24 @@
 import React from "react";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Spinner } from "@nextui-org/react";
 import { QueryComponentProps } from "@/data/interface-data";
+import BrandedLoader from "@/components/ui/BrandedLoader";
+import SectionSkeleton from "@/components/ui/SectionSkeleton";
+import InlineLoader from "@/components/ui/InlineLoader";
 
 function QueryComponent<T>(props: QueryComponentProps<T>) {
-  const { api, queryKey, children, page, limit, search, additionalParams } =
+  const {
+    api,
+    queryKey,
+    children,
+    page,
+    limit,
+    search,
+    additionalParams,
+    loadingVariant = "skeleton",
+    loadingMessage = "Loading",
+    emptyState,
+  } =
     props;
 
   // Dynamically construct parameters, excluding undefined or null values
@@ -24,25 +36,28 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
   });
 
   if (isLoading) {
-    toast.loading(`Fetching API for ${queryKey.join(", ")}`, {
-      position: "top-right",
-    });
-    return <Spinner label="Loading..." color="primary" labelColor="primary" />;
+    if (loadingVariant === "inline") {
+      return <InlineLoader message={loadingMessage} className="py-6 justify-center" />;
+    }
+
+    if (loadingVariant === "branded") {
+      return <BrandedLoader variant="compact" message={loadingMessage} />;
+    }
+
+    return <SectionSkeleton rows={4} className="py-3" />;
   }
 
   if (isError) {
-    toast.error("Failed to fetch data.", {
-      position: "top-right",
-    });
-    return <div>Query Failed...</div>;
-    {
-      /* Translate */
-    }
+    return (
+      <>
+        {emptyState || (
+          <div className="rounded-xl border border-danger-300/60 bg-danger-500/10 px-4 py-3 text-sm text-danger-600 dark:text-danger-300">
+            Failed to fetch data.
+          </div>
+        )}
+      </>
+    );
   }
-
-  toast.success("Data fetched successfully.", {
-    position: "top-right",
-  });
 
   // Pass the correct data structure to children based on the presence of `page`
   const responseData = page ? data?.data?.data : data?.data;

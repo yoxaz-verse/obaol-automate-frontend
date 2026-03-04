@@ -39,18 +39,27 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       try {
-        const res = await fetch(
-          `https://api.frankfurter.app/latest?from=INR&to=${selectedCurrency.toUpperCase()}`
-        );
-        const cur = await fetch(`https://api.frankfurter.app/currencies`);
-        const data = await res.json();
-        const datacur = await cur.json();
-        console.log(datacur);
+        const [res, curRes] = await Promise.all([
+          fetch(`https://api.frankfurter.app/latest?from=INR&to=${selectedCurrency.toUpperCase()}`),
+          fetch(`https://api.frankfurter.app/currencies`)
+        ]);
 
-        if (!data.rates) throw new Error("Invalid response from API");
+        if (!res.ok) {
+          console.warn(`Exchange rate API returned ${res.status}. Falling back to INR.`);
+          setExchangeRates({});
+          return;
+        }
+
+        const data = await res.json();
+
+        if (!data.rates || !data.rates[selectedCurrency.toUpperCase()]) {
+          throw new Error("Invalid response or missing rate from API");
+        }
+
         setExchangeRates(data.rates);
       } catch (error) {
-        console.error("Error fetching exchange rates", error);
+        console.error("Error fetching exchange rates:", error);
+        setExchangeRates({}); // Fallback to base currency (INR)
       }
     };
 

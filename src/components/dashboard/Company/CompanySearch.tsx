@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
-import { ReactNode } from "react";
+import InlineLoader from "@/components/ui/InlineLoader";
 
 // 🔎 same icon you had
 const SearchIcon = ({
@@ -68,7 +68,11 @@ export default function CompanySearch({
   }
 
   if (isLoading) {
-    return <div className="p-2 text-gray-500">Loading companies...</div>;
+    return (
+      <div className="px-1 py-2">
+        <InlineLoader message="Loading companies" />
+      </div>
+    );
   }
 
   const AutocompleteAny = Autocomplete as any;

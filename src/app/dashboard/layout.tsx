@@ -5,10 +5,10 @@ import AuthContext from "@/context/AuthContext"; // Adjust the import path as ne
 import TopBar from "@/components/dashboard/TopBar";
 import Sidebar from "@/components/dashboard/Sidebar";
 import BottomNav from "@/components/dashboard/BottomNav";
-import Template from "../template";
 import PrivateRoute from "@/components/Login/private-route";
 import { usePathname } from "next/navigation";
 import { getAllowedRoles } from "@/utils/roleHelpers";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [
@@ -56,7 +56,13 @@ export default function DashboardLayout({
   const allowedRoles = getAllowedRoles(pathname);
   const { user } = useContext(AuthContext);
 
-  if (!isMounted) return <div className="bg-content1 min-h-screen" />;
+  if (!isMounted) {
+    return (
+      <section className="bg-content1 min-h-screen">
+        <BrandedLoader fullScreen message="Preparing dashboard" variant="compact" />
+      </section>
+    );
+  }
 
   return (
     <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative">
@@ -80,9 +86,7 @@ export default function DashboardLayout({
               }}
             >
               <div className="max-w-full mx-auto w-full p-4 md:p-6 min-w-0">
-                <Template>
-                  {children}
-                </Template>
+                {children}
               </div>
             </div>
           </div>

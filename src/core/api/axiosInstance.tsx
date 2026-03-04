@@ -1,16 +1,12 @@
 // src/core/api/axiosInstance.js
 
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const baseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  "/api/v1/web"
-  //  ||"https://automate-backend.infra.obaol.com/api/v1/web";
-// "http://localhost:5001/api/v1/web";
-// 
-// ||"backend.obaol.com/api/v1/web"
-// "https://backend.obaol.com/api/v1/web";
+  "/api/v1/web";
 
 const instance = axios.create({
   baseURL: baseUrl,
@@ -18,7 +14,7 @@ const instance = axios.create({
     IDENTIFIER: process.env.IDENTIFIER || "A2hG9tE4rB6kY1sN",
     "ngrok-skip-browser-warning": "123",
   },
-  withCredentials: true, // Important for sending cookies
+  withCredentials: true,
   paramsSerializer: {
     serialize: (params) => {
       const searchParams = new URLSearchParams();
@@ -36,6 +32,18 @@ const instance = axios.create({
     },
   },
 });
+
+// Add request interceptor to include language header
+instance.interceptors.request.use(
+  (config) => {
+    const lang = Cookies.get("language") || "en";
+    config.headers["X-Language"] = lang;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Optionally, keep response interceptor for handling 401 errors
 instance.interceptors.response.use(

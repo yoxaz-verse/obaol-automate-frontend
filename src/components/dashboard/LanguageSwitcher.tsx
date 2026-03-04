@@ -34,11 +34,13 @@ export const LanguageSwitcher = () => {
         }));
 
         if (langCode === "en") {
-            // Clear the cookie when switching back to the default language
+            // Clear the cookies when switching back to the default language
             document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+            document.cookie = `language=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             if (domain.includes(".")) {
                 document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
+                document.cookie = `language=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain};`;
             }
             window.location.reload();
             return;
@@ -58,16 +60,20 @@ export const LanguageSwitcher = () => {
 
             // Set on current domain
             document.cookie = `googtrans=${cookieVal}; path=/; domain=${domain}${secureAttr}${sameSiteAttr}`;
+            document.cookie = `language=${langCode}; path=/; domain=${domain}${secureAttr}${sameSiteAttr}`;
 
             // Set on root domain preceded by dot for all subdomains
             if (rootDomain !== domain) {
                 document.cookie = `googtrans=${cookieVal}; path=/; domain=.${rootDomain}${secureAttr}${sameSiteAttr}`;
                 document.cookie = `googtrans=${cookieVal}; path=/; domain=${rootDomain}${secureAttr}${sameSiteAttr}`;
+                document.cookie = `language=${langCode}; path=/; domain=.${rootDomain}${secureAttr}${sameSiteAttr}`;
+                document.cookie = `language=${langCode}; path=/; domain=${rootDomain}${secureAttr}${sameSiteAttr}`;
             }
 
             // Fallback for localhost or direct IP
             if (domain === "localhost") {
                 document.cookie = `googtrans=${cookieVal}; path=/; SameSite=Lax`;
+                document.cookie = `language=${langCode}; path=/; SameSite=Lax`;
             }
         }
 

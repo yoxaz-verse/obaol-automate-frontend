@@ -28,6 +28,9 @@ export interface DynamicFilterProps {
   currentTable: string;
   formFields: FormField[];
   onApply: (filters: Record<string, any>) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
 }
 
 // Logical grouping for variantRate and similar product tables
@@ -56,6 +59,9 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   currentTable,
   formFields,
   onApply,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder = "Search records...",
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -269,8 +275,25 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         </div>
       )}
 
-      {/* Filter Button */}
-      <div className="flex justify-end">
+      {/* Search + Filter */}
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+        {onSearchChange && (
+          <Input
+            size="sm"
+            variant="flat"
+            isClearable
+            value={searchValue || ""}
+            onValueChange={onSearchChange}
+            onClear={() => onSearchChange("")}
+            placeholder={searchPlaceholder}
+            startContent={<FiSearch className="text-default-400" />}
+            className="w-full sm:max-w-sm"
+            classNames={{
+              inputWrapper:
+                "bg-default-100/50 hover:bg-default-200/50 border border-default-200/70",
+            }}
+          />
+        )}
         <Button
           onPress={onOpen}
           variant="flat"

@@ -63,25 +63,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const response = await postData("/login", data); // Unified login route
 
       if (response.data.success) {
-        const userResponse = await getData("/verify-token");
-        if (userResponse.data.success) {
-          setAuth({
-            isAuthenticated: true,
-            user: userResponse.data.user,
-            loading: false,
-          });
-          // Redirection handled in LoginComponent
-        } else {
-          throw new Error("Failed to retrieve user data");
-          {
-            /* Translate */
+        try {
+          const userResponse = await getData("/verify-token");
+          if (userResponse.data.success) {
+            setAuth({
+              isAuthenticated: true,
+              user: userResponse.data.user,
+              loading: false,
+            });
+            // Redirection handled in LoginComponent
+          } else {
+            throw new Error("Failed to retrieve user data");
           }
+        } catch (verifyError: any) {
+          const verifyStatus = Number(verifyError?.response?.status || 0);
+          if (verifyStatus === 401) {
+            const blockedError: any = new Error(
+              "Session cookie was blocked by browser privacy settings. Allow cookies for obaol.com/api.obaol.com and retry."
+            );
+            blockedError.code = "SESSION_COOKIE_BLOCKED";
+            throw blockedError;
+          }
+          throw verifyError;
         }
       } else {
         throw new Error(response.data.message || "Login failed");
-        {
-          /* Translate */
-        }
       }
     } catch (error: any) {
       console.error("Login error:", error);

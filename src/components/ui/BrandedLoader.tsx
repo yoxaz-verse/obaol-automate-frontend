@@ -21,9 +21,9 @@ export default function BrandedLoader({
 }: BrandedLoaderProps) {
   const reducedMotion = useReducedMotion();
   const sizeMap = {
-    sm: { frame: "w-[56px] h-[56px]", logo: 36 },
-    md: { frame: "w-[74px] h-[74px]", logo: 54 },
-    lg: { frame: "w-[88px] h-[88px]", logo: 64 },
+    sm: { frame: "w-[56px] h-[56px]", logo: 36, ring: "w-[74px] h-[74px]" },
+    md: { frame: "w-[74px] h-[74px]", logo: 54, ring: "w-[96px] h-[96px]" },
+    lg: { frame: "w-[88px] h-[88px]", logo: 64, ring: "w-[116px] h-[116px]" },
   } as const;
   const currentSize = sizeMap[size];
   const compact = variant === "compact";
@@ -33,14 +33,17 @@ export default function BrandedLoader({
       className={`w-full ${fullScreen ? "min-h-screen" : compact ? "min-h-[120px]" : "min-h-[220px]"} flex items-center justify-center ${className}`}
     >
       <div className={`flex flex-col items-center ${compact ? "gap-2.5" : "gap-4"}`}>
-        <div className="relative">
+        <div className="relative flex items-center justify-center">
+          <div className={`absolute ${currentSize.ring} rounded-full bg-warning-500/10 blur-2xl`} />
           {!reducedMotion && (
-            <div className="absolute inset-[-10px] rounded-full border-2 border-warning-500/30 border-t-warning-500 animate-spin" />
+            <div
+              className={`absolute ${currentSize.ring} rounded-full border-2 border-warning-500/25 border-t-warning-500/80 animate-spin`}
+            />
           )}
           <motion.div
             animate={reducedMotion ? undefined : { opacity: [0.82, 1, 0.82] }}
             transition={reducedMotion ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            className={`relative ${currentSize.frame} rounded-2xl bg-content1/95 border border-default-200/80 shadow-sm flex items-center justify-center`}
+            className={`relative z-10 ${currentSize.frame} rounded-2xl bg-content1 border border-default-200/80 shadow-md flex items-center justify-center`}
           >
             <Image
               src="/logo.png"

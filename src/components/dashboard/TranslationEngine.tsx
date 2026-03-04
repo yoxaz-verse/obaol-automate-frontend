@@ -49,6 +49,9 @@ export const TranslationEngine = () => {
             const addScript = document.createElement("script");
             addScript.id = "google-translate-script";
             addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+            addScript.onerror = () => {
+                window.dispatchEvent(new Event("translation-unavailable"));
+            };
             document.body.appendChild(addScript);
         }
 
@@ -76,6 +79,15 @@ export const TranslationEngine = () => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!isSwitching) return;
+        const watchdog = setTimeout(() => {
+            setIsSwitching(false);
+            window.dispatchEvent(new Event("translation-end"));
+        }, 8000);
+        return () => clearTimeout(watchdog);
+    }, [isSwitching]);
 
     const overlay = isSwitching ? (
         <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background backdrop-blur-3xl animate-in fade-in duration-500">

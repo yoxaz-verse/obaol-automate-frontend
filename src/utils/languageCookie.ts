@@ -61,21 +61,25 @@ export const getLanguageCookie = (): string => {
   return value || DEFAULT_LANGUAGE;
 };
 
-export const setLanguageCookies = (langCode: string) => {
+export const setLanguageCookies = (langCode: string): boolean => {
   const normalized = String(langCode || DEFAULT_LANGUAGE).toLowerCase();
   const googtransValue = `/en/${normalized}`;
   const options = getCookieOptions();
 
   Cookies.set(LANGUAGE_COOKIE, normalized, options);
   Cookies.set(GOOGLE_TRANSLATE_COOKIE, googtransValue, options);
+  const persisted = Cookies.get(LANGUAGE_COOKIE) === normalized;
 
   if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
     // eslint-disable-next-line no-console
     console.debug("[LanguageCookie] set", {
       lang: normalized,
       domain: options.domain || "(host-only)",
+      persisted,
     });
   }
+
+  return persisted;
 };
 
 export const clearLanguageCookies = () => {
@@ -93,4 +97,3 @@ export const clearLanguageCookies = () => {
     });
   }
 };
-

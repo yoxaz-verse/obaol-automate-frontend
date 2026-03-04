@@ -31,6 +31,8 @@ const EssentialTabContent = ({
   const queryClient = useQueryClient();
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const [filters, setFilters] = React.useState<Record<string, any>>({});
+  const [search, setSearch] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
 
   // ✅ Apply filter only when prop changes
   React.useEffect(() => {
@@ -38,6 +40,13 @@ const EssentialTabContent = ({
       setFilters(filter);
     }
   }, [filter]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const columns = generateColumns(essentialName, tableConfig);
 
@@ -77,14 +86,18 @@ const EssentialTabContent = ({
                 currentTable={essentialName}
                 formFields={formFields}
                 onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder={`Search ${essentialName}...`}
               />
             )}
           </div>{" "}
           <QueryComponent
             api={apiRoutesByRole[essentialName]}
-            queryKey={[essentialName, apiRoutesByRole[essentialName], filters]}
+            queryKey={[essentialName, apiRoutesByRole[essentialName], filters, debouncedSearch]}
             page={1}
             limit={1000}
+            search={debouncedSearch}
             additionalParams={filters}
           >
             {(data: any) => {

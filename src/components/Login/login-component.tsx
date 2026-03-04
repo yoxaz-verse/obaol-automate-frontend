@@ -84,9 +84,10 @@ const LoginComponent = ({ role }: ILoginProps) => {
     } catch (error: any) {
       setIsLoading(false);
 
-      const apiErrorMessage =
-        error.response?.data?.message ||
-        "Invalid email or password. Please try again.";
+      const apiErrorMessage = error?.code === "SESSION_COOKIE_BLOCKED"
+        ? "Session cookie was blocked by browser privacy settings. Allow cookies for obaol.com/api.obaol.com and retry."
+        : (error.response?.data?.message ||
+          "Invalid email or password. Please try again.");
 
       setErrorMessage(apiErrorMessage);
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import QueryComponent from "@/components/queryComponent";
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "../../CurdTable/common-table";
@@ -24,6 +24,16 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   const tableConfig = { ...initialTableConfig }; // Create a copy to avoid mutations
   const columns = generateColumns(currentTable, tableConfig);
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
@@ -39,10 +49,11 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           currentTable,
           apiRoutesByRole[currentTable],
           filters,
-          handleFiltersUpdate,
+          debouncedSearch,
         ]}
         page={1}
         limit={1000}
+        search={debouncedSearch}
         additionalParams={{
           ...filters,
         }}
@@ -107,6 +118,9 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   currentTable={currentTable}
                   formFields={tableConfig[currentTable]}
                   onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
+                  searchValue={search}
+                  onSearchChange={setSearch}
+                  searchPlaceholder={`Search ${currentTable}...`}
                 />{" "}
               </div>
               <Spacer y={5} />

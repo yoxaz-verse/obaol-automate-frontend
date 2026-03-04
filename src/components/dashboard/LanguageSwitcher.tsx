@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { LuLanguages, LuChevronDown, LuCheck } from "react-icons/lu";
+import React, { useEffect, useRef, useState } from "react";
+import { LuLanguages } from "react-icons/lu";
 import { languages } from "@/data/languages";
 import {
     clearLanguageCookies,
     getLanguageCookie,
     setLanguageCookies,
 } from "@/utils/languageCookie";
+import { showToastMessage } from "@/utils/utils";
 
 export const LanguageSwitcher = () => {
     const [currentLang, setCurrentLang] = useState("en");
+    const [translationWarning, setTranslationWarning] = useState("");
+    const translationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         const syncFromCookie = () => {
@@ -26,8 +29,27 @@ export const LanguageSwitcher = () => {
         const handleVisibility = () => {
             if (!document.hidden) syncFromCookie();
         };
+        const handleUnavailable = () => {
+            const warning =
+                "Translation service blocked by browser privacy settings. Content will stay in English, API language preference is saved.";
+            setTranslationWarning(warning);
+            showToastMessage({
+                type: "warning",
+                message: warning,
+                position: "top-right",
+            });
+            window.dispatchEvent(new Event("translation-end"));
+        };
         document.addEventListener("visibilitychange", handleVisibility);
-        return () => document.removeEventListener("visibilitychange", handleVisibility);
+        window.addEventListener("translation-unavailable", handleUnavailable);
+        return () => {
+            if (translationTimeoutRef.current) {
+                clearTimeout(translationTimeoutRef.current);
+                translationTimeoutRef.current = null;
+            }
+            document.removeEventListener("visibilitychange", handleVisibility);
+            window.removeEventListener("translation-unavailable", handleUnavailable);
+        };
     }, []);
 
     const changeLanguage = (langCode: string) => {
@@ -37,17 +59,41 @@ export const LanguageSwitcher = () => {
         window.dispatchEvent(new CustomEvent("translation-start", {
             detail: { name: selectedLang?.name || "Language" }
         }));
+        if (translationTimeoutRef.current) {
+            clearTimeout(translationTimeoutRef.current);
+        }
+        translationTimeoutRef.current = setTimeout(() => {
+            window.dispatchEvent(new Event("translation-end"));
+        }, 8000);
+
+        const finishTranslation = () => {
+            if (translationTimeoutRef.current) {
+                clearTimeout(translationTimeoutRef.current);
+                translationTimeoutRef.current = null;
+            }
+            window.dispatchEvent(new Event("translation-end"));
+        };
 
         if (langCode === "en") {
             clearLanguageCookies();
             setCurrentLang("en");
-            window.dispatchEvent(new Event("translation-end"));
-            window.location.reload();
+            const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+            if (select) {
+                select.value = "en";
+                select.dispatchEvent(new Event("change"));
+            }
+            finishTranslation();
             return;
         }
 
-        setLanguageCookies(langCode);
+        const cookiePersisted = setLanguageCookies(langCode);
         setCurrentLang(langCode);
+        if (!cookiePersisted) {
+            if (process.env.NODE_ENV !== "production") {
+                // eslint-disable-next-line no-console
+                console.debug("[LanguageSwitcher] language cookie write blocked");
+            }
+        }
 
         // Trigger Google Translate manually for non-English
         const triggerGoogle = (attempts = 0) => {
@@ -58,19 +104,17 @@ export const LanguageSwitcher = () => {
                 select.dispatchEvent(new Event("click"));
                 // Hide overlay after a short delay to let translation apply
                 setTimeout(() => {
-                    window.dispatchEvent(new Event("translation-end"));
+                    finishTranslation();
                 }, 2000);
             } else if (attempts < 10) {
                 setTimeout(() => triggerGoogle(attempts + 1), 500);
             } else {
-                window.location.reload();
+                window.dispatchEvent(new Event("translation-unavailable"));
             }
         };
 
         triggerGoogle();
     };
-
-    const currentLangName = languages.find((l) => l.code === currentLang)?.name || "Language";
 
     return (
         <div className="flex items-center">
@@ -98,6 +142,11 @@ export const LanguageSwitcher = () => {
                     </svg>
                 </div>
             </div>
+            {translationWarning && (
+                <span className="ml-2 hidden lg:inline text-[10px] text-warning-600 dark:text-warning-300 max-w-[240px] leading-tight">
+                    {translationWarning}
+                </span>
+            )}
         </div>
     );
 };

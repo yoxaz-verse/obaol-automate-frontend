@@ -16,12 +16,12 @@ const PrivateRoute = ({
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
-        router.push("/auth"); // Redirect if not authenticated
+        router.replace("/auth"); // Redirect if not authenticated
       } else if (
         allowedRoles.length > 0 &&
         !allowedRoles.includes(user?.role || "")
       ) {
-        router.push("/403"); // Redirect to a "Forbidden" page if the role is unauthorized
+        router.replace("/403"); // Redirect to a "Forbidden" page if the role is unauthorized
       }
     }
   }, [isAuthenticated, loading, user, allowedRoles, router]);
@@ -34,7 +34,7 @@ const PrivateRoute = ({
     !isAuthenticated ||
     (allowedRoles.length > 0 && !allowedRoles.includes(user?.role || ""))
   ) {
-    return null; // Prevent rendering protected content
+    return <BrandedLoader fullScreen message="Redirecting" variant="compact" />;
   }
 
   return <>{children}</>;

@@ -20,9 +20,9 @@ const RoleRoute: React.FC<RoleRouteProps> = ({ children, allowedRoles }) => {
     if (loading) return;
     if (isAuthenticated && user && !allowedRoles.includes(user.role)) {
       // Redirect to unauthorized page or dashboard
-      router.push('/unauthorized');
+      router.replace('/unauthorized');
     } else if (!isAuthenticated) {
-      router.push('/auth');
+      router.replace('/auth');
     }
   }, [isAuthenticated, user, allowedRoles, router, loading]);
 

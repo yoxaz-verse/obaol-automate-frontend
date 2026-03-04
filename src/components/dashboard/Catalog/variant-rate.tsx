@@ -73,6 +73,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   VariantRateMixed,
   additionalParams,
 }) => {
+  const router = useRouter();
   const productVariantValue = productVariant || null;
   const tableConfig = { ...initialTableConfig }; // avoid mutations
   const { user } = useContext(AuthContext);
@@ -115,12 +116,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
   }
 
   const { convertRate } = useCurrency();
-  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
-  const isAssociateUser = user?.role?.toLowerCase() === "associate";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
+  const isAdminUser = roleLower === "admin" || isEmployeeUser;
+  const isAssociateUser = roleLower === "associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
   const { view: _uiView, ...apiAdditionalParams } = additionalParams || {};
+  const canManageRow = (item: any) => {
+    if (!item) return false;
+    if (roleLower === "admin") return true;
+    if (isEmployeeUser && !item.isMarketplaceView && !item.isCatalogView && Boolean(item.companyId)) return true;
+    return Boolean(item.isOwnerView || item.isCatalogView);
+  };
 
   // If we only fetch associates if "rate" is "variantRate"
   const { data: associateByIdResponse } = useQuery({
@@ -131,9 +140,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const associateByIdValue = associateByIdResponse?.data;
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { data: variantResponse } = useQuery({
     queryKey: ["displayedRate", user?.id],
@@ -179,10 +197,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
         apiAdditionalParams,
         refetchData,
         filters,
+        debouncedSearch,
         addedRateIds.size, // Refresh when catalog items change
       ]}
       page={1}
       limit={1000}
+      search={debouncedSearch}
       additionalParams={{
         ...(filters || {}),
         ...(apiAdditionalParams || {}),
@@ -462,6 +482,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 currentTable={"variantRate"}
                 formFields={filterVariantRateFormFields}
                 onApply={handleFiltersUpdate}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search rates..."
               />
               {!displayOnly && rate === "variantRate" && canAddOwnRate && (
                 <AddModal
@@ -494,7 +517,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       color="warning"
                       variant="flat"
                       endContent={<FiArrowRight size={14} />}
-                      onPress={() => window.location.assign("/dashboard/profile")}
+                      onPress={() => router.push("/dashboard/profile")}
                     >
                       Link Company
                     </Button>
@@ -532,7 +555,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     return (
                       <div className="flex items-center justify-end">
                         {/* LiveToggle or Live Chip */}
-                        {(user?.role?.toLowerCase() === "admin" || (rowItem.isOwnerView && !rowItem.isCatalogView)) ? (
+                        {canManageRow(rowItem) ? (
                           <div className="flex flex-col items-center gap-1">
                             <LiveToggle
                               variantRate={rowItem}
@@ -577,14 +600,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   }}
                   editModal={(item: any) => {
                     if (!user) return null;
-                    const isAdmin = user.role?.toLowerCase() === "admin";
-                    const isOwner = item.isOwnerView;
-
-                    if (isAdmin || isOwner) {
+                    if (canManageRow(item)) {
                       const isCoolingTime = isCooling(item.coolingStartTime);
                       const isDifferentAssociate = item.associateId !== user.id;
 
-                      if (isAdmin || (isDifferentAssociate && isCoolingTime)) {
+                      if (roleLower === "admin" || isEmployeeUser || (isDifferentAssociate && isCoolingTime)) {
                         return (
                           <EditModal
                             _id={item._id}
@@ -604,11 +624,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   }}
                   deleteModal={(item: any) => {
                     if (!user) return null;
-                    const isAdmin = user.role?.toLowerCase() === "admin";
-                    const isOwner = item.isOwnerView;
-                    const isCatalog = item.isCatalogView;
-
-                    if (isAdmin || isOwner || isCatalog) {
+                    if (canManageRow(item)) {
                       return (
                         <DeleteModal
                           _id={item._id}
@@ -670,7 +686,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {user?.role?.toLowerCase() === "admin" || item.isOwnerView ? (
+                        {canManageRow(item) ? (
                           <>
                             <EditModal
                               _id={item._id}
@@ -715,7 +731,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       </div>
                     </div>
 
-                    {(user?.role?.toLowerCase() === "admin" || (item.isOwnerView && !item.isCatalogView)) && (
+                    {canManageRow(item) && (
                       <div className="flex justify-between items-center mt-2 pt-2 border-t border-foreground/[0.05]">
                         <span className="text-[10px] text-default-400">Visibility</span>
                         <LiveToggle

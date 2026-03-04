@@ -69,7 +69,7 @@ export default function CompanyProductPage() {
   const queryClient = useQueryClient();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("all"); // "all", "live", "active", "empty"
-  const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
+  const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web", "onboarding"
   const [isAssigning, setIsAssigning] = useState(false);
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
@@ -199,9 +199,10 @@ export default function CompanyProductPage() {
 
     // Determine selection based on current tab
     const currentList =
+      activeTab === "all" ? allCompanies :
       activeTab === "live" ? live :
-        activeTab === "active" ? active :
-          empty;
+      activeTab === "active" ? active :
+      empty;
 
     const selected = currentList.find(c => c._id === selectedCompanyId) || null;
 
@@ -270,37 +271,6 @@ export default function CompanyProductPage() {
         <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col gap-4">
           <Card className="p-4 bg-background/60 backdrop-blur-md border-none shadow-sm h-full overflow-hidden">
             <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Companies</h2>
-            {roleLower === "employee" && (
-              <div className="mb-4 flex flex-col gap-2">
-                {selectedCompanyId ? (
-                  <AddModal
-                    buttonLabel="Add Associate to Company"
-                    currentTable="associate"
-                    formFields={employeeAssociateFormFields}
-                    apiEndpoint={associateRoutes.getAll}
-                    additionalVariable={{
-                      associateCompany: selectedCompanyId,
-                      hasCompany: true,
-                      companyMode: "existing",
-                    }}
-                  />
-                ) : (
-                  <Button size="sm" color="warning" variant="flat" className="font-bold rounded-xl" isDisabled>
-                    Add Associate to Company
-                  </Button>
-                )}
-                <AddModal
-                  buttonLabel="Add Company"
-                  currentTable="associateCompany"
-                  formFields={employeeCompanyFormFields}
-                  apiEndpoint={associateCompanyRoutes.getAll}
-                  additionalVariable={{
-                    assignedEmployee: user?.id,
-                  }}
-                />
-              </div>
-            )}
-
             <CompanySearch
               defaultSelected={selectedCompanyId}
               itemsFilter={(companies) =>
@@ -572,6 +542,7 @@ export default function CompanyProductPage() {
                       <Tab key="details" title="Details" />
                       <Tab key="associates" title="Associates" />
                       <Tab key="web" title="Web Content" />
+                      {roleLower === "employee" && <Tab key="onboarding" title="Onboarding" />}
                     </Tabs>
                   </div>
 
@@ -1017,6 +988,66 @@ export default function CompanyProductPage() {
                           </Card>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {detailTab === "onboarding" && roleLower === "employee" && (
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                      <Card className="p-5 border-none bg-default-50 shadow-none">
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div>
+                            <h3 className="text-base font-bold text-foreground">Add Associate to Company</h3>
+                            <p className="text-xs text-default-500 mt-1">
+                              Create an associate under the currently selected company.
+                            </p>
+                          </div>
+                          <Chip size="sm" color="warning" variant="flat" className="text-[10px] font-bold uppercase">
+                            Company Scoped
+                          </Chip>
+                        </div>
+
+                        {selectedCompanyId ? (
+                          <AddModal
+                            buttonLabel="Add Associate to Company"
+                            currentTable="associate"
+                            formFields={employeeAssociateFormFields}
+                            apiEndpoint={associateRoutes.getAll}
+                            additionalVariable={{
+                              associateCompany: selectedCompanyId,
+                              hasCompany: true,
+                              companyMode: "existing",
+                            }}
+                          />
+                        ) : (
+                          <Button size="sm" color="warning" variant="flat" className="font-bold rounded-xl" isDisabled>
+                            Select a company first
+                          </Button>
+                        )}
+                      </Card>
+
+                      <Card className="p-5 border-none bg-default-50 shadow-none">
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div>
+                            <h3 className="text-base font-bold text-foreground">Add Company</h3>
+                            <p className="text-xs text-default-500 mt-1">
+                              Create a company under your supervision. Admin approval remains required.
+                            </p>
+                          </div>
+                          <Chip size="sm" color="primary" variant="flat" className="text-[10px] font-bold uppercase">
+                            Pending Review
+                          </Chip>
+                        </div>
+
+                        <AddModal
+                          buttonLabel="Add Company"
+                          currentTable="associateCompany"
+                          formFields={employeeCompanyFormFields}
+                          apiEndpoint={associateCompanyRoutes.getAll}
+                          additionalVariable={{
+                            assignedEmployee: user?.id,
+                          }}
+                        />
+                      </Card>
                     </div>
                   )}
                 </div>

@@ -84,7 +84,6 @@ export default function RegisterPage() {
     companyDivision: "",
     companyPincodeEntry: "",
     companySubFunctionIds: [] as string[],
-    companyFunctionIds: [] as string[],
     contactPreference: "phone",
     contactNotes: "",
     associateAddress: "",
@@ -308,13 +307,6 @@ export default function RegisterPage() {
       ),
     }));
   }, [companyFunctions, companySubFunctions]);
-  const selectedSubFunctionLabels = useMemo(() => {
-    const selected = new Set(formData.companySubFunctionIds || []);
-    return companySubFunctions
-      .filter((sub: any) => selected.has(String(sub?._id || "")))
-      .map((sub: any) => sub?.name || "")
-      .filter(Boolean);
-  }, [companySubFunctions, formData.companySubFunctionIds]);
 
   const validatePassword = (password: string) => {
     const missing: string[] = [];
@@ -496,11 +488,11 @@ export default function RegisterPage() {
 
     if (step === 3) {
       if (isNewCompany) {
-        if (!Array.isArray(formData.companyFunctionIds) || formData.companyFunctionIds.length < 1) {
-          stepErrors.companyFunctionIds = "Select at least 1 function.";
+        if (!Array.isArray(formData.companySubFunctionIds) || formData.companySubFunctionIds.length < 1) {
+          stepErrors.companySubFunctionIds = "Select at least 1 sub-function.";
         }
-        if (Array.isArray(formData.companyFunctionIds) && formData.companyFunctionIds.length > 10) {
-          stepErrors.companyFunctionIds = "You can select up to 10 functions.";
+        if (Array.isArray(formData.companySubFunctionIds) && formData.companySubFunctionIds.length > 10) {
+          stepErrors.companySubFunctionIds = "You can select up to 10 sub-functions.";
         }
       }
     }
@@ -592,13 +584,9 @@ export default function RegisterPage() {
           legalComplianceInfo: formData.companyGeoType === "INTERNATIONAL"
             ? formData.companyLegalInformation.trim()
             : undefined,
-          subFunctionIds: (() => {
-            const selectedFnIds = new Set(formData.companyFunctionIds || []);
-            return groupedCompanyFunctions
-              .filter((fn: any) => selectedFnIds.has(String(fn?._id || "")))
-              .flatMap((fn: any) => (Array.isArray(fn.subFunctions) ? fn.subFunctions : []).map((s: any) => String(s?._id || "")))
-              .filter(Boolean);
-          })(),
+          subFunctionIds: Array.from(
+            new Set((formData.companySubFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
+          ),
           phone: normalizedCompanyPhone.e164,
           phoneCountryCode: normalizedCompanyPhone.countryCode,
           phoneNational: normalizedCompanyPhone.national,
@@ -1221,81 +1209,88 @@ export default function RegisterPage() {
                   className="flex flex-col gap-4 rounded-2xl border border-success-200/30 bg-gradient-to-br from-success-50/20 to-transparent dark:from-success-900/10 p-4"
                 >
                   <div className="rounded-xl border border-primary-300/80 bg-primary-50 p-3 text-sm text-primary-900 dark:border-primary-300/70 dark:bg-primary-900/50 dark:text-primary-50">
-                    Select your company&apos;s capabilities. Choose <strong>1 to 10</strong> functions that best describe what your company does.
+                    Select your company&apos;s capabilities. Choose <strong>1 to 10</strong> sub-functions that best describe what your company does.
                   </div>
                   {isNewCompany ? (
                     <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-4">
                         {groupedCompanyFunctions.map((fn: any) => {
-                          const fnId = String(fn?._id || "");
-                          const isSelected = formData.companyFunctionIds.includes(fnId);
-                          const isDisabled = !isSelected && formData.companyFunctionIds.length >= 10;
+                          const fnSubFunctions = Array.isArray(fn?.subFunctions) ? fn.subFunctions : [];
+                          if (!fnSubFunctions.length) return null;
                           return (
-                            <button
-                              key={fnId}
-                              type="button"
-                              disabled={isDisabled}
-                              onClick={() => {
-                                setFormData((prev) => {
-                                  const current = Array.isArray(prev.companyFunctionIds) ? prev.companyFunctionIds : [];
-                                  if (isSelected) {
-                                    return { ...prev, companyFunctionIds: current.filter((id) => id !== fnId) };
-                                  }
-                                  if (current.length >= 10) return prev;
-                                  return { ...prev, companyFunctionIds: [...current, fnId] };
-                                });
-                                if (errors.companyFunctionIds) {
-                                  setErrors((prev) => ({ ...prev, companyFunctionIds: "" }));
-                                }
-                              }}
-                              className={`w-full text-left rounded-xl border-2 px-4 py-3 transition-all duration-150 ${isSelected
-                                ? "border-warning-500 bg-warning-50 dark:bg-warning-900/20 shadow-sm"
-                                : isDisabled
-                                  ? "border-default-200 bg-default-50/50 dark:bg-default-100/5 opacity-40 cursor-not-allowed"
-                                  : "border-default-200 bg-default-50/50 dark:bg-default-100/5 hover:border-warning-300 hover:bg-warning-50/30 dark:hover:bg-warning-900/10 cursor-pointer"
-                                }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <div>
-                                  <p className={`text-sm font-semibold ${isSelected ? "text-warning-700 dark:text-warning-400" : "text-foreground"
-                                    }`}>
-                                    {fn?.name || "Function"}
-                                  </p>
-                                  {fn?.description ? (
-                                    <p className="text-xs text-default-500 mt-0.5 line-clamp-1">{fn.description}</p>
-                                  ) : (
-                                    <p className="text-xs text-default-400 mt-0.5">
-                                      {Array.isArray(fn?.subFunctions) ? fn.subFunctions.length : 0} sub-functions
-                                    </p>
-                                  )}
-                                </div>
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${isSelected
-                                  ? "border-warning-500 bg-warning-500"
-                                  : "border-default-300"
-                                  }`}>
-                                  {isSelected && (
-                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  )}
-                                </div>
+                            <div key={String(fn?._id || "")} className="rounded-xl border border-default-200 bg-default-50/40 dark:bg-default-100/5 p-3">
+                              <div className="mb-2 flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-foreground">{fn?.name || "Function"}</p>
+                                <span className="text-[11px] text-default-500">
+                                  {fnSubFunctions.length} sub-functions
+                                </span>
                               </div>
-                            </button>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {fnSubFunctions.map((sub: any) => {
+                                  const subId = String(sub?._id || "");
+                                  const isSelected = formData.companySubFunctionIds.includes(subId);
+                                  const isDisabled = !isSelected && formData.companySubFunctionIds.length >= 10;
+                                  return (
+                                    <button
+                                      key={subId}
+                                      type="button"
+                                      disabled={isDisabled}
+                                      onClick={() => {
+                                        setFormData((prev) => {
+                                          const current = Array.isArray(prev.companySubFunctionIds) ? prev.companySubFunctionIds : [];
+                                          if (isSelected) {
+                                            return { ...prev, companySubFunctionIds: current.filter((id) => id !== subId) };
+                                          }
+                                          if (current.length >= 10) return prev;
+                                          return { ...prev, companySubFunctionIds: [...current, subId] };
+                                        });
+                                        if (errors.companySubFunctionIds) {
+                                          setErrors((prev) => ({ ...prev, companySubFunctionIds: "" }));
+                                        }
+                                      }}
+                                      className={`w-full text-left rounded-lg border px-3 py-2 transition-all duration-150 ${isSelected
+                                        ? "border-warning-500 bg-warning-50 dark:bg-warning-900/20"
+                                        : isDisabled
+                                          ? "border-default-200 bg-default-50/50 dark:bg-default-100/5 opacity-40 cursor-not-allowed"
+                                          : "border-default-200 bg-default-50/50 dark:bg-default-100/5 hover:border-warning-300 hover:bg-warning-50/30 dark:hover:bg-warning-900/10"
+                                        }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-2">
+                                        <div className="min-w-0">
+                                          <p className={`text-sm font-medium truncate ${isSelected ? "text-warning-700 dark:text-warning-400" : "text-foreground"}`}>
+                                            {sub?.name || "Sub-function"}
+                                          </p>
+                                          {sub?.description ? (
+                                            <p className="text-xs text-default-500 mt-0.5 line-clamp-1">{sub.description}</p>
+                                          ) : null}
+                                        </div>
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected
+                                          ? "border-warning-500 bg-warning-500"
+                                          : "border-default-300"
+                                          }`}>
+                                          {isSelected ? <span className="block w-1.5 h-1.5 rounded-full bg-white" /> : null}
+                                        </div>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
 
                       <div className="flex items-center justify-between text-xs text-default-500">
                         <span>
-                          {formData.companyFunctionIds.length} / 10 selected
+                          {formData.companySubFunctionIds.length} / 10 selected
                         </span>
-                        {formData.companyFunctionIds.length >= 10 && (
+                        {formData.companySubFunctionIds.length >= 10 && (
                           <span className="text-warning-600 font-semibold">Maximum reached</span>
                         )}
                       </div>
 
-                      {errors.companyFunctionIds ? (
-                        <p className="text-danger text-xs">{errors.companyFunctionIds}</p>
+                      {errors.companySubFunctionIds ? (
+                        <p className="text-danger text-xs">{errors.companySubFunctionIds}</p>
                       ) : null}
                     </>
                   ) : (

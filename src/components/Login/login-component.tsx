@@ -37,7 +37,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
     if (!loading && isAuthenticated) {
       const roleLower = String(user?.role || "").toLowerCase();
       const requiresInterestsSetup =
-        (roleLower === "associate" || roleLower === "employee" || roleLower === "team") &&
+        roleLower === "associate" &&
         user?.associateCompanyId &&
         user?.companyInterestsConfigured === false &&
         !interestsSetupDone;
@@ -45,6 +45,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
         setShowInterestsModal(true);
         return;
       }
+      setShowInterestsModal(false);
       router.push("/dashboard");
     }
   }, [isAuthenticated, loading, router, user, interestsSetupDone]);

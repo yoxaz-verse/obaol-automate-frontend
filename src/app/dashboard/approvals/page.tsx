@@ -132,7 +132,7 @@ export default function ApprovalsPage() {
         />
       </div>
 
-      <div className="mt-5 rounded-xl border border-default-200 bg-content1 overflow-x-auto">
+      <div className="mt-5 rounded-xl border border-default-200/80 bg-content1/95 overflow-x-auto shadow-sm">
         {listQuery.isLoading ? (
           <div className="p-8 flex items-center justify-center">
             <Spinner />
@@ -141,24 +141,28 @@ export default function ApprovalsPage() {
           <div className="p-8 text-center text-default-500">No records found for current filters.</div>
         ) : (
           <table className="w-full min-w-[980px] text-sm text-foreground">
-            <thead className="bg-default-100/80">
+            <thead className="bg-default-100/70 backdrop-blur-sm">
               <tr>
-                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Name</th>
-                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Email</th>
-                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Phone</th>
+                <th className="text-left px-3 py-2 text-default-600 font-semibold">Name</th>
+                <th className="text-left px-3 py-2 text-default-600 font-semibold">Email</th>
+                <th className="text-left px-3 py-2 text-default-600 font-semibold">Phone</th>
                 {tab === "associates" ? (
-                  <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Company</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Company</th>
                 ) : (
-                  <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">GST</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">GST</th>
                 )}
-                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Status</th>
-                <th className="text-left px-3 py-2 text-default-700 dark:text-default-300">Created At</th>
-                <th className="text-center px-3 py-2 text-default-700 dark:text-default-300">Actions</th>
+                <th className="text-left px-3 py-2 text-default-600 font-semibold">Status</th>
+                <th className="text-left px-3 py-2 text-default-600 font-semibold">Created At</th>
+                <th className="text-center px-3 py-2 text-default-600 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any) => (
-                <tr key={row._id} className="border-t border-default-200 hover:bg-default-50 dark:hover:bg-default-100/10 transition-colors">
+              {rows.map((row: any, index: number) => (
+                <tr
+                  key={row._id}
+                  className={`border-t border-default-200/70 transition-colors hover:bg-default-100/40 ${index % 2 === 0 ? "bg-transparent" : "bg-default-50/30 dark:bg-default-100/5"
+                    }`}
+                >
                   {(() => {
                     const normalizedStatus = String(row.registrationStatus || "PENDING_REVIEW").toUpperCase();
                     const isPendingReview = normalizedStatus === "PENDING_REVIEW";
@@ -173,20 +177,20 @@ export default function ApprovalsPage() {
 
                     return (
                       <>
-                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.name || "-"}</td>
-                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.email || "-"}</td>
-                  <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.phone || "-"}</td>
+                  <td className="px-3 py-2 text-foreground">{row.name || "-"}</td>
+                  <td className="px-3 py-2 text-foreground/90">{row.email || "-"}</td>
+                  <td className="px-3 py-2 text-foreground/90">{row.phone || "-"}</td>
                   {tab === "associates" ? (
-                    <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.associateCompany?.name || "-"}</td>
+                    <td className="px-3 py-2 text-foreground/90">{row.associateCompany?.name || "-"}</td>
                   ) : (
-                    <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.gstin || "-"}</td>
+                    <td className="px-3 py-2 text-foreground/90">{row.gstin || "-"}</td>
                   )}
                   <td className="px-3 py-2">
                     <Chip size="sm" color={formatStatusColor(row.registrationStatus) as any} variant="flat">
                       {row.registrationStatus || "PENDING_REVIEW"}
                     </Chip>
                   </td>
-                  <td className="px-3 py-2 text-default-700 dark:text-default-300">{formatDate(row.createdAt)}</td>
+                  <td className="px-3 py-2 text-default-600">{formatDate(row.createdAt)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-2">
                       {isPendingReview ? (

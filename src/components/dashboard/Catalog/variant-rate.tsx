@@ -57,6 +57,7 @@ interface VariantRateProps {
   rate: "variantRate" | "displayedRate" | "catalogItem";
   refetchData?: () => void;
   additionalParams?: Record<string, any>;
+  showAssociateColumn?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   displayOnly,
   VariantRateMixed,
   additionalParams,
+  showAssociateColumn = false,
 }) => {
   const router = useRouter();
   const productVariantValue = productVariant || null;
@@ -123,7 +125,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
-  const { view: _uiView, ...apiAdditionalParams } = additionalParams || {};
   const canManageRow = (item: any) => {
     if (!item) return false;
     if (roleLower === "admin") return true;
@@ -186,6 +187,21 @@ const VariantRate: React.FC<VariantRateProps> = ({
     user?.role
   );
 
+  if (
+    rate === "variantRate" &&
+    showAssociateColumn &&
+    isEmployeeUser &&
+    !columns.some((column: any) => column.uid === "associate")
+  ) {
+    const productIndex = columns.findIndex((column: any) => column.uid === "productVariant");
+    const associateColumn = { name: "ASSOCIATE", uid: "associate" };
+    if (productIndex >= 0) {
+      columns.splice(productIndex, 0, associateColumn);
+    } else {
+      columns.push(associateColumn);
+    }
+  }
+
   // Return the entire QueryComponent for data fetching
   return (
     <QueryComponent
@@ -194,7 +210,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         rate,
         apiRoutesByRole[rate],
         productVariantValue?._id,
-        apiAdditionalParams,
+        additionalParams,
         refetchData,
         filters,
         debouncedSearch,
@@ -205,7 +221,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
       search={debouncedSearch}
       additionalParams={{
         ...(filters || {}),
-        ...(apiAdditionalParams || {}),
+        ...(additionalParams || {}),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),
@@ -327,11 +343,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
         // Transform the rows if needed
         const tableData = (variantRateFetchedData || [])
           .filter((item: any) =>
-            // 1) CatalogItem / DisplayedRate: assume current user owns it, show it.
-            // 2) VariantRate (Marketplace): must have valid associate/company to show.
+            // 1) CatalogItem / DisplayedRate: keep existing visibility.
+            // 2) VariantRate (Marketplace): allow rows even when company relation is missing,
+            //    as long as productVariant reference exists.
             (rate !== "variantRate") ||
             (user?.role?.toLowerCase() === "admin") ||
-            (item.associate || item.associateCompany || item.associateId || item.associateCompanyId)
+            (isMarketplace
+              ? Boolean(item.productVariant || item.productVariantId)
+              : (item.associate || item.associateCompany || item.associateId || item.associateCompanyId))
           )
           .map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
@@ -412,6 +431,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 supplierIsLive: baseRate?.isLive !== false,
                 associate: item.associateCompanyId?.name || "My Company",
                 rate: convertRate(finalPrice),
+                commission: mediatorMarkup ? convertRate(mediatorMarkup) : convertRate(0),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",
@@ -576,9 +596,21 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 )}
                               </div>
                             ) : (
-                              <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
-                                Not Live
-                              </span>
+                              <>
+                                <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
+                                  Not Live
+                                </span>
+                                {/* Admin can create enquiries even on offline rates */}
+                                {isAdminUser && !rowItem.isCatalogView && (
+                                  <CreateEnquiryButton
+                                    productVariant={
+                                      rowItem.productVariantId ||
+                                      rowItem.variantRate?.productVariant?._id
+                                    }
+                                    variantRate={rowItem}
+                                  />
+                                )}
+                              </>
                             )}
                             <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
                           </div>
@@ -709,7 +741,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             )}
                           </>
                         ) : (
-                          !item.isCatalogView && isLive && (
+                          !item.isCatalogView && (isLive || isAdminUser) && (
                             <CreateEnquiryButton
                               productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
                               variantRate={item}
@@ -1332,6 +1364,7 @@ const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({
         <AddToCatalogModal
           isOpen={isOpen}
           onClose={onClose}
+          onSuccess={onSuccess}
           productVariantId={rowItem.productVariantId || rowItem.productVariant?._id}
           baseRateId={rowItem._id}
           basePrice={rowItem.rawBasePrice || rowItem.rate}

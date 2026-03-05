@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
     Modal,
     ModalContent,
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 interface AddToCatalogModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
     productVariantId: string;
     baseRateId: string;
     basePrice: number;
@@ -26,12 +28,14 @@ interface AddToCatalogModalProps {
 const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
     isOpen,
     onClose,
+    onSuccess,
     productVariantId,
     baseRateId,
     basePrice,
     productName,
     isPersonalCatalogMode = false,
 }) => {
+    const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [margin, setMargin] = useState<number>(0);
 
@@ -49,11 +53,13 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
             const response = await postData(apiRoutes.catalog.add, payload);
 
             if (response.data.success) {
+                await queryClient.invalidateQueries({ queryKey: ["catalogItems"] });
                 toast.success(
                     isPersonalCatalogMode
                         ? "Product added to your personal catalog!"
                         : "Product added to your catalog!"
                 );
+                onSuccess?.();
                 onClose();
             } else {
                 toast.error(response.data.message || "Failed to add product");

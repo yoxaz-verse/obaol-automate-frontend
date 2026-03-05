@@ -36,6 +36,7 @@ import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { FormField } from "@/data/interface-data";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
+import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 
 interface Company {
   _id: string;
@@ -66,10 +67,11 @@ interface Company {
 export default function CompanyProductPage() {
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
+  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
   const queryClient = useQueryClient();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("all"); // "all", "live", "active", "empty"
-  const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web", "onboarding"
+  const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
   const [isAssigning, setIsAssigning] = useState(false);
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
@@ -79,6 +81,114 @@ export default function CompanyProductPage() {
     { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
     { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
     { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
+    { label: "Phone Secondary", type: "number", key: "phoneSecondary", inForm: true, inTable: false, required: false },
+    {
+      label: "Designation",
+      type: "select",
+      key: "designation",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("designation"),
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Associate Company",
+      type: "select",
+      key: "associateCompany",
+      values: [],
+      dynamicValuesFn: () =>
+        fetchDependentOptions("associateCompany", undefined, undefined, {
+          mode: "associateForm",
+        }),
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    { label: "Address", type: "text", key: "address", inForm: true, inTable: false, required: true },
+    {
+      label: "Geo Type",
+      type: "select",
+      key: "geoType",
+      values: [
+        { key: "INDIAN", value: "Indian" },
+        { key: "INTERNATIONAL", value: "International" },
+      ],
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Country",
+      type: "select",
+      key: "country",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("country"),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INTERNATIONAL" },
+    },
+    {
+      label: "State",
+      type: "select",
+      key: "state",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("state"),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "District",
+      type: "select",
+      key: "district",
+      dependsOn: "state",
+      values: [],
+      dynamicValuesFn: (stateId: string) => fetchDependentOptions("district", "state", stateId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Division",
+      type: "select",
+      key: "division",
+      dependsOn: "district",
+      values: [],
+      dynamicValuesFn: (districtId: string) => fetchDependentOptions("division", "district", districtId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Pin Code",
+      type: "select",
+      key: "pincodeEntry",
+      dependsOn: "division",
+      values: [],
+      dynamicValuesFn: (divisionId: string) => fetchDependentOptions("pincodeEntry", "division", divisionId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Contact Preference",
+      type: "select",
+      key: "onboardingContactPreference",
+      values: [
+        { key: "phone", value: "Phone" },
+        { key: "email", value: "Email" },
+      ],
+      inForm: true,
+      inTable: false,
+      required: false,
+    },
+    { label: "Contact Notes", type: "textarea", key: "onboardingContactNotes", inForm: true, inTable: false, required: false },
     { label: "Password", type: "password", key: "password", inForm: true, inTable: false, required: true },
   ];
 
@@ -87,7 +197,130 @@ export default function CompanyProductPage() {
     { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
     { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
     { label: "Phone Secondary", type: "number", key: "phoneSecondary", inForm: true, inTable: false, required: true },
-    { label: "Address", type: "text", key: "address", inForm: true, inTable: false, required: false },
+    {
+      label: "Company Type",
+      type: "select",
+      key: "companyType",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("companyType"),
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Geo Type",
+      type: "select",
+      key: "geoType",
+      values: [
+        { key: "INDIAN", value: "Indian" },
+        { key: "INTERNATIONAL", value: "International" },
+      ],
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Country",
+      type: "select",
+      key: "country",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("country"),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INTERNATIONAL" },
+    },
+    {
+      label: "State",
+      type: "select",
+      key: "state",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("state"),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "District",
+      type: "select",
+      key: "district",
+      dependsOn: "state",
+      values: [],
+      dynamicValuesFn: (stateId: string) => fetchDependentOptions("district", "state", stateId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Division",
+      type: "select",
+      key: "division",
+      dependsOn: "district",
+      values: [],
+      dynamicValuesFn: (districtId: string) => fetchDependentOptions("division", "district", districtId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Pin Code",
+      type: "select",
+      key: "pincodeEntry",
+      dependsOn: "division",
+      values: [],
+      dynamicValuesFn: (divisionId: string) => fetchDependentOptions("pincodeEntry", "division", divisionId),
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    { label: "Address", type: "text", key: "address", inForm: true, inTable: false, required: true },
+    {
+      label: "GSTIN",
+      type: "text",
+      key: "gstin",
+      inForm: true,
+      inTable: false,
+      required: false,
+      showWhen: { key: "geoType", equals: "INDIAN" },
+    },
+    {
+      label: "Legal Registration Number",
+      type: "text",
+      key: "legalRegistrationNumber",
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INTERNATIONAL" },
+    },
+    {
+      label: "Legal Compliance Info",
+      type: "textarea",
+      key: "legalComplianceInfo",
+      inForm: true,
+      inTable: false,
+      required: true,
+      showWhen: { key: "geoType", equals: "INTERNATIONAL" },
+    },
+    {
+      label: "Service Capabilities",
+      type: "multiselect",
+      key: "serviceCapabilities",
+      values: [
+        { key: "PROCUREMENT", value: "Procurement" },
+        { key: "CERTIFICATION", value: "Certification" },
+        { key: "TRANSPORTATION", value: "Transportation" },
+        { key: "SHIPPING", value: "Freight Forwarding & Shipping" },
+        { key: "PACKAGING", value: "Packaging" },
+        { key: "QUALITY_TESTING", value: "Quality Testing & Assurance" },
+      ],
+      inForm: true,
+      inTable: false,
+      required: false,
+    },
   ];
 
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
@@ -179,7 +412,7 @@ export default function CompanyProductPage() {
 
     // Role-based filtering: Employees only see assigned companies
     // Note: Backend hook also handles this, but frontend filtering is a nice double-layer for UX
-    if (roleLower === "employee") {
+    if (isEmployeeUser) {
       allCompanies = allCompanies.filter(c => {
         const assignedId = typeof c.assignedEmployee === "object" ? c.assignedEmployee?._id : c.assignedEmployee;
         return String(assignedId || "") === String(user?.id || "");
@@ -214,7 +447,7 @@ export default function CompanyProductPage() {
       selectedCompany: selected,
       allEmployees,
     };
-  }, [companyData, employeeData, selectedCompanyId, activeTab, user, roleLower]);
+  }, [companyData, employeeData, selectedCompanyId, activeTab, user, isEmployeeUser]);
 
   useEffect(() => {
     const currentList =
@@ -265,6 +498,39 @@ export default function CompanyProductPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+      {isEmployeeUser && (
+        <Card className="mb-4 p-4 bg-background/60 backdrop-blur-md border-none shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-default-500">Onboarding Actions</div>
+              <p className="text-xs text-default-500 mt-0.5">
+                Add associates and companies with full registration details.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <AddModal
+                buttonLabel="Add Associate to Company"
+                currentTable="associate"
+                formFields={employeeAssociateFormFields}
+                apiEndpoint={associateRoutes.getAll}
+                additionalVariable={{
+                  hasCompany: true,
+                  companyMode: "existing",
+                }}
+              />
+              <AddModal
+                buttonLabel="Add Company"
+                currentTable="associateCompany"
+                formFields={employeeCompanyFormFields}
+                apiEndpoint={associateCompanyRoutes.getAll}
+                additionalVariable={{
+                  assignedEmployee: user?.id,
+                }}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
       <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px]">
 
         {/* --- Sidebar (Master) --- */}
@@ -501,7 +767,7 @@ export default function CompanyProductPage() {
                   )}
 
                   {/* --- Assigned Overseer (Employee View) --- */}
-                  {roleLower === "employee" && selectedCompany.assignedEmployee && (
+                  {isEmployeeUser && selectedCompany.assignedEmployee && (
                     <div className="flex flex-col items-end gap-1">
                       <div className="text-[10px] font-bold text-default-400 uppercase">Your Assignment</div>
                       <div className="flex items-center gap-2 bg-success-50 px-3 py-1 rounded-full border border-success-100">
@@ -542,7 +808,6 @@ export default function CompanyProductPage() {
                       <Tab key="details" title="Details" />
                       <Tab key="associates" title="Associates" />
                       <Tab key="web" title="Web Content" />
-                      {roleLower === "employee" && <Tab key="onboarding" title="Onboarding" />}
                     </Tabs>
                   </div>
 
@@ -991,65 +1256,6 @@ export default function CompanyProductPage() {
                     </div>
                   )}
 
-                  {detailTab === "onboarding" && roleLower === "employee" && (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
-                      <Card className="p-5 border-none bg-default-50 shadow-none">
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div>
-                            <h3 className="text-base font-bold text-foreground">Add Associate to Company</h3>
-                            <p className="text-xs text-default-500 mt-1">
-                              Create an associate under the currently selected company.
-                            </p>
-                          </div>
-                          <Chip size="sm" color="warning" variant="flat" className="text-[10px] font-bold uppercase">
-                            Company Scoped
-                          </Chip>
-                        </div>
-
-                        {selectedCompanyId ? (
-                          <AddModal
-                            buttonLabel="Add Associate to Company"
-                            currentTable="associate"
-                            formFields={employeeAssociateFormFields}
-                            apiEndpoint={associateRoutes.getAll}
-                            additionalVariable={{
-                              associateCompany: selectedCompanyId,
-                              hasCompany: true,
-                              companyMode: "existing",
-                            }}
-                          />
-                        ) : (
-                          <Button size="sm" color="warning" variant="flat" className="font-bold rounded-xl" isDisabled>
-                            Select a company first
-                          </Button>
-                        )}
-                      </Card>
-
-                      <Card className="p-5 border-none bg-default-50 shadow-none">
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div>
-                            <h3 className="text-base font-bold text-foreground">Add Company</h3>
-                            <p className="text-xs text-default-500 mt-1">
-                              Create a company under your supervision. Admin approval remains required.
-                            </p>
-                          </div>
-                          <Chip size="sm" color="primary" variant="flat" className="text-[10px] font-bold uppercase">
-                            Pending Review
-                          </Chip>
-                        </div>
-
-                        <AddModal
-                          buttonLabel="Add Company"
-                          currentTable="associateCompany"
-                          formFields={employeeCompanyFormFields}
-                          apiEndpoint={associateCompanyRoutes.getAll}
-                          additionalVariable={{
-                            assignedEmployee: user?.id,
-                          }}
-                        />
-                      </Card>
-                    </div>
-                  )}
                 </div>
               </>
             ) : (

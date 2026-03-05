@@ -215,4 +215,9 @@ export interface FormField {
   accept?: string; // For file inputs (e.g., "image/*")
   multiple?: boolean; // For file inputs
   required?: boolean; // For file inputs
+  showWhen?: {
+    key: string;
+    equals: string | boolean | number | null;
+  };
+  clearWhenHidden?: boolean;
 }

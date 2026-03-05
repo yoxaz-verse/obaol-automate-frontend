@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           />
         </div>
         {!isCollapsed && (
-          <span className="font-black text-sm tracking-[0.3em] text-foreground/80 whitespace-nowrap uppercase">
+          <span className="font-black text-sm tracking-[0.3em] text-foreground/80 whitespace-nowrap uppercase select-none">
             SUPREME
           </span>
         )}

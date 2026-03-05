@@ -45,6 +45,7 @@ import { fetchDependentOptions } from "./fetchDependentOptions";
 
 // Helper function to generate columns based on the current table
 export const generateColumns = (currentTable: string, tableConfig: any, userRole?: string) => {
+  const roleLower = String(userRole || "").toLowerCase();
   // Filter out the "Actions" column initially
   let nonActionColumns = tableConfig[currentTable]
     .filter(
@@ -52,8 +53,11 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
         field.inTable && field.type !== "select" && field.key !== "actions2"
     )
     .filter((field: any) => {
-      // Hide commission and finalRate from non-admins
-      if (userRole !== "Admin" && (field.key === "commission" || field.key === "finalRate")) {
+      // Hide commission/finalRate from non-admins except CatalogItem where associates need margin visibility.
+      if (roleLower !== "admin" && (field.key === "commission" || field.key === "finalRate")) {
+        if (currentTable === "catalogItem" && field.key === "commission") {
+          return true;
+        }
         return false;
       }
       return true;
@@ -89,7 +93,7 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
     nonActionColumns.push({ name: "Activity Status", uid: "activityStatus" });
     nonActionColumns.push({ name: "Activity Type", uid: "activityType" });
   } else if (currentTable === "variantRate") {
-    if (userRole !== "Associate") {
+    if (roleLower === "admin") {
       nonActionColumns.push({ name: "Associate", uid: "associate" });
     }
     nonActionColumns.push({ name: "Product", uid: "productVariant" });
@@ -519,7 +523,10 @@ export const initialTableConfig: Record<
       key: "associateCompany",
       filterType: "select",
       values: [],
-      dynamicValuesFn: () => fetchDependentOptions("associateCompany"),
+      dynamicValuesFn: () =>
+        fetchDependentOptions("associateCompany", undefined, undefined, {
+          mode: "associateForm",
+        }),
       inForm: true,
       inTable: true,
       required: true,
@@ -1908,12 +1915,26 @@ export const initialTableConfig: Record<
   // Product Variant Rate
   variantRate: [
     {
-      label: "Price",
+      label: "Price (per KG)",
       type: "number",
       key: "rate",
       inForm: true,
       inTable: true,
       inEdit: true,
+    },
+    {
+      label: "Unit",
+      type: "select",
+      key: "unit",
+      values: [
+        { key: "KG", value: "KG" },
+        { key: "MT", value: "Metric Ton (MT)" },
+        { key: "Quintal", value: "Quintal" },
+      ],
+      inForm: true,
+      inTable: true,
+      inEdit: true,
+      required: true,
     },
     {
       label: "Quantity (MT)",
@@ -2052,7 +2073,7 @@ export const initialTableConfig: Record<
       inEdit: true,
     },
     {
-      label: "Rate",
+      label: "Rate (per KG)",
       type: "number",
       key: "rate",
       inForm: true,
@@ -2104,9 +2125,16 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
-      label: "Final Price",
+      label: "Final Price (per KG)",
       type: "number",
       key: "rate",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Commission",
+      type: "number",
+      key: "commission",
       inForm: false,
       inTable: true,
     },

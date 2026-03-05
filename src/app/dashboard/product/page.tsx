@@ -6,14 +6,39 @@ import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import AuthContext from "@/context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getData } from "@/core/api/apiHandler";
+import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 
 export default function Product() {
   const [currentTable, setCurrentTable] = useState("mine"); // Default to My Products
 
   const { user } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
   const isAssociate = user?.role === "Associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const isNoCompanyAssociate = isAssociate && !hasLinkedCompany;
+
+  const { data: companyData } = useQuery({
+    queryKey: ["product-page-assigned-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
+    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
+    enabled: isEmployeeUser,
+  });
+
+  const employeeScopedCompanyIds: string[] = isEmployeeUser
+    ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
+        .map((company) => company?._id)
+        .filter((id): id is string => Boolean(id))
+    : [];
+
+  const employeeProductParams = isEmployeeUser
+    ? { associateCompany: employeeScopedCompanyIds }
+    : { selected: true };
+
+  const employeeLiveProductParams = isEmployeeUser
+    ? { associateCompany: employeeScopedCompanyIds, isLive: true }
+    : { isLive: true };
 
   useEffect(() => {
     if (isNoCompanyAssociate && currentTable !== "catalog") {
@@ -70,13 +95,15 @@ export default function Product() {
                   <Tab key={"selected"} title="Products">
                     <VariantRate
                       rate="variantRate"
-                      additionalParams={{ selected: true }}
+                      additionalParams={employeeProductParams}
+                      showAssociateColumn={isEmployeeUser}
                     />
                   </Tab>
                   <Tab key={"live"} title="Live Products">
                     <VariantRate
                       rate="variantRate"
-                      additionalParams={{ isLive: true }}
+                      additionalParams={employeeLiveProductParams}
+                      showAssociateColumn={isEmployeeUser}
                     />
                   </Tab>
                 </>

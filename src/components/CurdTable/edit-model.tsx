@@ -65,6 +65,7 @@ export default function EditModal({
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
     {}
   );
+  const [autocompleteInput, setAutocompleteInput] = useState<Record<string, string>>({});
 
   // 1) Fetch the record when modal opens
   const { data: fetched } = useQuery({
@@ -211,6 +212,28 @@ export default function EditModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const associateCompanyField = formFields.find((field) => field.key === "associateCompany");
+    if (associateCompanyField && formData.associateCompany) {
+      const options =
+        associateCompanyField.dependsOn && dynamicOptions[associateCompanyField.key]
+          ? dynamicOptions[associateCompanyField.key]
+          : associateCompanyField.dynamicValuesFn
+            ? dynamicOptions[associateCompanyField.key] || []
+            : associateCompanyField.values || [];
+
+      const normalizedOptions = (Array.isArray(options) ? options : []).map((o: any) => ({
+        key: String(o?.key ?? o?._id ?? o?.value ?? ""),
+        value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
+      }));
+
+      if (
+        normalizedOptions.length > 0 &&
+        !normalizedOptions.some((option) => String(option.key) === String(formData.associateCompany))
+      ) {
+        toast.error("Selected company is not available for your scope.");
+        return;
+      }
+    }
     setLoading(true);
     mutation.mutate(formData);
   };
@@ -241,6 +264,10 @@ export default function EditModal({
 
         setFormData((prevData) => ({
           ...prevData,
+          [field.key]: "",
+        }));
+        setAutocompleteInput((prev) => ({
+          ...prev,
           [field.key]: "",
         }));
       }
@@ -487,6 +514,7 @@ export default function EditModal({
         const currentLabel = currentKey
           ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
           : "";
+        const inputValue = autocompleteInput[f.key] ?? currentLabel;
 
         return (
           // @ts-ignore
@@ -502,7 +530,7 @@ export default function EditModal({
             isDisabled={!!isDisabled}
             items={normalizedOptions}
             selectedKey={currentKey}
-            defaultInputValue={currentLabel}
+            inputValue={inputValue}
             allowsCustomValue={false}
             defaultFilter={(textValue, inputValue) =>
               String(textValue || "")
@@ -510,13 +538,45 @@ export default function EditModal({
                 .includes(String(inputValue || "").toLowerCase())
             }
             onSelectionChange={(key: any) =>
-              handleInputChange({
-                target: {
-                  name: f.key,
-                  value: String(key || ""),
-                },
-              })
+              key != null
+                ? (() => {
+                  const selected = normalizedOptions.find((item: any) => String(item.key) === String(key));
+                  setAutocompleteInput((prev) => ({
+                    ...prev,
+                    [f.key]: selected?.value || "",
+                  }));
+                  handleInputChange({
+                    target: {
+                      name: f.key,
+                      value: String(key),
+                    },
+                  });
+                })()
+                : (() => {
+                  setAutocompleteInput((prev) => ({
+                    ...prev,
+                    [f.key]: "",
+                  }));
+                  handleInputChange({
+                    target: {
+                      name: f.key,
+                      value: "",
+                    },
+                  });
+                })()
             }
+            onInputChange={(value) => {
+              setAutocompleteInput((prev) => ({
+                ...prev,
+                [f.key]: value,
+              }));
+              if (currentKey) {
+                setFormData((prev) => ({
+                  ...prev,
+                  [f.key]: "",
+                }));
+              }
+            }}
             classNames={{
               base: "w-full",
               listboxWrapper: "text-foreground",

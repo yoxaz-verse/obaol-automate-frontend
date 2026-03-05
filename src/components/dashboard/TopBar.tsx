@@ -68,7 +68,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="relative flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 rounded-2xl border border-default-200/50 bg-gradient-to-r from-content1/95 via-content1/80 to-content1/95 backdrop-blur-xl shadow-none transition-all duration-300">
+    <div className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 rounded-2xl border border-default-200/50 bg-gradient-to-r from-content1/95 via-content1/80 to-content1/95 backdrop-blur-xl shadow-none transition-all duration-300">
       {/* Left Section: Mobile Menu & Panel Identity */}
       <div className="flex gap-4 items-center">
         {/* Hamburger - Mobile only */}

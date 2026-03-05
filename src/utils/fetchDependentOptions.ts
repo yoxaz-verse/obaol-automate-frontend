@@ -35,7 +35,8 @@ import {
 const getOptions = async (
   fieldKey: string,
   parentKey?: string,
-  parentValue?: string | string[]
+  parentValue?: string | string[],
+  context?: { mode?: "associateForm" | "default" }
 ): Promise<{ key: string; value: string }[]> => {
   const lowerKey = fieldKey.toLowerCase();
 
@@ -92,6 +93,9 @@ const getOptions = async (
     }
 
     if (lowerKey === "associatecompany") {
+      if (context?.mode === "associateForm") {
+        params = { ...params };
+      }
       const res = await getData(associateCompanyRoutes.getAll, params);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
@@ -206,7 +210,7 @@ const getOptions = async (
 
   // cache key includes dependencies
   // JSON.stringify handled arrays in cache key
-  const queryKey = [fieldKey, parentKey, JSON.stringify(parentValue)];
+  const queryKey = [fieldKey, parentKey, JSON.stringify(parentValue), context?.mode || "default"];
 
   // fetch or return cached data
   return queryClient.fetchQuery({

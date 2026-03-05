@@ -32,6 +32,7 @@ export default function ApprovalsPage() {
   const [notes, setNotes] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
+  const [activeAction, setActiveAction] = useState<{ id: string; action: "APPROVE" | "REJECT" } | null>(null);
 
   const listQuery = useQuery({
     queryKey: ["approvals", tab, status, search, page, limit],
@@ -47,6 +48,7 @@ export default function ApprovalsPage() {
 
   const actionMutation = useMutation({
     mutationFn: async (params: { id: string; action: "APPROVE" | "REJECT" }) => {
+      setActiveAction(params);
       const routeBase = tab === "associates" ? apiRoutes.approvals.associateAction : apiRoutes.approvals.companyAction;
       await patchData(`${routeBase}/${params.id}`, {
         action: params.action,
@@ -57,6 +59,7 @@ export default function ApprovalsPage() {
       showToastMessage({ type: "success", message: "Approval status updated.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
       setNotes("");
+      setActiveAction(null);
     },
     onError: (error: any) => {
       showToastMessage({
@@ -64,6 +67,7 @@ export default function ApprovalsPage() {
         message: error?.response?.data?.message || "Failed to update status.",
         position: "top-right",
       });
+      setActiveAction(null);
     },
   });
 
@@ -155,6 +159,20 @@ export default function ApprovalsPage() {
             <tbody>
               {rows.map((row: any) => (
                 <tr key={row._id} className="border-t border-default-200 hover:bg-default-50 dark:hover:bg-default-100/10 transition-colors">
+                  {(() => {
+                    const normalizedStatus = String(row.registrationStatus || "PENDING_REVIEW").toUpperCase();
+                    const isPendingReview = normalizedStatus === "PENDING_REVIEW";
+                    const isRowApproving =
+                      actionMutation.isPending &&
+                      activeAction?.id === row._id &&
+                      activeAction?.action === "APPROVE";
+                    const isRowRejecting =
+                      actionMutation.isPending &&
+                      activeAction?.id === row._id &&
+                      activeAction?.action === "REJECT";
+
+                    return (
+                      <>
                   <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.name || "-"}</td>
                   <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.email || "-"}</td>
                   <td className="px-3 py-2 text-default-800 dark:text-default-200">{row.phone || "-"}</td>
@@ -171,13 +189,14 @@ export default function ApprovalsPage() {
                   <td className="px-3 py-2 text-default-700 dark:text-default-300">{formatDate(row.createdAt)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-2">
-                      {row.registrationStatus === "PENDING_REVIEW" ? (
+                      {isPendingReview ? (
                         <>
                           <Button
                             size="sm"
                             color="success"
                             variant="flat"
-                            isLoading={actionMutation.isPending}
+                            isLoading={isRowApproving}
+                            isDisabled={actionMutation.isPending}
                             onPress={() => actionMutation.mutate({ id: row._id, action: "APPROVE" })}
                           >
                             Approve
@@ -186,7 +205,8 @@ export default function ApprovalsPage() {
                             size="sm"
                             color="danger"
                             variant="flat"
-                            isLoading={actionMutation.isPending}
+                            isLoading={isRowRejecting}
+                            isDisabled={actionMutation.isPending}
                             onPress={() => actionMutation.mutate({ id: row._id, action: "REJECT" })}
                           >
                             Reject
@@ -197,6 +217,9 @@ export default function ApprovalsPage() {
                       )}
                     </div>
                   </td>
+                      </>
+                    );
+                  })()}
                 </tr>
               ))}
             </tbody>

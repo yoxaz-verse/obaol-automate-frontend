@@ -379,71 +379,86 @@ export default function ProfilePage() {
 
                 {/* Right Column: Detailed Grouped Info */}
                 <div className="lg:w-2/3 flex flex-col gap-6">
-                  {config.groups.map((group, idx) => (
-                    <Card
-                      key={idx}
-                      className="border border-default-100 bg-background/60 backdrop-blur-md shadow-lg rounded-3xl"
-                    >
-                      <CardHeader className="px-8 pt-8 flex items-center gap-3">
-                        <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
-                        <h3 className="text-xl font-bold text-foreground tracking-tight">
-                          {group.title}
-                        </h3>
-                      </CardHeader>
-                      <CardBody className="px-8 pb-8 pt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                          {group.fields.map(({ key, label, format }) => {
-                            const value = getValue(profile, key);
-                            return (
-                              <div key={key} className="flex flex-col gap-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-default-400">
-                                  {label}
-                                </span>
-                                <div className="flex items-center gap-2 group">
-                                  <span className="text-base font-semibold text-foreground/90 group-hover:text-foreground transition-colors">
-                                    {format ? format(value, profile) : value ?? "—"}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
+                  {roleKey === "associate" && !profile?.associateCompany && (
+                    <Card className="border-2 border-dashed border-warning-500/30 bg-warning-500/5 shadow-xl rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-700">
+                      <CardBody className="p-10 flex flex-col items-center text-center gap-8">
+                        <div className="p-4 bg-warning-500/10 rounded-full">
+                          <FiBriefcase className="text-warning-500 w-10 h-10" />
                         </div>
-
-                        {group.title === "Company Identification" && roleKey === "associate" && !profile?.associateCompany && (
-                          <div className="mt-8 p-6 border-2 border-dashed border-warning-500/30 rounded-[32px] bg-warning-500/5 flex flex-col items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
-                            <div className="flex flex-col items-center gap-2 text-center">
-                              <h4 className="text-lg font-bold text-foreground tracking-tight italic uppercase underline decoration-warning-500/50 underline-offset-4">
-                                Registration Required
-                              </h4>
-                              <p className="text-sm text-default-500 max-w-sm">
-                                You haven't linked a company yet. Register your business to unlock premium features and verification.
-                              </p>
-                            </div>
-                            <AddModal
-                              name="Company"
-                              buttonLabel="Register Your Company"
-                              currentTable="associateCompany"
-                              apiEndpoint={apiRoutes.associateCompany.getAll}
-                              formFields={initialTableConfig.associateCompany}
-                              onSuccess={async (companyData: any) => {
-                                if (companyData?._id) {
-                                  try {
-                                    await patchData(`${apiRoutes.associate.getAll}/${profile?._id}`, {
-                                      associateCompany: companyData._id,
-                                      hasCompany: true
-                                    });
-                                    window.location.reload();
-                                  } catch (err) {
-                                    console.error("Failed to link company:", err);
-                                  }
-                                }
-                              }}
-                            />
-                          </div>
-                        )}
+                        <div className="flex flex-col gap-3">
+                          <h3 className="text-2xl font-bold text-foreground tracking-tight uppercase italic underline decoration-warning-500/50 underline-offset-8">
+                            Registration Required
+                          </h3>
+                          <p className="text-default-500 max-w-md text-base leading-relaxed">
+                            To unlock premium trading features, verified status, and personalized marketplace rates, please register your company profile.
+                          </p>
+                        </div>
+                        <AddModal
+                          name="Company"
+                          buttonLabel="Register Your Company Profile"
+                          currentTable="associateCompany"
+                          apiEndpoint={apiRoutes.associateCompany.getAll}
+                          formFields={initialTableConfig.associateCompany}
+                          onSuccess={async (companyData: any) => {
+                            if (companyData?._id) {
+                              try {
+                                await patchData(`${apiRoutes.associate.getAll}/${profile?._id}`, {
+                                  associateCompany: companyData._id,
+                                  hasCompany: true,
+                                });
+                                window.location.reload();
+                              } catch (err) {
+                                console.error("Failed to link company:", err);
+                              }
+                            }
+                          }}
+                        />
                       </CardBody>
                     </Card>
-                  ))}
+                  )}
+
+                  {config.groups
+                    .filter((group) => {
+                      if (roleKey === "associate" && !profile?.associateCompany) {
+                        return (
+                          group.title !== "Company Identification" &&
+                          group.title !== "Location Details"
+                        );
+                      }
+                      return true;
+                    })
+                    .map((group, idx) => (
+                      <Card
+                        key={idx}
+                        className="border border-default-100 bg-background/60 backdrop-blur-md shadow-lg rounded-3xl"
+                      >
+                        <CardHeader className="px-8 pt-8 flex items-center gap-3">
+                          <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
+                          <h3 className="text-xl font-bold text-foreground tracking-tight">
+                            {group.title}
+                          </h3>
+                        </CardHeader>
+                        <CardBody className="px-8 pb-8 pt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                            {group.fields.map(({ key, label, format }) => {
+                              const value = getValue(profile, key);
+                              return (
+                                <div key={key} className="flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-default-400">
+                                    {label}
+                                  </span>
+                                  <div className="flex items-center gap-2 group">
+                                    <span className="text-base font-semibold text-foreground/90 group-hover:text-foreground transition-colors">
+                                      {format ? format(value, profile) : value ?? "—"}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
                 </div>
               </div>
               {roleKey === "employee" && <EmployeeDashboardPanel userId={user?.id} />}

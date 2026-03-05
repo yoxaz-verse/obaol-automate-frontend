@@ -56,6 +56,25 @@ const AddForm: React.FC<AddFormProps> = ({
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
     {}
   );
+  const [autocompleteInput, setAutocompleteInput] = useState<Record<string, string>>({});
+
+  const isFieldVisible = (field: FormField, data: Record<string, any>) => {
+    if (!field.showWhen) return true;
+    return data[field.showWhen.key] === field.showWhen.equals;
+  };
+
+  const getVisibleFormFields = (data: Record<string, any>) =>
+    formFields.filter((field) => field.inForm && isFieldVisible(field, data));
+
+  const pruneHiddenFormData = (data: Record<string, any>) => {
+    const next = { ...data };
+    formFields.forEach((field) => {
+      if (!isFieldVisible(field, next) && field.clearWhenHidden !== false) {
+        delete next[field.key];
+      }
+    });
+    return next;
+  };
 
   useEffect(() => {
     const uppyInstance = new Uppy({
@@ -155,7 +174,8 @@ const AddForm: React.FC<AddFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const missing = validateFields(formFields, formData);
+    const visibleFields = getVisibleFormFields(formData);
+    const missing = validateFields(visibleFields, formData);
     setMissingFields(missing);
 
     if (missing.length > 0) {
@@ -232,14 +252,12 @@ const AddForm: React.FC<AddFormProps> = ({
         }
       }
 
-      let completeFormData = {
-        ...formData,
-      };
+      let completeFormData = pruneHiddenFormData({ ...formData });
 
       // Prepare the complete form data
       if (fileId || fileURL)
         completeFormData = {
-          ...formData,
+          ...pruneHiddenFormData({ ...formData }),
           fileId, // Include the uploaded file's ID
           fileURL, // Include the uploaded file's URL (optional, based on backend design)
         };
@@ -251,6 +269,34 @@ const AddForm: React.FC<AddFormProps> = ({
           ...completeFormData,
           ...additionalVariable,
         };
+      }
+
+      const associateCompanyField = formFields.find((field) => field.key === "associateCompany");
+      if (associateCompanyField && uploadFormData.associateCompany) {
+        const options =
+          associateCompanyField.dependsOn && dynamicOptions[associateCompanyField.key]
+            ? dynamicOptions[associateCompanyField.key]
+            : associateCompanyField.dynamicValuesFn
+              ? dynamicOptions[associateCompanyField.key] || []
+              : associateCompanyField.values || [];
+
+        const normalizedOptions = (Array.isArray(options) ? options : []).map((o: any) => ({
+          key: String(o?.key ?? o?._id ?? o?.value ?? ""),
+          value: String(o?.value ?? o?.label ?? o?.name ?? o?._id ?? ""),
+        }));
+
+        if (
+          normalizedOptions.length > 0 &&
+          !normalizedOptions.some((option) => String(option.key) === String(uploadFormData.associateCompany))
+        ) {
+          showToastMessage({
+            type: "error",
+            message: "Selected company is not available for your scope.",
+            position: "top-right",
+          });
+          setLoading(false);
+          return;
+        }
       }
       // Proceed with form submission
       addItem.mutate(uploadFormData);
@@ -272,10 +318,13 @@ const AddForm: React.FC<AddFormProps> = ({
   ) => {
     const { name, value } = e.target;
 
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => {
+      const nextData = pruneHiddenFormData({
+        ...prevData,
+        [name]: value,
+      });
+      return nextData;
+    });
 
     // Update dependent fields if any
     formFields.forEach(async (field) => {
@@ -290,7 +339,11 @@ const AddForm: React.FC<AddFormProps> = ({
         }));
 
         setFormData((prevData) => ({
-          ...prevData,
+          ...pruneHiddenFormData(prevData),
+          [field.key]: "",
+        }));
+        setAutocompleteInput((prev) => ({
+          ...prev,
           [field.key]: "",
         }));
       }
@@ -681,51 +734,88 @@ const AddForm: React.FC<AddFormProps> = ({
         const currentLabel = currentKey
           ? (normalizedOptions.find((o: any) => String(o.key) === currentKey)?.value ?? "")
           : "";
+        const inputValue = autocompleteInput[field.key] ?? currentLabel;
 
         return (
-          // @ts-ignore
-          <Autocomplete
-            aria-label={`Select ${field.label}`}
-            name={field.key}
-            className="w-full text-foreground"
-            label={`Select ${field.label}`}
-            placeholder={
-              isDisabled && field.dependsOn
-                ? `Please select ${toTitleCase(field.dependsOn)} first`
-                : field.label
-            }
-            isDisabled={!!isDisabled}
-            items={normalizedOptions}
-            selectedKey={currentKey}
-            // defaultInputValue feeds the visible text on first render
-            defaultInputValue={currentLabel}
-            allowsCustomValue={false}
-            defaultFilter={(textValue, inputValue) =>
-              String(textValue || "").toLowerCase().includes(String(inputValue || "").toLowerCase())
-            }
-            classNames={{
-              base: "w-full",
-              listboxWrapper: "text-foreground",
-              popoverContent: "bg-content1 text-foreground",
-            }}
-            onSelectionChange={(key: any) => {
-              // Only update when the user has actually picked an item (key is non-null)
-              if (key != null) {
-                handleInputChange({
-                  target: {
-                    name: field.key,
-                    value: String(key),
-                  },
-                });
+          <div className="w-full">
+            {/* @ts-ignore */}
+            <Autocomplete
+              aria-label={`Select ${field.label}`}
+              name={field.key}
+              className="w-full text-foreground"
+              label={`Select ${field.label}`}
+              placeholder={
+                isDisabled && field.dependsOn
+                  ? `Please select ${toTitleCase(field.dependsOn)} first`
+                  : field.label
               }
-            }}
-          >
-            {(item: any) => (
-              <AutocompleteItem key={String(item.key)} textValue={String(item.value)} className="text-foreground">
-                {item.value}
-              </AutocompleteItem>
+              isDisabled={!!isDisabled}
+              items={normalizedOptions}
+              selectedKey={currentKey}
+              inputValue={inputValue}
+              allowsCustomValue={false}
+              defaultFilter={(textValue, inputValue) =>
+                String(textValue || "").toLowerCase().includes(String(inputValue || "").toLowerCase())
+              }
+              classNames={{
+                base: "w-full",
+                listboxWrapper: "text-foreground",
+                popoverContent: "bg-content1 text-foreground",
+              }}
+              onSelectionChange={(key: any) => {
+                // Only update when the user has actually picked an item (key is non-null)
+                if (key != null) {
+                  const selected = normalizedOptions.find((item: any) => String(item.key) === String(key));
+                  setAutocompleteInput((prev) => ({
+                    ...prev,
+                    [field.key]: selected?.value || "",
+                  }));
+                  handleInputChange({
+                    target: {
+                      name: field.key,
+                      value: String(key),
+                    },
+                  });
+                } else {
+                  setAutocompleteInput((prev) => ({
+                    ...prev,
+                    [field.key]: "",
+                  }));
+                  handleInputChange({
+                    target: {
+                      name: field.key,
+                      value: "",
+                    },
+                  });
+                }
+              }}
+              onInputChange={(value) => {
+                setAutocompleteInput((prev) => ({
+                  ...prev,
+                  [field.key]: value,
+                }));
+                if (currentKey) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    [field.key]: "",
+                  }));
+                }
+              }}
+            >
+              {(item: any) => (
+                <AutocompleteItem key={String(item.key)} textValue={String(item.value)} className="text-foreground">
+                  {item.value}
+                </AutocompleteItem>
+              )}
+            </Autocomplete>
+            {field.key === "geoType" && (
+              <p className="mt-1 text-[11px] text-default-500">
+                {formData.geoType === "INTERNATIONAL"
+                  ? "Country + legal compliance details required."
+                  : "State, district, division and pincode required for Indian profiles."}
+              </p>
             )}
-          </Autocomplete>
+          </div>
         );
       }
       case "multiselect": {
@@ -923,7 +1013,7 @@ const AddForm: React.FC<AddFormProps> = ({
               style={{ ["--cols" as any]: grid }}
             >
               {formFields
-                .filter((field) => field.inForm)
+                .filter((field) => field.inForm && isFieldVisible(field, formData))
                 .map((field, index) => (
                   <div
                     key={index}

@@ -22,7 +22,8 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/core/api/apiHandler";
+import { getData, patchData } from "@/core/api/apiHandler";
+import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase } from "react-icons/fi";
@@ -125,7 +126,7 @@ const roleConfigs: Record<
     groups: {
       title: string;
       icon?: React.ReactNode;
-      fields: { key: string; label: string; format?: (val: any) => string }[];
+      fields: { key: string; label: string; format?: (val: any, profile?: any) => any }[];
     }[];
   }
 > = {
@@ -407,6 +408,39 @@ export default function ProfilePage() {
                             );
                           })}
                         </div>
+
+                        {group.title === "Company Identification" && roleKey === "associate" && !profile?.associateCompany && (
+                          <div className="mt-8 p-6 border-2 border-dashed border-warning-500/30 rounded-[32px] bg-warning-500/5 flex flex-col items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+                            <div className="flex flex-col items-center gap-2 text-center">
+                              <h4 className="text-lg font-bold text-foreground tracking-tight italic uppercase underline decoration-warning-500/50 underline-offset-4">
+                                Registration Required
+                              </h4>
+                              <p className="text-sm text-default-500 max-w-sm">
+                                You haven't linked a company yet. Register your business to unlock premium features and verification.
+                              </p>
+                            </div>
+                            <AddModal
+                              name="Company"
+                              buttonLabel="Register Your Company"
+                              currentTable="associateCompany"
+                              apiEndpoint={apiRoutes.associateCompany.getAll}
+                              formFields={initialTableConfig.associateCompany}
+                              onSuccess={async (companyData: any) => {
+                                if (companyData?._id) {
+                                  try {
+                                    await patchData(`${apiRoutes.associate.getAll}/${profile?._id}`, {
+                                      associateCompany: companyData._id,
+                                      hasCompany: true
+                                    });
+                                    window.location.reload();
+                                  } catch (err) {
+                                    console.error("Failed to link company:", err);
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
                       </CardBody>
                     </Card>
                   ))}

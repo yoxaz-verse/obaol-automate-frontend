@@ -125,7 +125,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
   const addItem = useMutation({
     mutationFn: async (data: any) => postData(apiEndpoint, data, {}),
-    onSuccess: () => {
+    onSuccess: (result: any) => {
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
@@ -136,10 +136,10 @@ const AddForm: React.FC<AddFormProps> = ({
       setSuccess(true); // 👈 trigger success state
       setLoading(false);
       // Auto-close after 2s
+      onSuccess?.(result.data); // 👈 Notify parent with result data
       setTimeout(() => {
         setSuccess(false);
         closeModal();
-        onSuccess?.(); // 👈 Notify parent to close
       }, 2000);
     },
     onError: (error: any) => {

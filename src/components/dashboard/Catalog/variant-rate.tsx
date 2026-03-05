@@ -306,21 +306,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
           return [];
         };
 
-        // DEBUGGING: Log Marketplace raw data
-        if (isMarketplace) {
-          console.log("=== MARKETPLACE DEBUG START ===");
-          console.log("[1] Raw variantRateData:", variantRateData);
-          console.log("[2] Is Array?:", Array.isArray(variantRateData));
-          console.log("[3] Has .data array?:", variantRateData?.data && Array.isArray(variantRateData?.data));
-        }
-
         // For Marketplace, use ONLY raw VariantRate data (no merge with DisplayedRate)
         if (isMarketplace || rate === "catalogItem") {
           variantRateFetchedData = extractArray(variantRateData);
-          if (isMarketplace) {
-            console.log("[4] variantRateFetchedData after extraction:", variantRateFetchedData);
-            console.log("[5] variantRateFetchedData length:", variantRateFetchedData.length);
-          }
         } else if (variantResponse?.data.data.data) {
           // For My Products view, merge with DisplayedRate if available
           variantRateFetchedData =
@@ -949,7 +937,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
 
   const { data: associatesResponse } = useQuery({
     queryKey: ["associates-list-for-enquiry"],
-    queryFn: () => getData(apiRoutesByRole["associate"], { page: 1, limit: 1000 }),
+    queryFn: () => getData(apiRoutesByRole["associate"], { page: 1, limit: 200 }),
     enabled: isAdminUser,
   });
 

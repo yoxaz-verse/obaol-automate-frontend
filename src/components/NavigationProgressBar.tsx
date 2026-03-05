@@ -1,30 +1,29 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion/tokens";
 
 function ProgressBarContent() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const reducedMotion = useReducedMotion();
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const routeKey = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
+  const routeKey = pathname || "/";
   const lastRouteKeyRef = useRef("");
   const timeoutsRef = useRef<number[]>([]);
 
-  const clearAllTimers = () => {
+  const clearAllTimers = useCallback(() => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id));
     timeoutsRef.current = [];
-  };
+  }, []);
 
-  const hardReset = () => {
+  const hardReset = useCallback(() => {
     clearAllTimers();
     setIsLoading(false);
     setProgress(0);
-  };
+  }, [clearAllTimers]);
 
   useEffect(() => {
     // Do not animate on first mount/hydration.
@@ -63,14 +62,14 @@ function ProgressBarContent() {
     return () => {
       clearAllTimers();
     };
-  }, [routeKey]);
+  }, [hardReset, routeKey, clearAllTimers]);
 
   // Extra guard: if bar ever stays loading due unexpected render path, auto-clear.
   useEffect(() => {
     if (!isLoading) return;
     const watchdog = window.setTimeout(hardReset, 4000);
     return () => window.clearTimeout(watchdog);
-  }, [isLoading]);
+  }, [isLoading, hardReset]);
 
   return (
     <AnimatePresence initial={false}>

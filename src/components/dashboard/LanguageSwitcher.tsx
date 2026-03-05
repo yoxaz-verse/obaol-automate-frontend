@@ -86,6 +86,9 @@ export const LanguageSwitcher = () => {
             return;
         }
 
+        // Lazy-init translation script only when user explicitly chooses non-English.
+        window.dispatchEvent(new Event("translation-init"));
+
         const cookiePersisted = setLanguageCookies(langCode);
         setCurrentLang(langCode);
         if (!cookiePersisted) {

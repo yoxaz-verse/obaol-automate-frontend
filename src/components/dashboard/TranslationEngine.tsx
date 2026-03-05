@@ -20,6 +20,9 @@ export const TranslationEngine = () => {
 
     useEffect(() => {
         setMounted(true);
+        let isScriptLoading = false;
+        let isScriptReady = false;
+
         const handleStart = (e: any) => {
             setTargetLang(e.detail.name);
             setIsSwitching(true);
@@ -41,19 +44,30 @@ export const TranslationEngine = () => {
                     },
                     "google_translate_element"
                 );
+                isScriptReady = true;
+                isScriptLoading = false;
             }
         };
 
-        // Add the Google Translate script if not present
-        if (!document.getElementById("google-translate-script")) {
+        const ensureTranslateScript = () => {
+            if (isScriptReady || isScriptLoading) return;
+
+            if (document.getElementById("google-translate-script")) {
+                isScriptLoading = true;
+                return;
+            }
+
+            isScriptLoading = true;
             const addScript = document.createElement("script");
             addScript.id = "google-translate-script";
             addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+            addScript.async = true;
             addScript.onerror = () => {
+                isScriptLoading = false;
                 window.dispatchEvent(new Event("translation-unavailable"));
             };
             document.body.appendChild(addScript);
-        }
+        };
 
         // Apply styles to hide Google Translate UI
         const style = document.createElement("style");
@@ -70,10 +84,12 @@ export const TranslationEngine = () => {
             }
         `;
         document.head.appendChild(style);
+        window.addEventListener("translation-init", ensureTranslateScript);
 
         return () => {
             window.removeEventListener("translation-start", handleStart);
             window.removeEventListener("translation-end", handleEnd);
+            window.removeEventListener("translation-init", ensureTranslateScript);
             if (document.head.contains(style)) {
                 document.head.removeChild(style);
             }
@@ -134,3 +150,5 @@ export const TranslationEngine = () => {
         </>
     );
 };
+
+export default TranslationEngine;

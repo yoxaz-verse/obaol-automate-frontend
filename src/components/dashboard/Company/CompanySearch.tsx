@@ -59,7 +59,7 @@ export default function CompanySearch({
 }) {
   const { data: companyData, isLoading } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 10000 }),
+    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
   });
 
   let companies: Company[] = companyData?.data?.data?.data || companyData?.data?.data || [];

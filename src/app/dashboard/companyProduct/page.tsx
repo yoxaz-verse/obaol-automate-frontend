@@ -92,18 +92,18 @@ export default function CompanyProductPage() {
 
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
     queryKey: ["associateCompany", associateCompanyRoutes.getAll],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 10000 }),
+    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
   });
 
   const { data: associatesData, refetch: refetchAssociates } = useQuery({
     queryKey: ["associates", selectedCompanyId],
-    queryFn: () => getData(associateRoutes.getAll, { associateCompany: selectedCompanyId, limit: 1000 }),
+    queryFn: () => getData(associateRoutes.getAll, { associateCompany: selectedCompanyId, limit: 200 }),
     enabled: !!selectedCompanyId && detailTab === "associates",
   });
 
   const { data: employeeData, isLoading: loadingEmployees } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => getData(employeeRoutes.getAll, { limit: 10000 }),
+    queryFn: () => getData(employeeRoutes.getAll, { limit: 300 }),
     enabled: roleLower === "admin",
   });
 

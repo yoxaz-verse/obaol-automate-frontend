@@ -14,7 +14,7 @@ export default function Page() {
   const { data: variantRateResponse } = useQuery({
     queryKey: ["variantRate", filters],
     queryFn: () =>
-      getData(variantRateRoutes.getAll, { limit: 10000, ...filters }),
+      getData(variantRateRoutes.getAll, { limit: 500, ...filters }),
   });
 
   const variantRateValue = variantRateResponse?.data?.data?.data;

@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Providers } from "./provider";
 import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import { VerificationProvider } from "@/context/VerificationContext";
 import Script from "next/script";
+import TranslationEngine from "@/components/dashboard/TranslationEngine";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -123,9 +123,6 @@ export const viewport = {
 
 const GTM_ID = "G-F4YK8H3Q4L";
 
-import NavigationProgressBar from "@/components/NavigationProgressBar";
-import { TranslationEngine } from "@/components/dashboard/TranslationEngine";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -202,7 +199,6 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
-        <NavigationProgressBar />
         {GTM_ID && (
           <noscript>
             <iframe

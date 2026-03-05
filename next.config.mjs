@@ -1,4 +1,21 @@
 import createMDX from "@next/mdx";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const withBundleAnalyzer = (() => {
+  try {
+    const nextBundleAnalyzer = require("@next/bundle-analyzer");
+    return nextBundleAnalyzer({
+      enabled: process.env.ANALYZE === "true",
+    });
+  } catch {
+    return (config) => config;
+  }
+})();
+
+const withMDX = createMDX({
+  extension: /\.mdx?$/,
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -38,8 +55,4 @@ const nextConfig = {
   },
 };
 
-const withMDX = createMDX({
-  extension: /\.mdx?$/,
-});
-
-export default withMDX(nextConfig);
+export default withBundleAnalyzer(withMDX(nextConfig));

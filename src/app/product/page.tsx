@@ -22,7 +22,7 @@ async function getProducts() {
     const apiUrl = publicApiUrl || "http://localhost:5001/api/v1/web";
 
     try {
-        const res = await fetch(`${apiUrl}/products?limit=1000`, {
+        const res = await fetch(`${apiUrl}/products?limit=300`, {
             cache: "no-store", // Ensure fresh data
         });
 

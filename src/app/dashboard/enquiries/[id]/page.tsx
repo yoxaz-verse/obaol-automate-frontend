@@ -166,15 +166,15 @@ export default function EnquiryDetailsPage() {
     });
     const { data: statesResponse } = useQuery({
         queryKey: ["states"],
-        queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 5000 }),
+        queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 500 }),
     });
     const { data: districtsResponse } = useQuery({
         queryKey: ["districts"],
-        queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 50000 }),
+        queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
     });
     const { data: countriesResponse } = useQuery({
         queryKey: ["countries"],
-        queryFn: () => getData(apiRoutes.country.getAll, { page: 1, limit: 1000 }),
+        queryFn: () => getData(apiRoutes.country.getAll, { page: 1, limit: 300 }),
     });
     const { data: originPortsResponse } = useQuery({
         queryKey: ["sea-ports", "origin", executionContext.originCountry],
@@ -182,7 +182,7 @@ export default function EnquiryDetailsPage() {
             getData(apiRoutes.enquiry.seaPorts, {
                 country: executionContext.originCountry,
                 page: 1,
-                limit: 1000,
+                limit: 300,
             }),
         enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.originCountry),
     });
@@ -192,7 +192,7 @@ export default function EnquiryDetailsPage() {
             getData(apiRoutes.enquiry.seaPorts, {
                 country: executionContext.destinationCountry,
                 page: 1,
-                limit: 1000,
+                limit: 300,
             }),
         enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.destinationCountry),
     });

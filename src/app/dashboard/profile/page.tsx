@@ -30,13 +30,13 @@ import { FiClock, FiActivity, FiLayers, FiBriefcase } from "react-icons/fi";
 function EmployeeDashboardPanel({ userId }: { userId: string }) {
   const { data: enquiryResponse } = useQuery({
     queryKey: ["employeeEnquiries", userId],
-    queryFn: () => getData(apiRoutes.enquiry.getAll, { assignedEmployeeId: userId, limit: 1000 }),
+    queryFn: () => getData(apiRoutes.enquiry.getAll, { assignedEmployeeId: userId, limit: 200 }),
     enabled: !!userId,
   });
 
   const { data: companiesResponse } = useQuery({
     queryKey: ["employeeCompanies", userId],
-    queryFn: () => getData(apiRoutes.researchedCompany.getAll, { submittedBy: userId, limit: 1000 }),
+    queryFn: () => getData(apiRoutes.researchedCompany.getAll, { submittedBy: userId, limit: 200 }),
     enabled: !!userId,
   });
 
@@ -212,7 +212,14 @@ const roleConfigs: Record<
           { key: "isEmailVerified", label: "Email Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
           { key: "isPhoneVerified", label: "Phone Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
           { key: "isOneToOneVerified", label: "One-to-One Chat", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
-          { key: "isCompanyVerified", label: "Company Verification", format: (v) => v ? "✅ Verified" : "❌ Unverified" },
+          {
+            key: "isCompanyVerified",
+            label: "Company Verification",
+            format: (v: boolean, profile?: any) => {
+              if (!profile?.associateCompany) return "❌ Not Linked";
+              return v ? "✅ Verified" : "⏳ Pending Approval";
+            },
+          },
         ],
       },
     ],
@@ -393,7 +400,7 @@ export default function ProfilePage() {
                                 </span>
                                 <div className="flex items-center gap-2 group">
                                   <span className="text-base font-semibold text-foreground/90 group-hover:text-foreground transition-colors">
-                                    {format ? format(value) : value ?? "—"}
+                                    {format ? format(value, profile) : value ?? "—"}
                                   </span>
                                 </div>
                               </div>

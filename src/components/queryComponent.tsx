@@ -20,7 +20,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     limit,
     search,
     additionalParams,
-    loadingVariant = "branded",
+    loadingVariant = "skeleton",
     loadingMessage = "Loading",
     emptyState,
   } =

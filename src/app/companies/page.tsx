@@ -43,7 +43,7 @@ export default function CompaniesPage() {
         queryKey: ["public-companies"],
         queryFn: () =>
             getData(associateCompanyRoutes.getAll, {
-                limit: 1000,
+                limit: 300,
                 fields: "name", // only ask for name — no contact data
             }),
     });

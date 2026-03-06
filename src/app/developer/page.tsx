@@ -232,6 +232,18 @@ export default function DeveloperIndexPage() {
   -H "Authorization: Bearer <API_KEY>"`}
           </pre>
         </div>
+        <div className="mt-5 rounded-xl border border-default-200 dark:border-white/15 p-4">
+          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">ChatGPT App Setup (MCP)</p>
+          <ol className="mt-2 list-decimal pl-5 text-sm text-default-700 dark:text-white/80 space-y-1">
+            <li>Create a connector token in <Link href="/developer/keys" className="text-primary-500 hover:underline">Developer Keys</Link>.</li>
+            <li>In ChatGPT App, use MCP Server URL: <code className="font-mono">https://api.obaol.com/mcp?connectorToken=&lt;TOKEN&gt;</code>.</li>
+            <li>Set authentication mode to <strong>No Auth</strong>.</li>
+            <li>Verify endpoint status at <code>/mcp/info</code> and <code>/mcp/health</code>.</li>
+          </ol>
+          <p className="mt-2 text-xs text-default-600 dark:text-white/70">
+            Opening <code>/mcp</code> directly in browser shows a blank page because it is an SSE stream endpoint.
+          </p>
+        </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
             href="/developer/login"

@@ -130,3 +130,54 @@ export async function devKeyUsage(keyId: string) {
 
   return parseJson(response);
 }
+
+export async function devListMcpConnectors() {
+  const token = getDeveloperToken();
+  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors`, {
+    headers: {
+      Authorization: `Bearer ${token || ""}`,
+    },
+  });
+  return parseJson(response);
+}
+
+export async function devCreateMcpConnector(payload: {
+  apiKeyId: string;
+  label?: string;
+  expiresInDays?: number;
+}) {
+  const token = getDeveloperToken();
+  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token || ""}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  return parseJson(response);
+}
+
+export async function devRevokeMcpConnector(connectorId: string) {
+  const token = getDeveloperToken();
+  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors/${connectorId}/revoke`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token || ""}`,
+    },
+  });
+  return parseJson(response);
+}
+
+export async function devValidateMcpConnector(payload: { connectorId?: string }) {
+  const token = getDeveloperToken();
+  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/validate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token || ""}`,
+    },
+    body: JSON.stringify(payload || {}),
+  });
+  return parseJson(response);
+}

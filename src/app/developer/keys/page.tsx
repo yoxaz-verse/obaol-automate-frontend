@@ -11,6 +11,7 @@ import {
   devListMcpConnectors,
   devRevokeKey,
   devRevokeMcpConnector,
+  getResolvedDeveloperApiBase,
 } from "@/utils/developerApi";
 import { clearDeveloperToken, getDeveloperToken } from "@/utils/developerSession";
 import SectionSkeleton from "@/components/ui/SectionSkeleton";
@@ -57,6 +58,13 @@ export default function DeveloperKeysPage() {
   const [connectorExpiresInDays, setConnectorExpiresInDays] = useState<number>(30);
   const [newConnectorToken, setNewConnectorToken] = useState("");
   const [newConnectorUrl, setNewConnectorUrl] = useState("");
+  const apiBaseHost = useMemo(() => {
+    try {
+      return new URL(getResolvedDeveloperApiBase()).origin;
+    } catch {
+      return "";
+    }
+  }, []);
 
   const hasToken = useMemo(() => Boolean(getDeveloperToken()), []);
 
@@ -83,11 +91,11 @@ export default function DeveloperKeysPage() {
         router.replace("/developer/login");
         return;
       }
-      setError(message);
+      setError(`${message}${apiBaseHost ? ` (Developer API: ${apiBaseHost})` : ""}`);
     } finally {
       setIsLoading(false);
     }
-  }, [router]);
+  }, [apiBaseHost, router]);
 
   useEffect(() => {
     if (!hasToken) {
@@ -110,7 +118,7 @@ export default function DeveloperKeysPage() {
       setNewRawKey(response?.data?.rawApiKey || "");
       await load();
     } catch (e: any) {
-      setError(e?.message || "Failed to create key.");
+      setError(`${e?.message || "Failed to create key."}${apiBaseHost ? ` (Developer API: ${apiBaseHost})` : ""}`);
     } finally {
       setIsCreating(false);
     }
@@ -133,7 +141,7 @@ export default function DeveloperKeysPage() {
       setNewConnectorUrl(response?.data?.mcpUrl || "");
       await load();
     } catch (e: any) {
-      setError(e?.message || "Failed to create MCP connector token.");
+      setError(`${e?.message || "Failed to create MCP connector token."}${apiBaseHost ? ` (Developer API: ${apiBaseHost})` : ""}`);
     } finally {
       setIsConnectorCreating(false);
     }
@@ -145,7 +153,7 @@ export default function DeveloperKeysPage() {
       await devRevokeMcpConnector(id);
       await load();
     } catch (e: any) {
-      setError(e?.message || "Failed to revoke connector token.");
+      setError(`${e?.message || "Failed to revoke connector token."}${apiBaseHost ? ` (Developer API: ${apiBaseHost})` : ""}`);
     }
   };
 
@@ -155,7 +163,7 @@ export default function DeveloperKeysPage() {
       await devRevokeKey(id);
       await load();
     } catch (e: any) {
-      setError(e?.message || "Failed to revoke key.");
+      setError(`${e?.message || "Failed to revoke key."}${apiBaseHost ? ` (Developer API: ${apiBaseHost})` : ""}`);
     }
   };
 

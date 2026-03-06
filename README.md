@@ -1,5 +1,20 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Developer API Environment
+
+For `/developer/*` pages, set:
+
+```bash
+NEXT_PUBLIC_OBAOL_API_BASE_URL=https://api.obaol.com
+```
+
+Do not use localhost values in production builds.
+
+Quick verification:
+1. Open browser devtools on `/developer/keys`.
+2. Trigger key list/create.
+3. Confirm requests go to `https://api.obaol.com/v1/dev-keys` and `https://api.obaol.com/v1/dev-mcp/connectors`.
+
 ## Getting Started
 
 First, run the development server:

@@ -1,14 +1,52 @@
 import { getDeveloperToken } from "@/utils/developerSession";
 
-const DEV_API_BASE = process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL;
+const PROD_DEV_API_BASE = "https://api.obaol.com";
+const LOCAL_DEV_API_BASE = "http://localhost:5002";
+
+const isLocalHost = (hostname: string) =>
+  hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+
+const safeParseUrl = (value: string): URL | null => {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+};
+
+const normalizeBase = (value: string) => String(value || "").trim().replace(/\/+$/, "");
+
+export function getResolvedDeveloperApiBase(): string {
+  const configuredRaw = normalizeBase(process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL || "");
+  const configuredUrl = configuredRaw ? safeParseUrl(configuredRaw) : null;
+
+  const currentHost = typeof window !== "undefined" ? window.location.hostname : "";
+  const runningOnLocalFrontend = currentHost ? isLocalHost(currentHost) : false;
+
+  if (configuredUrl) {
+    const configuredLocal = isLocalHost(configuredUrl.hostname);
+    if (configuredLocal && !runningOnLocalFrontend) {
+      return PROD_DEV_API_BASE;
+    }
+    return configuredUrl.origin;
+  }
+
+  if (runningOnLocalFrontend) {
+    return LOCAL_DEV_API_BASE;
+  }
+
+  return PROD_DEV_API_BASE;
+}
 
 function requireDevApiBase() {
-  if (!DEV_API_BASE) {
+  const base = getResolvedDeveloperApiBase();
+  const parsed = safeParseUrl(base);
+  if (!parsed) {
     throw new Error(
-      "Developer API base is not configured. Set NEXT_PUBLIC_OBAOL_API_BASE_URL to your obaol-api origin (e.g. http://localhost:5002)."
+      "Developer API base is invalid. Set NEXT_PUBLIC_OBAOL_API_BASE_URL to a valid API origin (e.g. https://api.obaol.com)."
     );
   }
-  return DEV_API_BASE;
+  return parsed.origin.replace(/\/+$/, "");
 }
 
 async function parseJson(response: Response) {
@@ -19,47 +57,48 @@ async function parseJson(response: Response) {
   return body;
 }
 
+async function devFetch(path: string, init?: RequestInit) {
+  const base = requireDevApiBase();
+  const url = `${base}${path}`;
+  try {
+    const response = await fetch(url, init);
+    return await parseJson(response);
+  } catch (error: any) {
+    const message = String(error?.message || "");
+    if (message.toLowerCase().includes("failed to fetch") || message.toLowerCase().includes("networkerror")) {
+      throw new Error(`Developer API unreachable. Check API base URL, HTTPS, and CORS. (${base})`);
+    }
+    throw error;
+  }
+}
+
 export async function devAuthGoogle(idToken: string) {
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-auth/google`, {
+  return devFetch("/v1/dev-auth/google", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
   });
-
-  return parseJson(response);
 }
 
 export async function devGetMe() {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-auth/me`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch("/v1/dev-auth/me", {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devGetKeyPresets() {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys/presets`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch("/v1/dev-keys/presets", {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devListKeys() {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch("/v1/dev-keys", {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devCreateKey(payload: {
@@ -68,7 +107,7 @@ export async function devCreateKey(payload: {
   rate_limit?: number;
 }) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys`, {
+  return devFetch("/v1/dev-keys", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -76,8 +115,6 @@ export async function devCreateKey(payload: {
     },
     body: JSON.stringify(payload),
   });
-
-  return parseJson(response);
 }
 
 export async function devUpdateKey(
@@ -85,7 +122,7 @@ export async function devUpdateKey(
   payload: { label?: string; permissionPreset?: string; rate_limit?: number }
 ) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys/${keyId}`, {
+  return devFetch(`/v1/dev-keys/${keyId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -93,52 +130,35 @@ export async function devUpdateKey(
     },
     body: JSON.stringify(payload),
   });
-
-  return parseJson(response);
 }
 
 export async function devRevokeKey(keyId: string) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys/${keyId}/revoke`, {
+  return devFetch(`/v1/dev-keys/${keyId}/revoke`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devUsageOverview() {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-usage/overview`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch("/v1/dev-usage/overview", {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devKeyUsage(keyId: string) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-keys/${keyId}/usage`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch(`/v1/dev-keys/${keyId}/usage`, {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-
-  return parseJson(response);
 }
 
 export async function devListMcpConnectors() {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors`, {
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+  return devFetch("/v1/dev-mcp/connectors", {
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-  return parseJson(response);
 }
 
 export async function devCreateMcpConnector(payload: {
@@ -147,7 +167,7 @@ export async function devCreateMcpConnector(payload: {
   expiresInDays?: number;
 }) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors`, {
+  return devFetch("/v1/dev-mcp/connectors", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -155,23 +175,19 @@ export async function devCreateMcpConnector(payload: {
     },
     body: JSON.stringify(payload),
   });
-  return parseJson(response);
 }
 
 export async function devRevokeMcpConnector(connectorId: string) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/connectors/${connectorId}/revoke`, {
+  return devFetch(`/v1/dev-mcp/connectors/${connectorId}/revoke`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token || ""}`,
-    },
+    headers: { Authorization: `Bearer ${token || ""}` },
   });
-  return parseJson(response);
 }
 
 export async function devValidateMcpConnector(payload: { connectorId?: string }) {
   const token = getDeveloperToken();
-  const response = await fetch(`${requireDevApiBase()}/v1/dev-mcp/validate`, {
+  return devFetch("/v1/dev-mcp/validate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -179,5 +195,4 @@ export async function devValidateMcpConnector(payload: { connectorId?: string })
     },
     body: JSON.stringify(payload || {}),
   });
-  return parseJson(response);
 }

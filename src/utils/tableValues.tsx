@@ -1935,6 +1935,17 @@ export const initialTableConfig: Record<
       inEdit: true,
     },
     {
+      label: "Product Variant",
+      type: "select",
+      filterType: "multiselect",
+      key: "productVariant",
+      values: [],
+      dependsOn: "product",
+      dynamicValuesFn: (productId: string) => fetchDependentOptions("productVariant", "product", productId),
+      inForm: false,
+      inTable: true,
+      // inEdit: true,
+    }, {
       label: "Unit",
       type: "select",
       key: "unit",
@@ -1972,18 +1983,7 @@ export const initialTableConfig: Record<
       inForm: false,
       inTable: true,
     },
-    {
-      label: "Product Variant",
-      type: "select",
-      filterType: "multiselect",
-      key: "productVariant",
-      values: [],
-      dependsOn: "product",
-      dynamicValuesFn: (productId: string) => fetchDependentOptions("productVariant", "product", productId),
-      inForm: false,
-      inTable: true,
-      // inEdit: true,
-    },
+
     {
       label: "Associate Name",
       type: "select",

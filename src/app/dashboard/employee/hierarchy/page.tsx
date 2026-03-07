@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
-import { FiRefreshCw, FiX } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiMinus, FiPlus, FiRefreshCw, FiX } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -190,6 +190,31 @@ const findNodeById = (node: TreeNode | null, nodeId: string): TreeNode | null =>
   return null;
 };
 
+const collectExpandableIds = (node: TreeNode | null): string[] => {
+  if (!node) return [];
+  const ids: string[] = [];
+  const children = Array.isArray(node.children) ? node.children : [];
+  if (children.length > 0 || node.__meta.hasLazyChildren) {
+    ids.push(node.__meta.id);
+  }
+  children.forEach((child) => {
+    ids.push(...collectExpandableIds(child));
+  });
+  return ids;
+};
+
+const findPathToNode = (node: TreeNode | null, targetId: string, path: string[] = []): string[] | null => {
+  if (!node) return null;
+  const nextPath = [...path, node.__meta.id];
+  if (node.__meta.id === targetId) return nextPath;
+  const children = Array.isArray(node.children) ? node.children : [];
+  for (const child of children) {
+    const found = findPathToNode(child, targetId, nextPath);
+    if (found) return found;
+  }
+  return null;
+};
+
 const toneByKind: Record<TreeNodeKind, string> = {
   self: "border-primary-400 bg-primary-100/70 dark:bg-primary-500/20 text-primary-700 dark:text-primary-200",
   direct_team: "border-success-400 bg-success-100/70 dark:bg-success-500/20 text-success-700 dark:text-success-200",
@@ -202,7 +227,7 @@ type BranchProps = {
   collapsedByNode: Record<string, boolean>;
   loadingChildrenByNode: Record<string, boolean>;
   onSelect: (meta: TreeMeta) => void;
-  onToggle: (node: TreeNode) => void;
+  onToggle: (node: TreeNode, action: "load_expand" | "expand" | "collapse") => void;
 };
 
 function HierarchyBranch({
@@ -212,35 +237,73 @@ function HierarchyBranch({
   onSelect,
   onToggle,
 }: BranchProps) {
-  const isCollapsed = Boolean(collapsedByNode[node.__meta.id]);
-  const loadingChildren = Boolean(loadingChildrenByNode[node.__meta.id]);
+  const nodeId = node.__meta.id;
+  const isCollapsed = Boolean(collapsedByNode[nodeId]);
+  const loadingChildren = Boolean(loadingChildrenByNode[nodeId]);
   const children = Array.isArray(node.children) ? node.children : [];
-  const hasChildren = children.length > 0;
-  const canExpand = hasChildren || node.__meta.hasLazyChildren;
+  const hasRenderedChildren = children.length > 0;
+  const canLazyLoad = node.__meta.hasLazyChildren && !node.__meta.loaded;
+  const isExpandedVisible = hasRenderedChildren && !isCollapsed;
+
+  let actionLabel = "";
+  let actionKind: "load_expand" | "expand" | "collapse" | null = null;
+  let actionIcon: JSX.Element | null = null;
+  if (loadingChildren) {
+    actionLabel = "Loading...";
+    actionIcon = <FiRefreshCw className="animate-spin" size={12} />;
+  } else if (canLazyLoad) {
+    actionLabel = "Load & Expand";
+    actionKind = "load_expand";
+    actionIcon = <FiChevronDown size={12} />;
+  } else if (isExpandedVisible) {
+    actionLabel = "Collapse";
+    actionKind = "collapse";
+    actionIcon = <FiChevronUp size={12} />;
+  } else if (hasRenderedChildren) {
+    actionLabel = "Expand";
+    actionKind = "expand";
+    actionIcon = <FiChevronDown size={12} />;
+  }
 
   return (
-    <li className="hierarchy-node">
+    <li className="hierarchy-node" data-node-id={node.__meta.id}>
       <button
         type="button"
         onClick={() => onSelect(node.__meta)}
-        className={`w-[220px] rounded-xl border px-3 py-2 shadow-md text-left ${toneByKind[node.__meta.kind]} bg-content1/95`}
+        className={`w-[220px] rounded-xl border px-3 py-2 shadow-md text-left ${toneByKind[node.__meta.kind]} bg-content1/95 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300`}
       >
-        <p className="truncate text-sm font-semibold">{toName(node.name)}</p>
-        <p className="mt-1 text-[11px] opacity-80">{String(node.attributes?.level || `L${node.__meta.level}`)}</p>
-        <p className="text-[11px] opacity-80">Team: {String(node.attributes?.teamSize || node.__meta.teamSize || 0)}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate text-sm font-semibold">{toName(node.name)}</p>
+          <span className="rounded-full border border-current/30 px-2 py-0.5 text-[10px] font-semibold">
+            {String(node.attributes?.level || `L${node.__meta.level}`)}
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] opacity-85">
+          Team <span className="font-semibold">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)}</span>
+        </p>
       </button>
 
-      <div className="mt-2 flex justify-center gap-2">
-        {canExpand ? (
-          <Button size="sm" variant="flat" className="h-7 min-w-16" onPress={() => onToggle(node)}>
-            {isCollapsed ? "Expand" : "Collapse"}
+      <div className="mt-3 flex justify-center gap-2">
+        {actionLabel ? (
+          <Button
+            size="sm"
+            variant="flat"
+            className="h-8 min-w-[124px] text-xs font-medium"
+            isDisabled={loadingChildren || !actionKind}
+            startContent={actionIcon}
+            onPress={() => {
+              if (!actionKind) return;
+              onToggle(node, actionKind);
+            }}
+          >
+            {actionLabel}
           </Button>
         ) : null}
       </div>
 
       {loadingChildren ? <p className="mt-1 text-[11px] text-default-500">Loading branch...</p> : null}
 
-      {hasChildren && !isCollapsed ? (
+      {hasRenderedChildren && !isCollapsed ? (
         <ul className="hierarchy-list">
           {children.map((child) => (
             <HierarchyBranch
@@ -270,6 +333,10 @@ export default function EmployeeHierarchyPage() {
   const [loadingChildrenByNode, setLoadingChildrenByNode] = useState<Record<string, boolean>>({});
   const [collapsedByNode, setCollapsedByNode] = useState<Record<string, boolean>>({});
   const [zoom, setZoom] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const panStartRef = useRef<{ x: number; y: number; baseX: number; baseY: number } | null>(null);
 
   const employeesQuery = useQuery({
     queryKey: ["employee-hierarchy", "employees", isAdmin],
@@ -371,7 +438,40 @@ export default function EmployeeHierarchyPage() {
     setLoadingChildrenByNode({});
     setCollapsedByNode({});
     setZoom(1);
+    setTranslate({ x: 0, y: 0 });
   }, [employeeId, initialTree]);
+
+  const clampZoom = useCallback((value: number) => Math.max(0.6, Math.min(1.8, Number(value.toFixed(2)))), []);
+
+  const applyZoom = useCallback(
+    (nextZoomRaw: number, anchorClientX?: number, anchorClientY?: number) => {
+      const nextZoom = clampZoom(nextZoomRaw);
+      setZoom((prevZoom) => {
+        const rect = viewportRef.current?.getBoundingClientRect();
+        if (!rect) {
+          return nextZoom;
+        }
+
+        setTranslate((prevTranslate) => {
+          const localX = anchorClientX == null ? rect.width / 2 : anchorClientX - rect.left;
+          const localY = anchorClientY == null ? rect.height / 2 : anchorClientY - rect.top;
+          const zoomRatio = nextZoom / prevZoom;
+          return {
+            x: localX - (localX - prevTranslate.x) * zoomRatio,
+            y: localY - (localY - prevTranslate.y) * zoomRatio,
+          };
+        });
+
+        return nextZoom;
+      });
+    },
+    [clampZoom]
+  );
+
+  const resetView = useCallback(() => {
+    setZoom(1);
+    setTranslate({ x: 0, y: 0 });
+  }, []);
 
   const loadNodeChildren = useCallback(async (nodeMeta: TreeMeta) => {
     if (!nodeMeta?.id || nodeMeta.loaded || !nodeMeta.hasLazyChildren) return;
@@ -421,21 +521,22 @@ export default function EmployeeHierarchyPage() {
   }, []);
 
   const onToggleNode = useCallback(
-    (node: TreeNode) => {
+    (node: TreeNode, action: "load_expand" | "expand" | "collapse") => {
       const nodeId = node.__meta.id;
-      const currentlyCollapsed = Boolean(collapsedByNode[nodeId]);
-      const isExpanding = currentlyCollapsed;
+      if (loadingChildrenByNode[nodeId]) return;
+
+      if (action === "load_expand") {
+        setCollapsedByNode((prev) => ({ ...prev, [nodeId]: false }));
+        void loadNodeChildren(node.__meta);
+        return;
+      }
 
       setCollapsedByNode((prev) => ({
         ...prev,
-        [nodeId]: !prev[nodeId],
+        [nodeId]: action === "collapse",
       }));
-
-      if (isExpanding && !node.__meta.loaded && node.__meta.hasLazyChildren && !loadingChildrenByNode[nodeId]) {
-        void loadNodeChildren(node.__meta);
-      }
     },
-    [collapsedByNode, loadNodeChildren, loadingChildrenByNode]
+    [loadNodeChildren, loadingChildrenByNode]
   );
 
   const onSelectNode = useCallback(
@@ -450,6 +551,117 @@ export default function EmployeeHierarchyPage() {
 
   const selectedNodeFromTree = selectedMeta ? findNodeById(treeData, selectedMeta.id) : null;
   const selectedNode = selectedNodeFromTree?.__meta || selectedMeta;
+
+  const collapseAll = useCallback(() => {
+    if (!treeData) return;
+    const ids = collectExpandableIds(treeData);
+    const next: Record<string, boolean> = {};
+    ids.forEach((id) => {
+      next[id] = true;
+    });
+    setCollapsedByNode(next);
+  }, [treeData]);
+
+  const expandDirectTeam = useCallback(() => {
+    if (!treeData) return;
+    const ids = collectExpandableIds(treeData);
+    const next: Record<string, boolean> = {};
+    ids.forEach((id) => {
+      next[id] = true;
+    });
+
+    const selfNode = findNodeById(treeData, employeeId);
+    const path = findPathToNode(treeData, employeeId) || [];
+    path.forEach((id) => {
+      next[id] = false;
+    });
+
+    if (selfNode) {
+      next[selfNode.__meta.id] = false;
+      const children = Array.isArray(selfNode.children) ? selfNode.children : [];
+      children.forEach((child) => {
+        next[child.__meta.id] = false;
+      });
+    }
+
+    setCollapsedByNode(next);
+  }, [employeeId, treeData]);
+
+  const centerOnSelf = useCallback(() => {
+    if (!viewportRef.current || !employeeId) return;
+    const nodeEl = viewportRef.current.querySelector(`[data-node-id="${employeeId}"]`) as HTMLElement | null;
+    if (!nodeEl) return;
+    const viewportRect = viewportRef.current.getBoundingClientRect();
+    const nodeRect = nodeEl.getBoundingClientRect();
+    const viewportCenterX = viewportRect.left + viewportRect.width / 2;
+    const viewportCenterY = viewportRect.top + viewportRect.height / 2;
+    const nodeCenterX = nodeRect.left + nodeRect.width / 2;
+    const nodeCenterY = nodeRect.top + nodeRect.height / 2;
+    setTranslate((prev) => ({
+      x: prev.x + (viewportCenterX - nodeCenterX),
+      y: prev.y + (viewportCenterY - nodeCenterY),
+    }));
+  }, [employeeId]);
+
+  const onViewportPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) return;
+    panStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      baseX: translate.x,
+      baseY: translate.y,
+    };
+    setIsPanning(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [translate.x, translate.y]);
+
+  const onViewportPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!panStartRef.current) return;
+    const dx = event.clientX - panStartRef.current.x;
+    const dy = event.clientY - panStartRef.current.y;
+    setTranslate({
+      x: panStartRef.current.baseX + dx,
+      y: panStartRef.current.baseY + dy,
+    });
+  }, []);
+
+  const stopPanning = useCallback(() => {
+    panStartRef.current = null;
+    setIsPanning(false);
+  }, []);
+
+  const onViewportWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const delta = event.deltaY > 0 ? -0.08 : 0.08;
+    const rect = viewportRef.current?.getBoundingClientRect();
+    const centerX = rect ? rect.left + rect.width / 2 : undefined;
+    const centerY = rect ? rect.top + rect.height / 2 : undefined;
+    applyZoom(zoom + delta, centerX, centerY);
+  }, [applyZoom, zoom]);
+
+  const onViewportKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      applyZoom(zoom + 0.1);
+      return;
+    }
+    if (event.key === "-" || event.key === "_") {
+      event.preventDefault();
+      applyZoom(zoom - 0.1);
+      return;
+    }
+    if (event.key === "0") {
+      event.preventDefault();
+      resetView();
+      return;
+    }
+    const step = 36;
+    if (event.key === "ArrowLeft") setTranslate((prev) => ({ ...prev, x: prev.x + step }));
+    if (event.key === "ArrowRight") setTranslate((prev) => ({ ...prev, x: prev.x - step }));
+    if (event.key === "ArrowUp") setTranslate((prev) => ({ ...prev, y: prev.y + step }));
+    if (event.key === "ArrowDown") setTranslate((prev) => ({ ...prev, y: prev.y - step }));
+  }, [applyZoom, resetView, zoom]);
 
   const selectedSummary = selectedSummaryQuery.data?.data?.data?.summary || {};
   const selectedSummaryStatus = (selectedSummaryQuery.error as any)?.response?.status;
@@ -571,24 +783,56 @@ export default function EmployeeHierarchyPage() {
       </div>
 
       <Card className="border border-default-200/80 overflow-hidden">
-        <CardBody className="space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-default-500">
-              Click any node for details. Blue: you, Green: your team, Orange: leadership chain.
-            </p>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="flat" onPress={() => setZoom((prev) => Math.max(0.65, Number((prev - 0.1).toFixed(2))))}>
-                -
+        <CardBody className="space-y-3 p-0">
+          <div className="sticky top-0 z-10 border-b border-default-200/70 bg-content1/90 px-4 py-3 backdrop-blur">
+            <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+              <p className="text-xs text-default-500">
+                Drag to move, scroll to zoom, click node for details.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-primary-100 px-2 py-1 text-[10px] font-semibold text-primary-700 dark:bg-primary-500/20 dark:text-primary-200">Self</span>
+                <span className="rounded-full bg-success-100 px-2 py-1 text-[10px] font-semibold text-success-700 dark:bg-success-500/20 dark:text-success-200">Team</span>
+                <span className="rounded-full bg-warning-100 px-2 py-1 text-[10px] font-semibold text-warning-700 dark:bg-warning-500/20 dark:text-warning-200">Leadership</span>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="flat" onPress={() => applyZoom(zoom - 0.1)}>
+                <FiMinus />
               </Button>
-              <span className="text-xs text-default-500 min-w-12 text-center">{Math.round(zoom * 100)}%</span>
-              <Button size="sm" variant="flat" onPress={() => setZoom((prev) => Math.min(1.6, Number((prev + 0.1).toFixed(2))))}>
-                +
+              <span className="min-w-14 text-center text-xs text-default-500">{Math.round(zoom * 100)}%</span>
+              <Button size="sm" variant="flat" onPress={() => applyZoom(zoom + 0.1)}>
+                <FiPlus />
+              </Button>
+              <Button size="sm" variant="flat" onPress={resetView}>
+                Reset View
+              </Button>
+              <Button size="sm" variant="flat" onPress={centerOnSelf}>
+                Center on You
+              </Button>
+              <Button size="sm" variant="flat" onPress={collapseAll}>
+                Collapse All
+              </Button>
+              <Button size="sm" variant="flat" onPress={expandDirectTeam}>
+                Expand Direct Team
               </Button>
             </div>
           </div>
 
-          <div className="overflow-auto rounded-xl border border-default-200/70 bg-content1/80 p-4">
-            <div className="min-w-[900px] origin-top transition-transform duration-200" style={{ transform: `scale(${zoom})` }}>
+          <div
+            ref={viewportRef}
+            tabIndex={0}
+            onKeyDown={onViewportKeyDown}
+            onWheel={onViewportWheel}
+            onPointerDown={onViewportPointerDown}
+            onPointerMove={onViewportPointerMove}
+            onPointerUp={stopPanning}
+            onPointerCancel={stopPanning}
+            className={`overflow-auto rounded-xl border border-default-200/70 bg-content1/80 p-4 outline-none ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
+          >
+            <div
+              className={`min-w-[900px] origin-top ${isPanning ? "" : "transition-transform duration-150"}`}
+              style={{ transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})` }}
+            >
               <ul className="hierarchy-root">
                 <HierarchyBranch
                   node={treeData}
@@ -698,7 +942,7 @@ export default function EmployeeHierarchyPage() {
           position: absolute;
           top: 0;
           right: 50%;
-          border-top: 1px solid rgba(148, 163, 184, 0.35);
+          border-top: 1px solid rgba(148, 163, 184, 0.28);
           width: 50%;
           height: 1.2rem;
         }
@@ -706,7 +950,7 @@ export default function EmployeeHierarchyPage() {
         .hierarchy-root li::after {
           right: auto;
           left: 50%;
-          border-left: 1px solid rgba(148, 163, 184, 0.35);
+          border-left: 1px solid rgba(148, 163, 184, 0.28);
         }
 
         .hierarchy-root li:only-child::after,
@@ -724,7 +968,7 @@ export default function EmployeeHierarchyPage() {
         }
 
         .hierarchy-root li:last-child::before {
-          border-right: 1px solid rgba(148, 163, 184, 0.35);
+          border-right: 1px solid rgba(148, 163, 184, 0.28);
           border-radius: 0 5px 0 0;
         }
 
@@ -737,7 +981,7 @@ export default function EmployeeHierarchyPage() {
           position: absolute;
           top: 0;
           left: 50%;
-          border-left: 1px solid rgba(148, 163, 184, 0.35);
+          border-left: 1px solid rgba(148, 163, 184, 0.28);
           width: 0;
           height: 1.2rem;
         }

@@ -433,9 +433,9 @@ export default function CompanyProductPage() {
     // Determine selection based on current tab
     const currentList =
       activeTab === "all" ? allCompanies :
-      activeTab === "live" ? live :
-      activeTab === "active" ? active :
-      empty;
+        activeTab === "live" ? live :
+          activeTab === "active" ? active :
+            empty;
 
     const selected = currentList.find(c => c._id === selectedCompanyId) || null;
 
@@ -479,8 +479,8 @@ export default function CompanyProductPage() {
   const displayedCompanies =
     activeTab === "all" ? allCompanies :
       activeTab === "live" ? liveCompanies :
-      activeTab === "active" ? activeCompanies :
-        emptyCompanies;
+        activeTab === "active" ? activeCompanies :
+          emptyCompanies;
 
   const handleAssign = () => {
     assignMutation.mutate(selectedEmployeeId);
@@ -534,118 +534,89 @@ export default function CompanyProductPage() {
       <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px]">
 
         {/* --- Sidebar (Master) --- */}
-        <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col gap-4">
-          <Card className="p-4 bg-background/60 backdrop-blur-md border-none shadow-sm h-full overflow-hidden">
-            <h2 className="text-lg font-bold text-foreground/90 mb-4 tracking-tight">Companies</h2>
-            <CompanySearch
-              defaultSelected={selectedCompanyId}
-              itemsFilter={(companies) =>
-                companies.filter((c) =>
-                  displayedCompanies.some((p) => p._id === c._id)
-                )
-              }
-              onSelect={(id) => setSelectedCompanyId(id)}
-            />
+        <div className="w-full md:w-[300px] lg:w-[340px] flex flex-col gap-3">
+          <Card className="bg-content1 border border-default-200/80 shadow-sm h-full overflow-hidden flex flex-col">
+            {/* Sidebar header */}
+            <div className="px-4 pt-4 pb-3 border-b border-default-100">
+              <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
+            </div>
 
-            <Tabs
-              fullWidth
-              size="sm"
-              variant="underlined"
-              aria-label="Filter companies"
-              selectedKey={activeTab}
-              onSelectionChange={(key: any) => {
-                setActiveTab(key as string);
-                setSelectedCompanyId(null);
-              }}
-              classNames={{
-                tabList:
-                  "gap-4 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto",
-                cursor: "w-full bg-warning-500",
-                tab: "max-w-fit px-0 h-10",
-                tabContent:
-                  "group-data-[selected=true]:text-warning-500 group-data-[selected=true]:font-bold text-xs font-medium text-default-600 dark:text-default-400",
-              }}
-            >
-              <Tab
-                key="all"
-                title={
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <span>All</span>
-                    <div className="bg-primary-50 text-primary-600 px-1 py-0.5 rounded text-[10px] font-bold">
-                      {allCompanies.length}
-                    </div>
-                  </div>
-                }
-              />
-              <Tab
-                key="live"
-                title={
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <span>Live</span>
-                    <div className="bg-success-50 text-success-600 px-1 py-0.5 rounded text-[10px] font-bold">
-                      {liveCompanies.length}
-                    </div>
-                  </div>
-                }
-              />
-              <Tab
-                key="active"
-                title={
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <span>Active</span>
-                    <div className="bg-warning-50 text-warning-600 px-1 py-0.5 rounded text-[10px] font-bold">
-                      {activeCompanies.length}
-                    </div>
-                  </div>
-                }
-              />
-              <Tab
-                key="empty"
-                title={
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <span>Empty</span>
-                    <div className="bg-default-100 text-default-600 px-1 py-0.5 rounded text-[10px] font-bold">
-                      {emptyCompanies.length}
-                    </div>
-                  </div>
-                }
-              />
-            </Tabs>
+            {/* Filter tabs */}
+            <div className="flex items-center gap-1 px-4 py-2 border-b border-default-100">
+              {(["all", "live", "active", "empty"] as const).map((tab) => {
+                const count = tab === "all" ? allCompanies.length : tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : emptyCompanies.length;
+                const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-primary-500";
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${activeTab === tab
+                        ? "bg-default-200 text-foreground"
+                        : "text-default-500 hover:text-foreground hover:bg-default-100"
+                      }`}
+                  >
+                    {tab !== "all" && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
+                    <span className="capitalize">{tab}</span>
+                    <span className={`text-[10px] font-bold px-1 rounded ${activeTab === tab ? "bg-foreground/10" : "bg-default-200/60"
+                      }`}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-            <div className="flex-1 overflow-y-auto mt-4 pr-2 custom-scrollbar">
-              <div className="flex flex-col gap-2">
+            {/* Company search */}
+            <div className="px-4 py-2">
+              <CompanySearch
+                defaultSelected={selectedCompanyId}
+                itemsFilter={(companies) =>
+                  companies.filter((c) =>
+                    displayedCompanies.some((p) => p._id === c._id)
+                  )
+                }
+                onSelect={(id) => setSelectedCompanyId(id)}
+              />
+            </div>
+
+            {/* Scrollable list */}
+            <div className="flex-1 overflow-y-auto px-3 pb-3 custom-scrollbar">
+              <div className="flex flex-col gap-1">
                 {displayedCompanies.map((company) => {
                   const isActive = selectedCompanyId === company._id;
                   const prodCount = (company as any).productCount;
+                  const isLive = (company.stats?.liveProducts || 0) > 0;
 
                   return (
                     <button
                       key={company._id}
                       onClick={() => setSelectedCompanyId(company._id)}
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all text-left ${isActive
-                        ? "bg-warning-500 text-white shadow-md scale-[1.02]"
-                        : "bg-default-100/50 hover:bg-default-200/50 text-foreground/80 hover:scale-[1.01]"
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
+                          ? "bg-warning-500/10 border border-warning-500/30"
+                          : "border border-transparent hover:bg-default-100/80"
                         }`}
                     >
                       <Avatar
                         size="sm"
                         src={`https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&bold=true`}
-                        className="flex-shrink-0 border-2 border-white/20"
+                        className="flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate text-sm">{company.name}</div>
+                        <div className={`font-semibold truncate text-xs ${isActive ? "text-warning-600 dark:text-warning-400" : "text-foreground/80"
+                          }`}>{company.name}</div>
                         {activeTab !== "empty" && (
-                          <div className={`text-[10px] ${isActive ? "text-white/80" : "text-default-400"}`}>
-                            {prodCount} {activeTab === "live" ? "live products" : "total products"}
+                          <div className="text-[10px] text-default-400 mt-0.5">
+                            {prodCount} {activeTab === "live" ? "live" : "products"}
                           </div>
                         )}
                       </div>
+                      {isLive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
+                      )}
                     </button>
                   );
                 })}
                 {displayedCompanies.length === 0 && (
-                  <div className="flex flex-col items-center justify-center p-10 opacity-60">
-                    <svg className="w-10 h-10 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex flex-col items-center justify-center py-12 opacity-50">
+                    <svg className="w-8 h-8 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
                     <p className="text-xs italic">No companies here.</p>
@@ -658,150 +629,135 @@ export default function CompanyProductPage() {
 
         {/* --- Main Content (Detail) --- */}
         <div className="flex-1 min-w-0">
-          <Card className="h-full bg-background/60 backdrop-blur-md border-none shadow-sm overflow-hidden flex flex-col min-w-0 max-w-full">
+          <Card className="h-full bg-content1 border border-default-200/80 shadow-sm overflow-hidden flex flex-col min-w-0 max-w-full">
             {selectedCompany ? (
               <>
-                <div className="p-6 border-b border-default-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <Avatar
-                      size="lg"
-                      src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
-                      className="border-4 border-warning-100 shadow-sm"
-                    />
-                    <div>
-                      <h1 className="text-2xl font-black text-foreground tracking-tight">{selectedCompany.name}</h1>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Chip
-                          size="sm"
-                          variant="flat"
-                          color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : "default"}
-                          className="capitalize text-[10px] font-bold"
-                        >
-                          {activeTab} Status
-                        </Chip>
-                        <p className="text-default-400 text-[11px] font-medium">
-                          {activeTab === "live" ? "Showing live products only" :
-                            activeTab === "active" ? "Showing all offline products" :
-                              "Initial allocation required"}
-                        </p>
+                {/* Detail header */}
+                <div className="px-6 py-5 border-b border-default-100">
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Company identity */}
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        size="lg"
+                        src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
+                        className="border-2 border-default-200 shadow-sm shrink-0"
+                      />
+                      <div>
+                        <h1 className="text-xl font-black text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : "default"}
+                            className="capitalize text-[10px] font-bold h-5"
+                          >
+                            {activeTab === "live" ? "● Live" : activeTab === "active" ? "◌ Active" : "○ Empty"}
+                          </Chip>
+                          {(selectedCompany as any).state?.name && (
+                            <span className="text-[10px] text-default-400">{(selectedCompany as any).state.name}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* --- Employee Assignment Section (Admin Only) --- */}
-                  {roleLower === "admin" && (
-                    <div className="flex flex-col items-end gap-2">
-                      <div className="text-[10px] font-bold text-default-400 uppercase">Assigned Overseer</div>
-                      {!isAssigning ? (
-                        <div className="flex items-center gap-2">
-                          {selectedCompany.assignedEmployee ? (
-                            <div className="flex items-center gap-2 bg-default-100 px-3 py-1.5 rounded-full">
-                              {(() => {
-                                const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
-                                const presence = resolvePresence(employeeObj);
-                                return (
-                                  <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
-                                      {employeeObj?.name || "Unknown"}
-                                    </span>
-                                    <span className={`text-[10px] ${presence.online ? "text-success-600" : "text-default-500"}`}>
-                                      {presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}
-                                    </span>
+                    {/* Assignment widget — Admin only */}
+                    {roleLower === "admin" && (
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <div className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Overseer</div>
+                        {!isAssigning ? (
+                          <div className="flex items-center gap-2">
+                            {selectedCompany.assignedEmployee ? (
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
+                                  const presence = resolvePresence(employeeObj);
+                                  return (
+                                    <div className="flex items-center gap-2 bg-default-100 px-2.5 py-1.5 rounded-lg">
+                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${presence.online ? "bg-success-500" : "bg-default-400"}`} />
+                                      <div className="flex flex-col leading-tight">
+                                        <span className="text-xs font-bold text-foreground/80">{employeeObj?.name || "Unknown"}</span>
+                                        <span className="text-[10px] text-default-400">{presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-default-400 italic">Not assigned</span>
+                            )}
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              className="text-warning-500"
+                              onClick={() => {
+                                setSelectedEmployeeId(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee._id : null);
+                                setIsAssigning(true);
+                              }}
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              size="sm"
+                              placeholder="Assign Employee"
+                              className="w-44"
+                              selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
+                              onSelectionChange={(keys: any) => setSelectedEmployeeId(Array.from(keys)[0] as string)}
+                            >
+                              {allEmployees.map((emp) => (
+                                <SelectItem key={emp._id} textValue={emp.name}>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium">{emp.name}</span>
                                   </div>
-                                );
-                              })()}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-default-400 italic">No one assigned</span>
-                          )}
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            className="text-warning-500"
-                            onClick={() => {
-                              setSelectedEmployeeId(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee._id : null);
-                              setIsAssigning(true);
-                            }}
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Select
-                            size="sm"
-                            placeholder="Assign Employee"
-                            className="w-48"
-                            selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
-                            onSelectionChange={(keys: any) => setSelectedEmployeeId(Array.from(keys)[0] as string)}
-                          >
-                            {allEmployees.map((emp) => (
-                              <SelectItem key={emp._id} textValue={emp.name}>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium">{emp.name}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </Select>
-                          <Button
-                            size="sm"
-                            color="warning"
-                            isLoading={assignMutation.isPending}
-                            onClick={handleAssign}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="light"
-                            onClick={() => setIsAssigning(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                                </SelectItem>
+                              ))}
+                            </Select>
+                            <Button size="sm" color="warning" isLoading={assignMutation.isPending} onClick={handleAssign}>Save</Button>
+                            <Button size="sm" variant="light" onClick={() => setIsAssigning(false)}>Cancel</Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  {/* --- Assigned Overseer (Employee View) --- */}
-                  {isEmployeeUser && selectedCompany.assignedEmployee && (
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="text-[10px] font-bold text-default-400 uppercase">Your Assignment</div>
-                      <div className="flex items-center gap-2 bg-success-50 px-3 py-1 rounded-full border border-success-100">
+                    {/* Employee view */}
+                    {isEmployeeUser && selectedCompany.assignedEmployee && (
+                      <div className="flex items-center gap-2 bg-success-50 dark:bg-success-900/20 px-3 py-1.5 rounded-lg border border-success-200/60 shrink-0">
                         {(() => {
                           const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
                           const presence = resolvePresence(employeeObj);
                           return (
                             <>
                               <div className={`w-1.5 h-1.5 rounded-full ${presence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
-                              <span className="text-[10px] font-bold text-success-700">
-                                {presence.online ? "Under your supervision • Online" : `Under your supervision • Last seen ${presence.lastSeenLabel}`}
+                              <span className="text-[10px] font-bold text-success-700 dark:text-success-300">
+                                Your supervision • {presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}
                               </span>
                             </>
                           );
                         })()}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 pt-2 custom-scrollbar min-w-0 max-w-full">
-                  <div className="mb-6">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4 custom-scrollbar min-w-0 max-w-full">
+                  <div className="mb-5">
                     <Tabs
                       aria-label="Detail Sections"
                       selectedKey={detailTab}
                       onSelectionChange={(key: any) => setDetailTab(key as string)}
-                      variant="solid"
+                      variant="underlined"
                       color="warning"
                       size="sm"
                       classNames={{
-                        tabList: "bg-default-200/50 dark:bg-default-100/50 p-1",
-                        cursor: "bg-warning-500 shadow-sm",
-                        tab: "h-8",
-                        tabContent: "group-data-[selected=true]:text-white font-bold text-xs text-default-600 dark:text-default-400",
+                        tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                        cursor: "w-full bg-warning-500",
+                        tab: "max-w-fit px-0 h-10",
+                        tabContent: "text-default-500 group-data-[selected=true]:text-warning-500 font-semibold text-xs",
                       }}
                     >
                       <Tab key="products" title="Products" />

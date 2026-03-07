@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { showToastMessage, useEmailValidation } from "../../utils/utils";
 import {
   Button,
   Input,
-  Spacer,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useRouter } from "next/navigation";
@@ -27,11 +26,22 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const isInvalidEmail = useEmailValidation(email);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRoutingToRegister, setIsRoutingToRegister] = useState(false);
   const [showInterestsModal, setShowInterestsModal] = useState(false);
   const [interestsSetupDone, setInterestsSetupDone] = useState(false);
+  const registerRouteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const router = useRouter();
   const { isAuthenticated, loading, login, user } = useContext(AuthContext);
+
+  useEffect(() => {
+    return () => {
+      if (registerRouteTimeoutRef.current) {
+        clearTimeout(registerRouteTimeoutRef.current);
+        registerRouteTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -52,6 +62,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isRoutingToRegister) return;
     setIsLoading(true);
     setErrorMessage("");
 
@@ -98,6 +109,19 @@ const LoginComponent = ({ role }: ILoginProps) => {
         position: "top-right",
       });
     }
+  };
+
+  const handleCreateAccount = () => {
+    if (isLoading || isRoutingToRegister) return;
+    setIsRoutingToRegister(true);
+    if (registerRouteTimeoutRef.current) {
+      clearTimeout(registerRouteTimeoutRef.current);
+    }
+    registerRouteTimeoutRef.current = setTimeout(() => {
+      setIsRoutingToRegister(false);
+      registerRouteTimeoutRef.current = null;
+    }, 6000);
+    router.push("/auth/register");
   };
 
   if (loading) {
@@ -159,12 +183,17 @@ const LoginComponent = ({ role }: ILoginProps) => {
         />
 
         <div className="flex justify-between items-center w-full px-1">
-          <p
-            onClick={() => router.push("/auth/register")}
-            className="text-sm text-primary hover:underline cursor-pointer transition-all"
+          <button
+            type="button"
+            onClick={handleCreateAccount}
+            disabled={isLoading || isRoutingToRegister}
+            className="inline-flex items-center gap-2 text-sm text-primary hover:underline transition-all disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1 py-0.5"
           >
-            Create account
-          </p>
+            {isRoutingToRegister ? "Opening registration..." : "Create account"}
+            {isRoutingToRegister ? (
+              <span className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin" aria-hidden="true" />
+            ) : null}
+          </button>
           <p
             onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
             className="text-sm text-default-500 hover:text-foreground cursor-pointer transition-colors"
@@ -183,11 +212,12 @@ const LoginComponent = ({ role }: ILoginProps) => {
           className="w-full font-bold shadow-lg shadow-warning/20"
           color="warning"
           type="submit"
-          isLoading={isLoading}
+          isLoading={isLoading || isRoutingToRegister}
+          isDisabled={isRoutingToRegister}
           size="lg"
           radius="lg"
         >
-          {isLoading ? "Signing in..." : "Sign In"}
+          {isRoutingToRegister ? "Opening registration..." : isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
       <CompanyInterestsModal

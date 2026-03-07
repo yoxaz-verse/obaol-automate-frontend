@@ -12,8 +12,23 @@ import { showToastMessage } from "@/utils/utils";
 
 export const LanguageSwitcher = () => {
     const [currentLang, setCurrentLang] = useState("en");
+    const [isSwitching, setIsSwitching] = useState(false);
     const [translationWarning, setTranslationWarning] = useState("");
     const translationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const switchRequestIdRef = useRef(0);
+    const terminalSentForRequestRef = useRef<number | null>(null);
+    const isSwitchingRef = useRef(false);
+
+    const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
+        if (process.env.NODE_ENV !== "production") {
+            // eslint-disable-next-line no-console
+            console.debug(`[LanguageSwitcher] ${checkpoint}`, payload || {});
+        }
+    };
+
+    useEffect(() => {
+        isSwitchingRef.current = isSwitching;
+    }, [isSwitching]);
 
     useEffect(() => {
         const syncFromCookie = () => {
@@ -30,14 +45,17 @@ export const LanguageSwitcher = () => {
             if (!document.hidden) syncFromCookie();
         };
         const handleUnavailable = () => {
+            if (!isSwitchingRef.current) return;
             const warning =
                 "Translation service blocked by browser privacy settings. Content will stay in English, API language preference is saved.";
             setTranslationWarning(warning);
+            setIsSwitching(false);
             showToastMessage({
                 type: "warning",
                 message: warning,
                 position: "top-right",
             });
+            debugLog("fallback", { reason: "translation-unavailable-event" });
             window.dispatchEvent(new Event("translation-end"));
         };
         document.addEventListener("visibilitychange", handleVisibility);
@@ -52,27 +70,60 @@ export const LanguageSwitcher = () => {
         };
     }, []);
 
-    const changeLanguage = (langCode: string) => {
-        const selectedLang = languages.find(l => l.code === langCode);
+    const waitForTranslateWidget = async (maxAttempts = 8, intervalMs = 400) => {
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+            if (select) {
+                debugLog("widget-found", { attempt });
+                return select;
+            }
 
-        // Dispatch start event for the overlay
-        window.dispatchEvent(new CustomEvent("translation-start", {
-            detail: { name: selectedLang?.name || "Language" }
-        }));
-        if (translationTimeoutRef.current) {
-            clearTimeout(translationTimeoutRef.current);
+            await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
-        translationTimeoutRef.current = setTimeout(() => {
-            window.dispatchEvent(new Event("translation-end"));
-        }, 8000);
 
-        const finishTranslation = () => {
+        return null;
+    };
+
+    const changeLanguage = async (langCode: string) => {
+        if (isSwitching || langCode === currentLang) return;
+
+        const selectedLang = languages.find(l => l.code === langCode);
+        const requestId = switchRequestIdRef.current + 1;
+        switchRequestIdRef.current = requestId;
+        terminalSentForRequestRef.current = null;
+        setIsSwitching(true);
+        setTranslationWarning("");
+
+        const emitTerminal = (kind: "end" | "unavailable") => {
+            if (terminalSentForRequestRef.current === requestId) return;
+            terminalSentForRequestRef.current = requestId;
+            setIsSwitching(false);
+
             if (translationTimeoutRef.current) {
                 clearTimeout(translationTimeoutRef.current);
                 translationTimeoutRef.current = null;
             }
-            window.dispatchEvent(new Event("translation-end"));
+
+            if (kind === "unavailable") {
+                window.dispatchEvent(new Event("translation-unavailable"));
+            } else {
+                window.dispatchEvent(new Event("translation-end"));
+            }
+
+            debugLog("end", { kind, requestId, langCode });
         };
+
+        debugLog("start", { requestId, langCode, langName: selectedLang?.name || "Language" });
+        window.dispatchEvent(new CustomEvent("translation-start", {
+            detail: { name: selectedLang?.name || "Language" }
+        }));
+
+        if (translationTimeoutRef.current) {
+            clearTimeout(translationTimeoutRef.current);
+        }
+        translationTimeoutRef.current = setTimeout(() => {
+            emitTerminal("unavailable");
+        }, 8000);
 
         if (langCode === "en") {
             clearLanguageCookies();
@@ -82,7 +133,7 @@ export const LanguageSwitcher = () => {
                 select.value = "en";
                 select.dispatchEvent(new Event("change"));
             }
-            finishTranslation();
+            emitTerminal("end");
             return;
         }
 
@@ -92,31 +143,19 @@ export const LanguageSwitcher = () => {
         const cookiePersisted = setLanguageCookies(langCode);
         setCurrentLang(langCode);
         if (!cookiePersisted) {
-            if (process.env.NODE_ENV !== "production") {
-                // eslint-disable-next-line no-console
-                console.debug("[LanguageSwitcher] language cookie write blocked");
-            }
+            debugLog("fallback", { reason: "cookie-write-blocked", langCode });
         }
 
-        // Trigger Google Translate manually for non-English
-        const triggerGoogle = (attempts = 0) => {
-            const select = document.querySelector(".goog-te-combo") as HTMLSelectElement;
-            if (select) {
-                select.value = langCode;
-                select.dispatchEvent(new Event("change"));
-                select.dispatchEvent(new Event("click"));
-                // Hide overlay after a short delay to let translation apply
-                setTimeout(() => {
-                    finishTranslation();
-                }, 2000);
-            } else if (attempts < 10) {
-                setTimeout(() => triggerGoogle(attempts + 1), 500);
-            } else {
-                window.dispatchEvent(new Event("translation-unavailable"));
-            }
-        };
+        const widget = await waitForTranslateWidget();
+        if (!widget) {
+            emitTerminal("unavailable");
+            return;
+        }
 
-        triggerGoogle();
+        widget.value = langCode;
+        widget.dispatchEvent(new Event("change"));
+        widget.dispatchEvent(new Event("click"));
+        setTimeout(() => emitTerminal("end"), 1200);
     };
 
     return (
@@ -126,6 +165,7 @@ export const LanguageSwitcher = () => {
                 <select
                     className="appearance-none w-[150px] bg-default-100 hover:bg-default-200 transition-colors cursor-pointer text-foreground font-bold text-[11px] uppercase tracking-wider h-10 pl-9 pr-8 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20"
                     value={currentLang}
+                    disabled={isSwitching}
                     onChange={(e: any) => changeLanguage(e.target.value)}
                     aria-label="Select Language"
                 >

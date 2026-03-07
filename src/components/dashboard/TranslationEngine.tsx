@@ -22,15 +22,30 @@ export const TranslationEngine = () => {
         setMounted(true);
         let isScriptLoading = false;
         let isScriptReady = false;
+        const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
+            if (process.env.NODE_ENV !== "production") {
+                // eslint-disable-next-line no-console
+                console.debug(`[TranslationEngine] ${checkpoint}`, payload || {});
+            }
+        };
 
         const handleStart = (e: any) => {
             setTargetLang(e.detail.name);
             setIsSwitching(true);
+            debugLog("start", { lang: e?.detail?.name || "" });
         };
-        const handleEnd = () => setIsSwitching(false);
+        const handleEnd = () => {
+            setIsSwitching(false);
+            debugLog("end");
+        };
+        const handleUnavailable = () => {
+            setIsSwitching(false);
+            debugLog("fallback", { reason: "translation-unavailable-event" });
+        };
 
         window.addEventListener("translation-start", handleStart);
         window.addEventListener("translation-end", handleEnd);
+        window.addEventListener("translation-unavailable", handleUnavailable);
 
         // Define the Google Translate initialization function
         window.googleTranslateElementInit = () => {
@@ -46,6 +61,7 @@ export const TranslationEngine = () => {
                 );
                 isScriptReady = true;
                 isScriptLoading = false;
+                debugLog("widget-ready");
             }
         };
 
@@ -54,16 +70,19 @@ export const TranslationEngine = () => {
 
             if (document.getElementById("google-translate-script")) {
                 isScriptLoading = true;
+                debugLog("script-exists");
                 return;
             }
 
             isScriptLoading = true;
+            debugLog("script-load-start");
             const addScript = document.createElement("script");
             addScript.id = "google-translate-script";
             addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
             addScript.async = true;
             addScript.onerror = () => {
                 isScriptLoading = false;
+                debugLog("script-load-error");
                 window.dispatchEvent(new Event("translation-unavailable"));
             };
             document.body.appendChild(addScript);
@@ -89,6 +108,7 @@ export const TranslationEngine = () => {
         return () => {
             window.removeEventListener("translation-start", handleStart);
             window.removeEventListener("translation-end", handleEnd);
+            window.removeEventListener("translation-unavailable", handleUnavailable);
             window.removeEventListener("translation-init", ensureTranslateScript);
             if (document.head.contains(style)) {
                 document.head.removeChild(style);
@@ -100,6 +120,10 @@ export const TranslationEngine = () => {
         if (!isSwitching) return;
         const watchdog = setTimeout(() => {
             setIsSwitching(false);
+            if (process.env.NODE_ENV !== "production") {
+                // eslint-disable-next-line no-console
+                console.debug("[TranslationEngine] fallback", { reason: "overlay-watchdog-timeout" });
+            }
             window.dispatchEvent(new Event("translation-end"));
         }, 8000);
         return () => clearTimeout(watchdog);

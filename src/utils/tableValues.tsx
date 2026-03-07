@@ -360,6 +360,18 @@ export const initialTableConfig: Record<
       inTable: true,
       required: true,
     },
+    {
+      label: "Mentor Employee",
+      type: "select",
+      filterType: "select",
+      key: "mentorEmployee",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("employee"),
+      inForm: true,
+      inEdit: true,
+      inTable: false,
+      required: false,
+    },
 
     {
       label: "Working Hours",

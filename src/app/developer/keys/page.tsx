@@ -58,6 +58,7 @@ export default function DeveloperKeysPage() {
   const [connectorExpiresInDays, setConnectorExpiresInDays] = useState<number>(30);
   const [newConnectorToken, setNewConnectorToken] = useState("");
   const [newConnectorUrl, setNewConnectorUrl] = useState("");
+  const [connectorWarning, setConnectorWarning] = useState("");
   const apiBaseHost = useMemo(() => {
     try {
       return new URL(getResolvedDeveloperApiBase()).origin;
@@ -71,18 +72,34 @@ export default function DeveloperKeysPage() {
   const load = useCallback(async () => {
     try {
       setError("");
+      setConnectorWarning("");
       setIsLoading(true);
-      const [keysRes, presetsRes, connectorsRes] = await Promise.all([
+      const [keysRes, presetsRes, connectorsRes] = await Promise.allSettled([
         devListKeys(),
         devGetKeyPresets(),
         devListMcpConnectors(),
       ]);
-      setKeys(keysRes?.data || []);
-      setPresets(presetsRes?.data || {});
-      const fetchedConnectors = connectorsRes?.data || [];
-      setConnectors(fetchedConnectors);
-      if (Array.isArray(keysRes?.data) && keysRes.data.length > 0) {
-        setConnectorApiKeyId((prev) => prev || String(keysRes.data[0].id || ""));
+      if (keysRes.status !== "fulfilled") {
+        throw keysRes.reason;
+      }
+      if (presetsRes.status !== "fulfilled") {
+        throw presetsRes.reason;
+      }
+
+      setKeys(keysRes.value?.data || []);
+      setPresets(presetsRes.value?.data || {});
+      if (Array.isArray(keysRes.value?.data) && keysRes.value.data.length > 0) {
+        setConnectorApiKeyId((prev) => prev || String(keysRes.value.data[0].id || ""));
+      }
+
+      if (connectorsRes.status === "fulfilled") {
+        setConnectors(connectorsRes.value?.data || []);
+      } else {
+        setConnectors([]);
+        const warnMessage = String(connectorsRes.reason?.message || "Connector endpoint unavailable.");
+        setConnectorWarning(
+          `MCP connector endpoints are not reachable right now. Keys still work. ${warnMessage}`
+        );
       }
     } catch (e: any) {
       const message = e?.message || "Failed to load developer keys.";
@@ -380,6 +397,11 @@ export default function DeveloperKeysPage() {
               </tbody>
             </table>
           </div>
+          {connectorWarning ? (
+            <p className="mt-4 rounded-lg border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-100">
+              {connectorWarning}
+            </p>
+          ) : null}
         </div>
 
         {error && (

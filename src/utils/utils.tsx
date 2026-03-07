@@ -4,11 +4,11 @@ import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiUsers } from "react-icons/fi";
 import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
-import { MdDashboard, MdOutlinePriceChange } from "react-icons/md";
+import { MdDashboard, MdOutlinePriceChange, MdOutlineAccountTree } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
 import { GiBookAura } from "react-icons/gi";
-import { GiBeamsAura } from "react-icons/gi";
+
 import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
@@ -64,14 +64,9 @@ export const sidebarOptions = [
     link: "/dashboard",
   },
   {
-    name: "Users", //Translate
-    icon: <GiBeamsAura />,
-    link: "/dashboard/users",
-  },
-  {
-    name: "Essentials", //Translate
-    icon: <MdOutlineSettingsInputComponent />,
-    link: "/dashboard/essentials",
+    name: "Enquiries", //Translate
+    icon: <RiFileAddLine />,
+    link: "/dashboard/enquiries",
   },
   {
     name: "Products", //Translate
@@ -94,9 +89,19 @@ export const sidebarOptions = [
     link: "/dashboard/companyProduct",
   },
   {
-    name: "Enquiries", //Translate
-    icon: <RiFileAddLine />,
-    link: "/dashboard/enquiries",
+    name: "Hierarchy",
+    icon: <MdOutlineAccountTree />,
+    link: "/dashboard/employee/hierarchy",
+  },
+  {
+    name: "Team",
+    icon: <FiUsers />,
+    link: "/dashboard/employee/team",
+  },
+  {
+    name: "Earnings",
+    icon: <MdOutlinePriceChange />,
+    link: "/dashboard/employee/earnings",
   },
   {
     name: "Orders",
@@ -109,33 +114,44 @@ export const sidebarOptions = [
     link: "/dashboard/execution-enquiries",
   },
   {
-    name: "Notifications",
-    icon: <FiBell />,
-    link: "/dashboard/notifications",
-  },
-  {
     name: "Approvals",
     icon: <FiCheckSquare />,
     link: "/dashboard/approvals",
   },
   {
+    name: "Notifications",
+    icon: <FiBell />,
+    link: "/dashboard/notifications",
+  },
+
+  {
     name: "Profile", //Translate
     icon: <RiUser2Fill />,
     link: "/dashboard/profile",
   },
-  {
-    name: "Map", //Translate
-    icon: <LiaMapMarkedAltSolid />,
-    link: "/dashboard/map",
-  },
+  // {
+  //   name: "Map", //Translate
+  //   icon: <LiaMapMarkedAltSolid />,
+  //   link: "/dashboard/map",
+  // },
   {
     name: "Geo Sphere", //Translate
     icon: <BsGlobeCentralSouthAsia />,
     link: "/dashboard/geosphere",
   },
   {
-    name: "RS Form", //Translate
-    icon: <SiGoogleforms />,
-    link: "/dashboard/rsForm",
+    name: "Users", //Translate
+    icon: <FiUsers />,
+    link: "/dashboard/users",
   },
+  {
+    name: "Essentials", //Translate
+    icon: <MdOutlineSettingsInputComponent />,
+    link: "/dashboard/essentials",
+  },
+  // {
+  //   name: "RS Form", //Translate
+  //   icon: <SiGoogleforms />,
+  //   link: "/dashboard/rsForm",
+  // },
 ];

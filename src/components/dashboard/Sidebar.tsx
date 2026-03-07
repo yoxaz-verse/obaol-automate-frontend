@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import {
   FiFileText,
   FiInbox,
@@ -28,28 +28,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useContext(AuthContext);
-  const [selectedOption, setSelectedOption] = useState<string>("dashboard");
-
-  useEffect(() => {
-    const pathSegments = pathname.split("/").filter(Boolean);
-    let currentOption = "dashboard";
-
-    if (pathSegments[0] === "dashboard") {
-      currentOption = pathSegments[1] || "dashboard";
-    } else {
-      currentOption = pathSegments[0];
-    }
-
-    setSelectedOption(currentOption.toLowerCase());
-  }, [pathname]);
 
   const filteredOptions = sidebarOptions.filter((option) => {
     const allowedRoles = routeRoles[option.link] || [];
     return user?.role ? allowedRoles.includes(user.role) : false;
   });
 
-  const handleOptionClick = (optionLink: string, optionName: string) => {
-    setSelectedOption(optionName.toLowerCase());
+  const handleOptionClick = (optionLink: string) => {
     router.push(optionLink);
   };
 
@@ -90,13 +75,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
       {/* Navigation Options */}
       <div className="flex-1 px-3 py-4 space-y-2 overflow-y-auto no-scrollbar">
         {filteredOptions.map((option, index) => {
-          const isActive = selectedOption === option.name.toLowerCase() ||
-            (option.name === "Dashboard" && selectedOption === "dashboard");
+          const isDashboardLink = option.link === "/dashboard";
+          const isActive = isDashboardLink
+            ? pathname === "/dashboard"
+            : pathname === option.link || pathname.startsWith(`${option.link}/`);
 
           const content = (
             <div
               key={index}
-              onClick={() => handleOptionClick(option.link, option.name)}
+              onClick={() => handleOptionClick(option.link)}
               className={`group relative flex items-center px-4 py-3 cursor-pointer rounded-xl transition-all duration-200 ${isActive
                 ? "bg-default-100/80 text-warning-500"
                 : "text-default-500 hover:bg-default-100 hover:text-foreground"

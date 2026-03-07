@@ -289,6 +289,15 @@ export const brandPublicRoutes = {
   products: "/brand/products", // + /:companyId
 };
 
+export const employeeHierarchyRoutes = {
+  leadership: (employeeId: string) => `/employees/leadership/${employeeId}`,
+  team: (employeeId: string) => `/employees/team/${employeeId}`,
+};
+
+export const commissionRoutes = {
+  employeeHistory: (employeeId: string) => `/commissions/employee/${employeeId}`,
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
@@ -356,4 +365,6 @@ export const apiRoutes = {
   companySubFunction: companySubFunctionRoutes,
   companyFunctionMapping: companyFunctionMappingRoutes,
   catalog: catalogRoutes,
+  employeeHierarchy: employeeHierarchyRoutes,
+  commissions: commissionRoutes,
 };

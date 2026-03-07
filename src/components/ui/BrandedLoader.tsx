@@ -43,7 +43,7 @@ export default function BrandedLoader({
           <motion.div
             animate={reducedMotion ? undefined : { opacity: [0.82, 1, 0.82] }}
             transition={reducedMotion ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            className={`relative z-10 ${currentSize.frame} rounded-2xl bg-content1 border border-default-200/80 shadow-md flex items-center justify-center`}
+            className={`relative z-10 ${currentSize.frame} rounded-2xl m-5 bg-content1 border border-default-200/80 shadow-md flex items-center justify-center`}
           >
             <Image
               src="/logo.png"

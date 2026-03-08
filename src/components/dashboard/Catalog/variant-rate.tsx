@@ -151,6 +151,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
+  const shouldUseServerSearch = !(isMarketplaceView && typeof externalSearch === "string");
+  const serverSearch = shouldUseServerSearch ? effectiveSearch : "";
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
@@ -221,12 +223,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
         additionalParams,
         refetchData,
         effectiveFilters,
-        effectiveSearch,
+        serverSearch,
         addedRateIds.size, // Refresh when catalog items change
       ]}
       page={1}
       limit={1000}
-      search={effectiveSearch}
+      search={serverSearch}
       additionalParams={{
         ...(effectiveFilters || {}),
         ...(additionalParams || {}),
@@ -350,16 +352,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
           new Date(startTimestamp).getTime() + FIFTEEN_MINUTES > Date.now();
         // Transform the rows if needed
         const tableData = (variantRateFetchedData || [])
-          .filter((item: any) =>
-            // 1) CatalogItem / DisplayedRate: keep existing visibility.
-            // 2) VariantRate (Marketplace): allow rows even when company relation is missing,
-            //    as long as productVariant reference exists.
-            (rate !== "variantRate") ||
-            (user?.role?.toLowerCase() === "admin") ||
-            (isMarketplace
-              ? Boolean(item.productVariant || item.productVariantId)
-              : (item.associate || item.associateCompany || item.associateId || item.associateCompanyId))
-          )
+          .filter((item: any) => {
+            if (rate !== "variantRate") return true;
+            if (isMarketplace) {
+              // Marketplace must not hide rows just because some relations are sparsely populated.
+              // Keep only a minimal guard against malformed documents.
+              return Boolean(item?._id || item?.id);
+            }
+            return Boolean(item.associate || item.associateCompany || item.associateId || item.associateCompanyId);
+          })
           .map((item: any) => {
             const { isDeleted, isActive, password, __v, ...rest } = item;
 
@@ -388,13 +389,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     : (item.associateCompany?.name || "OBAOL"),
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
-                productVariant:
-                  (item.productVariant?.product?.name || "") +
-                  " " +
-                  (item.productVariant?.name || ""),
+                productVariant: String(
+                  (
+                    (item.productVariant?.product?.name || "") +
+                    " " +
+                    (item.productVariant?.name || item.productVariantName || "")
+                  ).trim() || "N/A"
+                ),
                 product: item.productVariant?.product?.name,
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
-                productVariantId: item.productVariant?._id,
+                productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
 
                 // Column Mapping
                 rate: isAdminUser && isMarketplace
@@ -491,6 +495,24 @@ const VariantRate: React.FC<VariantRateProps> = ({
             }
           });
 
+        const marketplaceSearchText = effectiveSearch.toLowerCase();
+        const finalTableData =
+          isMarketplaceView && marketplaceSearchText
+            ? tableData.filter((row: any) => {
+              const haystack = [
+                row.product,
+                row.productVariant,
+                row.associate,
+                row.rate,
+                row.quantity,
+              ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+              return haystack.includes(marketplaceSearchText);
+            })
+            : tableData;
+
         return (
           <div className="w-full max-w-full min-w-0">
             {(!hideBuiltInFilters || (!displayOnly && rate === "variantRate" && canAddOwnRate)) && (
@@ -549,7 +571,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             <section className="hidden md:block w-full min-w-0 max-w-full overflow-hidden">
               <TableFrame>
                 <CommonTable
-                  TableData={tableData}
+                  TableData={finalTableData}
                   columns={columns}
                   isLoading={false}
                   otherModal={(rowItem: any) => {
@@ -673,7 +695,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               </TableFrame>
             </section >
             <section className="md:hidden space-y-2">
-              {tableData.map((item: any, index: number) => {
+              {finalTableData.map((item: any, index: number) => {
                 const isLive = item.isLive;
                 return (
                   <motion.div

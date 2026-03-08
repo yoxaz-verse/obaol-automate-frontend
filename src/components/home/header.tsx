@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useContext } from "react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { LanguageSwitcher } from "@/components/dashboard/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 
@@ -87,10 +86,6 @@ export default function Header() {
                 </svg>
               </Link>
 
-              <div className="hidden lg:block">
-                <LanguageSwitcher />
-              </div>
-
               {/* CTA */}
               <Link
                 href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
@@ -170,7 +165,6 @@ export default function Header() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </Link>
-                <LanguageSwitcher />
                 <ThemeSwitcher />
               </div>
             </nav>

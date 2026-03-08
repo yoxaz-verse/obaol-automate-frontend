@@ -18,23 +18,38 @@ interface AuthLayoutProps {
     };
 }
 
-const FloatingPixel = ({ delay }: { delay: number }) => (
-    <motion.div
-        className="absolute w-1 h-1 bg-warning-500/40 rounded-full"
-        initial={{ y: "110vh", x: Math.random() * 100 + "vw", opacity: 0 }}
-        animate={{
-            y: "-10vh",
-            opacity: [0, 1, 0],
-        }}
-        transition={{
+const FloatingPixel = ({ delay }: { delay: number }) => {
+    const [mounted, setMounted] = useState(false);
+    const [config, setConfig] = useState({ x: "0vw", duration: 15 });
+
+    useEffect(() => {
+        setMounted(true);
+        setConfig({
+            x: Math.random() * 100 + "vw",
             duration: 15 + Math.random() * 10,
-            repeat: Infinity,
-            delay: delay,
-            ease: "linear",
-            repeatType: "loop",
-        }}
-    />
-);
+        });
+    }, []);
+
+    if (!mounted) return null;
+
+    return (
+        <motion.div
+            className="absolute w-1 h-1 bg-warning-500/40 rounded-full"
+            initial={{ y: "110vh", x: config.x, opacity: 0 }}
+            animate={{
+                y: "-10vh",
+                opacity: [0, 1, 0],
+            }}
+            transition={{
+                duration: config.duration,
+                repeat: Infinity,
+                delay: delay,
+                ease: "linear",
+                repeatType: "loop",
+            }}
+        />
+    );
+};
 
 
 
@@ -78,7 +93,7 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
     }, [subIndex, index, reverse, words]);
 
     return (
-        <span>
+        <span translate="no">
             {`${words[index].substring(0, subIndex)}`}
             {blink ? "|" : " "}
         </span>
@@ -171,8 +186,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
                         ) : (
                             <>
                                 <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
-                                    OBAOL <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block h-[1.2em]">
+                                    <span>OBAOL</span> <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block min-h-[1.2em] leading-tight pb-1">
                                         <TypewriterEffect
                                             words={[
                                                 "AUTOMATION",

@@ -9,9 +9,9 @@ import {
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
-import Image from "next/image";
 import AuthLayout from "../Auth/AuthLayout";
 import CompanyInterestsModal from "./company-interests-modal";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 interface ILoginProps {
   role: string;
@@ -125,17 +125,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-screen relative w-full m-0 p-0 justify-center items-center flex-col bg-background">
-        <Image
-          src={"/logo.png"}
-          width={300}
-          height={300}
-          alt="Obaol"
-          className="w-max rounded-md"
-        />
-      </div>
-    );
+    return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;
   }
 
   return (

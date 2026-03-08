@@ -3,176 +3,313 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { LuLanguages } from "react-icons/lu";
-import { languages } from "@/data/languages";
+import { usePathname } from "next/navigation";
+import { isLanguageSupported, languages, normalizeLanguageCode } from "@/data/languages";
+import { clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
+import { showToastMessage } from "@/utils/utils";
 
 declare global {
-    interface Window {
-        googleTranslateElementInit: () => void;
-        // @ts-ignore
-        google: any;
-    }
+  interface Window {
+    googleTranslateElementInit: () => void;
+    // @ts-ignore
+    google: any;
+  }
 }
 
 export const TranslationEngine = () => {
-    const [isSwitching, setIsSwitching] = useState(false);
-    const [targetLang, setTargetLang] = useState("");
-    const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [targetLang, setTargetLang] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-        let isScriptLoading = false;
-        let isScriptReady = false;
-        const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
-            if (process.env.NODE_ENV !== "production") {
-                // eslint-disable-next-line no-console
-                console.debug(`[TranslationEngine] ${checkpoint}`, payload || {});
-            }
+  useEffect(() => {
+    setMounted(true);
+    let isScriptLoading = false;
+    let isScriptReady = false;
+    let pendingLanguageToApply = "";
+    let startupApplyTimeout: ReturnType<typeof setTimeout> | null = null;
+    let applyRetryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let unavailableToastShown = false;
+    let activeApplyRunId = 0;
+
+    const APPLY_RETRY_MS = 180;
+    const MAX_APPLY_ATTEMPTS = 40;
+
+    const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.debug(`[TranslationEngine] ${checkpoint}`, payload || {});
+      }
+    };
+
+    const readPreferredLanguage = () => normalizeLanguageCode(getLanguageCookie());
+
+    const emitUnavailable = (reason: string) => {
+      const preferred = readPreferredLanguage();
+      setIsSwitching(false);
+      debugLog("fallback", { reason, preferred });
+      if (preferred !== "en" && !unavailableToastShown) {
+        unavailableToastShown = true;
+        showToastMessage({
+          type: "warning",
+          message: "Live translation is unavailable in this browser right now. Language preference is saved.",
+          position: "top-right",
+        });
+      }
+      window.dispatchEvent(new Event("translation-unavailable"));
+    };
+
+    const clearApplyRetryTimer = () => {
+      if (applyRetryTimeout) {
+        clearTimeout(applyRetryTimeout);
+        applyRetryTimeout = null;
+      }
+    };
+
+    const applyLanguageToWidget = (langCode: string): boolean => {
+      const normalized = normalizeLanguageCode(langCode);
+      if (!normalized || normalized === "en") return true;
+      if (!isLanguageSupported(normalized)) return false;
+
+      const select = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+      if (!select) return false;
+
+      const hasLanguage = Array.from(select.options || []).some(
+        (option) => String(option.value || "").toLowerCase() === normalized
+      );
+      if (!hasLanguage) {
+        debugLog("language-not-in-widget", { langCode: normalized });
+        return false;
+      }
+
+      select.value = normalized;
+      select.dispatchEvent(new Event("change"));
+      select.dispatchEvent(new Event("click"));
+      return true;
+    };
+
+    const applyLanguageWithRetries = (langCode: string, maxAttempts = MAX_APPLY_ATTEMPTS): Promise<boolean> =>
+      new Promise((resolve) => {
+        const normalized = normalizeLanguageCode(langCode);
+        if (!normalized || normalized === "en") {
+          resolve(true);
+          return;
+        }
+
+        const runId = ++activeApplyRunId;
+        let attempts = 0;
+
+        const attempt = () => {
+          if (runId !== activeApplyRunId) {
+            resolve(false);
+            return;
+          }
+
+          attempts += 1;
+          const applied = applyLanguageToWidget(normalized);
+          debugLog("apply-retry", { langCode: normalized, attempts, applied });
+
+          if (applied) {
+            resolve(true);
+            return;
+          }
+
+          if (attempts >= maxAttempts) {
+            resolve(false);
+            return;
+          }
+
+          clearApplyRetryTimer();
+          applyRetryTimeout = setTimeout(attempt, APPLY_RETRY_MS);
         };
 
-        const handleStart = (e: any) => {
-            setTargetLang(e.detail.name);
-            setIsSwitching(true);
-            debugLog("start", { lang: e?.detail?.name || "" });
-        };
-        const handleEnd = () => {
-            setIsSwitching(false);
-            debugLog("end");
-        };
-        const handleUnavailable = () => {
-            setIsSwitching(false);
-            debugLog("fallback", { reason: "translation-unavailable-event" });
-        };
+        attempt();
+      });
 
-        window.addEventListener("translation-start", handleStart);
-        window.addEventListener("translation-end", handleEnd);
-        window.addEventListener("translation-unavailable", handleUnavailable);
+    window.googleTranslateElementInit = () => {
+      if (window.google && window.google.translate) {
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages: languages.map((l) => l.code).join(","),
+            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+        isScriptReady = true;
+        isScriptLoading = false;
+        debugLog("widget-ready");
 
-        // Define the Google Translate initialization function
-        window.googleTranslateElementInit = () => {
-            if (window.google && window.google.translate) {
-                new window.google.translate.TranslateElement(
-                    {
-                        pageLanguage: "en",
-                        includedLanguages: languages.map((l) => l.code).join(","),
-                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                        autoDisplay: false,
-                    },
-                    "google_translate_element"
-                );
-                isScriptReady = true;
-                isScriptLoading = false;
-                debugLog("widget-ready");
+        if (pendingLanguageToApply) {
+          const pending = pendingLanguageToApply;
+          pendingLanguageToApply = "";
+          applyLanguageWithRetries(pending).then((applied) => {
+            debugLog("apply-pending-language", { langCode: pending, applied });
+            if (!applied) {
+              emitUnavailable("widget-missing-pending-language");
+            } else {
+              window.dispatchEvent(new Event("translation-engine-ready"));
             }
-        };
+          });
+        } else {
+          window.dispatchEvent(new Event("translation-engine-ready"));
+        }
 
-        const ensureTranslateScript = () => {
-            if (isScriptReady || isScriptLoading) return;
+        if (startupApplyTimeout) {
+          clearTimeout(startupApplyTimeout);
+          startupApplyTimeout = null;
+        }
+      }
+    };
 
-            if (document.getElementById("google-translate-script")) {
-                isScriptLoading = true;
-                debugLog("script-exists");
-                return;
-            }
+    const ensureTranslateScript = () => {
+      if (isScriptReady || isScriptLoading) return;
 
-            isScriptLoading = true;
-            debugLog("script-load-start");
-            const addScript = document.createElement("script");
-            addScript.id = "google-translate-script";
-            addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-            addScript.async = true;
-            addScript.onerror = () => {
-                isScriptLoading = false;
-                debugLog("script-load-error");
-                window.dispatchEvent(new Event("translation-unavailable"));
-            };
-            document.body.appendChild(addScript);
-        };
+      if (document.getElementById("google-translate-script")) {
+        isScriptLoading = true;
+        return;
+      }
 
-        // Apply styles to hide Google Translate UI
-        const style = document.createElement("style");
-        style.innerHTML = `
-            body {
-                top: 0 !important;
-                position: static !important;
-            }
-            iframe.skiptranslate {
-                display: none !important;
-            }
-            .goog-te-banner-frame {
-                display: none !important;
-            }
-        `;
-        document.head.appendChild(style);
-        window.addEventListener("translation-init", ensureTranslateScript);
+      isScriptLoading = true;
+      debugLog("script-load-start");
+      const addScript = document.createElement("script");
+      addScript.id = "google-translate-script";
+      addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      addScript.async = true;
+      addScript.onerror = () => {
+        isScriptLoading = false;
+        debugLog("script-load-error");
+        window.dispatchEvent(new Event("translation-engine-error"));
+        emitUnavailable("script-load-error");
+      };
+      document.body.appendChild(addScript);
+    };
 
-        return () => {
-            window.removeEventListener("translation-start", handleStart);
-            window.removeEventListener("translation-end", handleEnd);
-            window.removeEventListener("translation-unavailable", handleUnavailable);
-            window.removeEventListener("translation-init", ensureTranslateScript);
-            if (document.head.contains(style)) {
-                document.head.removeChild(style);
-            }
-        };
-    }, []);
+    const applySavedLanguagePreference = () => {
+      const preferredLang = readPreferredLanguage();
+      if (!preferredLang || preferredLang === "en") return;
 
-    useEffect(() => {
-        if (!isSwitching) return;
-        const watchdog = setTimeout(() => {
-            setIsSwitching(false);
-            if (process.env.NODE_ENV !== "production") {
-                // eslint-disable-next-line no-console
-                console.debug("[TranslationEngine] fallback", { reason: "overlay-watchdog-timeout" });
-            }
-            window.dispatchEvent(new Event("translation-end"));
-        }, 8000);
-        return () => clearTimeout(watchdog);
-    }, [isSwitching]);
+      if (!isLanguageSupported(preferredLang)) {
+        clearLanguageCookies();
+        return;
+      }
 
-    const overlay = isSwitching ? (
-        <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background backdrop-blur-3xl animate-in fade-in duration-500">
-            <div className="flex flex-col items-center gap-8 p-12 rounded-[40px] bg-content1 border border-default-200 shadow-2xl scale-in-center max-w-[90vw] backdrop-blur-xl">
-                <div className="relative">
-                    <LuLanguages className="text-warning-500 w-24 h-24 relative" />
-                    <div className="absolute inset-0 bg-warning-500/20 blur-3xl rounded-full -z-10 animate-pulse"></div>
-                </div>
-                <div className="text-center space-y-4">
-                    <h2 className="text-4xl font-black tracking-tight text-foreground uppercase italic underline decoration-warning-500 selection:bg-warning-500/30">Translating</h2>
-                    <p className="text-2xl text-default-600 font-bold">
-                        Optimizing for <span className="text-warning-500 font-black decoration-warning-500/30 underline-offset-[12px]">{targetLang}</span>
-                    </p>
-                </div>
-                <div className="w-80 h-2 bg-default-100 rounded-full overflow-hidden border border-default-200 shadow-inner">
-                    <div className="h-full bg-warning-500 animate-progress origin-left shadow-[0_0_20px_rgba(251,146,60,0.5)]"></div>
-                </div>
-            </div>
-            <style>{`
-                @keyframes progress {
-                    0% { transform: scaleX(0); }
-                    100% { transform: scaleX(1); }
-                }
-                .animate-progress {
-                    animation: progress 3s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-                }
-                .scale-in-center {
-                    animation: scale-in-center 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
-                }
-                @keyframes scale-in-center {
-                    0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
-                    100% { transform: scale(1); opacity: 1; filter: blur(0); }
-                }
-            `}</style>
-        </div>
-    ) : null;
+      setLanguageCookies(preferredLang);
 
-    if (!mounted) return <div id="google_translate_element" className="hidden" aria-hidden="true"></div>;
+      if (isScriptReady) {
+        applyLanguageWithRetries(preferredLang).then((applied) => {
+          debugLog("apply-saved-ready", { langCode: preferredLang, applied });
+          if (!applied) {
+            emitUnavailable("saved-apply-failed-after-ready");
+          }
+        });
+      } else {
+        pendingLanguageToApply = preferredLang;
+        debugLog("apply-saved-pending", { langCode: preferredLang });
+        ensureTranslateScript();
+      }
 
-    return (
-        <>
-            <div id="google_translate_element" className="hidden" aria-hidden="true"></div>
-            {mounted && overlay && createPortal(overlay, document.body)}
-        </>
-    );
+      if (startupApplyTimeout) {
+        clearTimeout(startupApplyTimeout);
+      }
+      startupApplyTimeout = setTimeout(() => {
+        if (!pendingLanguageToApply) return;
+        pendingLanguageToApply = "";
+        clearApplyRetryTimer();
+        emitUnavailable("startup-apply-timeout");
+      }, 10_000);
+    };
+
+    const handleStart = (event: Event) => {
+      const detail = (event as CustomEvent<{ name?: string }>).detail;
+      setTargetLang(detail?.name || "Language");
+      setIsSwitching(true);
+    };
+
+    const handleEnd = () => {
+      setIsSwitching(false);
+    };
+
+    const handleInit = () => {
+      ensureTranslateScript();
+    };
+
+    const handleReapply = () => {
+      setTimeout(applySavedLanguagePreference, 0);
+    };
+
+    window.addEventListener("translation-start", handleStart);
+    window.addEventListener("translation-end", handleEnd);
+    window.addEventListener("translation-init", handleInit);
+    window.addEventListener("translation-reapply", handleReapply);
+    window.addEventListener("translation-unavailable", handleEnd);
+
+    const style = document.createElement("style");
+    style.innerHTML = `
+      body {
+        top: 0 !important;
+        position: static !important;
+      }
+      iframe.skiptranslate,
+      .goog-te-banner-frame {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    setTimeout(applySavedLanguagePreference, 0);
+
+    return () => {
+      activeApplyRunId += 1;
+      clearApplyRetryTimer();
+      if (startupApplyTimeout) {
+        clearTimeout(startupApplyTimeout);
+        startupApplyTimeout = null;
+      }
+      window.removeEventListener("translation-start", handleStart);
+      window.removeEventListener("translation-end", handleEnd);
+      window.removeEventListener("translation-init", handleInit);
+      window.removeEventListener("translation-reapply", handleReapply);
+      window.removeEventListener("translation-unavailable", handleEnd);
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    window.dispatchEvent(new Event("translation-reapply"));
+  }, [pathname, mounted]);
+
+  useEffect(() => {
+    if (!isSwitching) return;
+    const watchdog = setTimeout(() => {
+      setIsSwitching(false);
+      window.dispatchEvent(new Event("translation-end"));
+    }, 8000);
+    return () => clearTimeout(watchdog);
+  }, [isSwitching]);
+
+  const overlay = isSwitching ? (
+    <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background/80 backdrop-blur-xl">
+      <div className="flex flex-col items-center gap-4 rounded-3xl border border-default-200 bg-content1 px-8 py-7 shadow-xl">
+        <LuLanguages className="text-warning-500 h-12 w-12" />
+        <p className="text-sm font-bold tracking-wide uppercase text-default-600">Applying language</p>
+        <p className="text-lg font-semibold text-foreground">{targetLang || "Language"}</p>
+      </div>
+    </div>
+  ) : null;
+
+  if (!mounted) return <div id="google_translate_element" className="hidden" aria-hidden="true"></div>;
+
+  return (
+    <>
+      <div id="google_translate_element" className="hidden" aria-hidden="true"></div>
+      {overlay ? createPortal(overlay, document.body) : null}
+    </>
+  );
 };
 
 export default TranslationEngine;

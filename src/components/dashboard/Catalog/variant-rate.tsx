@@ -58,6 +58,9 @@ interface VariantRateProps {
   refetchData?: () => void;
   additionalParams?: Record<string, any>;
   showAssociateColumn?: boolean;
+  hideBuiltInFilters?: boolean;
+  externalSearch?: string;
+  externalFilters?: Record<string, any>;
 }
 
 /**
@@ -74,6 +77,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
   VariantRateMixed,
   additionalParams,
   showAssociateColumn = false,
+  hideBuiltInFilters = false,
+  externalSearch,
+  externalFilters,
 }) => {
   const router = useRouter();
   const productVariantValue = productVariant || null;
@@ -143,6 +149,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const effectiveFilters = externalFilters ?? filters;
+  const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
@@ -212,15 +220,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
         productVariantValue?._id,
         additionalParams,
         refetchData,
-        filters,
-        debouncedSearch,
+        effectiveFilters,
+        effectiveSearch,
         addedRateIds.size, // Refresh when catalog items change
       ]}
       page={1}
       limit={1000}
-      search={debouncedSearch}
+      search={effectiveSearch}
       additionalParams={{
-        ...(filters || {}),
+        ...(effectiveFilters || {}),
         ...(additionalParams || {}),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
@@ -485,29 +493,33 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         return (
           <div className="w-full max-w-full min-w-0">
-            <div className="flex justify-between items-center gap-3 mb-4">
-              <DynamicFilter
-                currentTable={"variantRate"}
-                formFields={filterVariantRateFormFields}
-                onApply={handleFiltersUpdate}
-                searchValue={search}
-                onSearchChange={setSearch}
-                searchPlaceholder="Search rates..."
-              />
-              {!displayOnly && rate === "variantRate" && canAddOwnRate && (
-                <AddModal
-                  buttonLabel="Add"
-                  currentTable={rate}
-                  formFields={variantRateFormFields}
-                  apiEndpoint={apiRoutesByRole[rate]}
-                  refetchData={refetchData}
-                  additionalVariable={{
-                    ...(productVariantValue && { productVariant: productVariantValue._id }),
-                    ...(user?.role === "Associate" && { associate: user?.id }),
-                  }}
-                />
-              )}
-            </div>
+            {(!hideBuiltInFilters || (!displayOnly && rate === "variantRate" && canAddOwnRate)) && (
+              <div className="flex justify-between items-center gap-3 mb-4">
+                {!hideBuiltInFilters && (
+                  <DynamicFilter
+                    currentTable={"variantRate"}
+                    formFields={filterVariantRateFormFields}
+                    onApply={handleFiltersUpdate}
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    searchPlaceholder="Search rates..."
+                  />
+                )}
+                {!displayOnly && rate === "variantRate" && canAddOwnRate && (
+                  <AddModal
+                    buttonLabel="Add"
+                    currentTable={rate}
+                    formFields={variantRateFormFields}
+                    apiEndpoint={apiRoutesByRole[rate]}
+                    refetchData={refetchData}
+                    additionalVariable={{
+                      ...(productVariantValue && { productVariant: productVariantValue._id }),
+                      ...(user?.role === "Associate" && { associate: user?.id }),
+                    }}
+                  />
+                )}
+              </div>
+            )}
             {!displayOnly && rate === "variantRate" && isAssociateUser && !hasLinkedCompany && (
               <Card className="mb-4 border border-warning-300/30 bg-warning-500/10">
                 <CardBody className="py-3 px-4">

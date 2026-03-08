@@ -1,15 +1,90 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
-import AuthContext from "@/context/AuthContext";
 import { LuWarehouse } from "react-icons/lu";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import MarketplaceFilterBar, {
+  MarketplaceFilterState,
+} from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
+
+type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
+
+const emptyState: MarketplaceFilterState = { search: "", filters: {} };
+
+const parseStateFromParams = (
+  params: URLSearchParams,
+  prefix: "ml_" | "mo_"
+): MarketplaceFilterState => {
+  const next: MarketplaceFilterState = { search: "", filters: {} };
+  const search = params.get(`${prefix}search`);
+  if (search) next.search = search;
+  return next;
+};
+
+const serializeStateToParams = (
+  params: URLSearchParams,
+  prefix: "ml_" | "mo_",
+  state: MarketplaceFilterState
+) => {
+  Array.from(params.keys()).forEach((key) => {
+    if (key.startsWith(prefix) && key !== `${prefix}search`) {
+      params.delete(key);
+    }
+  });
+  params.delete(`${prefix}search`);
+
+  const search = String(state.search || "").trim();
+  if (search) params.set(`${prefix}search`, search);
+};
 
 export default function MarketplacePage() {
-    const [currentTable, setCurrentTable] = useState("marketplace-live");
-    const { user } = useContext(AuthContext);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const [isHydratedFromUrl, setIsHydratedFromUrl] = useState(false);
+    const [currentTable, setCurrentTable] = useState<MarketplaceTabKey>("marketplace-live");
+    const [liveState, setLiveState] = useState<MarketplaceFilterState>(emptyState);
+    const [offlineState, setOfflineState] = useState<MarketplaceFilterState>(emptyState);
+
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        const tabFromUrl = params.get("tab");
+        const tab = tabFromUrl === "marketplace-offline" ? "marketplace-offline" : "marketplace-live";
+        setCurrentTable(tab);
+        setLiveState(parseStateFromParams(params, "ml_"));
+        setOfflineState(parseStateFromParams(params, "mo_"));
+        setIsHydratedFromUrl(true);
+    }, [searchParams]);
+
+    useEffect(() => {
+        if (!isHydratedFromUrl) return;
+        const current = new URLSearchParams(searchParams.toString());
+        const next = new URLSearchParams(searchParams.toString());
+
+        next.set("tab", currentTable);
+        serializeStateToParams(next, "ml_", liveState);
+        serializeStateToParams(next, "mo_", offlineState);
+
+        if (next.toString() !== current.toString()) {
+            router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+        }
+    }, [currentTable, liveState, offlineState, isHydratedFromUrl, pathname, router, searchParams]);
+
+    const activeState = useMemo(
+        () => (currentTable === "marketplace-live" ? liveState : offlineState),
+        [currentTable, liveState, offlineState]
+    );
+
+    const setActiveState = (nextState: MarketplaceFilterState) => {
+        if (currentTable === "marketplace-live") {
+            setLiveState(nextState);
+            return;
+        }
+        setOfflineState(nextState);
+    };
 
     return (
         <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8">
@@ -33,12 +108,17 @@ export default function MarketplacePage() {
 
                 <div className="bg-content1 rounded-3xl border border-default-200 shadow-sm overflow-hidden">
                     <div className="p-6">
+                        <MarketplaceFilterBar
+                            activeTab={currentTable}
+                            state={activeState}
+                            onStateChange={setActiveState}
+                        />
                         <div className="flex w-full gap-4">
                             <div className="w-full min-w-0 pb-10 overflow-x-auto">
                                 <Tabs
                                     aria-label="Marketplace Tabs"
                                     selectedKey={currentTable}
-                                    onSelectionChange={(key) => setCurrentTable(key as string)}
+                                    onSelectionChange={(key) => setCurrentTable(key as MarketplaceTabKey)}
                                     variant="underlined"
                                     color="warning"
                                     classNames={{
@@ -54,6 +134,9 @@ export default function MarketplacePage() {
                                         <VariantRate
                                             rate="variantRate"
                                             additionalParams={{ view: "marketplace", isLive: true }}
+                                            hideBuiltInFilters
+                                            externalSearch={liveState.search}
+                                            externalFilters={liveState.filters}
                                         />
                                     </Tab>
                                     <Tab key={"marketplace-offline"} title="Marketplace (Offline)">
@@ -62,6 +145,9 @@ export default function MarketplacePage() {
                                         <VariantRate
                                             rate="variantRate"
                                             additionalParams={{ view: "marketplace", isLive: false }}
+                                            hideBuiltInFilters
+                                            externalSearch={offlineState.search}
+                                            externalFilters={offlineState.filters}
                                         />
                                     </Tab>
                                 </Tabs>

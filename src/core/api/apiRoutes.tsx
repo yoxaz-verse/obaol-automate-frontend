@@ -56,6 +56,7 @@ const BASE_PATHS = {
   COMPANY_FUNCTION: "/company-functions",
   COMPANY_SUB_FUNCTION: "/company-sub-functions",
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
+  ORGANIZATION_REPORT: "/organization-reports",
 };
 
 // Define account-related routes separately
@@ -298,6 +299,13 @@ export const commissionRoutes = {
   employeeHistory: (employeeId: string) => `/commissions/employee/${employeeId}`,
 };
 
+export const organizationReportRoutes = {
+  list: BASE_PATHS.ORGANIZATION_REPORT,
+  create: BASE_PATHS.ORGANIZATION_REPORT,
+  update: BASE_PATHS.ORGANIZATION_REPORT,
+  action: (id: string) => `${BASE_PATHS.ORGANIZATION_REPORT}/${id}/action`,
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
@@ -367,4 +375,5 @@ export const apiRoutes = {
   catalog: catalogRoutes,
   employeeHierarchy: employeeHierarchyRoutes,
   commissions: commissionRoutes,
+  organizationReports: organizationReportRoutes,
 };

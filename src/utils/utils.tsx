@@ -18,6 +18,7 @@ import { FiShoppingBag } from "react-icons/fi";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell } from "react-icons/fi";
+import { FiFlag } from "react-icons/fi";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -84,6 +85,11 @@ export const sidebarOptions = [
     link: "/dashboard/catalog",
   },
   {
+    name: "My Company",
+    icon: <GoOrganization />,
+    link: "/dashboard/company",
+  },
+  {
     name: "Companies", //Translate
     icon: <GoOrganization />,
     link: "/dashboard/companyProduct",
@@ -117,6 +123,11 @@ export const sidebarOptions = [
     name: "Approvals",
     icon: <FiCheckSquare />,
     link: "/dashboard/approvals",
+  },
+  {
+    name: "Reports",
+    icon: <FiFlag />,
+    link: "/dashboard/reports",
   },
   {
     name: "Notifications",

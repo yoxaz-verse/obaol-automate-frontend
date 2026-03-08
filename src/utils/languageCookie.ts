@@ -1,9 +1,11 @@
 "use client";
 
 import Cookies from "js-cookie";
+import { normalizeLanguageCode } from "@/data/languages";
 
 const LANGUAGE_COOKIE = "language";
 const GOOGLE_TRANSLATE_COOKIE = "googtrans";
+const LANGUAGE_STORAGE_KEY = "obaol_language";
 const DEFAULT_LANGUAGE = "en";
 
 const ONE_YEAR_DAYS = 365;
@@ -57,17 +59,49 @@ const getCleanupScopes = () => {
 };
 
 export const getLanguageCookie = (): string => {
-  const value = Cookies.get(LANGUAGE_COOKIE);
-  return value || DEFAULT_LANGUAGE;
+  const cookieValue = Cookies.get(LANGUAGE_COOKIE);
+  if (cookieValue) {
+    const normalizedCookie = normalizeLanguageCode(String(cookieValue));
+    if (normalizedCookie !== String(cookieValue).toLowerCase()) {
+      clearLanguageCookies();
+      return DEFAULT_LANGUAGE;
+    }
+    return normalizedCookie;
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const storedValue = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (storedValue) {
+        const normalizedStored = normalizeLanguageCode(String(storedValue));
+        if (normalizedStored !== String(storedValue).toLowerCase()) {
+          window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+          return DEFAULT_LANGUAGE;
+        }
+        return normalizedStored;
+      }
+    } catch {
+      // Ignore storage read issues.
+    }
+  }
+
+  return DEFAULT_LANGUAGE;
 };
 
 export const setLanguageCookies = (langCode: string): boolean => {
-  const normalized = String(langCode || DEFAULT_LANGUAGE).toLowerCase();
+  const normalized = normalizeLanguageCode(String(langCode || DEFAULT_LANGUAGE));
   const googtransValue = `/en/${normalized}`;
   const options = getCookieOptions();
 
   Cookies.set(LANGUAGE_COOKIE, normalized, options);
   Cookies.set(GOOGLE_TRANSLATE_COOKIE, googtransValue, options);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, normalized);
+    } catch {
+      // Ignore storage write issues.
+    }
+  }
   const persisted = Cookies.get(LANGUAGE_COOKIE) === normalized;
 
   if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
@@ -89,6 +123,13 @@ export const clearLanguageCookies = () => {
     Cookies.remove(LANGUAGE_COOKIE, scope);
     Cookies.remove(GOOGLE_TRANSLATE_COOKIE, scope);
   });
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+    } catch {
+      // Ignore storage delete issues.
+    }
+  }
 
   if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
     // eslint-disable-next-line no-console

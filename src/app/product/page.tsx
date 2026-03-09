@@ -1,12 +1,13 @@
 import React from "react";
 import { Metadata } from "next";
-import { Card, CardBody, CardHeader, Spacer } from "@heroui/react";
-import dynamic from "next/dynamic";
+import { Card, CardBody, CardHeader, Spacer } from "@nextui-org/react";
+import nextDynamic from "next/dynamic";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
-const TradeOperatingLayer = dynamic(() => import("@/components/home/tradeoperatinglayer"), {
-    loading: () => <div className="mx-auto mt-10 h-56 w-[95%] max-w-7xl animate-pulse rounded-2xl bg-content2/70" />,
+const TradeOperatingLayer = nextDynamic(() => import("@/components/home/tradeoperatinglayer"), {
+    loading: () => <div className="mx-auto mt-10 h-56 w-[95%] max-w-7xl animate-pulse rounded-2xl bg-default-200/20" />,
 });
+
 const BASE_URL = "https://obaol.com";
 
 export const metadata: Metadata = {
@@ -34,14 +35,13 @@ export const dynamic = "force-dynamic";
 
 async function getProducts() {
     // Fetch from the new public endpoint
-    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+    const publicApiBase = process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL || "http://localhost:5001";
+    const publicApiPath = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
 
-    // During build time, if no public API URL is set, we skip the fetch to avoid ENOTFOUND/ECONNREFUSED
-    if (!publicApiUrl && typeof window === "undefined") {
-        return null;
-    }
-
-    const apiUrl = publicApiUrl || "http://localhost:5001/api/v1/web";
+    // Ensure we have an absolute URL for server-side fetching
+    const apiUrl = publicApiBase.startsWith('http')
+        ? `${publicApiBase}${publicApiPath}`
+        : `http://localhost:5001${publicApiPath}`;
 
     try {
         const res = await fetch(`${apiUrl}/products?limit=300`, {
@@ -49,13 +49,14 @@ async function getProducts() {
         });
 
         if (!res.ok) {
+            console.error(`[ProductPage] Fetch failed with status: ${res.status}`);
             return null;
         }
 
         const data = await res.json();
         return data.data;
     } catch (error) {
-        // Silently fail during build to prevent build-stopping log noise
+        console.error("[ProductPage] Error fetching products:", error);
         return null;
     }
 }
@@ -67,6 +68,8 @@ export default async function ProductPage() {
     // But wait, CrudEngine.findAll returns { data: [...], pagination: ... }
     // GenericCrudController res.json({ success: true, data: result });
     // So result.data is the array.
+    // GenericCrudController returns { success: true, data: { data: [], totalCount: ... } }
+    // So productsResponse is { data: [], totalCount: ... }
     const products = productsResponse?.data || [];
 
     return (
@@ -87,7 +90,7 @@ export default async function ProductPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {products.map((product: any) => (
-                            <Card key={product._id} className="h-full hover:scale-105 transition-transform duration-200">
+                            <Card key={`${product._id}-product-card`} className="h-full hover:scale-105 transition-transform duration-200">
                                 <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
                                     <p className="text-tiny uppercase font-bold text-primary/80 mb-1">
                                         {product.subCategory?.name || "Commodity"}

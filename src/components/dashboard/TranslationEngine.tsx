@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { LuLanguages } from "react-icons/lu";
 import { usePathname } from "next/navigation";
 import { isLanguageSupported, languages, normalizeLanguageCode } from "@/data/languages";
-import { clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
+import { clearGoogtransCookie, clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
 import { showToastMessage } from "@/utils/utils";
 
 declare global {
@@ -187,6 +187,12 @@ export const TranslationEngine = () => {
     };
 
     const applySavedLanguagePreference = () => {
+      const isDashboard = window.location.pathname.startsWith("/dashboard");
+      if (!isDashboard) {
+        clearGoogtransCookie();
+        return;
+      }
+
       const preferredLang = readPreferredLanguage();
       if (!preferredLang || preferredLang === "en") return;
 
@@ -280,6 +286,16 @@ export const TranslationEngine = () => {
 
   useEffect(() => {
     if (!mounted) return;
+
+    const isDashboard = pathname.startsWith("/dashboard");
+    if (!isDashboard) {
+      // Force English outside dashboard
+      clearGoogtransCookie();
+      // If the widget is already initialized and set to something else, we might need a more aggressive reset,
+      // but usually clearing the cookie and not triggering the apply logic is enough.
+      return;
+    }
+
     window.dispatchEvent(new Event("translation-reapply"));
   }, [pathname, mounted]);
 

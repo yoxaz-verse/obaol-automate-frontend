@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ParticleNetwork from "@/components/ui/particle-network";
 import { useContext } from "react";
@@ -35,6 +35,15 @@ const itemVariants = {
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
   const { isAuthenticated, loading } = useContext(AuthContext);
+  const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const update = () => setShowDesktopVisuals(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   /* ===== Parallax Scroll ===== */
   const { scrollYProgress } = useScroll({
@@ -80,9 +89,11 @@ export default function HeroSection() {
       </motion.div>
 
       {/* Particle Network */}
-      <motion.div style={{ opacity: particleOpacity }} className="absolute inset-0 z-0 opacity-15 dark:opacity-35">
-        <ParticleNetwork />
-      </motion.div>
+      {showDesktopVisuals ? (
+        <motion.div style={{ opacity: particleOpacity }} className="absolute inset-0 z-0 opacity-15 dark:opacity-35">
+          <ParticleNetwork />
+        </motion.div>
+      ) : null}
 
       {/* High-Tech Geometric Grid — theme-aware color */}
       <motion.div
@@ -96,15 +107,17 @@ export default function HeroSection() {
       />
 
       {/* Subtle Dock Image overlay at the bottom */}
-      <motion.div style={{ y: dockLayerY }} className="absolute bottom-0 w-full h-[60vh] pointer-events-none z-0">
-        <Image
-          src="/images/hero_dock.png"
-          alt="Global commodity trading infrastructure"
-          fill
-          priority
-          className="object-cover object-bottom opacity-10 dark:opacity-20 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]"
-        />
-      </motion.div>
+      {showDesktopVisuals ? (
+        <motion.div style={{ y: dockLayerY }} className="absolute bottom-0 w-full h-[60vh] pointer-events-none z-0">
+          <Image
+            src="/images/hero_dock.png"
+            alt="Global commodity trading infrastructure"
+            fill
+            priority
+            className="object-cover object-bottom opacity-10 dark:opacity-20 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]"
+          />
+        </motion.div>
+      ) : null}
 
       {/* Bottom fade to next section */}
       <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />

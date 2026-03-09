@@ -8,6 +8,7 @@ import {
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
 import CompanyInterestsModal from "./company-interests-modal";
@@ -95,11 +96,19 @@ const LoginComponent = ({ role }: ILoginProps) => {
       });
     } catch (error: any) {
       setIsLoading(false);
+      console.error("Login Error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        code: error.code
+      });
 
       const apiErrorMessage = error?.code === "SESSION_COOKIE_BLOCKED"
         ? "Session cookie was blocked by browser privacy settings. Allow cookies for obaol.com/api.obaol.com and retry."
-        : (error.response?.data?.message ||
-          "Invalid email or password. Please try again.");
+        : error.message === "Network Error" || error.code === "ERR_NETWORK"
+          ? "Network Error: The request was blocked by the browser (CORS) or the server is unreachable. Please check your connection."
+          : (error.response?.data?.message ||
+            "Invalid email or password. Please try again.");
 
       setErrorMessage(apiErrorMessage);
 
@@ -124,12 +133,89 @@ const LoginComponent = ({ role }: ILoginProps) => {
     router.push("/auth/register");
   };
 
+  const roleContent: Record<string, any> = {
+    admin: {
+      headline: "OBAOL",
+      highlight: "ADMINISTRATION",
+      description: "Centralized control for entire supply chain operations and system management.",
+      points: [
+        "User & Role Management",
+        "System Health Monitoring",
+        "Global Configuration",
+        "Security & Audit Logs"
+      ],
+      footer: "Admin_Console_v3.2"
+    },
+    associate: {
+      headline: "OBAOL",
+      highlight: "ASSOCIATE NETWORK",
+      description: "Join a trusted network for structured agro commodity trade and verified sourcing.",
+      points: [
+        "Verified Sourcing & Quality",
+        "Direct Structured Agro-Trade",
+        "Transparent Financial Settlement",
+        "Inventory Monetization Tools"
+      ],
+      footer: "Associate_Hub_Online"
+    },
+    employee: {
+      headline: "OBAOL",
+      highlight: "STAFF PORTAL",
+      description: "Access your daily tasks, performance metrics, and internal resources efficiently.",
+      points: [
+        "Dynamic Task Management",
+        "Personal Performance Metrics",
+        "Shift & Attendance Logs",
+        "Unified Communications"
+      ],
+      footer: "Employee_Portal_v2"
+    },
+    "project manager": {
+      headline: "OBAOL",
+      highlight: "PROJECT OPERATIONS",
+      description: "Oversee project lifecycles, resource allocation, and timeline management in real-time.",
+      points: [
+        "Real-time Resource Tracking",
+        "Milestone & Deadline Monitor",
+        "Budget & Cost Analytics",
+        "Cross-team Sync"
+      ],
+      footer: "Project_Manager_Console"
+    },
+    "activity manager": {
+      headline: "OBAOL",
+      highlight: "FIELD ACTIVITY",
+      description: "Manage field operations, warehouse logistics, and coordination activities seamlessly.",
+      points: [
+        "Logistics & Transit Tracking",
+        "Warehouse Activity Logs",
+        "Field Agent Coordination",
+        "Quality Verification"
+      ],
+      footer: "Field_Ops_Manager"
+    },
+    worker: {
+      headline: "OBAOL",
+      highlight: "FIELD MOBILE",
+      description: "Simplified interface for logging work progress and receiving on-site instructions.",
+      points: [
+        "Instant Task Assignments",
+        "Simple Work Progress Logging",
+        "Safety & Notification Alerts",
+        "Site Check-in/Check-out"
+      ],
+      footer: "Field_Worker_Service"
+    }
+  };
+
+  const currentRoleContent = roleContent[role.toLowerCase()] || null;
+
   if (loading) {
     return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;
   }
 
   return (
-    <AuthLayout title={role} subtitle="Login">
+    <AuthLayout title={role} subtitle="Login" leftPanel={currentRoleContent}>
       <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
         <Input
           value={email}
@@ -198,17 +284,23 @@ const LoginComponent = ({ role }: ILoginProps) => {
           </div>
         )}
 
-        <Button
-          className="w-full font-bold shadow-lg shadow-warning/20"
-          color="warning"
-          type="submit"
-          isLoading={isLoading || isRoutingToRegister}
-          isDisabled={isRoutingToRegister}
-          size="lg"
-          radius="lg"
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full"
         >
-          {isRoutingToRegister ? "Opening registration..." : isLoading ? "Signing in..." : "Sign In"}
-        </Button>
+          <Button
+            className="w-full font-bold shadow-xl shadow-warning/20 bg-gradient-to-r from-warning-500 to-amber-600 text-white border-none h-12"
+            color="warning"
+            type="submit"
+            isLoading={isLoading || isRoutingToRegister}
+            isDisabled={isRoutingToRegister}
+            size="lg"
+            radius="lg"
+          >
+            {isRoutingToRegister ? "Opening registration..." : isLoading ? "Signing in..." : "Sign In"}
+          </Button>
+        </motion.div>
       </form>
       <CompanyInterestsModal
         open={showInterestsModal}

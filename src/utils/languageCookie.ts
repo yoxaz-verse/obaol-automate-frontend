@@ -116,6 +116,20 @@ export const setLanguageCookies = (langCode: string): boolean => {
   return persisted;
 };
 
+export const setGoogtransCookie = (langCode: string) => {
+  const normalized = normalizeLanguageCode(langCode);
+  const googtransValue = `/en/${normalized}`;
+  const options = getCookieOptions();
+  Cookies.set(GOOGLE_TRANSLATE_COOKIE, googtransValue, options);
+};
+
+export const clearGoogtransCookie = () => {
+  const scopes = getCleanupScopes();
+  scopes.forEach((scope) => {
+    Cookies.remove(GOOGLE_TRANSLATE_COOKIE, scope);
+  });
+};
+
 export const clearLanguageCookies = () => {
   const scopes = getCleanupScopes();
 

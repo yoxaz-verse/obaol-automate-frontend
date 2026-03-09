@@ -1,11 +1,33 @@
 import React from "react";
 import { Metadata } from "next";
-import { Card, CardBody, CardHeader, Divider, Spacer, Image } from "@heroui/react";
-import Title from "@/components/titles";
+import { Card, CardBody, CardHeader, Spacer } from "@heroui/react";
+import dynamic from "next/dynamic";
+import CTASection from "@/components/home/ctasection";
+import Footer from "@/components/home/footer";
+const TradeOperatingLayer = dynamic(() => import("@/components/home/tradeoperatinglayer"), {
+    loading: () => <div className="mx-auto mt-10 h-56 w-[95%] max-w-7xl animate-pulse rounded-2xl bg-content2/70" />,
+});
+const BASE_URL = "https://obaol.com";
 
 export const metadata: Metadata = {
     title: "Products | OBAOL Supreme",
-    description: "Explore our wide range of agricultural and industrial products. Verified quality, transparent rates.",
+    description: "Explore OBAOL product categories and verified commodity listings with transparent product context and execution-focused support.",
+    alternates: {
+        canonical: `${BASE_URL}/product`,
+    },
+    openGraph: {
+        title: "Products | OBAOL Supreme",
+        description: "Browse verified product listings and commodity categories on OBAOL.",
+        url: `${BASE_URL}/product`,
+        type: "website",
+        images: [{ url: "/logo.png", width: 1200, height: 630, alt: "OBAOL Products" }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Products | OBAOL Supreme",
+        description: "Browse verified product listings and commodity categories on OBAOL.",
+        images: ["/logo.png"],
+    },
 };
 
 export const dynamic = "force-dynamic";
@@ -88,6 +110,9 @@ export default async function ProductPage() {
                 {/* @ts-ignore */}
                 <Spacer y={12} />
             </div>
+            <TradeOperatingLayer />
+            <CTASection />
+            <Footer />
         </div>
     );
 }

@@ -163,29 +163,45 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
 
                         {leftPanel ? (
                             <>
-                                <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
+                                <motion.h1
+                                    className="text-4xl xl:text-5xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                >
                                     {leftPanel.headline} <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block">
                                         {leftPanel.highlight || "ASSOCIATE NETWORK"}
                                     </span>
-                                </h1>
-                                <p className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
+                                </motion.h1>
+                                <motion.p
+                                    className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                >
                                     {leftPanel.description || "Join a trusted network for structured agro commodity trade."}
-                                </p>
+                                </motion.p>
                                 {!!leftPanel.points?.length && (
                                     <div className="mt-8 space-y-3 max-w-md">
                                         {leftPanel.points.map((point, idx) => (
-                                            <div key={`${point}-${idx}`} className="text-sm text-default-300 flex gap-3 items-start">
+                                            <motion.div
+                                                key={`${point}-${idx}`}
+                                                className="text-sm text-default-300 flex gap-3 items-start"
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ duration: 0.3, delay: 0.6 + idx * 0.1 }}
+                                            >
                                                 <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
                                                 <span>{point}</span>
-                                            </div>
+                                            </motion.div>
                                         ))}
                                     </div>
                                 )}
                             </>
                         ) : (
                             <>
-                                <h1 className="text-5xl xl:text-6xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
+                                <h1 className="text-4xl xl:text-5xl font-black tracking-tighter text-foreground mb-6 leading-[0.95]">
                                     <span>OBAOL</span> <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600 block min-h-[1.2em] leading-tight pb-1">
                                         <TypewriterEffect
@@ -234,9 +250,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
                             </div>
 
                             {/* Glass Card */}
-                            <div className="relative bg-content2/60 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden">
+                            <motion.div
+                                className="relative bg-content2/60 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden group/card"
+                                whileHover={{ boxShadow: "0 25px 50px -12px rgba(245, 165, 36, 0.15)" }}
+                                transition={{ duration: 0.4 }}
+                            >
                                 {/* Card Highlight */}
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-warning-500/50 to-transparent opacity-50" />
+                                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-warning-500/50 to-transparent opacity-50 group-hover/card:via-warning-500 transition-all duration-700" />
 
                                 <div className="mb-8">
                                     <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
@@ -247,10 +267,15 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
                                     </p>
                                 </div>
 
-                                <div className="space-y-4">
+                                <motion.div
+                                    className="space-y-4"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.4, delay: 0.4 }}
+                                >
                                     {children}
-                                </div>
-                            </div>
+                                </motion.div>
+                            </motion.div>
 
                             <div className="mt-8 text-center text-[10px] text-default-600 font-mono tracking-widest uppercase opacity-40">
                                 Obaol Automate &bull; Enterprise Access

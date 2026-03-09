@@ -262,6 +262,6 @@ export default function BrokenTradeExperience() {
           </div>
         )}
       </div>
-    </ motion.section>
+    </motion.section>
   );
 }

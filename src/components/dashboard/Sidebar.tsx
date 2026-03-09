@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useState, useTransition } from "react";
 import {
   FiFileText,
   FiInbox,
@@ -28,6 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useContext(AuthContext);
+  const [, startTransition] = useTransition();
+  const [pendingLink, setPendingLink] = useState<string | null>(null);
 
   const filteredOptions = sidebarOptions.filter((option) => {
     const allowedRoles = routeRoles[option.link] || [];
@@ -35,8 +37,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   });
 
   const handleOptionClick = (optionLink: string) => {
-    router.push(optionLink);
+    setPendingLink(optionLink);
+    startTransition(() => {
+      router.push(optionLink);
+    });
   };
+
+  // Reset pending link when pathname matches
+  React.useEffect(() => {
+    if (pathname === pendingLink) {
+      setPendingLink(null);
+    }
+  }, [pathname, pendingLink]);
 
   return (
     <div
@@ -80,25 +92,53 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             ? pathname === "/dashboard"
             : pathname === option.link || pathname.startsWith(`${option.link}/`);
 
+          const isPendingItem = pendingLink === option.link;
+
           const content = (
             <div
               key={index}
               onClick={() => handleOptionClick(option.link)}
+              aria-busy={isPendingItem}
               className={`group relative flex items-center px-4 py-3 cursor-pointer rounded-xl transition-all duration-200 ${isActive
                 ? "bg-default-100/80 text-warning-500"
-                : "text-default-500 hover:bg-default-100 hover:text-foreground"
+                : isPendingItem
+                  ? "bg-warning-500/10 text-warning-500/70"
+                  : "text-default-500 hover:bg-default-100 hover:text-foreground"
                 } ${isCollapsed ? "justify-center" : "gap-4"}`}
             >
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-warning-500 rounded-r-full" />
+              {(isActive || isPendingItem) && (
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-warning-500 rounded-r-full ${isPendingItem ? "animate-pulse" : ""}`} />
               )}
-              <div className={`text-xl flex-shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}>
+              <div
+                className={`text-xl flex-shrink-0 transition-all duration-200 ${isActive
+                  ? "scale-110"
+                  : isPendingItem
+                    ? "scale-105 text-warning-500"
+                    : "group-hover:scale-110"
+                  }`}
+              >
                 {option.icon}
               </div>
               {!isCollapsed && (
-                <span className={`font-bold whitespace-nowrap overflow-hidden text-ellipsis tracking-tight ${isActive ? "text-foreground" : ""}`}>
+                <span
+                  className={`font-bold whitespace-nowrap overflow-hidden text-ellipsis tracking-tight ${isActive ? "text-foreground" : isPendingItem ? "text-foreground/70" : ""
+                    }`}
+                >
                   {option.name}
+                  {isPendingItem && (
+                    <span className="ml-2 inline-flex items-center gap-1 align-middle">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse [animation-delay:120ms]" />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse [animation-delay:240ms]" />
+                    </span>
+                  )}
                 </span>
+              )}
+
+              {isPendingItem && !isCollapsed && (
+                <div className="pointer-events-none absolute bottom-1 left-4 right-4 h-[2px] overflow-hidden rounded-full bg-warning-500/15">
+                  <div className="h-full w-1/2 rounded-full bg-warning-500 animate-[pulse_1s_ease-in-out_infinite]" />
+                </div>
               )}
             </div>
           );

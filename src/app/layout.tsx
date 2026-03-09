@@ -5,6 +5,7 @@ import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 import TranslationEngine from "@/components/dashboard/TranslationEngine";
+import TopLoader from "@/components/ui/TopLoader";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -77,10 +78,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
       "max-video-preview": -1,
     },
-  },
-
-  alternates: {
-    canonical: "/",
   },
 
   openGraph: {
@@ -215,6 +212,7 @@ export default function RootLayout({
         <AuthProvider>
           {/* <VerificationProvider> */}
           <Providers>
+            <TopLoader />
             <TranslationEngine />
             {children}
           </Providers>

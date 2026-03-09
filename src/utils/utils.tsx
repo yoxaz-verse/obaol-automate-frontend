@@ -85,6 +85,11 @@ export const sidebarOptions = [
     link: "/dashboard/catalog",
   },
   {
+    name: "Inventory",
+    icon: <LuWarehouse />,
+    link: "/dashboard/inventory",
+  },
+  {
     name: "My Company",
     icon: <GoOrganization />,
     link: "/dashboard/company",

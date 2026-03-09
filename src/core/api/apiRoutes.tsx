@@ -57,6 +57,7 @@ const BASE_PATHS = {
   COMPANY_SUB_FUNCTION: "/company-sub-functions",
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
   ORGANIZATION_REPORT: "/organization-reports",
+  INVENTORY: "/inventories",
 };
 
 // Define account-related routes separately
@@ -102,6 +103,8 @@ export const divisionRoutes = addCustomRoutes(
     // If you have other custom routes for location, add them here
   }
 );
+
+export const inventoryRoutes = createCRUDRoutes(BASE_PATHS.INVENTORY);
 
 export const pincodeEntryRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.PINCODE_ENTRY),
@@ -376,4 +379,5 @@ export const apiRoutes = {
   employeeHierarchy: employeeHierarchyRoutes,
   commissions: commissionRoutes,
   organizationReports: organizationReportRoutes,
+  inventory: inventoryRoutes,
 };

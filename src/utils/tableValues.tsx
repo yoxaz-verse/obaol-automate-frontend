@@ -24,6 +24,7 @@ import {
   generalIntentRoutes,
   incotermRoutes,
   inventoryManagerRoutes,
+  inventoryRoutes,
   jobRoleRoutes,
   jobTypeRoutes,
   languageRoutes,
@@ -107,6 +108,12 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
     currentTable === "activityManager"
   ) {
     nonActionColumns.push({ name: "ADMIN", uid: "admin" });
+  } else if (currentTable === "inventories") {
+    nonActionColumns.push({ name: "Product", uid: "product" });
+    nonActionColumns.push({ name: "Product Variant", uid: "productVariant" });
+    if (roleLower === "admin") {
+      nonActionColumns.push({ name: "Associate", uid: "associate" });
+    }
   }
 
   // Find the "Actions" column separately
@@ -166,6 +173,7 @@ export const apiRoutesByRole: Record<string, string> = {
   jobRole: jobRoleRoutes.getAll,
   jobType: jobTypeRoutes.getAll,
   language: languageRoutes.getAll,
+  inventories: inventoryRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -2981,6 +2989,112 @@ export const initialTableConfig: Record<
       label: "Changed At",
       type: "dateTime",
       key: "changedAt",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  inventories: [
+    {
+      label: "Category",
+      type: "select",
+      key: "category",
+      values: [],
+      dynamicValuesFn: () => fetchDependentOptions("category"),
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Sub Category",
+      type: "select",
+      key: "subCategory",
+      dependsOn: "category",
+      values: [],
+      dynamicValuesFn: (categoryId: string) => fetchDependentOptions("subCategory", "category", categoryId),
+      inForm: true,
+      inTable: false,
+      required: true,
+    },
+    {
+      label: "Product",
+      type: "select",
+      key: "product",
+      dependsOn: "subCategory",
+      values: [],
+      dynamicValuesFn: (subCategoryId: string) => fetchDependentOptions("product", "subCategory", subCategoryId),
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Product Variant",
+      type: "select",
+      key: "productVariant",
+      dependsOn: "product",
+      values: [],
+      dynamicValuesFn: (productId: string) => fetchDependentOptions("productVariant", "product", productId),
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Quantity",
+      type: "number",
+      key: "quantity",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Unit",
+      type: "select",
+      key: "unit",
+      values: [
+        { key: "KG", value: "KG" },
+        { key: "MT", value: "MT" },
+        { key: "Quintal", value: "Quintal" },
+      ],
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Warehouse Name",
+      type: "text",
+      key: "warehouseName",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "State",
+      type: "select",
+      key: "state",
+      dynamicValuesFn: () => fetchDependentOptions("state"),
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "District",
+      type: "select",
+      key: "district",
+      dependsOn: "state",
+      dynamicValuesFn: (stateId: string) => fetchDependentOptions("district", "state", stateId),
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Associate",
+      type: "select",
+      key: "associate",
+      dynamicValuesFn: () => fetchDependentOptions("associate"),
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
       inForm: false,
       inTable: true,
     },

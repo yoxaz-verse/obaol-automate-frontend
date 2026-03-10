@@ -404,7 +404,7 @@ const Dashboard: NextPage = () => {
         <CardBody className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight">Operations Command Center</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Operations Command Center</h1>
               <p className="text-sm md:text-base text-white/85">
                 Welcome back, {welcomeName}. Track your priorities, activity, and progress from one screen.
               </p>
@@ -700,6 +700,24 @@ const Dashboard: NextPage = () => {
           ))}
         </div>
       </div>
+
+      {(isAdmin || isAssociate || isEmployeeUser) && (
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardHeader className="flex items-center justify-between gap-3">
+            <div>
+              <h4 className="font-semibold text-foreground">Need Only One Service?</h4>
+              <p className="text-xs text-default-500">Create a partial service request for procurement, packaging, testing, transport, or customs.</p>
+            </div>
+            <Button
+              color="primary"
+              endContent={<FiArrowRight size={14} />}
+              onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
+            >
+              Create Partial Service
+            </Button>
+          </CardHeader>
+        </Card>
+      )}
 
       {isEmployeeUser && (
         <Card className="border border-default-100 shadow-sm bg-content1/70">

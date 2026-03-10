@@ -1,14 +1,6 @@
 export default function Title({ title }: { title: string }) {
   return (
-    <h1
-      className="font-bold text-[22px] md:text-[44px] text-transparent"
-      style={{
-        WebkitTextStroke: "1px #ce8a23", // outline
-        textShadow: `
-          0 0 5px #ce8a23,
-        `, // glow layers
-      }}
-    >
+    <h1 className="font-bold text-[22px] md:text-[44px] text-foreground tracking-tight">
       {title}
     </h1>
   );
@@ -16,7 +8,9 @@ export default function Title({ title }: { title: string }) {
 
 export function SubTitle({ title }: { title: string }) {
   return (
-    <h2 className=" text-[15px] md:text-[35px] text-primary-300">{title}</h2>
+    <h2 className="text-[15px] md:text-[35px] text-default-500 font-medium tracking-tight">
+      {title}
+    </h2>
   );
 }
 export function toTitleCase(str: string): string {

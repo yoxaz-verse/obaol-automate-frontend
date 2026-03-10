@@ -30,7 +30,7 @@ const STATUS_OPTIONS = [
 ] as const;
 type StatusFilter = (typeof STATUS_OPTIONS)[number];
 
-const ACTION_OPTIONS = ["NONE", "DEACTIVATE_ASSOCIATE", "REMOVE_FROM_COMPANY"] as const;
+const ACTION_OPTIONS = ["NONE", "DEACTIVATE_ASSOCIATE", "REMOVE_FROM_COMPANY", "APPLY_COMPANY_INTERESTS"] as const;
 type ActionType = (typeof ACTION_OPTIONS)[number];
 
 const formatDate = (value: unknown) => {
@@ -49,10 +49,11 @@ const statusColor = (status: string) => {
 
 export default function ReportsPage() {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<StatusFilter>("PENDING_REVIEW");
+  const [status, setStatus] = useState<StatusFilter>("ALL");
   const [search, setSearch] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [page, setPage] = useState(1);
+  const [reasonFocus, setReasonFocus] = useState<"ALL" | "COMPANY_INTEREST_UPDATE">("ALL");
   const limit = 20;
 
   const [activeReport, setActiveReport] = useState<any>(null);
@@ -119,6 +120,31 @@ export default function ReportsPage() {
     () => (Array.isArray(companiesQuery.data) ? companiesQuery.data : []),
     [companiesQuery.data]
   );
+  const isCompanyInterestReport = (row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE";
+  const companyInterestRows = useMemo(() => rows.filter(isCompanyInterestReport), [rows]);
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("[reports] company-interest rows", companyInterestRows.length);
+  }
+  const companyInterestStats = useMemo(() => {
+    const stats = {
+      pending: 0,
+      underReview: 0,
+      actionTaken: 0,
+      rejected: 0,
+    };
+    companyInterestRows.forEach((row: any) => {
+      const currentStatus = String(row?.status || "").toUpperCase();
+      if (currentStatus === "PENDING_REVIEW") stats.pending += 1;
+      if (currentStatus === "UNDER_REVIEW") stats.underReview += 1;
+      if (currentStatus === "ACTION_TAKEN") stats.actionTaken += 1;
+      if (currentStatus === "REJECTED") stats.rejected += 1;
+    });
+    return stats;
+  }, [companyInterestRows]);
+  const visibleRows = useMemo(
+    () => (reasonFocus === "COMPANY_INTEREST_UPDATE" ? companyInterestRows : rows),
+    [reasonFocus, rows, companyInterestRows]
+  );
 
   return (
     <div className="w-full p-4 md:p-6 space-y-5">
@@ -177,14 +203,125 @@ export default function ReportsPage() {
           ))}
         </Select>
       </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Chip
+          variant={reasonFocus === "ALL" ? "solid" : "flat"}
+          color={reasonFocus === "ALL" ? "warning" : "default"}
+          className="cursor-pointer"
+          onClick={() => {
+            setReasonFocus("ALL");
+            setPage(1);
+          }}
+        >
+          All Reasons
+        </Chip>
+        <Chip
+          variant={reasonFocus === "COMPANY_INTEREST_UPDATE" ? "solid" : "flat"}
+          color={reasonFocus === "COMPANY_INTEREST_UPDATE" ? "warning" : "default"}
+          className="cursor-pointer"
+          onClick={() => {
+            setReasonFocus("COMPANY_INTEREST_UPDATE");
+            setPage(1);
+          }}
+        >
+          Company Interest Updates
+        </Chip>
+      </div>
+
+      <div className="rounded-xl border border-default-200/80 bg-content1/95 p-4 md:p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Company Interest Update Requests</h2>
+            <p className="text-sm text-default-600">
+              Fast track interest-change approvals requested by associate companies.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Chip size="sm" color="warning" variant="flat">Pending: {companyInterestStats.pending}</Chip>
+            <Chip size="sm" color="secondary" variant="flat">Under Review: {companyInterestStats.underReview}</Chip>
+            <Chip size="sm" color="success" variant="flat">Action Taken: {companyInterestStats.actionTaken}</Chip>
+            <Chip size="sm" color="danger" variant="flat">Rejected: {companyInterestStats.rejected}</Chip>
+          </div>
+        </div>
+
+        {reportsQuery.isLoading ? (
+          <div className="pt-4 flex items-center justify-center"><Spinner /></div>
+        ) : companyInterestRows.length === 0 ? (
+          <div className="pt-4 text-sm text-default-500">No company interest update requests on this page.</div>
+        ) : (
+          <div className="pt-4 overflow-x-auto">
+            <table className="w-full min-w-[860px] text-sm">
+              <thead className="bg-default-100/70">
+                <tr>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Company</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Reporter</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Requested Interests</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Status</th>
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Created</th>
+                  <th className="text-center px-3 py-2 text-default-600 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {companyInterestRows.slice(0, 8).map((row: any, index: number) => (
+                  <tr
+                    key={`interest-report-${row?._id || index}`}
+                    className={`border-t border-default-200/70 ${index % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                  >
+                    <td className="px-3 py-2">{row?.reporterCompanyId?.name || "-"}</td>
+                    <td className="px-3 py-2">{row?.reporterAssociateId?.name || "-"}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(row?.payload?.requestedInterests) && row.payload.requestedInterests.length > 0 ? (
+                          row.payload.requestedInterests.map((interest: string) => (
+                            <Chip key={`${row?._id}-${interest}`} size="sm" color="primary" variant="flat">
+                              {String(interest || "").replace(/_/g, " ")}
+                            </Chip>
+                          ))
+                        ) : (
+                          <span className="text-default-500">-</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Chip size="sm" color={statusColor(row?.status) as any} variant="flat">
+                        {row?.status || "PENDING_REVIEW"}
+                      </Chip>
+                    </td>
+                    <td className="px-3 py-2 text-default-600">{formatDate(row?.createdAt)}</td>
+                    <td className="px-3 py-2 text-center">
+                      <Button
+                        size="sm"
+                        color="warning"
+                        variant="flat"
+                        onPress={() => {
+                          setActiveReport(row);
+                          setNextStatus(String(row?.status || "UNDER_REVIEW"));
+                          setActionType("NONE");
+                          setAdminNotes(String(row?.adminNotes || ""));
+                        }}
+                      >
+                        Open Review
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl border border-default-200/80 bg-content1/95 overflow-x-auto shadow-sm">
         {reportsQuery.isLoading ? (
           <div className="p-8 flex items-center justify-center">
             <Spinner />
           </div>
-        ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-default-500">No reports found for current filters.</div>
+        ) : visibleRows.length === 0 ? (
+          <div className="p-8 text-center text-default-500">
+            {reasonFocus === "COMPANY_INTEREST_UPDATE"
+              ? "No company interest update reports found for current filters."
+              : "No reports found for current filters."}
+          </div>
         ) : (
           <table className="w-full min-w-[1080px] text-sm text-foreground">
             <thead className="bg-default-100/70">
@@ -199,7 +336,7 @@ export default function ReportsPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any, index: number) => (
+              {visibleRows.map((row: any, index: number) => (
                 <tr
                   key={row?._id || index}
                   className={`border-t border-default-200/70 ${index % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
@@ -238,7 +375,7 @@ export default function ReportsPage() {
 
       <div className="flex items-center justify-between text-sm text-default-600">
         <div>
-          Page {meta.page || 1} of {meta.totalPages || 1} • Total {meta.total || 0}
+          Page {meta.page || 1} of {meta.totalPages || 1} • Total {meta.total || 0} • Showing {visibleRows.length} on this page
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -269,6 +406,8 @@ export default function ReportsPage() {
             setAdminNotes("");
           }
         }}
+        isDismissable={false}
+        isKeyboardDismissDisabled
       >
         <ModalContent>
           <ModalHeader>Review Report</ModalHeader>
@@ -279,6 +418,22 @@ export default function ReportsPage() {
               value={activeReport?.targetAssociateId?.name || "-"}
               isReadOnly
             />
+            {String(activeReport?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE" ? (
+              <div>
+                <div className="text-sm font-medium text-default-700 mb-2">Requested Interests</div>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(activeReport?.payload?.requestedInterests) && activeReport.payload.requestedInterests.length > 0 ? (
+                    activeReport.payload.requestedInterests.map((interest: string) => (
+                      <Chip key={`interest-${interest}`} size="sm" color="primary" variant="flat">
+                        {String(interest || "").replace(/_/g, " ")}
+                      </Chip>
+                    ))
+                  ) : (
+                    <span className="text-sm text-default-500">No requested interests provided.</span>
+                  )}
+                </div>
+              </div>
+            ) : null}
             <Select
               label="Status"
               labelPlacement="outside"

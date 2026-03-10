@@ -11,24 +11,24 @@ import AuthContext from "@/context/AuthContext";
 /* ================= CONTAINER REVEAL ================= */
 
 const containerVariants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 1.2,
+      duration: 0.7,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 15 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 1, ease: "easeOut" },
+    transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] },
   },
 };
 
@@ -95,6 +95,18 @@ export default function HeroSection() {
         </motion.div>
       ) : null}
 
+      {/* Subtle Realistic Glint Animation Styles */}
+      <style jsx global>{`
+        @keyframes subtle-glint {
+          0% { background-position: -200% center; }
+          45%, 100% { background-position: 200% center; }
+        }
+        .animate-subtle-glint {
+          background-size: 200% auto;
+          animation: subtle-glint 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+      `}</style>
+
       {/* High-Tech Geometric Grid — theme-aware color */}
       <motion.div
         className="absolute inset-0 z-0 pointer-events-none opacity-[0.045] dark:opacity-[0.07] [mask-image:linear-gradient(to_bottom,black_20%,transparent_80%)]"
@@ -137,7 +149,7 @@ export default function HeroSection() {
           <span className="relative flex h-2.5 w-2.5">
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500/80" />
           </span>
-          <span className="text-xs font-bold text-orange-500 dark:text-orange-400 tracking-widest uppercase">System Protocol Active</span>
+          <span className="text-xs font-bold text-orange-500 dark:text-orange-400 tracking-tight uppercase">System Protocol Active</span>
         </motion.div>
 
         <motion.div
@@ -149,19 +161,19 @@ export default function HeroSection() {
           {/* 1️⃣ HEADLINE */}
           <motion.h1
             variants={itemVariants}
-            className="relative text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[0.98] md:leading-[0.82] tracking-tight"
+            className="relative text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] md:leading-[1.05] tracking-tight"
           >
             <motion.span className="relative z-10 block text-foreground">
               The Operating System
             </motion.span>
-            <span className="relative z-30 block text-foreground/55 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-none mt-0 sm:mt-1 md:-mt-6 mb-0 sm:mb-1 md:-mb-6">
+            <span className="relative z-30 block text-foreground/55 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-none mt-2 mb-2">
               for
             </span>
             <motion.span
-              className="relative z-20 block mt-0 sm:mt-1 md:-mt-10"
+              className="relative z-20 block"
             >
-              {/* Orange gradient text — looks great in both modes */}
-              <span className="relative inline-block bg-gradient-to-br from-orange-500 via-orange-400 to-orange-500 dark:from-orange-200 dark:via-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
+              {/* Ultra-Narrow Subtle Shine Headline */}
+              <span className="relative inline-block pb-5 bg-[linear-gradient(110deg,#f97316_49%,#fed7aa_50%,#f97316_51%)] dark:bg-[linear-gradient(110deg,#f97316_49%,#ffedd5_50%,#f97316_51%)] bg-clip-text text-transparent animate-subtle-glint">
                 Agro Commodity Trade.
               </span>
             </motion.span>
@@ -170,7 +182,7 @@ export default function HeroSection() {
           {/* 2️⃣ SUBTITLE */}
           <motion.p
             variants={itemVariants}
-            className="mt-8 max-w-3xl mx-auto text-lg md:text-xl lg:text-2xl text-foreground/60 font-medium leading-relaxed"
+            className="mt-12 max-w-3xl mx-auto text-lg md:text-xl lg:text-2xl text-foreground/60 font-medium leading-relaxed"
           >
             <span className="text-foreground font-semibold">OBAOL Supreme</span>{" "}
             is an end-to-end trade execution environment. Discover verified partners, engage securely, and execute with absolute certainty.
@@ -186,36 +198,26 @@ export default function HeroSection() {
 
           {/* 4️⃣ CTA — Premium Glassmorphic Button */}
           <motion.div variants={itemVariants} className="mt-14 relative group inline-flex justify-center">
-            {/* Minimalist CTA */}
 
             <Link
               href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
               className={[
-                "relative flex items-center justify-center gap-3 px-10 py-5 rounded-2xl overflow-hidden",
-                "transition-all duration-300 group-hover:scale-[1.03]",
-                /* Light mode: solid warm border, lighter glass bg */
-                "bg-white/70 dark:bg-white/5",
-                "border border-orange-400/40 dark:border-orange-500/20",
-                "backdrop-blur-xl",
-                "shadow-none",
-                "group-hover:border-orange-500/60 dark:group-hover:border-orange-500/50",
-                "group-hover:bg-white/90 dark:group-hover:bg-white/10",
-                "group-hover:shadow-sm",
+                "relative flex items-center justify-center gap-3 px-10 py-4 rounded-2xl overflow-hidden",
+                "transition-all duration-300 group-hover:scale-[1.03] active:scale-[0.97]",
+                "bg-orange-500 hover:bg-orange-600 text-white",
+                "shadow-none hover:shadow-[0_0_28px_-4px_rgba(249,115,22,0.5)]",
               ].join(" ")}
             >
-              {/* Radial inner glow on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 [background:radial-gradient(ellipse_at_center,rgba(251,146,60,0.12)_0%,transparent_70%)]" />
-
               {/* Shimmer sweep */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-orange-100/30 dark:via-white/10 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
 
-              <span className="relative z-10 text-foreground font-bold tracking-wide text-lg">
+              <span className="relative z-10 font-bold tracking-wide text-lg">
                 {!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
               </span>
 
               {/* Arrow */}
               <svg
-                className="relative z-10 w-5 h-5 text-orange-500 transform group-hover:translate-x-1 transition-transform duration-200"
+                className="relative z-10 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

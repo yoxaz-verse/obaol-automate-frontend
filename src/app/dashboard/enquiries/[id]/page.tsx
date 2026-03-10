@@ -89,6 +89,34 @@ const sanitizeBuyerOrObaol = (value: any): "buyer" | "obaol" => {
 };
 const sanitizeBuyerOnly = (_value: any): "buyer" => "buyer";
 const sanitizeObaolOnly = (_value: any): "obaol" => "obaol";
+const sanitizeDisplayText = (value: any): string => String(value || "").trim();
+const getProductDisplayName = (enquiry: any): string => {
+    const candidates = [
+        enquiry?.productId?.name,
+        enquiry?.productVariant?.product?.name,
+        enquiry?.variantRateId?.product?.name,
+    ];
+    return candidates.map(sanitizeDisplayText).find(Boolean) || "Unknown Product";
+};
+const getVariantDisplayName = (enquiry: any, liveRate: any): string => {
+    const specificationFallback = sanitizeDisplayText((enquiry as any)?.specifications || (enquiry as any)?.specification || "")
+        .replace(/\s+/g, " ")
+        .split(/\s+Notes:/i)[0]
+        .trim();
+    const candidates = [
+        enquiry?.productVariant?.name,
+        enquiry?.variantId?.name,
+        enquiry?.variantRateId?.productVariant?.name,
+        enquiry?.variantRateId?.variant?.name,
+        enquiry?.variantRateId?.name,
+        liveRate?.productVariant?.name,
+        liveRate?.variant?.name,
+        (enquiry as any)?.productVariantName,
+        (enquiry as any)?.variantName,
+        specificationFallback,
+    ];
+    return candidates.map(sanitizeDisplayText).find(Boolean) || "Unknown Variant";
+};
 
 export default function EnquiryDetailsPage() {
     const { id } = useParams();
@@ -101,6 +129,7 @@ export default function EnquiryDetailsPage() {
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
     const [commitUntil, setCommitUntil] = useState<string>("");
     const [buyerSpecification, setBuyerSpecification] = useState<string>("");
+    const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
     const [specSavedAt, setSpecSavedAt] = useState<string>("");
     const [responsibilitySavedAt, setResponsibilitySavedAt] = useState<string>("");
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
@@ -160,6 +189,8 @@ export default function EnquiryDetailsPage() {
         select: (res) => res?.data?.data,
         enabled: !!variantRateId,
     });
+    const productNameLabel = getProductDisplayName(enquiry);
+    const variantNameLabel = getVariantDisplayName(enquiry, liveRate);
     const { data: incotermResponse } = useQuery({
         queryKey: ["incoterms"],
         queryFn: () => getData(apiRoutes.incoterm.getAll),
@@ -197,9 +228,13 @@ export default function EnquiryDetailsPage() {
         enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.destinationCountry),
     });
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
+    const enquiryPackagingSpecificationsValue = (enquiry as any)?.packagingSpecifications || "";
     useEffect(() => {
         setBuyerSpecification(enquirySpecificationValue);
     }, [enquirySpecificationValue]);
+    useEffect(() => {
+        setPackagingSpecifications(String(enquiryPackagingSpecificationsValue || ""));
+    }, [enquiryPackagingSpecificationsValue]);
     useEffect(() => {
         if (!enquiry) return;
         const savedPlan = (enquiry as any)?.responsibilityPlan || {};
@@ -433,7 +468,10 @@ export default function EnquiryDetailsPage() {
     });
     const finalizeResponsibilitiesMutation = useMutation({
         mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/finalize-responsibilities`, { executionContext }),
+            patchData(`${apiRoutes.enquiry.getAll}/${id}/finalize-responsibilities`, {
+                executionContext,
+                packagingSpecifications,
+            }),
         onSuccess: () => {
             toast.success("Responsibilities finalized and execution inquiries generated.");
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
@@ -457,8 +495,8 @@ export default function EnquiryDetailsPage() {
             const oldSpec = ((enquiry as any).specifications || (enquiry as any).specification || "").trim();
             const newSpec = (buyerSpecification || "").trim();
             const actor = (user as any)?.name || (user as any)?.email || "User";
-            const productName = enquiry?.productId?.name || enquiry?.productVariant?.product?.name || "Unknown Product";
-            const variantName = enquiry?.productVariant?.name || enquiry?.variantId?.name || "Unknown Variant";
+            const productName = productNameLabel;
+            const variantName = variantNameLabel;
 
             return patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
                 specifications: buyerSpecification,
@@ -483,8 +521,8 @@ export default function EnquiryDetailsPage() {
         mutationFn: () => {
             const actor = (user as any)?.name || (user as any)?.email || "User";
             const oldPlan = (enquiry as any)?.responsibilityPlan || {};
-            const productName = enquiry?.productId?.name || enquiry?.productVariant?.product?.name || "Unknown Product";
-            const variantName = enquiry?.productVariant?.name || enquiry?.variantId?.name || "Unknown Variant";
+            const productName = productNameLabel;
+            const variantName = variantNameLabel;
             const normalizedPlan = {
                 procurementBy: sanitizeOwner(responsibilityPlan.procurementBy),
                 certificateBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
@@ -504,6 +542,7 @@ export default function EnquiryDetailsPage() {
             return patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
                 responsibilityPlan: normalizedPlan,
                 executionContext,
+                packagingSpecifications,
                 history: [
                     ...(enquiry.history || []),
                     {
@@ -564,7 +603,7 @@ export default function EnquiryDetailsPage() {
     // ─── Role Detection ───────────────────────────────────────────────────────
     const roleLower = String(user?.role || "").toLowerCase();
     const isSystemAdmin = roleLower === "admin";
-    const isEmployeeUser = roleLower === "employee";
+    const isEmployeeUser = roleLower === "employee" || roleLower === "team";
     const assignedEmployeeId = (assignedEmployeeObj?._id || enquiry.assignedEmployeeId || "").toString();
     const isAssignedEmployee = Boolean(isEmployeeUser && user?.id && assignedEmployeeId === String(user.id));
     const isAdmin = isSystemAdmin || isAssignedEmployee;
@@ -698,9 +737,10 @@ export default function EnquiryDetailsPage() {
     const isExecutionContextChanged =
         JSON.stringify(normalizeExecutionContext(executionContext)) !==
         JSON.stringify(normalizeExecutionContext(initialExecutionContext));
-    const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged;
-    const productNameLabel = enquiry?.productId?.name || enquiry?.productVariant?.product?.name || "Unknown Product";
-    const variantNameLabel = enquiry?.productVariant?.name || enquiry?.variantId?.name || "Unknown Variant";
+    const isPackagingSpecificationsChanged =
+        String(packagingSpecifications || "").trim() !== String((enquiry as any)?.packagingSpecifications || "").trim();
+    const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged || isPackagingSpecificationsChanged;
+    const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
     // ─── Financial Calculations ───────────────────────────────────────────────
     const quantity = enquiry.quantity || 0;
     const quantityKg = quantity * 1000;
@@ -869,7 +909,7 @@ export default function EnquiryDetailsPage() {
                                                 variant="shadow"
                                                 className="w-full sm:w-auto"
                                                 isLoading={finalizeResponsibilitiesMutation.isPending}
-                                                isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan}
+                                                isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
                                                 onPress={() => finalizeResponsibilitiesMutation.mutate()}
                                             >
                                                 Finalize Responsibilities
@@ -1485,10 +1525,25 @@ export default function EnquiryDetailsPage() {
                                     onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
                                     isDisabled={!canEditRouteNotes}
                                 />
+                                <Textarea
+                                    size="sm"
+                                    className="md:col-span-2"
+                                    label="Packaging Specifications"
+                                    value={packagingSpecifications}
+                                    onValueChange={setPackagingSpecifications}
+                                    isDisabled={!canEditResponsibilityPlan}
+                                    minRows={4}
+                                    placeholder="Enter packaging and labeling requirements (dimensions, material, labels, stacking, handling notes)."
+                                />
                             </div>
                             <p className="text-xs text-default-500 mt-2">
                                 Domestic: choose state and district. International: choose country and port.
                             </p>
+                            {!hasPackagingSpecifications && (
+                                <p className="text-xs text-danger-500 mt-1">
+                                    Packaging specifications are required before finalization.
+                                </p>
+                            )}
                             {executionContext.tradeType === "INTERNATIONAL" && (
                                 <p className="text-xs text-warning-600 mt-1">
                                     International trade will include additional cost components such as inland-to-port movement, packaging, freight forwarding, shipping, and customs clearance.
@@ -1662,6 +1717,9 @@ export default function EnquiryDetailsPage() {
                                     <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
                                     <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
                                     <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
+                                    <div className="rounded-lg bg-default-100 px-3 py-2 sm:col-span-2">
+                                        Packaging Specs: <b>{String(packagingSpecifications || "").trim() || "Not provided"}</b>
+                                    </div>
                                     {executionContext.tradeType === "INTERNATIONAL" && (
                                         <>
                                             <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>

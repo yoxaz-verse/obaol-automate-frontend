@@ -17,6 +17,9 @@ export default function ParticleNetwork() {
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
+    const currentTheme = resolvedTheme || theme;
+    const isDark = currentTheme === "dark";
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -38,16 +41,13 @@ export default function ParticleNetwork() {
         let containerWidth = container.clientWidth;
         let containerHeight = container.clientHeight;
 
-        const currentTheme = resolvedTheme || theme;
-        const isDark = currentTheme === "dark";
-
-        const PARTICLE_COUNT = 80;
-        const CONNECTION_DISTANCE = 120;
-        const MOUSE_INFLUENCE_RADIUS = 150;
+        const PARTICLE_COUNT = 85;
+        const CONNECTION_DISTANCE = 130;
+        const MOUSE_INFLUENCE_RADIUS = 200;
 
         // Colors based on theme
-        const particleBaseColor = isDark ? "200, 200, 200" : "150, 150, 150";
-        const lineBaseColor = isDark ? "255, 255, 255" : "100, 100, 100";
+        const particleBaseColor = isDark ? "251, 146, 60" : "150, 150, 150";
+        const lineBaseColor = isDark ? "251, 146, 60" : "100, 100, 100";
 
         // Initialize Canvas Size
         const handleResize = () => {
@@ -131,6 +131,10 @@ export default function ParticleNetwork() {
             const rect = canvas.getBoundingClientRect();
             mouseX = e.clientX - rect.left;
             mouseY = e.clientY - rect.top;
+
+            // Update CSS variables for the glow effect
+            canvas.style.setProperty('--mouse-x', `${mouseX}px`);
+            canvas.style.setProperty('--mouse-y', `${mouseY}px`);
         };
 
         const handleMouseLeave = () => {
@@ -158,8 +162,17 @@ export default function ParticleNetwork() {
     return (
         <div ref={containerRef} className="w-full h-full relative overflow-hidden">
             <canvas ref={canvasRef} className="absolute inset-0 block" />
+
+            {/* Cursor Glow Layer */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-60 mix-blend-screen transition-opacity duration-1000"
+                style={{
+                    background: `radial-gradient(600px circle at ${mounted ? 'var(--mouse-x, -1000px)' : '-1000px'} ${mounted ? 'var(--mouse-y, -1000px)' : '-1000px'}, ${isDark ? 'rgba(251, 146, 60, 0.1)' : 'rgba(251, 146, 60, 0.05)'}, transparent 80%)`
+                }}
+            />
+
             <div className="absolute bottom-4 left-4 pointer-events-none">
-                <p className="text-[10px] text-default-400 tracking-widest uppercase font-bold opacity-50">Global Trade Network</p>
+                <p className="text-[10px] text-default-400 tracking-tight uppercase font-bold opacity-50">Global Trade Network</p>
             </div>
         </div>
     );

@@ -58,6 +58,7 @@ const BASE_PATHS = {
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
   ORGANIZATION_REPORT: "/organization-reports",
   INVENTORY: "/inventories",
+  SERVICE_REQUEST: "/service-requests",
 };
 
 // Define account-related routes separately
@@ -309,6 +310,15 @@ export const organizationReportRoutes = {
   action: (id: string) => `${BASE_PATHS.ORGANIZATION_REPORT}/${id}/action`,
 };
 
+export const serviceRequestRoutes = {
+  list: BASE_PATHS.SERVICE_REQUEST,
+  create: BASE_PATHS.SERVICE_REQUEST,
+  getOne: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}`,
+  bid: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/bid`,
+  commit: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/commit`,
+  status: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/status`,
+};
+
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
@@ -379,5 +389,6 @@ export const apiRoutes = {
   employeeHierarchy: employeeHierarchyRoutes,
   commissions: commissionRoutes,
   organizationReports: organizationReportRoutes,
+  serviceRequests: serviceRequestRoutes,
   inventory: inventoryRoutes,
 };

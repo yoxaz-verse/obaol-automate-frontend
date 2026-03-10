@@ -17,11 +17,27 @@ const withMDX = createMDX({
   extension: /\.mdx?$/,
 });
 
+const isLocalOrigin = (value) => {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return ["localhost", "127.0.0.1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
   async rewrites() {
-    const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || "http://localhost:5001";
+    const isProd = process.env.NODE_ENV === "production";
+    const configuredOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+    const backendOrigin = isProd
+      ? configuredOrigin || "https://automate-backend.infra.obaol.com"
+      : isLocalOrigin(configuredOrigin)
+      ? configuredOrigin
+      : "http://localhost:5001";
     return [
       {
         source: "/api/:path*",

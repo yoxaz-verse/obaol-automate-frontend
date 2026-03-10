@@ -57,7 +57,7 @@ function DeepSearchResult({
           <div className="flex items-center gap-1 flex-wrap mb-1">
             {breadcrumb.map((crumb, i) => (
               <React.Fragment key={i}>
-                <span className="text-[10px] font-semibold text-default-400 uppercase tracking-wide">{crumb}</span>
+                <span className="text-[10px] font-bold text-default-400 uppercase tracking-wide">{crumb}</span>
                 {i < breadcrumb.length - 1 && <FiChevronRight size={10} className="text-default-300 shrink-0" />}
               </React.Fragment>
             ))}
@@ -99,7 +99,7 @@ function DeepSearchPanel({
           if (!items.length) return null;
           return (
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-warning-500 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-warning-500 mb-3 flex items-center gap-2">
                 <FiFolder size={12} /> Categories
               </p>
               <div className="flex flex-col gap-2">
@@ -125,7 +125,7 @@ function DeepSearchPanel({
           if (!items.length) return null;
           return (
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-warning-600 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-warning-600 mb-3 flex items-center gap-2">
                 <FiLayers size={12} /> Sub Categories
               </p>
               <div className="flex flex-col gap-2">
@@ -157,7 +157,7 @@ function DeepSearchPanel({
           if (!items.length) return null;
           return (
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600 mb-3 flex items-center gap-2">
                 <FiPackage size={12} /> Products
               </p>
               <div className="flex flex-col gap-2">
@@ -272,7 +272,7 @@ export default function CatalogPage() {
         {/* Header & Search */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-foreground/5 pb-8">
           <div className="flex flex-col">
-            <h1 className="text-4xl font-black tracking-tighter text-foreground mb-1 uppercase">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground mb-1 uppercase">
               Global <span className="text-warning-500">Catalog</span>
             </h1>
             <p className="text-default-400 text-sm font-medium tracking-wide">
@@ -345,7 +345,7 @@ export default function CatalogPage() {
               <FiSearch className="text-warning-500" size={16} />
               <span className="text-sm font-semibold text-default-500">
                 Searching across all levels for{" "}
-                <span className="text-warning-500 font-black">&quot;{search}&quot;</span>
+                <span className="text-warning-500 font-bold">&quot;{search}&quot;</span>
               </span>
               <button
                 onClick={() => setSearch("")}

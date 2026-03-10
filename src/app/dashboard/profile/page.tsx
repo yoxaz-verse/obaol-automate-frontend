@@ -386,7 +386,7 @@ export default function ProfilePage() {
                           <FiBriefcase className="text-warning-500 w-10 h-10" />
                         </div>
                         <div className="flex flex-col gap-3">
-                          <h3 className="text-2xl font-bold text-foreground tracking-tight uppercase italic underline decoration-warning-500/50 underline-offset-8">
+                          <h3 className="text-xl font-bold text-foreground tracking-tight uppercase">
                             Registration Required
                           </h3>
                           <p className="text-default-500 max-w-md text-base leading-relaxed">

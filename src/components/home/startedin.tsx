@@ -63,7 +63,7 @@ export default function StartedIn() {
           transition={{ duration: 0.8 }}
           className="max-w-4xl mb-20 md:mb-24"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-foreground">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
             <span className="text-orange-500">Started</span> in the{" "}
             <span className="text-green-500">Indian Market</span>.<br />
             Designed for Domestic & Global Trade.

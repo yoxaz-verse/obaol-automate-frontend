@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
-import CompanyInterestsModal from "./company-interests-modal";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 
 interface ILoginProps {
@@ -28,8 +27,6 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
   const [isRoutingToRegister, setIsRoutingToRegister] = useState(false);
-  const [showInterestsModal, setShowInterestsModal] = useState(false);
-  const [interestsSetupDone, setInterestsSetupDone] = useState(false);
   const registerRouteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const router = useRouter();
@@ -47,19 +44,16 @@ const LoginComponent = ({ role }: ILoginProps) => {
   useEffect(() => {
     if (!loading && isAuthenticated) {
       const roleLower = String(user?.role || "").toLowerCase();
-      const requiresInterestsSetup =
-        roleLower === "associate" &&
-        user?.associateCompanyId &&
-        user?.companyInterestsConfigured === false &&
-        !interestsSetupDone;
-      if (requiresInterestsSetup) {
-        setShowInterestsModal(true);
-        return;
+      if (roleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
+        showToastMessage({
+          type: "warning",
+          message: "Company interests are not configured. Update them from My Company for execution matching.",
+          position: "top-right",
+        });
       }
-      setShowInterestsModal(false);
       router.push("/dashboard");
     }
-  }, [isAuthenticated, loading, router, user, interestsSetupDone]);
+  }, [isAuthenticated, loading, router, user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -149,24 +143,23 @@ const LoginComponent = ({ role }: ILoginProps) => {
     associate: {
       headline: "OBAOL",
       highlight: "ASSOCIATE NETWORK",
-      description: "Join a trusted network for structured agro commodity trade and verified sourcing.",
+      description: "Join a trusted structured agro commodity network with verified sourcing, inventory management, and execution support.",
       points: [
         "Verified Sourcing & Quality",
-        "Direct Structured Agro-Trade",
-        "Transparent Financial Settlement",
-        "Inventory Monetization Tools"
+        "Global Execution Panel for End-to-End Trade Coordination",
+        "Transportation, Packaging, and Procurement on One Platform",
       ],
       footer: "Associate_Hub_Online"
     },
     employee: {
       headline: "OBAOL",
       highlight: "STAFF PORTAL",
-      description: "Access your daily tasks, performance metrics, and internal resources efficiently.",
+      description: "Access your assoicates, performance metrics, and internal resources efficiently.",
       points: [
-        "Dynamic Task Management",
+        "Assoicate Management",
         "Personal Performance Metrics",
-        "Shift & Attendance Logs",
-        "Unified Communications"
+        "Enquriy Management",
+        "Team and Hierachy"
       ],
       footer: "Employee_Portal_v2"
     },
@@ -302,15 +295,6 @@ const LoginComponent = ({ role }: ILoginProps) => {
           </Button>
         </motion.div>
       </form>
-      <CompanyInterestsModal
-        open={showInterestsModal}
-        associateCompanyId={user?.associateCompanyId}
-        onSaved={() => {
-          setShowInterestsModal(false);
-          setInterestsSetupDone(true);
-          router.push("/dashboard");
-        }}
-      />
     </AuthLayout>
   );
 };

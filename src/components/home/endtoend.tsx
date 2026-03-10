@@ -377,7 +377,7 @@ function TotalTimeCard({
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
           transition={{ type: "spring", stiffness: 200 }}
-          className={`text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter ${highlight ? "text-orange-500" : "text-foreground"
+          className={`text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter ${highlight ? "text-orange-500" : "text-foreground"
             }`}
         >
           {time}

@@ -551,8 +551,8 @@ export default function CompanyProductPage() {
                     key={tab}
                     onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${activeTab === tab
-                        ? "bg-default-200 text-foreground"
-                        : "text-default-500 hover:text-foreground hover:bg-default-100"
+                      ? "bg-default-200 text-foreground"
+                      : "text-default-500 hover:text-foreground hover:bg-default-100"
                       }`}
                   >
                     {tab !== "all" && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
@@ -590,8 +590,8 @@ export default function CompanyProductPage() {
                       key={company._id}
                       onClick={() => setSelectedCompanyId(company._id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
-                          ? "bg-warning-500/10 border border-warning-500/30"
-                          : "border border-transparent hover:bg-default-100/80"
+                        ? "bg-warning-500/10 border border-warning-500/30"
+                        : "border border-transparent hover:bg-default-100/80"
                         }`}
                     >
                       <Avatar
@@ -643,7 +643,7 @@ export default function CompanyProductPage() {
                         className="border-2 border-default-200 shadow-sm shrink-0"
                       />
                       <div>
-                        <h1 className="text-xl font-black text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
+                        <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
                         <div className="flex items-center gap-2 mt-1">
                           <Chip
                             size="sm"

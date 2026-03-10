@@ -2,13 +2,22 @@ import React from "react";
 import { Metadata } from "next";
 import { Card, CardBody, CardHeader, Spacer } from "@nextui-org/react";
 import nextDynamic from "next/dynamic";
+import Link from "next/link";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
+import { buildPublicWebApiUrl, resolvePublicWebApiBase } from "@/utils/publicApi";
 const TradeOperatingLayer = nextDynamic(() => import("@/components/home/tradeoperatinglayer"), {
     loading: () => <div className="mx-auto mt-10 h-56 w-[95%] max-w-7xl animate-pulse rounded-2xl bg-default-200/20" />,
 });
 
 const BASE_URL = "https://obaol.com";
+type ProductRow = {
+    _id: string;
+    slug?: string;
+    name: string;
+    description?: string;
+    subCategory?: { name?: string } | null;
+};
 
 export const metadata: Metadata = {
     title: "Products | OBAOL Supreme",
@@ -34,30 +43,36 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 async function getProducts() {
-    // Fetch from the new public endpoint
-    const publicApiBase = process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL || "http://localhost:5001";
-    const publicApiPath = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-
-    // Ensure we have an absolute URL for server-side fetching
-    const apiUrl = publicApiBase.startsWith('http')
-        ? `${publicApiBase}${publicApiPath}`
-        : `http://localhost:5001${publicApiPath}`;
+    const requestUrl = buildPublicWebApiUrl("/products?limit=300");
+    const apiHost = (() => {
+        try {
+            return new URL(resolvePublicWebApiBase()).host;
+        } catch {
+            return resolvePublicWebApiBase();
+        }
+    })();
 
     try {
-        const res = await fetch(`${apiUrl}/products?limit=300`, {
+        const res = await fetch(requestUrl, {
             cache: "no-store", // Ensure fresh data
         });
 
         if (!res.ok) {
-            console.error(`[ProductPage] Fetch failed with status: ${res.status}`);
-            return null;
+            console.error(`[ProductPage] Fetch failed with status ${res.status} from ${apiHost}`);
+            return [];
         }
 
         const data = await res.json();
-        return data.data;
+        const payload = data?.data;
+        const rows = Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+                ? payload
+                : [];
+        return rows as ProductRow[];
     } catch (error) {
-        console.error("[ProductPage] Error fetching products:", error);
-        return null;
+        console.error(`[ProductPage] Error fetching products from ${apiHost}:`, error);
+        return [];
     }
 }
 
@@ -70,7 +85,7 @@ export default async function ProductPage() {
     // So result.data is the array.
     // GenericCrudController returns { success: true, data: { data: [], totalCount: ... } }
     // So productsResponse is { data: [], totalCount: ... }
-    const products = productsResponse?.data || [];
+    const products = Array.isArray(productsResponse) ? productsResponse : [];
 
     return (
         <div className="bg-background">
@@ -89,18 +104,35 @@ export default async function ProductPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {products.map((product: any) => (
+                        {products.map((product: ProductRow) => (
                             <Card key={`${product._id}-product-card`} className="h-full hover:scale-105 transition-transform duration-200">
                                 <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
                                     <p className="text-tiny uppercase font-bold text-primary/80 mb-1">
                                         {product.subCategory?.name || "Commodity"}
                                     </p>
-                                    <h4 className="font-bold text-large">{product.name}</h4>
+                                    {product.slug ? (
+                                        <Link
+                                            href={`/product/${product.slug}`}
+                                            className="font-bold text-large hover:text-warning-500 transition-colors"
+                                        >
+                                            {product.name}
+                                        </Link>
+                                    ) : (
+                                        <h4 className="font-bold text-large">{product.name}</h4>
+                                    )}
                                 </CardHeader>
                                 <CardBody className="overflow-visible py-2">
                                     <p className="text-default-500 text-sm line-clamp-3">
                                         {product.description}
                                     </p>
+                                    {product.slug ? (
+                                        <Link
+                                            href={`/product/${product.slug}`}
+                                            className="mt-2 inline-block text-xs font-semibold text-warning-500 hover:text-warning-400"
+                                        >
+                                            View details
+                                        </Link>
+                                    ) : null}
                                     {/* @ts-ignore */}
                                     <Spacer y={2} />
                                     {/* If we had images, we'd put them here. For now, description key. */}

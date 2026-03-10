@@ -3,10 +3,27 @@
 import axios from "axios";
 import { getLanguageCookie } from "@/utils/languageCookie";
 
-export const baseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "/api/v1/web";
+const toAbsoluteBaseUrl = () => {
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "/api/v1/web";
+  const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || "";
+
+  if (/^https?:\/\//i.test(apiBase)) {
+    return apiBase;
+  }
+
+  if (backendOrigin) {
+    const normalizedOrigin = backendOrigin.replace(/\/+$/, "");
+    const normalizedPath = apiBase.startsWith("/") ? apiBase : `/${apiBase}`;
+    return `${normalizedOrigin}${normalizedPath}`;
+  }
+
+  return apiBase;
+};
+
+export const baseUrl = toAbsoluteBaseUrl();
 
 const instance = axios.create({
   baseURL: baseUrl,

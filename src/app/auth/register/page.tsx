@@ -634,11 +634,11 @@ export default function RegisterPage() {
       leftPanel={{
         headline: "Become an",
         highlight: "OBAOL ASSOCIATE",
-        description: "Associates power verified agro commodity trade with structured execution, transparent roles, and trusted delivery.",
+        description: "Associates power verified agro commodity trade with inventory management and unified execution from anywhere in the world.",
         points: [
           "Access verified buyer-supplier opportunities across the network.",
-          "Work through structured enquiry, responsibility, and order workflows.",
-          "Get manual onboarding support from OBAOL team before activation.",
+          "Manage inventory and coordinate procurement, transportation, and packaging on one platform.",
+          "Execute end-to-end workflows globally with OBAOL support before activation.",
         ],
         footer: "Associate_Onboarding",
       }}

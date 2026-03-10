@@ -74,7 +74,7 @@ const NotificationsPage = () => {
       <div className="rounded-2xl border border-default-200 bg-content1 p-4 md:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl md:text-2xl font-black text-foreground">Notifications</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Notifications</h1>
             <p className="text-sm text-default-500">
               Role-scoped updates for enquiries, orders, and live catalog events.
             </p>
@@ -117,9 +117,8 @@ const NotificationsPage = () => {
             {rows.map((item) => (
               <div
                 key={item._id}
-                className={`rounded-xl border px-3 py-3 md:px-4 md:py-3.5 ${
-                  item.isRead ? "border-default-200/70 bg-content1" : "border-warning-400/40 bg-warning-500/10"
-                }`}
+                className={`rounded-xl border px-3 py-3 md:px-4 md:py-3.5 ${item.isRead ? "border-default-200/70 bg-content1" : "border-warning-400/40 bg-warning-500/10"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

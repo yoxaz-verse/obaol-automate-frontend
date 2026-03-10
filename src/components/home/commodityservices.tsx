@@ -306,7 +306,7 @@ export default function ResponsibilityTransferSection() {
                       }`}
                   >
                     {/* Step number */}
-                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-colors duration-300
+                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors duration-300
                       ${active ? "bg-orange-400 text-black" : "bg-foreground/10 text-default-500 group-hover:bg-orange-400/20 group-hover:text-orange-400"}`}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
@@ -365,7 +365,7 @@ export default function ResponsibilityTransferSection() {
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-black text-xs font-black shadow-none whitespace-nowrap"
+                  className="flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-black text-xs font-bold shadow-none whitespace-nowrap"
                 >
                   {obaolHandles.length}
                 </motion.span>

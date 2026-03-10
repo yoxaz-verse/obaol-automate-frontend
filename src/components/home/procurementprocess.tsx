@@ -205,7 +205,7 @@ function FlowStep({
         {/* Step Indicator (Mobile: Absolute Left, Desktop: Integrated into layout) */}
         <div
           className={`absolute left-0 sm:left-0 top-2 md:top-auto md:relative md:inline-flex flex items-center justify-center text-center
-          w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full text-sm sm:text-base font-black tracking-widest backdrop-blur-md border border-white/10
+          w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full text-sm sm:text-base font-bold tracking-tight backdrop-blur-md border border-white/10
           ${fromLeft ? "md:ml-auto md:mb-4 md:float-right" : "md:mr-auto md:mb-4"}
           ${highlight
               ? "bg-orange-500 text-white border-orange-400"

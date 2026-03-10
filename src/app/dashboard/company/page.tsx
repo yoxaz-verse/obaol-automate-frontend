@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -20,6 +20,25 @@ import AuthContext from "@/context/AuthContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
+
+const INTEREST_OPTIONS = [
+  "PROCUREMENT",
+  "CERTIFICATION",
+  "TRANSPORTATION",
+  "SHIPPING",
+  "PACKAGING",
+  "QUALITY_TESTING",
+  "OCEAN_FREIGHT",
+  "AIR_FREIGHT",
+  "INLAND_LOGISTICS",
+  "SEA_FREIGHT_FORWARDING",
+  "AIR_FREIGHT_FORWARDING",
+  "CUSTOMS_CLEARANCE",
+  "INLAND_TRANSPORT",
+  "WAREHOUSING",
+  "CONSOLIDATION_LCL",
+  "PROJECT_CARGO",
+];
 
 const REPORT_REASONS = [
   { key: "INACTIVE_MEMBER", label: "Inactive Member" },
@@ -54,6 +73,14 @@ export default function CompanyWorkspacePage() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [reasonCode, setReasonCode] = useState("INACTIVE_MEMBER");
   const [description, setDescription] = useState("");
+  const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
+  const [requestedInterests, setRequestedInterests] = useState<string[]>([]);
+  const [interestNote, setInterestNote] = useState("");
+  const [recentInterestSubmission, setRecentInterestSubmission] = useState<{
+    requestedInterests: string[];
+    createdAt: string;
+    syncing: boolean;
+  } | null>(null);
 
   const companyQuery = useQuery({
     queryKey: ["company-workspace-company", associateCompanyId],
@@ -91,6 +118,15 @@ export default function CompanyWorkspacePage() {
     enabled: isAssociate && Boolean(associateCompanyId),
   });
 
+  const interestsQuery = useQuery({
+    queryKey: ["company-workspace-interests", associateCompanyId],
+    queryFn: async () => {
+      const response = await getData("/auth/company-interests/status");
+      return response?.data?.data || null;
+    },
+    enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
   const reportMutation = useMutation({
     mutationFn: async () => {
       if (!selectedMember?._id) {
@@ -118,9 +154,118 @@ export default function CompanyWorkspacePage() {
     },
   });
 
+  const interestRequestMutation = useMutation({
+    mutationFn: async () => {
+      if (!requestedInterests.length) throw new Error("Select at least one interest.");
+      const response = await postData(apiRoutes.organizationReports.create, {
+        targetAssociateId: user?.id,
+        reasonCode: "COMPANY_INTEREST_UPDATE",
+        description: interestNote.trim() || "Company interest update request from My Company.",
+        payload: {
+          requestedInterests,
+        },
+      });
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message || "Failed to submit interest request.");
+      }
+      return response?.data?.data || null;
+    },
+    onSuccess: (createdReport: any) => {
+      const submittedInterests = [...requestedInterests];
+      showToastMessage({
+        type: "success",
+        message:
+          "Interest update request submitted. Previous pending/under-review requests were auto-cancelled.",
+        position: "top-right",
+      });
+      setRecentInterestSubmission({
+        requestedInterests:
+          Array.isArray(createdReport?.payload?.requestedInterests) && createdReport.payload.requestedInterests.length
+            ? createdReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase())
+            : submittedInterests,
+        createdAt: String(createdReport?.createdAt || new Date().toISOString()),
+        syncing: !Boolean(createdReport?._id),
+      });
+      setIsInterestModalOpen(false);
+      setRequestedInterests([]);
+      setInterestNote("");
+      queryClient.invalidateQueries({ queryKey: ["company-workspace-reports"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || error?.message || "Failed to submit interest request.",
+        position: "top-right",
+      });
+    },
+  });
+
   const company = companyQuery.data;
   const members = useMemo(() => (Array.isArray(membersQuery.data) ? membersQuery.data : []), [membersQuery.data]);
   const reports = useMemo(() => (Array.isArray(reportsQuery.data) ? reportsQuery.data : []), [reportsQuery.data]);
+  const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
+    ? interestsQuery.data.companyInterests.map((value: any) => String(value || "").toUpperCase())
+    : [];
+  const interestsFromCompany = Array.isArray((company as any)?.serviceCapabilities)
+    ? (company as any).serviceCapabilities.map((value: any) => String(value || "").toUpperCase())
+    : [];
+  const companyInterests = interestsFromStatus.length ? interestsFromStatus : interestsFromCompany;
+  const interestReports = useMemo(
+    () => reports.filter((row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE"),
+    [reports]
+  );
+  const interestStatusSummary = useMemo(() => {
+    const summary = {
+      pending: 0,
+      underReview: 0,
+      actionTaken: 0,
+      rejected: 0,
+      latest: null as any,
+    };
+    if (!interestReports.length) return summary;
+    summary.latest = interestReports[0];
+    interestReports.forEach((row: any) => {
+      const status = String(row?.status || "").toUpperCase();
+      if (status === "PENDING_REVIEW") summary.pending += 1;
+      if (status === "UNDER_REVIEW") summary.underReview += 1;
+      if (status === "ACTION_TAKEN") summary.actionTaken += 1;
+      if (status === "REJECTED") summary.rejected += 1;
+    });
+    return summary;
+  }, [interestReports]);
+  const latestPendingLikeReport = useMemo(() => {
+    return interestReports.find((row: any) => {
+      const status = String(row?.status || "").toUpperCase();
+      return status === "PENDING_REVIEW" || status === "UNDER_REVIEW";
+    }) || null;
+  }, [interestReports]);
+
+  useEffect(() => {
+    if (!recentInterestSubmission) return;
+    if (latestPendingLikeReport) {
+      setRecentInterestSubmission(null);
+    }
+  }, [latestPendingLikeReport, recentInterestSubmission]);
+
+  useEffect(() => {
+    if (!recentInterestSubmission?.syncing) return;
+    const timer = setTimeout(() => {
+      setRecentInterestSubmission(null);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [recentInterestSubmission]);
+
+  const pendingBannerRequestedInterests = useMemo(() => {
+    if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedInterests)) {
+      return latestPendingLikeReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase());
+    }
+    if (recentInterestSubmission?.requestedInterests?.length) {
+      return recentInterestSubmission.requestedInterests.map((value) => String(value || "").toUpperCase());
+    }
+    return [];
+  }, [latestPendingLikeReport, recentInterestSubmission]);
+
+  const pendingBannerCreatedAt = latestPendingLikeReport?.createdAt || recentInterestSubmission?.createdAt || null;
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
@@ -165,6 +310,75 @@ export default function CompanyWorkspacePage() {
             <p className="text-default-600 text-sm">{company?.email || "-"} • {company?.phone || "-"}</p>
             <p className="text-default-500 text-sm">{company?.address || "No address available."}</p>
           </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground">Company Interests</h2>
+            <p className="text-sm text-default-600">
+              Execution opportunities are matched using approved company interests.
+            </p>
+          </div>
+          <Button color="primary" variant="flat" onPress={() => setIsInterestModalOpen(true)}>
+            Request Interest Update
+          </Button>
+        </div>
+        <div className="mb-3">
+          <Chip size="sm" color={companyInterests.length ? "success" : "warning"} variant="flat">
+            {companyInterests.length ? "Configured" : "Not Configured"}
+          </Chip>
+        </div>
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Chip size="sm" variant="flat" color="warning">
+            Pending: {interestStatusSummary.pending}
+          </Chip>
+          <Chip size="sm" variant="flat" color="secondary">
+            Under Review: {interestStatusSummary.underReview}
+          </Chip>
+          <Chip size="sm" variant="flat" color="success">
+            Action Taken: {interestStatusSummary.actionTaken}
+          </Chip>
+          <Chip size="sm" variant="flat" color="danger">
+            Rejected: {interestStatusSummary.rejected}
+          </Chip>
+        </div>
+        {(latestPendingLikeReport || recentInterestSubmission) && (
+          <div className="mb-4 rounded-lg border border-warning-200 bg-warning-50 px-3 py-2 dark:border-warning-400/30 dark:bg-warning-400/10">
+            <div className="text-sm font-medium text-warning-800 dark:text-warning-200">
+              {latestPendingLikeReport ? "Request sent and pending admin approval." : "Submitting request (syncing status...)"} 
+            </div>
+            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+              Previous pending/under-review requests were auto-cancelled. Latest request is now active.
+            </div>
+            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+              Services requested:
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {pendingBannerRequestedInterests.map((interest) => (
+                <Chip key={`pending-interest-${interest}`} size="sm" color="warning" variant="flat">
+                  {interest.replace(/_/g, " ")}
+                </Chip>
+              ))}
+            </div>
+            <div className="mt-2 text-xs text-warning-700/90 dark:text-warning-200/90">
+              Submitted: {formatDate(pendingBannerCreatedAt)}
+            </div>
+          </div>
+        )}
+        {companyInterests.length ? (
+          <div className="flex flex-wrap gap-2">
+            {companyInterests.map((interest: string) => (
+              <Chip key={interest} size="sm" color="primary" variant="flat">
+                {interest.replace(/_/g, " ")}
+              </Chip>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-default-500">
+            No approved interests available yet. Submit an update request for admin approval.
+          </p>
         )}
       </div>
 
@@ -229,6 +443,60 @@ export default function CompanyWorkspacePage() {
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
         <div className="mb-4">
+          <h2 className="text-xl font-semibold text-foreground">Interest Update Requests</h2>
+          <p className="text-sm text-default-600">Track company interest change requests and their admin status.</p>
+        </div>
+        {reportsQuery.isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Spinner />
+          </div>
+        ) : interestReports.length === 0 ? (
+          <div className="py-6 text-default-500">No interest update requests submitted yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-sm">
+              <thead className="bg-default-100/70">
+                <tr>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Requested Interests</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Admin Notes</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {interestReports.map((report: any, idx: number) => (
+                  <tr
+                    key={report?._id || idx}
+                    className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                  >
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(report?.payload?.requestedInterests) && report.payload.requestedInterests.length > 0
+                          ? report.payload.requestedInterests.map((interest: string) => (
+                              <Chip key={`${report?._id}-${interest}`} size="sm" color="primary" variant="flat">
+                                {String(interest || "").replace(/_/g, " ")}
+                              </Chip>
+                            ))
+                          : "-"}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Chip size="sm" variant="flat" color={statusColor(report?.status) as any}>
+                        {report?.status || "PENDING_REVIEW"}
+                      </Chip>
+                    </td>
+                    <td className="px-3 py-2 text-default-600">{report?.adminNotes || "-"}</td>
+                    <td className="px-3 py-2 text-default-600">{formatDate(report?.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+        <div className="mb-4">
           <h2 className="text-xl font-semibold text-foreground">{isSupervisor ? "Company Reports" : "My Submitted Reports"}</h2>
           <p className="text-sm text-default-600">
             {isSupervisor
@@ -285,6 +553,8 @@ export default function CompanyWorkspacePage() {
             setDescription("");
           }
         }}
+        isDismissable={false}
+        isKeyboardDismissDisabled
       >
         <ModalContent>
           <ModalHeader>Report Member</ModalHeader>
@@ -330,6 +600,64 @@ export default function CompanyWorkspacePage() {
               onPress={() => reportMutation.mutate()}
             >
               Submit Report
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isInterestModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsInterestModalOpen(false);
+            setRequestedInterests([]);
+            setInterestNote("");
+          }
+        }}
+        isDismissable={false}
+        isKeyboardDismissDisabled
+      >
+        <ModalContent>
+          <ModalHeader>Request Company Interest Update</ModalHeader>
+          <ModalBody>
+            <Select
+              label="Requested Interests"
+              labelPlacement="outside"
+              selectionMode="multiple"
+              selectedKeys={new Set(requestedInterests)}
+              onSelectionChange={(keys) =>
+                setRequestedInterests(Array.from(keys as Set<string>).map((value) => String(value)))
+              }
+            >
+              {INTEREST_OPTIONS.map((interest) => (
+                <SelectItem key={interest} value={interest}>
+                  {interest.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </Select>
+            <p className="text-xs text-default-500">
+              Select one or more interests. Submit to admin for approval.
+            </p>
+            <Textarea
+              label="Note (Optional)"
+              labelPlacement="outside"
+              minRows={3}
+              placeholder="Add context for admin review."
+              value={interestNote}
+              onValueChange={setInterestNote}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setIsInterestModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              isLoading={interestRequestMutation.isPending}
+              isDisabled={requestedInterests.length === 0}
+              onPress={() => interestRequestMutation.mutate()}
+            >
+              Submit Request
             </Button>
           </ModalFooter>
         </ModalContent>

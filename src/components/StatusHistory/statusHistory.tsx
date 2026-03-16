@@ -69,8 +69,17 @@ const StatusHistoryTabContent: React.FC<StatusHistoryTabContentProps> = ({
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       });
     };
-    if (historyData?.data?.data) {
-      return historyData.data.data.map((history: any, index: number) => ({
+    const raw = historyData?.data?.data;
+    const rows = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(historyData?.data?.data?.data)
+          ? historyData?.data?.data?.data
+          : [];
+
+    if (rows.length > 0) {
+      return rows.map((history: any, index: number) => ({
         id: history._id || `history-${index}`, // Ensure unique key
         changeType: history.changeType,
         previousStatus: history.previousStatus || "N/A",

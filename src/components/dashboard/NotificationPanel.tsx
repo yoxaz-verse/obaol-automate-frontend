@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Chip, Spinner } from "@heroui/react";
+import { Button, Chip, Spinner } from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";

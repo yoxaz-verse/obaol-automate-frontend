@@ -22,7 +22,7 @@ import {
   useDisclosure,
   Tooltip,
   Spinner,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ import SelectModal from "./select-modal"; // Commission logic
 import AddToCatalogModal from "./AddToCatalogModal";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
-import { associateRoutes, variantRateRoutes, apiRoutes, displayedRateRoutes, catalogItemRoutes } from "@/core/api/apiRoutes";
+import { associateRoutes, variantRateRoutes, apiRoutes, displayedRateRoutes, catalogItemRoutes, inventoryRoutes } from "@/core/api/apiRoutes";
 import {
   apiRoutesByRole,
   generateColumns,
@@ -46,6 +46,7 @@ import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import TableFrame from "@/components/CurdTable/table-frame";
 import { useCurrency } from "@/context/CurrencyContext";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
+import { showToastMessage } from "@/utils/utils";
 
 /**
  * Props for your existing VariantRate component
@@ -61,6 +62,8 @@ interface VariantRateProps {
   hideBuiltInFilters?: boolean;
   externalSearch?: string;
   externalFilters?: Record<string, any>;
+  showInventoryStatus?: boolean;
+  inventoryCompanyId?: string | null;
 }
 
 /**
@@ -80,6 +83,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   hideBuiltInFilters = false,
   externalSearch,
   externalFilters,
+  showInventoryStatus = false,
+  inventoryCompanyId = null,
 }) => {
   const router = useRouter();
   const productVariantValue = productVariant || null;
@@ -125,8 +130,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const { convertRate } = useCurrency();
   const roleLower = String(user?.role || "").toLowerCase();
-  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
-  const isAdminUser = roleLower === "admin" || isEmployeeUser;
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
+  const isAdminUser = roleLower === "admin" || isOperatorUser;
   const isAssociateUser = roleLower === "associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
@@ -134,7 +139,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const canManageRow = (item: any) => {
     if (!item) return false;
     if (roleLower === "admin") return true;
-    if (isEmployeeUser && !item.isMarketplaceView && !item.isCatalogView && Boolean(item.companyId)) return true;
+    if (isOperatorUser && !item.isMarketplaceView && !item.isCatalogView && Boolean(item.companyId)) return true;
     return Boolean(item.isOwnerView || item.isCatalogView);
   };
 
@@ -149,6 +154,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+  const [inventoryQty, setInventoryQty] = useState("");
+  const [inventorySubmitting, setInventorySubmitting] = useState(false);
+  const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const shouldUseServerSearch = !(isMarketplaceView && typeof externalSearch === "string");
@@ -188,6 +197,57 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const addedRateIds = new Set(catalogItems.map((item: any) => item.baseRateId?._id || item.baseRateId));
 
+  const { data: inventoryResponse } = useQuery({
+    queryKey: ["inventory-status", inventoryCompanyId, user?.id],
+    queryFn: () =>
+      getData(inventoryRoutes.getAll, {
+        limit: 1000,
+        ...(inventoryCompanyId && { associateCompany: inventoryCompanyId }),
+        ...(isAssociateUser && !inventoryCompanyId && { associate: user?.id }),
+      }),
+    enabled: showInventoryStatus && (Boolean(inventoryCompanyId) || isAssociateUser),
+  });
+
+  const inventoryRows = Array.isArray(inventoryResponse?.data?.data?.data)
+    ? inventoryResponse?.data?.data?.data
+    : (inventoryResponse?.data?.data || []);
+
+  const { data: statesResponse } = useQuery({
+    queryKey: ["sample-request-states"],
+    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 1000 }),
+  });
+  const { data: districtsResponse } = useQuery({
+    queryKey: ["sample-request-districts"],
+    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
+  });
+  const { data: citiesResponse } = useQuery({
+    queryKey: ["sample-request-cities"],
+    queryFn: () => getData(apiRoutes.city.getAll, { page: 1, limit: 4000 }),
+  });
+  const states = Array.isArray(statesResponse?.data?.data?.data)
+    ? statesResponse?.data?.data?.data
+    : (statesResponse?.data?.data || []);
+  const districts = Array.isArray(districtsResponse?.data?.data?.data)
+    ? districtsResponse?.data?.data?.data
+    : (districtsResponse?.data?.data || []);
+  const cities = Array.isArray(citiesResponse?.data?.data?.data)
+    ? citiesResponse?.data?.data?.data
+    : (citiesResponse?.data?.data || []);
+
+  const inventorySummaryMap = new Map<string, { totalQty: number; warehouses: Set<string> }>();
+  for (const inv of inventoryRows || []) {
+    const pvId = inv.productVariant?._id || inv.productVariant;
+    const compId = inv.associateCompany?._id || inv.associateCompany || "";
+    if (!pvId) continue;
+    const key = `${pvId}::${compId}`;
+    if (!inventorySummaryMap.has(key)) {
+      inventorySummaryMap.set(key, { totalQty: 0, warehouses: new Set<string>() });
+    }
+    const summary = inventorySummaryMap.get(key)!;
+    summary.totalQty += Number(inv.quantity || 0);
+    if (inv.warehouseName) summary.warehouses.add(String(inv.warehouseName));
+  }
+
   // Build the columns from table config
   const currentTable = rate;
 
@@ -197,10 +257,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
     user?.role
   );
 
+  if (!showInventoryStatus) {
+    columns = columns.filter((column: any) => column.uid !== "inventoryStatus");
+  }
+
   if (
     rate === "variantRate" &&
     showAssociateColumn &&
-    isEmployeeUser &&
+    isOperatorUser &&
     !columns.some((column: any) => column.uid === "associate")
   ) {
     const productIndex = columns.findIndex((column: any) => column.uid === "productVariant");
@@ -368,6 +432,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
               // Row is a VariantRate (My Products OR Marketplace)
               const isMarketplace = isMarketplaceView;
               const isOwner = item.associate?._id === user?.id || item.associate === user?.id;
+              const pvId = item.productVariant?._id || item.productVariant || item.productVariantId;
+              const compId = item.associateCompany?._id || item.associateCompany || "";
+              const inventorySummary = showInventoryStatus ? inventorySummaryMap.get(`${pvId}::${compId}`) : null;
+              const inventoryStatus = inventorySummary
+                ? `In Stock: ${inventorySummary.totalQty} MT • Warehouses: ${inventorySummary.warehouses.size}`
+                : "No inventory";
+              const hasInventory = Boolean(inventorySummary && inventorySummary.totalQty > 0);
 
               const supplierRate = item.rate || 0;
               const quantityValue = item.quantity;
@@ -384,9 +455,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...rest,
                 isLive: item.isLive,
                 associate:
-                  isOwner
-                    ? (item.associateCompany?.name || "My Company")
-                    : (item.associateCompany?.name || "OBAOL"),
+                  item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL"),
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant: String(
@@ -417,6 +486,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   ? `${quantityValue} MT`
                   : "-",
                 quantityRaw: quantityValue,
+                inventoryQty: inventorySummary
+                  ? `${inventorySummary.totalQty} MT`
+                  : "-",
+                inventoryStatus,
+                hasInventory,
 
                 rawBasePrice: totalRate,
                 rawCommission: 0,
@@ -503,6 +577,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 row.product,
                 row.productVariant,
                 row.associate,
+                row.warehouseName,
                 row.rate,
                 row.quantity,
               ]
@@ -575,6 +650,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   columns={columns}
                   isLoading={false}
                   otherModal={(rowItem: any) => {
+                    const canAddInventory =
+                      showInventoryStatus &&
+                      rowItem &&
+                      !rowItem.hasInventory &&
+                      (roleLower === "admin" || isOperatorUser || isAssociateUser);
                     if (rowItem.isMarketplaceView) {
                       return (
                         <div className="flex items-center gap-2">
@@ -590,6 +670,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               productVariant={rowItem.productVariantId}
                               variantRate={rowItem}
                             />
+                          )}
+                          <RequestSampleButton
+                            variantRate={rowItem}
+                            states={states}
+                            districts={districts}
+                            cities={cities}
+                          />
+                          {canAddInventory && (
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="warning"
+                              onPress={() => {
+                                setSelectedInventoryRate(rowItem);
+                                setInventoryQty("");
+                                setInventoryModalOpen(true);
+                              }}
+                            >
+                              Add Inventory
+                            </Button>
                           )}
                         </div>
                       );
@@ -610,6 +710,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
                               </Tooltip>
                             )}
+                            {canAddInventory && (
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="warning"
+                                onPress={() => {
+                                  setSelectedInventoryRate(rowItem);
+                                  setInventoryQty("");
+                                  setInventoryModalOpen(true);
+                                }}
+                              >
+                                Add Inventory
+                              </Button>
+                            )}
                           </div>
                         ) : (
                           <div className="flex flex-col items-center gap-1">
@@ -628,6 +742,26 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     variantRate={rowItem}
                                   />
                                 )}
+                                <RequestSampleButton
+                                  variantRate={rowItem}
+                                  states={states}
+                                  districts={districts}
+                                  cities={cities}
+                                />
+                                {canAddInventory && (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    onPress={() => {
+                                      setSelectedInventoryRate(rowItem);
+                                      setInventoryQty("");
+                                      setInventoryModalOpen(true);
+                                    }}
+                                  >
+                                    Add Inventory
+                                  </Button>
+                                )}
                               </div>
                             ) : (
                               <>
@@ -644,6 +778,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     variantRate={rowItem}
                                   />
                                 )}
+                                {canAddInventory && (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    onPress={() => {
+                                      setSelectedInventoryRate(rowItem);
+                                      setInventoryQty("");
+                                      setInventoryModalOpen(true);
+                                    }}
+                                  >
+                                    Add Inventory
+                                  </Button>
+                                )}
                               </>
                             )}
                             <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
@@ -658,7 +806,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       const isCoolingTime = isCooling(item.coolingStartTime);
                       const isDifferentAssociate = item.associateId !== user.id;
 
-                      if (roleLower === "admin" || isEmployeeUser || (isDifferentAssociate && isCoolingTime)) {
+                      if (roleLower === "admin" || isOperatorUser || (isDifferentAssociate && isCoolingTime)) {
                         return (
                           <EditModal
                             _id={item._id}
@@ -697,6 +845,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
             <section className="md:hidden space-y-2">
               {finalTableData.map((item: any, index: number) => {
                 const isLive = item.isLive;
+                const canAddInventory =
+                  showInventoryStatus &&
+                  item &&
+                  !item.hasInventory &&
+                  (roleLower === "admin" || isOperatorUser || isAssociateUser);
                 return (
                   <motion.div
                     key={index}
@@ -773,6 +926,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             {(user?.role === "Associate" || isAdminUser) && (
                               <CreateEnquiryButton productVariant={item.productVariantId} variantRate={item} />
                             )}
+                            <RequestSampleButton
+                              variantRate={item}
+                              states={states}
+                              districts={districts}
+                              cities={cities}
+                            />
                           </>
                         ) : (
                           !item.isCatalogView && (isLive || isAdminUser) && (
@@ -781,6 +940,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               variantRate={item}
                             />
                           )
+                        )}
+                        {canAddInventory && (
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            color="warning"
+                            onPress={() => {
+                              setSelectedInventoryRate(item);
+                              setInventoryQty("");
+                              setInventoryModalOpen(true);
+                            }}
+                          >
+                            Add Inventory
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -799,6 +972,174 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 );
               })}
             </section>
+            <Modal
+              isOpen={inventoryModalOpen}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setInventoryModalOpen(false);
+                  setInventoryQty("");
+                  setSelectedInventoryRate(null);
+                  setInventorySubmitting(false);
+                }
+              }}
+              isDismissable={!inventorySubmitting}
+              size="lg"
+            >
+              <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
+                <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="p-2.5 bg-warning/10 rounded-xl text-warning-500 shadow-sm shadow-warning/10">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black tracking-tight text-foreground">Add Inventory</h3>
+                      <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Stock in Metric Tonnes (MT)</p>
+                    </div>
+                  </div>
+                </ModalHeader>
+                <ModalBody className="py-5 px-6 flex flex-col gap-4">
+                  {/* Product context card */}
+                  {selectedInventoryRate && (
+                    <div className="p-3 bg-default-100/50 rounded-xl border border-divider/30 flex justify-between items-center gap-3">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">Product</span>
+                        <span className="text-sm font-bold text-foreground truncate">
+                          {selectedInventoryRate.product || "—"}
+                        </span>
+                      </div>
+                      <div className="px-3 py-1.5 bg-warning/10 text-warning-600 rounded-xl text-xs font-black border border-warning/20 shadow-inner shrink-0">
+                        {selectedInventoryRate.productVariant || "Standard"}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quantity input */}
+                  <Input
+                    label="Quantity (MT)"
+                    type="number"
+                    value={inventoryQty}
+                    onChange={(e) => setInventoryQty(e.target.value)}
+                    placeholder="e.g. 10"
+                    isDisabled={inventorySubmitting}
+                    variant="bordered"
+                    labelPlacement="outside"
+                    startContent={
+                      <span className="text-default-400 text-sm font-semibold pointer-events-none">MT</span>
+                    }
+                    description="Enter the quantity available at this location in Metric Tonnes."
+                    classNames={{
+                      label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                    }}
+                  />
+
+                  {/* Info note */}
+                  <div className="flex items-start gap-2 text-xs text-default-400 bg-default-100/40 px-3 py-2.5 rounded-xl border border-divider/20">
+                    <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Location, state, and district will be inherited from the rate record.
+                  </div>
+                </ModalBody>
+                <ModalFooter className="border-t border-divider px-6 py-4 gap-3">
+                  <Button
+                    variant="flat"
+                    color="default"
+                    onPress={() => setInventoryModalOpen(false)}
+                    isDisabled={inventorySubmitting}
+                    className="font-semibold"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color="warning"
+                    isLoading={inventorySubmitting}
+                    className="font-bold"
+                    startContent={!inventorySubmitting ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    ) : undefined}
+                    onPress={async () => {
+                      if (!selectedInventoryRate) return;
+                      const qty = Number(inventoryQty);
+                      if (!qty || Number.isNaN(qty) || qty <= 0) {
+                        showToastMessage({
+                          type: "error",
+                          message: "Enter a valid quantity in MT.",
+                          position: "top-right",
+                        });
+                        return;
+                      }
+                      setInventorySubmitting(true);
+                      try {
+                        const pvId = selectedInventoryRate.productVariantId || selectedInventoryRate.productVariant?._id || selectedInventoryRate.productVariant;
+                        const productId = selectedInventoryRate.productId || selectedInventoryRate.productVariant?.product?._id || selectedInventoryRate.productVariant?.product;
+                        const compId = selectedInventoryRate.companyId || selectedInventoryRate.associateCompany?._id || selectedInventoryRate.associateCompany || inventoryCompanyId;
+                        let associateId = selectedInventoryRate.associateId || selectedInventoryRate.associate?._id || selectedInventoryRate.associate;
+
+                        if (!associateId && compId) {
+                          const assocResponse = await getData(associateRoutes.getAll, {
+                            associateCompany: compId,
+                            limit: 1,
+                          });
+                          const assocRows = Array.isArray(assocResponse?.data?.data?.data)
+                            ? assocResponse?.data?.data?.data
+                            : (assocResponse?.data?.data || []);
+                          associateId = assocRows?.[0]?._id || assocRows?.[0]?.id;
+                        }
+
+                        if (!associateId) {
+                          showToastMessage({
+                            type: "error",
+                            message: "No associate found for this company.",
+                            position: "top-right",
+                          });
+                          setInventorySubmitting(false);
+                          return;
+                        }
+
+                        await postData(inventoryRoutes.getAll, {
+                          productVariant: pvId,
+                          product: productId,
+                          associateCompany: compId,
+                          associate: associateId,
+                          state: selectedInventoryRate.stateId || selectedInventoryRate.state?._id || selectedInventoryRate.state,
+                          district: selectedInventoryRate.districtId || selectedInventoryRate.district?._id || selectedInventoryRate.district,
+                          division: selectedInventoryRate.divisionId || selectedInventoryRate.division?._id || selectedInventoryRate.division,
+                          pincodeEntry: selectedInventoryRate.pincodeEntryId || selectedInventoryRate.pincodeEntry?._id || selectedInventoryRate.pincodeEntry,
+                          quantity: qty,
+                          unit: "MT",
+                        });
+
+                        showToastMessage({
+                          type: "success",
+                          message: "Inventory added successfully.",
+                          position: "top-right",
+                        });
+                        setInventoryModalOpen(false);
+                        setInventoryQty("");
+                        setSelectedInventoryRate(null);
+                        setInventorySubmitting(false);
+                        refetchData();
+                      } catch (error: any) {
+                        console.error("Inventory add failed:", error?.response?.data || error);
+                        showToastMessage({
+                          type: "error",
+                          message: error?.response?.data?.message || "Unable to add inventory. Please try again.",
+                          position: "top-right",
+                        });
+                        setInventorySubmitting(false);
+                      }
+                    }}
+                  >
+                    Add to Inventory
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+
+            </Modal>
           </div>
         );
       }}
@@ -888,6 +1229,168 @@ interface CreateEnquiryButtonProps {
   productVariant: string;
   variantRate: any;
 }
+
+interface RequestSampleButtonProps {
+  variantRate: any;
+  states: any[];
+  districts: any[];
+  cities: any[];
+}
+
+const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
+  variantRate,
+  states,
+  districts,
+  cities,
+}) => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { user } = useContext(AuthContext);
+  const [requestState, setRequestState] = useState("");
+  const [requestDistrict, setRequestDistrict] = useState("");
+  const [requestCity, setRequestCity] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const districtOptions = requestState
+    ? districts.filter((d: any) => String(d.state?._id || d.state) === String(requestState))
+    : districts;
+  const cityOptions = requestDistrict
+    ? cities.filter((c: any) => String(c.district?._id || c.district) === String(requestDistrict))
+    : cities;
+
+  const handleSubmit = async () => {
+    if (!requestState || !requestDistrict || !requestCity) {
+      showToastMessage({
+        type: "error",
+        message: "Select state, district, and city.",
+        position: "top-right",
+      });
+      return;
+    }
+    if (!window.confirm("Are you sure you want to request a sample?")) return;
+    setSubmitting(true);
+    try {
+      await postData(apiRoutes.sampleRequest.create, {
+        variantRateId: variantRate._id,
+        requestState,
+        requestDistrict,
+        requestCity,
+      });
+      showToastMessage({
+        type: "success",
+        message: "Sample request sent to supplier.",
+        position: "top-right",
+      });
+      setRequestState("");
+      setRequestDistrict("");
+      setRequestCity("");
+      onOpenChange();
+    } catch (error: any) {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Unable to request sample.",
+        position: "top-right",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (user?.role !== "Associate") return null;
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <Tooltip content="Request Sample">
+        <span
+          onClick={onOpen}
+          className="text-xl text-warning-500 cursor-pointer active:opacity-50 hover:text-warning-600 transition-all duration-200 transform hover:scale-110"
+        >
+          <FiPackage />
+        </span>
+      </Tooltip>
+      <Modal
+        {...({
+          placement: "center",
+          isOpen: isOpen,
+          className: "text-foreground mx-4",
+          onOpenChange: onOpenChange,
+          size: "lg",
+          backdrop: "blur",
+        } as any)}
+      >
+        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
+                <h3 className="text-xl font-black tracking-tight text-foreground">Request Sample</h3>
+                <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">
+                  Confirm location for sample delivery
+                </p>
+              </ModalHeader>
+              <ModalBody className="py-4 px-6 overflow-y-auto">
+                <Select
+                  label="State"
+                  selectedKeys={requestState ? [requestState] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setRequestState(value);
+                    setRequestDistrict("");
+                    setRequestCity("");
+                  }}
+                >
+                  {states.map((state: any) => (
+                    <SelectItem key={state._id} value={state._id}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="District"
+                  selectedKeys={requestDistrict ? [requestDistrict] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setRequestDistrict(value);
+                    setRequestCity("");
+                  }}
+                >
+                  {districtOptions.map((district: any) => (
+                    <SelectItem key={district._id} value={district._id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="City"
+                  selectedKeys={requestCity ? [requestCity] : []}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setRequestCity(value);
+                  }}
+                >
+                  {cityOptions.map((city: any) => (
+                    <SelectItem key={city._id} value={city._id}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <div className="text-xs text-default-500">
+                  Are you sure you want to request a sample? Supplier will provide minimum quantity and quote.
+                </div>
+              </ModalBody>
+              <ModalFooter className="border-t border-divider py-3 px-6">
+                <Button variant="light" onPress={onClose} isDisabled={submitting}>
+                  Cancel
+                </Button>
+                <Button color="warning" onPress={handleSubmit} isLoading={submitting}>
+                  Request Sample
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </div>
+  );
+};
 const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
   variantRate,
   productVariant,
@@ -985,7 +1488,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [createdEnquiryId, setCreatedEnquiryId] = useState<string | null>(null);
 
   const { user } = useContext(AuthContext);
-  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "employee";
+  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "operator";
 
   // Robust Associate ID Fetching
   const { data: associateDetail } = useQuery({
@@ -1052,7 +1555,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const createEnquiryMutation = useMutation({
     mutationFn: async () => {
       const roleLower = String(user?.role || "").toLowerCase();
-      const isEmployeeCreator = roleLower === "employee";
+      const isOperatorCreator = roleLower === "operator" || roleLower === "team";
       let resolvedProductId: any =
         variantRate.productId ||
         variantRate.product?._id ||
@@ -1103,7 +1606,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         variantRateId: variantRate.isCatalogView ? null : variantRate._id,
         catalogItemId: variantRate.isCatalogView ? variantRate._id : null,
         preferredIncoterm: preferredIncotermId || null,
-        ...(isEmployeeCreator && user?.id ? { assignedEmployeeId: user.id } : {}),
+        ...(isOperatorCreator && user?.id ? { assignedOperatorId: user.id } : {}),
         // Optional name/phone if they were overridden in the form
         ...(name && name !== associateProfile?.name && { name }),
         ...(phoneNumber && phoneNumber !== (associateProfile?.phone || associateProfile?.phoneNumber) && { phoneNumber }),

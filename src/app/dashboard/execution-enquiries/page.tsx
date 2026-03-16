@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -122,7 +122,11 @@ export default function ExecutionEnquiriesPage() {
 
   const roleLower = String(user?.role || "").toLowerCase();
   const isAdmin = roleLower === "admin";
-  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
+
+  useEffect(() => {
+    patchData(apiRoutes.notifications.markSectionRead("execution"), {}).catch(() => {});
+  }, []);
   const myCompanyId = String(
     (user as any)?.associateCompany?._id ||
       (user as any)?.associateCompany ||
@@ -250,11 +254,11 @@ export default function ExecutionEnquiriesPage() {
       const sellerId = (enq?.sellerAssociateId?._id || enq?.sellerAssociateId || "").toString();
       const isBuyer = userId && buyerId === userId;
       const isSeller = userId && sellerId === userId;
-      const assignedEmployeeId = (enq?.assignedEmployeeId?._id || enq?.assignedEmployeeId || "").toString();
-      const isAssignedEmployee = Boolean(isEmployeeUser && userId && assignedEmployeeId === userId);
+      const assignedOperatorId = (enq?.assignedOperatorId?._id || enq?.assignedOperatorId || "").toString();
+      const isAssignedOperator = Boolean(isOperatorUser && userId && assignedOperatorId === userId);
       const createdById = String(enq?.createdBy?._id || enq?.createdBy || "");
-      const isCreatedByEmployee = Boolean(isEmployeeUser && userId && createdById === userId);
-      const canSeeEnquiry = isSystemAdmin || !isEmployeeUser || isAssignedEmployee || isCreatedByEmployee;
+      const isCreatedByOperator = Boolean(isOperatorUser && userId && createdById === userId);
+      const canSeeEnquiry = isSystemAdmin || !isOperatorUser || isAssignedOperator || isCreatedByOperator;
       if (!canSeeEnquiry) return [];
 
       return (Array.isArray(enq?.executionInquiries) ? enq.executionInquiries : [])
@@ -268,11 +272,11 @@ export default function ExecutionEnquiriesPage() {
             providerCandidate ||
             (owner === "buyer" && isBuyer) ||
             (owner === "seller" && isSeller);
-          const canCommit = isSystemAdmin || isAssignedEmployee;
-          const canViewBidDetails = isSystemAdmin || isAssignedEmployee || providerCandidate;
+          const canCommit = isSystemAdmin || isAssignedOperator;
+          const canViewBidDetails = isSystemAdmin || isAssignedOperator || providerCandidate;
           const typeUpper = String(task?.type || "").toUpperCase();
           const matchesInterest = configuredInterests.length === 0 || configuredInterests.includes(typeUpper);
-          const shouldShowByDefault = isSystemAdmin || isAssignedEmployee || !isProviderAssociate || (providerCandidate && matchesInterest);
+          const shouldShowByDefault = isSystemAdmin || isAssignedOperator || !isProviderAssociate || (providerCandidate && matchesInterest);
           if (!shouldShowByDefault) return null;
 
           const productName = enq?.productId?.name || enq?.productVariant?.product?.name || "Unknown Product";
@@ -309,7 +313,7 @@ export default function ExecutionEnquiriesPage() {
         })
         .filter(Boolean) as any[];
     });
-  }, [enquiries, user, interestsStatusRes, roleLower, myCompanyId, isAdmin, isEmployeeUser]);
+  }, [enquiries, user, interestsStatusRes, roleLower, myCompanyId, isAdmin, isOperatorUser]);
 
   const filteredRows = useMemo(() => {
     if (activeType === "ALL") return rows;
@@ -451,7 +455,7 @@ export default function ExecutionEnquiriesPage() {
     router.replace(`/dashboard/execution-enquiries${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
-  const canCreateServiceRequest = isAdmin || isEmployeeUser || roleLower === "associate";
+  const canCreateServiceRequest = isAdmin || isOperatorUser || roleLower === "associate";
 
   if ((activeTab === "deal-execution" && isDealLoading) || (activeTab === "service-requests" && isServiceLoading)) {
     return <BrandedLoader message="Loading execution enquiries" />;

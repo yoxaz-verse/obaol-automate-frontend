@@ -100,7 +100,10 @@ export default function CompanyWorkspacePage() {
         limit: 250,
         sort: "createdAt:desc",
       });
-      return response?.data?.data?.data || [];
+      const payload = response?.data?.data;
+      if (Array.isArray(payload?.data)) return payload.data;
+      if (Array.isArray(payload)) return payload;
+      return [];
     },
     enabled: isAssociate && Boolean(associateCompanyId),
   });

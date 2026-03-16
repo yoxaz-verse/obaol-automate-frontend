@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import PhoneField from "@/components/form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
+import { useSoundEffect } from "@/context/SoundContext";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -58,7 +59,6 @@ export default function RegisterPage() {
     phoneSecondary: "",
     phoneSecondaryCountryCode: "+91",
     phoneSecondaryNational: "",
-    designation: "",
     password: "",
     confirmPassword: "",
     hasCompany: "yes",
@@ -118,7 +118,6 @@ export default function RegisterPage() {
       let fallbackOutput: any = {
         existingCompanies: [],
         companyTypes: [],
-        designations: [],
         states: [],
         districts: [],
         divisions: [],
@@ -147,7 +146,6 @@ export default function RegisterPage() {
               const output: any = {
                 existingCompanies: Array.isArray(payload?.existingCompanies) ? payload.existingCompanies : [],
                 companyTypes: Array.isArray(payload?.companyTypes) ? payload.companyTypes : [],
-                designations: Array.isArray(payload?.designations) ? payload.designations : [],
                 states: Array.isArray(payload?.states) ? payload.states : [],
                 districts: Array.isArray(payload?.districts) ? payload.districts : [],
                 divisions: Array.isArray(payload?.divisions) ? payload.divisions : [],
@@ -157,10 +155,9 @@ export default function RegisterPage() {
                 companySubFunctions: Array.isArray(payload?.companySubFunctions) ? payload.companySubFunctions : [],
               };
 
-              if (!output.existingCompanies.length || !output.designations.length || !output.countries.length) {
-                const [companiesRes, designationsRes, countriesRes] = await Promise.allSettled([
+              if (!output.existingCompanies.length || !output.countries.length) {
+                const [companiesRes, countriesRes] = await Promise.allSettled([
                   axios.get(`${routeRoot}/register/companies`, { timeout: 8000, withCredentials: false }),
-                  axios.get(`${routeRoot}/register/designations`, { timeout: 8000, withCredentials: false }),
                   axios.get(`${routeRoot}/register/countries`, { timeout: 8000, withCredentials: false }),
                 ]);
 
@@ -171,12 +168,6 @@ export default function RegisterPage() {
                   }
                 }
 
-                if (designationsRes.status === "fulfilled") {
-                  const designationsPayload = designationsRes.value?.data?.data || designationsRes.value?.data?.data?.data || [];
-                  if (Array.isArray(designationsPayload)) {
-                    output.designations = designationsPayload;
-                  }
-                }
                 if (countriesRes.status === "fulfilled") {
                   const countriesPayload = countriesRes.value?.data?.data || countriesRes.value?.data?.data?.data || [];
                   if (Array.isArray(countriesPayload)) {
@@ -189,14 +180,14 @@ export default function RegisterPage() {
               setOptionsDebug({
                 resolvedEndpoint: `${routeRoot}/register/options`,
                 counts: {
-                  designations: output.designations.length,
+                  designations: 0,
                   existingCompanies: output.existingCompanies.length,
                   companyTypes: output.companyTypes.length,
                   countries: output.countries.length,
                 },
                 lastError: "",
               });
-              if (output.existingCompanies.length || output.designations.length || output.companyTypes.length) {
+              if (output.existingCompanies.length || output.companyTypes.length) {
                 return output;
               }
             } catch (nestedErr) {
@@ -211,7 +202,7 @@ export default function RegisterPage() {
         setOptionsDebug((prev) => ({
           ...prev,
           counts: {
-            designations: Array.isArray(fallbackOutput.designations) ? fallbackOutput.designations.length : 0,
+            designations: 0,
             existingCompanies: Array.isArray(fallbackOutput.existingCompanies) ? fallbackOutput.existingCompanies.length : 0,
             companyTypes: Array.isArray(fallbackOutput.companyTypes) ? fallbackOutput.companyTypes.length : 0,
             countries: Array.isArray(fallbackOutput.countries) ? fallbackOutput.countries.length : 0,
@@ -227,12 +218,12 @@ export default function RegisterPage() {
 
   const companyTypes = Array.isArray(registerOptions?.companyTypes) ? registerOptions.companyTypes : EMPTY_LIST;
   const existingCompanies = Array.isArray(registerOptions?.existingCompanies) ? registerOptions.existingCompanies : EMPTY_LIST;
-  const designationOptions = Array.isArray(registerOptions?.designations) ? registerOptions.designations : EMPTY_LIST;
   const states = Array.isArray(registerOptions?.states) ? registerOptions.states : EMPTY_LIST;
   const districts = Array.isArray(registerOptions?.districts) ? registerOptions.districts : EMPTY_LIST;
   const divisions = Array.isArray(registerOptions?.divisions) ? registerOptions.divisions : EMPTY_LIST;
   const pincodeEntries = Array.isArray(registerOptions?.pincodeEntries) ? registerOptions.pincodeEntries : EMPTY_LIST;
   const countries = Array.isArray(registerOptions?.countries) ? registerOptions.countries : EMPTY_LIST;
+  const { play } = useSoundEffect();
   const companyFunctions = Array.isArray(registerOptions?.companyFunctions) ? registerOptions.companyFunctions : EMPTY_LIST;
   const companySubFunctions = Array.isArray(registerOptions?.companySubFunctions) ? registerOptions.companySubFunctions : EMPTY_LIST;
 
@@ -271,8 +262,6 @@ export default function RegisterPage() {
       setDynamicPincodes([]);
     }
   }, [formData.associateDivision]);
-  const selectedDesignationLabel =
-    designationOptions.find((item: any) => String(item?._id) === String(formData.designation))?.name || "Not selected";
   const selectedCompanyLabel =
     existingCompanies.find((item: any) => String(item?._id) === String(formData.associateCompanyId))?.name || "Not selected";
   const selectedCompanyTypeLabel =
@@ -403,7 +392,6 @@ export default function RegisterPage() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isCompanyFlow = formData.hasCompany === "yes";
   const isNewCompany = isCompanyFlow && formData.companyMode === "new";
-  const hasDesignationOptions = designationOptions.length > 0;
   const hasExistingCompanyOptions = existingCompanies.length > 0;
   const hasCompanyTypeOptions = companyTypes.length > 0;
 
@@ -544,7 +532,7 @@ export default function RegisterPage() {
         phoneSecondaryCountryCode: normalizedSecondaryPhone.countryCode || normalizedPhone.countryCode,
         phoneSecondaryNational: normalizedSecondaryPhone.national || normalizedPhone.national,
         associateInterests: [],
-        designation: formData.designation.trim(),
+        designation: "",
         password: formData.password,
         hasCompany: isCompanyFlow,
         companyMode: isCompanyFlow ? formData.companyMode : null,
@@ -615,12 +603,14 @@ export default function RegisterPage() {
           message: response.data?.message || "Registration submitted for review.",
           position: "top-right",
         });
+        play("success");
         router.push("/auth/register/success");
       }
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || "Registration failed.";
       setErrors((prev) => ({ ...prev, general: errorMessage }));
       showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
+      play("danger");
     } finally {
       setIsLoading(false);
     }
@@ -700,9 +690,7 @@ export default function RegisterPage() {
                 {step.label}
               </Chip>
             ))}
-            {!hasDesignationOptions && (
-              <Chip size="sm" color="warning" variant="flat">Designation List Unavailable</Chip>
-            )}
+            {/* Removed designation chip */}
           </div>
 
           <div className="grid grid-cols-1 gap-4 items-start">
@@ -768,22 +756,7 @@ export default function RegisterPage() {
                     />
                     {errors.phoneSecondary ? <p className="text-danger text-xs mt-1">{errors.phoneSecondary}</p> : null}
                   </div>
-                  <Select
-                    label="Designation (Optional)"
-                    labelPlacement="outside"
-                    placeholder={designationOptions.length ? "Select designation" : "No designations available"}
-                    selectedKeys={formData.designation ? [formData.designation] : []}
-                    onSelectionChange={(keys) => {
-                      const selected = Array.from(keys as Set<string>)[0] || "";
-                      setField("designation", selected);
-                    }}
-                  >
-                    {designationOptions.map((item: any) => (
-                      <SelectItem key={item._id} value={item._id}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
+
                   <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       type={showPassword ? "text" : "password"}

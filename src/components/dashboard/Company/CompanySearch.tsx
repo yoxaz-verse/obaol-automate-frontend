@@ -5,6 +5,7 @@ import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 import InlineLoader from "@/components/ui/InlineLoader";
+import { useEffect, useMemo, useState } from "react";
 
 // 🔎 same icon you had
 const SearchIcon = ({
@@ -57,15 +58,50 @@ export default function CompanySearch({
   defaultSelected?: string | null;
   itemsFilter?: (companies: Company[]) => Company[]; // allow filtering (e.g. onlyWithProducts)
 }) {
+  const [inputValue, setInputValue] = useState("");
+  const [selectedKey, setSelectedKey] = useState<string | null>(
+    defaultSelected ?? null
+  );
+
   const { data: companyData, isLoading } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
+    queryFn: () => getData(associateCompanyRoutes.getAll, { page: 1, limit: 500 }),
   });
 
-  let companies: Company[] = companyData?.data?.data?.data || companyData?.data?.data || [];
+  const rawCompanies = Array.isArray(companyData?.data?.data?.data)
+    ? companyData?.data?.data?.data
+    : Array.isArray(companyData?.data?.data?.data?.data)
+      ? companyData?.data?.data?.data?.data
+      : Array.isArray(companyData?.data?.data)
+        ? companyData?.data?.data
+        : Array.isArray(companyData?.data)
+          ? companyData?.data
+          : [];
+  let companies: Company[] = rawCompanies || [];
   if (itemsFilter) {
     companies = itemsFilter(companies);
   }
+
+  const filteredCompanies = useMemo(() => {
+    const needle = inputValue.trim().toLowerCase();
+    if (!needle) return companies;
+    return companies.filter((company) =>
+      String(company.name || "").toLowerCase().includes(needle)
+    );
+  }, [companies, inputValue]);
+
+  useEffect(() => {
+    if (defaultSelected === undefined) return;
+    setSelectedKey(defaultSelected ?? null);
+  }, [defaultSelected]);
+
+  useEffect(() => {
+    if (!selectedKey) return;
+    const match = companies.find((c) => String(c._id) === String(selectedKey));
+    if (match) {
+      setInputValue(match.name || "");
+    }
+  }, [selectedKey, companies]);
 
   if (isLoading) {
     return (
@@ -80,13 +116,13 @@ export default function CompanySearch({
   return (
     <AutocompleteAny
       aria-label="Select a company"
-      items={companies}
+      items={filteredCompanies}
       maxListboxHeight={400}
       itemHeight={60}
       placeholder="Search by company name"
       variant="bordered"
       radius="full"
-      selectedKey={defaultSelected || undefined}
+      selectedKey={selectedKey || undefined}
       className="text-warning-400 w-full max-w-md mb-6"
       classNames={{
         base: "max-w-full",
@@ -102,6 +138,16 @@ export default function CompanySearch({
           inputWrapper: "h-[48px]",
         },
       }}
+      inputValue={inputValue}
+      onInputChange={(value: string) => {
+        setInputValue(value);
+        if (selectedKey) {
+          const match = companies.find((c) => String(c._id) === String(selectedKey));
+          if (match && value.trim() !== match.name) {
+            setSelectedKey(null);
+          }
+        }
+      }}
       popoverProps={{
         offset: 10,
         classNames: {
@@ -111,7 +157,11 @@ export default function CompanySearch({
         },
       }}
       onSelectionChange={(key: any) => {
-        if (onSelect) onSelect((key as string) ?? null);
+        const nextKey = (key as string) ?? null;
+        setSelectedKey(nextKey);
+        const match = companies.find((c) => String(c._id) === String(nextKey));
+        if (match) setInputValue(match.name || "");
+        if (onSelect) onSelect(nextKey);
       }}
     >
       {(item: any) => (

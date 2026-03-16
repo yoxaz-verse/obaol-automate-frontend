@@ -271,6 +271,13 @@ const AddForm: React.FC<AddFormProps> = ({
         };
       }
 
+      if (currentTable === "inventories") {
+        uploadFormData = {
+          ...uploadFormData,
+          unit: "MT",
+        };
+      }
+
       const associateCompanyField = formFields.find((field) => field.key === "associateCompany");
       if (associateCompanyField && uploadFormData.associateCompany) {
         const options =

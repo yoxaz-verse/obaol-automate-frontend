@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 import TranslationEngine from "@/components/dashboard/TranslationEngine";
 import TopLoader from "@/components/ui/TopLoader";
+import SoundInitializer from "@/components/ui/SoundInitializer";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -107,6 +108,14 @@ export const metadata: Metadata = {
   },
 
   category: "Business",
+  icons: {
+    icon: [
+      { url: "/logo.png", href: "/logo.png", type: "image/png" }
+    ],
+    apple: [
+      { url: "/logo.png", href: "/logo.png", type: "image/png" }
+    ]
+  }
 };
 
 export const viewport = {
@@ -212,6 +221,7 @@ export default function RootLayout({
         <AuthProvider>
           {/* <VerificationProvider> */}
           <Providers>
+            <SoundInitializer />
             <TopLoader />
             <TranslationEngine />
             {children}

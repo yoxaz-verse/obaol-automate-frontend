@@ -235,7 +235,8 @@ export default function EditModal({
       }
     }
     setLoading(true);
-    mutation.mutate(formData);
+    const payload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
+    mutation.mutate(payload);
   };
 
   const handleInputChange = (

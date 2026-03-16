@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Chip, Input, Select, SelectItem, Spinner, Tab, Tabs, Textarea } from "@nextui-org/react";
 import { getData, patchData } from "@/core/api/apiHandler";
@@ -26,7 +26,7 @@ const formatDate = (value: any) => {
 
 export default function ApprovalsPage() {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"associates" | "companies">("associates");
+  const [tab, setTab] = useState<"associates" | "companies" | "operators">("associates");
   const [status, setStatus] = useState<StatusFilter>("PENDING_REVIEW");
   const [search, setSearch] = useState("");
   const [notes, setNotes] = useState("");
@@ -34,10 +34,19 @@ export default function ApprovalsPage() {
   const [limit] = useState(20);
   const [activeAction, setActiveAction] = useState<{ id: string; action: "APPROVE" | "REJECT" } | null>(null);
 
+  useEffect(() => {
+    patchData(apiRoutes.notifications.markSectionRead("approvals"), {}).catch(() => {});
+  }, []);
+
   const listQuery = useQuery({
     queryKey: ["approvals", tab, status, search, page, limit],
     queryFn: async () => {
-      const route = tab === "associates" ? apiRoutes.approvals.associatesList : apiRoutes.approvals.companiesList;
+      const route =
+        tab === "associates"
+          ? apiRoutes.approvals.associatesList
+          : tab === "companies"
+            ? apiRoutes.approvals.companiesList
+            : apiRoutes.approvals.operatorsList;
       const response = await getData(route, { status, search, page, limit });
       return {
         rows: response?.data?.data || [],
@@ -49,7 +58,12 @@ export default function ApprovalsPage() {
   const actionMutation = useMutation({
     mutationFn: async (params: { id: string; action: "APPROVE" | "REJECT" }) => {
       setActiveAction(params);
-      const routeBase = tab === "associates" ? apiRoutes.approvals.associateAction : apiRoutes.approvals.companyAction;
+      const routeBase =
+        tab === "associates"
+          ? apiRoutes.approvals.associateAction
+          : tab === "companies"
+            ? apiRoutes.approvals.companyAction
+            : apiRoutes.approvals.operatorAction;
       await patchData(`${routeBase}/${params.id}`, {
         action: params.action,
         notes: notes.trim(),
@@ -78,18 +92,19 @@ export default function ApprovalsPage() {
     <div className="w-full min-w-0 max-w-full p-4 md:p-6">
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-foreground">Approvals</h1>
-        <p className="text-sm text-default-600">Review pending associates and companies before dashboard access.</p>
+        <p className="text-sm text-default-600">Review pending associates, companies, and operators before dashboard access.</p>
       </div>
 
       <Tabs
         selectedKey={tab}
         onSelectionChange={(key) => {
-          setTab(String(key) as "associates" | "companies");
+          setTab(String(key) as "associates" | "companies" | "operators");
           setPage(1);
         }}
       >
         <Tab key="associates" title="Pending Associates" />
         <Tab key="companies" title="Pending Companies" />
+        <Tab key="operators" title="Pending Operators" />
       </Tabs>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -100,7 +115,13 @@ export default function ApprovalsPage() {
             setPage(1);
           }}
           label="Search"
-          placeholder={tab === "associates" ? "Name, email, phone" : "Name, email, GST"}
+          placeholder={
+            tab === "associates"
+              ? "Name, email, phone"
+              : tab === "companies"
+                ? "Name, email, GST"
+                : "Name, email, phone"
+          }
           labelPlacement="outside"
         />
         <Select
@@ -148,8 +169,10 @@ export default function ApprovalsPage() {
                 <th className="text-left px-3 py-2 text-default-600 font-semibold">Phone</th>
                 {tab === "associates" ? (
                   <th className="text-left px-3 py-2 text-default-600 font-semibold">Company</th>
-                ) : (
+                ) : tab === "companies" ? (
                   <th className="text-left px-3 py-2 text-default-600 font-semibold">GST</th>
+                ) : (
+                  <th className="text-left px-3 py-2 text-default-600 font-semibold">Role / Type</th>
                 )}
                 <th className="text-left px-3 py-2 text-default-600 font-semibold">Status</th>
                 <th className="text-left px-3 py-2 text-default-600 font-semibold">Created At</th>
@@ -182,8 +205,12 @@ export default function ApprovalsPage() {
                   <td className="px-3 py-2 text-foreground/90">{row.phone || "-"}</td>
                   {tab === "associates" ? (
                     <td className="px-3 py-2 text-foreground/90">{row.associateCompany?.name || "-"}</td>
-                  ) : (
+                  ) : tab === "companies" ? (
                     <td className="px-3 py-2 text-foreground/90">{row.gstin || "-"}</td>
+                  ) : (
+                    <td className="px-3 py-2 text-foreground/90">
+                      {row.jobRole?.name || "-"} {row.jobType?.name ? `• ${row.jobType?.name}` : ""}
+                    </td>
                   )}
                   <td className="px-3 py-2">
                     <Chip size="sm" color={formatStatusColor(row.registrationStatus) as any} variant="flat">

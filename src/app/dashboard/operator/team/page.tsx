@@ -8,14 +8,14 @@ import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 
 type TeamRow = {
-  employeeId: string;
+  operatorId: string;
   name: string;
-  mentorEmployee?: { employeeId: string; name: string } | null;
+  mentorOperator?: { operatorId: string; name: string } | null;
   teamSize?: number;
   totalCommission?: number;
 };
 
-type EmployeeRecord = {
+type OperatorRecord = {
   _id?: string;
   id?: string;
   name?: string;
@@ -55,12 +55,12 @@ const extractList = (response: any): any[] => {
   return [];
 };
 
-export default function EmployeeTeamPage() {
+export default function OperatorTeamPage() {
   const { user } = useContext(AuthContext);
-  const selfEmployeeId = toId(user?.id);
+  const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedOperatorId, setSelectedOperatorId] = useState("");
 
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("name");
@@ -68,40 +68,40 @@ export default function EmployeeTeamPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const employeesQuery = useQuery({
-    queryKey: ["employee-team", "employees", isAdmin],
-    queryFn: async () => getData(apiRoutes.employee.getAll, { page: 1, limit: 5000 }),
+  const operatorsQuery = useQuery({
+    queryKey: ["operator-team", "operators", isAdmin],
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
     enabled: isAdmin,
     refetchOnWindowFocus: false,
   });
 
-  const employeeOptions = useMemo(() => {
-    const rows = extractList(employeesQuery.data);
+  const operatorOptions = useMemo(() => {
+    const rows = extractList(operatorsQuery.data);
     return rows
       .map((row: any) => ({
         id: toId(row?._id || row?.id),
         name: toName(row?.name),
       }))
       .filter((row: any) => Boolean(row.id));
-  }, [employeesQuery.data]);
+  }, [operatorsQuery.data]);
 
   useEffect(() => {
     if (!isAdmin) return;
-    const validIds = new Set(employeeOptions.map((option: any) => String(option.id)));
-    if (employeeOptions.length === 0) {
-      if (selectedEmployeeId) setSelectedEmployeeId("");
+    const validIds = new Set(operatorOptions.map((option: any) => String(option.id)));
+    if (operatorOptions.length === 0) {
+      if (selectedOperatorId) setSelectedOperatorId("");
       return;
     }
-    if (selectedEmployeeId && validIds.has(selectedEmployeeId)) return;
-    setSelectedEmployeeId(employeeOptions[0].id);
-  }, [employeeOptions, isAdmin, selfEmployeeId, selectedEmployeeId]);
+    if (selectedOperatorId && validIds.has(selectedOperatorId)) return;
+    setSelectedOperatorId(operatorOptions[0].id);
+  }, [operatorOptions, isAdmin, selfOperatorId, selectedOperatorId]);
 
-  const employeeId = isAdmin ? selectedEmployeeId : selfEmployeeId;
+  const operatorId = isAdmin ? selectedOperatorId : selfOperatorId;
 
   const teamQuery = useQuery({
-    queryKey: ["employee-team", employeeId],
-    queryFn: async () => getData(apiRoutes.employeeHierarchy.team(employeeId)),
-    enabled: Boolean(employeeId),
+    queryKey: ["operator-team", operatorId],
+    queryFn: async () => getData(apiRoutes.operatorHierarchy.team(operatorId)),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
@@ -110,70 +110,70 @@ export default function EmployeeTeamPage() {
     return Array.isArray(data.directTeam) ? data.directTeam : [];
   }, [teamQuery.data]);
 
-  const teamIds = useMemo(() => directTeam.map((row) => toId(row.employeeId)).filter(Boolean), [directTeam]);
+  const teamIds = useMemo(() => directTeam.map((row) => toId(row.operatorId)).filter(Boolean), [directTeam]);
 
-  const employeeLookupQuery = useQuery({
-    queryKey: ["employee-team", "lookup", teamIds.join("|")],
-    queryFn: async () => getData(apiRoutes.employee.getAll, { page: 1, limit: 5000 }),
+  const operatorLookupQuery = useQuery({
+    queryKey: ["operator-team", "lookup", teamIds.join("|")],
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
     enabled: teamIds.length > 0,
     refetchOnWindowFocus: false,
   });
 
-  const employeeLookup = useMemo(() => {
-    const rows = extractList(employeeLookupQuery.data);
+  const operatorLookup = useMemo(() => {
+    const rows = extractList(operatorLookupQuery.data);
     const idSet = new Set(teamIds);
 
-    return rows.reduce<Map<string, EmployeeRecord>>((acc, row: EmployeeRecord) => {
+    return rows.reduce<Map<string, OperatorRecord>>((acc, row: OperatorRecord) => {
       const id = toId(row?._id || row?.id);
       if (id && idSet.has(id)) {
         acc.set(id, row);
       }
       return acc;
-    }, new Map<string, EmployeeRecord>());
-  }, [employeeLookupQuery.data, teamIds]);
+    }, new Map<string, OperatorRecord>());
+  }, [operatorLookupQuery.data, teamIds]);
 
   const enrichedRows = useMemo(() => {
     return directTeam.map((row) => {
-      const id = toId(row.employeeId);
-      const lookup = employeeLookup.get(id);
+      const id = toId(row.operatorId);
+      const lookup = operatorLookup.get(id);
       return {
-        employeeId: id,
+        operatorId: id,
         name: toName(row.name),
         email: String(lookup?.email || ""),
-        mentor: toName(row.mentorEmployee?.name),
+        mentor: toName(row.mentorOperator?.name),
         teamSize: toNumber(row.teamSize),
         totalCommission: toNumber(row.totalCommission),
         joinDate: lookup?.createdAt || "",
       };
     });
-  }, [directTeam, employeeLookup]);
+  }, [directTeam, operatorLookup]);
 
   const dealQueries = useQueries({
     queries: enrichedRows.map((row) => ({
-      queryKey: ["employee-team", "deals", row.employeeId],
+      queryKey: ["operator-team", "deals", row.operatorId],
       queryFn: async () =>
-        getData(apiRoutes.commissions.employeeHistory(row.employeeId), {
+        getData(apiRoutes.commissions.operatorHistory(row.operatorId), {
           page: 1,
           limit: 1,
         }),
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
-      enabled: Boolean(row.employeeId),
+      enabled: Boolean(row.operatorId),
     })),
   });
 
-  const dealsByEmployee = useMemo(() => {
+  const dealsByOperator = useMemo(() => {
     const dealsMap = new Map<string, number>();
     enrichedRows.forEach((row, index) => {
       const summary = (dealQueries[index]?.data as any)?.data?.data?.summary || {};
-      dealsMap.set(row.employeeId, toNumber(summary.dealsClosed));
+      dealsMap.set(row.operatorId, toNumber(summary.dealsClosed));
     });
     return dealsMap;
   }, [dealQueries, enrichedRows]);
 
   const totalDealsClosed = useMemo(
-    () => enrichedRows.reduce((sum, row) => sum + toNumber(dealsByEmployee.get(row.employeeId)), 0),
-    [dealsByEmployee, enrichedRows]
+    () => enrichedRows.reduce((sum, row) => sum + toNumber(dealsByOperator.get(row.operatorId)), 0),
+    [dealsByOperator, enrichedRows]
   );
 
   const totalTeamEarnings = useMemo(
@@ -250,7 +250,7 @@ export default function EmployeeTeamPage() {
     );
   };
 
-  if ((isAdmin && employeesQuery.isLoading) || teamQuery.isLoading) {
+  if ((isAdmin && operatorsQuery.isLoading) || teamQuery.isLoading) {
     return (
       <div className="w-full p-4 md:p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -284,13 +284,13 @@ export default function EmployeeTeamPage() {
     );
   }
 
-  if (!employeeId) {
+  if (!operatorId) {
     return (
       <div className="w-full p-4 md:p-6">
         <div className="w-full rounded-xl border border-default-300/70 bg-content1 px-4 py-3 text-sm text-default-600">
-          {isAdmin && employeeOptions.length === 0
-            ? "No employees available to inspect."
-            : "Select an employee to view team data."}
+          {isAdmin && operatorOptions.length === 0
+            ? "No operators available to inspect."
+            : "Select an operator to view team data."}
         </div>
       </div>
     );
@@ -308,17 +308,17 @@ export default function EmployeeTeamPage() {
       {isAdmin ? (
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Employee</p>
+            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
             <select
-              value={selectedEmployeeId}
+              value={selectedOperatorId}
               onChange={(event) => {
-                setSelectedEmployeeId(String(event.target.value || ""));
+                setSelectedOperatorId(String(event.target.value || ""));
                 setPage(1);
               }}
               className="h-10 rounded-lg border border-default-300 bg-content1 px-3 text-sm text-foreground"
             >
-              {employeeOptions.length === 0 ? <option value="">No employees found</option> : null}
-              {employeeOptions.map((option: any) => (
+              {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
+              {operatorOptions.map((option: any) => (
                 <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
@@ -364,7 +364,7 @@ export default function EmployeeTeamPage() {
                 setSearch(value);
                 setPage(1);
               }}
-              placeholder="Search by employee name or email"
+              placeholder="Search by operator name or email"
               className="max-w-xl"
             />
             <div className="flex items-center gap-3">
@@ -393,7 +393,7 @@ export default function EmployeeTeamPage() {
             <table className="w-full min-w-[920px] text-sm text-foreground">
               <thead className="bg-default-100/80">
                 <tr>
-                  <th className="px-3 py-3 text-left">{renderSortLabel("Employee Name", "name")}</th>
+                  <th className="px-3 py-3 text-left">{renderSortLabel("Operator Name", "name")}</th>
                   <th className="px-3 py-3 text-left text-default-700 font-semibold">Mentor</th>
                   <th className="px-3 py-3 text-left">{renderSortLabel("Team Size", "teamSize")}</th>
                   <th className="px-3 py-3 text-left">{renderSortLabel("Total Commission", "totalCommission")}</th>
@@ -410,7 +410,7 @@ export default function EmployeeTeamPage() {
                 ) : (
                   pagedRows.map((row, index) => (
                     <tr
-                      key={row.employeeId}
+                      key={row.operatorId}
                       className={`border-t border-default-200/70 ${index % 2 === 0 ? "bg-transparent" : "bg-default-50/30 dark:bg-default-100/5"}`}
                     >
                       <td className="px-3 py-3">
@@ -454,9 +454,9 @@ export default function EmployeeTeamPage() {
             </div>
           </div>
 
-          {employeeLookupQuery.isError ? (
+          {operatorLookupQuery.isError ? (
             <p className="text-xs text-warning-600 dark:text-warning-300">
-              Employee email/join-date enrichment is currently unavailable.
+              Operator email/join-date enrichment is currently unavailable.
             </p>
           ) : null}
         </CardBody>

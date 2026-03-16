@@ -9,35 +9,44 @@ import AuthContext from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
+import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
 export default function Product() {
   const [currentTable, setCurrentTable] = useState("mine"); // Default to My Products
 
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
-  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAssociate = user?.role === "Associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const isNoCompanyAssociate = isAssociate && !hasLinkedCompany;
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const inventoryStatusEnabled = isAssociate ? true : Boolean(selectedCompanyId);
 
   const { data: companyData } = useQuery({
     queryKey: ["product-page-assigned-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
     queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
-    enabled: isEmployeeUser,
+    enabled: isOperatorUser,
   });
 
-  const employeeScopedCompanyIds: string[] = isEmployeeUser
+  const operatorScopedCompanyIds: string[] = isOperatorUser
     ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
         .map((company) => company?._id)
         .filter((id): id is string => Boolean(id))
     : [];
 
-  const employeeProductParams = isEmployeeUser
-    ? { associateCompany: employeeScopedCompanyIds }
+  useEffect(() => {
+    if (isOperatorUser && !selectedCompanyId && operatorScopedCompanyIds.length === 1) {
+      setSelectedCompanyId(operatorScopedCompanyIds[0]);
+    }
+  }, [isOperatorUser, operatorScopedCompanyIds, selectedCompanyId]);
+
+  const operatorProductParams = isOperatorUser
+    ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds }
     : { selected: true };
 
-  const employeeLiveProductParams = isEmployeeUser
-    ? { associateCompany: employeeScopedCompanyIds, isLive: true }
+  const operatorLiveProductParams = isOperatorUser
+    ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds, isLive: true }
     : { isLive: true };
 
   useEffect(() => {
@@ -55,6 +64,19 @@ export default function Product() {
               <p className="text-xs font-semibold text-warning-700 dark:text-warning-300">
                 Marketplace-to-Catalog mode active. Link company to publish own rates.
               </p>
+            </div>
+          )}
+          {(roleLower === "admin" || isOperatorUser) && (
+            <div className="mb-4">
+              <CompanySearch
+                defaultSelected={selectedCompanyId}
+                onSelect={(id) => setSelectedCompanyId(id)}
+                itemsFilter={
+                  isOperatorUser
+                    ? (companies) => companies.filter((c) => operatorScopedCompanyIds.includes(c._id))
+                    : undefined
+                }
+              />
             </div>
           )}
           <div className="mb-4">
@@ -80,6 +102,8 @@ export default function Product() {
                       <VariantRate
                         rate="variantRate"
                         additionalParams={{ associate: user?.id }}
+                        showInventoryStatus={inventoryStatusEnabled}
+                        inventoryCompanyId={(user as any)?.associateCompanyId || null}
                       />
                     </Tab>
                   )}
@@ -95,15 +119,19 @@ export default function Product() {
                   <Tab key={"selected"} title="Products">
                     <VariantRate
                       rate="variantRate"
-                      additionalParams={employeeProductParams}
-                      showAssociateColumn={isEmployeeUser}
+                      additionalParams={operatorProductParams}
+                      showAssociateColumn={isOperatorUser}
+                      showInventoryStatus={inventoryStatusEnabled}
+                      inventoryCompanyId={selectedCompanyId}
                     />
                   </Tab>
                   <Tab key={"live"} title="Live Products">
                     <VariantRate
                       rate="variantRate"
-                      additionalParams={employeeLiveProductParams}
-                      showAssociateColumn={isEmployeeUser}
+                      additionalParams={operatorLiveProductParams}
+                      showAssociateColumn={isOperatorUser}
+                      showInventoryStatus={inventoryStatusEnabled}
+                      inventoryCompanyId={selectedCompanyId}
                     />
                   </Tab>
                 </>

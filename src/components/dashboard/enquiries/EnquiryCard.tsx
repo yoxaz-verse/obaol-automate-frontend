@@ -111,9 +111,9 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                     )}
 
                     {/* Value Module */}
-                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 bg-gradient-to-br from-default-100/50 to-transparent p-3 rounded-xl border border-default-200/50">
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">Indicative Rate</span>
+                    <div className="bg-gradient-to-br from-default-100/50 to-transparent p-3 rounded-xl border border-default-200/50">
+                        <span className="block text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">Indicative Rate</span>
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
                             <span className="text-sm font-black text-success-600 dark:text-success-400 tabular-nums">
                                 {(() => {
                                     if (data.isAdmin) {
@@ -135,21 +135,22 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                     );
                                 })()}
                             </span>
+
+                            {data.isAdmin && (
+                                <div className="flex items-center gap-1.5 sm:ml-2">
+                                    {data.adminCommission !== undefined && (
+                                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded leading-none tracking-tight">
+                                            OBAOL: {convertRate(data.adminCommission)}
+                                        </span>
+                                    )}
+                                    {data.mediatorCommission !== undefined && data.type === "Mediated" && (
+                                        <span className="text-[8px] font-bold opacity-80 text-slate-400 dark:text-slate-500 bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded leading-none tracking-tighter">
+                                            Med.: {convertRate(data.mediatorCommission)}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
-
-                        {data.adminCommission !== undefined && data.isAdmin && (
-                            <div className="flex flex-col sm:border-l border-default-200/60 sm:pl-4 md:pl-6">
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">OBAOL Comm.</span>
-                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{convertRate(data.adminCommission)}</span>
-                            </div>
-                        )}
-
-                        {data.mediatorCommission !== undefined && data.type === "Mediated" && data.isAdmin && (
-                            <div className="flex flex-col sm:border-l border-default-200/60 sm:pl-4 md:pl-6">
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-1.5">Mediator Comm.</span>
-                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{convertRate(data.mediatorCommission)}</span>
-                            </div>
-                        )}
                     </div>
 
                     {/* Handling Insight */}
@@ -157,7 +158,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
                             <div className="flex flex-col gap-1.5 min-w-0 flex-1">
                                 <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest mb-0.5">Assigned To</span>
-                                <span className="text-primary-600 dark:text-primary-300 font-bold text-sm truncate">{data.assignedEmployee || "OBAOL Desk"}</span>
+                                <span className="text-primary-600 dark:text-primary-300 font-bold text-sm truncate">{data.assignedOperator || "OBAOL Desk"}</span>
                             </div>
                             {!data.isAdmin && clientName && (
                                 <div className="flex flex-col sm:items-end min-w-0 flex-1">
@@ -201,7 +202,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                             color="primary"
                             className="font-bold text-[10px] tracking-widest uppercase py-4 rounded-lg hover:bg-primary hover:text-white transition-all shadow-none w-full"
                             onClick={(e) => e.stopPropagation()}
-                            onPress={() => window.location.href = `tel:${data.employeePhone}`}
+                            onPress={() => window.location.href = `tel:${data.operatorPhone}`}
                         >
                             <FiPhone size={14} className="flex-shrink-0" /> Contact
                         </Button>

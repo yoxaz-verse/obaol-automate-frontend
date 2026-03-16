@@ -49,7 +49,7 @@ export default function PhoneField({
             listboxWrapper: "text-foreground",
             popoverContent: "bg-content1 text-foreground",
           }}
-          defaultItems={COMMON_DIAL_CODES}
+          items={COMMON_DIAL_CODES}
           selectedKey={parsed.countryCode || null}
           isDisabled={disabled}
           allowsCustomValue={false}
@@ -63,7 +63,7 @@ export default function PhoneField({
             });
           }}
         >
-          {(item) => (
+          {(item: any) => (
             <AutocompleteItem key={item.key} textValue={item.value}>
               {item.value}
             </AutocompleteItem>

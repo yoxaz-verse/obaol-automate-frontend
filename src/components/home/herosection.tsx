@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ParticleNetwork from "@/components/ui/particle-network";
 import { useContext } from "react";
@@ -34,8 +35,10 @@ const itemVariants = {
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
+  const router = useRouter();
   const { isAuthenticated, loading } = useContext(AuthContext);
   const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
@@ -197,34 +200,68 @@ export default function HeroSection() {
           </motion.p>
 
           {/* 4️⃣ CTA — Premium Glassmorphic Button */}
-          <motion.div variants={itemVariants} className="mt-14 relative group inline-flex justify-center">
-
-            <Link
-              href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
+          <motion.div variants={itemVariants} className="mt-14 flex flex-col items-center gap-6 relative group">
+            <button
+              onClick={() => {
+                if (loading) return;
+                setIsNavigating(true);
+                router.push(isAuthenticated ? "/dashboard" : "/auth");
+              }}
+              disabled={isNavigating || loading}
               className={[
                 "relative flex items-center justify-center gap-3 px-10 py-4 rounded-2xl overflow-hidden",
-                "transition-all duration-300 group-hover:scale-[1.03] active:scale-[0.97]",
+                "transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]",
                 "bg-orange-500 hover:bg-orange-600 text-white",
                 "shadow-none hover:shadow-[0_0_28px_-4px_rgba(249,115,22,0.5)]",
+                "disabled:opacity-80 disabled:scale-100"
               ].join(" ")}
             >
               {/* Shimmer sweep */}
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
 
               <span className="relative z-10 font-bold tracking-wide text-lg">
-                {!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
+                {isNavigating ? (
+                  <span className="flex items-center gap-3">
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Opening Experience...
+                  </span>
+                ) : (
+                  !loading && isAuthenticated ? "Go to Dashboard" : "Sign In to Access"
+                )}
               </span>
 
               {/* Arrow */}
-              <svg
-                className="relative z-10 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              {!isNavigating && (
+                <svg
+                  className="relative z-10 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              )}
+            </button>
+
+            {/* Premium Create Account Prompt */}
+            {!loading && !isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="flex items-center gap-2 text-sm"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
+                <span className="text-foreground/40 font-medium">New to OBAOL?</span>
+                <Link
+                  href="/auth/register"
+                  className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
+                >
+                  <span className="relative z-10">Join Now</span>
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
+                </Link>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       </motion.div>

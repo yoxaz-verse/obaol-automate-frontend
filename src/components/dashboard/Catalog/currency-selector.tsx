@@ -10,6 +10,7 @@ import {
   Button,
 } from "@nextui-org/react";
 import { LuCircleDollarSign, LuChevronDown } from "react-icons/lu";
+import { useSoundEffect } from "@/context/SoundContext";
 
 interface CurrencyMap {
   [code: string]: string;
@@ -28,6 +29,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 
 const CurrencySelector: React.FC = () => {
   const { selectedCurrency, setSelectedCurrency } = useCurrency();
+  const { play } = useSoundEffect();
   const [currencies, setCurrencies] = useState<CurrencyMap>({});
 
   useEffect(() => {
@@ -66,7 +68,10 @@ const CurrencySelector: React.FC = () => {
       <DropdownMenu
         aria-label="Select Currency"
         className="max-h-[300px] overflow-y-auto"
-        onAction={(key) => setSelectedCurrency(String(key).toLowerCase())}
+        onAction={(key) => {
+          play("cash");
+          setSelectedCurrency(String(key).toLowerCase());
+        }}
         selectedKeys={[currentCurrencyCode]}
         selectionMode="single"
       >

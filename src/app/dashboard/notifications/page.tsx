@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Button, Chip, Spinner } from "@heroui/react";
@@ -50,6 +50,10 @@ const NotificationsPage = () => {
 
   const rows = data?.rows || [];
   const meta = data?.meta || { page, limit, pages: 1, total: 0 };
+
+  useEffect(() => {
+    patchData(notificationRoutes.markSectionRead("notifications"), {}).catch(() => {});
+  }, []);
 
   const markReadMutation = useMutation({
     mutationFn: (id: string) => patchData(notificationRoutes.readOne(id), {}),
@@ -203,4 +207,3 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
-

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Breadcrumbs, BreadcrumbItem } from "@heroui/react";
+import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
 import { FiHome, FiChevronRight } from "react-icons/fi";
 
 interface CatalogBreadcrumbsProps {

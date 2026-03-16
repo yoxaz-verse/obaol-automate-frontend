@@ -90,65 +90,65 @@ const extractList = (response: any): any[] => {
   return [];
 };
 
-export default function EmployeeEarningsPage() {
+export default function OperatorEarningsPage() {
   const { user } = useContext(AuthContext);
-  const selfEmployeeId = toId(user?.id);
+  const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedOperatorId, setSelectedOperatorId] = useState("");
 
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
 
-  const employeesQuery = useQuery({
-    queryKey: ["employee-earnings", "employees", isAdmin],
-    queryFn: async () => getData(apiRoutes.employee.getAll, { page: 1, limit: 5000 }),
+  const operatorsQuery = useQuery({
+    queryKey: ["operator-earnings", "operators", isAdmin],
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
     enabled: isAdmin,
     refetchOnWindowFocus: false,
   });
 
-  const employeeOptions = useMemo(() => {
-    const rows = extractList(employeesQuery.data);
+  const operatorOptions = useMemo(() => {
+    const rows = extractList(operatorsQuery.data);
     return rows
       .map((row: any) => ({
         id: toId(row?._id || row?.id),
         name: toName(row?.name),
       }))
       .filter((row: any) => Boolean(row.id));
-  }, [employeesQuery.data]);
+  }, [operatorsQuery.data]);
 
   useEffect(() => {
     if (!isAdmin) return;
-    const validIds = new Set(employeeOptions.map((option: any) => String(option.id)));
-    if (employeeOptions.length === 0) {
-      if (selectedEmployeeId) setSelectedEmployeeId("");
+    const validIds = new Set(operatorOptions.map((option: any) => String(option.id)));
+    if (operatorOptions.length === 0) {
+      if (selectedOperatorId) setSelectedOperatorId("");
       return;
     }
-    if (selectedEmployeeId && validIds.has(selectedEmployeeId)) return;
-    setSelectedEmployeeId(employeeOptions[0].id);
-  }, [employeeOptions, isAdmin, selectedEmployeeId, selfEmployeeId]);
+    if (selectedOperatorId && validIds.has(selectedOperatorId)) return;
+    setSelectedOperatorId(operatorOptions[0].id);
+  }, [operatorOptions, isAdmin, selectedOperatorId, selfOperatorId]);
 
-  const employeeId = isAdmin ? selectedEmployeeId : selfEmployeeId;
+  const operatorId = isAdmin ? selectedOperatorId : selfOperatorId;
 
   const earningsQuery = useQuery({
-    queryKey: ["employee-earnings", employeeId, page, limit],
+    queryKey: ["operator-earnings", operatorId, page, limit],
     queryFn: async () =>
-      getData(apiRoutes.commissions.employeeHistory(employeeId), {
+      getData(apiRoutes.commissions.operatorHistory(operatorId), {
         page,
         limit,
       }),
-    enabled: Boolean(employeeId),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
   const chartSourceQuery = useQuery({
-    queryKey: ["employee-earnings", "chart", employeeId],
+    queryKey: ["operator-earnings", "chart", operatorId],
     queryFn: async () =>
-      getData(apiRoutes.commissions.employeeHistory(employeeId), {
+      getData(apiRoutes.commissions.operatorHistory(operatorId), {
         page: 1,
         limit: 200,
       }),
-    enabled: Boolean(employeeId),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
@@ -175,7 +175,7 @@ export default function EmployeeEarningsPage() {
     [chartRows]
   );
 
-  if ((isAdmin && employeesQuery.isLoading) || earningsQuery.isLoading) {
+  if ((isAdmin && operatorsQuery.isLoading) || earningsQuery.isLoading) {
     return (
       <div className="w-full p-4 md:p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -207,13 +207,13 @@ export default function EmployeeEarningsPage() {
     );
   }
 
-  if (!employeeId) {
+  if (!operatorId) {
     return (
       <div className="w-full p-4 md:p-6">
         <div className="w-full rounded-xl border border-default-300/70 bg-content1 px-4 py-3 text-sm text-default-600">
-          {isAdmin && employeeOptions.length === 0
-            ? "No employees available to inspect."
-            : "Select an employee to view earnings."}
+          {isAdmin && operatorOptions.length === 0
+            ? "No operators available to inspect."
+            : "Select an operator to view earnings."}
         </div>
       </div>
     );
@@ -229,17 +229,17 @@ export default function EmployeeEarningsPage() {
       {isAdmin ? (
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Employee</p>
+            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
             <select
-              value={selectedEmployeeId}
+              value={selectedOperatorId}
               onChange={(event) => {
-                setSelectedEmployeeId(String(event.target.value || ""));
+                setSelectedOperatorId(String(event.target.value || ""));
                 setPage(1);
               }}
               className="h-10 rounded-lg border border-default-300 bg-content1 px-3 text-sm text-foreground"
             >
-              {employeeOptions.length === 0 ? <option value="">No employees found</option> : null}
-              {employeeOptions.map((option: any) => (
+              {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
+              {operatorOptions.map((option: any) => (
                 <option key={option.id} value={option.id}>
                   {option.name}
                 </option>

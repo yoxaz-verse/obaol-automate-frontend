@@ -35,7 +35,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const queryClient = useQueryClient();
 
-  const userRole = user?.role;
+  const userRole = String(user?.role || "").toLowerCase();
   const associateId = user?.id;
 
   // 1. Determine Endpoints
@@ -109,7 +109,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
     },
   });
 
-  const isReadOnly = userRole === "Employee";
+  const isReadOnly = userRole === "operator" || userRole === "team";
   const canEdit = userRole === "Admin" || userRole === "Associate";
 
   if (!canEdit && !isReadOnly) return null;

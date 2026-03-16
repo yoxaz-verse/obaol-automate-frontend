@@ -1,21 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@heroui/react";
 import { Tabs, Tab } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { deleteData, patchData, postData } from "@/core/api/apiHandler";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
 import AuthContext from "@/context/AuthContext";
+import { useSoundEffect } from "@/context/SoundContext";
+import { showToastMessage } from "@/utils/utils";
 
 export default function OrdersPage() {
     const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string>("All");
+    const [navigatingId, setNavigatingId] = React.useState<string | null>(null);
+    const [demoLoading, setDemoLoading] = React.useState(false);
+    const [demoClearing, setDemoClearing] = React.useState(false);
     const { user } = React.useContext(AuthContext);
+    const { play } = useSoundEffect();
     const roleLower = String(user?.role || "").toLowerCase();
-    const isEmployeeUser = roleLower === "employee";
+    const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const canUseDemo = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
+
+    useEffect(() => {
+        patchData(apiRoutes.notifications.markSectionRead("orders"), {}).catch(() => { });
+    }, []);
 
     return (
         <section className="">
@@ -27,7 +39,7 @@ export default function OrdersPage() {
                 page={1}
                 limit={50}
             >
-                {(orderResponse: any) => {
+                {(orderResponse: any, refetch) => {
                     const extractOrders = (raw: any): any[] => {
                         const candidates = [
                             raw,
@@ -45,18 +57,85 @@ export default function OrdersPage() {
                     };
                     const ordersData = extractOrders(orderResponse);
                     const scopedOrders = ordersData.filter((item: any) => {
-                        if (!isEmployeeUser) return true;
-                        const assignedEmployeeId = (
-                            item?.enquiry?.assignedEmployeeId?._id ||
-                            item?.enquiry?.assignedEmployeeId ||
+                        if (!isOperatorUser) return true;
+                        const assignedOperatorId = (
+                            item?.enquiry?.assignedOperatorId?._id ||
+                            item?.enquiry?.assignedOperatorId ||
                             ""
                         ).toString();
-                        return Boolean(user?.id && assignedEmployeeId === String(user.id));
+                        return Boolean(user?.id && assignedOperatorId === String(user.id));
                     });
 
                     return (
                         <div className="flex flex-col items-center w-full">
                             <div className="w-full px-2 sm:px-4 md:px-0 md:w-[95%]">
+                                {canUseDemo && (
+                                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-default-200/40 bg-content1 px-4 py-3">
+                                        <div>
+                                            <div className="text-sm font-semibold text-foreground">Admin Demo Preview</div>
+                                            <div className="text-xs text-default-500">
+                                                Create realistic demo orders to test flows without creating enquiries.
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Button
+                                                size="sm"
+                                                className="bg-secondary text-white"
+                                                isLoading={demoLoading}
+                                                onPress={async () => {
+                                                    setDemoLoading(true);
+                                                    try {
+                                                        await postData(apiRoutes.demo.orders, {});
+                                                        showToastMessage({
+                                                            type: "success",
+                                                            message: "Demo orders loaded.",
+                                                            position: "top-right",
+                                                        });
+                                                        refetch?.();
+                                                    } catch (error: any) {
+                                                        showToastMessage({
+                                                            type: "error",
+                                                            message: error?.response?.data?.message || "Unable to load demo orders.",
+                                                            position: "top-right",
+                                                        });
+                                                    } finally {
+                                                        setDemoLoading(false);
+                                                    }
+                                                }}
+                                            >
+                                                Load Demo Orders
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="bordered"
+                                                className="border-default-300 text-default-500"
+                                                isLoading={demoClearing}
+                                                onPress={async () => {
+                                                    setDemoClearing(true);
+                                                    try {
+                                                        await deleteData(apiRoutes.demo.orders);
+                                                        showToastMessage({
+                                                            type: "success",
+                                                            message: "Demo orders cleared.",
+                                                            position: "top-right",
+                                                        });
+                                                        refetch?.();
+                                                    } catch (error: any) {
+                                                        showToastMessage({
+                                                            type: "error",
+                                                            message: error?.response?.data?.message || "Unable to clear demo orders.",
+                                                            position: "top-right",
+                                                        });
+                                                    } finally {
+                                                        setDemoClearing(false);
+                                                    }
+                                                }}
+                                            >
+                                                Clear Demo Orders
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                                 {/* Status Tabs */}
                                 <div className="flex justify-between items-center mb-6 overflow-x-auto no-scrollbar touch-pan-x pb-2">
                                     <Tabs
@@ -86,13 +165,13 @@ export default function OrdersPage() {
                                         {ordersData
                                             .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
                                             .filter((item: any) => {
-                                                if (!isEmployeeUser) return true;
-                                                const assignedEmployeeId = (
-                                                    item?.enquiry?.assignedEmployeeId?._id ||
-                                                    item?.enquiry?.assignedEmployeeId ||
+                                                if (!isOperatorUser) return true;
+                                                const assignedOperatorId = (
+                                                    item?.enquiry?.assignedOperatorId?._id ||
+                                                    item?.enquiry?.assignedOperatorId ||
                                                     ""
                                                 ).toString();
-                                                return Boolean(user?.id && assignedEmployeeId === String(user.id));
+                                                return Boolean(user?.id && assignedOperatorId === String(user.id));
                                             })
                                             .map((item: any) => (
                                                 (() => {
@@ -102,13 +181,23 @@ export default function OrdersPage() {
                                                         <OrderCard
                                                             key={orderId}
                                                             data={item}
+                                                            onCardClick={() => {
+                                                                play("nav");
+                                                                setNavigatingId(String(orderId));
+                                                                router.push(`/dashboard/orders/${String(orderId)}`);
+                                                            }}
                                                             action={
                                                                 <Button
-                                                                    className="bg-secondary text-white font-medium shadow-sm h-8"
+                                                                    className="bg-secondary text-white font-semibold shadow-md h-8 min-w-[96px] px-4 border border-secondary-600/60"
                                                                     size="sm"
-                                                                    onPress={() => router.push(`/dashboard/orders/${String(orderId)}`)}
+                                                                    isLoading={navigatingId === String(orderId)}
+                                                                    onPress={() => {
+                                                                        play("nav");
+                                                                        setNavigatingId(String(orderId));
+                                                                        router.push(`/dashboard/orders/${String(orderId)}`);
+                                                                    }}
                                                                 >
-                                                                    Manage
+                                                                    {navigatingId === String(orderId) ? "" : "Manage"}
                                                                 </Button>
                                                             }
                                                         />

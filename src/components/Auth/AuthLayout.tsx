@@ -8,6 +8,7 @@ interface AuthLayoutProps {
     title: string;
     subtitle?: string;
     children: React.ReactNode;
+    topContent?: React.ReactNode;
     cardMaxWidthClass?: string;
     leftPanel?: {
         headline: string;
@@ -100,7 +101,7 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
     );
 };
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, cardMaxWidthClass = "max-w-[440px]", leftPanel }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[440px]", leftPanel }) => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -130,7 +131,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
                 />
 
                 {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#88888810_1px,transparent_1px),linear-gradient(to_bottom,#88888810_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 dark:opacity-40" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#88888810_1px,transparent_1px),linear-gradient(to_bottom,#88888810_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 dark:opacity-20" />
 
                 {/* Floating Particles */}
                 {[...Array(30)].map((_, i) => (
@@ -143,7 +144,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
 
                 {/* Left Side: Branding (Hidden on Mobile) */}
                 <motion.div
-                    className="hidden lg:flex w-5/12 flex-col justify-center px-12 xl:px-20 relative border-r border-default-100 bg-content1/20 backdrop-blur-sm"
+                    className="hidden lg:flex w-5/12 flex-col justify-center px-12 xl:px-20 relative border-r border-default-100 bg-content1/40 backdrop-blur-md"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
@@ -249,9 +250,21 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, card
                                 </div>
                             </div>
 
+                            {/* Top Content (Prompts, Banners) */}
+                            {topContent && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.3 }}
+                                    className="mb-4"
+                                >
+                                    {topContent}
+                                </motion.div>
+                            )}
+
                             {/* Glass Card */}
                             <motion.div
-                                className="relative bg-content2/60 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden group/card"
+                                className="relative bg-content1/90 dark:bg-content1/80 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden group/card"
                                 whileHover={{ boxShadow: "0 25px 50px -12px rgba(245, 165, 36, 0.15)" }}
                                 transition={{ duration: 0.4 }}
                             >

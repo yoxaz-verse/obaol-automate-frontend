@@ -29,7 +29,7 @@ import { getData, patchData } from "@/core/api/apiHandler";
 import {
   associateCompanyRoutes,
   variantRateRoutes,
-  employeeRoutes,
+  operatorRoutes,
   associateRoutes,
 } from "@/core/api/apiRoutes";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
@@ -41,7 +41,7 @@ import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 interface Company {
   _id: string;
   name: string;
-  assignedEmployee?: any;
+  assignedOperator?: any;
   stats?: {
     totalProducts: number;
     liveProducts: number;
@@ -67,17 +67,17 @@ interface Company {
 export default function CompanyProductPage() {
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
-  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const queryClient = useQueryClient();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("all"); // "all", "live", "active", "empty"
+  const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty", "dormant"
   const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
   const [isAssigning, setIsAssigning] = useState(false);
   const [isEditingWeb, setIsEditingWeb] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(null);
   const [webFields, setWebFields] = useState<any>({});
 
-  const employeeAssociateFormFields: FormField[] = [
+  const operatorAssociateFormFields: FormField[] = [
     { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
     { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
     { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
@@ -192,7 +192,7 @@ export default function CompanyProductPage() {
     { label: "Password", type: "password", key: "password", inForm: true, inTable: false, required: true },
   ];
 
-  const employeeCompanyFormFields: FormField[] = [
+  const operatorCompanyFormFields: FormField[] = [
     { label: "Company Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
     { label: "Email", type: "email", key: "email", inForm: true, inTable: false, required: true },
     { label: "Phone", type: "number", key: "phone", inForm: true, inTable: false, required: true },
@@ -334,15 +334,15 @@ export default function CompanyProductPage() {
     enabled: !!selectedCompanyId && detailTab === "associates",
   });
 
-  const { data: employeeData, isLoading: loadingEmployees } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => getData(employeeRoutes.getAll, { limit: 300 }),
+  const { data: operatorData, isLoading: loadingOperators } = useQuery({
+    queryKey: ["operators"],
+    queryFn: () => getData(operatorRoutes.getAll, { limit: 300 }),
     enabled: roleLower === "admin",
   });
 
   const assignMutation = useMutation({
-    mutationFn: (employeeId: string | null) =>
-      patchData(`${associateCompanyRoutes.getAll}/${selectedCompanyId}`, { assignedEmployee: employeeId }),
+    mutationFn: (operatorId: string | null) =>
+      patchData(`${associateCompanyRoutes.getAll}/${selectedCompanyId}`, { assignedOperator: operatorId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       setIsAssigning(false);
@@ -404,17 +404,23 @@ export default function CompanyProductPage() {
     liveCompanies,
     activeCompanies,
     emptyCompanies,
+    dormantCompanies,
     selectedCompany,
-    allEmployees,
+    allOperators,
   } = useMemo(() => {
-    let allCompanies: Company[] = companyData?.data?.data?.data || [];
-    const allEmployees: any[] = employeeData?.data?.data?.data || [];
+    const rawCompanies = Array.isArray(companyData?.data?.data?.data)
+      ? companyData?.data?.data?.data
+      : Array.isArray(companyData?.data?.data)
+        ? companyData?.data?.data
+        : [];
+    let allCompanies: Company[] = rawCompanies || [];
+    const allOperators: any[] = operatorData?.data?.data?.data || [];
 
-    // Role-based filtering: Employees only see assigned companies
+    // Role-based filtering: Operators only see assigned companies
     // Note: Backend hook also handles this, but frontend filtering is a nice double-layer for UX
-    if (isEmployeeUser) {
+    if (isOperatorUser) {
       allCompanies = allCompanies.filter(c => {
-        const assignedId = typeof c.assignedEmployee === "object" ? c.assignedEmployee?._id : c.assignedEmployee;
+        const assignedId = typeof c.assignedOperator === "object" ? c.assignedOperator?._id : c.assignedOperator;
         return String(assignedId || "") === String(user?.id || "");
       });
     }
@@ -430,34 +436,40 @@ export default function CompanyProductPage() {
 
     const empty = allCompanies.filter((c) => (c.stats?.totalProducts || 0) === 0);
 
-    // Determine selection based on current tab
-    const currentList =
-      activeTab === "all" ? allCompanies :
-        activeTab === "live" ? live :
-          activeTab === "active" ? active :
-            empty;
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const dormant = allCompanies
+      .filter((c) => (c.stats?.totalProducts || 0) > 0)
+      .filter((c) => {
+        const supervisorObj = typeof (c as any).supervisor === "object" ? (c as any).supervisor : null;
+        const assignedObj = typeof (c as any).assignedOperator === "object" ? (c as any).assignedOperator : null;
+        const lastSeenAt = supervisorObj?.lastSeenAt || assignedObj?.lastSeenAt || null;
+        if (!lastSeenAt) return false;
+        return new Date(lastSeenAt) <= weekAgo;
+      })
+      .map(c => ({ ...c, productCount: c.stats?.totalProducts }));
 
-    const selected = currentList.find(c => c._id === selectedCompanyId) || null;
+    const selected = allCompanies.find(c => c._id === selectedCompanyId) || null;
 
     return {
       allCompanies,
       liveCompanies: live,
       activeCompanies: active,
       emptyCompanies: empty,
+      dormantCompanies: dormant,
       selectedCompany: selected,
-      allEmployees,
+      allOperators,
     };
-  }, [companyData, employeeData, selectedCompanyId, activeTab, user, isEmployeeUser]);
+  }, [companyData, operatorData, selectedCompanyId, user, isOperatorUser]);
 
   useEffect(() => {
     const currentList =
-      activeTab === "all"
-        ? allCompanies
-        : activeTab === "live"
-          ? liveCompanies
-          : activeTab === "active"
-            ? activeCompanies
-            : emptyCompanies;
+      activeTab === "live"
+        ? liveCompanies
+        : activeTab === "active"
+          ? activeCompanies
+          : activeTab === "empty"
+            ? emptyCompanies
+            : dormantCompanies;
 
     if (!currentList.length) {
       if (selectedCompanyId) setSelectedCompanyId(null);
@@ -468,7 +480,7 @@ export default function CompanyProductPage() {
     if (!existsInCurrentList) {
       setSelectedCompanyId(currentList[0]._id);
     }
-  }, [activeTab, allCompanies, liveCompanies, activeCompanies, emptyCompanies, selectedCompanyId]);
+  }, [activeTab, allCompanies, liveCompanies, activeCompanies, emptyCompanies, dormantCompanies, selectedCompanyId]);
 
   if (loadingCompanies) {
     return (
@@ -477,13 +489,13 @@ export default function CompanyProductPage() {
   }
 
   const displayedCompanies =
-    activeTab === "all" ? allCompanies :
-      activeTab === "live" ? liveCompanies :
-        activeTab === "active" ? activeCompanies :
-          emptyCompanies;
+    activeTab === "live" ? liveCompanies :
+      activeTab === "active" ? activeCompanies :
+        activeTab === "empty" ? emptyCompanies :
+          dormantCompanies;
 
   const handleAssign = () => {
-    assignMutation.mutate(selectedEmployeeId);
+    assignMutation.mutate(selectedOperatorId);
   };
 
   const resolvePresence = (person: any) => {
@@ -498,7 +510,7 @@ export default function CompanyProductPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
-      {isEmployeeUser && (
+      {isOperatorUser && (
         <Card className="mb-4 p-4 bg-background/60 backdrop-blur-md border-none shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
@@ -508,25 +520,25 @@ export default function CompanyProductPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <AddModal
-                buttonLabel="Add Associate to Company"
-                currentTable="associate"
-                formFields={employeeAssociateFormFields}
-                apiEndpoint={associateRoutes.getAll}
-                additionalVariable={{
-                  hasCompany: true,
-                  companyMode: "existing",
-                }}
-              />
-              <AddModal
-                buttonLabel="Add Company"
-                currentTable="associateCompany"
-                formFields={employeeCompanyFormFields}
-                apiEndpoint={associateCompanyRoutes.getAll}
-                additionalVariable={{
-                  assignedEmployee: user?.id,
-                }}
-              />
+                <AddModal
+                  buttonLabel="Add Associate to Company"
+                  currentTable="associate"
+                  formFields={operatorAssociateFormFields}
+                  apiEndpoint={associateRoutes.getAll}
+                  additionalVariable={{
+                    hasCompany: true,
+                    companyMode: "existing",
+                  }}
+                />
+                <AddModal
+                  buttonLabel="Add Company"
+                  currentTable="associateCompany"
+                  formFields={operatorCompanyFormFields}
+                  apiEndpoint={associateCompanyRoutes.getAll}
+                  additionalVariable={{
+                    assignedOperator: user?.id,
+                  }}
+                />
             </div>
           </div>
         </Card>
@@ -543,9 +555,9 @@ export default function CompanyProductPage() {
 
             {/* Filter tabs */}
             <div className="flex items-center gap-1 px-4 py-2 border-b border-default-100">
-              {(["all", "live", "active", "empty"] as const).map((tab) => {
-                const count = tab === "all" ? allCompanies.length : tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : emptyCompanies.length;
-                const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-primary-500";
+              {(["live", "active", "empty", "dormant"] as const).map((tab) => {
+                const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
+                const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-danger-500";
                 return (
                   <button
                     key={tab}
@@ -555,8 +567,8 @@ export default function CompanyProductPage() {
                       : "text-default-500 hover:text-foreground hover:bg-default-100"
                       }`}
                   >
-                    {tab !== "all" && <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />}
-                    <span className="capitalize">{tab}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                    <span className="capitalize">{tab === "dormant" ? "Dormant (7d)" : tab}</span>
                     <span className={`text-[10px] font-bold px-1 rounded ${activeTab === tab ? "bg-foreground/10" : "bg-default-200/60"
                       }`}>{count}</span>
                   </button>
@@ -568,11 +580,6 @@ export default function CompanyProductPage() {
             <div className="px-4 py-2">
               <CompanySearch
                 defaultSelected={selectedCompanyId}
-                itemsFilter={(companies) =>
-                  companies.filter((c) =>
-                    displayedCompanies.some((p) => p._id === c._id)
-                  )
-                }
                 onSelect={(id) => setSelectedCompanyId(id)}
               />
             </div>
@@ -584,6 +591,7 @@ export default function CompanyProductPage() {
                   const isActive = selectedCompanyId === company._id;
                   const prodCount = (company as any).productCount;
                   const isLive = (company.stats?.liveProducts || 0) > 0;
+                  const isDormant = activeTab === "dormant";
 
                   return (
                     <button
@@ -608,9 +616,11 @@ export default function CompanyProductPage() {
                           </div>
                         )}
                       </div>
-                      {isLive && (
+                      {isDormant ? (
+                        <span className="w-1.5 h-1.5 rounded-full bg-danger-500 shrink-0" />
+                      ) : isLive ? (
                         <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
-                      )}
+                      ) : null}
                     </button>
                   );
                 })}
@@ -648,10 +658,16 @@ export default function CompanyProductPage() {
                           <Chip
                             size="sm"
                             variant="flat"
-                            color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : "default"}
+                            color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : activeTab === "dormant" ? "danger" : "default"}
                             className="capitalize text-[10px] font-bold h-5"
                           >
-                            {activeTab === "live" ? "● Live" : activeTab === "active" ? "◌ Active" : "○ Empty"}
+                            {activeTab === "live"
+                              ? "● Live"
+                              : activeTab === "active"
+                                ? "◌ Active"
+                                : activeTab === "dormant"
+                                  ? "● Dormant"
+                                  : "○ Empty"}
                           </Chip>
                           {(selectedCompany as any).state?.name && (
                             <span className="text-[10px] text-default-400">{(selectedCompany as any).state.name}</span>
@@ -666,16 +682,16 @@ export default function CompanyProductPage() {
                         <div className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Overseer</div>
                         {!isAssigning ? (
                           <div className="flex items-center gap-2">
-                            {selectedCompany.assignedEmployee ? (
+                            {selectedCompany.assignedOperator ? (
                               <div className="flex items-center gap-2">
                                 {(() => {
-                                  const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
-                                  const presence = resolvePresence(employeeObj);
+                                  const operatorObj = typeof selectedCompany.assignedOperator === "object" ? selectedCompany.assignedOperator : null;
+                                  const presence = resolvePresence(operatorObj);
                                   return (
                                     <div className="flex items-center gap-2 bg-default-100 px-2.5 py-1.5 rounded-lg">
                                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${presence.online ? "bg-success-500" : "bg-default-400"}`} />
                                       <div className="flex flex-col leading-tight">
-                                        <span className="text-xs font-bold text-foreground/80">{employeeObj?.name || "Unknown"}</span>
+                                        <span className="text-xs font-bold text-foreground/80">{operatorObj?.name || "Unknown"}</span>
                                         <span className="text-[10px] text-default-400">{presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}</span>
                                       </div>
                                     </div>
@@ -691,7 +707,7 @@ export default function CompanyProductPage() {
                               variant="light"
                               className="text-warning-500"
                               onClick={() => {
-                                setSelectedEmployeeId(typeof selectedCompany.assignedEmployee === 'object' ? selectedCompany.assignedEmployee._id : null);
+                                setSelectedOperatorId(typeof selectedCompany.assignedOperator === 'object' ? selectedCompany.assignedOperator._id : null);
                                 setIsAssigning(true);
                               }}
                             >
@@ -704,12 +720,12 @@ export default function CompanyProductPage() {
                           <div className="flex items-center gap-2">
                             <Select
                               size="sm"
-                              placeholder="Assign Employee"
+                              placeholder="Assign Operator"
                               className="w-44"
-                              selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
-                              onSelectionChange={(keys: any) => setSelectedEmployeeId(Array.from(keys)[0] as string)}
+                              selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
+                              onSelectionChange={(keys: any) => setSelectedOperatorId(Array.from(keys)[0] as string)}
                             >
-                              {allEmployees.map((emp) => (
+                              {allOperators.map((emp) => (
                                 <SelectItem key={emp._id} textValue={emp.name}>
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium">{emp.name}</span>
@@ -724,12 +740,12 @@ export default function CompanyProductPage() {
                       </div>
                     )}
 
-                    {/* Employee view */}
-                    {isEmployeeUser && selectedCompany.assignedEmployee && (
+                    {/* Operator view */}
+                    {isOperatorUser && selectedCompany.assignedOperator && (
                       <div className="flex items-center gap-2 bg-success-50 dark:bg-success-900/20 px-3 py-1.5 rounded-lg border border-success-200/60 shrink-0">
                         {(() => {
-                          const employeeObj = typeof selectedCompany.assignedEmployee === "object" ? selectedCompany.assignedEmployee : null;
-                          const presence = resolvePresence(employeeObj);
+                          const operatorObj = typeof selectedCompany.assignedOperator === "object" ? selectedCompany.assignedOperator : null;
+                          const presence = resolvePresence(operatorObj);
                           return (
                             <>
                               <div className={`w-1.5 h-1.5 rounded-full ${presence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />

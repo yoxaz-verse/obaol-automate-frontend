@@ -22,18 +22,24 @@ import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import Image from "next/image";
 import CurrencySelector from "./Catalog/currency-selector";
-import { FiBell, FiSettings } from "react-icons/fi";
+import { FiBell, FiSettings, FiVolume2, FiVolumeX } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence } from "framer-motion";
+import { useSoundEffect } from "@/context/SoundContext";
 
 const TopBar = ({ username, role }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
+  const { soundEnabled, setSoundEnabled, play } = useSoundEffect();
+  const normalizedRole = String(role || "").toLowerCase();
+  const displayRole = (normalizedRole === "operator" || normalizedRole === "team")
+    ? "Operator"
+    : (role?.charAt(0).toUpperCase() + role.slice(1));
 
   const { data: unreadData } = useQuery({
     queryKey: ["notifications", "unread-count"],
@@ -68,33 +74,40 @@ const TopBar = ({ username, role }: TopbarProps) => {
   });
 
   return (
-    <div className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-4 md:my-4 md:mx-6 rounded-2xl border border-default-200/50 bg-gradient-to-r from-content1/95 via-content1/80 to-content1/95 backdrop-blur-xl shadow-none transition-all duration-300">
-      {/* Left Section: Mobile Menu & Panel Identity */}
-      <div className="flex gap-4 items-center">
+    <div
+      data-topbar
+      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-2.5 md:my-3 md:mx-4 rounded-2xl border border-default-300/70 dark:border-default-800/70 bg-gradient-to-r from-content1/98 via-content1/90 to-content1/98 backdrop-blur-xl shadow-lg transition-all duration-300"
+    >
+      {/* Left Section: Navigation & Identity */}
+      <div className="flex gap-3 md:gap-4 items-center min-w-0">
         {/* Hamburger - Mobile only */}
         <div className="md:hidden">
           <Dropdown>
             <DropdownTrigger>
-              <Button isIconOnly variant="light" aria-label="Menu">
-                <CiMenuBurger size={24} />
+              <Button isIconOnly variant="light" aria-label="Menu" className="min-w-10">
+                <CiMenuBurger size={22} className="text-default-700" />
               </Button>
             </DropdownTrigger>
             <DropdownMenu
               {...({
                 "aria-label": "Sidebar Options",
-                disallowEmptySelection: true,
-                selectionMode: "single",
-                className: "text-foreground",
+                className: "text-foreground w-[240px]",
+                itemClasses: { base: "py-2" },
               } as any)}
             >
               {filteredOptions.map((option) => (
-                <DropdownItem key={option.name}>
-                  <Link href={option.link} className="w-full h-full block">
-                    <div className="flex items-center gap-2">
-                      <span className="text-warning-500"> {option.icon}</span>
-                      {option.name}
-                    </div>
-                  </Link>
+                <DropdownItem
+                  key={option.name}
+                  textValue={option.name}
+                  onPress={() => {
+                    play("nav");
+                    setTimeout(() => router.push(option.link), 50);
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-warning-500 text-lg"> {option.icon}</span>
+                    <span className="font-medium text-[13px]">{option.name}</span>
+                  </div>
                 </DropdownItem>
               ))}
             </DropdownMenu>
@@ -102,11 +115,11 @@ const TopBar = ({ username, role }: TopbarProps) => {
         </div>
 
         {/* Identity - Hidden on mobile, visible on desktop */}
-        <div className="hidden md:flex flex-col">
-          <h1 className="text-lg font-bold text-foreground">
-            {role.charAt(0).toUpperCase() + role.slice(1)} Panel
+        <div className="hidden md:flex flex-col min-w-0 pr-4">
+          <h1 className="text-[15px] font-bold text-foreground tracking-tight truncate">
+            {displayRole} Panel
           </h1>
-          <p className="text-[10px] text-default-500">
+          <p className="text-[10px] text-default-500 font-medium truncate uppercase tracking-widest leading-none mt-0.5">
             {new Date().getHours() < 12
               ? "Good Morning"
               : new Date().getHours() < 18
@@ -117,25 +130,25 @@ const TopBar = ({ username, role }: TopbarProps) => {
       </div>
 
       {/* Brand / Logo (Visible on mobile, replaces Identity) */}
-      <div className="md:hidden">
+      <div className="md:hidden absolute left-1/2 -translate-x-1/2">
         <Image
           src={"/logo.png"}
-          width={80} // Smaller logo for mobile
-          height={80}
+          width={32}
+          height={32}
           alt="Obaol"
-          className="object-contain rounded-md"
+          className="object-contain rounded-lg shadow-sm"
         />
       </div>
 
       {/* Right Section: Utilities & User Profile */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 pr-1">
         <CurrencySelector />
         <div className="relative" ref={notificationRef}>
           <Button
             isIconOnly
             variant="light"
             aria-label="Notifications"
-            className="relative"
+            className="relative text-default-700 dark:text-default-100"
             onPress={() => setIsNotificationOpen((prev) => !prev)}
           >
             <FiBell size={18} />
@@ -166,10 +179,10 @@ const TopBar = ({ username, role }: TopbarProps) => {
               }}
               className="transition-transform"
               name={username}
-              description={<span className="text-default-400 capitalize hidden md:block">{role}</span>} // Hide role on mobile
+              description={<span className="text-default-500 font-medium capitalize hidden md:block">{role}</span>}
               classNames={{
-                name: "text-foreground font-semibold hidden md:block", // Hide name on mobile
-                description: "text-default-400"
+                name: "text-foreground font-bold hidden md:block leading-tight",
+                description: "text-default-500"
               }}
             />
           </DropdownTrigger>
@@ -210,6 +223,21 @@ const TopBar = ({ username, role }: TopbarProps) => {
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-default-600">Theme</span>
                 <ThemeSwitcher />
+              </div>
+            </DropdownItem>
+            <DropdownItem key="sound-control" closeOnSelect={false} textValue="Sound control">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-default-600">Sounds</span>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg transition-all ${soundEnabled
+                    ? "bg-warning-500/15 text-warning-600"
+                    : "bg-default-100 text-default-400"
+                    }`}
+                >
+                  {soundEnabled ? <FiVolume2 size={13} /> : <FiVolumeX size={13} />}
+                  {soundEnabled ? "On" : "Off"}
+                </button>
               </div>
             </DropdownItem>
             <DropdownItem

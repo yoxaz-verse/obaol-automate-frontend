@@ -8,23 +8,23 @@ import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 
-type EmployeeBasic = {
-  employeeId: string;
+type OperatorBasic = {
+  operatorId: string;
   name: string;
   email?: string;
 };
 
 type LeadershipMember = {
-  employeeId: string;
+  operatorId: string;
   name: string;
   level: number;
   email?: string;
 };
 
 type TeamMember = {
-  employeeId: string;
+  operatorId: string;
   name: string;
-  mentorEmployee?: { employeeId: string; name: string } | null;
+  mentorOperator?: { operatorId: string; name: string } | null;
   teamSize?: number;
   totalCommission?: number;
 };
@@ -72,7 +72,7 @@ const extractList = (response: any): any[] => {
 };
 
 const buildTeamNode = (member: TeamMember, kind: TreeNodeKind, level: number): TreeNode => {
-  const memberId = toId(member.employeeId);
+  const memberId = toId(member.operatorId);
   const teamSize = toNumber(member.teamSize);
 
   return {
@@ -85,7 +85,7 @@ const buildTeamNode = (member: TeamMember, kind: TreeNodeKind, level: number): T
       id: memberId,
       kind,
       level,
-      mentorName: toName(member.mentorEmployee?.name || "-"),
+      mentorName: toName(member.mentorOperator?.name || "-"),
       teamSize,
       email: "",
       totalCommission: toNumber(member.totalCommission),
@@ -96,36 +96,36 @@ const buildTeamNode = (member: TeamMember, kind: TreeNodeKind, level: number): T
 };
 
 const buildInitialTree = ({
-  employee,
+  operator,
   mentor,
   leadershipChain,
   directTeam,
 }: {
-  employee: EmployeeBasic;
-  mentor: EmployeeBasic | null;
+  operator: OperatorBasic;
+  mentor: OperatorBasic | null;
   leadershipChain: LeadershipMember[];
   directTeam: TeamMember[];
 }): TreeNode | null => {
-  const employeeId = toId(employee?.employeeId);
-  if (!employeeId) return null;
+  const operatorId = toId(operator?.operatorId);
+  if (!operatorId) return null;
 
   const sortedLeadership = [...leadershipChain].sort((a, b) => toNumber(a.level) - toNumber(b.level));
   const selfLevel = sortedLeadership.length + 1;
 
   const selfNode: TreeNode = {
-    name: toName(employee.name),
+    name: toName(operator.name),
     attributes: {
       level: `L${selfLevel}`,
       teamSize: String(directTeam.length),
     },
     children: directTeam.map((member) => buildTeamNode(member, "direct_team", selfLevel + 1)),
     __meta: {
-      id: employeeId,
+      id: operatorId,
       kind: "self",
       level: selfLevel,
       mentorName: mentor ? toName(mentor.name) : "No mentor",
       teamSize: directTeam.length,
-      email: String(employee.email || ""),
+      email: String(operator.email || ""),
       totalCommission: 0,
       hasLazyChildren: directTeam.length > 0,
       loaded: true,
@@ -145,7 +145,7 @@ const buildInitialTree = ({
         },
         children: [child],
         __meta: {
-          id: toId(leader.employeeId),
+          id: toId(leader.operatorId),
           kind: "leadership",
           level: leaderLevel,
           mentorName: "-",
@@ -321,12 +321,12 @@ function HierarchyBranch({
   );
 }
 
-export default function EmployeeHierarchyPage() {
+export default function OperatorHierarchyPage() {
   const { user } = useContext(AuthContext);
-  const selfEmployeeId = toId(user?.id);
+  const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedOperatorId, setSelectedOperatorId] = useState("");
 
   const [treeData, setTreeData] = useState<TreeNode | null>(null);
   const [selectedMeta, setSelectedMeta] = useState<TreeMeta | null>(null);
@@ -338,73 +338,73 @@ export default function EmployeeHierarchyPage() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const panStartRef = useRef<{ x: number; y: number; baseX: number; baseY: number } | null>(null);
 
-  const employeesQuery = useQuery({
-    queryKey: ["employee-hierarchy", "employees", isAdmin],
-    queryFn: async () => getData(apiRoutes.employee.getAll, { page: 1, limit: 5000 }),
+  const operatorsQuery = useQuery({
+    queryKey: ["operator-hierarchy", "operators", isAdmin],
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
     enabled: isAdmin,
     refetchOnWindowFocus: false,
   });
 
-  const employeeOptions = useMemo(() => {
-    const rows = extractList(employeesQuery.data);
+  const operatorOptions = useMemo(() => {
+    const rows = extractList(operatorsQuery.data);
     return rows
       .map((row: any) => ({
         id: toId(row?._id || row?.id),
         name: toName(row?.name),
       }))
       .filter((row: any) => Boolean(row.id));
-  }, [employeesQuery.data]);
+  }, [operatorsQuery.data]);
 
   useEffect(() => {
     if (!isAdmin) {
-      setSelectedEmployeeId(selfEmployeeId);
+      setSelectedOperatorId(selfOperatorId);
       return;
     }
-    const validIds = new Set(employeeOptions.map((option: any) => String(option.id)));
-    if (employeeOptions.length === 0) {
-      if (selectedEmployeeId) setSelectedEmployeeId("");
+    const validIds = new Set(operatorOptions.map((option: any) => String(option.id)));
+    if (operatorOptions.length === 0) {
+      if (selectedOperatorId) setSelectedOperatorId("");
       return;
     }
-    if (selectedEmployeeId && validIds.has(selectedEmployeeId)) return;
-    setSelectedEmployeeId(employeeOptions[0].id);
-  }, [employeeOptions, isAdmin, selfEmployeeId, selectedEmployeeId]);
+    if (selectedOperatorId && validIds.has(selectedOperatorId)) return;
+    setSelectedOperatorId(operatorOptions[0].id);
+  }, [operatorOptions, isAdmin, selfOperatorId, selectedOperatorId]);
 
-  const employeeId = isAdmin ? selectedEmployeeId : selfEmployeeId;
+  const operatorId = isAdmin ? selectedOperatorId : selfOperatorId;
 
   const leadershipQuery = useQuery({
-    queryKey: ["employee-hierarchy", "leadership", employeeId],
-    queryFn: async () => getData(apiRoutes.employeeHierarchy.leadership(employeeId)),
-    enabled: Boolean(employeeId),
+    queryKey: ["operator-hierarchy", "leadership", operatorId],
+    queryFn: async () => getData(apiRoutes.operatorHierarchy.leadership(operatorId)),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
   const teamQuery = useQuery({
-    queryKey: ["employee-hierarchy", "team", employeeId],
-    queryFn: async () => getData(apiRoutes.employeeHierarchy.team(employeeId)),
-    enabled: Boolean(employeeId),
+    queryKey: ["operator-hierarchy", "team", operatorId],
+    queryFn: async () => getData(apiRoutes.operatorHierarchy.team(operatorId)),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
   const selfSummaryQuery = useQuery({
-    queryKey: ["employee-hierarchy", "summary", employeeId],
+    queryKey: ["operator-hierarchy", "summary", operatorId],
     queryFn: async () =>
-      getData(apiRoutes.commissions.employeeHistory(employeeId), {
+      getData(apiRoutes.commissions.operatorHistory(operatorId), {
         page: 1,
         limit: 1,
       }),
-    enabled: Boolean(employeeId),
+    enabled: Boolean(operatorId),
     refetchOnWindowFocus: false,
   });
 
-  const selectedNodeEmployeeId = selectedMeta?.id || "";
+  const selectedNodeOperatorId = selectedMeta?.id || "";
   const selectedSummaryQuery = useQuery({
-    queryKey: ["employee-hierarchy", "node-summary", selectedNodeEmployeeId],
+    queryKey: ["operator-hierarchy", "node-summary", selectedNodeOperatorId],
     queryFn: async () =>
-      getData(apiRoutes.commissions.employeeHistory(selectedNodeEmployeeId), {
+      getData(apiRoutes.commissions.operatorHistory(selectedNodeOperatorId), {
         page: 1,
         limit: 1,
       }),
-    enabled: Boolean(selectedNodeEmployeeId),
+    enabled: Boolean(selectedNodeOperatorId),
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -412,8 +412,8 @@ export default function EmployeeHierarchyPage() {
   const leadershipData = leadershipQuery.data?.data?.data || {};
   const teamData = teamQuery.data?.data?.data || {};
 
-  const employee: EmployeeBasic = leadershipData.employee || { employeeId: employeeId, name: user?.name || "You" };
-  const mentor: EmployeeBasic | null = leadershipData.mentor || null;
+  const operator: OperatorBasic = leadershipData.operator || { operatorId: operatorId, name: user?.name || "You" };
+  const mentor: OperatorBasic | null = leadershipData.mentor || null;
   const leadershipChain: LeadershipMember[] = Array.isArray(leadershipData.leadershipChain)
     ? leadershipData.leadershipChain
     : [];
@@ -424,12 +424,12 @@ export default function EmployeeHierarchyPage() {
   const initialTree = useMemo(
     () =>
       buildInitialTree({
-        employee,
+        operator,
         mentor,
         leadershipChain,
         directTeam,
       }),
-    [employee, mentor, leadershipChain, directTeam]
+    [operator, mentor, leadershipChain, directTeam]
   );
 
   useEffect(() => {
@@ -439,7 +439,7 @@ export default function EmployeeHierarchyPage() {
     setCollapsedByNode({});
     setZoom(1);
     setTranslate({ x: 0, y: 0 });
-  }, [employeeId, initialTree]);
+  }, [operatorId, initialTree]);
 
   const clampZoom = useCallback((value: number) => Math.max(0.6, Math.min(1.8, Number(value.toFixed(2)))), []);
 
@@ -479,7 +479,7 @@ export default function EmployeeHierarchyPage() {
     setLoadingChildrenByNode((prev) => ({ ...prev, [nodeMeta.id]: true }));
 
     try {
-      const response = await getData(apiRoutes.employeeHierarchy.team(nodeMeta.id));
+      const response = await getData(apiRoutes.operatorHierarchy.team(nodeMeta.id));
       const responseData = response?.data?.data || {};
       const childrenRows: TeamMember[] = Array.isArray(responseData.directTeam) ? responseData.directTeam : [];
 
@@ -570,8 +570,8 @@ export default function EmployeeHierarchyPage() {
       next[id] = true;
     });
 
-    const selfNode = findNodeById(treeData, employeeId);
-    const path = findPathToNode(treeData, employeeId) || [];
+    const selfNode = findNodeById(treeData, operatorId);
+    const path = findPathToNode(treeData, operatorId) || [];
     path.forEach((id) => {
       next[id] = false;
     });
@@ -585,11 +585,11 @@ export default function EmployeeHierarchyPage() {
     }
 
     setCollapsedByNode(next);
-  }, [employeeId, treeData]);
+  }, [operatorId, treeData]);
 
   const centerOnSelf = useCallback(() => {
-    if (!viewportRef.current || !employeeId) return;
-    const nodeEl = viewportRef.current.querySelector(`[data-node-id="${employeeId}"]`) as HTMLElement | null;
+    if (!viewportRef.current || !operatorId) return;
+    const nodeEl = viewportRef.current.querySelector(`[data-node-id="${operatorId}"]`) as HTMLElement | null;
     if (!nodeEl) return;
     const viewportRect = viewportRef.current.getBoundingClientRect();
     const nodeRect = nodeEl.getBoundingClientRect();
@@ -601,7 +601,7 @@ export default function EmployeeHierarchyPage() {
       x: prev.x + (viewportCenterX - nodeCenterX),
       y: prev.y + (viewportCenterY - nodeCenterY),
     }));
-  }, [employeeId]);
+  }, [operatorId]);
 
   const onViewportPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
@@ -668,12 +668,12 @@ export default function EmployeeHierarchyPage() {
   const hasRestrictedMetrics = selectedSummaryStatus === 403 || selectedSummaryStatus === 401;
 
   const rootLoading =
-    leadershipQuery.isLoading || teamQuery.isLoading || (isAdmin && employeesQuery.isLoading && !selectedEmployeeId);
+    leadershipQuery.isLoading || teamQuery.isLoading || (isAdmin && operatorsQuery.isLoading && !selectedOperatorId);
   const rootError = leadershipQuery.isError || teamQuery.isError;
 
   const teamSizeFromSummary = toNumber(summary.teamSize);
   const networkCount = Math.max(teamSizeFromSummary, directTeam.length);
-  const employeeLevel = leadershipChain.length + 1;
+  const operatorLevel = leadershipChain.length + 1;
 
   if (rootLoading) {
     return (
@@ -698,13 +698,13 @@ export default function EmployeeHierarchyPage() {
     );
   }
 
-  if (!employeeId) {
+  if (!operatorId) {
     return (
       <div className="w-full p-4 md:p-6">
         <div className="w-full rounded-xl border border-default-300/70 bg-content1 px-4 py-3 text-sm text-default-600">
-          {isAdmin && employeeOptions.length === 0
-            ? "No employees available to inspect."
-            : "Select an employee to view hierarchy."}
+          {isAdmin && operatorOptions.length === 0
+            ? "No operators available to inspect."
+            : "Select an operator to view hierarchy."}
         </div>
       </div>
     );
@@ -723,7 +723,7 @@ export default function EmployeeHierarchyPage() {
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Employee Network</h1>
+        <h1 className="text-2xl font-bold text-foreground">Operator Network</h1>
         <p className="text-sm text-default-500">
           Visual leadership structure for mentor chain, direct team, and growth visibility.
         </p>
@@ -732,14 +732,14 @@ export default function EmployeeHierarchyPage() {
       {isAdmin ? (
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Employee</p>
+            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
             <select
-              value={selectedEmployeeId}
-              onChange={(event) => setSelectedEmployeeId(String(event.target.value || ""))}
+              value={selectedOperatorId}
+              onChange={(event) => setSelectedOperatorId(String(event.target.value || ""))}
               className="h-10 rounded-lg border border-default-300 bg-content1 px-3 text-sm text-foreground"
             >
-              {employeeOptions.length === 0 ? <option value="">No employees found</option> : null}
-              {employeeOptions.map((option: any) => (
+              {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
+              {operatorOptions.map((option: any) => (
                 <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
@@ -752,14 +752,14 @@ export default function EmployeeHierarchyPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Employee Name</p>
-            <p className="text-lg font-semibold text-foreground truncate">{toName(employee.name)}</p>
+            <p className="text-xs uppercase tracking-wide text-default-500">Operator Name</p>
+            <p className="text-lg font-semibold text-foreground truncate">{toName(operator.name)}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Employee Level</p>
-            <p className="text-lg font-semibold text-foreground">L{employeeLevel}</p>
+            <p className="text-xs uppercase tracking-wide text-default-500">Operator Level</p>
+            <p className="text-lg font-semibold text-foreground">L{operatorLevel}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
@@ -866,7 +866,7 @@ export default function EmployeeHierarchyPage() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Employee Details</h3>
+              <h3 className="text-lg font-semibold text-foreground">Operator Details</h3>
               <Button isIconOnly size="sm" variant="light" onPress={() => setSelectedMeta(null)}>
                 <FiX />
               </Button>
@@ -874,7 +874,7 @@ export default function EmployeeHierarchyPage() {
 
             <div className="mt-4 space-y-3 text-sm">
               <div>
-                <p className="text-xs uppercase tracking-wide text-default-500">Employee Name</p>
+                <p className="text-xs uppercase tracking-wide text-default-500">Operator Name</p>
                 <p className="font-medium text-foreground">{toName(selectedNodeFromTree?.name || selectedNode.id)}</p>
               </div>
               <div>

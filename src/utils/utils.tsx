@@ -19,6 +19,8 @@ import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell } from "react-icons/fi";
 import { FiFlag } from "react-icons/fi";
+import { FiFileText } from "react-icons/fi";
+import { FiGlobe } from "react-icons/fi";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -76,7 +78,7 @@ export const sidebarOptions = [
   },
   {
     name: "Marketplace",
-    icon: <LuWarehouse />,
+    icon: <FiShoppingBag />,
     link: "/dashboard/marketplace",
   },
   {
@@ -102,22 +104,52 @@ export const sidebarOptions = [
   {
     name: "Hierarchy",
     icon: <MdOutlineAccountTree />,
-    link: "/dashboard/employee/hierarchy",
+    link: "/dashboard/operator/hierarchy",
   },
   {
     name: "Team",
     icon: <FiUsers />,
-    link: "/dashboard/employee/team",
+    link: "/dashboard/operator/team",
   },
   {
     name: "Earnings",
     icon: <MdOutlinePriceChange />,
-    link: "/dashboard/employee/earnings",
+    link: "/dashboard/operator/earnings",
   },
   {
     name: "Orders",
     icon: <FiShoppingBag />,
     link: "/dashboard/orders",
+  },
+  {
+    name: "Documents",
+    icon: <FiFileText />,
+    link: "/dashboard/documents",
+  },
+  {
+    name: "News",
+    icon: <FiGlobe />,
+    link: "/dashboard/news",
+  },
+  {
+    name: "Documentation Rules",
+    icon: <FiFileText />,
+    link: "/dashboard/documentation-rules",
+  },
+  {
+    name: "Documentation Preview",
+    icon: <FiFileText />,
+    link: "/dashboard/documentation-preview",
+  },
+  {
+    name: "Order Rules",
+    icon: <FiFileText />,
+    link: "/dashboard/order-rules",
+  },
+  {
+    name: "Enquiry Rules",
+    icon: <FiFileText />,
+    link: "/dashboard/enquiry-rules",
   },
   {
     name: "Execution Panel",

@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { useSoundEffect } from "@/context/SoundContext";
 
 interface ILoginProps {
   role: string;
@@ -26,8 +27,10 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const isInvalidEmail = useEmailValidation(email);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<"idle" | "success" | "error">("idle");
   const [isRoutingToRegister, setIsRoutingToRegister] = useState(false);
   const registerRouteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { play } = useSoundEffect();
 
   const router = useRouter();
   const { isAuthenticated, loading, login, user } = useContext(AuthContext);
@@ -83,6 +86,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
         );
       }
 
+      play("success");
+      setLoginStatus("success");
       showToastMessage({
         type: "success",
         message: "Login Successful",
@@ -90,6 +95,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
       });
     } catch (error: any) {
       setIsLoading(false);
+      setLoginStatus("error");
       console.error("Login Error:", {
         message: error.message,
         response: error.response?.data,
@@ -111,6 +117,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
         message: apiErrorMessage,
         position: "top-right",
       });
+      play("danger");
     }
   };
 
@@ -124,6 +131,11 @@ const LoginComponent = ({ role }: ILoginProps) => {
       setIsRoutingToRegister(false);
       registerRouteTimeoutRef.current = null;
     }, 6000);
+    const roleLower = String(role || "").toLowerCase();
+    if (roleLower === "operator" || roleLower === "team") {
+      router.push("/auth/operator/register");
+      return;
+    }
     router.push("/auth/register");
   };
 
@@ -151,17 +163,17 @@ const LoginComponent = ({ role }: ILoginProps) => {
       ],
       footer: "Associate_Hub_Online"
     },
-    employee: {
+    operator: {
       headline: "OBAOL",
-      highlight: "STAFF PORTAL",
-      description: "Access your assoicates, performance metrics, and internal resources efficiently.",
+      highlight: "OPERATOR PORTAL",
+      description: "Access your associates, performance metrics, and operational resources efficiently.",
       points: [
-        "Assoicate Management",
+        "Associate Management",
         "Personal Performance Metrics",
-        "Enquriy Management",
-        "Team and Hierachy"
+        "Enquiry Management",
+        "Team and Hierarchy"
       ],
-      footer: "Employee_Portal_v2"
+      footer: "Operator_Portal_v2"
     },
     "project manager": {
       headline: "OBAOL",
@@ -201,14 +213,59 @@ const LoginComponent = ({ role }: ILoginProps) => {
     }
   };
 
-  const currentRoleContent = roleContent[role.toLowerCase()] || null;
+  const roleLower = String(role || "").toLowerCase();
+  const roleKey = roleLower === "operator" || roleLower === "team" ? "operator" : roleLower;
+  const currentRoleContent = roleContent[roleKey] || null;
 
   if (loading) {
     return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;
   }
 
+  const joinCta = roleKey === "operator"
+    ? {
+        title: "New Operator?",
+        description: "Create an operator account to access the portal",
+      }
+    : {
+        title: "New Associate?",
+        description: "Create an account to start trading",
+      };
+
   return (
-    <AuthLayout title={role} subtitle="Login" leftPanel={currentRoleContent}>
+    <AuthLayout
+      title={role}
+      subtitle="Login"
+      leftPanel={currentRoleContent}
+      topContent={
+        !isAuthenticated && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="group/banner relative overflow-hidden rounded-xl border border-warning-500/10 bg-warning-500/5 p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-warning-500/10 transition-all duration-300"
+            onClick={handleCreateAccount}
+          >
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-warning-600 dark:text-warning-400 uppercase tracking-widest">{joinCta.title}</span>
+              <span className="text-sm font-medium text-foreground/80">{joinCta.description}</span>
+            </div>
+            <div className="flex items-center gap-2 text-warning-500 font-bold text-sm group-hover/banner:translate-x-1 transition-transform duration-300">
+              {isRoutingToRegister ? (
+                <span className="w-4 h-4 rounded-full border-2 border-warning-500 border-t-transparent animate-spin" />
+              ) : (
+                <>
+                  Join Now
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
+            </div>
+            {/* Ambient shine */}
+            <div className="absolute inset-0 -translate-x-full group-hover/banner:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-in-out skew-x-12" />
+          </motion.div>
+        )
+      }
+    >
       <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
         <Input
           value={email}
@@ -221,7 +278,10 @@ const LoginComponent = ({ role }: ILoginProps) => {
           errorMessage={!isInvalidEmail && email.length > 0 ? "Please enter a valid email" : ""}
           isRequired
           placeholder="name@example.com"
-          onValueChange={setEmail}
+          onValueChange={(val) => {
+            setEmail(val);
+            if (loginStatus !== "idle") setLoginStatus("idle");
+          }}
           classNames={{
             inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
           }}
@@ -245,24 +305,16 @@ const LoginComponent = ({ role }: ILoginProps) => {
             </button>
           }
           type={isVisible ? "text" : "password"}
-          onValueChange={setPassword}
+          onValueChange={(val) => {
+            setPassword(val);
+            if (loginStatus !== "idle") setLoginStatus("idle");
+          }}
           classNames={{
             inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
           }}
         />
 
-        <div className="flex justify-between items-center w-full px-1">
-          <button
-            type="button"
-            onClick={handleCreateAccount}
-            disabled={isLoading || isRoutingToRegister}
-            className="inline-flex items-center gap-2 text-sm text-primary hover:underline transition-all disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1 py-0.5"
-          >
-            {isRoutingToRegister ? "Opening registration..." : "Create account"}
-            {isRoutingToRegister ? (
-              <span className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin" aria-hidden="true" />
-            ) : null}
-          </button>
+        <div className="flex justify-end items-center w-full px-1">
           <p
             onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
             className="text-sm text-default-500 hover:text-foreground cursor-pointer transition-colors"
@@ -283,15 +335,29 @@ const LoginComponent = ({ role }: ILoginProps) => {
           className="w-full"
         >
           <Button
-            className="w-full font-bold shadow-xl shadow-warning/20 bg-gradient-to-r from-warning-500 to-amber-600 text-white border-none h-12"
-            color="warning"
+            className={`w-full font-bold shadow-xl transition-all duration-500 h-12 border-none
+              ${loginStatus === "success" 
+                ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success/20" 
+                : loginStatus === "error" 
+                  ? "bg-gradient-to-r from-danger-500 to-red-600 shadow-danger/20" 
+                  : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning/20"
+              }`}
+            color={loginStatus === "success" ? "success" : loginStatus === "error" ? "danger" : "warning"}
             type="submit"
             isLoading={isLoading || isRoutingToRegister}
             isDisabled={isRoutingToRegister}
             size="lg"
             radius="lg"
           >
-            {isRoutingToRegister ? "Opening registration..." : isLoading ? "Signing in..." : "Sign In"}
+            {isRoutingToRegister 
+              ? "Opening registration..." 
+              : loginStatus === "success"
+                ? "Access Granted"
+                : loginStatus === "error"
+                  ? "Check Credentials"
+                  : isLoading 
+                    ? "Verifying..." 
+                    : "Sign In"}
           </Button>
         </motion.div>
       </form>

@@ -40,6 +40,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   const refetchData = () => {
     // Implement refetch logic if necessary
   };
+  const tableLabel = currentTable;
 
   return (
     <div className="w-full max-w-full min-w-0">
@@ -70,7 +71,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                 ? arr.map((x) => x.name).join(", ")
                 : "Not Defined";
 
-            if (currentTable === "employee") {
+            if (currentTable === "operator") {
               const presenceStatus = item.presenceStatus || getPresenceStatus(item.lastSeenAt);
               return {
                 ...rest,
@@ -120,7 +121,7 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                   onApply={handleFiltersUpdate} // Pass the callback to DynamicFilter
                   searchValue={search}
                   onSearchChange={setSearch}
-                  searchPlaceholder={`Search ${currentTable}...`}
+                  searchPlaceholder={`Search ${tableLabel}...`}
                 />{" "}
               </div>
               <Spacer y={5} />

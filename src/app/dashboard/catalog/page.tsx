@@ -181,6 +181,53 @@ function DeepSearchPanel({
           );
         }}
       </QueryComponent>
+
+      {/* Companies */}
+      <QueryComponent
+        api={apiRoutesByRole["associateCompany"]}
+        queryKey={["search-company", search]}
+        page={1}
+        limit={CATALOG_FETCH_LIMIT}
+        additionalParams={{ search }}
+      >
+        {(data: any) => {
+          const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
+          if (!items.length) return null;
+          return (
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-2">
+                <FiSearch size={12} /> Companies
+              </p>
+              <div className="flex flex-col gap-2">
+                {items.map(item => (
+                  <motion.button
+                    key={item._id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full text-left group flex items-center gap-4 p-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-blue-500/5 hover:border-blue-500/20 transition-all outline-none"
+                    onClick={() => {
+                      // For now just clear search or maybe we could navigate to a company profile?
+                      // Catalog doesn't have a company view yet, so we'll just clear or show alert.
+                      window.location.href = `/dashboard/marketplace?search=${item.name}`;
+                    }}
+                  >
+                    <div className="shrink-0 w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                      <FiSearch size={20} className="text-blue-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-sm truncate">{item.name}</p>
+                      <p className="text-xs text-default-400 truncate mt-0.5">{item.email} · {item.phone}</p>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">
+                      Company
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          );
+        }}
+      </QueryComponent>
     </div>
   );
 }

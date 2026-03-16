@@ -7,7 +7,7 @@
 const BASE_PATHS = {
   USER: "/user",
   ADMIN: "/admins",
-  EMPLOYEE: "/employees",
+  OPERATOR: "/operators",
   INVENTORY_MANAGER: "/inventory-managers",
   PROJECT_MANAGER: "/project-managers",
   SERVICE_COMPANY: "/service-companies",
@@ -36,6 +36,7 @@ const BASE_PATHS = {
   DIVISION: "/divisions",
   DISTRICT: "/districts",
   STATE: "/states",
+  CITY: "/cities",
   DESIGNATION: "/designations",
   ENQUIRY_PROCESS_STATUS: "/enquiry-process-statuses",
   COUNTRY: "/countries",
@@ -59,6 +60,13 @@ const BASE_PATHS = {
   ORGANIZATION_REPORT: "/organization-reports",
   INVENTORY: "/inventories",
   SERVICE_REQUEST: "/service-requests",
+  INVENTORY_RESERVATION: "/inventory-reservations",
+  SAMPLE_REQUEST: "/sample-requests",
+  TRADE_DOCUMENT: "/trade-documents",
+  DOCUMENT_RULE: "/document-rules",
+  ENQUIRY_RULE: "/enquiry-rules",
+  ORDER_RULE: "/order-rules",
+  DEMO: "/demo",
 };
 
 // Define account-related routes separately
@@ -68,6 +76,8 @@ export const accountRoutes = {
   managerLogin: "/manager/login",
   servicesLogin: "/services/login",
   workerLogin: "/worker/login",
+  operatorRegister: "/auth/operator/register",
+  operatorRegisterOptions: "/auth/operator/register/options",
 };
 
 // Helper function to generate standard CRUD routes
@@ -88,7 +98,7 @@ const addCustomRoutes = (
 // Define resource-specific routes using the CRUD generator
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
-export const employeeRoutes = createCRUDRoutes(BASE_PATHS.EMPLOYEE);
+export const operatorRoutes = createCRUDRoutes(BASE_PATHS.OPERATOR);
 export const statusHistoryRoutes = createCRUDRoutes(BASE_PATHS.STATUS_HISTORY);
 export const inventoryManagerRoutes = createCRUDRoutes(
   BASE_PATHS.INVENTORY_MANAGER
@@ -106,6 +116,13 @@ export const divisionRoutes = addCustomRoutes(
 );
 
 export const inventoryRoutes = createCRUDRoutes(BASE_PATHS.INVENTORY);
+export const inventoryReservationRoutes = createCRUDRoutes(
+  BASE_PATHS.INVENTORY_RESERVATION
+);
+export const sampleRequestRoutes = createCRUDRoutes(BASE_PATHS.SAMPLE_REQUEST);
+export const tradeDocumentRoutes = createCRUDRoutes(BASE_PATHS.TRADE_DOCUMENT);
+export const documentRuleRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_RULE);
+export const demoRoutes = createCRUDRoutes(BASE_PATHS.DEMO);
 
 export const pincodeEntryRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.PINCODE_ENTRY),
@@ -124,6 +141,7 @@ export const districtRoutes = addCustomRoutes(
 export const stateRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.STATE), {
   // If you have other custom routes for location, add them here
 });
+export const cityRoutes = createCRUDRoutes(BASE_PATHS.CITY);
 
 export const serviceCompanyRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.SERVICE_COMPANY),
@@ -259,7 +277,7 @@ export const dashboardRoutes = {
   productPerformance: `${ANALYTICS_BASE}/performance/products`,
   systemMetrics: `${ANALYTICS_BASE}/metrics/system`,
   associateMetrics: `${ANALYTICS_BASE}/metrics/associate`,
-  employeeMetrics: `${ANALYTICS_BASE}/metrics/employee`,
+  operatorMetrics: `${ANALYTICS_BASE}/metrics/operator`,
 };
 
 export const approvalRoutes = {
@@ -267,11 +285,15 @@ export const approvalRoutes = {
   associateAction: "/approvals/associates",
   companiesList: "/approvals/companies",
   companyAction: "/approvals/companies",
+  operatorsList: "/approvals/operators",
+  operatorAction: "/approvals/operators",
 };
 
 export const notificationRoutes = {
   list: "/notifications",
   unreadCount: "/notifications/unread-count",
+  unreadSummary: "/notifications/unread-summary",
+  markSectionRead: (section: string) => `/notifications/mark-section-read?section=${section}`,
   readOne: (id: string) => `/notifications/${id}/read`,
   readAll: "/notifications/read-all",
 };
@@ -294,13 +316,13 @@ export const brandPublicRoutes = {
   products: "/brand/products", // + /:companyId
 };
 
-export const employeeHierarchyRoutes = {
-  leadership: (employeeId: string) => `/employees/leadership/${employeeId}`,
-  team: (employeeId: string) => `/employees/team/${employeeId}`,
+export const operatorHierarchyRoutes = {
+  leadership: (operatorId: string) => `/operators/leadership/${operatorId}`,
+  team: (operatorId: string) => `/operators/team/${operatorId}`,
 };
 
 export const commissionRoutes = {
-  employeeHistory: (employeeId: string) => `/commissions/employee/${employeeId}`,
+  operatorHistory: (operatorId: string) => `/commissions/operator/${operatorId}`,
 };
 
 export const organizationReportRoutes = {
@@ -328,7 +350,7 @@ export const apiRoutes = {
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,
-  employee: employeeRoutes,
+  operator: operatorRoutes,
   admin: adminRoutes,
 
   serviceCompany: serviceCompanyRoutes,
@@ -354,6 +376,42 @@ export const apiRoutes = {
   displayedRate: displayedRateRoutes,
   catalogItem: catalogItemRoutes,
   inventoryManager: inventoryManagerRoutes,
+  inventoryReservation: inventoryReservationRoutes,
+  sampleRequest: {
+    list: `${BASE_PATHS.SAMPLE_REQUEST}`,
+    create: `${BASE_PATHS.SAMPLE_REQUEST}`,
+    quote: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/quote`,
+    decision: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/decision`,
+    markup: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/markup`,
+  },
+  tradeDocuments: {
+    list: `${BASE_PATHS.TRADE_DOCUMENT}`,
+    create: `${BASE_PATHS.TRADE_DOCUMENT}`,
+    getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
+    update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
+  },
+  documentRules: {
+    list: `${BASE_PATHS.DOCUMENT_RULE}`,
+    create: `${BASE_PATHS.DOCUMENT_RULE}`,
+    update: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
+  },
+  enquiryRules: {
+    list: `${BASE_PATHS.ENQUIRY_RULE}`,
+    create: `${BASE_PATHS.ENQUIRY_RULE}`,
+    update: (id: string) => `${BASE_PATHS.ENQUIRY_RULE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.ENQUIRY_RULE}/${id}`,
+  },
+  orderRules: {
+    list: `${BASE_PATHS.ORDER_RULE}`,
+    create: `${BASE_PATHS.ORDER_RULE}`,
+    update: (id: string) => `${BASE_PATHS.ORDER_RULE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.ORDER_RULE}/${id}`,
+  },
+  demo: {
+    orders: `${BASE_PATHS.DEMO}/orders`,
+    inventory: `${BASE_PATHS.DEMO}/inventory`,
+  },
   enquiry: enquiryRoutes,
   orders: {
     create: "/orders",
@@ -363,6 +421,7 @@ export const apiRoutes = {
   },
   pincodeEntry: pincodeEntryRoutes,
   state: stateRoutes,
+  city: cityRoutes,
   district: districtRoutes,
   division: divisionRoutes,
   designation: designationRoutes,
@@ -386,7 +445,7 @@ export const apiRoutes = {
   companySubFunction: companySubFunctionRoutes,
   companyFunctionMapping: companyFunctionMappingRoutes,
   catalog: catalogRoutes,
-  employeeHierarchy: employeeHierarchyRoutes,
+  operatorHierarchy: operatorHierarchyRoutes,
   commissions: commissionRoutes,
   organizationReports: organizationReportRoutes,
   serviceRequests: serviceRequestRoutes,

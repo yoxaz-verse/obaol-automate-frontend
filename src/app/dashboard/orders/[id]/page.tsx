@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getData, patchData } from "@/core/api/apiHandler";
+import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import {
     Card,
@@ -17,6 +17,12 @@ import {
     SelectItem,
     Input,
     Switch,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Progress,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -25,16 +31,6 @@ import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 
 dayjs.extend(relativeTime);
-
-const ORDER_STATUSES = [
-    "Procuring",
-    "Loaded",
-    "In Transit",
-    "Arrived",
-    "Unloading",
-    "Completed",
-    "Cancelled",
-];
 
 const OWNER_OPTIONS = [
     { key: "buyer", label: "Buyer" },
@@ -68,10 +64,16 @@ const MILESTONE_LABELS: Record<string, string> = {
 export default function OrderDetailsPage() {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
+    const router = useRouter();
     const orderId = Array.isArray(id) ? id[0] : id;
     const queryClient = useQueryClient();
     const [logisticsList, setLogisticsList] = useState<any[]>([]);
     const [trackingId, setTrackingId] = useState("");
+    const [planError, setPlanError] = useState<string>("");
+    const [workflowStage, setWorkflowStage] = useState("ORDER_CREATED");
+    const [docActionOpen, setDocActionOpen] = useState(false);
+    const [docActionRule, setDocActionRule] = useState<any>(null);
+    const [docActionFileUrl, setDocActionFileUrl] = useState("");
     const [responsibilities, setResponsibilities] = useState<any>({
         procurementBy: "",
         certificateBy: "",
@@ -130,12 +132,26 @@ export default function OrderDetailsPage() {
         select: (res) => res?.data?.data,
         enabled: !!orderId,
     });
+
+    const { data: orderRulesResponse } = useQuery({
+        queryKey: ["order-rules"],
+        queryFn: () => getData(apiRoutes.orderRules.list),
+    });
     const enquiryRefId = (order as any)?.enquiry?._id || (order as any)?.enquiry;
     const { data: linkedEnquiry } = useQuery({
         queryKey: ["order-enquiry", enquiryRefId],
         queryFn: () => getData(`${apiRoutes.enquiry.getAll}/${enquiryRefId}`),
         select: (res) => res?.data?.data,
         enabled: Boolean(enquiryRefId),
+    });
+    const { data: docRulesResponse } = useQuery({
+        queryKey: ["document-rules"],
+        queryFn: () => getData(apiRoutes.documentRules.list),
+    });
+    const { data: orderDocsResponse } = useQuery({
+        queryKey: ["trade-documents", "order", orderId],
+        queryFn: () => getData(apiRoutes.tradeDocuments.list, { orderId, page: 1, limit: 200 }),
+        enabled: Boolean(orderId),
     });
     // Update Status Mutation
     const updateMutation = useMutation({
@@ -144,7 +160,45 @@ export default function OrderDetailsPage() {
         },
         onSuccess: () => {
             toast.success("Order updated successfully!");
+            setPlanError("");
             queryClient.invalidateQueries({ queryKey: ["order", id] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || error?.message || "Failed to update order.";
+            toast.error(message);
+            setPlanError(message);
+        }
+    });
+    const updateWorkflowStageMutation = useMutation({
+        mutationFn: async (stage: string) => {
+            return patchData(`${apiRoutes.orders.getAll}/${orderId}`, { workflowStage: stage });
+        },
+        onSuccess: () => {
+            toast.success("Workflow stage updated.");
+            queryClient.invalidateQueries({ queryKey: ["order", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to update workflow stage.");
+        },
+    });
+    const createDocMutation = useMutation({
+        mutationFn: async () => {
+            if (!docActionRule) throw new Error("No document rule selected.");
+            const payload: any = { type: docActionRule.docType, orderId };
+            if (String(docActionRule.actionType) === "UPLOAD") {
+                payload.fileUrl = docActionFileUrl;
+            }
+            return postData(apiRoutes.tradeDocuments.create, payload);
+        },
+        onSuccess: () => {
+            toast.success("Document created.");
+            setDocActionOpen(false);
+            setDocActionRule(null);
+            setDocActionFileUrl("");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "order", orderId] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to create document.");
         },
     });
 
@@ -153,6 +207,15 @@ export default function OrderDetailsPage() {
         if (order) {
             setLogisticsList(order.logistics || []);
             setTrackingId(order.trackingId || "");
+            const fallbackStage = (() => {
+                const legacy = String(order?.status || "").toLowerCase();
+                if (legacy === "completed") return "TRADE_CLOSED";
+                if (legacy === "arrived") return "DELIVERED";
+                if (legacy === "in transit") return "SHIPPED";
+                if (legacy === "loaded") return "READY_FOR_SHIPMENT";
+                return "ORDER_CREATED";
+            })();
+            setWorkflowStage(String(order?.workflowStage || fallbackStage));
             setResponsibilities({
                 procurementBy: order?.responsibilities?.procurementBy || "obaol",
                 certificateBy: order?.responsibilities?.certificateBy || "obaol",
@@ -187,15 +250,19 @@ export default function OrderDetailsPage() {
         }
     }, [order]);
 
-    const handleStatusChange = (newStatus: string) => {
-        updateMutation.mutate({ status: newStatus });
+    const handleWorkflowStageChange = (newStage: string) => {
+        setWorkflowStage(newStage);
+        updateWorkflowStageMutation.mutate(newStage);
     };
 
     const handleGeneralUpdate = () => {
         if (!milestones.schedulingMode || !milestones.schedulingFinalizedDate) {
-            toast.error("Finalize scheduling mode and scheduling date before saving the order plan.");
+            const message = "Finalize scheduling mode and scheduling date before saving the order plan.";
+            toast.error(message);
+            setPlanError(message);
             return;
         }
+        setPlanError("");
         const dateOrNull = (value: any) => (value ? value : null);
         updateMutation.mutate({
             logistics: logisticsList,
@@ -227,9 +294,14 @@ export default function OrderDetailsPage() {
     const getOwnerLabel = (val: string) => OWNER_OPTIONS.find((item) => item.key === val)?.label || "Not set";
     const updateMilestone = (key: string, value: any) =>
         setMilestones((prev: any) => ({ ...prev, [key]: value }));
-    const tradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || (order as any)?.enquiry?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
-    const isInternational = tradeType === "INTERNATIONAL";
+    const orderTradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || (order as any)?.enquiry?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
+    const isInternational = orderTradeType === "INTERNATIONAL";
     const isSchedulingFinalized = Boolean(milestones.schedulingFinalizedDate);
+    useEffect(() => {
+        if (planError && milestones.schedulingMode && milestones.schedulingFinalizedDate) {
+            setPlanError("");
+        }
+    }, [planError, milestones.schedulingMode, milestones.schedulingFinalizedDate]);
     const ownerLayers = [
         { key: "buyer", title: "Buyer Layer" },
         { key: "seller", title: "Supplier Layer" },
@@ -261,15 +333,15 @@ export default function OrderDetailsPage() {
     if (isLoading) return <BrandedLoader message="Loading order details" />;
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
-    const isEmployeeUser = roleLower === "employee";
-    const assignedEmployeeId = (
-        (linkedEnquiry as any)?.assignedEmployeeId?._id ||
-        (linkedEnquiry as any)?.assignedEmployeeId ||
-        (order as any)?.enquiry?.assignedEmployeeId?._id ||
-        (order as any)?.enquiry?.assignedEmployeeId ||
+    const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const assignedOperatorId = (
+        (linkedEnquiry as any)?.assignedOperatorId?._id ||
+        (linkedEnquiry as any)?.assignedOperatorId ||
+        (order as any)?.enquiry?.assignedOperatorId?._id ||
+        (order as any)?.enquiry?.assignedOperatorId ||
         ""
     ).toString();
-    if (isEmployeeUser && (!user?.id || assignedEmployeeId !== String(user.id))) {
+    if (isOperatorUser && (!user?.id || assignedOperatorId !== String(user.id))) {
         return (
             <div className="p-10 text-center">
                 <p className="text-lg font-semibold">Access restricted</p>
@@ -278,8 +350,63 @@ export default function OrderDetailsPage() {
         );
     }
 
+    const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+    const orderRules = Array.isArray(orderRulesResponse?.data?.data) ? orderRulesResponse.data.data : [];
+    const tradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
+    const sortedOrderStages = orderRules
+        .filter((r: any) => r?.isActive !== false)
+        .filter((r: any) => !r?.tradeType || r.tradeType === "BOTH" || String(r.tradeType) === tradeType)
+        .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+        .map((r: any) => String(r.stageKey || "").toUpperCase())
+        .filter(Boolean);
+    const stageLabelMap = new Map(
+        orderRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
+    );
+    const workflowStageOptions = sortedOrderStages.length > 0
+        ? sortedOrderStages
+        : ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", "QUALITY_VERIFIED", "COMPLIANCE_APPROVED", "PACKING_COMPLETED", "READY_FOR_SHIPMENT", "SHIPPED", "DELIVERED", "PAYMENT_PENDING", "PAYMENT_COMPLETED", "TRADE_CLOSED"];
+    const docsForOrder = Array.isArray(orderDocsResponse?.data?.data?.data)
+        ? orderDocsResponse?.data?.data?.data
+        : (orderDocsResponse?.data?.data || []);
+    const rulesForStage = docRules
+        .filter((r: any) =>
+            String(r.stageType) === "ORDER" &&
+            String(r.stageKey) === workflowStage &&
+            r.isActive !== false &&
+            (r.tradeType === "BOTH" || r.tradeType === tradeType)
+        )
+        .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+    const canSeeRule = (rule: any) => {
+        const visibility = String(rule.visibility || "BOTH");
+        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
+        if (visibility === "INTERNAL") return false;
+        if (visibility === "BOTH") return true;
+        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
+        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
+        const userId = String(user?.id || "");
+        if (visibility === "BUYER") return buyerId === userId;
+        if (visibility === "SELLER") return sellerId === userId;
+        return false;
+    };
+    const canActOnRule = (rule: any) => {
+        if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
+        const roleKey = String(rule.responsibleRole || "");
+        const buyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
+        const sellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
+        const userId = String(user?.id || "");
+        if (roleKey === "BUYER") return buyerId === userId;
+        if (roleKey === "SELLER") return sellerId === userId;
+        return false;
+    };
+    const hasDocType = (type: string) => (docsForOrder || []).some((doc: any) => String(doc?.type || "") === type);
+
     return (
         <div className="w-full p-6 flex flex-col gap-6">
+            <div className="flex justify-start">
+                <Button variant="light" onPress={() => router.back()}>
+                    Back
+                </Button>
+            </div>
             {/* Header */}
             <Card className="w-full bg-gradient-to-r from-blue-900 to-slate-900 text-white">
                 <CardHeader className="flex justify-between items-center px-6 py-6">
@@ -291,11 +418,48 @@ export default function OrderDetailsPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                         <Chip className="capitalize font-bold" color="primary" size="lg">
-                            {order.status}
+                            {String(order.workflowStage || order.status || "").replaceAll("_", " ")}
                         </Chip>
                         <span className="text-xs opacity-70">Last updated: {dayjs(order.updatedAt).fromNow()}</span>
                     </div>
                 </CardHeader>
+            </Card>
+
+            {/* Status Stepper */}
+            <Card className="w-full shadow-sm border border-default-200/50">
+                <CardBody className="px-6 py-6">
+                    <Progress
+                        size="sm"
+                        radius="full"
+                        value={workflowStageOptions.length > 1 ? (Math.max(0, workflowStageOptions.indexOf(workflowStage)) / (workflowStageOptions.length - 1)) * 100 : 0}
+                        color={workflowStage === "TRADE_CLOSED" ? "success" : "primary"}
+                        className="mb-4"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        {workflowStageOptions.map((step, index) => {
+                            const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
+                            const isCompleted = index < currentStepIndex;
+                            const isCurrent = index === currentStepIndex;
+                            return (
+                                <React.Fragment key={step}>
+                                    <div
+                                        className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
+                                            ? "bg-primary text-white border-primary"
+                                            : isCompleted
+                                                ? "bg-success/10 text-success-700 border-success/30"
+                                                : "bg-default-100 text-default-500 border-default-200"
+                                            }`}
+                                    >
+                                        {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
+                                    </div>
+                                    {index < workflowStageOptions.length - 1 && (
+                                        <span className="text-default-300 text-xs">→</span>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                </CardBody>
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -304,15 +468,9 @@ export default function OrderDetailsPage() {
                     <CardHeader className="font-bold text-lg">Workflow Actions</CardHeader>
                     <Divider />
                     <CardBody className="flex flex-col gap-4">
-                        <Select
-                            label="Update Status"
-                            selectedKeys={[order.status]}
-                            onChange={(e) => handleStatusChange(e.target.value)}
-                        >
-                            {ORDER_STATUSES.map((s) => (
-                                <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                        </Select>
+                        <Chip size="sm" variant="flat">
+                            {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
+                        </Chip>
 
                         <Input
                             label="Internal Tracking ID"
@@ -324,14 +482,19 @@ export default function OrderDetailsPage() {
                         <Button color="primary" variant="shadow" className="mt-2" onClick={handleGeneralUpdate} isLoading={updateMutation.isPending}>
                             Save Order Plan & Timeline
                         </Button>
+                        {planError && (
+                            <div className="mt-2 rounded-lg border border-danger-200 bg-danger-50/70 px-3 py-2 text-xs text-danger-700">
+                                {planError}
+                            </div>
+                        )}
                         <p className="text-xs text-default-500">
                             Scheduling mode and finalized date are required before saving execution updates.
                         </p>
                     </CardBody>
                 </Card>
 
-                {/* Execution Milestones */}
-                <Card className="lg:col-span-2">
+            {/* Execution Milestones */}
+            <Card className="lg:col-span-2">
                     <CardHeader className="font-bold text-lg">Execution Milestones</CardHeader>
                     <Divider />
                     <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -613,7 +776,7 @@ export default function OrderDetailsPage() {
                     <CardBody className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         {ownerLayers.map((layer) => {
                             const assignedTasks = RESPONSIBILITY_TASKS.filter((task) => {
-                                if (task.internationalOnly && !isInternational) return false;
+                                if ('internationalOnly' in task && (task as any).internationalOnly && !isInternational) return false;
                                 return responsibilities?.[task.key] === layer.key;
                             });
                             return (
@@ -711,6 +874,84 @@ export default function OrderDetailsPage() {
                     </div>
                 </CardBody>
             </Card>
+
+            <Card className="lg:col-span-3">
+                <CardHeader className="font-bold text-lg">Documentation Checklist</CardHeader>
+                <Divider />
+                <CardBody className="flex flex-col gap-2">
+                    {rulesForStage.filter(canSeeRule).length === 0 ? (
+                        <div className="text-sm text-default-500">No documentation rules configured for this stage.</div>
+                    ) : (
+                        rulesForStage.filter(canSeeRule).map((rule: any) => {
+                            const hasDoc = hasDocType(String(rule.docType || ""));
+                            return (
+                                <div key={rule._id} className="flex items-center justify-between gap-3 border border-default-200/60 rounded-lg px-3 py-2">
+                                    <div className="text-sm">
+                                        <span className="font-medium">{rule.docType}</span>
+                                        <span className="text-default-500"> • {rule.responsibleRole} • {rule.actionType}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Chip size="sm" variant="flat" color={hasDoc ? "success" : "warning"}>
+                                            {hasDoc ? "Uploaded" : "Pending"}
+                                        </Chip>
+                                        {!hasDoc && canActOnRule(rule) && (
+                                            <Button
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={() => {
+                                                    setDocActionRule(rule);
+                                                    setDocActionOpen(true);
+                                                }}
+                                            >
+                                                {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </CardBody>
+            </Card>
+
+            <Modal
+                isOpen={docActionOpen}
+                onOpenChange={setDocActionOpen}
+                isDismissable={false}
+                isKeyboardDismissDisabled
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
+                    </ModalHeader>
+                    <ModalBody>
+                        {String(docActionRule?.actionType || "") === "UPLOAD" && (
+                            <Input
+                                label="File URL"
+                                placeholder="https://..."
+                                value={docActionFileUrl}
+                                onChange={(e) => setDocActionFileUrl(e.target.value)}
+                            />
+                        )}
+                        <div className="text-xs text-default-500">
+                            {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
+                            Cancel
+                        </Button>
+                        <Button
+                            color="primary"
+                            onPress={() => createDocMutation.mutate()}
+                            isLoading={createDocMutation.isPending}
+                            isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
+                        >
+                            {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

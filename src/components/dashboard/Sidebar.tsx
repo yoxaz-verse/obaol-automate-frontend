@@ -1,170 +1,195 @@
 "use client";
 
 import React, { useContext, useState, useTransition } from "react";
-import {
-  FiFileText,
-  FiInbox,
-  FiMessageCircle,
-  FiSettings,
-  FiUsers,
-  FiTrendingUp,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
-import { RiBuildingLine } from "react-icons/ri";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
+import { useSoundEffect } from "@/context/SoundContext";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getData } from "@/core/api/apiHandler";
+import { notificationRoutes } from "@/core/api/apiRoutes";
 
 interface SidebarProps {
-  isCollapsed: boolean;
-  setIsCollapsed: (value: boolean) => void;
+    isCollapsed: boolean;
+    setIsCollapsed: (value: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user } = useContext(AuthContext);
-  const [, startTransition] = useTransition();
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
+    const router = useRouter();
+    const pathname = usePathname();
+    const { user } = useContext(AuthContext);
+    const [, startTransition] = useTransition();
+    const [pendingLink, setPendingLink] = useState<string | null>(null);
 
-  const filteredOptions = sidebarOptions.filter((option) => {
-    const allowedRoles = routeRoles[option.link] || [];
-    return user?.role ? allowedRoles.includes(user.role) : false;
-  });
-
-  const handleOptionClick = (optionLink: string) => {
-    setPendingLink(optionLink);
-    startTransition(() => {
-      router.push(optionLink);
+    const filteredOptions = sidebarOptions.filter((option) => {
+        const allowedRoles = routeRoles[option.link] || [];
+        return user?.role ? allowedRoles.includes(user.role) : false;
     });
-  };
 
-  // Reset pending link when pathname matches
-  React.useEffect(() => {
-    if (pathname === pendingLink) {
-      setPendingLink(null);
-    }
-  }, [pathname, pendingLink]);
+    const { play } = useSoundEffect();
 
-  return (
-    <div
-      className={`fixed left-0 top-0 h-full z-50 transition-all duration-300 bg-content1 border-r border-default-200 hidden md:flex flex-col ${isCollapsed ? "w-[80px]" : "w-[280px]"
-        }`}
-    >
-      {/* Toggle Button */}
-      <Button
-        isIconOnly
-        variant="flat"
-        size="sm"
-        className="absolute -right-3 top-20 bg-content1 border border-default-200 rounded-full z-50 hover:bg-default-100"
-        onPress={() => setIsCollapsed(!isCollapsed)}
-      >
-        {isCollapsed ? <FiChevronRight size={14} /> : <FiChevronLeft size={14} />}
-      </Button>
+    const { data: unreadSummaryData } = useQuery({
+        queryKey: ["notifications", "unread-summary"],
+        queryFn: async () => {
+            const res: any = await getData(notificationRoutes.unreadSummary);
+            return res?.data?.data || {};
+        },
+        refetchInterval: 25000,
+    });
+    const unreadSummary = unreadSummaryData || {};
+    const dotMap: Record<string, number> = {
+        "/dashboard/notifications": Number(unreadSummary.notifications || 0),
+        "/dashboard/approvals": Number(unreadSummary.approvals || 0),
+        "/dashboard/enquiries": Number(unreadSummary.enquiries || 0),
+        "/dashboard/orders": Number(unreadSummary.orders || 0),
+        "/dashboard/execution-enquiries": Number(unreadSummary.execution || 0),
+    };
 
-      {/* Header / Logo */}
-      <div className={`flex items-center px-4 py-8 overflow-hidden ${isCollapsed ? "justify-center" : "justify-start gap-4"}`}>
-        <div className="min-w-[48px] flex justify-center transform transition-transform duration-300 hover:scale-110">
-          <Image
-            src={"/logo.png"}
-            width={48}
-            height={48}
-            alt="Obaol"
-            className="rounded-xl object-contain shadow-sm"
-          />
-        </div>
-        {!isCollapsed && (
-          <span className="font-black text-sm tracking-[0.3em] text-foreground/80 whitespace-nowrap uppercase select-none">
-            SUPREME
-          </span>
-        )}
-      </div>
+    const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
+        e.preventDefault();
+        if (pathname === optionLink) return;
 
-      {/* Navigation Options */}
-      <div className="flex-1 px-3 py-4 space-y-2 overflow-y-auto no-scrollbar">
-        {filteredOptions.map((option, index) => {
-          const isDashboardLink = option.link === "/dashboard";
-          const isActive = isDashboardLink
-            ? pathname === "/dashboard"
-            : pathname === option.link || pathname.startsWith(`${option.link}/`);
+        play("nav");
+        setPendingLink(optionLink);
+        startTransition(() => {
+            router.push(optionLink);
+        });
+    };
 
-          const isPendingItem = pendingLink === option.link;
+    // Reset pending link when pathname matches
+    React.useEffect(() => {
+        if (pathname === pendingLink || pathname.startsWith(pendingLink + "/")) {
+            setPendingLink(null);
+        }
+    }, [pathname, pendingLink]);
 
-          const content = (
-            <div
-              key={index}
-              onClick={() => handleOptionClick(option.link)}
-              aria-busy={isPendingItem}
-              className={`group relative flex items-center px-4 py-3 cursor-pointer rounded-xl transition-all duration-200 ${isActive
-                ? "bg-default-100/80 text-warning-500"
-                : isPendingItem
-                  ? "bg-warning-500/10 text-warning-500/70"
-                  : "text-default-500 hover:bg-default-100 hover:text-foreground"
-                } ${isCollapsed ? "justify-center" : "gap-4"}`}
+    return (
+        <div
+            data-sidebar
+            className={`fixed left-0 top-0 h-full z-50 transition-all duration-300 ease-in-out bg-content1/80 backdrop-blur-xl border-r border-default-200/50 hidden md:flex flex-col ${isCollapsed ? "w-[72px]" : "w-[240px]"
+                }`}
+        >
+            {/* Toggle Button */}
+            <Button
+                isIconOnly
+                variant="flat"
+                size="sm"
+                className="absolute -right-3 top-[72px] w-6 h-6 bg-content1 border border-default-200/50 rounded-full z-40 hover:bg-default-100 shadow-sm"
+                onPress={() => {
+                    play("toggle");
+                    setIsCollapsed(!isCollapsed);
+                }}
             >
-              {(isActive || isPendingItem) && (
-                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-warning-500 rounded-r-full ${isPendingItem ? "animate-pulse" : ""}`} />
-              )}
-              <div
-                className={`text-xl flex-shrink-0 transition-all duration-200 ${isActive
-                  ? "scale-110"
-                  : isPendingItem
-                    ? "scale-105 text-warning-500"
-                    : "group-hover:scale-110"
-                  }`}
-              >
-                {option.icon}
-              </div>
-              {!isCollapsed && (
-                <span
-                  className={`font-bold whitespace-nowrap overflow-hidden text-ellipsis tracking-tight ${isActive ? "text-foreground" : isPendingItem ? "text-foreground/70" : ""
-                    }`}
-                >
-                  {option.name}
-                  {isPendingItem && (
-                    <span className="ml-2 inline-flex items-center gap-1 align-middle">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse [animation-delay:120ms]" />
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse [animation-delay:240ms]" />
-                    </span>
-                  )}
-                </span>
-              )}
+                {isCollapsed ? <FiChevronRight size={12} className="text-default-500" /> : <FiChevronLeft size={12} className="text-default-500" />}
+            </Button>
 
-              {isPendingItem && !isCollapsed && (
-                <div className="pointer-events-none absolute bottom-1 left-4 right-4 h-[2px] overflow-hidden rounded-full bg-warning-500/15">
-                  <div className="h-full w-1/2 rounded-full bg-warning-500 animate-[pulse_1s_ease-in-out_infinite]" />
+            {/* Header / Logo */}
+            <div className={`flex items-center px-4 py-6 overflow-hidden mt-2 ${isCollapsed ? "justify-center" : "justify-start gap-4"}`}>
+                <div className="flex-shrink-0 flex justify-center transform transition-transform duration-300 hover:scale-105">
+                    <Image
+                        src={"/logo.png"}
+                        width={36}
+                        height={36}
+                        alt="Obaol"
+                        className="rounded-lg object-contain shadow-sm"
+                    />
                 </div>
-              )}
+                {!isCollapsed && (
+                    <span className="font-extrabold text-sm tracking-[0.25em] text-foreground/80 whitespace-nowrap uppercase select-none opacity-90">
+                        SUPREME
+                    </span>
+                )}
             </div>
-          );
 
-          if (isCollapsed) {
-            return (
-              <Tooltip key={index} content={option.name} placement="right" color="warning" closeDelay={0}>
-                {content}
-              </Tooltip>
-            );
-          }
+            {/* Navigation Options */}
+            <div className="flex-1 px-3 py-2 space-y-1.5 overflow-y-auto no-scrollbar pb-6">
+                {filteredOptions.map((option, index) => {
+                    const isDashboardLink = option.link === "/dashboard";
+                    const isActive = isDashboardLink
+                        ? pathname === "/dashboard"
+                        : pathname === option.link || pathname.startsWith(`${option.link}/`);
 
-          return content;
-        })}
-      </div>
+                    const isPendingItem = pendingLink === option.link;
 
-      {/* Footer / User Info (Optional) */}
-      {!isCollapsed && (
-        <div className="p-4 border-t border-default-100">
-          <p className="text-[10px] text-default-400 text-center uppercase tracking-widest font-bold">
-            &copy; 2026 Obaol Supreme
-          </p>
+                    const hasDot = (dotMap[option.link] || 0) > 0;
+                    const content = (
+                        <Link
+                            key={index}
+                            href={option.link}
+                            onClick={(e) => handleOptionClick(e, option.link)}
+                            aria-busy={isPendingItem}
+                            className={`group relative flex items-center px-3 py-2.5 cursor-pointer rounded-lg transition-all duration-200 ${isActive
+                                    ? "bg-default-100/60 dark:bg-default-50/10 text-warning-600 dark:text-warning-400 font-semibold"
+                                    : isPendingItem
+                                        ? "bg-warning-500/5 text-warning-500/70"
+                                        : "text-default-500 hover:bg-default-100/50 hover:text-foreground font-medium"
+                                } ${isCollapsed ? "justify-center" : "gap-3.5"}`}
+                        >
+                            {/* Active Indicator Line */}
+                            {(isActive || isPendingItem) && (
+                                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-warning-500 rounded-r-full transition-all ${isPendingItem ? "opacity-50 animate-pulse h-3" : "opacity-100"}`} />
+                            )}
+
+                            {/* Icon */}
+                            <div
+                                className={`flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : isPendingItem ? "scale-100" : "group-hover:scale-110"
+                                    }`}
+                            >
+                                {/* Dynamically adjust icon size to be slightly smaller and elegant */}
+                                {React.cloneElement(option.icon as React.ReactElement, { size: 18 })}
+                            </div>
+
+                            {/* Label */}
+                            {!isCollapsed && (
+                                <span className="text-[13px] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis leading-none flex-1 mt-0.5">
+                                    {option.name}
+                                </span>
+                            )}
+
+                            {hasDot && (
+                                <span
+                                    className={`ml-auto ${isCollapsed ? "absolute top-2 right-2" : ""} w-2 h-2 rounded-full bg-success-500`}
+                                />
+                            )}
+
+                            {/* Loading Indicator */}
+                            {isPendingItem && !isCollapsed && (
+                                <span className="flex-shrink-0 inline-flex items-center gap-[2px]">
+                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
+                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:150ms]" />
+                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:300ms]" />
+                                </span>
+                            )}
+                        </Link>
+                    );
+
+                    if (isCollapsed) {
+                        return (
+                            <Tooltip key={index} content={option.name} placement="right" color="default" closeDelay={0} showArrow={true} classNames={{ content: "text-xs font-medium px-2 py-1" }}>
+                                {content}
+                            </Tooltip>
+                        );
+                    }
+
+                    return content;
+                })}
+            </div>
+
+            {/* Footer */}
+            {!isCollapsed && (
+                <div className="p-4 border-t border-default-200/30">
+                    <p className="text-[9px] text-default-400/80 text-center uppercase tracking-[0.2em] font-bold">
+                        &copy; {new Date().getFullYear()} Obaol
+                    </p>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Sidebar;

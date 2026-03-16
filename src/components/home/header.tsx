@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -12,13 +13,16 @@ const NAV_LINKS = [
   { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Products" },
+  { href: "/news", label: "News" },
   { href: "/faq", label: "FAQ" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const { isAuthenticated, loading } = useContext(AuthContext);
+  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -86,20 +90,46 @@ export default function Header() {
                 </svg>
               </Link>
 
+              {/* Create Account - Desktop */}
+              {!loading && !isAuthenticated && (
+                <Link
+                  href="/auth/register"
+                  className="hidden xl:block text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
+                >
+                  Join Now
+                </Link>
+              )}
+
               {/* CTA */}
-              <Link
-                href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
+              <button
+                onClick={() => {
+                  if (loading) return;
+                  setIsNavigating(true);
+                  router.push(isAuthenticated ? "/dashboard" : "/auth");
+                }}
+                disabled={isNavigating || loading}
                 className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold overflow-hidden transition-all duration-300
                   bg-orange-500 hover:bg-orange-600 text-white
-                  shadow-none hover:scale-[1.03] active:scale-[0.97]"
+                  shadow-none hover:scale-[1.03] active:scale-[0.97] disabled:opacity-80 disabled:scale-100"
               >
                 {/* Shimmer */}
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 skew-x-12" />
-                <span className="relative">{!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}</span>
-                <svg className="relative w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
+                <span className="relative">
+                  {isNavigating ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Opening...
+                    </span>
+                  ) : (
+                    !loading && isAuthenticated ? "Go to Dashboard" : "Sign In"
+                  )}
+                </span>
+                {!isNavigating && (
+                  <svg className="relative w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                )}
+              </button>
 
               {/* Mobile hamburger */}
               <button
@@ -154,18 +184,45 @@ export default function Header() {
               </Link>
 
               {/* Mobile CTA + theme */}
-              <div className="mt-3 pt-3 border-t border-foreground/10 flex items-center gap-3">
-                <Link
-                  href={!loading && isAuthenticated ? "/dashboard" : "/auth"}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 text-white text-sm font-bold shadow-[0_0_20px_-4px_rgba(251,146,60,0.5)] hover:brightness-110 transition-all"
+              <div className="mt-3 pt-3 border-t border-foreground/10 flex flex-col gap-3 px-4">
+                <button
+                  onClick={() => {
+                    if (loading) return;
+                    setIsNavigating(true);
+                    setMobileOpen(false);
+                    router.push(isAuthenticated ? "/dashboard" : "/auth");
+                  }}
+                  disabled={isNavigating || loading}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 text-white text-sm font-bold shadow-[0_0_20px_-4px_rgba(251,146,60,0.5)] hover:brightness-110 transition-all disabled:opacity-80"
                 >
-                  {!loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
-                <ThemeSwitcher />
+                  {isNavigating ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Opening...
+                    </span>
+                  ) : (
+                    !loading && isAuthenticated ? "Go to Dashboard" : "Sign In"
+                  )}
+                  {!isNavigating && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  )}
+                </button>
+
+                {!loading && !isAuthenticated && (
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
+                  >
+                    Join Now
+                  </Link>
+                )}
+
+                <div className="flex justify-center border-t border-foreground/5 pt-3">
+                  <ThemeSwitcher />
+                </div>
               </div>
             </nav>
           </motion.div>

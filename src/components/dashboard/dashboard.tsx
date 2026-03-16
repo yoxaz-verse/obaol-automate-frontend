@@ -45,7 +45,7 @@ const Dashboard: NextPage = () => {
 
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate";
-  const isEmployeeUser = roleLower === "employee" || roleLower === "team";
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
 
   const enquiriesQuery = useQuery({
     queryKey: ["dashboardEnquiry", roleLower, userId],
@@ -95,10 +95,10 @@ const Dashboard: NextPage = () => {
     refetchOnWindowFocus: false,
   });
 
-  const employeeMetricsQuery = useQuery({
-    queryKey: ["employeeMetrics", userId, roleLower],
-    queryFn: () => getData(apiRoutes.analytics.employeeMetrics, {}),
-    enabled: !!userId && isEmployeeUser,
+  const operatorMetricsQuery = useQuery({
+    queryKey: ["operatorMetrics", userId, roleLower],
+    queryFn: () => getData(apiRoutes.analytics.operatorMetrics, {}),
+    enabled: !!userId && isOperatorUser,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });
@@ -173,7 +173,7 @@ const Dashboard: NextPage = () => {
 
   const systemMetrics = systemMetricsQuery.data?.data?.data || {};
   const associateMetrics = associateMetricsQuery.data?.data?.data || {};
-  const employeeMetrics = employeeMetricsQuery.data?.data?.data || {};
+  const operatorMetrics = operatorMetricsQuery.data?.data?.data || {};
   const pendingAssociateApprovals = Number(approvalsAssociatesQuery.data?.data?.meta?.total || 0);
   const pendingCompanyApprovals = Number(approvalsCompaniesQuery.data?.data?.meta?.total || 0);
   const pendingApprovalsTotal = pendingAssociateApprovals + pendingCompanyApprovals;
@@ -205,17 +205,17 @@ const Dashboard: NextPage = () => {
 
   const prioritizedLinks = useMemo(() => {
     const priorityMap = isAdmin
-      ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/companyProduct", "/dashboard/employee/team"]
+      ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/companyProduct", "/dashboard/operator/team"]
       : isAssociate
         ? ["/dashboard/marketplace", "/dashboard/catalog", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"]
-        : isEmployeeUser
-          ? ["/dashboard/companyProduct", "/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/employee/hierarchy"]
+        : isOperatorUser
+          ? ["/dashboard/companyProduct", "/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/operator/hierarchy"]
           : ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"];
 
     return priorityMap
       .map((link) => filteredOptions.find((option) => option.link === link))
       .filter(Boolean) as typeof sidebarOptions;
-  }, [filteredOptions, isAdmin, isAssociate, isEmployeeUser]);
+  }, [filteredOptions, isAdmin, isAssociate, isOperatorUser]);
 
   const isEnquiryRelevantForRole = useCallback((item: any) => {
     if (isAdmin) return true;
@@ -226,20 +226,20 @@ const Dashboard: NextPage = () => {
         (item?.mediatorAssociateId?._id || item?.mediatorAssociateId)?.toString() === userId
       );
     }
-    if (isEmployeeUser) {
+    if (isOperatorUser) {
       return (
-        (item?.assignedEmployeeId?._id || item?.assignedEmployeeId)?.toString() === userId ||
+        (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId ||
         (item?.createdBy?._id || item?.createdBy)?.toString() === userId
       );
     }
     return true;
-  }, [isAdmin, isAssociate, isEmployeeUser, userId]);
+  }, [isAdmin, isAssociate, isOperatorUser, userId]);
 
   const isOrderRelevantForRole = useCallback((item: any) => {
     if (isAdmin) return true;
-    if (isEmployeeUser) {
+    if (isOperatorUser) {
       return (
-        (item?.assignedEmployeeId?._id || item?.assignedEmployeeId)?.toString() === userId ||
+        (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId ||
         (item?.createdBy?._id || item?.createdBy)?.toString() === userId
       );
     }
@@ -251,7 +251,7 @@ const Dashboard: NextPage = () => {
       );
     }
     return true;
-  }, [isAdmin, isAssociate, isEmployeeUser, userId]);
+  }, [isAdmin, isAssociate, isOperatorUser, userId]);
 
   const activityFeed = useMemo(() => {
     const enquiryFeed = enquiries
@@ -331,13 +331,13 @@ const Dashboard: NextPage = () => {
       ];
     }
 
-    if (isEmployeeUser) {
-      const totalAssignedProducts = Number(employeeMetrics.totalAssignedProducts || 0);
-      const liveAssignedProducts = Number(employeeMetrics.liveAssignedProducts || 0);
+    if (isOperatorUser) {
+      const totalAssignedProducts = Number(operatorMetrics.totalAssignedProducts || 0);
+      const liveAssignedProducts = Number(operatorMetrics.liveAssignedProducts || 0);
       return [
         {
           label: "Pending assigned enquiries",
-          value: Number(employeeMetrics.pendingAssignedEnquiries || 0),
+          value: Number(operatorMetrics.pendingAssignedEnquiries || 0),
           detail: "Assigned enquiries awaiting next action",
           route: "/dashboard/enquiries",
           color: "warning" as const,
@@ -351,7 +351,7 @@ const Dashboard: NextPage = () => {
         },
         {
           label: "Assigned companies",
-          value: Number(employeeMetrics.assignedCompanies || 0),
+          value: Number(operatorMetrics.assignedCompanies || 0),
           detail: "Companies currently mapped to you",
           route: "/dashboard/companyProduct",
           color: "success" as const,
@@ -366,13 +366,13 @@ const Dashboard: NextPage = () => {
     associateActionRequired,
     associateMetrics.liveProducts,
     associateMetrics.obaolCatalogCount,
-    employeeMetrics.assignedCompanies,
-    employeeMetrics.liveAssignedProducts,
-    employeeMetrics.pendingAssignedEnquiries,
-    employeeMetrics.totalAssignedProducts,
+    operatorMetrics.assignedCompanies,
+    operatorMetrics.liveAssignedProducts,
+    operatorMetrics.pendingAssignedEnquiries,
+    operatorMetrics.totalAssignedProducts,
     isAdmin,
     isAssociate,
-    isEmployeeUser,
+    isOperatorUser,
     pendingApprovalsTotal,
     pendingAssociateApprovals,
     pendingCompanyApprovals,
@@ -386,16 +386,16 @@ const Dashboard: NextPage = () => {
     ? systemMetricsQuery.isLoading
     : isAssociate
       ? associateMetricsQuery.isLoading
-      : isEmployeeUser
-        ? employeeMetricsQuery.isLoading
+      : isOperatorUser
+        ? operatorMetricsQuery.isLoading
         : enquiriesQuery.isLoading;
 
   const executiveError = isAdmin
     ? systemMetricsQuery.isError
     : isAssociate
       ? associateMetricsQuery.isError
-      : isEmployeeUser
-        ? employeeMetricsQuery.isError
+      : isOperatorUser
+        ? operatorMetricsQuery.isError
         : false;
 
   return (
@@ -435,43 +435,43 @@ const Dashboard: NextPage = () => {
         </div>
       ) : (
         <>
-          {(isAdmin || isEmployeeUser) && (
+          {(isAdmin || isOperatorUser) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               <InsightCard
                 title="Total Enquiries"
                 metric={(
-                  isEmployeeUser
-                    ? Number(employeeMetrics.totalAssignedEnquiries ?? 0)
+                  isOperatorUser
+                    ? Number(operatorMetrics.totalAssignedEnquiries ?? 0)
                     : Number(systemMetrics.totalEnquiries ?? totalEnquiries)
                 ).toLocaleString()}
                 trend={{
-                  value: `${isEmployeeUser ? Number(employeeMetrics.newAssignedEnquiriesToday ?? 0) : Number(systemMetrics.newEnquiriesToday ?? 0)} today`,
+                  value: `${isOperatorUser ? Number(operatorMetrics.newAssignedEnquiriesToday ?? 0) : Number(systemMetrics.newEnquiriesToday ?? 0)} today`,
                   isPositive: true,
                 }}
                 icon={<FiActivity size={18} />}
-                footer={<span className="text-xs text-default-500">{isEmployeeUser ? "Assigned enquiry volume" : "All-time inbound enquiry volume"}</span>}
+                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Assigned enquiry volume" : "All-time inbound enquiry volume"}</span>}
               />
               <InsightCard
-                title={isEmployeeUser ? "Assigned Companies" : "Pending Actions"}
-                metric={(isEmployeeUser ? Number(employeeMetrics.assignedCompanies ?? 0) : adminActionRequired).toLocaleString()}
-                icon={isEmployeeUser ? <FiUsers size={18} /> : <FiClock size={18} />}
-                footer={<span className="text-xs text-default-500">{isEmployeeUser ? "Associate companies mapped to you" : "Need acceptance/confirmation/conversion"}</span>}
+                title={isOperatorUser ? "Assigned Companies" : "Pending Actions"}
+                metric={(isOperatorUser ? Number(operatorMetrics.assignedCompanies ?? 0) : adminActionRequired).toLocaleString()}
+                icon={isOperatorUser ? <FiUsers size={18} /> : <FiClock size={18} />}
+                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Associate companies mapped to you" : "Need acceptance/confirmation/conversion"}</span>}
               />
               <InsightCard
-                title={isEmployeeUser ? "Assigned Products Live" : "Orders In Progress"}
+                title={isOperatorUser ? "Assigned Products Live" : "Orders In Progress"}
                 metric={
-                  isEmployeeUser
-                    ? `${Number(employeeMetrics.liveAssignedProducts ?? 0)}/${Number(employeeMetrics.totalAssignedProducts ?? 0)}`
+                  isOperatorUser
+                    ? `${Number(operatorMetrics.liveAssignedProducts ?? 0)}/${Number(operatorMetrics.totalAssignedProducts ?? 0)}`
                     : activeOrders.toLocaleString()
                 }
-                icon={isEmployeeUser ? <FiTrendingUp size={18} /> : <FiShoppingBag size={18} />}
-                footer={<span className="text-xs text-default-500">{isEmployeeUser ? "Live products out of assigned products" : "Operational orders currently active"}</span>}
+                icon={isOperatorUser ? <FiTrendingUp size={18} /> : <FiShoppingBag size={18} />}
+                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Live products out of assigned products" : "Operational orders currently active"}</span>}
               />
               <InsightCard
-                title={isEmployeeUser ? "Live Activation Rate" : "Completion Rate"}
-                metric={`${isEmployeeUser ? Number(employeeMetrics.liveProductPercentage ?? 0) : orderCompletionPct}%`}
+                title={isOperatorUser ? "Live Activation Rate" : "Completion Rate"}
+                metric={`${isOperatorUser ? Number(operatorMetrics.liveProductPercentage ?? 0) : orderCompletionPct}%`}
                 icon={<FiCheckCircle size={18} />}
-                footer={<span className="text-xs text-default-500">{isEmployeeUser ? "Share of assigned products currently live" : "Completed orders out of all created orders"}</span>}
+                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Share of assigned products currently live" : "Completed orders out of all created orders"}</span>}
               />
             </div>
           )}
@@ -581,7 +581,7 @@ const Dashboard: NextPage = () => {
               <div className="text-xs text-default-400">
                 {isAssociate
                   ? "No associate activity yet. Start from Marketplace or Enquiries."
-                  : isEmployeeUser
+                  : isOperatorUser
                     ? "No assigned activity yet. Check your companies and enquiries."
                     : "No recent activity available yet."}
               </div>
@@ -639,24 +639,24 @@ const Dashboard: NextPage = () => {
           ) : (
             <Card className="bg-content1/70 border border-default-100 shadow-sm">
               <CardHeader className="pb-2">
-                <h4 className="font-semibold text-foreground">{isEmployeeUser ? "My Assignment Snapshot" : "System Snapshot"}</h4>
+                <h4 className="font-semibold text-foreground">{isOperatorUser ? "My Assignment Snapshot" : "System Snapshot"}</h4>
               </CardHeader>
               <CardBody className="pt-0 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiUsers size={14} /> {isEmployeeUser ? "Assigned Companies" : "Associates"}</span>
-                  <span className="font-semibold">{(isEmployeeUser ? Number(employeeMetrics.assignedCompanies ?? 0) : Number(systemMetrics.totalAssociates ?? 0)).toLocaleString()}</span>
+                  <span className="text-default-500 flex items-center gap-2"><FiUsers size={14} /> {isOperatorUser ? "Assigned Companies" : "Associates"}</span>
+                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.assignedCompanies ?? 0) : Number(systemMetrics.totalAssociates ?? 0)).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiBox size={14} /> {isEmployeeUser ? "Assigned Products" : "Total Enquiries"}</span>
-                  <span className="font-semibold">{(isEmployeeUser ? Number(employeeMetrics.totalAssignedProducts ?? 0) : totalEnquiries).toLocaleString()}</span>
+                  <span className="text-default-500 flex items-center gap-2"><FiBox size={14} /> {isOperatorUser ? "Assigned Products" : "Total Enquiries"}</span>
+                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.totalAssignedProducts ?? 0) : totalEnquiries).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiTrendingUp size={14} /> {isEmployeeUser ? "Live Assigned Products" : "Live Rates"}</span>
-                  <span className="font-semibold">{(isEmployeeUser ? Number(employeeMetrics.liveAssignedProducts ?? 0) : Number(systemMetrics.totalLiveRates ?? 0)).toLocaleString()}</span>
+                  <span className="text-default-500 flex items-center gap-2"><FiTrendingUp size={14} /> {isOperatorUser ? "Live Assigned Products" : "Live Rates"}</span>
+                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.liveAssignedProducts ?? 0) : Number(systemMetrics.totalLiveRates ?? 0)).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiLayers size={14} /> {isEmployeeUser ? "Pending Assigned Enquiries" : "Converted Enquiries"}</span>
-                  <span className="font-semibold">{(isEmployeeUser ? Number(employeeMetrics.pendingAssignedEnquiries ?? 0) : convertedEnquiries).toLocaleString()}</span>
+                  <span className="text-default-500 flex items-center gap-2"><FiLayers size={14} /> {isOperatorUser ? "Pending Assigned Enquiries" : "Converted Enquiries"}</span>
+                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.pendingAssignedEnquiries ?? 0) : convertedEnquiries).toLocaleString()}</span>
                 </div>
               </CardBody>
             </Card>
@@ -701,7 +701,7 @@ const Dashboard: NextPage = () => {
         </div>
       </div>
 
-      {(isAdmin || isAssociate || isEmployeeUser) && (
+      {(isAdmin || isAssociate || isOperatorUser) && (
         <Card className="border border-default-100 shadow-sm bg-content1/70">
           <CardHeader className="flex items-center justify-between gap-3">
             <div>
@@ -719,14 +719,14 @@ const Dashboard: NextPage = () => {
         </Card>
       )}
 
-      {isEmployeeUser && (
+      {isOperatorUser && (
         <Card className="border border-default-100 shadow-sm bg-content1/70">
           <CardHeader>
             <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
           </CardHeader>
           <Divider />
           <CardBody>
-            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedBy: user.id }} hideAdd={true} />
+            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user.id }} hideAdd={true} />
           </CardBody>
         </Card>
       )}

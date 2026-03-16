@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, inventoryRoutes, inventoryReservationRoutes } from "@/core/api/apiRoutes";
 import {
     Card,
     CardBody,
@@ -30,19 +30,10 @@ import {
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone } from "react-icons/fi";
+import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList } from "react-icons/fi";
 import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
-
-const STATUS_STEPS = [
-    "Pending",
-    "Supplier Accepted",
-    "Buyer Confirmed",
-    "Execution Plan Finalized",
-    "Converted",
-    "Completed",
-];
 
 type ResponsibilityPlan = {
     procurementBy: "buyer" | "seller" | "obaol" | "";
@@ -126,12 +117,26 @@ export default function EnquiryDetailsPage() {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [conversionNote, setConversionNote] = useState("");
     const { user } = useContext(AuthContext);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+    const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
     const [commitUntil, setCommitUntil] = useState<string>("");
     const [buyerSpecification, setBuyerSpecification] = useState<string>("");
     const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
     const [specSavedAt, setSpecSavedAt] = useState<string>("");
     const [responsibilitySavedAt, setResponsibilitySavedAt] = useState<string>("");
+    const [workflowStage, setWorkflowStage] = useState<string>("INQUIRY_CREATED");
+    const [inventoryAcceptOpen, setInventoryAcceptOpen] = useState(false);
+    const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
+    const [isAddingNewInventory, setIsAddingNewInventory] = useState(false);
+    const [inlineWarehouseName, setInlineWarehouseName] = useState("");
+    const [inlineQuantity, setInlineQuantity] = useState("");
+    const [inlineStateId, setInlineStateId] = useState<string>("");
+    const [inlineDistrictId, setInlineDistrictId] = useState<string>("");
+    const [acceptAttempted, setAcceptAttempted] = useState(false);
+    const [docActionOpen, setDocActionOpen] = useState(false);
+    const [docActionRule, setDocActionRule] = useState<any>(null);
+    const [docActionFileUrl, setDocActionFileUrl] = useState("");
+    const [reopenRequestOpen, setReopenRequestOpen] = useState(false);
+    const [reopenReason, setReopenReason] = useState("");
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
         tradeType: "DOMESTIC",
         originCountry: "",
@@ -167,10 +172,24 @@ export default function EnquiryDetailsPage() {
         queryFn: () => getData(`${apiRoutes.enquiry.getAll}/${id}`),
         select: (res) => res?.data?.data,
     });
-    const { data: employees } = useQuery({
-        queryKey: ["employees"],
-        queryFn: () => getData(apiRoutes.employee.getAll),
-        enabled: !!user && (user.role === "Admin" || user.role === "Employee"),
+    const { data: quotationResponse } = useQuery({
+        queryKey: ["trade-documents", id],
+        queryFn: () => getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 20, enquiryId: id, type: "QUOTATION" }),
+        enabled: Boolean(id),
+    });
+    const { data: enquiryRulesResponse } = useQuery({
+        queryKey: ["enquiry-rules"],
+        queryFn: () => getData(apiRoutes.enquiryRules.list),
+    });
+    const quotationRows = Array.isArray(quotationResponse?.data?.data?.data)
+        ? quotationResponse?.data?.data?.data
+        : (quotationResponse?.data?.data || []);
+    const quotationDoc = quotationRows?.[0] || null;
+    const quotationId = quotationDoc?._id || null;
+    const { data: operators } = useQuery({
+        queryKey: ["operators"],
+        queryFn: () => getData(apiRoutes.operator.getAll),
+        enabled: !!user && (user.role === "Admin" || user.role === "Operator" || user.role === "Team"),
         select: (res) => {
             const raw = res?.data;
             if (Array.isArray(raw)) return raw;
@@ -188,6 +207,38 @@ export default function EnquiryDetailsPage() {
         queryFn: () => getData(`/variant-rates/${variantRateId}`),
         select: (res) => res?.data?.data,
         enabled: !!variantRateId,
+    });
+    const sellerCompanyId =
+        (enquiry as any)?.sellerAssociateId?.associateCompany?._id ||
+        (enquiry as any)?.sellerAssociateId?.associateCompany ||
+        (enquiry as any)?.sellerAssociateCompanyId ||
+        null;
+    const productVariantId =
+        (enquiry as any)?.variantRateId?.productVariant?._id ||
+        (enquiry as any)?.variantRateId?.productVariant ||
+        (enquiry as any)?.productVariant?._id ||
+        (enquiry as any)?.productVariant ||
+        null;
+    const { data: sellerInventoryResponse } = useQuery({
+        queryKey: ["seller-inventories", sellerCompanyId, productVariantId],
+        queryFn: () =>
+            getData(inventoryRoutes.getAll, {
+                associateCompany: sellerCompanyId,
+                productVariant: productVariantId,
+                limit: 200,
+            }),
+        enabled: Boolean(sellerCompanyId && productVariantId),
+    });
+    const { data: sellerReservationResponse } = useQuery({
+        queryKey: ["seller-reservations", sellerCompanyId, productVariantId],
+        queryFn: () =>
+            getData(inventoryReservationRoutes.getAll, {
+                associateCompany: sellerCompanyId,
+                productVariant: productVariantId,
+                status: "RESERVED",
+                limit: 200,
+            }),
+        enabled: Boolean(sellerCompanyId && productVariantId),
     });
     const productNameLabel = getProductDisplayName(enquiry);
     const variantNameLabel = getVariantDisplayName(enquiry, liveRate);
@@ -227,6 +278,15 @@ export default function EnquiryDetailsPage() {
             }),
         enabled: executionContext.tradeType === "INTERNATIONAL" && Boolean(executionContext.destinationCountry),
     });
+    const { data: docRulesResponse } = useQuery({
+        queryKey: ["document-rules"],
+        queryFn: () => getData(apiRoutes.documentRules.list),
+    });
+    const { data: enquiryDocsResponse } = useQuery({
+        queryKey: ["trade-documents", "enquiry", id],
+        queryFn: () => getData(apiRoutes.tradeDocuments.list, { enquiryId: id, page: 1, limit: 200 }),
+        enabled: Boolean(id),
+    });
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
     const enquiryPackagingSpecificationsValue = (enquiry as any)?.packagingSpecifications || "";
     useEffect(() => {
@@ -237,6 +297,13 @@ export default function EnquiryDetailsPage() {
     }, [enquiryPackagingSpecificationsValue]);
     useEffect(() => {
         if (!enquiry) return;
+        const fallbackStage = (() => {
+            if ((enquiry as any)?.order) return "ORDER_CONFIRMED";
+            if (enquiry?.buyerConfirmedAt) return "PURCHASE_ORDER_RECEIVED";
+            if (enquiry?.sellerAcceptedAt) return "QUOTATION_SUBMITTED";
+            return "INQUIRY_CREATED";
+        })();
+        setWorkflowStage(String((enquiry as any)?.workflowStage || fallbackStage));
         const savedPlan = (enquiry as any)?.responsibilityPlan || {};
         const savedCtx = (enquiry as any)?.executionContext || {};
         setResponsibilityPlan({
@@ -349,7 +416,7 @@ export default function EnquiryDetailsPage() {
         },
         onError: () => { toast.error("Failed to convert enquiry."); },
     });
-    const employeeOptions = Array.isArray(employees) ? employees : [];
+    const operatorOptions = Array.isArray(operators) ? operators : [];
     const countryRowsForCheck = Array.isArray(countriesResponse?.data?.data?.data)
         ? countriesResponse.data.data.data
         : Array.isArray(countriesResponse?.data?.data?.docs)
@@ -411,19 +478,19 @@ export default function EnquiryDetailsPage() {
     );
 
     // Update Status Mutation
-    const assignEmployeeMutation = useMutation({
+    const assignOperatorMutation = useMutation({
         mutationFn: async () => {
-            if (!selectedEmployeeId) return;
+            if (!selectedOperatorId) return;
             return patchData(`${apiRoutes.enquiry.getAll}/${id}/assign`, {
-                employeeId: selectedEmployeeId,
+                operatorId: selectedOperatorId,
             });
         },
         onSuccess: () => {
-            toast.success("Employee assigned successfully");
+            toast.success("Operator assigned successfully");
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
         },
         onError: () => {
-            toast.error("Failed to assign employee.");
+            toast.error("Failed to assign operator.");
         },
     });
 
@@ -444,14 +511,87 @@ export default function EnquiryDetailsPage() {
     });
 
     const sellerAcceptMutation = useMutation({
-        mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/seller-accept`, {}),
-        onSuccess: () => {
-            toast.success("Enquiry accepted by supplier.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        mutationFn: async () => {
+            // If adding new or updating existing inline
+            if (isAddingNewInventory || (selectedInventoryId && Number(inlineQuantity) > 0)) {
+                const qty = Number(inlineQuantity);
+
+                let targetInvId = selectedInventoryId;
+
+                // 1. Handle Inventory (Create or Update)
+                if (isAddingNewInventory) {
+                    if (!inlineWarehouseName) throw new Error("Warehouse name is required for new inventory.");
+                    if (!qty || qty <= 0) throw new Error("Please enter a valid quantity.");
+                    if (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)) {
+                        throw new Error("Please select state and district for the new warehouse.");
+                    }
+
+                    const invRes = await postData(inventoryRoutes.getAll, {
+                        productVariant: productVariantId,
+                        product: enquiry?.productVariant?.product?._id || enquiry?.productId?._id,
+                        associateCompany: sellerCompanyId,
+                        associate: (enquiry as any)?.sellerAssociateId?._id || (enquiry as any)?.sellerAssociateId,
+                        warehouseName: inlineWarehouseName,
+                        ...(inlineStateId && { state: inlineStateId }),
+                        ...(inlineDistrictId && { district: inlineDistrictId }),
+                        quantity: qty,
+                        unit: "MT",
+                    });
+                    targetInvId = (invRes as any)?.data?.data?._id || (invRes as any)?.data?._id;
+                } else if (selectedInventoryId && qty > 0) {
+                    const currentQty = Number(selectedInventory?.quantity || 0);
+                    await patchData(`${inventoryRoutes.getAll}/${selectedInventoryId}`, {
+                        quantity: currentQty + qty,
+                    });
+                }
+
+                if (!targetInvId) throw new Error("Failed to resolve inventory ID.");
+
+                // 2. Finally Accept with the target inventory
+                return patchData(`${apiRoutes.enquiry.getAll}/${id}/seller-accept`, {
+                    inventoryId: targetInvId,
+                });
+            }
+
+            // Normal flow: just accept with selected inventory
+            if (!selectedInventoryId) {
+                throw new Error("Select an inventory or add new stock to proceed.");
+            }
+            if (selectedInventory && (selectedInventory.availableQty || 0) < Number(enquiry?.quantity || 0)) {
+                throw new Error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
+            }
+            return patchData(`${apiRoutes.enquiry.getAll}/${id}/seller-accept`, {
+                inventoryId: selectedInventoryId,
+            });
         },
-        onError: () => {
-            toast.error("Failed to accept enquiry.");
+        onSuccess: () => {
+            toast.success("Enquiry accepted and inventory updated.");
+            setInventoryAcceptOpen(false);
+            setSelectedInventoryId("");
+            setIsAddingNewInventory(false);
+            setInlineQuantity("");
+            setInlineWarehouseName("");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
+            queryClient.invalidateQueries({ queryKey: ["variantRate", variantRateId] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to accept enquiry.");
+        },
+    });
+
+    const createQuotationMutation = useMutation({
+        mutationFn: async () => {
+            return postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
+        },
+        onSuccess: (res: any) => {
+            toast.success("Quotation created.");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
+            const createdId = res?.data?.data?._id;
+            if (createdId) router.push(`/dashboard/documents/${createdId}`);
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to create quotation.");
         },
     });
 
@@ -489,6 +629,17 @@ export default function EnquiryDetailsPage() {
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
         },
         onError: () => { toast.error("Failed to update status."); },
+    });
+    const updateWorkflowStageMutation = useMutation({
+        mutationFn: (stage: string) =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}/workflow-stage`, { workflowStage: stage }),
+        onSuccess: () => {
+            toast.success("Workflow stage updated.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to update workflow stage.");
+        },
     });
     const updateSpecificationMutation = useMutation({
         mutationFn: () => {
@@ -562,9 +713,97 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to save responsibility plan.");
         },
     });
+    const createDocMutation = useMutation({
+        mutationFn: async () => {
+            if (!docActionRule) throw new Error("No document rule selected.");
+            const payload: any = {
+                type: docActionRule.docType,
+                enquiryId: id,
+            };
+            if (String(docActionRule.actionType) === "UPLOAD") {
+                payload.fileUrl = docActionFileUrl;
+            }
+            return postData(apiRoutes.tradeDocuments.create, payload);
+        },
+        onSuccess: () => {
+            toast.success("Document created.");
+            setDocActionOpen(false);
+            setDocActionRule(null);
+            setDocActionFileUrl("");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to create document.");
+        },
+    });
+
+    const reopenRequestMutation = useMutation({
+        mutationFn: async () => {
+            if (!id) throw new Error("Missing enquiry id.");
+            const description = reopenReason.trim() || "Reopen enquiry request";
+            return postData(apiRoutes.organizationReports.create, {
+                reasonCode: "REOPEN_INQUIRY_REQUEST",
+                description,
+                payload: { inquiryId: id, note: description },
+            });
+        },
+        onSuccess: () => {
+            toast.success("Reopen request submitted for admin approval.");
+            setReopenRequestOpen(false);
+            setReopenReason("");
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to submit reopen request.");
+        },
+    });
 
     if (isLoading) return <div className="flex items-center justify-center h-screen"><Progress isIndeterminate className="max-w-md" /></div>;
     if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
+
+    const sellerInventoryRows = Array.isArray(sellerInventoryResponse?.data?.data?.data)
+        ? sellerInventoryResponse?.data?.data?.data
+        : (sellerInventoryResponse?.data?.data || []);
+    const sellerReservationRows = Array.isArray(sellerReservationResponse?.data?.data?.data)
+        ? sellerReservationResponse?.data?.data?.data
+        : (sellerReservationResponse?.data?.data || []);
+    const reservedByInventory = new Map<string, number>();
+    for (const reservation of sellerReservationRows || []) {
+        const invId = reservation.inventoryId?._id || reservation.inventoryId;
+        if (!invId) continue;
+        reservedByInventory.set(
+            String(invId),
+            (reservedByInventory.get(String(invId)) || 0) + Number(reservation.quantity || 0)
+        );
+    }
+    const inventoryOptions = (sellerInventoryRows || []).map((row: any) => {
+        const invId = row._id || row.id;
+        const reservedQty = reservedByInventory.get(String(invId)) || 0;
+        const totalQty = Number(row.quantity || 0);
+        const availableQty = Math.max(0, totalQty - reservedQty);
+        return {
+            ...row,
+            invId: String(invId || ""),
+            reservedQty,
+            availableQty,
+        };
+    });
+    const selectedInventory = inventoryOptions.find((row: any) => String(row.invId) === String(selectedInventoryId));
+    const requiredQty = Number(enquiry?.quantity || 0);
+    const addedQty = Number(inlineQuantity || 0);
+    const projectedAvailable = !isAddingNewInventory && selectedInventory
+        ? (selectedInventory.availableQty || 0) + (Number.isFinite(addedQty) ? addedQty : 0)
+        : (selectedInventory?.availableQty || 0);
+    const hasInsufficientStock = Boolean(!isAddingNewInventory && selectedInventory && requiredQty > projectedAvailable);
+    const shouldShowInsufficient = Boolean(acceptAttempted && hasInsufficientStock);
+
+    const handleInventoryAccept = () => {
+        setAcceptAttempted(true);
+        if (!isAddingNewInventory && hasInsufficientStock) {
+            toast.error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
+            return;
+        }
+        sellerAcceptMutation.mutate();
+    };
 
     const normalizedStatus = String(enquiry.status || "").toUpperCase();
     const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt);
@@ -584,31 +823,24 @@ export default function EnquiryDetailsPage() {
     const isCompletedFlow = normalizedStatus === "COMPLETED" || normalizedStatus === "CLOSED";
     const isConvertedFlow = normalizedStatus === "CONVERTED";
     const initialPlan = (enquiry as any)?.responsibilityPlan || {};
-    const currentStepIndex = (() => {
-        if (isCompletedFlow) return STATUS_STEPS.indexOf("Completed");
-        if (isConvertedFlow) return STATUS_STEPS.indexOf("Converted");
-        if (hasExecutionPlanReady) return STATUS_STEPS.indexOf("Execution Plan Finalized");
-        if (hasBuyerConfirmed) return STATUS_STEPS.indexOf("Buyer Confirmed");
-        if (hasSellerAccepted) return STATUS_STEPS.indexOf("Supplier Accepted");
-        return STATUS_STEPS.indexOf("Pending");
-    })();
-
-    // assignedEmployeeId may be an object or just an ID string; handle both safely
-    const assignedEmployeeObj = (enquiry.assignedEmployeeId && typeof enquiry.assignedEmployeeId === 'object') ? enquiry.assignedEmployeeId : null;
-    const assignedEmployeeName =
-        assignedEmployeeObj?.name ||
-        (enquiry as any)?.assignedEmployeeName ||
-        (typeof enquiry.assignedEmployeeId === "string" ? "Assigned team member" : "OBAOL Desk");
+    // assignedOperatorId may be an object or just an ID string; handle both safely
+    const assignedOperatorObj = (enquiry.assignedOperatorId && typeof enquiry.assignedOperatorId === 'object') ? enquiry.assignedOperatorId : null;
+    const assignedOperatorName =
+        assignedOperatorObj?.name ||
+        (enquiry as any)?.assignedOperatorName ||
+        (typeof enquiry.assignedOperatorId === "string" ? "Assigned operator" : "OBAOL Desk");
 
     // ─── Role Detection ───────────────────────────────────────────────────────
     const roleLower = String(user?.role || "").toLowerCase();
     const isSystemAdmin = roleLower === "admin";
-    const isEmployeeUser = roleLower === "employee" || roleLower === "team";
-    const assignedEmployeeId = (assignedEmployeeObj?._id || enquiry.assignedEmployeeId || "").toString();
-    const isAssignedEmployee = Boolean(isEmployeeUser && user?.id && assignedEmployeeId === String(user.id));
-    const isAdmin = isSystemAdmin || isAssignedEmployee;
-    const isEmployeeBlocked = Boolean(isEmployeeUser && !isAssignedEmployee);
-    if (isEmployeeBlocked) {
+    const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const canManageDocs = isSystemAdmin || isOperatorUser;
+    const canManageWorkflow = isSystemAdmin || isOperatorUser;
+    const assignedOperatorId = (assignedOperatorObj?._id || enquiry.assignedOperatorId || "").toString();
+    const isAssignedOperator = Boolean(isOperatorUser && user?.id && assignedOperatorId === String(user.id));
+    const isAdmin = isSystemAdmin || isAssignedOperator;
+    const isOperatorBlocked = Boolean(isOperatorUser && !isAssignedOperator);
+    if (isOperatorBlocked) {
         return (
             <div className="p-10 text-center">
                 <p className="text-lg font-semibold">Access restricted</p>
@@ -655,13 +887,63 @@ export default function EnquiryDetailsPage() {
         lastSeenLabel: formatLastSeen(sellerAssociateObj?.lastSeenAt),
     };
     const assignedPresence = {
-        online: isOnline(assignedEmployeeObj?.lastSeenAt),
-        status: getPresenceStatus(assignedEmployeeObj?.lastSeenAt),
-        lastSeenLabel: formatLastSeen(assignedEmployeeObj?.lastSeenAt),
+        online: isOnline(assignedOperatorObj?.lastSeenAt),
+        status: getPresenceStatus(assignedOperatorObj?.lastSeenAt),
+        lastSeenLabel: formatLastSeen(assignedOperatorObj?.lastSeenAt),
     };
     const userIdStr = user?.id?.toString();
     const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
+
+    const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+    const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data) ? enquiryRulesResponse.data.data : [];
+    const docsForEnquiry = Array.isArray(enquiryDocsResponse?.data?.data?.data)
+        ? enquiryDocsResponse?.data?.data?.data
+        : (enquiryDocsResponse?.data?.data || []);
+    const rulesForStage = docRules
+        .filter((r: any) =>
+            String(r.stageType) === "INQUIRY" &&
+            String(r.stageKey) === workflowStage &&
+            r.isActive !== false &&
+            (r.tradeType === "BOTH" || r.tradeType === executionContext.tradeType)
+        )
+        .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+    const canSeeRule = (rule: any) => {
+        const visibility = String(rule.visibility || "BOTH");
+        if (isAdmin || isOperatorUser) return true;
+        if (visibility === "INTERNAL") return false;
+        if (visibility === "BOTH") return true;
+        if (visibility === "BUYER") return Boolean(isBuyer);
+        if (visibility === "SELLER") return Boolean(isSeller);
+        return false;
+    };
+    const canActOnRule = (rule: any) => {
+        if (isAdmin || isOperatorUser) return true;
+        const roleKey = String(rule.responsibleRole || "");
+        if (roleKey === "BUYER") return Boolean(isBuyer);
+        if (roleKey === "SELLER") return Boolean(isSeller);
+        return false;
+    };
+    const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === workflowStage);
+    const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
+    const actionStatus = {
+        SUPPLIER_ACCEPTED: Boolean(enquiry?.sellerAcceptedAt),
+        BUYER_CONFIRMED: Boolean(enquiry?.buyerConfirmedAt),
+        RESPONSIBILITIES_FINALIZED: Boolean((enquiry as any)?.responsibilitiesFinalizedAt),
+    };
+    const sortedEnquiryStages = enquiryRules
+        .filter((r: any) => r?.isActive !== false)
+        .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+        .map((r: any) => String(r.stageKey || "").toUpperCase())
+        .filter(Boolean);
+    const stageLabelMap = new Map(
+        enquiryRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
+    );
+    const workflowStageOptions = sortedEnquiryStages.length > 0
+        ? sortedEnquiryStages
+        : ["INQUIRY_CREATED", "QUOTATION_SUBMITTED", "QUOTATION_REVISED", "PROFORMA_ISSUED", "PURCHASE_ORDER_RECEIVED", "ORDER_CONFIRMED"];
+    const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
+    const hasDocType = (type: string) => (docsForEnquiry || []).some((doc: any) => String(doc?.type || "") === type);
     const waitingMessage = (() => {
         if (isCancelled) return "This enquiry was cancelled.";
         if (isCompletedFlow) return "This enquiry is completed.";
@@ -792,6 +1074,7 @@ export default function EnquiryDetailsPage() {
     const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
     const originDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.originState);
     const destinationDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.destinationState);
+    const inlineDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === inlineStateId);
     const originPortOptions = originSeaPorts;
     const destinationPortOptions = destinationSeaPorts;
     const preferredIncoterm = (() => {
@@ -835,6 +1118,27 @@ export default function EnquiryDetailsPage() {
 
     return (
         <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0">
+            <div className="flex justify-start">
+                <Button variant="light" onPress={() => router.back()}>
+                    Back
+                </Button>
+            </div>
+            {isCancelled && (
+                <Card className="border border-danger-400/30 bg-danger-500/10 shadow-sm">
+                    <CardBody className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                        <div>
+                            <div className="font-semibold text-danger-700">Enquiry cancelled</div>
+                            <div className="text-sm text-default-500">This enquiry is closed. You can request a reopen for admin review.</div>
+                        </div>
+                        {(isBuyer || isSeller || isMediator || isAdmin) && (
+                            <Button color="danger" variant="flat" onPress={() => setReopenRequestOpen(true)}>
+                                Request Reopen
+                            </Button>
+                        )}
+                    </CardBody>
+                </Card>
+            )}
+            <div className={isCancelled ? "opacity-60 pointer-events-none" : ""}>
             {/* Header & Status */}
             <Card className="w-full shadow-md border-none bg-gradient-to-r from-content1 to-default-50">
                 <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 md:px-6 py-4 md:py-6">
@@ -855,13 +1159,34 @@ export default function EnquiryDetailsPage() {
 
                     {/* Role-based action buttons */}
                     <div className="flex flex-wrap gap-2 w-full md:w-auto md:justify-end">
+                        {quotationId && (
+                            <Button
+                                color="secondary"
+                                variant="flat"
+                                className="w-full sm:w-auto"
+                                onPress={() => router.push(`/dashboard/documents/${quotationId}`)}
+                            >
+                                View Quotation
+                            </Button>
+                        )}
+                        {!quotationId && canManageDocs && enquiry.sellerAcceptedAt && (
+                            <Button
+                                color="secondary"
+                                variant="flat"
+                                className="w-full sm:w-auto"
+                                isLoading={createQuotationMutation.isPending}
+                                onPress={() => createQuotationMutation.mutate()}
+                            >
+                                Create Quotation
+                            </Button>
+                        )}
                         {isSeller && !enquiry.sellerAcceptedAt && (
                             <Button
                                 color="success"
                                 variant="flat"
                                 className="w-full sm:w-auto"
                                 isLoading={sellerAcceptMutation.isPending}
-                                onPress={() => sellerAcceptMutation.mutate()}
+                                onPress={() => setInventoryAcceptOpen(true)}
                             >
                                 Accept Enquiry
                             </Button>
@@ -883,7 +1208,7 @@ export default function EnquiryDetailsPage() {
                                 variant="flat"
                                 className="w-full sm:w-auto"
                                 isLoading={sellerAcceptMutation.isPending}
-                                onPress={() => sellerAcceptMutation.mutate()}
+                                onPress={() => setInventoryAcceptOpen(true)}
                             >
                                 Supplier Accept
                             </Button>
@@ -949,6 +1274,17 @@ export default function EnquiryDetailsPage() {
                             </>
                         )}
                     </div>
+
+                    <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
+                        <Chip size="sm" variant="flat">
+                            {workflowStage.replaceAll("_", " ")}
+                        </Chip>
+                        {(enquiry as any)?.order && (
+                            <Button size="sm" variant="flat" onPress={() => router.push(`/dashboard/orders/${(enquiry as any).order}`)}>
+                                View Order
+                            </Button>
+                        )}
+                    </div>
                 </CardHeader>
                 <Divider />
                 <CardBody className="px-4 md:px-6 py-6 md:py-10">
@@ -956,12 +1292,14 @@ export default function EnquiryDetailsPage() {
                     <Progress
                         size="sm"
                         radius="full"
-                        value={(currentStepIndex / (STATUS_STEPS.length - 1)) * 100}
+                        value={workflowStageOptions.length > 1
+                            ? (currentStepIndex / (workflowStageOptions.length - 1)) * 100
+                            : 0}
                         color={isCompletedFlow ? "success" : "primary"}
                         className="mb-4"
                     />
                     <div className="flex flex-wrap items-center gap-2 mb-5">
-                        {STATUS_STEPS.map((step, index) => {
+                        {workflowStageOptions.map((step, index) => {
                             const isCompleted = index < currentStepIndex;
                             const isCurrent = index === currentStepIndex;
                             return (
@@ -974,9 +1312,9 @@ export default function EnquiryDetailsPage() {
                                                 : "bg-default-100 text-default-500 border-default-200"
                                             }`}
                                     >
-                                        {step}
+                                        {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
                                     </div>
-                                    {index < STATUS_STEPS.length - 1 && (
+                                    {index < workflowStageOptions.length - 1 && (
                                         <span className="text-default-300 text-xs">→</span>
                                     )}
                                 </React.Fragment>
@@ -990,6 +1328,51 @@ export default function EnquiryDetailsPage() {
                         </div>
                         <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
                     </div>
+                </CardBody>
+            </Card>
+
+            <Card className="w-full shadow-sm border border-default-200/50">
+                <CardHeader className="flex flex-col gap-1 px-4 md:px-6 pt-4 md:pt-5">
+                    <span className="font-bold text-lg">Documentation Checklist</span>
+                    <span className="text-[10px] uppercase font-black tracking-wider text-default-400">
+                        Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
+                    </span>
+                </CardHeader>
+                <CardBody className="px-4 md:px-6 pb-4 md:pb-6">
+                    {rulesForStage.filter(canSeeRule).length === 0 ? (
+                        <div className="text-sm text-default-500">No documentation rules configured for this stage.</div>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {rulesForStage.filter(canSeeRule).map((rule: any) => {
+                                const hasDoc = hasDocType(String(rule.docType || ""));
+                                return (
+                                    <div key={rule._id} className="flex items-center justify-between gap-3 border border-default-200/60 rounded-lg px-3 py-2">
+                                        <div className="text-sm">
+                                            <span className="font-medium">{rule.docType}</span>
+                                            <span className="text-default-500"> • {rule.responsibleRole} • {rule.actionType}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Chip size="sm" variant="flat" color={hasDoc ? "success" : "warning"}>
+                                                {hasDoc ? "Uploaded" : "Pending"}
+                                            </Chip>
+                                            {!hasDoc && canActOnRule(rule) && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="flat"
+                                                    onPress={() => {
+                                                        setDocActionRule(rule);
+                                                        setDocActionOpen(true);
+                                                    }}
+                                                >
+                                                    {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </CardBody>
             </Card>
 
@@ -1619,12 +2002,12 @@ export default function EnquiryDetailsPage() {
                     <Divider className="my-2" />
                     <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
                         <div className="flex flex-col gap-1">
-                            <span className="text-[10px] uppercase font-bold text-default-400">Assigned Employee</span>
+                            <span className="text-[10px] uppercase font-bold text-default-400">Assigned Operator</span>
                             <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${assignedEmployeeName === "OBAOL Desk" ? "bg-default-400" : assignedPresence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
-                                <span className={`font-bold ${assignedEmployeeName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedEmployeeName}</span>
+                                <div className={`w-2 h-2 rounded-full ${assignedOperatorName === "OBAOL Desk" ? "bg-default-400" : assignedPresence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
+                                <span className={`font-bold ${assignedOperatorName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedOperatorName}</span>
                             </div>
-                            {assignedEmployeeName !== "OBAOL Desk" && (
+                            {assignedOperatorName !== "OBAOL Desk" && (
                                 <span className={`text-xs ${assignedPresence.online ? "text-success-600" : "text-default-500"}`}>
                                     {assignedPresence.online ? "Online" : `Last seen ${assignedPresence.lastSeenLabel}`}
                                 </span>
@@ -1632,19 +2015,19 @@ export default function EnquiryDetailsPage() {
                         </div>
                         {isAdmin && (
                             <div className="flex flex-col gap-2">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Assign / Reassign Employee</span>
+                                <span className="text-[10px] uppercase font-bold text-default-400">Assign / Reassign Operator</span>
                                 <div className="flex gap-2">
                                     <Select
                                         size="sm"
-                                        selectedKeys={selectedEmployeeId ? [selectedEmployeeId] : []}
+                                        selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
                                         onSelectionChange={(keys) => {
                                             const arr = Array.from(keys as Set<string>);
-                                            setSelectedEmployeeId(arr[0] || "");
+                                            setSelectedOperatorId(arr[0] || "");
                                         }}
                                         className="flex-1"
-                                        placeholder="Select employee"
+                                        placeholder="Select operator"
                                     >
-                                        {employeeOptions.map((emp: any) => (
+                                        {operatorOptions.map((emp: any) => (
                                             <SelectItem key={emp._id} value={emp._id}>
                                                 {emp.name || emp.firstName || emp.email}
                                             </SelectItem>
@@ -1653,9 +2036,9 @@ export default function EnquiryDetailsPage() {
                                     <Button
                                         size="sm"
                                         color="primary"
-                                        isLoading={assignEmployeeMutation.isPending}
-                                        onPress={() => assignEmployeeMutation.mutate()}
-                                        isDisabled={!selectedEmployeeId}
+                                        isLoading={assignOperatorMutation.isPending}
+                                        onPress={() => assignOperatorMutation.mutate()}
+                                        isDisabled={!selectedOperatorId}
                                     >
                                         Save
                                     </Button>
@@ -1703,6 +2086,199 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
             </div >
+
+            </div>
+
+            <Modal
+                isOpen={inventoryAcceptOpen}
+                onOpenChange={(open) => {
+                    setInventoryAcceptOpen(open);
+                    if (!open) setSelectedInventoryId("");
+                    if (!open) {
+                        setAcceptAttempted(false);
+                        setInlineQuantity("");
+                        setInlineWarehouseName("");
+                        setInlineStateId("");
+                        setInlineDistrictId("");
+                    }
+                }}
+                isDismissable={false}
+                isKeyboardDismissDisabled
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">Select Inventory for Supplier Acceptance</ModalHeader>
+                    <ModalBody>
+                        <div className="flex flex-col gap-4">
+                            <div className="text-sm text-default-500">
+                                Reserve <span className="font-semibold text-foreground">{enquiry?.quantity || 0} MT</span> from the selected warehouse.
+                            </div>
+                            <div className="rounded-lg border border-default-200/60 bg-default-50/60 px-3 py-2 text-xs text-default-500">
+                                This inventory and location information is <span className="font-semibold">not visible to the buyer</span>. It is used only for internal documentation and fulfillment.
+                            </div>
+
+                            {inventoryOptions.length > 0 ? (
+                                <div className="flex gap-2 p-1 bg-default-100 rounded-xl overflow-hidden">
+                                    <Button
+                                        size="sm"
+                                        variant={!isAddingNewInventory ? "solid" : "light"}
+                                        color={!isAddingNewInventory ? "primary" : "default"}
+                                        className="flex-1 font-bold h-8"
+                                        onPress={() => {
+                                            setIsAddingNewInventory(false);
+                                            setAcceptAttempted(false);
+                                        }}
+                                        data-sound="tab"
+                                        startContent={<FiList size={14} />}
+                                    >
+                                        Existing
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={isAddingNewInventory ? "solid" : "light"}
+                                        color={isAddingNewInventory ? "primary" : "default"}
+                                        className="flex-1 font-bold h-8"
+                                        onPress={() => {
+                                            setIsAddingNewInventory(true);
+                                            setAcceptAttempted(false);
+                                        }}
+                                        data-sound="tab"
+                                        startContent={<FiPlus size={14} />}
+                                    >
+                                        New Stock
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
+                                    No existing inventory found. Please add a new warehouse and stock below.
+                                </div>
+                            )}
+
+                            {!isAddingNewInventory && inventoryOptions.length > 0 ? (
+                                <>
+                                    <Select
+                                        label="Select Warehouse"
+                                        placeholder="Choose inventory"
+                                        selectedKeys={selectedInventoryId ? new Set([selectedInventoryId]) : new Set()}
+                                        renderValue={(items) => {
+                                            const item = items?.[0];
+                                            const data = (item as any)?.data as any;
+                                            if (!data) return "Choose inventory";
+                                            const name = data.warehouseName || "Warehouse";
+                                            return `${name} • ${data.availableQty} MT available`;
+                                        }}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            const id = arr[0] || "";
+                                            setSelectedInventoryId(id);
+                                            setInlineQuantity("");
+                                            setAcceptAttempted(false);
+                                        }}
+                                    >
+                                        {inventoryOptions.map((row: any) => (
+                                            <SelectItem
+                                                key={row.invId}
+                                                value={row.invId}
+                                                isDisabled={row.availableQty <= 0}
+                                                textValue={row.warehouseName || "Warehouse"}
+                                            >
+                                                {row.warehouseName || "Warehouse"} • {row.availableQty} MT available
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </>
+                            ) : (
+                                <>
+                                    <Input
+                                        label="Warehouse Name"
+                                        placeholder="Enter warehouse name"
+                                        value={inlineWarehouseName}
+                                        onValueChange={setInlineWarehouseName}
+                                        variant="bordered"
+                                    />
+                                    {inventoryOptions.length === 0 && (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Select
+                                                label="State"
+                                                placeholder="Select state"
+                                                selectedKeys={inlineStateId ? new Set([inlineStateId]) : new Set()}
+                                                onSelectionChange={(keys) => {
+                                                    const arr = Array.from(keys as Set<string>);
+                                                    const id = arr[0] || "";
+                                                    setInlineStateId(id);
+                                                    setInlineDistrictId("");
+                                                }}
+                                            >
+                                                {states.map((item: any) => (
+                                                    <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
+                                                        {item?.name || item?.stateName || "State"}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Select
+                                                label="District"
+                                                placeholder="Select district"
+                                                selectedKeys={inlineDistrictId ? new Set([inlineDistrictId]) : new Set()}
+                                                onSelectionChange={(keys) => {
+                                                    const arr = Array.from(keys as Set<string>);
+                                                    const id = arr[0] || "";
+                                                    setInlineDistrictId(id);
+                                                }}
+                                                isDisabled={!inlineStateId}
+                                            >
+                                                {inlineDistrictOptions.map((item: any) => (
+                                                    <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
+                                                        {item?.name || item?.districtName || "District"}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <Input
+                                    label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
+                                    type="number"
+                                    placeholder="0"
+                                    value={inlineQuantity}
+                                    onValueChange={setInlineQuantity}
+                                    variant="bordered"
+                                />
+                            </div>
+
+                        {selectedInventory && !isAddingNewInventory && (
+                            <div className="text-[10px] text-default-400 uppercase font-black px-1">
+                                Current Stock: {selectedInventory.availableQty} MT available • {selectedInventory.reservedQty} MT reserved • {selectedInventory.quantity} MT total
+                            </div>
+                        )}
+                            {shouldShowInsufficient && (
+                                <div className="text-xs text-danger-600 font-semibold px-1">
+                                    Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.
+                                </div>
+                            )}
+                        </div>
+                    </ModalBody>
+                    <ModalFooter className="border-t border-divider">
+                        <Button variant="light" onPress={() => setInventoryAcceptOpen(false)}>
+                            Cancel
+                        </Button>
+                            <Button
+                                color="success"
+                                className="font-bold"
+                                onPress={handleInventoryAccept}
+                                isLoading={sellerAcceptMutation.isPending}
+                                isDisabled={
+                                    isAddingNewInventory
+                                    ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
+                                    : (!selectedInventoryId)
+                                }
+                            >
+                            Save & Accept Enquiry
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
 
             {/* Conversion Modal */}
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -1760,6 +2336,83 @@ export default function EnquiryDetailsPage() {
                             </ModalFooter>
                         </>
                     )}
+                </ModalContent>
+            </Modal>
+
+            <Modal
+                isOpen={docActionOpen}
+                onOpenChange={setDocActionOpen}
+                isDismissable={false}
+                isKeyboardDismissDisabled
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
+                    </ModalHeader>
+                    <ModalBody>
+                        {String(docActionRule?.actionType || "") === "UPLOAD" && (
+                            <Input
+                                label="File URL"
+                                placeholder="https://..."
+                                value={docActionFileUrl}
+                                onChange={(e) => setDocActionFileUrl(e.target.value)}
+                            />
+                        )}
+                        <div className="text-xs text-default-500">
+                            {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
+                            Cancel
+                        </Button>
+                        <Button
+                            color="primary"
+                            onPress={() => createDocMutation.mutate()}
+                            isLoading={createDocMutation.isPending}
+                            isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
+                        >
+                            {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Modal
+                isOpen={reopenRequestOpen}
+                onOpenChange={(open) => {
+                    setReopenRequestOpen(open);
+                    if (!open) setReopenReason("");
+                }}
+                isDismissable={false}
+                isKeyboardDismissDisabled
+            >
+                <ModalContent>
+                    <ModalHeader>Request Reopen</ModalHeader>
+                    <ModalBody>
+                        <Textarea
+                            label="Reason (optional)"
+                            placeholder="Add a short reason for reopening this enquiry."
+                            minRows={3}
+                            value={reopenReason}
+                            onValueChange={setReopenReason}
+                        />
+                        <div className="text-xs text-default-500">
+                            This will be reviewed by admin. If approved, a new enquiry will be created.
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setReopenRequestOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            color="danger"
+                            onPress={() => reopenRequestMutation.mutate()}
+                            isLoading={reopenRequestMutation.isPending}
+                        >
+                            Submit Request
+                        </Button>
+                    </ModalFooter>
                 </ModalContent>
             </Modal>
         </div >

@@ -30,7 +30,7 @@ const STATUS_OPTIONS = [
 ] as const;
 type StatusFilter = (typeof STATUS_OPTIONS)[number];
 
-const ACTION_OPTIONS = ["NONE", "DEACTIVATE_ASSOCIATE", "REMOVE_FROM_COMPANY", "APPLY_COMPANY_INTERESTS"] as const;
+const ACTION_OPTIONS = ["NONE", "DEACTIVATE_ASSOCIATE", "REMOVE_FROM_COMPANY", "APPLY_COMPANY_INTERESTS", "REOPEN_INQUIRY_CREATE"] as const;
 type ActionType = (typeof ACTION_OPTIONS)[number];
 
 const formatDate = (value: unknown) => {
@@ -432,6 +432,12 @@ export default function ReportsPage() {
                     <span className="text-sm text-default-500">No requested interests provided.</span>
                   )}
                 </div>
+              </div>
+            ) : null}
+            {String(activeReport?.reasonCode || "").toUpperCase() === "REOPEN_INQUIRY_REQUEST" ? (
+              <div className="rounded-lg border border-warning-200/60 bg-warning-50/60 px-3 py-2 text-sm text-warning-800">
+                <div className="font-semibold">Reopen enquiry request</div>
+                <div className="text-xs mt-1">Inquiry ID: {String(activeReport?.payload?.inquiryId || "-")}</div>
               </div>
             ) : null}
             <Select

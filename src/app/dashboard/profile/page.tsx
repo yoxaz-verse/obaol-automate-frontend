@@ -28,16 +28,16 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase } from "react-icons/fi";
 
-function EmployeeDashboardPanel({ userId }: { userId: string }) {
+function OperatorDashboardPanel({ userId }: { userId: string }) {
   const { data: enquiryResponse } = useQuery({
-    queryKey: ["employeeEnquiries", userId],
-    queryFn: () => getData(apiRoutes.enquiry.getAll, { assignedEmployeeId: userId, limit: 200 }),
+    queryKey: ["operatorEnquiries", userId],
+    queryFn: () => getData(apiRoutes.enquiry.getAll, { assignedOperatorId: userId, limit: 200 }),
     enabled: !!userId,
   });
 
   const { data: companiesResponse } = useQuery({
-    queryKey: ["employeeCompanies", userId],
-    queryFn: () => getData(apiRoutes.researchedCompany.getAll, { submittedBy: userId, limit: 200 }),
+    queryKey: ["operatorCompanies", userId],
+    queryFn: () => getData(apiRoutes.researchedCompany.getAll, { submittedByOperator: userId, limit: 200 }),
     enabled: !!userId,
   });
 
@@ -130,7 +130,7 @@ const roleConfigs: Record<
     }[];
   }
 > = {
-  employee: {
+  operator: {
     groups: [
       {
         title: "Personal Information",
@@ -277,9 +277,18 @@ const getValue = (obj: any, path: string) =>
 
 export default function ProfilePage() {
   const { user } = useContext(AuthContext);
-  const roleKey = user?.role?.toLowerCase() as string;
+  const roleKeyRaw = user?.role?.toLowerCase() as string;
 
-  if (!roleKey) return null;
+  if (!roleKeyRaw) return null;
+
+  const roleKey =
+    roleKeyRaw === "operator" || roleKeyRaw === "team"
+      ? "operator"
+      : roleKeyRaw;
+  const displayRole =
+    roleKeyRaw === "operator" || roleKeyRaw === "team"
+      ? "OPERATOR"
+      : String(user?.role || "").toUpperCase();
 
   const config = roleConfigs[roleKey] || { groups: [] };
   const refetchData = () => { };
@@ -330,7 +339,7 @@ export default function ProfilePage() {
                             className="font-bold uppercase text-[10px]"
                             size="sm"
                           >
-                            {user?.role?.toUpperCase()}
+                            {displayRole}
                           </Chip>
                         </div>
                         <div className="flex justify-between items-center px-4">
@@ -461,7 +470,7 @@ export default function ProfilePage() {
                     ))}
                 </div>
               </div>
-              {roleKey === "employee" && <EmployeeDashboardPanel userId={user?.id} />}
+              {roleKey === "operator" && <OperatorDashboardPanel userId={user?.id} />}
             </div>
           );
         }}

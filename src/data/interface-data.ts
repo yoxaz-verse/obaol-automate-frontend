@@ -185,6 +185,8 @@ export interface AddModalProps {
   currentTable: string;
   formFields: FormField[];
   apiEndpoint: string;
+  refetchData?: () => void;
+  additionalVariable?: Record<string, any>;
   onSuccess?: (data?: any) => void; // callback when form successfully submits
 }
 

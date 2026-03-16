@@ -16,7 +16,7 @@ import {
   designationRoutes,
   districtRoutes,
   divisionRoutes,
-  employeeRoutes,
+  operatorRoutes,
   enquiryProcessStatusRoutes,
   generalIntentRoutes,
   incotermRoutes,
@@ -62,8 +62,8 @@ const getOptions = async (
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
-    if (lowerKey === "employee") {
-      const res = await getData(employeeRoutes.getAll, params);
+    if (lowerKey === "operator") {
+      const res = await getData(operatorRoutes.getAll, params);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 

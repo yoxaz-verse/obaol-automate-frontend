@@ -101,11 +101,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative">
+    <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative lg:h-screen">
       <PrivateRoute allowedRoles={allowedRoles}>
         <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
 
-        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 min-h-screen ${isCollapsed ? "md:ml-[80px]" : "md:ml-[280px]"}`}>
+        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${isCollapsed ? "md:ml-[72px]" : "md:ml-[240px]"}`}>
           <div className="w-full lg:h-screen overflow-hidden flex flex-col relative">
             {/* Check if user data is available before rendering TopBar */}
             {user && (

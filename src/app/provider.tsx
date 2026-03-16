@@ -4,6 +4,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { SoundProvider } from "@/context/SoundContext";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 export const queryClient = new QueryClient({
@@ -19,6 +20,7 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
@@ -28,7 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           defaultTheme="system"
           enableSystem={true}
         >
-          <CurrencyProvider>{children}</CurrencyProvider>
+          <SoundProvider>
+            <CurrencyProvider>{children}</CurrencyProvider>
+          </SoundProvider>
         </NextThemesProvider>
       </NextUIProvider>
       {process.env.NODE_ENV === "development" && (

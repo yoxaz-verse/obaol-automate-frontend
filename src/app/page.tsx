@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   title: "OBAOL Supreme | Commodity & Agro Trading Platform",
   description:
     "OBAOL is a verified commodity trading operating system. Securely trade agro commodities with integrated procurement, logistics, and trade execution.",
-  keywords: ["Agro Commodities", "Commodity Trading", "Supply Chain", "Procurement", "Trade Execution", "OBAOL", "Agriculture", "B2B Trading"],
+  keywords: [
+    "Agro Commodities", "Commodity Trading", "Supply Chain", "Procurement",
+    "Trade Execution", "OBAOL", "Agriculture", "B2B Trading",
+    "Verified Suppliers", "Agro Logistics India", "Commodity Sourcing"
+  ],
   authors: [{ name: "OBAOL Supreme" }],
   creator: "OBAOL Supreme",
   openGraph: {
@@ -28,12 +32,17 @@ export const metadata: Metadata = {
     title: "OBAOL Supreme | Commodity & Agro Trading Platform",
     description: "Secure, verified agro commodity trading system.",
     images: ["/logo.png"],
-    creator: "@obaol_supreme", // Placeholder if they have one, or remove
   },
-  metadataBase: new URL(BASE_URL), // Important for resolving social images
+  metadataBase: new URL(BASE_URL),
   alternates: {
     canonical: BASE_URL,
   },
+  other: {
+    "geo.region": "IN-MH",
+    "geo.placename": "Mumbai",
+    "geo.position": "19.0760;72.8777",
+    ICBM: "19.0760, 72.8777",
+  }
 };
 
 const webSiteJsonLd = {

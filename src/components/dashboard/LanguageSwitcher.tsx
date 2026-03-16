@@ -5,10 +5,12 @@ import { LuLanguages } from "react-icons/lu";
 import { languages, normalizeLanguageCode } from "@/data/languages";
 import { clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
 import { showToastMessage } from "@/utils/utils";
+import { useSoundEffect } from "@/context/SoundContext";
 
 export const LanguageSwitcher = () => {
   const [currentLang, setCurrentLang] = useState("en");
   const [isSwitching, setIsSwitching] = useState(false);
+  const { play } = useSoundEffect();
   const warningShownRef = useRef(false);
   const isSwitchingRef = useRef(false);
   const reloadTriggeredRef = useRef(false);
@@ -73,6 +75,7 @@ export const LanguageSwitcher = () => {
     warningShownRef.current = false;
     setIsSwitching(true);
     setCurrentLang(normalized);
+    play("language");
 
     const selectedLang = languages.find((lang) => lang.code === normalized);
     window.dispatchEvent(

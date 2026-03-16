@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardBody, CardFooter, Image, Button, Spinner, Chip } from "@heroui/react";
+import { Card, CardBody, CardFooter, Image, Button, Spinner, Chip } from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import Link from "next/link";

@@ -23,7 +23,7 @@ export default function OrdersPage() {
     const { play } = useSoundEffect();
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
-    const canUseDemo = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
+    const canUseDemo = roleLower === "admin";
 
     useEffect(() => {
         patchData(apiRoutes.notifications.markSectionRead("orders"), {}).catch(() => { });

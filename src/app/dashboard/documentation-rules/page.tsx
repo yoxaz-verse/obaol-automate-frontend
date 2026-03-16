@@ -98,6 +98,17 @@ export default function DocumentationRulesPage() {
     },
   });
 
+  const seedMutation = useMutation({
+    mutationFn: () => postData(`${apiRoutes.documentRules.seed}?force=true`, {}),
+    onSuccess: () => {
+      showToastMessage({ type: "success", message: "Default document rules restored.", position: "top-right" });
+      queryClient.invalidateQueries({ queryKey: ["document-rules"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to restore defaults.", position: "top-right" });
+    },
+  });
+
   const openCreate = () => {
     setEditing(null);
     setForm({
@@ -162,7 +173,12 @@ export default function DocumentationRulesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <Button color="primary" onPress={openCreate}>Add Rule</Button>
+            <div className="flex items-center gap-2">
+              <Button variant="flat" onPress={() => seedMutation.mutate()} isLoading={seedMutation.isPending}>
+                Restore Defaults
+              </Button>
+              <Button color="primary" onPress={openCreate}>Add Rule</Button>
+            </div>
           </div>
 
           <div className="rounded-xl border border-default-200/70 bg-content1/95 overflow-x-auto">

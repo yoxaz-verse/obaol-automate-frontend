@@ -414,7 +414,10 @@ export default function EnquiryDetailsPage() {
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
             router.push(`/dashboard/orders/${orderId}`);
         },
-        onError: () => { toast.error("Failed to convert enquiry."); },
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message || error?.message || "Failed to convert enquiry.";
+            toast.error(msg);
+        },
     });
     const operatorOptions = Array.isArray(operators) ? operators : [];
     const countryRowsForCheck = Array.isArray(countriesResponse?.data?.data?.data)
@@ -513,13 +516,13 @@ export default function EnquiryDetailsPage() {
     const sellerAcceptMutation = useMutation({
         mutationFn: async () => {
             // If adding new or updating existing inline
-            if (isAddingNewInventory || (selectedInventoryId && Number(inlineQuantity) > 0)) {
+            if (isAddingNewInventory || inventoryOptions.length === 0 || (selectedInventoryId && Number(inlineQuantity) > 0)) {
                 const qty = Number(inlineQuantity);
 
                 let targetInvId = selectedInventoryId;
 
                 // 1. Handle Inventory (Create or Update)
-                if (isAddingNewInventory) {
+                if (isAddingNewInventory || inventoryOptions.length === 0) {
                     if (!inlineWarehouseName) throw new Error("Warehouse name is required for new inventory.");
                     if (!qty || qty <= 0) throw new Error("Please enter a valid quantity.");
                     if (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)) {
@@ -2269,7 +2272,7 @@ export default function EnquiryDetailsPage() {
                                 onPress={handleInventoryAccept}
                                 isLoading={sellerAcceptMutation.isPending}
                                 isDisabled={
-                                    isAddingNewInventory
+                                    (isAddingNewInventory || inventoryOptions.length === 0)
                                     ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
                                     : (!selectedInventoryId)
                                 }

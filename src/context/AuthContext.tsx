@@ -36,6 +36,7 @@ interface LoginData {
   email: string;
   password: string;
   role: string;
+  rememberMe?: boolean;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -99,6 +100,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // Function to handle logout
   const logout = async () => {
     try {
+      try {
+        await postData("/logout", {});
+      } catch (logoutError) {
+        console.warn("Logout API call failed, continuing with local cleanup.", logoutError);
+      }
       // Clear authentication state
       setAuth({
         isAuthenticated: false,
@@ -108,9 +114,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       // Remove the token from localStorage
       localStorage.removeItem("currentUserToken");
+      sessionStorage.clear();
 
       // Redirect to the login page or another route
-      router.push("/auth");
+      router.replace("/auth");
+      router.refresh();
+      if (typeof window !== "undefined") {
+        window.location.href = "/auth";
+      }
     } catch (error) {
       console.error("Logout error:", error);
     }

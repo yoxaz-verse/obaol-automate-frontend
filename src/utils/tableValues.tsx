@@ -351,10 +351,10 @@ export const initialTableConfig: Record<
       key: "jobType",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("jobType"),
-      inForm: true,
-      inEdit: true,
-      inTable: true,
-      required: true,
+      inForm: false,
+      inEdit: false,
+      inTable: false,
+      required: false,
     },
     {
       label: "Job Role",
@@ -363,10 +363,10 @@ export const initialTableConfig: Record<
       key: "jobRole",
       values: [],
       dynamicValuesFn: () => fetchDependentOptions("jobRole"),
-      inForm: true,
-      inEdit: true,
-      inTable: true,
-      required: true,
+      inForm: false,
+      inEdit: false,
+      inTable: false,
+      required: false,
     },
     {
       label: "Mentor Operator",
@@ -379,16 +379,6 @@ export const initialTableConfig: Record<
       inEdit: true,
       inTable: false,
       required: false,
-    },
-
-    {
-      label: "Working Hours",
-      type: "multiTimeRange",
-      key: "workingHours",
-      inEdit: true,
-      inForm: true,
-      inTable: false,
-      required: true,
     },
 
     {

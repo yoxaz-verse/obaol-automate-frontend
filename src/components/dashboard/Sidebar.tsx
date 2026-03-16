@@ -30,6 +30,55 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
         const allowedRoles = routeRoles[option.link] || [];
         return user?.role ? allowedRoles.includes(user.role) : false;
     });
+    const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
+    const sidebarSections = [
+        {
+            label: "Core",
+            links: [
+                "/dashboard",
+                "/dashboard/enquiries",
+                "/dashboard/orders",
+                "/dashboard/product",
+                "/dashboard/marketplace",
+                "/dashboard/catalog",
+                "/dashboard/inventory",
+                "/dashboard/execution-enquiries",
+                "/dashboard/documents",
+                "/dashboard/news",
+            ],
+        },
+        {
+            label: "Manage",
+            links: [
+                "/dashboard/company",
+                "/dashboard/companyProduct",
+                "/dashboard/notifications",
+                "/dashboard/approvals",
+                "/dashboard/reports",
+                "/dashboard/profile",
+            ],
+        },
+        {
+            label: "Operator",
+            links: [
+                "/dashboard/operator/hierarchy",
+                "/dashboard/operator/team",
+                "/dashboard/operator/earnings",
+            ],
+        },
+        {
+            label: "Admin Tools",
+            links: [
+                "/dashboard/documentation-rules",
+                "/dashboard/documentation-preview",
+                "/dashboard/enquiry-rules",
+                "/dashboard/order-rules",
+                "/dashboard/users",
+                "/dashboard/essentials",
+                "/dashboard/geosphere",
+            ],
+        },
+    ];
 
     const { play } = useSoundEffect();
 
@@ -107,76 +156,85 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             </div>
 
             {/* Navigation Options */}
-            <div className="flex-1 px-3 py-2 space-y-1.5 overflow-y-auto no-scrollbar pb-6">
-                {filteredOptions.map((option, index) => {
-                    const isDashboardLink = option.link === "/dashboard";
-                    const isActive = isDashboardLink
-                        ? pathname === "/dashboard"
-                        : pathname === option.link || pathname.startsWith(`${option.link}/`);
+            <div className="flex-1 px-3 py-2 space-y-4 overflow-y-auto no-scrollbar pb-6">
+                {sidebarSections.map((section) => {
+                    const sectionOptions = section.links
+                        .map((link) => optionMap.get(link))
+                        .filter(Boolean) as typeof filteredOptions;
+                    if (sectionOptions.length === 0) return null;
 
-                    const isPendingItem = pendingLink === option.link;
-
-                    const hasDot = (dotMap[option.link] || 0) > 0;
-                    const content = (
-                        <Link
-                            key={index}
-                            href={option.link}
-                            onClick={(e) => handleOptionClick(e, option.link)}
-                            aria-busy={isPendingItem}
-                            className={`group relative flex items-center px-3 py-2.5 cursor-pointer rounded-lg transition-all duration-200 ${isActive
-                                    ? "bg-default-100/60 dark:bg-default-50/10 text-warning-600 dark:text-warning-400 font-semibold"
-                                    : isPendingItem
-                                        ? "bg-warning-500/5 text-warning-500/70"
-                                        : "text-default-500 hover:bg-default-100/50 hover:text-foreground font-medium"
-                                } ${isCollapsed ? "justify-center" : "gap-3.5"}`}
-                        >
-                            {/* Active Indicator Line */}
-                            {(isActive || isPendingItem) && (
-                                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-warning-500 rounded-r-full transition-all ${isPendingItem ? "opacity-50 animate-pulse h-3" : "opacity-100"}`} />
-                            )}
-
-                            {/* Icon */}
-                            <div
-                                className={`flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : isPendingItem ? "scale-100" : "group-hover:scale-110"
-                                    }`}
-                            >
-                                {/* Dynamically adjust icon size to be slightly smaller and elegant */}
-                                {React.cloneElement(option.icon as React.ReactElement, { size: 18 })}
-                            </div>
-
-                            {/* Label */}
+                    return (
+                        <div key={section.label} className="space-y-1.5">
                             {!isCollapsed && (
-                                <span className="text-[13px] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis leading-none flex-1 mt-0.5">
-                                    {option.name}
-                                </span>
+                                <div className="px-2 pt-1 text-[10px] uppercase tracking-[0.25em] text-default-400/80 font-semibold">
+                                    {section.label}
+                                </div>
                             )}
+                            {sectionOptions.map((option, index) => {
+                                const isDashboardLink = option.link === "/dashboard";
+                                const isActive = isDashboardLink
+                                    ? pathname === "/dashboard"
+                                    : pathname === option.link || pathname.startsWith(`${option.link}/`);
+                                const isPendingItem = pendingLink === option.link;
+                                const hasDot = (dotMap[option.link] || 0) > 0;
+                                const content = (
+                                    <Link
+                                        key={`${section.label}-${index}`}
+                                        href={option.link}
+                                        onClick={(e) => handleOptionClick(e, option.link)}
+                                        aria-busy={isPendingItem}
+                                        className={`group relative flex items-center px-3 py-2.5 cursor-pointer rounded-lg transition-all duration-200 ${isActive
+                                                ? "bg-default-100/60 dark:bg-default-50/10 text-warning-600 dark:text-warning-400 font-semibold"
+                                                : isPendingItem
+                                                    ? "bg-warning-500/5 text-warning-500/70"
+                                                    : "text-default-500 hover:bg-default-100/50 hover:text-foreground font-medium"
+                                            } ${isCollapsed ? "justify-center" : "gap-3.5"}`}
+                                    >
+                                        {(isActive || isPendingItem) && (
+                                            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-warning-500 rounded-r-full transition-all ${isPendingItem ? "opacity-50 animate-pulse h-3" : "opacity-100"}`} />
+                                        )}
 
-                            {hasDot && (
-                                <span
-                                    className={`ml-auto ${isCollapsed ? "absolute top-2 right-2" : ""} w-2 h-2 rounded-full bg-success-500`}
-                                />
-                            )}
+                                        <div
+                                            className={`flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : isPendingItem ? "scale-100" : "group-hover:scale-110"
+                                                }`}
+                                        >
+                                            {React.cloneElement(option.icon as React.ReactElement, { size: 18 })}
+                                        </div>
 
-                            {/* Loading Indicator */}
-                            {isPendingItem && !isCollapsed && (
-                                <span className="flex-shrink-0 inline-flex items-center gap-[2px]">
-                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
-                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:150ms]" />
-                                    <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:300ms]" />
-                                </span>
-                            )}
-                        </Link>
+                                        {!isCollapsed && (
+                                            <span className="text-[13px] tracking-tight whitespace-nowrap overflow-hidden text-ellipsis leading-none flex-1 mt-0.5">
+                                                {option.name}
+                                            </span>
+                                        )}
+
+                                        {hasDot && (
+                                            <span
+                                                className={`ml-auto ${isCollapsed ? "absolute top-2 right-2" : ""} w-2 h-2 rounded-full bg-success-500`}
+                                            />
+                                        )}
+
+                                        {isPendingItem && !isCollapsed && (
+                                            <span className="flex-shrink-0 inline-flex items-center gap-[2px]">
+                                                <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
+                                                <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:150ms]" />
+                                                <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse [animation-delay:300ms]" />
+                                            </span>
+                                        )}
+                                    </Link>
+                                );
+
+                                if (isCollapsed) {
+                                    return (
+                                        <Tooltip key={`${section.label}-${index}`} content={option.name} placement="right" color="default" closeDelay={0} showArrow={true} classNames={{ content: "text-xs font-medium px-2 py-1" }}>
+                                            {content}
+                                        </Tooltip>
+                                    );
+                                }
+
+                                return content;
+                            })}
+                        </div>
                     );
-
-                    if (isCollapsed) {
-                        return (
-                            <Tooltip key={index} content={option.name} placement="right" color="default" closeDelay={0} showArrow={true} classNames={{ content: "text-xs font-medium px-2 py-1" }}>
-                                {content}
-                            </Tooltip>
-                        );
-                    }
-
-                    return content;
                 })}
             </div>
 

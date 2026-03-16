@@ -17,8 +17,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
         obaol: "OBAOL Team",
     };
     // Extract data safely
-    const product = data.enquiry?.productVariant?.product?.name || "Product";
-    const variant = data.enquiry?.productVariant?.name || "Variant";
+    const product =
+        data.enquiry?.productVariant?.product?.name ||
+        data.enquiry?.product?.name ||
+        data.productVariant?.product?.name ||
+        data.product?.name ||
+        "Product";
+    const variant =
+        data.enquiry?.productVariant?.name ||
+        data.productVariant?.name ||
+        data.enquiry?.variantName ||
+        data.variantName ||
+        "Variant";
     const clientName = data.enquiry?.name || "Client";
     const company = data.enquiry?.associateCompany?.name || "Direct";
     const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "Recent";

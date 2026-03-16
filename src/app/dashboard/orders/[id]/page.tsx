@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -297,7 +297,7 @@ export default function OrderDetailsPage() {
     const orderTradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || (order as any)?.enquiry?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
     const isInternational = orderTradeType === "INTERNATIONAL";
     const isSchedulingFinalized = Boolean(milestones.schedulingFinalizedDate);
-    useEffect(() => {
+    React.useEffect(() => {
         if (planError && milestones.schedulingMode && milestones.schedulingFinalizedDate) {
             setPlanError("");
         }

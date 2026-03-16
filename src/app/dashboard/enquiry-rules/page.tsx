@@ -22,12 +22,17 @@ import { showToastMessage } from "@/utils/utils";
 import {
   DndContext,
   closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
   arrayMove,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -72,7 +77,7 @@ type DocRuleDraft = {
   isRequired: boolean;
 };
 
-function SortableCard({ rule, onEdit }: { rule: any; onEdit: (rule: any) => void }) {
+function SortableCard({ rule, onEdit, dragDisabled }: { rule: any; onEdit: (rule: any) => void; dragDisabled?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: rule._id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -91,7 +96,14 @@ function SortableCard({ rule, onEdit }: { rule: any; onEdit: (rule: any) => void
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="flat" onPress={() => onEdit(rule)}>Edit</Button>
-          <Button size="sm" variant="light" {...attributes} {...listeners}>
+          <Button
+            size="sm"
+            variant="light"
+            {...attributes}
+            {...listeners}
+            isDisabled={dragDisabled}
+            title={dragDisabled ? "Clear search to reorder" : "Drag to reorder"}
+          >
             Drag
           </Button>
         </div>
@@ -147,7 +159,31 @@ export default function EnquiryRulesPage() {
     queryKey: ["document-rules"],
     queryFn: () => getData(apiRoutes.documentRules.list),
   });
-  const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+
+  const actionUsage = useMemo(() => {
+    const used = new Set<string>();
+    rules.forEach((rule: any) => {
+      (rule.requiredActions || []).forEach((action: string) => {
+        used.add(String(action));
+      });
+    });
+    return ACTIONS.map((action) => ({
+      action,
+      used: used.has(action),
+    }));
+  }, [rules]);
+
+  const seedMutation = useMutation({
+    mutationFn: () => postData(`${apiRoutes.enquiryRules.seed}?force=true`, {}),
+    onSuccess: () => {
+      showToastMessage({ type: "success", message: "Default enquiry rules restored.", position: "top-right" });
+      queryClient.invalidateQueries({ queryKey: ["enquiry-rules"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to restore defaults.", position: "top-right" });
+    },
+  });
 
   const filteredRules = useMemo(() => {
     if (!search.trim()) return rules;
@@ -160,6 +196,13 @@ export default function EnquiryRulesPage() {
   const sortedRules = useMemo(() => {
     return [...rules].sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
   }, [rules]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const dragDisabled = Boolean(search.trim());
 
   const previewStage = useMemo(() => {
     if (!sortedRules.length) return null;
@@ -329,9 +372,10 @@ export default function EnquiryRulesPage() {
   const onDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = filteredRules.findIndex((r: any) => r._id === active.id);
-    const newIndex = filteredRules.findIndex((r: any) => r._id === over.id);
-    const reordered = arrayMove(filteredRules, oldIndex, newIndex);
+    if (dragDisabled) return;
+    const oldIndex = sortedRules.findIndex((r: any) => r._id === active.id);
+    const newIndex = sortedRules.findIndex((r: any) => r._id === over.id);
+    const reordered = arrayMove(sortedRules, oldIndex, newIndex);
     reordered.forEach((rule: any, idx: number) => {
       patchData(apiRoutes.enquiryRules.update(rule._id), { sortOrder: (idx + 1) * 10 });
     });
@@ -344,24 +388,44 @@ export default function EnquiryRulesPage() {
 
       <div className="mx-2 md:mx-6 mb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <Input
-              className="w-full md:w-80"
-              placeholder="Search stages"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+        <div className="rounded-xl border border-default-200/70 bg-content1/95 p-4">
+          <div className="text-xs font-semibold text-default-500 mb-2">Enquiry Actions</div>
+          <div className="flex flex-wrap gap-2">
+            {actionUsage.map(({ action, used }) => (
+              <Chip
+                key={action}
+                size="sm"
+                color={used ? "success" : "default"}
+                variant={used ? "flat" : "bordered"}
+              >
+                {action.replaceAll("_", " ")} · {used ? "Used" : "Not used"}
+              </Chip>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <Input
+            className="w-full md:w-80"
+            placeholder="Search stages"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="flex items-center gap-2">
+            <Button variant="flat" onPress={() => seedMutation.mutate()} isLoading={seedMutation.isPending}>
+              Restore Defaults
+            </Button>
             <Button color="primary" onPress={openCreate}>Add Stage</Button>
           </div>
+        </div>
 
-          <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={filteredRules.map((r: any) => r._id)} strategy={verticalListSortingStrategy}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={sortedRules.map((r: any) => r._id)} strategy={verticalListSortingStrategy}>
               <div className="grid grid-cols-1 gap-3">
                 {filteredRules.length === 0 ? (
                   <div className="rounded-xl border border-default-200/70 bg-content1/95 p-6 text-center text-default-500">No rules found.</div>
                 ) : (
                   filteredRules.map((rule: any) => (
-                    <SortableCard key={rule._id} rule={rule} onEdit={openEdit} />
+                    <SortableCard key={rule._id} rule={rule} onEdit={openEdit} dragDisabled={dragDisabled} />
                   ))
                 )}
               </div>

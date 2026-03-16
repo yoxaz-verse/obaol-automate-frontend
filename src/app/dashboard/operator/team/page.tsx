@@ -1,11 +1,12 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, CardBody, Input, Skeleton } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
-import { getData } from "@/core/api/apiHandler";
+import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { showToastMessage } from "@/utils/utils";
 
 type TeamRow = {
   operatorId: string;
@@ -105,6 +106,15 @@ export default function OperatorTeamPage() {
     refetchOnWindowFocus: false,
   });
 
+  const managerData = teamQuery.data?.data?.data?.manager || {};
+  const referralCode = String(managerData?.referralCode || "").trim();
+  const canRegenerateReferral = Boolean(operatorId) && (isAdmin || operatorId === selfOperatorId);
+  const referralLink = useMemo(() => {
+    if (!referralCode) return "";
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}/auth/operator/register?ref=${referralCode}`;
+  }, [referralCode]);
+
   const directTeam: TeamRow[] = useMemo(() => {
     const data = teamQuery.data?.data?.data || {};
     return Array.isArray(data.directTeam) ? data.directTeam : [];
@@ -185,6 +195,27 @@ export default function OperatorTeamPage() {
     () => enrichedRows.reduce((sum, row) => sum + toNumber(row.teamSize), 0),
     [enrichedRows]
   );
+
+  const queryClient = useQueryClient();
+  const regenerateMutation = useMutation({
+    mutationFn: async () => postData(apiRoutes.operatorHierarchy.referralRegenerate(operatorId), {}),
+    onSuccess: (response: any) => {
+      const nextCode = String(response?.data?.data?.referralCode || "").trim();
+      showToastMessage({
+        type: "success",
+        message: nextCode ? `New referral code: ${nextCode}` : "Referral code regenerated.",
+        position: "top-right",
+      });
+      queryClient.invalidateQueries({ queryKey: ["operator-team", operatorId] });
+    },
+    onError: (error: any) => {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Failed to regenerate referral code.",
+        position: "top-right",
+      });
+    },
+  });
 
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -327,6 +358,45 @@ export default function OperatorTeamPage() {
           </CardBody>
         </Card>
       ) : null}
+
+      <Card className="border border-default-200/80">
+        <CardBody className="gap-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-xs uppercase tracking-wide text-default-500">Referral Code</p>
+            <p className="text-lg font-semibold text-foreground">{referralCode || "Not available yet"}</p>
+            <p className="text-xs text-default-500">Invite operators to join your team using this code.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="flat"
+              isDisabled={!referralLink}
+              onPress={async () => {
+                if (!referralLink) return;
+                try {
+                  await navigator.clipboard.writeText(referralLink);
+                  showToastMessage({ type: "success", message: "Referral link copied.", position: "top-right" });
+                } catch (error) {
+                  showToastMessage({ type: "error", message: "Unable to copy referral link.", position: "top-right" });
+                }
+              }}
+            >
+              Copy Link
+            </Button>
+            {canRegenerateReferral ? (
+              <Button
+                size="sm"
+                color="warning"
+                variant="flat"
+                isLoading={regenerateMutation.isPending}
+                onPress={() => regenerateMutation.mutate()}
+              >
+                Regenerate
+              </Button>
+            ) : null}
+          </div>
+        </CardBody>
+      </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="border border-default-200/80">

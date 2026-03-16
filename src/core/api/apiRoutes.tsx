@@ -319,6 +319,7 @@ export const brandPublicRoutes = {
 export const operatorHierarchyRoutes = {
   leadership: (operatorId: string) => `/operators/leadership/${operatorId}`,
   team: (operatorId: string) => `/operators/team/${operatorId}`,
+  referralRegenerate: (operatorId: string) => `/operators/referral/regenerate/${operatorId}`,
 };
 
 export const commissionRoutes = {
@@ -393,18 +394,21 @@ export const apiRoutes = {
   documentRules: {
     list: `${BASE_PATHS.DOCUMENT_RULE}`,
     create: `${BASE_PATHS.DOCUMENT_RULE}`,
+    seed: `${BASE_PATHS.DOCUMENT_RULE}/seed`,
     update: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
   },
   enquiryRules: {
     list: `${BASE_PATHS.ENQUIRY_RULE}`,
     create: `${BASE_PATHS.ENQUIRY_RULE}`,
+    seed: `${BASE_PATHS.ENQUIRY_RULE}/seed`,
     update: (id: string) => `${BASE_PATHS.ENQUIRY_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.ENQUIRY_RULE}/${id}`,
   },
   orderRules: {
     list: `${BASE_PATHS.ORDER_RULE}`,
     create: `${BASE_PATHS.ORDER_RULE}`,
+    seed: `${BASE_PATHS.ORDER_RULE}/seed`,
     update: (id: string) => `${BASE_PATHS.ORDER_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.ORDER_RULE}/${id}`,
   },

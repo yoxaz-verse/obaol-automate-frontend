@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Input,
@@ -9,7 +9,7 @@ import {
   Textarea,
   Checkbox,
 } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import AuthLayout from "@/components/Auth/AuthLayout";
 import PhoneField from "@/components/form/PhoneField";
@@ -19,13 +19,6 @@ import { accountRoutes } from "@/core/api/apiRoutes";
 import axios from "axios";
 
 const EMPTY_LIST: any[] = [];
-
-const toTimePayload = (time: string) => {
-  const [hourRaw, minuteRaw] = String(time || "0:0").split(":");
-  const hour = Math.max(0, Math.min(23, Number(hourRaw || 0)));
-  const minute = Math.max(0, Math.min(59, Number(minuteRaw || 0)));
-  return { hour, minute, second: 0, millisecond: 0 };
-};
 
 export default function OperatorRegisterPage() {
   const router = useRouter();
@@ -39,16 +32,20 @@ export default function OperatorRegisterPage() {
     phoneNational: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
     address: "",
     state: "",
     district: "",
-    jobRole: "",
-    jobType: "",
     languageKnown: [] as string[],
     joiningDate: "",
-    workingStart: "09:00",
-    workingEnd: "18:00",
   });
+  const searchParams = useSearchParams();
+  const referralParam = String(searchParams?.get("ref") || "").trim();
+
+  useEffect(() => {
+    if (!referralParam) return;
+    setForm((prev) => (prev.referralCode ? prev : { ...prev, referralCode: referralParam.toUpperCase() }));
+  }, [referralParam]);
 
   const { data: optionsResponse, isLoading: optionsLoading } = useQuery({
     queryKey: ["operator-register-options"],
@@ -60,8 +57,6 @@ export default function OperatorRegisterPage() {
     },
   });
 
-  const jobRoles = Array.isArray(optionsResponse?.jobRoles) ? optionsResponse.jobRoles : EMPTY_LIST;
-  const jobTypes = Array.isArray(optionsResponse?.jobTypes) ? optionsResponse.jobTypes : EMPTY_LIST;
   const languages = Array.isArray(optionsResponse?.languages) ? optionsResponse.languages : EMPTY_LIST;
   const states = Array.isArray(optionsResponse?.states) ? optionsResponse.states : EMPTY_LIST;
   const districts = Array.isArray(optionsResponse?.districts) ? optionsResponse.districts : EMPTY_LIST;
@@ -81,7 +76,7 @@ export default function OperatorRegisterPage() {
       showToastMessage({ type: "error", message: "Passwords do not match.", position: "top-right" });
       return;
     }
-    if (!form.state || !form.district || !form.jobRole || !form.jobType || !form.joiningDate) {
+    if (!form.state || !form.district || !form.joiningDate) {
       showToastMessage({ type: "error", message: "Please complete all required selections.", position: "top-right" });
       return;
     }
@@ -101,19 +96,13 @@ export default function OperatorRegisterPage() {
         phoneCountryCode: phoneParsed.countryCode || form.phoneCountryCode,
         phoneNational: phoneParsed.national || form.phoneNational,
         password: form.password,
+        referralCode: form.referralCode ? form.referralCode.trim() : undefined,
         address: form.address,
         state: form.state,
         district: form.district,
-        jobRole: form.jobRole,
-        jobType: form.jobType,
         languageKnown: form.languageKnown,
         joiningDate: form.joiningDate,
-        workingHours: [
-          {
-            start: toTimePayload(form.workingStart),
-            end: toTimePayload(form.workingEnd),
-          },
-        ],
+        workingHours: [],
       };
 
       const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
@@ -185,9 +174,12 @@ export default function OperatorRegisterPage() {
             onValueChange={(v) => setForm({ ...form, confirmPassword: v })}
             isRequired
           />
+          <Input
+            label="Referral Code (optional)"
+            value={form.referralCode}
+            onValueChange={(v) => setForm({ ...form, referralCode: v.toUpperCase() })}
+          />
           <Input label="Joining Date" type="date" value={form.joiningDate} onValueChange={(v) => setForm({ ...form, joiningDate: v })} isRequired />
-          <Input label="Working Hours (Start)" type="time" value={form.workingStart} onValueChange={(v) => setForm({ ...form, workingStart: v })} isRequired />
-          <Input label="Working Hours (End)" type="time" value={form.workingEnd} onValueChange={(v) => setForm({ ...form, workingEnd: v })} isRequired />
         </div>
 
         <Textarea
@@ -218,28 +210,6 @@ export default function OperatorRegisterPage() {
             isDisabled={!form.state}
           >
             {filteredDistricts.map((item: any) => (
-              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Job Role"
-            selectedKeys={form.jobRole ? [form.jobRole] : []}
-            onSelectionChange={(keys) => setForm({ ...form, jobRole: String(Array.from(keys)[0] || "") })}
-            isRequired
-            isLoading={optionsLoading}
-          >
-            {jobRoles.map((item: any) => (
-              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Job Type"
-            selectedKeys={form.jobType ? [form.jobType] : []}
-            onSelectionChange={(keys) => setForm({ ...form, jobType: String(Array.from(keys)[0] || "") })}
-            isRequired
-            isLoading={optionsLoading}
-          >
-            {jobTypes.map((item: any) => (
               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
             ))}
           </Select>

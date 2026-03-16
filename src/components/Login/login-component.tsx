@@ -74,6 +74,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
       email: email,
       password: password,
       role: role,
+      rememberMe: rememberMe,
     };
 
     try {
@@ -155,23 +156,24 @@ const LoginComponent = ({ role }: ILoginProps) => {
     associate: {
       headline: "OBAOL",
       highlight: "ASSOCIATE NETWORK",
-      description: "Join a trusted structured agro commodity network with verified sourcing, inventory management, and execution support.",
+      description: "The Associate panel is designed for the core logistics and trading ecosystem participants.",
       points: [
-        "Verified Sourcing & Quality",
-        "Global Execution Panel for End-to-End Trade Coordination",
-        "Transportation, Packaging, and Procurement on One Platform",
+        "Company Owners & Manufacturers",
+        "Commodity Traders",
+        "Exporters & Importers",
+        "Ecosystem & Logistics Partners"
       ],
       footer: "Associate_Hub_Online"
     },
     operator: {
       headline: "OBAOL",
       highlight: "OPERATOR PORTAL",
-      description: "Access your associates, performance metrics, and operational resources efficiently.",
+      description: "Designed for internal operators, mediators, and individuals entering digital agro-trading.",
       points: [
-        "Associate Management",
-        "Personal Performance Metrics",
-        "Enquiry Management",
-        "Team and Hierarchy"
+        "Individuals starting digital agro-trading",
+        "Mediators dealing with multiple companies",
+        "Internal Operations & Team",
+        "New Entrants building their companies"
       ],
       footer: "Operator_Portal_v2"
     },
@@ -314,7 +316,27 @@ const LoginComponent = ({ role }: ILoginProps) => {
           }}
         />
 
-        <div className="flex justify-end items-center w-full px-1">
+        <div className="flex justify-between items-center w-full px-1">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative flex items-center">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="peer appearance-none w-5 h-5 rounded border-2 border-default-300 checked:border-warning-500 checked:bg-warning-500 transition-all cursor-pointer"
+              />
+              <svg
+                className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none left-0.5 top-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={4}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-sm text-default-500 group-hover:text-foreground transition-colors">Remember me</span>
+          </label>
           <p
             onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
             className="text-sm text-default-500 hover:text-foreground cursor-pointer transition-colors"

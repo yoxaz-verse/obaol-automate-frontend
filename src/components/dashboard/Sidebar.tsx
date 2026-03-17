@@ -34,22 +34,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
     const sidebarSections = [
         {
             label: "Core",
+            links: ["/dashboard"],
+        },
+        {
+            label: "Product",
             links: [
-                "/dashboard",
+                "/dashboard/product",
+                "/dashboard/catalog",
+                "/dashboard/marketplace",
+            ],
+        },
+        {
+            label: "Execution",
+            links: [
                 "/dashboard/enquiries",
                 "/dashboard/orders",
-                "/dashboard/product",
-                "/dashboard/marketplace",
-                "/dashboard/catalog",
-                "/dashboard/inventory",
                 "/dashboard/execution-enquiries",
                 "/dashboard/documents",
-                "/dashboard/news",
             ],
+        },
+        {
+            label: "News",
+            links: ["/dashboard/news"],
         },
         {
             label: "Manage",
             links: [
+                "/dashboard/inventory",
                 "/dashboard/company",
                 "/dashboard/companyProduct",
                 "/dashboard/notifications",

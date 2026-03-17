@@ -72,7 +72,7 @@ export const sidebarOptions = [
     link: "/dashboard/enquiries",
   },
   {
-    name: "Products", //Translate
+    name: "My Product", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
   },

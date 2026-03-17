@@ -38,7 +38,7 @@ export default function PhoneField({
   return (
     <div className={`w-full ${className || ""}`}>
       <div className="mb-1.5 text-sm font-medium text-foreground/90">{label}</div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[120px_minmax(0,1fr)]">
         <Autocomplete
           aria-label={`${label} country code`}
           size="sm"

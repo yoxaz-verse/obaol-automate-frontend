@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     try {
       try {
-        await postData("/logout", {});
+        await postData("/auth/logout", {});
       } catch (logoutError) {
         console.warn("Logout API call failed, continuing with local cleanup.", logoutError);
       }

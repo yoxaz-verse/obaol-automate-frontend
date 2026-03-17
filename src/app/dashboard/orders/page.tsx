@@ -183,7 +183,7 @@ export default function OrdersPage() {
                                                 }}
                                                 classNames={{
                                                     tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                                    cursor: "w-full bg-secondary h-[3px]",
+                                            cursor: "w-full bg-warning h-[3px]",
                                                     tab: "max-w-fit px-0 h-10",
                                                     tabContent: "group-data-[selected=true]:text-warning font-black uppercase tracking-widest text-[11px]"
                                                 }}
@@ -243,7 +243,7 @@ export default function OrdersPage() {
                                                             }}
                                                             action={
                                                                 <Button
-                                                                    className="bg-secondary text-white font-semibold shadow-md h-8 min-w-[96px] px-4 border border-secondary-600/60"
+                                                                className="bg-warning text-white font-semibold shadow-md h-8 min-w-[96px] px-4 border border-warning-600/60"
                                                                     size="sm"
                                                                     isLoading={navigatingId === String(orderId)}
                                                                     onPress={() => {
@@ -306,7 +306,7 @@ export default function OrdersPage() {
                             <ModalFooter>
                                 <Button variant="light" onPress={onClose}>Cancel</Button>
                                 <Button
-                                    className="bg-secondary text-white"
+                                    className="bg-warning text-white"
                                     isLoading={externalLoading}
                                     onPress={async () => {
                                         if (externalLoading) return;

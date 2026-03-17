@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import {
   Button,
   Input,
@@ -20,7 +20,7 @@ import axios from "axios";
 
 const EMPTY_LIST: any[] = [];
 
-export default function OperatorRegisterPage() {
+function OperatorRegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -245,5 +245,13 @@ export default function OperatorRegisterPage() {
         </Button>
       </form>
     </AuthLayout>
+  );
+}
+
+export default function OperatorRegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <OperatorRegisterForm />
+    </Suspense>
   );
 }

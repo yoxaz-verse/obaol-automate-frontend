@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Autocomplete, AutocompleteItem, Input } from "@nextui-org/react";
+import { Select, SelectItem, Input } from "@heroui/react";
 import { COMMON_DIAL_CODES, parsePhoneValue } from "@/utils/phone";
 
 type PhoneFieldProps = {
@@ -38,38 +38,38 @@ export default function PhoneField({
   return (
     <div className={`w-full ${className || ""}`}>
       <div className="mb-1.5 text-sm font-medium text-foreground/90">{label}</div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[120px_minmax(0,1fr)]">
-        <Autocomplete
+      <div className="flex w-full flex-col gap-2 md:flex-row md:items-start">
+        <Select
           aria-label={`${label} country code`}
           size="sm"
-          className="w-full"
+          className="w-full md:w-[68px]"
           classNames={{
-            base: "w-full",
-            selectorButton: "text-default-500",
-            listboxWrapper: "text-foreground",
-            popoverContent: "bg-content1 text-foreground",
+            base: "w-full md:w-[68px]",
+            trigger: "px-1.5 min-h-[32px] h-[32px] shadow-none bg-default-100/70", 
+            value: "text-[11px] font-bold text-center",
+            innerWrapper: "gap-0",
           }}
-          items={COMMON_DIAL_CODES}
-          selectedKey={parsed.countryCode || null}
+          selectedKeys={parsed.countryCode ? [parsed.countryCode] : []}
           isDisabled={disabled}
-          allowsCustomValue={false}
-          placeholder="Country code"
+          placeholder="+91"
           onSelectionChange={(keys) => {
-            const selected = String(keys || "+91");
+            const selected = String(Array.from(keys)[0] || "+91");
             onChange({
               countryCode: selected,
               national: parsed.national,
               e164: parsed.national ? `${selected}${parsed.national}` : "",
             });
           }}
+          disallowEmptySelection
+          selectionMode="single"
         >
-          {(item: any) => (
-            <AutocompleteItem key={item.key} textValue={item.value}>
-              {item.value}
-            </AutocompleteItem>
-          )}
-        </Autocomplete>
-        <div className="w-full">
+          {COMMON_DIAL_CODES.map((item) => (
+            <SelectItem key={item.key} textValue={item.key}>
+              <span className="text-xs">{item.value}</span>
+            </SelectItem>
+          ))}
+        </Select>
+        <div className="w-full flex-1">
           <Input
             aria-label={label}
             name={name}

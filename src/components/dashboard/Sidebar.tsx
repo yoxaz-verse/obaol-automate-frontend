@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = [
         {
-            label: "Core",
+            label: "",
             links: ["/dashboard"],
         },
         {
@@ -168,15 +168,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
 
             {/* Navigation Options */}
             <div className="flex-1 px-3 py-2 space-y-4 overflow-y-auto no-scrollbar pb-6">
-                {sidebarSections.map((section) => {
+                {sidebarSections.map((section, index) => {
                     const sectionOptions = section.links
                         .map((link) => optionMap.get(link))
                         .filter(Boolean) as typeof filteredOptions;
                     if (sectionOptions.length === 0) return null;
 
                     return (
-                        <div key={section.label} className="space-y-1.5">
-                            {!isCollapsed && (
+                        <div key={section.label || index} className="space-y-1.5">
+                            {!isCollapsed && section.label && (
                                 <div className="px-2 pt-1 text-[10px] uppercase tracking-[0.25em] text-default-400/80 font-semibold">
                                     {section.label}
                                 </div>

@@ -89,10 +89,10 @@ export default function Product() {
               variant="underlined"
               className="w-full"
               classNames={{
-                tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider flex-nowrap overflow-x-auto no-scrollbar",
-                cursor: "w-full bg-primary h-[3px]",
-                tab: "max-w-fit px-0 h-10 flex-shrink-0",
-                tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[11px]"
+                tabList: "gap-8 w-full relative rounded-none p-0 border-b border-divider/50 flex-nowrap overflow-x-auto no-scrollbar bg-transparent",
+                cursor: "w-full bg-warning-500 h-[2.5px] rounded-full shadow-[0_-2px_10px_rgba(245,158,11,0.3)]",
+                tab: "max-w-fit px-2 h-10 flex-shrink-0 transition-all duration-300",
+                tabContent: "group-data-[selected=true]:text-warning-500 font-black uppercase tracking-[0.15em] text-[10.5px] text-default-500 transition-colors"
               }}
             >
               {isAssociate ? (

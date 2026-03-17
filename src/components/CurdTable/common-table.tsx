@@ -13,6 +13,7 @@ import {
   Pagination,
   Spinner,
 } from "@heroui/react";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Image from "next/image";
 import EmptyState from "../ui/EmptyState";
 import { baseUrl } from "@/core/api/axiosInstance";
@@ -190,11 +191,30 @@ export default function CommonTable({
   }
 
   const isEmpty = !TableData || TableData.length === 0;
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+  const updateScrollState = React.useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    setCanScrollLeft(el.scrollLeft > 8);
+    setCanScrollRight(el.scrollLeft < maxScrollLeft - 8);
+  }, []);
+
+  React.useEffect(() => {
+    updateScrollState();
+  }, [items, updateScrollState]);
 
   return (
     <div className="group relative w-full min-w-0 max-w-full overflow-hidden">
       {!isEmpty ? (
-        <div className="scrollbar-gutter-stable w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2">
+        <div
+          ref={scrollRef}
+          onScroll={updateScrollState}
+          className="scrollbar-gutter-stable w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2"
+        >
           <Table
             {...({
               removeWrapper: true,
@@ -206,9 +226,42 @@ export default function CommonTable({
                 base: "w-full min-w-0 max-w-full",
                 wrapper: "p-0 bg-transparent shadow-none overflow-visible",
                 table: "w-max table-auto",
-                th: ["bg-default-100", "text-default-800", "font-bold", "text-[11px]", "uppercase", "tracking-wider", "border-b", "border-divider", "whitespace-nowrap", "min-w-[140px]"],
-                td: ["py-3", "align-middle", "text-sm", "whitespace-nowrap", "overflow-hidden", "min-w-[140px]"],
-                tr: ["hover:bg-default-50/50", "transition-colors", "cursor-default"],
+                th: [
+                  "bg-default-100/80",
+                  "dark:bg-default-100/20",
+                  "text-default-700",
+                  "dark:text-default-500", // Slightly dimmed uppercase headers
+                  "font-bold",
+                  "text-[11px]",
+                  "uppercase",
+                  "tracking-wider",
+                  "border-b",
+                  "border-divider",
+                  "whitespace-nowrap",
+                  "min-w-[140px]",
+                  "backdrop-blur-md", // Keep headers sharp
+                ],
+                td: [
+                  "py-4", // Slightly more breathing room
+                  "align-middle",
+                  "text-sm",
+                  "text-default-800",
+                  "dark:text-foreground", // High contrast text for body
+                  "whitespace-nowrap",
+                  "overflow-hidden",
+                  "min-w-[140px]",
+                  "border-b",
+                  "border-divider/50",
+                ],
+                tr: [
+                  "group/row",
+                  "hover:bg-default-50/50",
+                  "dark:hover:bg-default-100/10",
+                  "transition-colors",
+                  "cursor-default",
+                  "even:bg-default-50/30",
+                  "dark:even:bg-default-50/5",
+                ],
               }
             } as any)}
             style={{ minWidth: `${minTableWidthPx}px` }}
@@ -252,6 +305,30 @@ export default function CommonTable({
         <div className="w-full">
           {emptyContent || <EmptyState />}
         </div>
+      )}
+      {!isEmpty && (
+        <>
+          <button
+            type="button"
+            aria-label="Scroll table left"
+            onClick={() => scrollRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
+            className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full border border-default-200/70 bg-content1/90 backdrop-blur-md text-foreground shadow-sm transition ${
+              canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <FiChevronLeft className="mx-auto" />
+          </button>
+          <button
+            type="button"
+            aria-label="Scroll table right"
+            onClick={() => scrollRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full border border-default-200/70 bg-content1/90 backdrop-blur-md text-foreground shadow-sm transition ${
+              canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <FiChevronRight className="mx-auto" />
+          </button>
+        </>
       )}
       {!isEmpty && items.length > 0 && (
         <div className="flex w-full justify-center pt-2">

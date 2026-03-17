@@ -72,6 +72,7 @@ export default function CompanyProductPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty", "dormant"
   const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
+  const [companySearch, setCompanySearch] = useState<string>("");
   const [isAssigning, setIsAssigning] = useState(false);
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(null);
@@ -415,6 +416,12 @@ export default function CompanyProductPage() {
         : [];
     let allCompanies: Company[] = rawCompanies || [];
     const allOperators: any[] = operatorData?.data?.data?.data || [];
+    const sortByName = (list: Company[]) =>
+      [...list].sort((a, b) =>
+        String(a?.name || "").localeCompare(String(b?.name || ""), "en", {
+          sensitivity: "base",
+        })
+      );
 
     // Role-based filtering: Operators only see assigned companies
     // Note: Backend hook also handles this, but frontend filtering is a nice double-layer for UX
@@ -426,18 +433,23 @@ export default function CompanyProductPage() {
     }
 
     // Categorize using backend-provided stats
-    const live = allCompanies
+    const live = sortByName(
+      allCompanies
       .filter((c) => (c.stats?.liveProducts || 0) > 0)
-      .map(c => ({ ...c, productCount: c.stats?.liveProducts }));
+      .map(c => ({ ...c, productCount: c.stats?.liveProducts }))
+    );
 
-    const active = allCompanies
+    const active = sortByName(
+      allCompanies
       .filter((c) => (c.stats?.totalProducts || 0) > 0 && (c.stats?.liveProducts || 0) === 0)
-      .map(c => ({ ...c, productCount: c.stats?.totalProducts }));
+      .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
+    );
 
-    const empty = allCompanies.filter((c) => (c.stats?.totalProducts || 0) === 0);
+    const empty = sortByName(allCompanies.filter((c) => (c.stats?.totalProducts || 0) === 0));
 
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const dormant = allCompanies
+    const dormant = sortByName(
+      allCompanies
       .filter((c) => (c.stats?.totalProducts || 0) > 0)
       .filter((c) => {
         const supervisorObj = typeof (c as any).supervisor === "object" ? (c as any).supervisor : null;
@@ -446,12 +458,13 @@ export default function CompanyProductPage() {
         if (!lastSeenAt) return false;
         return new Date(lastSeenAt) <= weekAgo;
       })
-      .map(c => ({ ...c, productCount: c.stats?.totalProducts }));
+      .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
+    );
 
     const selected = allCompanies.find(c => c._id === selectedCompanyId) || null;
 
     return {
-      allCompanies,
+      allCompanies: sortByName(allCompanies),
       liveCompanies: live,
       activeCompanies: active,
       emptyCompanies: empty,
@@ -461,38 +474,37 @@ export default function CompanyProductPage() {
     };
   }, [companyData, operatorData, selectedCompanyId, user, isOperatorUser]);
 
-  useEffect(() => {
-    const currentList =
-      activeTab === "live"
-        ? liveCompanies
-        : activeTab === "active"
-          ? activeCompanies
-          : activeTab === "empty"
-            ? emptyCompanies
-            : dormantCompanies;
+  const displayedCompanies =
+    activeTab === "live" ? liveCompanies :
+      activeTab === "active" ? activeCompanies :
+        activeTab === "empty" ? emptyCompanies :
+          dormantCompanies;
 
-    if (!currentList.length) {
+  const filteredCompanies = useMemo(() => {
+    const needle = companySearch.trim().toLowerCase();
+    if (!needle) return displayedCompanies;
+    return allCompanies.filter((company) =>
+      String(company.name || "").toLowerCase().includes(needle)
+    );
+  }, [allCompanies, displayedCompanies, companySearch]);
+
+  useEffect(() => {
+    if (!filteredCompanies.length) {
       if (selectedCompanyId) setSelectedCompanyId(null);
       return;
     }
 
-    const existsInCurrentList = currentList.some((c: any) => c._id === selectedCompanyId);
+    const existsInCurrentList = filteredCompanies.some((c: any) => c._id === selectedCompanyId);
     if (!existsInCurrentList) {
-      setSelectedCompanyId(currentList[0]._id);
+      setSelectedCompanyId(filteredCompanies[0]._id);
     }
-  }, [activeTab, allCompanies, liveCompanies, activeCompanies, emptyCompanies, dormantCompanies, selectedCompanyId]);
+  }, [activeTab, filteredCompanies, selectedCompanyId]);
 
   if (loadingCompanies) {
     return (
       <BrandedLoader message="Loading company catalog" />
     );
   }
-
-  const displayedCompanies =
-    activeTab === "live" ? liveCompanies :
-      activeTab === "active" ? activeCompanies :
-        activeTab === "empty" ? emptyCompanies :
-          dormantCompanies;
 
   const handleAssign = () => {
     assignMutation.mutate(selectedOperatorId);
@@ -510,6 +522,29 @@ export default function CompanyProductPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+      <div className="mb-4 max-w-[460px]">
+        <CompanySearch
+          defaultSelected={selectedCompanyId}
+          onSelect={(id) => {
+            if (!id) {
+              setSelectedCompanyId(null);
+              return;
+            }
+            const selected = allCompanies.find((company) => String(company._id) === String(id));
+            if (selected) {
+              const isLive = (selected.stats?.liveProducts || 0) > 0;
+              const isActive = (selected.stats?.totalProducts || 0) > 0 && (selected.stats?.liveProducts || 0) === 0;
+              const isEmpty = (selected.stats?.totalProducts || 0) === 0;
+              if (isLive) setActiveTab("live");
+              else if (isActive) setActiveTab("active");
+              else if (isEmpty) setActiveTab("empty");
+              else setActiveTab("dormant");
+            }
+            setSelectedCompanyId(id);
+          }}
+          onSearchChange={(value) => setCompanySearch(value)}
+        />
+      </div>
       {isOperatorUser && (
         <Card className="mb-4 p-4 bg-background/60 backdrop-blur-md border-none shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -554,7 +589,7 @@ export default function CompanyProductPage() {
             </div>
 
             {/* Filter tabs */}
-            <div className="flex items-center gap-1 px-4 py-2 border-b border-default-100">
+            <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-default-100">
               {(["live", "active", "empty", "dormant"] as const).map((tab) => {
                 const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
                 const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-danger-500";
@@ -576,18 +611,10 @@ export default function CompanyProductPage() {
               })}
             </div>
 
-            {/* Company search */}
-            <div className="px-4 py-2">
-              <CompanySearch
-                defaultSelected={selectedCompanyId}
-                onSelect={(id) => setSelectedCompanyId(id)}
-              />
-            </div>
-
             {/* Scrollable list */}
             <div className="flex-1 overflow-y-auto px-3 pb-3 custom-scrollbar">
               <div className="flex flex-col gap-1">
-                {displayedCompanies.map((company) => {
+                {filteredCompanies.map((company) => {
                   const isActive = selectedCompanyId === company._id;
                   const prodCount = (company as any).productCount;
                   const isLive = (company.stats?.liveProducts || 0) > 0;
@@ -624,7 +651,7 @@ export default function CompanyProductPage() {
                     </button>
                   );
                 })}
-                {displayedCompanies.length === 0 && (
+                {filteredCompanies.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-12 opacity-50">
                     <svg className="w-8 h-8 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -644,19 +671,19 @@ export default function CompanyProductPage() {
               <>
                 {/* Detail header */}
                 <div className="px-6 py-5 border-b border-default-100">
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Company identity */}
-                    <div className="flex items-center gap-4">
-                      <Avatar
-                        size="lg"
-                        src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
-                        className="border-2 border-default-200 shadow-sm shrink-0"
-                      />
-                      <div>
-                        <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Chip
-                            size="sm"
+                    <div className="flex items-start justify-between gap-4">
+                      {/* Company identity */}
+                      <div className="flex items-center gap-4">
+                        <Avatar
+                          size="lg"
+                          src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
+                          className="border-2 border-default-200 shadow-sm shrink-0"
+                        />
+                        <div>
+                          <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Chip
+                              size="sm"
                             variant="flat"
                             color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : activeTab === "dormant" ? "danger" : "default"}
                             className="capitalize text-[10px] font-bold h-5"
@@ -672,9 +699,30 @@ export default function CompanyProductPage() {
                           {(selectedCompany as any).state?.name && (
                             <span className="text-[10px] text-default-400">{(selectedCompany as any).state.name}</span>
                           )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                      {(() => {
+                        const customDomain = String(selectedCompany.customDomain || "").trim();
+                        const subdomain = String(selectedCompany.subdomain || "").trim();
+                        const isLive = Boolean((selectedCompany as any).isWebsiteLive);
+                        const portfolioUrl = customDomain
+                          ? `https://${customDomain}`
+                          : subdomain
+                            ? `https://${subdomain}.company.obaol.com`
+                            : "";
+                        if (!isLive || !portfolioUrl) return null;
+                        return (
+                          <a
+                            href={portfolioUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full border border-default-200/70 bg-default-100/60 px-3 py-1 text-[11px] font-semibold text-default-700 hover:bg-default-200/70 dark:bg-default-50/10 dark:text-default-200"
+                          >
+                            View Portfolio
+                          </a>
+                        );
+                      })()}
 
                     {/* Assignment widget — Admin only */}
                     {roleLower === "admin" && (

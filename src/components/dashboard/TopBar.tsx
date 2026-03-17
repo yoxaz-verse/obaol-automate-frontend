@@ -146,16 +146,23 @@ const TopBar = ({ username, role }: TopbarProps) => {
         <div className="relative" ref={notificationRef}>
           <Button
             isIconOnly
-            variant="light"
+            variant="flat"
+            size="sm"
             aria-label="Notifications"
-            className="relative text-default-700 dark:text-default-100"
+            className={`relative min-w-9 w-9 h-9 md:w-10 md:h-10 rounded-xl transition-all duration-300 ${unreadCount > 0
+                ? "bg-warning-500/10 text-warning-500 border border-warning-500/20"
+                : "bg-default-100/50 dark:bg-default-50/5 text-default-600 dark:text-default-400 hover:bg-default-200 dark:hover:bg-default-100/10"
+              }`}
             onPress={() => setIsNotificationOpen((prev) => !prev)}
           >
-            <FiBell size={18} />
+            <FiBell size={18} className={unreadCount > 0 ? "animate-pulse" : ""} />
             {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 min-w-5 h-5 px-1 rounded-full bg-danger text-white text-[10px] leading-5 font-bold text-center">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
+              <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-danger-500 border-2 border-content1 dark:border-default-800 flex items-center justify-center text-[8px] font-black text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              </div>
             )}
           </Button>
           <AnimatePresence>

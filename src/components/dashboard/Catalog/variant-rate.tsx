@@ -569,9 +569,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
             }
           });
 
-        const marketplaceSearchText = effectiveSearch.toLowerCase();
+        const searchText = effectiveSearch.toLowerCase();
         const finalTableData =
-          isMarketplaceView && marketplaceSearchText
+          searchText
             ? tableData.filter((row: any) => {
               const haystack = [
                 row.product,
@@ -584,7 +584,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 .filter(Boolean)
                 .join(" ")
                 .toLowerCase();
-              return haystack.includes(marketplaceSearchText);
+              return haystack.includes(searchText);
             })
             : tableData;
 

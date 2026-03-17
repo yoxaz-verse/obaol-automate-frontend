@@ -5,7 +5,7 @@ import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 import InlineLoader from "@/components/ui/InlineLoader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // 🔎 same icon you had
 const SearchIcon = ({
@@ -53,15 +53,18 @@ export default function CompanySearch({
   onSelect,
   defaultSelected,
   itemsFilter,
+  onSearchChange,
 }: {
   onSelect?: (id: string | null) => void;
   defaultSelected?: string | null;
   itemsFilter?: (companies: Company[]) => Company[]; // allow filtering (e.g. onlyWithProducts)
+  onSearchChange?: (value: string) => void;
 }) {
   const [inputValue, setInputValue] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(
     defaultSelected ?? null
   );
+  const userSelectedKeyRef = useRef<string | null>(null);
 
   const { data: companyData, isLoading } = useQuery({
     queryKey: ["companies"],
@@ -82,26 +85,18 @@ export default function CompanySearch({
     companies = itemsFilter(companies);
   }
 
-  const filteredCompanies = useMemo(() => {
-    const needle = inputValue.trim().toLowerCase();
-    if (!needle) return companies;
-    return companies.filter((company) =>
-      String(company.name || "").toLowerCase().includes(needle)
-    );
-  }, [companies, inputValue]);
-
   useEffect(() => {
     if (defaultSelected === undefined) return;
-    setSelectedKey(defaultSelected ?? null);
-  }, [defaultSelected]);
-
-  useEffect(() => {
-    if (!selectedKey) return;
-    const match = companies.find((c) => String(c._id) === String(selectedKey));
-    if (match) {
-      setInputValue(match.name || "");
+    const nextKey = defaultSelected ?? null;
+    setSelectedKey(nextKey);
+    userSelectedKeyRef.current = nextKey;
+    if (!nextKey) {
+      setInputValue("");
+      return;
     }
-  }, [selectedKey, companies]);
+    const match = companies.find((c) => String(c._id) === String(nextKey));
+    if (match) setInputValue(match.name || "");
+  }, [defaultSelected]);
 
   if (isLoading) {
     return (
@@ -116,13 +111,14 @@ export default function CompanySearch({
   return (
     <AutocompleteAny
       aria-label="Select a company"
-      items={filteredCompanies}
+      items={companies}
       maxListboxHeight={400}
       itemHeight={60}
       placeholder="Search by company name"
       variant="bordered"
       radius="full"
       selectedKey={selectedKey || undefined}
+      isClearable
       className="text-warning-400 w-full max-w-md mb-6"
       classNames={{
         base: "max-w-full",
@@ -140,13 +136,29 @@ export default function CompanySearch({
       }}
       inputValue={inputValue}
       onInputChange={(value: string) => {
+        const nextValue = String(value || "");
+        const trimmed = nextValue.trim();
         setInputValue(value);
-        if (selectedKey) {
-          const match = companies.find((c) => String(c._id) === String(selectedKey));
-          if (match && value.trim() !== match.name) {
-            setSelectedKey(null);
-          }
+        if (onSearchChange) onSearchChange(value);
+        if (!trimmed) {
+          setSelectedKey(null);
+          userSelectedKeyRef.current = null;
+          if (onSelect) onSelect(null);
+          return;
         }
+        const selected = companies.find((c) => String(c._id) === String(selectedKey));
+        if (selected && trimmed.toLowerCase() !== String(selected.name || "").toLowerCase()) {
+          setSelectedKey(null);
+          userSelectedKeyRef.current = null;
+          if (onSelect) onSelect(null);
+        }
+      }}
+      onClear={() => {
+        setInputValue("");
+        setSelectedKey(null);
+        userSelectedKeyRef.current = null;
+        if (onSearchChange) onSearchChange("");
+        if (onSelect) onSelect(null);
       }}
       popoverProps={{
         offset: 10,
@@ -159,8 +171,12 @@ export default function CompanySearch({
       onSelectionChange={(key: any) => {
         const nextKey = (key as string) ?? null;
         setSelectedKey(nextKey);
+        userSelectedKeyRef.current = nextKey;
         const match = companies.find((c) => String(c._id) === String(nextKey));
-        if (match) setInputValue(match.name || "");
+        if (match) {
+          setInputValue(match.name || "");
+          if (onSearchChange) onSearchChange(match.name || "");
+        }
         if (onSelect) onSelect(nextKey);
       }}
     >

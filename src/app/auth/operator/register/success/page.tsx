@@ -25,7 +25,7 @@ export default function OperatorRegisterSuccessPage() {
         footer: "Operator_Verification",
       }}
     >
-      <div className="rounded-2xl border border-success-300/60 dark:border-success-400/40 bg-success-50/90 dark:bg-success-900/25 p-5 text-center">
+      <div className="rounded-2xl border border-success-300/60 dark:border-success-300/30 bg-success-50/90 dark:bg-success-950/40 p-5 text-center">
         <h2 className="text-xl font-semibold text-success-800 dark:text-success-100">
           Your registration was submitted successfully.
         </h2>
@@ -35,7 +35,11 @@ export default function OperatorRegisterSuccessPage() {
       </div>
 
       <div className="mt-6 flex flex-col sm:flex-row gap-3">
-        <Button className="w-full" variant="flat" onPress={() => router.push("/")}>
+        <Button
+          className="w-full border-default-200/60 dark:border-default-100/20 dark:text-default-100"
+          variant="bordered"
+          onPress={() => router.push("/")}
+        >
           Go to Home
         </Button>
         <Button className="w-full font-semibold" color="warning" onPress={() => router.push("/auth/operator")}>

@@ -290,7 +290,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             className="w-full sm:max-w-sm"
             classNames={{
               inputWrapper:
-                "bg-default-100/50 hover:bg-default-200/50 border border-default-200/70",
+                "bg-default-100/60 dark:bg-default-50/10 hover:bg-default-200/60 dark:hover:bg-default-100/20 border-1.5 border-default-200/50 dark:border-default-100/20 transition-all",
             }}
           />
         )}
@@ -299,12 +299,12 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           variant="flat"
           size="md"
           color="warning"
-          className="bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-semibold"
+          className="bg-warning-500/10 dark:bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-bold hover:bg-warning-500/20 transition-all shadow-sm"
           startContent={<IoFilterOutline className="text-lg" />}
         >
           Filters
           {activeFiltersCount > 0 && (
-            <span className="ml-1 bg-warning-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="ml-1 bg-warning-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black">
               {activeFiltersCount}
             </span>
           )}

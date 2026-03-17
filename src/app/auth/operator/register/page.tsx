@@ -2,10 +2,10 @@
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import {
+  Autocomplete,
+  AutocompleteItem,
   Button,
   Input,
-  Select,
-  SelectItem,
   Textarea,
   Checkbox,
 } from "@nextui-org/react";
@@ -16,7 +16,7 @@ import PhoneField from "@/components/form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { showToastMessage } from "@/utils/utils";
 import { accountRoutes } from "@/core/api/apiRoutes";
-import axios from "axios";
+import { getData, postData } from "@/core/api/apiHandler";
 
 const EMPTY_LIST: any[] = [];
 
@@ -24,6 +24,7 @@ function OperatorRegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -37,7 +38,6 @@ function OperatorRegisterForm() {
     state: "",
     district: "",
     languageKnown: [] as string[],
-    joiningDate: "",
   });
   const searchParams = useSearchParams();
   const referralParam = String(searchParams?.get("ref") || "").trim();
@@ -50,25 +50,13 @@ function OperatorRegisterForm() {
   const { data: optionsResponse, isLoading: optionsLoading } = useQuery({
     queryKey: ["operator-register-options"],
     queryFn: async () => {
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const normalized = String(apiRoot).trim().replace(/\/+$/, "");
-      const baseCandidates = Array.from(new Set([normalized, "/api/v1/web"])).filter(Boolean);
-      let lastError: any = null;
-      for (const base of baseCandidates) {
-        try {
-          const res = await axios.get(`${base}${accountRoutes.operatorRegisterOptions}`, {
-            timeout: 12000,
-            withCredentials: false,
-          });
-          return res.data?.data || {};
-        } catch (error) {
-          lastError = error;
-        }
+      try {
+        const response = await getData(accountRoutes.operatorRegisterOptions);
+        return response.data?.data || {};
+      } catch (error) {
+        console.error("Failed to fetch operator registration options:", error);
+        throw error;
       }
-      if (lastError) {
-        throw lastError;
-      }
-      return {};
     },
     retry: 1,
   });
@@ -84,23 +72,30 @@ function OperatorRegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
+    setFormError("");
     if (!form.name || !form.email || !form.phone || !form.password) {
-      showToastMessage({ type: "error", message: "Please fill all required fields.", position: "top-right" });
+      const msg = "Please fill all required fields.";
+      setFormError(msg);
+      showToastMessage({ type: "error", message: msg, position: "top-right" });
       return;
     }
     if (form.password !== form.confirmPassword) {
-      showToastMessage({ type: "error", message: "Passwords do not match.", position: "top-right" });
+      const msg = "Passwords do not match.";
+      setFormError(msg);
+      showToastMessage({ type: "error", message: msg, position: "top-right" });
       return;
     }
-    if (!form.state || !form.district || !form.joiningDate) {
-      showToastMessage({ type: "error", message: "Please complete all required selections.", position: "top-right" });
+    if (!form.state || !form.district) {
+      const msg = "Please complete all required selections.";
+      setFormError(msg);
+      showToastMessage({ type: "error", message: msg, position: "top-right" });
       return;
     }
 
     setIsLoading(true);
     try {
       const phoneParsed = parsePhoneValue({
-        value: form.phone,
+        raw: form.phone,
         countryCode: form.phoneCountryCode,
         national: form.phoneNational,
       });
@@ -117,20 +112,20 @@ function OperatorRegisterForm() {
         state: form.state,
         district: form.district,
         languageKnown: form.languageKnown,
-        joiningDate: form.joiningDate,
         workingHours: [],
       };
 
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const base = String(apiRoot).replace(/\/+$/, "");
-      await axios.post(`${base}${accountRoutes.operatorRegister}`, payload, { timeout: 15000 });
-      router.push("/auth/operator/register/success");
-    } catch (error: any) {
+      await postData(accountRoutes.operatorRegister, payload);
       showToastMessage({
-        type: "error",
-        message: error?.response?.data?.message || "Registration failed. Please try again.",
+        type: "success",
+        message: "Registration submitted for approval.",
         position: "top-right",
       });
+      router.push("/auth/operator/register/success");
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || "Registration failed. Please try again.";
+      setFormError(errorMessage);
+      showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
     } finally {
       setIsLoading(false);
     }
@@ -154,6 +149,11 @@ function OperatorRegisterForm() {
       }}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {formError && (
+          <div className="rounded-lg border border-danger-400/40 bg-danger-500/10 px-4 py-2 text-sm text-danger-500">
+            {formError}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input label="Full Name" value={form.name} onValueChange={(v) => setForm({ ...form, name: v })} isRequired />
           <Input label="Email" type="email" value={form.email} onValueChange={(v) => setForm({ ...form, email: v })} isRequired />
@@ -196,7 +196,6 @@ function OperatorRegisterForm() {
             value={form.referralCode}
             onValueChange={(v) => setForm({ ...form, referralCode: v.toUpperCase() })}
           />
-          <Input label="Joining Date" type="date" value={form.joiningDate} onValueChange={(v) => setForm({ ...form, joiningDate: v })} isRequired />
         </div>
 
         <Textarea
@@ -207,29 +206,39 @@ function OperatorRegisterForm() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select
+          <Autocomplete
             label="State"
-            selectedKeys={form.state ? [form.state] : []}
-            onSelectionChange={(keys) => setForm({ ...form, state: String(Array.from(keys)[0] || ""), district: "" })}
+            selectedKey={form.state || null}
+            onSelectionChange={(key) =>
+              setForm({ ...form, state: String(key || ""), district: "" })
+            }
             isRequired
             isLoading={optionsLoading}
+            defaultItems={states}
           >
-            {states.map((item: any) => (
-              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-            ))}
-          </Select>
-          <Select
+            {(item: any) => (
+              <AutocompleteItem key={item._id} textValue={item.name}>
+                {item.name}
+              </AutocompleteItem>
+            )}
+          </Autocomplete>
+          <Autocomplete
             label="District"
-            selectedKeys={form.district ? [form.district] : []}
-            onSelectionChange={(keys) => setForm({ ...form, district: String(Array.from(keys)[0] || "") })}
+            selectedKey={form.district || null}
+            onSelectionChange={(key) =>
+              setForm({ ...form, district: String(key || "") })
+            }
             isRequired
             isLoading={optionsLoading}
             isDisabled={!form.state}
+            defaultItems={filteredDistricts}
           >
-            {filteredDistricts.map((item: any) => (
-              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-            ))}
-          </Select>
+            {(item: any) => (
+              <AutocompleteItem key={item._id} textValue={item.name}>
+                {item.name}
+              </AutocompleteItem>
+            )}
+          </Autocomplete>
         </div>
 
         <div className="rounded-xl border border-default-200/70 p-3">
@@ -257,9 +266,14 @@ function OperatorRegisterForm() {
           </div>
         </div>
 
-        <Button type="submit" color="warning" className="w-full font-semibold" isLoading={isLoading}>
+        <Button type="submit" color="warning" className="w-full font-semibold" isLoading={isLoading} isDisabled={isLoading}>
           Submit for Approval
         </Button>
+        {isLoading && (
+          <div className="text-xs text-default-500 text-center">
+            Submitting your registration. Please wait...
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

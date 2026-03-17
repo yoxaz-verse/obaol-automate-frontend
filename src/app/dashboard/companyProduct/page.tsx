@@ -21,7 +21,7 @@ const Tab = HeroTab as any;
 const Chip = HeroChip as any;
 const Select = HeroSelect as any;
 const Switch = HeroSwitch as any;
-import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo } from "react-icons/lu";
+import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo, LuCopy } from "react-icons/lu";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import AddModal from "@/components/CurdTable/add-model";
 import AuthContext from "@/context/AuthContext";
@@ -1081,6 +1081,96 @@ export default function CompanyProductPage() {
                                   {selectedCompany?.customDomain || "No custom domain linked"}
                                 </div>
                               </div>
+                            </div>
+                          </Card>
+
+                          <Card className="p-4 border-none bg-default-50 shadow-none space-y-4">
+                            <div className="text-[10px] font-bold text-default-400 uppercase">Portfolio Links</div>
+                            <div className="space-y-4 text-xs">
+                              {(() => {
+                                const customDomain = String(selectedCompany?.customDomain || "").trim();
+                                const subdomain = String(selectedCompany?.subdomain || "").trim();
+                                const brandUrl = customDomain
+                                  ? `https://${customDomain}`
+                                  : subdomain
+                                    ? `https://${subdomain}.company.obaol.com`
+                                    : "";
+                                const brandPreviewUrl = subdomain ? `https://obaol.com/brand/${subdomain}` : "";
+                                return (
+                                  <div className="space-y-2">
+                                    <div className="text-[11px] font-semibold text-foreground/80">Brand Page</div>
+                                    {brandUrl ? (
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-[11px] font-mono bg-default-100 px-2 py-1 rounded border border-divider">
+                                          {brandUrl}
+                                        </span>
+                                        <a
+                                          href={brandUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-warning-500 hover:text-warning-600"
+                                        >
+                                          <LuExternalLink className="w-3.5 h-3.5" />
+                                          Open
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={() => navigator.clipboard?.writeText(brandUrl)}
+                                          className="inline-flex items-center gap-1 text-default-500 hover:text-default-700"
+                                        >
+                                          <LuCopy className="w-3.5 h-3.5" />
+                                          Copy
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-[11px] text-default-400 italic">Not configured (set subdomain or custom domain).</div>
+                                    )}
+                                    {brandPreviewUrl && (
+                                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-default-500">
+                                        <span className="font-mono bg-default-50 px-2 py-1 rounded border border-default-200/60">
+                                          {brandPreviewUrl}
+                                        </span>
+                                        <span className="text-[10px] text-default-400">Preview on main domain</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                              {(() => {
+                                const slug = String((selectedCompany as any)?.slug || "").trim();
+                                const catalogUrl = slug ? `https://obaol.com/obaol/${slug}` : "";
+                                return (
+                                  <div className="space-y-2">
+                                    <div className="text-[11px] font-semibold text-foreground/80">Company Catalog Page</div>
+                                    {catalogUrl ? (
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-[11px] font-mono bg-default-100 px-2 py-1 rounded border border-divider">
+                                          {catalogUrl}
+                                        </span>
+                                        <a
+                                          href={catalogUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-warning-500 hover:text-warning-600"
+                                        >
+                                          <LuExternalLink className="w-3.5 h-3.5" />
+                                          Open
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={() => navigator.clipboard?.writeText(catalogUrl)}
+                                          className="inline-flex items-center gap-1 text-default-500 hover:text-default-700"
+                                        >
+                                          <LuCopy className="w-3.5 h-3.5" />
+                                          Copy
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-[11px] text-default-400 italic">Not configured (company slug missing).</div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </Card>
                         </div>

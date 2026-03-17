@@ -66,6 +66,8 @@ const BASE_PATHS = {
   DOCUMENT_RULE: "/document-rules",
   ENQUIRY_RULE: "/enquiry-rules",
   ORDER_RULE: "/order-rules",
+  IMPORTS: "/imports",
+  IMPORT_RESERVATION: "/import-reservations",
   DEMO: "/demo",
 };
 
@@ -384,6 +386,19 @@ export const apiRoutes = {
     quote: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/quote`,
     decision: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/decision`,
     markup: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/markup`,
+  },
+  imports: {
+    list: `${BASE_PATHS.IMPORTS}`,
+    create: `${BASE_PATHS.IMPORTS}`,
+    update: (id: string) => `${BASE_PATHS.IMPORTS}/${id}`,
+    close: (id: string) => `${BASE_PATHS.IMPORTS}/${id}/close`,
+    reserve: (id: string) => `${BASE_PATHS.IMPORTS}/${id}/reservations`,
+  },
+  importReservations: {
+    list: `${BASE_PATHS.IMPORT_RESERVATION}`,
+    accept: (id: string) => `${BASE_PATHS.IMPORT_RESERVATION}/${id}/accept`,
+    reject: (id: string) => `${BASE_PATHS.IMPORT_RESERVATION}/${id}/reject`,
+    cancel: (id: string) => `${BASE_PATHS.IMPORT_RESERVATION}/${id}/cancel`,
   },
   tradeDocuments: {
     list: `${BASE_PATHS.TRADE_DOCUMENT}`,

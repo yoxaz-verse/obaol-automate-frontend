@@ -68,6 +68,12 @@ export const routeRoles: { [key: string]: string[] } = {
     "Worker",
     "Operator",
   ],
+  "/dashboard/imports": [
+    "Admin",
+    "Associate",
+    "Operator",
+    "team",
+  ],
 };
 
 export const getAllowedRoles = (pathname: string): string[] => {

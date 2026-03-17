@@ -42,6 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 "/dashboard/product",
                 "/dashboard/catalog",
                 "/dashboard/marketplace",
+                "/dashboard/imports",
             ],
         },
         {

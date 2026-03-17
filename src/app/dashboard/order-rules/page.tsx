@@ -19,21 +19,17 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import {
-  DndContext,
-  closestCenter,
   PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import RulesActionStrip from "@/components/rules/RulesActionStrip";
+import RulesSearchBar from "@/components/rules/RulesSearchBar";
+import RulesSortableList from "@/components/rules/RulesSortableList";
+import RulesPreviewPanel from "@/components/rules/RulesPreviewPanel";
+import DocRulesEditor from "@/components/rules/DocRulesEditor";
 
 const DOC_TYPES = [
   "QUOTATION",
@@ -66,62 +62,7 @@ type RuleForm = {
   triggersClose: boolean;
 };
 
-type DocRuleDraft = {
-  docType: string;
-  actionType: string;
-  visibility: string;
-  responsibleRole: string;
-  tradeType: string;
-  isRequired: boolean;
-};
-
-function SortableCard({ rule, onEdit, dragDisabled }: { rule: any; onEdit: (rule: any) => void; dragDisabled?: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: rule._id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  } as React.CSSProperties;
-
-  return (
-    <div ref={setNodeRef} style={style} className="rounded-xl border border-default-200/70 bg-content1/95 p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <div className="text-sm font-bold">{rule.label}</div>
-          <div className="text-xs text-default-500">{rule.stageKey}</div>
-          {rule.description && (
-            <div className="text-xs text-default-400 mt-1">{rule.description}</div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="flat" onPress={() => onEdit(rule)}>Edit</Button>
-          <Button
-            size="sm"
-            variant="light"
-            {...attributes}
-            {...listeners}
-            isDisabled={dragDisabled}
-            title={dragDisabled ? "Clear search to reorder" : "Drag to reorder"}
-          >
-            Drag
-          </Button>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {rule.tradeType && (
-          <span className="text-xs font-semibold text-default-600 bg-default-100/70 px-2 py-1 rounded-full">
-            {rule.tradeType}
-          </span>
-        )}
-        {rule.triggersClose && (
-          <span className="text-xs font-semibold text-success-600 bg-success-500/10 px-2 py-1 rounded-full">Final stage</span>
-        )}
-        {!rule.isActive && (
-          <span className="text-xs font-semibold text-warning-600 bg-warning-500/10 px-2 py-1 rounded-full">Inactive</span>
-        )}
-      </div>
-    </div>
-  );
-}
+type DocRuleDraft = import("@/components/rules/DocRulesEditor").DocRuleDraft;
 
 export default function OrderRulesPage() {
   const queryClient = useQueryClient();
@@ -141,7 +82,6 @@ export default function OrderRulesPage() {
     triggersClose: false,
   });
   const [selectedDocs, setSelectedDocs] = useState<DocRuleDraft[]>([]);
-  const [newDocType, setNewDocType] = useState<string>("");
 
   const { data: rulesResponse } = useQuery({
     queryKey: ["order-rules"],
@@ -370,43 +310,43 @@ export default function OrderRulesPage() {
 
       <div className="mx-2 md:mx-6 mb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-default-200/70 bg-content1/95 p-4">
-            <div className="text-xs font-semibold text-default-500 mb-2">Order Actions</div>
-            <div className="text-xs text-default-400">No predefined order actions configured yet.</div>
-          </div>
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <Input
-              className="w-full md:w-80"
-              placeholder="Search stages"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="flex items-center gap-2">
-              <Button variant="flat" onPress={() => seedMutation.mutate()} isLoading={seedMutation.isPending}>
-                Restore Defaults
-              </Button>
-              <Button color="primary" onPress={openCreate}>Add Stage</Button>
-            </div>
-          </div>
-
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={sortedRules.map((r: any) => r._id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 gap-3">
-                {filteredRules.length === 0 ? (
-                  <div className="rounded-xl border border-default-200/70 bg-content1/95 p-6 text-center text-default-500">No rules found.</div>
-                ) : (
-                  filteredRules.map((rule: any) => (
-                    <SortableCard key={rule._id} rule={rule} onEdit={openEdit} dragDisabled={dragDisabled} />
-                  ))
-                )}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <RulesActionStrip
+            title="Order Actions"
+            items={[]}
+            emptyMessage="No predefined order actions configured yet."
+          />
+          <RulesSearchBar
+            search={search}
+            onSearch={setSearch}
+            onRestore={() => seedMutation.mutate()}
+            onAdd={openCreate}
+            restoreLoading={seedMutation.isPending}
+          />
+          <RulesSortableList
+            rules={sortedRules}
+            filteredRules={filteredRules}
+            dragDisabled={dragDisabled}
+            onEdit={openEdit}
+            onDragEnd={onDragEnd}
+            sensors={sensors}
+            renderBadges={(rule) => {
+              const badges = [] as { label: string; colorClass?: string }[];
+              if (rule.tradeType) {
+                badges.push({ label: rule.tradeType, colorClass: "text-default-600 bg-default-100/70" });
+              }
+              if (rule.triggersClose) {
+                badges.push({ label: "Final stage", colorClass: "text-success-600 bg-success-500/10" });
+              }
+              if (!rule.isActive) {
+                badges.push({ label: "Inactive", colorClass: "text-warning-600 bg-warning-500/10" });
+              }
+              return badges;
+            }}
+          />
         </div>
 
-        <div className="rounded-xl border border-default-200/70 bg-content1/95 p-4 h-fit sticky top-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-bold">Flow Preview</div>
+        <RulesPreviewPanel
+          header={(
             <Select
               aria-label="Trade Type"
               size="sm"
@@ -418,9 +358,8 @@ export default function OrderRulesPage() {
                 <SelectItem key={t}>{t}</SelectItem>
               ))}
             </Select>
-          </div>
-
-          {sortedRules.length === 0 ? (
+          )}
+          body={sortedRules.length === 0 ? (
             <div className="text-xs text-default-500">No stages configured yet.</div>
           ) : (
             <>
@@ -482,7 +421,7 @@ export default function OrderRulesPage() {
               </div>
             </>
           )}
-        </div>
+        />
       </div>
 
       <Modal isOpen={open} onOpenChange={setOpen} isDismissable={false} isKeyboardDismissDisabled>
@@ -535,132 +474,16 @@ export default function OrderRulesPage() {
               Active
             </Switch>
 
-            <div className="pt-2">
-              <div className="text-sm font-semibold mb-2">Required Documents</div>
-              <div className="flex gap-2 items-end flex-wrap">
-                <Select
-                  label="Add Document"
-                  className="min-w-[220px]"
-                  selectedKeys={newDocType ? [newDocType] : []}
-                  onSelectionChange={(keys) => setNewDocType(String(Array.from(keys)[0] || ""))}
-                >
-                  {DOC_TYPES.filter((t) => !selectedDocs.some((d) => d.docType === t)).map((t) => (
-                    <SelectItem key={t}>{t}</SelectItem>
-                  ))}
-                </Select>
-                <Button
-                  size="sm"
-                  onPress={() => {
-                    if (!newDocType) return;
-                    setSelectedDocs((prev) => [
-                      ...prev,
-                      {
-                        docType: newDocType,
-                        actionType: "UPLOAD",
-                        visibility: "BOTH",
-                        responsibleRole: "OBAOL",
-                        tradeType: "BOTH",
-                        isRequired: true,
-                      },
-                    ]);
-                    setNewDocType("");
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
-
-              {selectedDocs.length === 0 ? (
-                <div className="mt-3 text-xs text-default-500">No documents selected for this stage.</div>
-              ) : (
-                <div className="mt-3 flex flex-col gap-3">
-                  {selectedDocs.map((doc, idx) => (
-                    <div key={doc.docType} className="rounded-lg border border-default-200/70 p-3 bg-default-50/40">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-sm font-semibold">{doc.docType}</div>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          onPress={() => setSelectedDocs((prev) => prev.filter((d) => d.docType !== doc.docType))}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <Select
-                          label="Action Type"
-                          selectedKeys={[doc.actionType]}
-                          onSelectionChange={(keys) => {
-                            const value = String(Array.from(keys)[0] || "UPLOAD");
-                            setSelectedDocs((prev) =>
-                              prev.map((d, i) => (i === idx ? { ...d, actionType: value } : d))
-                            );
-                          }}
-                        >
-                          {ACTION_TYPES.map((a) => (
-                            <SelectItem key={a}>{a}</SelectItem>
-                          ))}
-                        </Select>
-                        <Select
-                          label="Visibility"
-                          selectedKeys={[doc.visibility]}
-                          onSelectionChange={(keys) => {
-                            const value = String(Array.from(keys)[0] || "BOTH");
-                            setSelectedDocs((prev) =>
-                              prev.map((d, i) => (i === idx ? { ...d, visibility: value } : d))
-                            );
-                          }}
-                        >
-                          {VISIBILITY.map((v) => (
-                            <SelectItem key={v}>{v}</SelectItem>
-                          ))}
-                        </Select>
-                        <Select
-                          label="Responsible Role"
-                          selectedKeys={[doc.responsibleRole]}
-                          onSelectionChange={(keys) => {
-                            const value = String(Array.from(keys)[0] || "OBAOL");
-                            setSelectedDocs((prev) =>
-                              prev.map((d, i) => (i === idx ? { ...d, responsibleRole: value } : d))
-                            );
-                          }}
-                        >
-                          {RESPONSIBLE_ROLES.map((r) => (
-                            <SelectItem key={r}>{r}</SelectItem>
-                          ))}
-                        </Select>
-                        <Select
-                          label="Trade Type"
-                          selectedKeys={[doc.tradeType]}
-                          onSelectionChange={(keys) => {
-                            const value = String(Array.from(keys)[0] || "BOTH");
-                            setSelectedDocs((prev) =>
-                              prev.map((d, i) => (i === idx ? { ...d, tradeType: value } : d))
-                            );
-                          }}
-                        >
-                          {TRADE_TYPES.map((t) => (
-                            <SelectItem key={t}>{t}</SelectItem>
-                          ))}
-                        </Select>
-                      </div>
-                      <div className="mt-2">
-                        <Switch
-                          isSelected={doc.isRequired}
-                          onValueChange={(value) =>
-                            setSelectedDocs((prev) =>
-                              prev.map((d, i) => (i === idx ? { ...d, isRequired: value } : d))
-                            )
-                          }
-                        >
-                          Required
-                        </Switch>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <DocRulesEditor
+              docTypes={DOC_TYPES}
+              selectedDocs={selectedDocs}
+              setSelectedDocs={setSelectedDocs}
+              defaults={{ actionType: "UPLOAD", visibility: "BOTH", responsibleRole: "OBAOL", tradeType: "BOTH" }}
+              actionTypes={ACTION_TYPES}
+              visibilityOptions={VISIBILITY}
+              responsibleRoles={RESPONSIBLE_ROLES}
+              tradeTypes={TRADE_TYPES}
+            />
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={() => setOpen(false)}>

@@ -14,7 +14,7 @@ import { GoOrganization } from "react-icons/go";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse } from "react-icons/lu";
-import { FiShoppingBag } from "react-icons/fi";
+import { FiShoppingBag, FiPackage } from "react-icons/fi";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell } from "react-icons/fi";
@@ -80,6 +80,11 @@ export const sidebarOptions = [
     name: "Marketplace",
     icon: <FiShoppingBag />,
     link: "/dashboard/marketplace",
+  },
+  {
+    name: "Imports",
+    icon: <FiPackage />,
+    link: "/dashboard/imports",
   },
   {
     name: "Catalog", //Translate

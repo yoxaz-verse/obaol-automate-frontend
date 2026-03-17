@@ -51,10 +51,26 @@ function OperatorRegisterForm() {
     queryKey: ["operator-register-options"],
     queryFn: async () => {
       const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const base = String(apiRoot).replace(/\/+$/, "");
-      const res = await axios.get(`${base}${accountRoutes.operatorRegisterOptions}`, { timeout: 12000 });
-      return res.data?.data || {};
+      const normalized = String(apiRoot).trim().replace(/\/+$/, "");
+      const baseCandidates = Array.from(new Set([normalized, "/api/v1/web"])).filter(Boolean);
+      let lastError: any = null;
+      for (const base of baseCandidates) {
+        try {
+          const res = await axios.get(`${base}${accountRoutes.operatorRegisterOptions}`, {
+            timeout: 12000,
+            withCredentials: false,
+          });
+          return res.data?.data || {};
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      if (lastError) {
+        throw lastError;
+      }
+      return {};
     },
+    retry: 1,
   });
 
   const languages = Array.isArray(optionsResponse?.languages) ? optionsResponse.languages : EMPTY_LIST;
@@ -142,16 +158,17 @@ function OperatorRegisterForm() {
           <Input label="Full Name" value={form.name} onValueChange={(v) => setForm({ ...form, name: v })} isRequired />
           <Input label="Email" type="email" value={form.email} onValueChange={(v) => setForm({ ...form, email: v })} isRequired />
           <PhoneField
+            name="phone"
             label="Phone"
             value={form.phone}
-            countryCode={form.phoneCountryCode}
-            national={form.phoneNational}
-            onChange={(value, meta) =>
+            countryCodeValue={form.phoneCountryCode}
+            nationalValue={form.phoneNational}
+            onChange={(next) =>
               setForm({
                 ...form,
-                phone: value,
-                phoneCountryCode: meta?.countryCode || form.phoneCountryCode,
-                phoneNational: meta?.national || form.phoneNational,
+                phone: next.e164,
+                phoneCountryCode: next.countryCode,
+                phoneNational: next.national,
               })
             }
           />

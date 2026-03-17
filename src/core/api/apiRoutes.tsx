@@ -419,6 +419,7 @@ export const apiRoutes = {
   enquiry: enquiryRoutes,
   orders: {
     create: "/orders",
+    createExternal: "/orders/external",
     getAll: "/orders",
     update: "/orders",
     delete: "/orders",

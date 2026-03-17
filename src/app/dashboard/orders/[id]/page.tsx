@@ -294,7 +294,12 @@ export default function OrderDetailsPage() {
     const getOwnerLabel = (val: string) => OWNER_OPTIONS.find((item) => item.key === val)?.label || "Not set";
     const updateMilestone = (key: string, value: any) =>
         setMilestones((prev: any) => ({ ...prev, [key]: value }));
-    const orderTradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || (order as any)?.enquiry?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
+    const orderTradeType = String(
+        (order as any)?.externalTradeType ||
+        (linkedEnquiry as any)?.executionContext?.tradeType ||
+        (order as any)?.enquiry?.executionContext?.tradeType ||
+        "DOMESTIC"
+    ).toUpperCase();
     const isInternational = orderTradeType === "INTERNATIONAL";
     const isSchedulingFinalized = Boolean(milestones.schedulingFinalizedDate);
     React.useEffect(() => {
@@ -352,7 +357,12 @@ export default function OrderDetailsPage() {
 
     const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
     const orderRules = Array.isArray(orderRulesResponse?.data?.data) ? orderRulesResponse.data.data : [];
-    const tradeType = String((linkedEnquiry as any)?.executionContext?.tradeType || "DOMESTIC").toUpperCase();
+    const tradeType = String(
+        (order as any)?.externalTradeType ||
+        (linkedEnquiry as any)?.executionContext?.tradeType ||
+        "DOMESTIC"
+    ).toUpperCase();
+    const isExternal = Boolean((order as any)?.isExternal);
     const sortedOrderStages = orderRules
         .filter((r: any) => r?.isActive !== false)
         .filter((r: any) => !r?.tradeType || r.tradeType === "BOTH" || String(r.tradeType) === tradeType)
@@ -412,9 +422,13 @@ export default function OrderDetailsPage() {
                 <CardHeader className="flex justify-between items-center px-6 py-6">
                     <div className="flex flex-col gap-1">
                         <h1 className="text-3xl font-bold">Order #{orderId?.slice(-6).toUpperCase()}</h1>
-                        <span className="opacity-80">
-                            Generated from Enquiry #{(order.enquiry?._id || order.enquiry)?.slice(-6).toUpperCase()}
-                        </span>
+                        {isExternal ? (
+                            <span className="opacity-80">External Order Execution</span>
+                        ) : (
+                            <span className="opacity-80">
+                                Generated from Enquiry #{(order.enquiry?._id || order.enquiry)?.slice(-6).toUpperCase()}
+                            </span>
+                        )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
                         <Chip className="capitalize font-bold" color="primary" size="lg">
@@ -424,6 +438,38 @@ export default function OrderDetailsPage() {
                     </div>
                 </CardHeader>
             </Card>
+
+            {isExternal && (
+                <Card className="w-full border border-default-200/60">
+                    <CardHeader className="font-bold text-lg">External Parties</CardHeader>
+                    <Divider />
+                    <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="rounded-lg border border-default-200/70 p-3">
+                            <div className="text-xs uppercase tracking-widest text-default-500">Buyer</div>
+                            <div className="text-base font-semibold">{(order as any)?.externalBuyer?.name || "Buyer"}</div>
+                            <div className="text-xs text-default-500">{(order as any)?.externalBuyer?.email || ""}</div>
+                            <div className="text-xs text-default-500">{(order as any)?.externalBuyer?.phone || ""}</div>
+                        </div>
+                        <div className="rounded-lg border border-default-200/70 p-3">
+                            <div className="text-xs uppercase tracking-widest text-default-500">Seller</div>
+                            <div className="text-base font-semibold">{(order as any)?.externalSeller?.name || "Seller"}</div>
+                            <div className="text-xs text-default-500">{(order as any)?.externalSeller?.email || ""}</div>
+                            <div className="text-xs text-default-500">{(order as any)?.externalSeller?.phone || ""}</div>
+                        </div>
+                        <div className="rounded-lg border border-default-200/70 p-3 md:col-span-2">
+                            <div className="text-xs uppercase tracking-widest text-default-500">Product</div>
+                            <div className="text-base font-semibold">
+                                {(order as any)?.externalProduct?.name || "Product"}
+                                {(order as any)?.externalProduct?.variant ? ` • ${(order as any)?.externalProduct?.variant}` : ""}
+                            </div>
+                            <div className="text-xs text-default-500">
+                                {(order as any)?.externalProduct?.quantity ? `${(order as any)?.externalProduct?.quantity} ` : ""}
+                                {(order as any)?.externalProduct?.unit || ""}
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
+            )}
 
             {/* Status Stepper */}
             <Card className="w-full shadow-sm border border-default-200/50">

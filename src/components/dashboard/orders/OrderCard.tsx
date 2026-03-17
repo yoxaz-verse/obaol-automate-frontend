@@ -17,13 +17,19 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
         obaol: "OBAOL Team",
     };
     // Extract data safely
+    const isExternal = Boolean(data.isExternal);
     const product =
+        (isExternal && data.externalProduct?.name) ||
+        data.enquiry?.variantRateId?.productVariant?.product?.name ||
         data.enquiry?.productVariant?.product?.name ||
+        data.enquiry?.productId?.name ||
         data.enquiry?.product?.name ||
         data.productVariant?.product?.name ||
         data.product?.name ||
         "Product";
     const variant =
+        (isExternal && data.externalProduct?.variant) ||
+        data.enquiry?.variantRateId?.productVariant?.name ||
         data.enquiry?.productVariant?.name ||
         data.productVariant?.name ||
         data.enquiry?.variantName ||
@@ -69,7 +75,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                     <div className="flex flex-col sm:flex-row justify-between w-full items-start gap-3">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                                <h4 className="text-base font-black text-slate-800 dark:text-slate-100 leading-tight truncate group-hover:text-secondary transition-colors">
+                                <h4 className="text-base font-black text-slate-800 dark:text-slate-100 leading-tight truncate group-hover:text-warning transition-colors">
                                     {product}
                                 </h4>
                             </div>
@@ -77,7 +83,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 {variant}
                             </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] bg-secondary-100 text-secondary-800 dark:bg-warning-500/10 dark:text-warning-400 px-2.5 py-1 rounded-md font-bold border border-secondary-300/40 dark:border-warning-500/30 uppercase tracking-tighter whitespace-nowrap self-start shadow-sm">
+                        <div className="flex items-center gap-1.5 text-[11px] bg-warning-100 text-warning-800 dark:bg-warning-500/10 dark:text-warning-400 px-2.5 py-1 rounded-md font-bold border border-warning-300/40 dark:border-warning-500/30 uppercase tracking-tighter whitespace-nowrap self-start shadow-sm">
                             <FiCalendar size={12} className="opacity-70" />
                             {date}
                         </div>
@@ -91,7 +97,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                             radius="full"
                             size="sm"
                             name={clientName[0]}
-                            className="bg-secondary-50 text-secondary-600 font-black border border-secondary-100 shadow-sm"
+                            className="bg-warning-50 text-warning-600 font-black border border-warning-100 shadow-sm"
                         />
                         <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-tight truncate">{clientName}</p>
@@ -102,7 +108,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                     {/* Logistics Module */}
                     <div className="bg-gradient-to-br from-default-100/60 to-transparent p-3 rounded-xl border border-default-200/60 space-y-2">
                         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                            <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                            <div className="w-6 h-6 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
                                 <FiTruck size={14} />
                             </div>
                             <span className="text-xs font-black uppercase tracking-wide truncate">{vehicleNo}</span>
@@ -119,8 +125,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                     <div className="flex flex-col gap-1.5 pt-1">
                         <span className="text-[10px] text-default-400 uppercase font-black tracking-widest px-0.5">Procurement Owner</span>
                         <div className="flex items-center gap-2 px-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-secondary-500 animate-pulse" />
-                            <span className="text-xs font-bold text-secondary-600 dark:text-secondary-400 flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                            <span className="text-xs font-bold text-warning-600 dark:text-warning-400 flex items-center gap-2">
                                 {procurementOwner}
                             </span>
                         </div>
@@ -143,8 +149,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 size="sm"
                                 isIconOnly
                                 variant="flat"
-                                color="secondary"
-                                className="rounded-xl w-9 h-9 bg-secondary/10 hover:bg-secondary hover:text-white transition-all shadow-sm"
+                                color="warning"
+                                className="rounded-xl w-9 h-9 bg-warning/10 hover:bg-warning hover:text-white transition-all shadow-sm"
                             >
                                 <FiPhone size={16} />
                             </Button>

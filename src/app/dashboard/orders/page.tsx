@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { Button } from "@heroui/react";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
@@ -16,14 +16,31 @@ import { showToastMessage } from "@/utils/utils";
 export default function OrdersPage() {
     const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string>("All");
+    const [scopeTab, setScopeTab] = React.useState<"internal" | "external">("internal");
     const [navigatingId, setNavigatingId] = React.useState<string | null>(null);
     const [demoLoading, setDemoLoading] = React.useState(false);
     const [demoClearing, setDemoClearing] = React.useState(false);
+    const [externalOpen, setExternalOpen] = React.useState(false);
+    const [externalLoading, setExternalLoading] = React.useState(false);
+    const [externalForm, setExternalForm] = React.useState({
+        buyerName: "",
+        buyerEmail: "",
+        buyerPhone: "",
+        sellerName: "",
+        sellerEmail: "",
+        sellerPhone: "",
+        productName: "",
+        productVariant: "",
+        quantity: "",
+        unit: "MT",
+        tradeType: "DOMESTIC",
+    });
     const { user } = React.useContext(AuthContext);
     const { play } = useSoundEffect();
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const canUseDemo = roleLower === "admin";
+    const canCreateExternal = roleLower === "admin" || roleLower === "operator" || roleLower === "team" || roleLower === "associate";
 
     useEffect(() => {
         patchData(apiRoutes.notifications.markSectionRead("orders"), {}).catch(() => { });
@@ -58,6 +75,21 @@ export default function OrdersPage() {
                     const ordersData = extractOrders(orderResponse);
                     const scopedOrders = ordersData.filter((item: any) => {
                         if (!isOperatorUser) return true;
+                        if (item?.isExternal) return true;
+                        const assignedOperatorId = (
+                            item?.enquiry?.assignedOperatorId?._id ||
+                            item?.enquiry?.assignedOperatorId ||
+                            ""
+                        ).toString();
+                        return Boolean(user?.id && assignedOperatorId === String(user.id));
+                    });
+
+                    const filteredByScope = ordersData.filter((item: any) => scopeTab === "external"
+                        ? Boolean(item?.isExternal)
+                        : !item?.isExternal);
+                    const scopedFiltered = filteredByScope.filter((item: any) => {
+                        if (!isOperatorUser) return true;
+                        if (item?.isExternal) return true;
                         const assignedOperatorId = (
                             item?.enquiry?.assignedOperatorId?._id ||
                             item?.enquiry?.assignedOperatorId ||
@@ -80,7 +112,7 @@ export default function OrdersPage() {
                                         <div className="flex flex-wrap gap-2">
                                             <Button
                                                 size="sm"
-                                                className="bg-secondary text-white"
+                                                className="bg-warning text-white"
                                                 isLoading={demoLoading}
                                                 onPress={async () => {
                                                     setDemoLoading(true);
@@ -138,41 +170,64 @@ export default function OrdersPage() {
                                 )}
                                 {/* Status Tabs */}
                                 <div className="flex justify-between items-center mb-6 overflow-x-auto no-scrollbar touch-pan-x pb-2">
-                                    <Tabs
-                                        aria-label="Order Stages"
-                                        color="secondary"
-                                        variant="underlined"
-                                        selectedKey={selectedTab}
-                                        onSelectionChange={(key) => setSelectedTab(key as string)}
-                                        classNames={{
-                                            tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                            cursor: "w-full bg-secondary h-[3px]",
+                                    <div className="w-full flex flex-col gap-3">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <Tabs
+                                                aria-label="Order Scope"
+                                                color="secondary"
+                                                variant="underlined"
+                                                selectedKey={scopeTab}
+                                                onSelectionChange={(key) => {
+                                                    setScopeTab(key as "internal" | "external");
+                                                    setSelectedTab("All");
+                                                }}
+                                                classNames={{
+                                                    tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                                                    cursor: "w-full bg-secondary h-[3px]",
+                                                    tab: "max-w-fit px-0 h-10",
+                                                    tabContent: "group-data-[selected=true]:text-warning font-black uppercase tracking-widest text-[11px]"
+                                                }}
+                                            >
+                                                <Tab key="internal" title="Internal Orders" />
+                                                <Tab key="external" title="External Orders" />
+                                            </Tabs>
+                                            {scopeTab === "external" && canCreateExternal && (
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-warning text-white"
+                                                    onPress={() => setExternalOpen(true)}
+                                                >
+                                                    Create External Order
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <Tabs
+                                            aria-label="Order Stages"
+                                            color="secondary"
+                                            variant="underlined"
+                                            selectedKey={selectedTab}
+                                            onSelectionChange={(key) => setSelectedTab(key as string)}
+                                            classNames={{
+                                                tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                                            cursor: "w-full bg-warning h-[3px]",
                                             tab: "max-w-fit px-0 h-10",
-                                            tabContent: "group-data-[selected=true]:text-secondary font-black uppercase tracking-widest text-[11px]"
+                                            tabContent: "group-data-[selected=true]:text-warning font-black uppercase tracking-widest text-[11px]"
                                         }}
-                                    >
-                                        <Tab key="All" title="All Orders" />
-                                        <Tab key="Procuring" title="Procuring" />
-                                        <Tab key="Loaded" title="Loaded" />
-                                        <Tab key="In Transit" title="In Transit" />
-                                        <Tab key="Arrived" title="Arrived" />
-                                        <Tab key="Completed" title="Completed" />
-                                    </Tabs>
+                                        >
+                                            <Tab key="All" title="All Orders" />
+                                            <Tab key="Procuring" title="Procuring" />
+                                            <Tab key="Loaded" title="Loaded" />
+                                            <Tab key="In Transit" title="In Transit" />
+                                            <Tab key="Arrived" title="Arrived" />
+                                            <Tab key="Completed" title="Completed" />
+                                        </Tabs>
+                                    </div>
                                 </div>
 
                                 <section className="py-2 w-full">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                        {ordersData
+                                        {scopedFiltered
                                             .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
-                                            .filter((item: any) => {
-                                                if (!isOperatorUser) return true;
-                                                const assignedOperatorId = (
-                                                    item?.enquiry?.assignedOperatorId?._id ||
-                                                    item?.enquiry?.assignedOperatorId ||
-                                                    ""
-                                                ).toString();
-                                                return Boolean(user?.id && assignedOperatorId === String(user.id));
-                                            })
                                             .map((item: any) => (
                                                 (() => {
                                                     const orderId = item?._id || item?.id || item?.orderId;
@@ -206,7 +261,7 @@ export default function OrdersPage() {
                                             ))}
                                     </div>
 
-                                    {scopedOrders.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
+                                    {scopedFiltered.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
                                         <div className="text-center py-20 text-default-400 font-medium">
                                             No orders found in this stage.
                                         </div>
@@ -217,6 +272,98 @@ export default function OrdersPage() {
                     );
                 }}
             </QueryComponent>
+
+            <Modal isOpen={externalOpen} onOpenChange={setExternalOpen} size="2xl">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader>Create External Order</ModalHeader>
+                            <ModalBody className="gap-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <Input label="Buyer Name" value={externalForm.buyerName} onValueChange={(v) => setExternalForm({ ...externalForm, buyerName: v })} />
+                                    <Input label="Buyer Email" value={externalForm.buyerEmail} onValueChange={(v) => setExternalForm({ ...externalForm, buyerEmail: v })} />
+                                    <Input label="Buyer Phone" value={externalForm.buyerPhone} onValueChange={(v) => setExternalForm({ ...externalForm, buyerPhone: v })} />
+                                    <Input label="Seller Name" value={externalForm.sellerName} onValueChange={(v) => setExternalForm({ ...externalForm, sellerName: v })} />
+                                    <Input label="Seller Email" value={externalForm.sellerEmail} onValueChange={(v) => setExternalForm({ ...externalForm, sellerEmail: v })} />
+                                    <Input label="Seller Phone" value={externalForm.sellerPhone} onValueChange={(v) => setExternalForm({ ...externalForm, sellerPhone: v })} />
+                                    <Input label="Product Name" value={externalForm.productName} onValueChange={(v) => setExternalForm({ ...externalForm, productName: v })} />
+                                    <Input label="Variant (optional)" value={externalForm.productVariant} onValueChange={(v) => setExternalForm({ ...externalForm, productVariant: v })} />
+                                    <Input label="Quantity (optional)" value={externalForm.quantity} onValueChange={(v) => setExternalForm({ ...externalForm, quantity: v })} />
+                                    <Input label="Unit (optional)" value={externalForm.unit} onValueChange={(v) => setExternalForm({ ...externalForm, unit: v })} />
+                                    <Select
+                                        label="Trade Type"
+                                        selectedKeys={[externalForm.tradeType]}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setExternalForm({ ...externalForm, tradeType: String(arr[0] || "DOMESTIC") });
+                                        }}
+                                    >
+                                        <SelectItem key="DOMESTIC" value="DOMESTIC">Domestic</SelectItem>
+                                        <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">International</SelectItem>
+                                    </Select>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button variant="light" onPress={onClose}>Cancel</Button>
+                                <Button
+                                    className="bg-secondary text-white"
+                                    isLoading={externalLoading}
+                                    onPress={async () => {
+                                        if (externalLoading) return;
+                                        if (!externalForm.buyerName || !externalForm.sellerName || !externalForm.productName || !externalForm.tradeType) {
+                                            showToastMessage({
+                                                type: "error",
+                                                message: "Buyer, seller, product, and trade type are required.",
+                                                position: "top-right",
+                                            });
+                                            return;
+                                        }
+                                        setExternalLoading(true);
+                                        try {
+                                            await postData(apiRoutes.orders.createExternal, {
+                                                externalTradeType: externalForm.tradeType,
+                                                externalBuyer: {
+                                                    name: externalForm.buyerName,
+                                                    email: externalForm.buyerEmail,
+                                                    phone: externalForm.buyerPhone,
+                                                },
+                                                externalSeller: {
+                                                    name: externalForm.sellerName,
+                                                    email: externalForm.sellerEmail,
+                                                    phone: externalForm.sellerPhone,
+                                                },
+                                                externalProduct: {
+                                                    name: externalForm.productName,
+                                                    variant: externalForm.productVariant,
+                                                    quantity: externalForm.quantity ? Number(externalForm.quantity) : null,
+                                                    unit: externalForm.unit,
+                                                },
+                                            });
+                                            showToastMessage({
+                                                type: "success",
+                                                message: "External order created.",
+                                                position: "top-right",
+                                            });
+                                            refetch?.();
+                                            setExternalOpen(false);
+                                        } catch (error: any) {
+                                            showToastMessage({
+                                                type: "error",
+                                                message: error?.response?.data?.message || "Unable to create external order.",
+                                                position: "top-right",
+                                            });
+                                        } finally {
+                                            setExternalLoading(false);
+                                        }
+                                    }}
+                                >
+                                    Create Order
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </section>
     );
 }

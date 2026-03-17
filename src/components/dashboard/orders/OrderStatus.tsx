@@ -8,9 +8,9 @@ interface OrderStatusProps {
 const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     const getStatusConfig = (s: string) => {
         const normalize = s?.toLowerCase() || "procuring";
-        if (normalize.includes("procuring")) return { color: "secondary", step: 1, label: "Procuring" };
+        if (normalize.includes("procuring")) return { color: "warning", step: 1, label: "Procuring" };
         if (normalize.includes("loaded")) return { color: "warning", step: 2, label: "Loaded" };
-        if (normalize.includes("transit")) return { color: "secondary", step: 3, label: "In Transit" };
+        if (normalize.includes("transit")) return { color: "warning", step: 3, label: "In Transit" };
         if (normalize.includes("arrived")) return { color: "success", step: 4, label: "Arrived" };
         if (normalize.includes("unloading")) return { color: "warning", step: 5, label: "Unloading" };
         if (normalize.includes("complete")) return { color: "success", step: 6, label: "Completed" };
@@ -23,7 +23,7 @@ const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     return (
         <div className="flex flex-col gap-1.5 min-w-[100px] sm:min-w-[120px]">
             <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-black uppercase tracking-widest text-${config.color === "default" ? "default-500" : config.color + (config.color === 'secondary' ? '' : '-500')}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest text-${config.color === "default" ? "default-500" : config.color + "-500"}`}>
                     {config.label}
                 </span>
             </div>
@@ -34,7 +34,7 @@ const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
                         <div
                             key={step}
                             className={`flex-1 rounded-full transition-all duration-700 ${step <= config.step
-                                ? `bg-${config.color}${config.color === 'secondary' ? '' : '-500'} shadow-[0_0_8px_rgba(0,0,0,0.1)]`
+                                ? `bg-${config.color}-500 shadow-[0_0_8px_rgba(0,0,0,0.1)]`
                                 : "bg-default-200/50"
                                 }`}
                         />

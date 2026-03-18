@@ -61,7 +61,7 @@ export default function BrandPage() {
         );
     }
 
-    if (!company || !company.isWebsiteLive) {
+    if (!company) {
         return (
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center">
                 <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">404 • Lost in Space</h1>
@@ -73,6 +73,11 @@ export default function BrandPage() {
 
     return (
         <div className="min-h-screen bg-black text-white selection:bg-warning-500 selection:text-black">
+            {!company.isWebsiteLive && (
+                <div className="sticky top-0 z-50 bg-warning-500/10 border-b border-warning-500/30 text-warning-100 px-4 py-3 text-sm font-semibold text-center">
+                    Preview Mode: This brand page isn&apos;t live yet, but you&apos;re viewing the draft preview.
+                </div>
+            )}
             {/* Cinematic Hero Section */}
             <section className="relative h-[80vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
                 {/* Animated Background Overlay */}

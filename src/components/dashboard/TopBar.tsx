@@ -149,13 +149,13 @@ const TopBar = ({ username, role }: TopbarProps) => {
             variant="flat"
             size="sm"
             aria-label="Notifications"
-            className={`relative min-w-9 w-9 h-9 md:w-10 md:h-10 rounded-xl transition-all duration-300 ${unreadCount > 0
-                ? "bg-warning-500/10 text-warning-500 border border-warning-500/20"
+            className={`relative min-w-9 w-9 h-9 md:w-10 md:h-10 rounded-xl transition-all duration-500 ${unreadCount > 0
+                ? "bg-warning-500/20 text-warning-600 border border-warning-500/40 shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-pulse"
                 : "bg-default-100/50 dark:bg-default-50/5 text-default-600 dark:text-default-400 hover:bg-default-200 dark:hover:bg-default-100/10"
               }`}
             onPress={() => setIsNotificationOpen((prev) => !prev)}
           >
-            <FiBell size={18} className={unreadCount > 0 ? "animate-pulse" : ""} />
+            <FiBell size={18} className={unreadCount > 0 ? "scale-110" : ""} />
             {unreadCount > 0 && (
               <div className="absolute -top-1 -right-1 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-500 opacity-75"></span>

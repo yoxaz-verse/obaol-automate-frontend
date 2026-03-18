@@ -140,17 +140,24 @@ export default function CompanySearch({
         const trimmed = nextValue.trim();
         setInputValue(value);
         if (onSearchChange) onSearchChange(value);
+
+        // If the user clears the input completely, reset the selection.
         if (!trimmed) {
           setSelectedKey(null);
           userSelectedKeyRef.current = null;
           if (onSelect) onSelect(null);
           return;
         }
-        const selected = companies.find((c) => String(c._id) === String(selectedKey));
-        if (selected && trimmed.toLowerCase() !== String(selected.name || "").toLowerCase()) {
-          setSelectedKey(null);
-          userSelectedKeyRef.current = null;
-          if (onSelect) onSelect(null);
+
+        // If currently selected name doesn't match the input, clear the key.
+        // This ensures a new selection MUST be selected from the list.
+        if (selectedKey) {
+          const selected = companies.find((c) => String(c._id) === String(selectedKey));
+          if (selected && trimmed.toLowerCase() !== (selected.name || "").toLowerCase()) {
+            setSelectedKey(null);
+            userSelectedKeyRef.current = null;
+            if (onSelect) onSelect(null);
+          }
         }
       }}
       onClear={() => {
@@ -160,6 +167,25 @@ export default function CompanySearch({
         if (onSearchChange) onSearchChange("");
         if (onSelect) onSelect(null);
       }}
+      onSelectionChange={(key: any) => {
+        if (!key) {
+           setSelectedKey(null);
+           userSelectedKeyRef.current = null;
+           if (onSelect) onSelect(null);
+           return;
+        }
+
+        const nextKey = String(key);
+        setSelectedKey(nextKey);
+        userSelectedKeyRef.current = nextKey;
+        
+        const match = companies.find((c) => String(c._id) === nextKey);
+        if (match) {
+          setInputValue(match.name || "");
+          if (onSearchChange) onSearchChange(match.name || "");
+        }
+        if (onSelect) onSelect(nextKey);
+      }}
       popoverProps={{
         offset: 10,
         classNames: {
@@ -168,17 +194,7 @@ export default function CompanySearch({
             "p-1 flex flex-col gap-2 border-small border-default-100 bg-background",
         },
       }}
-      onSelectionChange={(key: any) => {
-        const nextKey = (key as string) ?? null;
-        setSelectedKey(nextKey);
-        userSelectedKeyRef.current = nextKey;
-        const match = companies.find((c) => String(c._id) === String(nextKey));
-        if (match) {
-          setInputValue(match.name || "");
-          if (onSearchChange) onSearchChange(match.name || "");
-        }
-        if (onSelect) onSelect(nextKey);
-      }}
+      allowsCustomValue={true}
     >
       {(item: any) => (
         <AutocompleteItem

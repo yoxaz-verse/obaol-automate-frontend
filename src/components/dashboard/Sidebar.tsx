@@ -188,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                                     ? pathname === "/dashboard"
                                     : pathname === option.link || pathname.startsWith(`${option.link}/`);
                                 const isPendingItem = pendingLink === option.link;
-                                const hasDot = (dotMap[option.link] || 0) > 0;
+                                const hasDot = (dotMap[option.link] || 0) > 0 && !isActive;
                                 const content = (
                                     <Link
                                         key={`${section.label}-${index}`}

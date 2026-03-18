@@ -1295,7 +1295,8 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     }
   };
 
-  if (user?.role !== "Associate") return null;
+  const role = String(user?.role || "").toLowerCase();
+  if (role !== "associate") return null;
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -1308,14 +1309,14 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         </span>
       </Tooltip>
       <Modal
-        {...({
-          placement: "center",
-          isOpen: isOpen,
-          className: "text-foreground mx-4",
-          onOpenChange: onOpenChange,
-          size: "lg",
-          backdrop: "blur",
-        } as any)}
+        placement="center"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        isDismissable={false}
+        isKeyboardDismissDisabled={true}
+        className="text-foreground mx-4"
+        size="lg"
+        backdrop="blur"
       >
         <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
           {(onClose) => (
@@ -1409,14 +1410,14 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
       </Tooltip>
       {/* @ts-ignore */}
       <Modal
-        {...({
-          placement: "center",
-          isOpen: isOpen,
-          className: "text-foreground mx-4",
-          onOpenChange: onOpenChange,
-          size: "lg",
-          backdrop: "blur",
-        } as any)}
+        placement="center"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        isDismissable={false}
+        isKeyboardDismissDisabled={true}
+        className="text-foreground mx-4"
+        size="lg"
+        backdrop="blur"
       >
         <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
           {(onClose) => (

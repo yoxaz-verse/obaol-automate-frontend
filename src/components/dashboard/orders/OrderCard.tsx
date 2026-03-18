@@ -42,6 +42,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
     const procurementOwner = ownerLabelMap[data.responsibilities?.procurementBy] || "Not set";
     const vehicleNo = data.logistics?.vehicleNo || "No Vehicle Info";
     const transportCompany = data.logistics?.transportCompany || "In-house";
+    const isNew = data.createdAt ? (Date.now() - new Date(data.createdAt).getTime() < 86400000) : false;
 
     // Dynamic color for the accent bar based on status
     const getAccentColor = (s: string) => {
@@ -70,6 +71,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
             <Card className="h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-lg overflow-hidden group">
                 {/* Visual Accent Top Bar */}
                 <div className={`h-1.5 w-full ${getAccentColor(status)} shadow-sm opacity-80`} />
+
+                {/* Recently Opened / New Indicator Dot */}
+                {isNew && (
+                    <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
+                        <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                        </span>
+                    </div>
+                )}
 
                 <CardHeader className="flex flex-col items-start pb-0 px-4 pt-4 space-y-2">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-start gap-3">

@@ -378,6 +378,44 @@ const Dashboard: NextPage = () => {
     pendingCompanyApprovals,
   ]);
 
+  const pendingActionsList = useMemo(() => {
+    const missingLabel = (item: any) => {
+      if (!item?.sellerAcceptedAt) return "Awaiting supplier accept";
+      if (!item?.buyerConfirmedAt) return "Awaiting buyer confirm";
+      return "Awaiting conversion";
+    };
+
+    const baseList = enquiries.filter((item: any) => {
+      if (isAdmin) {
+        const isConverted = String(item?.status || "").toUpperCase() === "CONVERTED";
+        return !item?.sellerAcceptedAt || !item?.buyerConfirmedAt || !isConverted;
+      }
+
+      if (isAssociate) {
+        const isBuying = (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId;
+        const isSelling = (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId;
+        const sellerPending = isSelling && !item?.sellerAcceptedAt;
+        const buyerPending = isBuying && item?.sellerAcceptedAt && !item?.buyerConfirmedAt;
+        return sellerPending || buyerPending;
+      }
+
+      if (isOperatorUser) {
+        const assigned = (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId
+          || (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
+        if (!assigned) return false;
+        const status = String(item?.status || "").toUpperCase();
+        return !["COMPLETED", "CLOSED", "CANCELLED", "CONVERTED"].includes(status);
+      }
+
+      return false;
+    });
+
+    return baseList.slice(0, 10).map((item: any) => ({
+      id: item?._id,
+      missingStep: missingLabel(item),
+    }));
+  }, [enquiries, isAdmin, isAssociate, isOperatorUser, userId]);
+
   const welcomeName = isAssociate
     ? associateMetrics.associateName || user?.email
     : user?.name || user?.email || "User";
@@ -397,6 +435,381 @@ const Dashboard: NextPage = () => {
       : isOperatorUser
         ? operatorMetricsQuery.isError
         : false;
+
+  const renderActionCenter = () => (
+    <Card className="lg:col-span-2 border border-default-100 shadow-sm bg-content1/70">
+      <CardHeader>
+        <h4 className="font-semibold text-foreground">Action Center</h4>
+      </CardHeader>
+      <Divider />
+      <CardBody className="space-y-3">
+        {actionCenterItems.map((item) => (
+          <div key={item.label} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-default-200/60 rounded-xl p-3 bg-content1/70">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">{item.label}</span>
+                <Chip color={item.color} variant="flat" size="sm">
+                  {item.value}
+                </Chip>
+              </div>
+              <p className="text-xs text-default-500 mt-1">{item.detail}</p>
+            </div>
+            <Button
+              size="sm"
+              variant="flat"
+              color={item.color}
+              endContent={<FiArrowRight className="w-3.5 h-3.5" />}
+              onPress={() => router.push(item.route)}
+            >
+              Open
+            </Button>
+          </div>
+        ))}
+        <div className="border border-default-200/60 rounded-xl p-3 bg-content1/70">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Pending Actions</span>
+            <Button
+              size="sm"
+              variant="light"
+              className="text-xs"
+              onPress={() => router.push("/dashboard/enquiries")}
+            >
+              View all enquiries
+            </Button>
+          </div>
+          {pendingActionsList.length === 0 ? (
+            <div className="text-xs text-default-500">No pending actions right now.</div>
+          ) : (
+            <div className="space-y-2">
+              {pendingActionsList.map((item) => (
+                <button
+                  key={item.id}
+                  className="w-full flex items-center justify-between gap-2 text-left text-xs px-2 py-1.5 rounded-lg hover:bg-default-100/70 transition-colors"
+                  onClick={() => router.push(`/dashboard/enquiries/${item.id}`)}
+                >
+                  <span className="font-semibold text-foreground">
+                    Enquiry #{String(item.id || "").slice(-6).toUpperCase()}
+                  </span>
+                  <span className="text-default-500">{item.missingStep}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {actionCenterItems.length === 0 && (
+          <div className="text-xs text-default-500">No role-specific actions available.</div>
+        )}
+      </CardBody>
+    </Card>
+  );
+
+  const renderRecentActivity = () => (
+    <Card className="border border-default-100 shadow-sm bg-content1/70">
+      <CardHeader>
+        <h4 className="font-semibold text-foreground">Recent Activity</h4>
+      </CardHeader>
+      <Divider />
+      <CardBody className="space-y-3">
+        {enquiriesQuery.isLoading || ordersQuery.isLoading ? (
+          Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="space-y-2">
+              <Skeleton className="h-4 w-2/3 rounded-lg" />
+              <Skeleton className="h-3 w-1/2 rounded-lg" />
+            </div>
+          ))
+        ) : activityFeed.length > 0 ? (
+          activityFeed.map((item) => (
+            <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="font-medium text-foreground truncate">
+                  {item.type} #{String(item.id || "").slice(-6).toUpperCase()}
+                </div>
+                <div className="text-xs text-default-500 truncate">{item.status}</div>
+              </div>
+              <Chip size="sm" variant="flat">
+                {new Date(item.at).toLocaleDateString()}
+              </Chip>
+            </div>
+          ))
+        ) : (
+          <div className="text-xs text-default-400">
+            {isAssociate
+              ? "No associate activity yet. Start from Marketplace or Enquiries."
+              : isOperatorUser
+                ? "No assigned activity yet. Check your companies and enquiries."
+                : "No recent activity available yet."}
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
+
+  const renderShortcuts = () => (
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-wider text-default-500 mb-3">Priority Shortcuts</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {prioritizedLinks.map((option, index) => (
+          <div key={`${option.link}-${index}`} className="aspect-square">
+            <DashboardTile data={option} type="view" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderPartialService = () => (
+    (isAdmin || isAssociate || isOperatorUser) ? (
+      <Card className="border border-default-100 shadow-sm bg-content1/70">
+        <CardHeader className="flex items-center justify-between gap-3">
+          <div>
+            <h4 className="font-semibold text-foreground">Need Only One Service?</h4>
+            <p className="text-xs text-default-500">Create a partial service request for procurement, packaging, testing, transport, or customs.</p>
+          </div>
+          <Button
+            color="primary"
+            endContent={<FiArrowRight size={14} />}
+            onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
+          >
+            Create Partial Service
+          </Button>
+        </CardHeader>
+      </Card>
+    ) : null
+  );
+
+  const renderAdminDashboard = () => (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {actionCenterItems.map((item) => (
+          <InsightCard
+            key={item.label}
+            title={item.label}
+            metric={Number(item.value || 0).toLocaleString()}
+            icon={item.color === "warning" ? <FiClock size={18} /> : item.color === "primary" ? <FiActivity size={18} /> : <FiShoppingBag size={18} />}
+            footer={<span className="text-xs text-default-500">{item.detail}</span>}
+          />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <InsightCard
+          title="Total Enquiries"
+          metric={Number(systemMetrics.totalEnquiries ?? totalEnquiries).toLocaleString()}
+          trend={{
+            value: `${Number(systemMetrics.newEnquiriesToday ?? 0)} today`,
+            isPositive: true,
+          }}
+          icon={<FiActivity size={18} />}
+          footer={<span className="text-xs text-default-500">All-time inbound enquiry volume</span>}
+        />
+        <InsightCard
+          title="Pending Actions"
+          metric={adminActionRequired.toLocaleString()}
+          icon={<FiClock size={18} />}
+          footer={<span className="text-xs text-default-500">Need acceptance/confirmation/conversion</span>}
+        />
+        <InsightCard
+          title="Orders In Progress"
+          metric={activeOrders.toLocaleString()}
+          icon={<FiShoppingBag size={18} />}
+          footer={<span className="text-xs text-default-500">Operational orders currently active</span>}
+        />
+        <InsightCard
+          title="Completion Rate"
+          metric={`${orderCompletionPct}%`}
+          icon={<FiCheckCircle size={18} />}
+          footer={<span className="text-xs text-default-500">Completed orders out of all created orders</span>}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 h-[350px]">
+          {trendQuery.isLoading ? (
+            <Card className="h-full border border-default-100 bg-content1/70">
+              <CardBody className="p-5 space-y-4">
+                <Skeleton className="h-5 w-1/3 rounded-lg" />
+                <Skeleton className="h-full w-full rounded-lg" />
+              </CardBody>
+            </Card>
+          ) : trendQuery.isError ? (
+            <Card className="h-full border border-danger-200 bg-danger-50/40 dark:bg-danger-500/10">
+              <CardBody className="flex items-center justify-center text-sm text-danger-700 dark:text-danger-300">
+                Unable to load enquiry trend chart.
+              </CardBody>
+            </Card>
+          ) : (
+            <TrendChart
+              title="Enquiry Trends (Last 30 Days)"
+              data={Array.isArray(trendList) ? trendList : []}
+              dataKey="count"
+              categoryKey="_id"
+              color="#06b6d4"
+              type="area"
+            />
+          )}
+        </div>
+
+        <Card className="bg-content1/70 border border-default-100 shadow-sm">
+          <CardHeader className="pb-2">
+            <h4 className="font-semibold text-foreground">Top Performing Products</h4>
+          </CardHeader>
+          <CardBody className="pt-0 space-y-3">
+            {topProductsQuery.isLoading ? (
+              Array.from({ length: 4 }).map((_, idx) => <Skeleton key={idx} className="h-5 w-full rounded-lg" />)
+            ) : topProductsQuery.isError ? (
+              <div className="text-xs text-danger-500">Unable to load product analytics.</div>
+            ) : (Array.isArray(topProducts) ? topProducts : []).length > 0 ? (
+              (Array.isArray(topProducts) ? topProducts : []).slice(0, 5).map((prod: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between text-sm">
+                  <span className="truncate max-w-[70%] text-default-600">{prod?.name || "Unknown Product"}</span>
+                  <Chip size="sm" variant="flat" color="primary">
+                    {prod?.enquiryCount || 0}
+                  </Chip>
+                </div>
+              ))
+            ) : (
+              <div className="text-xs text-default-400">No product analytics available yet.</div>
+            )}
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {renderActionCenter()}
+        {renderRecentActivity()}
+      </div>
+
+      {renderShortcuts()}
+      {renderPartialService()}
+    </>
+  );
+
+  const renderAssociateDashboard = () => (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <InsightCard
+          title="Action Required"
+          metric={associateActionRequired.toLocaleString()}
+          icon={<FiClock size={18} />}
+          footer={<span className="text-xs text-default-500">Pending your accept/confirm actions</span>}
+        />
+        <InsightCard
+          title="Buying Enquiries"
+          metric={(Number(associateMetrics.totalInquiries || associateBuyingCount) || 0).toLocaleString()}
+          icon={<FiShoppingBag size={18} />}
+          footer={<span className="text-xs text-default-500">Enquiries where you are buyer-side</span>}
+        />
+        <InsightCard
+          title="Selling Enquiries"
+          metric={associateSellingCount.toLocaleString()}
+          icon={<FiPackage size={18} />}
+          footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
+        />
+        <InsightCard
+          title="Live Catalog Presence"
+          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
+          icon={<FiTrendingUp size={18} />}
+          footer={<span className="text-xs text-default-500">Your currently live products</span>}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 border border-default-100 shadow-sm bg-content1/70">
+          <CardHeader className="pb-1">
+            <h4 className="font-semibold text-foreground">Conversion Readiness</h4>
+          </CardHeader>
+          <CardBody className="pt-0">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-default-500">Orders Completed Ratio</span>
+              <span className="font-semibold">{orderCompletionPct}%</span>
+            </div>
+            <Progress value={orderCompletionPct} color="success" className="max-w-full" />
+            <p className="text-xs text-default-500 mt-3">
+              Keep responses fast on supplier acceptance and buyer confirmation to improve conversion speed.
+            </p>
+          </CardBody>
+        </Card>
+
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardHeader>
+            <h4 className="font-semibold text-foreground">Active Orders</h4>
+          </CardHeader>
+          <Divider />
+          <CardBody className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-default-500">Active orders</span>
+              <span className="font-semibold">{activeOrders.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-default-500">Completed orders</span>
+              <span className="font-semibold">{completedOrders.toLocaleString()}</span>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {renderActionCenter()}
+        {renderRecentActivity()}
+      </div>
+
+      {renderShortcuts()}
+      {renderPartialService()}
+    </>
+  );
+
+  const renderOperatorDashboard = () => {
+    const totalAssignedProducts = Number(operatorMetrics.totalAssignedProducts || 0);
+    const liveAssignedProducts = Number(operatorMetrics.liveAssignedProducts || 0);
+    return (
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <InsightCard
+            title="Pending Assigned Enquiries"
+            metric={Number(operatorMetrics.pendingAssignedEnquiries || 0).toLocaleString()}
+            icon={<FiClock size={18} />}
+            footer={<span className="text-xs text-default-500">Assigned enquiries awaiting next action</span>}
+          />
+          <InsightCard
+            title="Assigned Companies"
+            metric={Number(operatorMetrics.assignedCompanies || 0).toLocaleString()}
+            icon={<FiUsers size={18} />}
+            footer={<span className="text-xs text-default-500">Companies currently mapped to you</span>}
+          />
+          <InsightCard
+            title="Live-rate Gap"
+            metric={Math.max(totalAssignedProducts - liveAssignedProducts, 0).toLocaleString()}
+            icon={<FiTrendingUp size={18} />}
+            footer={<span className="text-xs text-default-500">Assigned products not yet live</span>}
+          />
+          <InsightCard
+            title="Assigned Products"
+            metric={`${liveAssignedProducts}/${totalAssignedProducts}`}
+            icon={<FiBox size={18} />}
+            footer={<span className="text-xs text-default-500">Live products out of assigned products</span>}
+          />
+        </div>
+
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardHeader>
+            <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
+          </CardHeader>
+          <Divider />
+          <CardBody>
+            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user.id }} hideAdd={true} />
+          </CardBody>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {renderActionCenter()}
+          {renderRecentActivity()}
+        </div>
+
+        {renderShortcuts()}
+        {renderPartialService()}
+      </>
+    );
+  };
 
   return (
     <div className="w-full p-4 md:p-6 space-y-6">
@@ -433,79 +846,7 @@ const Dashboard: NextPage = () => {
             </Card>
           ))}
         </div>
-      ) : (
-        <>
-          {(isAdmin || isOperatorUser) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <InsightCard
-                title="Total Enquiries"
-                metric={(
-                  isOperatorUser
-                    ? Number(operatorMetrics.totalAssignedEnquiries ?? 0)
-                    : Number(systemMetrics.totalEnquiries ?? totalEnquiries)
-                ).toLocaleString()}
-                trend={{
-                  value: `${isOperatorUser ? Number(operatorMetrics.newAssignedEnquiriesToday ?? 0) : Number(systemMetrics.newEnquiriesToday ?? 0)} today`,
-                  isPositive: true,
-                }}
-                icon={<FiActivity size={18} />}
-                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Assigned enquiry volume" : "All-time inbound enquiry volume"}</span>}
-              />
-              <InsightCard
-                title={isOperatorUser ? "Assigned Companies" : "Pending Actions"}
-                metric={(isOperatorUser ? Number(operatorMetrics.assignedCompanies ?? 0) : adminActionRequired).toLocaleString()}
-                icon={isOperatorUser ? <FiUsers size={18} /> : <FiClock size={18} />}
-                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Associate companies mapped to you" : "Need acceptance/confirmation/conversion"}</span>}
-              />
-              <InsightCard
-                title={isOperatorUser ? "Assigned Products Live" : "Orders In Progress"}
-                metric={
-                  isOperatorUser
-                    ? `${Number(operatorMetrics.liveAssignedProducts ?? 0)}/${Number(operatorMetrics.totalAssignedProducts ?? 0)}`
-                    : activeOrders.toLocaleString()
-                }
-                icon={isOperatorUser ? <FiTrendingUp size={18} /> : <FiShoppingBag size={18} />}
-                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Live products out of assigned products" : "Operational orders currently active"}</span>}
-              />
-              <InsightCard
-                title={isOperatorUser ? "Live Activation Rate" : "Completion Rate"}
-                metric={`${isOperatorUser ? Number(operatorMetrics.liveProductPercentage ?? 0) : orderCompletionPct}%`}
-                icon={<FiCheckCircle size={18} />}
-                footer={<span className="text-xs text-default-500">{isOperatorUser ? "Share of assigned products currently live" : "Completed orders out of all created orders"}</span>}
-              />
-            </div>
-          )}
-
-          {isAssociate && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <InsightCard
-                title="Buying Enquiries"
-                metric={(Number(associateMetrics.totalInquiries || associateBuyingCount) || 0).toLocaleString()}
-                icon={<FiShoppingBag size={18} />}
-                footer={<span className="text-xs text-default-500">Enquiries where you are buyer-side</span>}
-              />
-              <InsightCard
-                title="Selling Enquiries"
-                metric={associateSellingCount.toLocaleString()}
-                icon={<FiPackage size={18} />}
-                footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
-              />
-              <InsightCard
-                title="Action Required"
-                metric={associateActionRequired.toLocaleString()}
-                icon={<FiClock size={18} />}
-                footer={<span className="text-xs text-default-500">Pending your accept/confirm actions</span>}
-              />
-              <InsightCard
-                title="Live Catalog Presence"
-                metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
-                icon={<FiTrendingUp size={18} />}
-                footer={<span className="text-xs text-default-500">Your currently live products</span>}
-              />
-            </div>
-          )}
-        </>
-      )}
+      ) : null}
 
       {executiveError ? (
         <Card className="border border-danger-200 bg-danger-50/40 dark:bg-danger-500/10">
@@ -515,221 +856,9 @@ const Dashboard: NextPage = () => {
         </Card>
       ) : null}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader>
-            <h4 className="font-semibold text-foreground">Action Center</h4>
-          </CardHeader>
-          <Divider />
-          <CardBody className="space-y-3">
-            {actionCenterItems.map((item) => (
-              <div key={item.label} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-default-200/60 rounded-xl p-3 bg-content1/70">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground">{item.label}</span>
-                    <Chip color={item.color} variant="flat" size="sm">
-                      {item.value}
-                    </Chip>
-                  </div>
-                  <p className="text-xs text-default-500 mt-1">{item.detail}</p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color={item.color}
-                  endContent={<FiArrowRight className="w-3.5 h-3.5" />}
-                  onPress={() => router.push(item.route)}
-                >
-                  Open
-                </Button>
-              </div>
-            ))}
-            {actionCenterItems.length === 0 && (
-              <div className="text-xs text-default-500">No role-specific actions available.</div>
-            )}
-          </CardBody>
-        </Card>
-
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader>
-            <h4 className="font-semibold text-foreground">Recent Activity</h4>
-          </CardHeader>
-          <Divider />
-          <CardBody className="space-y-3">
-            {enquiriesQuery.isLoading || ordersQuery.isLoading ? (
-              Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="space-y-2">
-                  <Skeleton className="h-4 w-2/3 rounded-lg" />
-                  <Skeleton className="h-3 w-1/2 rounded-lg" />
-                </div>
-              ))
-            ) : activityFeed.length > 0 ? (
-              activityFeed.map((item) => (
-                <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-medium text-foreground truncate">
-                      {item.type} #{String(item.id || "").slice(-6).toUpperCase()}
-                    </div>
-                    <div className="text-xs text-default-500 truncate">{item.status}</div>
-                  </div>
-                  <Chip size="sm" variant="flat">
-                    {new Date(item.at).toLocaleDateString()}
-                  </Chip>
-                </div>
-              ))
-            ) : (
-              <div className="text-xs text-default-400">
-                {isAssociate
-                  ? "No associate activity yet. Start from Marketplace or Enquiries."
-                  : isOperatorUser
-                    ? "No assigned activity yet. Check your companies and enquiries."
-                    : "No recent activity available yet."}
-              </div>
-            )}
-          </CardBody>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {isAdmin && (
-          <div className="lg:col-span-2 h-[350px]">
-            {trendQuery.isLoading ? (
-              <Card className="h-full border border-default-100 bg-content1/70">
-                <CardBody className="p-5 space-y-4">
-                  <Skeleton className="h-5 w-1/3 rounded-lg" />
-                  <Skeleton className="h-full w-full rounded-lg" />
-                </CardBody>
-              </Card>
-            ) : trendQuery.isError ? (
-              <Card className="h-full border border-danger-200 bg-danger-50/40 dark:bg-danger-500/10">
-                <CardBody className="flex items-center justify-center text-sm text-danger-700 dark:text-danger-300">
-                  Unable to load enquiry trend chart.
-                </CardBody>
-              </Card>
-            ) : (
-              <TrendChart
-                title="Enquiry Trends (Last 30 Days)"
-                data={Array.isArray(trendList) ? trendList : []}
-                dataKey="count"
-                categoryKey="_id"
-                color="#06b6d4"
-                type="area"
-              />
-            )}
-          </div>
-        )}
-
-        <div className={`space-y-4 ${isAdmin ? "" : "lg:col-span-3"}`}>
-          {isAssociate ? (
-            <Card className="border border-default-100 shadow-sm bg-content1/70">
-              <CardHeader className="pb-1">
-                <h4 className="font-semibold text-foreground">Conversion Readiness</h4>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-default-500">Orders Completed Ratio</span>
-                  <span className="font-semibold">{orderCompletionPct}%</span>
-                </div>
-                <Progress value={orderCompletionPct} color="success" className="max-w-full" />
-                <p className="text-xs text-default-500 mt-3">
-                  Keep responses fast on supplier acceptance and buyer confirmation to improve conversion speed.
-                </p>
-              </CardBody>
-            </Card>
-          ) : (
-            <Card className="bg-content1/70 border border-default-100 shadow-sm">
-              <CardHeader className="pb-2">
-                <h4 className="font-semibold text-foreground">{isOperatorUser ? "My Assignment Snapshot" : "System Snapshot"}</h4>
-              </CardHeader>
-              <CardBody className="pt-0 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiUsers size={14} /> {isOperatorUser ? "Assigned Companies" : "Associates"}</span>
-                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.assignedCompanies ?? 0) : Number(systemMetrics.totalAssociates ?? 0)).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiBox size={14} /> {isOperatorUser ? "Assigned Products" : "Total Enquiries"}</span>
-                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.totalAssignedProducts ?? 0) : totalEnquiries).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiTrendingUp size={14} /> {isOperatorUser ? "Live Assigned Products" : "Live Rates"}</span>
-                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.liveAssignedProducts ?? 0) : Number(systemMetrics.totalLiveRates ?? 0)).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-default-500 flex items-center gap-2"><FiLayers size={14} /> {isOperatorUser ? "Pending Assigned Enquiries" : "Converted Enquiries"}</span>
-                  <span className="font-semibold">{(isOperatorUser ? Number(operatorMetrics.pendingAssignedEnquiries ?? 0) : convertedEnquiries).toLocaleString()}</span>
-                </div>
-              </CardBody>
-            </Card>
-          )}
-
-          {isAdmin && (
-            <Card className="bg-content1/70 border border-default-100 shadow-sm">
-              <CardHeader className="pb-2">
-                <h4 className="font-semibold text-foreground">Top Performing Products</h4>
-              </CardHeader>
-              <CardBody className="pt-0 space-y-3">
-                {topProductsQuery.isLoading ? (
-                  Array.from({ length: 4 }).map((_, idx) => <Skeleton key={idx} className="h-5 w-full rounded-lg" />)
-                ) : topProductsQuery.isError ? (
-                  <div className="text-xs text-danger-500">Unable to load product analytics.</div>
-                ) : (Array.isArray(topProducts) ? topProducts : []).length > 0 ? (
-                  (Array.isArray(topProducts) ? topProducts : []).slice(0, 5).map((prod: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between text-sm">
-                      <span className="truncate max-w-[70%] text-default-600">{prod?.name || "Unknown Product"}</span>
-                      <Chip size="sm" variant="flat" color="primary">
-                        {prod?.enquiryCount || 0}
-                      </Chip>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-xs text-default-400">No product analytics available yet.</div>
-                )}
-              </CardBody>
-            </Card>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-bold uppercase tracking-wider text-default-500 mb-3">Priority Shortcuts</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {prioritizedLinks.map((option, index) => (
-            <div key={`${option.link}-${index}`} className="aspect-square">
-              <DashboardTile data={option} type="view" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {(isAdmin || isAssociate || isOperatorUser) && (
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader className="flex items-center justify-between gap-3">
-            <div>
-              <h4 className="font-semibold text-foreground">Need Only One Service?</h4>
-              <p className="text-xs text-default-500">Create a partial service request for procurement, packaging, testing, transport, or customs.</p>
-            </div>
-            <Button
-              color="primary"
-              endContent={<FiArrowRight size={14} />}
-              onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
-            >
-              Create Partial Service
-            </Button>
-          </CardHeader>
-        </Card>
-      )}
-
-      {isOperatorUser && (
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader>
-            <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user.id }} hideAdd={true} />
-          </CardBody>
-        </Card>
-      )}
+      {isAdmin && renderAdminDashboard()}
+      {isAssociate && renderAssociateDashboard()}
+      {isOperatorUser && !isAdmin && !isAssociate && renderOperatorDashboard()}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import React from "react";
 import { NextPage } from "next";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer, Card, CardBody, User, Chip, Skeleton, Divider, Tooltip } from "@heroui/react";
+import { Spacer, Card, CardBody, User, Chip, Skeleton, Divider, Tooltip } from "@nextui-org/react";
 import { associateCompanyRoutes, apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
@@ -53,7 +53,6 @@ const CompanyProfilePage: NextPage = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-background">
             <div className="w-[95%] max-w-7xl py-8">
-                {/* @ts-ignore */}
                 <Spacer y={2} />
 
                 {/* Company Header */}
@@ -192,7 +191,6 @@ const CompanyProfilePage: NextPage = () => {
                     additionalParams={{ associateCompany: companyId }}
                 />
 
-                {/* @ts-ignore */}
                 <Spacer y={4} />
             </div>
         </div>

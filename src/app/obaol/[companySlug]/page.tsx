@@ -49,6 +49,11 @@ const PublicCatalogPage = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen">
+            {!companyInfo?.isWebsiteLive && (
+                <div className="mb-6 rounded-xl border border-warning-500/40 bg-warning-500/10 px-4 py-3 text-sm font-semibold text-warning-600">
+                    Preview Mode: This company catalog isn&apos;t live yet, but you&apos;re viewing the draft preview.
+                </div>
+            )}
             {/* Header */}
             <div className="mb-8 text-center md:text-left border-b border-default-200 pb-6">
                 <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent inline-block">

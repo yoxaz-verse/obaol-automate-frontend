@@ -538,7 +538,16 @@ export default function ExecutionEnquiriesPage() {
                 <CardBody className="pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {enq.tasks.map((row: any) => (
-                      <Card key={row.key} className="border border-default-200">
+                        <Card key={row.key} className="border border-default-200 relative overflow-hidden">
+                          {/* Recently Opened / New Indicator Dot */}
+                          {enq.createdAt && (Date.now() - new Date(enq.createdAt).getTime() < 86400000) && (
+                              <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
+                                  <span className="relative flex h-2 w-2">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                                  </span>
+                              </div>
+                          )}
                         <CardHeader className="flex justify-between items-start gap-2">
                           <div>
                             <div className="font-semibold">{row.title}</div>
@@ -743,7 +752,16 @@ export default function ExecutionEnquiriesPage() {
               const canBid = roleLower === "associate" ? isCandidate : isAdmin;
 
               return (
-                <Card key={key} className="border border-default-200 shadow-sm">
+                <Card key={key} className="border border-default-200 shadow-sm relative overflow-hidden">
+                  {/* Recently Opened / New Indicator Dot */}
+                  {item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 86400000) && (
+                      <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
+                          <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                          </span>
+                      </div>
+                  )}
                   <CardHeader className="flex justify-between items-start gap-3">
                     <div>
                       <div className="text-[10px] uppercase tracking-widest font-bold text-default-400">{item.requestType}</div>

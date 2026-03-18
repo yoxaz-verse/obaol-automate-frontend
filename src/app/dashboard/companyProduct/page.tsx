@@ -21,7 +21,7 @@ const Tab = HeroTab as any;
 const Chip = HeroChip as any;
 const Select = HeroSelect as any;
 const Switch = HeroSwitch as any;
-import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo, LuCopy } from "react-icons/lu";
+import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo, LuCopy, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import AddModal from "@/components/CurdTable/add-model";
 import AuthContext from "@/context/AuthContext";
@@ -32,7 +32,6 @@ import {
   operatorRoutes,
   associateRoutes,
 } from "@/core/api/apiRoutes";
-import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { FormField } from "@/data/interface-data";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
@@ -494,11 +493,12 @@ export default function CompanyProductPage() {
       return;
     }
 
-    const existsInCurrentList = filteredCompanies.some((c: any) => c._id === selectedCompanyId);
-    if (!existsInCurrentList) {
-      setSelectedCompanyId(filteredCompanies[0]._id);
+    // Only auto-select if we are an operator with exactly one company assigned
+    // Otherwise, let the user choose manually to avoid "automatic selection" glitches.
+    if (isOperatorUser && !selectedCompanyId && allCompanies.length === 1) {
+      setSelectedCompanyId(allCompanies[0]._id);
     }
-  }, [activeTab, filteredCompanies, selectedCompanyId]);
+  }, [activeTab, filteredCompanies, selectedCompanyId, isOperatorUser, allCompanies]);
 
   if (loadingCompanies) {
     return (
@@ -520,31 +520,10 @@ export default function CompanyProductPage() {
     };
   };
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
-      <div className="mb-4 max-w-[460px]">
-        <CompanySearch
-          defaultSelected={selectedCompanyId}
-          onSelect={(id) => {
-            if (!id) {
-              setSelectedCompanyId(null);
-              return;
-            }
-            const selected = allCompanies.find((company) => String(company._id) === String(id));
-            if (selected) {
-              const isLive = (selected.stats?.liveProducts || 0) > 0;
-              const isActive = (selected.stats?.totalProducts || 0) > 0 && (selected.stats?.liveProducts || 0) === 0;
-              const isEmpty = (selected.stats?.totalProducts || 0) === 0;
-              if (isLive) setActiveTab("live");
-              else if (isActive) setActiveTab("active");
-              else if (isEmpty) setActiveTab("empty");
-              else setActiveTab("dormant");
-            }
-            setSelectedCompanyId(id);
-          }}
-          onSearchChange={(value) => setCompanySearch(value)}
-        />
-      </div>
       {isOperatorUser && (
         <Card className="mb-4 p-4 bg-background/60 backdrop-blur-md border-none shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -578,14 +557,36 @@ export default function CompanyProductPage() {
           </div>
         </Card>
       )}
-      <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px]">
+      <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px] relative">
+        <Button
+            isIconOnly
+            variant="flat"
+            size="sm"
+            className={`absolute top-4 z-20 transition-all duration-300 dark:bg-default-100/30 border border-default-200/70 dark:border-default-500/40 ${isSidebarCollapsed ? "-left-3" : "left-[285px] lg:left-[325px]"}`}
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        >
+            {isSidebarCollapsed ? <LuChevronRight size={16} /> : <LuChevronLeft size={16} />}
+        </Button>
 
         {/* --- Sidebar (Master) --- */}
-        <div className="w-full md:w-[300px] lg:w-[340px] flex flex-col gap-3">
+        {!isSidebarCollapsed && (
+          <div className="w-full md:w-[300px] lg:w-[340px] flex flex-col gap-3 flex-shrink-0 transition-all duration-300 animate-in slide-in-from-left duration-300">
           <Card className="bg-content1 border border-default-200/80 shadow-sm h-full overflow-hidden flex flex-col">
             {/* Sidebar header */}
             <div className="px-4 pt-4 pb-3 border-b border-default-100">
               <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
+              <Input
+                value={companySearch}
+                onChange={(event) => setCompanySearch(event.target.value)}
+                placeholder="Search company name"
+                size="sm"
+                variant="bordered"
+                classNames={{
+                  inputWrapper: "bg-background/50 border-default-200/70",
+                }}
+                isClearable
+                onClear={() => setCompanySearch("")}
+              />
             </div>
 
             {/* Filter tabs */}
@@ -663,6 +664,7 @@ export default function CompanyProductPage() {
             </div>
           </Card>
         </div>
+        )}
 
         {/* --- Main Content (Detail) --- */}
         <div className="flex-1 min-w-0">

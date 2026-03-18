@@ -43,12 +43,22 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                 <div
                     className="h-1.5 w-full bg-gradient-to-r"
                     style={{
-                        backgroundImage: `linear-gradient(to right, ${data.dateColor === 'success' ? '#22c55e, #10b981' :
+                    backgroundImage: `linear-gradient(to right, ${data.dateColor === 'success' ? '#22c55e, #10b981' :
                             data.dateColor === 'warning' ? '#f59e0b, #fbbf24' :
                                 data.dateColor === 'primary' ? '#06b6d4, #3b82f6' :
                                     '#64748b, #94a3b8'})`
                     }}
                 />
+
+                {/* Recently Opened / New Indicator Dot */}
+                {data.dateColor === 'success' && (
+                    <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
+                        <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                        </span>
+                    </div>
+                )}
 
                 <CardHeader className="flex flex-col items-start pb-0 px-3 sm:px-4 pt-4 space-y-2">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-start gap-3 sm:gap-4">

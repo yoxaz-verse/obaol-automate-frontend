@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -22,6 +22,8 @@ import {
   useDisclosure,
   Tooltip,
   Spinner,
+  Autocomplete,
+  AutocompleteItem,
 } from "@nextui-org/react";
 import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -220,19 +222,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
     queryKey: ["sample-request-districts"],
     queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
   });
-  const { data: citiesResponse } = useQuery({
-    queryKey: ["sample-request-cities"],
-    queryFn: () => getData(apiRoutes.city.getAll, { page: 1, limit: 4000 }),
-  });
   const states = Array.isArray(statesResponse?.data?.data?.data)
     ? statesResponse?.data?.data?.data
     : (statesResponse?.data?.data || []);
   const districts = Array.isArray(districtsResponse?.data?.data?.data)
     ? districtsResponse?.data?.data?.data
     : (districtsResponse?.data?.data || []);
-  const cities = Array.isArray(citiesResponse?.data?.data?.data)
-    ? citiesResponse?.data?.data?.data
-    : (citiesResponse?.data?.data || []);
 
   const inventorySummaryMap = new Map<string, { totalQty: number; warehouses: Set<string> }>();
   for (const inv of inventoryRows || []) {
@@ -675,7 +670,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             variantRate={rowItem}
                             states={states}
                             districts={districts}
-                            cities={cities}
                           />
                           {canAddInventory && (
                             <Button
@@ -746,7 +740,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   variantRate={rowItem}
                                   states={states}
                                   districts={districts}
-                                  cities={cities}
                                 />
                                 {canAddInventory && (
                                   <Button
@@ -768,15 +761,21 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
                                   Not Live
                                 </span>
-                                {/* Admin can create enquiries even on offline rates */}
                                 {isAdminUser && !rowItem.isCatalogView && (
-                                  <CreateEnquiryButton
-                                    productVariant={
-                                      rowItem.productVariantId ||
-                                      rowItem.variantRate?.productVariant?._id
-                                    }
-                                    variantRate={rowItem}
-                                  />
+                                  <div className="flex items-center gap-2">
+                                    <CreateEnquiryButton
+                                      productVariant={
+                                        rowItem.productVariantId ||
+                                        rowItem.variantRate?.productVariant?._id
+                                      }
+                                      variantRate={rowItem}
+                                    />
+                                    <RequestSampleButton
+                                      variantRate={rowItem}
+                                      states={states}
+                                      districts={districts}
+                                    />
+                                  </div>
                                 )}
                                 {canAddInventory && (
                                   <Button
@@ -930,16 +929,24 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               variantRate={item}
                               states={states}
                               districts={districts}
-                              cities={cities}
                             />
                           </>
                         ) : (
-                          !item.isCatalogView && (isLive || isAdminUser) && (
-                            <CreateEnquiryButton
-                              productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
-                              variantRate={item}
-                            />
-                          )
+                          <div className="flex flex-col gap-2">
+                            {!item.isCatalogView && (isLive || isAdminUser) && (
+                              <CreateEnquiryButton
+                                productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
+                                variantRate={item}
+                              />
+                            )}
+                            {(isAdminUser || (isLive && !item.isCatalogView)) && (
+                              <RequestSampleButton
+                                variantRate={item}
+                                states={states}
+                                districts={districts}
+                              />
+                            )}
+                          </div>
                         )}
                         {canAddInventory && (
                           <Button
@@ -1234,35 +1241,70 @@ interface RequestSampleButtonProps {
   variantRate: any;
   states: any[];
   districts: any[];
-  cities: any[];
 }
 
 const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   variantRate,
   states,
   districts,
-  cities,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { user } = useContext(AuthContext);
   const [requestState, setRequestState] = useState("");
   const [requestDistrict, setRequestDistrict] = useState("");
   const [requestCity, setRequestCity] = useState("");
+  const [requestAddress, setRequestAddress] = useState("");
+  const [requestPincode, setRequestPincode] = useState("");
+  const [pincodeSearch, setPincodeSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const districtOptions = requestState
-    ? districts.filter((d: any) => String(d.state?._id || d.state) === String(requestState))
-    : districts;
-  const cityOptions = requestDistrict
-    ? cities.filter((c: any) => String(c.district?._id || c.district) === String(requestDistrict))
-    : cities;
+  // Dynamic Cities Fetching
+  const { data: cityResponse, isLoading: citiesLoading } = useQuery({
+    queryKey: ["request-cities", requestDistrict],
+    queryFn: () => getData(apiRoutes.city.getAll, { district: requestDistrict, limit: 1000 }),
+    enabled: !!requestDistrict,
+  });
+
+  // Dynamic Pincodes Fetching
+  const { data: pincodeResponse, isLoading: pincodesLoading } = useQuery({
+    queryKey: ["request-pincodes", pincodeSearch],
+    queryFn: () => getData(apiRoutes.pincodeEntry.getAll, { search: pincodeSearch, limit: 100 }),
+    enabled: !!pincodeSearch && pincodeSearch.length >= 2,
+  });
+
+  const cityOptions = useMemo(() => {
+    const raw = cityResponse?.data?.data?.data || cityResponse?.data?.data || cityResponse?.data || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [cityResponse]);
+
+  const pincodeOptions = useMemo(() => {
+    const raw = pincodeResponse?.data?.data?.data || pincodeResponse?.data?.data || pincodeResponse?.data || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [pincodeResponse]);
+
+  const districtOptions = useMemo(() => {
+    return districts.filter((d: any) => String(d.state?._id || d.state) === String(requestState));
+  }, [districts, requestState]);
 
   const handleSubmit = async () => {
     if (!requestState || !requestDistrict || !requestCity) {
       showToastMessage({
         type: "error",
         message: "Select state, district, and city.",
-        position: "top-right",
+      });
+      return;
+    }
+    if (!requestAddress.trim()) {
+      showToastMessage({
+        type: "error",
+        message: "Enter the full address.",
+      });
+      return;
+    }
+    if (!requestPincode.trim()) {
+      showToastMessage({
+        type: "error",
+        message: "Select or enter the pincode.",
       });
       return;
     }
@@ -1274,21 +1316,23 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         requestState,
         requestDistrict,
         requestCity,
+        requestAddress: requestAddress.trim(),
+        requestPincode: requestPincode.trim(),
       });
       showToastMessage({
         type: "success",
         message: "Sample request sent to supplier.",
-        position: "top-right",
       });
       setRequestState("");
       setRequestDistrict("");
       setRequestCity("");
+      setRequestAddress("");
+      setRequestPincode("");
       onOpenChange();
     } catch (error: any) {
       showToastMessage({
         type: "error",
         message: error?.response?.data?.message || "Unable to request sample.",
-        position: "top-right",
       });
     } finally {
       setSubmitting(false);
@@ -1327,54 +1371,111 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                   Confirm location for sample delivery
                 </p>
               </ModalHeader>
-              <ModalBody className="py-4 px-6 overflow-y-auto">
-                <Select
-                  label="State"
-                  selectedKeys={requestState ? [requestState] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys as Set<string>)[0] || "";
-                    setRequestState(value);
-                    setRequestDistrict("");
-                    setRequestCity("");
-                  }}
-                >
-                  {states.map((state: any) => (
-                    <SelectItem key={state._id} value={state._id}>
-                      {state.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="District"
-                  selectedKeys={requestDistrict ? [requestDistrict] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys as Set<string>)[0] || "";
-                    setRequestDistrict(value);
-                    setRequestCity("");
-                  }}
-                >
-                  {districtOptions.map((district: any) => (
-                    <SelectItem key={district._id} value={district._id}>
-                      {district.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="City"
-                  selectedKeys={requestCity ? [requestCity] : []}
-                  onSelectionChange={(keys) => {
-                    const value = Array.from(keys as Set<string>)[0] || "";
-                    setRequestCity(value);
-                  }}
-                >
-                  {cityOptions.map((city: any) => (
-                    <SelectItem key={city._id} value={city._id}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <div className="text-xs text-default-500">
-                  Are you sure you want to request a sample? Supplier will provide minimum quantity and quote.
+              <ModalBody className="py-6 px-8 flex flex-col gap-6 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Select
+                    label="State"
+                    labelPlacement="outside"
+                    placeholder="Select state"
+                    variant="bordered"
+                    selectedKeys={requestState ? [requestState] : []}
+                    onSelectionChange={(keys) => {
+                      const value = Array.from(keys as Set<string>)[0] || "";
+                      setRequestState(value);
+                      setRequestDistrict("");
+                      setRequestCity("");
+                      setRequestPincode("");
+                    }}
+                  >
+                    {states.map((state: any) => (
+                      <SelectItem key={state._id} value={state._id}>
+                        {state.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  <Select
+                    label="District"
+                    labelPlacement="outside"
+                    placeholder="Select district"
+                    variant="bordered"
+                    selectedKeys={requestDistrict ? [requestDistrict] : []}
+                    isDisabled={!requestState}
+                    onSelectionChange={(keys) => {
+                      const value = Array.from(keys as Set<string>)[0] || "";
+                      setRequestDistrict(value);
+                      setRequestCity("");
+                      setRequestPincode("");
+                    }}
+                  >
+                    {districtOptions.map((district: any) => (
+                      <SelectItem key={district._id} value={district._id}>
+                        {district.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Select
+                    label="City"
+                    labelPlacement="outside"
+                    placeholder={citiesLoading ? "Loading cities..." : "Select city"}
+                    variant="bordered"
+                    selectedKeys={requestCity ? [requestCity] : []}
+                    isDisabled={!requestDistrict || citiesLoading}
+                    isLoading={citiesLoading}
+                    onSelectionChange={(keys) => {
+                      const value = Array.from(keys as Set<string>)[0] || "";
+                      setRequestCity(value);
+                      setRequestPincode("");
+                    }}
+                  >
+                    {cityOptions.map((city: any) => (
+                      <SelectItem key={city._id} value={city._id}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+
+                  {/* @ts-ignore */}
+                  <Autocomplete
+                    label="Pincode"
+                    labelPlacement="outside"
+                    placeholder={pincodesLoading ? "Searching..." : "Type pincode or office..."}
+                    variant="bordered"
+                    selectedKey={requestPincode || null}
+                    isLoading={pincodesLoading}
+                    allowsCustomValue={true}
+                    onSelectionChange={(key) => setRequestPincode(String(key || ""))}
+                    onInputChange={(value) => {
+                      setRequestPincode(value);
+                      setPincodeSearch(value);
+                    }}
+                  >
+                    {pincodeOptions.map((p: any) => (
+                      /* @ts-ignore */
+                      <AutocompleteItem key={p.pincode} textValue={p.pincode}>
+                        {p.pincode} - {p.officename}
+                      </AutocompleteItem>
+                    ))}
+                  </Autocomplete>
+                </div>
+
+                <Textarea
+                  label="Full Address"
+                  labelPlacement="outside"
+                  placeholder="Street, locality, landmark"
+                  variant="bordered"
+                  minRows={3}
+                  value={requestAddress}
+                  onValueChange={setRequestAddress}
+                />
+
+                <div className="flex items-start gap-2.5 p-3.5 bg-primary/5 rounded-2xl border border-primary/10">
+                  <FiInfo className="text-primary mt-0.5 shrink-0" size={16} />
+                  <p className="text-xs text-default-600 leading-relaxed font-medium">
+                    Are you sure you want to request a sample? The supplier will provide the minimum available quantity and a corresponding quote.
+                  </p>
                 </div>
               </ModalBody>
               <ModalFooter className="border-t border-divider py-3 px-6">

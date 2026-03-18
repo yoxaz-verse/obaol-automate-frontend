@@ -8,7 +8,7 @@ import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { deleteData, patchData, postData } from "@/core/api/apiHandler";
-import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX } from "react-icons/fi";
+import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiSearch } from "react-icons/fi";
 import { LuPlus, LuShoppingBag, LuBookOpen } from "react-icons/lu";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
 import AuthContext from "@/context/AuthContext";
@@ -278,8 +278,45 @@ export default function OrdersPage() {
                                     </div>
 
                                     {scopedFiltered.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
-                                        <div className="text-center py-20 text-default-400 font-medium">
-                                            No orders found in this stage.
+                                        <div className="flex flex-col items-center justify-center py-16 px-6 bg-content1/50 rounded-[2.5rem] border border-divider border-dashed max-w-4xl mx-auto w-full group transition-all hover:bg-content1/80">
+                                            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                                <LuShoppingBag size={32} />
+                                            </div>
+                                            <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 text-center">Start Your First Trade</h3>
+                                            <p className="text-default-500 text-sm max-w-md text-center mb-10 font-medium">
+                                                You don't have any orders here yet. Follow our simple verified trade process to get started.
+                                            </p>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 w-full mb-12 relative">
+                                                {[
+                                                    { icon: <FiSearch size={18} />, label: "Discover", sub: "Marketplace" },
+                                                    { icon: <FiMessageSquare size={18} />, label: "Enquiry", sub: "Price Quote" },
+                                                    { icon: <FiPackage size={18} />, label: "Finalize", sub: "Trade Terms" },
+                                                    { icon: <FiCheckCircle size={18} />, label: "Execute", sub: "Order Live" }
+                                                ].map((step, idx) => (
+                                                    <div key={idx} className="flex flex-col items-center gap-3 relative z-10">
+                                                        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-default-100 flex items-center justify-center text-default-400 border border-divider transition-all duration-300 group-hover:border-primary/50 group-hover:text-primary shadow-sm">
+                                                            {step.icon}
+                                                        </div>
+                                                        <div className="flex flex-col items-center text-center">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground leading-tight">{step.label}</span>
+                                                            <span className="text-[9px] text-default-400 font-bold uppercase tracking-tight mt-0.5">{step.sub}</span>
+                                                        </div>
+                                                        {idx < 3 && (
+                                                            <div className="hidden sm:block absolute top-6 left-[calc(50%+30px)] w-[calc(100%-60px)] h-[2px] bg-gradient-to-r from-divider to-transparent" />
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <Button
+                                                color="primary"
+                                                className="font-black px-10 h-14 rounded-2xl shadow-2xl shadow-primary/40 text-sm tracking-widest hover:scale-105 active:scale-95 transition-all"
+                                                onPress={() => router.push("/dashboard/marketplace")}
+                                                endContent={<FiArrowRight className="ml-1" />}
+                                            >
+                                                EXPLORE MARKETPLACE
+                                            </Button>
                                         </div>
                                     )}
                                 </section>
@@ -331,7 +368,7 @@ export default function OrdersPage() {
                                                 <div className="mt-2 p-3 bg-primary/5 rounded-xl border border-primary/10">
                                                     <p className="text-[10px] text-primary-600 font-medium leading-relaxed">
                                                         <span className="font-bold uppercase tracking-wide mr-1">Process Flow:</span>
-                                                        Select a product → Create Enquiry → Negotiate & Finalize → Order Generated
+                                                        Select a product → Create Enquiry → Finalize Terms → Order Generated
                                                     </p>
                                                 </div>
                                             </ModalBody>

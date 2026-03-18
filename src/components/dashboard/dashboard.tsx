@@ -20,7 +20,12 @@ import {
   FiClock,
   FiLayers,
   FiPackage,
+  FiSearch,
   FiShoppingBag,
+  FiAnchor,
+  FiSend,
+  FiShield,
+  FiTruck,
   FiTrendingUp,
   FiUsers,
 } from "react-icons/fi";
@@ -577,6 +582,67 @@ const Dashboard: NextPage = () => {
     ) : null
   );
 
+  const associateInterestChips = useMemo(() => {
+    const rawInterests = Array.isArray(user?.companyInterests)
+      ? user?.companyInterests.map((value) => String(value || "").toUpperCase())
+      : [];
+
+    const map: Record<string, { label: string; icon: React.ReactNode }> = {
+      BUYER: { label: "Buyer", icon: <FiShoppingBag size={14} /> },
+      SUPPLIER: { label: "Supplier", icon: <FiPackage size={14} /> },
+      PROCUREMENT_PARTNER: { label: "Procurement", icon: <FiSearch size={14} /> },
+      PACKAGING_PARTNER: { label: "Packaging", icon: <FiBox size={14} /> },
+      LOGISTICS_PARTNER: { label: "Logistics", icon: <FiTruck size={14} /> },
+      INLAND_LOGISTICS: { label: "Logistics", icon: <FiTruck size={14} /> },
+      OCEAN_FREIGHT: { label: "Ocean Freight", icon: <FiAnchor size={14} /> },
+      SEA_FREIGHT_FORWARDING: { label: "Ocean Freight", icon: <FiAnchor size={14} /> },
+      AIR_FREIGHT: { label: "Air Freight", icon: <FiSend size={14} /> },
+      AIR_FREIGHT_FORWARDING: { label: "Air Freight", icon: <FiSend size={14} /> },
+      CUSTOMS_CLEARANCE: { label: "Customs", icon: <FiShield size={14} /> },
+      WAREHOUSING: { label: "Warehousing", icon: <FiLayers size={14} /> },
+      QUALITY_TESTING_PARTNER: { label: "Quality", icon: <FiCheckCircle size={14} /> },
+      CERTIFICATION_PARTNER: { label: "Certification", icon: <FiCheckCircle size={14} /> },
+    };
+
+    const seen = new Set<string>();
+    const chips = rawInterests
+      .map((key) => map[key])
+      .filter(Boolean)
+      .filter((item) => {
+        const token = item.label;
+        if (seen.has(token)) return false;
+        seen.add(token);
+        return true;
+      });
+
+    return chips;
+  }, [user?.companyInterests]);
+
+  const getAssociateOpsHint = (type: "execution" | "documents" | "enquiries" | "orders") => {
+    const interests = Array.isArray(user?.companyInterests)
+      ? user?.companyInterests.map((value) => String(value || "").toUpperCase())
+      : [];
+    const hasLogistics = interests.includes("LOGISTICS_PARTNER") || interests.includes("INLAND_LOGISTICS");
+    const hasProcurement = interests.includes("PROCUREMENT_PARTNER");
+    const hasPackaging = interests.includes("PACKAGING_PARTNER");
+    const hasQuality = interests.includes("QUALITY_TESTING_PARTNER") || interests.includes("CERTIFICATION_PARTNER");
+
+    if (type === "execution") {
+      if (hasLogistics) return "Manage shipment execution and delivery coordination.";
+      if (hasPackaging) return "Track packaging assignments and readiness.";
+      if (hasProcurement) return "Follow procurement execution milestones.";
+      return "Monitor execution tasks and fulfillment updates.";
+    }
+    if (type === "documents") {
+      if (hasQuality) return "Track certificates and compliance files.";
+      return "Manage deal documents and trade files.";
+    }
+    if (type === "enquiries") {
+      return "Track active enquiries and incoming requests.";
+    }
+    return "Monitor orders and execution stages.";
+  };
+
   const renderAdminDashboard = () => (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -623,6 +689,11 @@ const Dashboard: NextPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {renderActionCenter()}
+        {renderRecentActivity()}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 h-[350px]">
           {trendQuery.isLoading ? (
             <Card className="h-full border border-default-100 bg-content1/70">
@@ -638,14 +709,31 @@ const Dashboard: NextPage = () => {
               </CardBody>
             </Card>
           ) : (
-            <TrendChart
-              title="Enquiry Trends (Last 30 Days)"
-              data={Array.isArray(trendList) ? trendList : []}
-              dataKey="count"
-              categoryKey="_id"
-              color="#06b6d4"
-              type="area"
-            />
+            <Card className="h-full border border-default-100 bg-content1/70">
+              <CardHeader className="flex items-center justify-between">
+                <h4 className="font-semibold text-foreground">Enquiry Trends (Last 30 Days)</h4>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="primary"
+                  endContent={<FiArrowRight className="w-3.5 h-3.5" />}
+                  onPress={() => router.push("/dashboard/enquiries")}
+                >
+                  View Enquiries
+                </Button>
+              </CardHeader>
+              <Divider />
+              <CardBody className="p-0">
+                <TrendChart
+                  title=""
+                  data={Array.isArray(trendList) ? trendList : []}
+                  dataKey="count"
+                  categoryKey="_id"
+                  color="#06b6d4"
+                  type="area"
+                />
+              </CardBody>
+            </Card>
           )}
         </div>
 
@@ -674,11 +762,6 @@ const Dashboard: NextPage = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {renderActionCenter()}
-        {renderRecentActivity()}
-      </div>
-
       {renderShortcuts()}
       {renderPartialService()}
     </>
@@ -686,6 +769,46 @@ const Dashboard: NextPage = () => {
 
   const renderAssociateDashboard = () => (
     <>
+      {!user?.companyInterestsConfigured && (
+        <Card className="border border-warning-500/30 bg-warning-500/10">
+          <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <h4 className="font-semibold text-warning-700 dark:text-warning-300">
+                Configure your company responsibilities to unlock full panels.
+              </h4>
+              <p className="text-xs text-warning-600/80 dark:text-warning-200/70 mt-1">
+                Add your company functions so the dashboard can tailor execution and routing.
+              </p>
+            </div>
+            <Button
+              color="warning"
+              variant="flat"
+              onPress={() => router.push("/dashboard/company")}
+            >
+              Configure Now
+            </Button>
+          </CardBody>
+        </Card>
+      )}
+
+      <Card className="border border-default-100 shadow-sm bg-content1/70">
+        <CardHeader className="pb-2">
+          <h4 className="font-semibold text-foreground">Your Roles</h4>
+        </CardHeader>
+        <Divider />
+        <CardBody className="flex flex-wrap gap-2">
+          {associateInterestChips.length > 0 ? (
+            associateInterestChips.map((chip) => (
+              <Chip key={chip.label} color="primary" variant="flat" startContent={chip.icon}>
+                {chip.label}
+              </Chip>
+            ))
+          ) : (
+            <div className="text-xs text-default-500">No responsibilities configured yet.</div>
+          )}
+        </CardBody>
+      </Card>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <InsightCard
           title="Action Required"
@@ -706,46 +829,95 @@ const Dashboard: NextPage = () => {
           footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
         />
         <InsightCard
-          title="Live Catalog Presence"
-          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
+          title="Active Orders"
+          metric={activeOrders.toLocaleString()}
           icon={<FiTrendingUp size={18} />}
-          footer={<span className="text-xs text-default-500">Your currently live products</span>}
+          footer={<span className="text-xs text-default-500">Orders currently active</span>}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader className="pb-1">
-            <h4 className="font-semibold text-foreground">Conversion Readiness</h4>
-          </CardHeader>
-          <CardBody className="pt-0">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-default-500">Orders Completed Ratio</span>
-              <span className="font-semibold">{orderCompletionPct}%</span>
-            </div>
-            <Progress value={orderCompletionPct} color="success" className="max-w-full" />
-            <p className="text-xs text-default-500 mt-3">
-              Keep responses fast on supplier acceptance and buyer confirmation to improve conversion speed.
-            </p>
-          </CardBody>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader>
-            <h4 className="font-semibold text-foreground">Active Orders</h4>
-          </CardHeader>
-          <Divider />
-          <CardBody className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-default-500">Active orders</span>
-              <span className="font-semibold">{activeOrders.toLocaleString()}</span>
+          <CardBody className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-foreground">Execution Panel</h4>
+              <FiActivity className="text-default-400" />
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-default-500">Completed orders</span>
-              <span className="font-semibold">{completedOrders.toLocaleString()}</span>
-            </div>
+            <p className="text-xs text-default-500">{getAssociateOpsHint("execution")}</p>
+            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/execution-enquiries")}>
+              Open Execution
+            </Button>
           </CardBody>
         </Card>
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardBody className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-foreground">Documents</h4>
+              <FiCheckCircle className="text-default-400" />
+            </div>
+            <p className="text-xs text-default-500">{getAssociateOpsHint("documents")}</p>
+            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/documents")}>
+              View Documents
+            </Button>
+          </CardBody>
+        </Card>
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardBody className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-foreground">Enquiries</h4>
+              <FiShoppingBag className="text-default-400" />
+            </div>
+            <p className="text-xs text-default-500">{getAssociateOpsHint("enquiries")}</p>
+            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/enquiries")}>
+              Open Enquiries
+            </Button>
+          </CardBody>
+        </Card>
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardBody className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-foreground">Orders</h4>
+              <FiPackage className="text-default-400" />
+            </div>
+            <p className="text-xs text-default-500">{getAssociateOpsHint("orders")}</p>
+            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/orders")}>
+              Open Orders
+            </Button>
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <InsightCard
+          title="Marketplace"
+          metric={Number(associateMetrics.obaolCatalogCount || 0).toLocaleString()}
+          icon={<FiShoppingBag size={18} />}
+          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/marketplace")}>Explore</Button>}
+        />
+        <InsightCard
+          title="Catalog"
+          metric={Number(associateMetrics.obaolCatalogCount || 0).toLocaleString()}
+          icon={<FiLayers size={18} />}
+          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/catalog")}>View Catalog</Button>}
+        />
+        <InsightCard
+          title="My Products"
+          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
+          icon={<FiPackage size={18} />}
+          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/product")}>Manage</Button>}
+        />
+        <InsightCard
+          title="Inventory"
+          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
+          icon={<FiBox size={18} />}
+          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/inventory")}>Open</Button>}
+        />
+        <InsightCard
+          title="Imports"
+          metric="New"
+          icon={<FiPackage size={18} />}
+          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/imports")}>Open</Button>}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

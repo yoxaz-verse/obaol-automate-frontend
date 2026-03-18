@@ -29,11 +29,12 @@ import {
     AutocompleteItem,
     Breadcrumbs,
     BreadcrumbItem,
+    Tooltip,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo } from "react-icons/fi";
-import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft } from "react-icons/lu";
+import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo, FiArrowRight } from "react-icons/fi";
+import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity } from "react-icons/lu";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
@@ -442,6 +443,24 @@ export default function EnquiryDetailsPage() {
     const isIndiaName = (name: string) => String(name || "").trim().toLowerCase() === "india";
     const isFromIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.originCountry));
     const isToIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.destinationCountry));
+
+    const responsibilityFieldConfig = React.useMemo(() => {
+        return [
+            { key: "procurementBy", label: "Procurement / Sourcing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuSearch size={16} /> },
+            { key: "qualityTestingBy", label: "Quality Testing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuClipboardCheck size={16} /> },
+            { key: "packagingBy", label: "Packaging & Labelling", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuPackage size={16} /> },
+            { key: "transportBy", label: "Inland Transportation", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuTruck size={16} /> },
+            { key: "shippingBy", label: "Freight Forwarding & Shipping", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL", icon: <LuAnchor size={16} /> },
+            { key: "exportCustomsBy", label: "Export Customs", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isFromIndia, icon: <LuFileCheck size={16} /> },
+            { key: "importCustomsBy", label: "Import Customs", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuFileCheck size={16} /> },
+            { key: "dutiesTaxesBy", label: "Duties & Taxes", allowed: ["buyer"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTag size={16} /> },
+            { key: "portHandlingBy", label: "Port Handling", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuAnchor size={16} /> },
+            { key: "destinationInlandTransportBy", label: "Port → Warehouse Transport", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTruck size={16} /> },
+            { key: "destinationInspectionBy", label: "Destination Inspection", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuEye size={16} /> },
+            { key: "finalDeliveryConfirmationBy", label: "Final Delivery Check", allowed: ["obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuCheck size={16} /> },
+        ].filter((f) => f.show);
+    }, [executionContext.tradeType, isFromIndia, isToIndia]);
+
     const allowedResponsibilityValues: Record<string, Set<string>> = {
         procurementBy: new Set(["buyer", "seller", "obaol"]),
         qualityTestingBy: new Set(["buyer", "seller", "obaol"]),
@@ -1108,20 +1127,6 @@ export default function EnquiryDetailsPage() {
     };
     const getOwnerOptions = (allowedKeys: string[]) =>
         allowedKeys.map((key) => ({ key, label: ownerLabelByKey[key] || key }));
-    const responsibilityFieldConfig = [
-        { key: "procurementBy", label: "Procurement / Sourcing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuSearch size={16} /> },
-        { key: "qualityTestingBy", label: "Quality Testing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuClipboardCheck size={16} /> },
-        { key: "packagingBy", label: "Packaging & Labelling", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuPackage size={16} /> },
-        { key: "transportBy", label: "Inland Transportation", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuTruck size={16} /> },
-        { key: "shippingBy", label: "Freight Forwarding & Shipping", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL", icon: <LuAnchor size={16} /> },
-        { key: "exportCustomsBy", label: "Export Customs", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isFromIndia, icon: <LuFileCheck size={16} /> },
-        { key: "importCustomsBy", label: "Import Customs", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuFileCheck size={16} /> },
-        { key: "dutiesTaxesBy", label: "Duties & Taxes", allowed: ["buyer"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTag size={16} /> },
-        { key: "portHandlingBy", label: "Port Handling", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuAnchor size={16} /> },
-        { key: "destinationInlandTransportBy", label: "Port → Warehouse Transport", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTruck size={16} /> },
-        { key: "destinationInspectionBy", label: "Destination Inspection", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuEye size={16} /> },
-        { key: "finalDeliveryConfirmationBy", label: "Final Delivery Check", allowed: ["obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuCheck size={16} /> },
-    ].filter((f) => f.show);
 
     return (
         <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0 text-left">
@@ -1152,7 +1157,7 @@ export default function EnquiryDetailsPage() {
                 </Card>
             )}
 
-            <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-6" : "flex flex-col gap-6"}>
+            <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-10" : "flex flex-col gap-10"}>
                 {/* Header & Status Card */}
                 <Card className="w-full border border-divider/50 bg-gradient-to-r from-content1 to-default-50 overflow-visible">
                     <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4 md:px-6 py-6 border-b border-divider/50">
@@ -1163,7 +1168,7 @@ export default function EnquiryDetailsPage() {
                                 </h1>
                                 <Chip
                                     color={normalizedStatus === "CONVERTED" ? "success" : normalizedStatus === "CANCELLED" ? "danger" : "warning"}
-                                    variant="shadow" size="sm" className="font-bold border-none"
+                                    variant="flat" size="sm" className="font-bold border-none"
                                 >
                                     {enquiry.status}
                                 </Chip>
@@ -1229,123 +1234,6 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             )}
 
-                            {/* Action Buttons Hub */}
-                            <div className="flex flex-wrap gap-2.5 justify-end">
-                                {quotationId && (
-                                    <Button
-                                        color="primary"
-                                        variant="solid"
-                                        className="w-full sm:w-auto font-black px-6 rounded-2xl h-11 text-xs tracking-wide"
-                                        onPress={() => router.push(`/dashboard/documents/${quotationId}`)}
-                                        startContent={<LuEye size={18} />}
-                                    >
-                                        View Quotation
-                                    </Button>
-                                )}
-                                {!quotationId && canManageDocs && enquiry.sellerAcceptedAt && (
-                                    <Button
-                                        color="primary"
-                                        variant="solid"
-                                        className="w-full sm:w-auto font-black px-6 rounded-2xl h-11 text-xs tracking-wide"
-                                        isLoading={createQuotationMutation.isPending}
-                                        onPress={() => createQuotationMutation.mutate()}
-                                        startContent={<FiPlus size={18} />}
-                                    >
-                                        Create Quotation
-                                    </Button>
-                                )}
-
-                                {isSeller && !enquiry.sellerAcceptedAt && (
-                                    <Button
-                                        color="success"
-                                        variant="flat"
-                                        className="w-full sm:w-auto font-bold rounded-2xl h-11"
-                                        isLoading={sellerAcceptMutation.isPending}
-                                        onPress={() => setInventoryAcceptOpen(true)}
-                                    >
-                                        Accept Enquiry
-                                    </Button>
-                                )}
-
-                                {isBuyer && enquiry.sellerAcceptedAt && !enquiry.buyerConfirmedAt && (
-                                    <Button
-                                        color="primary"
-                                        variant="flat"
-                                        className="w-full sm:w-auto font-bold rounded-2xl h-11"
-                                        isLoading={buyerConfirmMutation.isPending}
-                                        onPress={() => buyerConfirmMutation.mutate()}
-                                    >
-                                        Mark All Good to Go
-                                    </Button>
-                                )}
-
-                                {isAdmin && (
-                                    <div className="flex flex-wrap gap-2 justify-end">
-                                        {!isConvertedFlow && !isCompletedFlow && !isCancelled && enquiry.sellerAcceptedAt && enquiry.buyerConfirmedAt && (
-                                            <>
-                                                {!hasResponsibilitiesFinalized && (
-                                                    <Button
-                                                        color="warning"
-                                                        variant="solid"
-                                                        className="w-full sm:w-auto font-bold rounded-2xl h-11"
-                                                        isLoading={finalizeResponsibilitiesMutation.isPending}
-                                                        isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
-                                                        onPress={() => finalizeResponsibilitiesMutation.mutate()}
-                                                    >
-                                                        Finalize Responsibilities
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    color="primary"
-                                                    variant="solid"
-                                                    className="w-full sm:w-auto font-bold rounded-2xl h-11"
-                                                    onPress={onOpen}
-                                                    isDisabled={!hasResponsibilitiesFinalized}
-                                                >
-                                                    Convert to Order
-                                                </Button>
-                                            </>
-                                        )}
-
-                                        {normalizedStatus === "CONVERTED" && (
-                                            <div className="flex flex-wrap gap-2">
-                                                <Button
-                                                    color="success"
-                                                    variant="flat"
-                                                    className="w-full sm:w-auto font-bold rounded-2xl h-11"
-                                                    onPress={() => updateStatusMutation.mutate("CLOSED")}
-                                                    isLoading={updateStatusMutation.isPending}
-                                                >
-                                                    Complete Enquiry
-                                                </Button>
-                                                <Button
-                                                    color="success"
-                                                    variant="solid"
-                                                    className="w-full sm:w-auto font-black px-6 rounded-2xl h-11"
-                                                    isDisabled={!enquiryOrderId}
-                                                    onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
-                                                    startContent={<LuTruck size={18} />}
-                                                >
-                                                    View Order
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Order Context View for non-admins */}
-                                {!isAdmin && (enquiry as any)?.order && (
-                                    <Button
-                                        color="success"
-                                        variant="solid"
-                                        className="w-full sm:w-auto font-black px-6 rounded-2xl h-11"
-                                        onPress={() => router.push(`/dashboard/orders/${(enquiry as any).order}`)}
-                                        startContent={<LuTruck size={18} />}
-                                    >
-                                        View Order
-                                    </Button>
-                                )}
-                            </div>
                         </div>
                     </CardHeader>
                     <Divider />
@@ -1464,7 +1352,7 @@ export default function EnquiryDetailsPage() {
                         </CardHeader>
                         <Divider className="mt-4" />
                         <CardBody className="px-4 md:px-6 py-4 md:py-5">
-                            <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 rounded-3xl border border-divider bg-content1/50">
+                            <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-6 rounded-3xl border border-divider bg-content1/50">
                                 {/* Enquiry Rate */}
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Enquiry Rate</span>
@@ -1537,13 +1425,13 @@ export default function EnquiryDetailsPage() {
                 )}
 
                 {/* Details Grid */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Parties Involved */}
                     {(isAdmin || isMediator) && (
                         <Card className="md:col-span-1 border border-divider bg-content1/50">
-                            <CardHeader className="font-semibold text-base px-4 md:px-6 pt-4 md:pt-6">Parties Involved</CardHeader>
-                            <Divider className="my-2" />
-                            <CardBody className="flex flex-col gap-4 px-4 md:px-6 pb-4 md:pb-6">
+                            <CardHeader className="font-semibold text-base px-6 pt-6 uppercase tracking-wider text-default-400">Parties Involved</CardHeader>
+                            <Divider className="my-1" />
+                            <CardBody className="flex flex-col gap-4 px-6 pb-6">
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
                                         <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
@@ -1584,9 +1472,9 @@ export default function EnquiryDetailsPage() {
 
                     {/* Product Info */}
                     <Card className="md:col-span-1 border border-divider bg-content1/50">
-                        <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Product Details</CardHeader>
-                        <Divider className="my-2" />
-                        <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
+                        <CardHeader className="font-bold text-lg px-6 pt-6">Product Details</CardHeader>
+                        <Divider className="my-1" />
+                        <CardBody className="flex flex-col gap-4 md:gap-5 px-6 pb-6">
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Product</span>
                                 <span className="font-semibold text-lg">{enquiry.productId?.name || "N/A"}</span>
@@ -1655,12 +1543,12 @@ export default function EnquiryDetailsPage() {
 
                     {/* Pricing Scenario */}
                     <Card className="md:col-span-1 border border-divider bg-success-50/20">
-                        <CardHeader className="flex flex-col items-start gap-1 px-4 md:px-6 pt-4 md:pt-6 pb-2">
+                        <CardHeader className="flex flex-col items-start gap-1 px-6 pt-6 pb-2">
                             <span className="font-bold text-lg">Pricing Scenario</span>
                             <span className="text-[10px] uppercase font-black tracking-wider text-success-600">Excludes GST & Transportation</span>
                         </CardHeader>
-                        <Divider className="my-2" />
-                        <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
+                        <Divider />
+                        <CardBody className="px-6 pb-6 pt-4">
                             <div className="flex justify-end">
                                 <CurrencySelector />
                             </div>
@@ -1721,446 +1609,460 @@ export default function EnquiryDetailsPage() {
 
                     {/* Responsibility Arena */}
                     <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
-                        <CardHeader className="px-4 md:px-6 pt-5 pb-0 flex flex-col items-start gap-1">
+                        <CardHeader className="px-6 pt-6 pb-0 flex flex-col items-start gap-1">
                             <span className="font-bold text-lg tracking-tight">Responsibility Event</span>
                             <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
                         </CardHeader>
                         <Divider className="mt-4" />
-                        <CardBody className="flex flex-col gap-4 md:gap-6 px-4 md:px-6 py-6 font-sans">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                                {/* Column 1: Responsibility Event Allocation */}
-                                <div className="flex flex-col gap-6">
-                                    <div className="flex flex-col gap-1">
-                                        <h3 className="text-base font-bold text-foreground inline-flex items-center gap-2">
-                                            <LuClipboardCheck className="text-primary" size={18} />
-                                            Responsibility Allocation
-                                        </h3>
-                                        <p className="text-xs text-default-500">Buyer and supplier finalize who owns each execution step before order conversion.</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                        {responsibilityFieldConfig.map((field) => {
-                                            const currentValue = (responsibilityPlan as any)[field.key] || "";
-                                            const allowed = field.allowed;
-                                            const getOwnerStyles = (owner: string) => {
-                                                switch (owner) {
-                                                    case "buyer": return "bg-indigo-500 text-white";
-                                                    case "seller": return "bg-amber-500 text-white";
-                                                    case "obaol": return "bg-cyan-600 text-white";
-                                                    default: return "bg-white text-primary";
-                                                }
-                                            };
-                                            return (
-                                                <div key={field.key} className="flex flex-col gap-3 p-3 md:p-3.5 rounded-2xl border border-default-200 bg-default-50/50 dark:bg-default-100/5 transition-all hover:border-primary/30 group">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold border border-primary-200/30">
-                                                            {(field as any).icon}
-                                                        </div>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="text-[11px] font-black text-foreground/90 uppercase tracking-widest leading-none">{field.label}</span>
-                                                            <span className="text-[9px] text-default-400 mt-1 truncate uppercase tracking-tight">Ownership Assignment</span>
-                                                        </div>
-                                                    </div>
+                        <CardBody className="flex flex-col gap-10 px-6 py-8 transition-all duration-300">
+                            {/* Section 1: Execution Context & Location Strategy */}
+                            <div className="flex flex-col gap-8 p-8 rounded-[2.5rem] border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
+                                <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
+                                    <LuNavigation size={180} />
+                                </div>
 
-                                                    <div className="flex bg-default-100/50 dark:bg-black/20 p-1 rounded-xl gap-1 border border-default-200/50 group-data-[locked=true]:opacity-60">
-                                                        {allowed.map((option: string) => {
-                                                            const isSelected = currentValue === option;
-                                                            const canSelect = canEditResponsibilityPlan && (allowed.length > 1 || !isSelected);
-                                                            return (
-                                                                <button
-                                                                    key={option}
-                                                                    onClick={() => {
-                                                                        if (canSelect) {
-                                                                            setResponsibilityPlan((prev) => ({ ...prev, [field.key]: option as any }));
-                                                                        }
-                                                                    }}
-                                                                    disabled={!canSelect}
-                                                                    className={`flex-1 flex items-center justify-center py-1.5 px-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-300
-                                                                    ${isSelected
-                                                                            ? `${getOwnerStyles(option)} z-10 font-black`
-                                                                            : "text-default-400 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
-                                                                        }
-                                                                    ${!canSelect && !isSelected ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
-                                                                `}
-                                                                >
-                                                                    {ownerLabelByKey[option] || option}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10 border-b border-divider/50 pb-8">
+                                    <div className="flex flex-col gap-2">
+                                        <h3 className="text-2xl font-black text-foreground inline-flex items-center gap-3 tracking-tighter">
+                                            <LuNavigation className="text-primary" size={26} />
+                                            Execution Context
+                                        </h3>
+                                        <p className="text-sm text-default-500 font-bold tracking-tight uppercase opacity-70">Logistics Parameters & Trade Type</p>
+                                    </div>
+                                    <div className="bg-default-200/50 dark:bg-black/40 p-1.5 rounded-2xl gap-1.5 border border-default-300/40 flex self-start md:self-center shadow-inner scale-110 md:mr-4">
+                                        {["DOMESTIC", "INTERNATIONAL"].map((type) => {
+                                            const isSelected = executionContext.tradeType === type;
+                                            const canToggle = (isBuyer || isAdmin) && canEditResponsibilityPlan;
+                                            return (
+                                                <button
+                                                    key={type}
+                                                    onClick={() => {
+                                                        if (canToggle) {
+                                                            const value = type as "DOMESTIC" | "INTERNATIONAL";
+                                                            setExecutionContext((prev) => ({
+                                                                ...prev,
+                                                                tradeType: value,
+                                                                ...(value === "DOMESTIC"
+                                                                    ? { originCountry: "", destinationCountry: "", originPort: "", destinationPort: "" }
+                                                                    : { originState: "", destinationState: "", originDistrict: "", destinationDistrict: "" }),
+                                                            }));
+                                                        }
+                                                    }}
+                                                    disabled={!canToggle}
+                                                    className={`px-8 h-11 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${isSelected
+                                                        ? "bg-white dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
+                                                        : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
+                                                        } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
+                                                >
+                                                    {type}
+                                                </button>
                                             );
                                         })}
                                     </div>
-                                    {executionContext.tradeType === "INTERNATIONAL" && (
-                                        <div className="rounded-2xl border border-primary-100/40 bg-primary-50/40 dark:bg-primary-900/10 px-4 py-3 text-[11px] text-primary-700 dark:text-primary-300 font-semibold leading-relaxed flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
-                                            Cargo Insurance is auto-assigned to the same owner who handles Freight Forwarding & Shipping.
-                                        </div>
-                                    )}
                                 </div>
 
-                                {/* Column 2: Execution Context & Route Logistics */}
-                                <div className="flex flex-col gap-6 lg:border-l lg:border-default-200 lg:pl-8">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col gap-0.5">
-                                            <h3 className="text-base font-bold text-foreground inline-flex items-center gap-2">
-                                                <LuNavigation className="text-primary" size={18} />
-                                                Execution Context
-                                            </h3>
-                                            <p className="text-xs text-default-500">Route and logistics specifics for this order.</p>
-                                        </div>
-                                        <div className="flex bg-default-100/50 dark:bg-default-100/10 p-1.5 rounded-2xl gap-1.5 border border-default-200/40 group-data-[locked=true]:opacity-60">
-                                            {["DOMESTIC", "INTERNATIONAL"].map((type) => {
-                                                const isSelected = executionContext.tradeType === type;
-                                                const canToggle = (isBuyer || isAdmin) && canEditResponsibilityPlan;
-                                                return (
-                                                    <button
-                                                        key={type}
-                                                        onClick={() => {
-                                                            if (canToggle) {
-                                                                const value = type as "DOMESTIC" | "INTERNATIONAL";
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                                    {executionContext.tradeType === "DOMESTIC" ? (
+                                        <>
+                                            {showOriginLogisticsFields && (
+                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-4 mb-2">
+                                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                                            <LuMapPin size={24} />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
+                                                            <span className="text-xl font-black text-foreground tracking-tighter">Ship From</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                        <Select
+                                                            size="sm"
+                                                            label="State"
+                                                            variant="bordered"
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            selectedKeys={executionContext.originState ? [executionContext.originState] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const arr = Array.from(keys as Set<string>);
+                                                                const value = (arr[0] as string) || "";
                                                                 setExecutionContext((prev) => ({
                                                                     ...prev,
-                                                                    tradeType: value,
-                                                                    ...(value === "DOMESTIC"
-                                                                        ? { originCountry: "", destinationCountry: "", originPort: "", destinationPort: "" }
-                                                                        : { originState: "", destinationState: "", originDistrict: "", destinationDistrict: "" }),
+                                                                    originState: value,
+                                                                    originDistrict: "",
                                                                 }));
-                                                            }
-                                                        }}
-                                                        disabled={!canToggle}
-                                                        className={`px-4 h-9 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${isSelected
-                                                            ? "bg-white dark:bg-default-200 text-primary z-10"
-                                                            : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
-                                                            } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
-                                                    >
-                                                        {type.charAt(0) + type.slice(1).toLowerCase()}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {executionContext.tradeType === "DOMESTIC" ? (
-                                            <>
-                                                {showOriginLogisticsFields && (
-                                                    <div className="flex flex-col gap-4 p-3.5 md:p-4 rounded-2xl border border-default-200 bg-default-50/50 dark:bg-default-100/5">
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                                <LuMapPin size={16} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">Logistics</span>
-                                                                <span className="text-sm font-bold text-foreground">Ship From</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex flex-col gap-3">
-                                                            <Select
-                                                                size="sm"
-                                                                label="State"
-                                                                variant="bordered"
-                                                                classNames={{ trigger: "rounded-lg border-default-200 h-9 min-h-unit-9" }}
-                                                                selectedKeys={executionContext.originState ? [executionContext.originState] : []}
-                                                                onSelectionChange={(keys) => {
-                                                                    const arr = Array.from(keys as Set<string>);
-                                                                    const value = (arr[0] as string) || "";
-                                                                    setExecutionContext((prev) => ({
-                                                                        ...prev,
-                                                                        originState: value,
-                                                                        originDistrict: "",
-                                                                    }));
-                                                                }}
-                                                                isDisabled={!canEditOriginLogistics}
-                                                            >
-                                                                {states.map((item: any) => (
-                                                                    <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                                ))}
-                                                            </Select>
-                                                            <Select
-                                                                size="sm"
-                                                                label="District"
-                                                                variant="bordered"
-                                                                classNames={{ trigger: "rounded-lg border-default-200 h-9 min-h-unit-9" }}
-                                                                selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
-                                                                onSelectionChange={(keys) => {
-                                                                    const arr = Array.from(keys as Set<string>);
-                                                                    setExecutionContext((prev) => ({ ...prev, originDistrict: (arr[0] as string) || "" }));
-                                                                }}
-                                                                isDisabled={!canEditOriginLogistics || !executionContext.originState}
-                                                            >
-                                                                {originDistrictOptions.map((item: any) => (
-                                                                    <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                                ))}
-                                                            </Select>
-                                                        </div>
+                                                            }}
+                                                            isDisabled={!canEditOriginLogistics}
+                                                        >
+                                                            {states.map((item: any) => (
+                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                            ))}
+                                                        </Select>
+                                                        <Select
+                                                            size="sm"
+                                                            label="District"
+                                                            variant="bordered"
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const arr = Array.from(keys as Set<string>);
+                                                                setExecutionContext((prev) => ({ ...prev, originDistrict: (arr[0] as string) || "" }));
+                                                            }}
+                                                            isDisabled={!canEditOriginLogistics || !executionContext.originState}
+                                                        >
+                                                            {originDistrictOptions.map((item: any) => (
+                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                            ))}
+                                                        </Select>
                                                     </div>
-                                                )}
-                                                {showDestinationLogisticsFields && (
-                                                    <div className="flex flex-col gap-4 p-3.5 md:p-4 rounded-2xl border border-default-200 bg-default-50/50 dark:bg-default-100/5">
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                                <LuNavigation size={16} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">Logistics</span>
-                                                                <span className="text-sm font-bold text-foreground">Ship To</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex flex-col gap-3">
-                                                            <Select
-                                                                size="sm"
-                                                                label="State"
-                                                                variant="bordered"
-                                                                classNames={{ trigger: "rounded-lg border-default-200 h-9 min-h-unit-9" }}
-                                                                selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
-                                                                onSelectionChange={(keys) => {
-                                                                    const arr = Array.from(keys as Set<string>);
-                                                                    const value = (arr[0] as string) || "";
-                                                                    setExecutionContext((prev) => ({
-                                                                        ...prev,
-                                                                        destinationState: value,
-                                                                        destinationDistrict: "",
-                                                                    }));
-                                                                }}
-                                                                isDisabled={!canEditDestinationLogistics}
-                                                            >
-                                                                {states.map((item: any) => (
-                                                                    <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                                ))}
-                                                            </Select>
-                                                            <Select
-                                                                size="sm"
-                                                                label="District"
-                                                                variant="bordered"
-                                                                classNames={{ trigger: "rounded-lg border-default-200 h-9 min-h-unit-9" }}
-                                                                selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
-                                                                onSelectionChange={(keys) => {
-                                                                    const arr = Array.from(keys as Set<string>);
-                                                                    setExecutionContext((prev) => ({ ...prev, destinationDistrict: (arr[0] as string) || "" }));
-                                                                }}
-                                                                isDisabled={!canEditDestinationLogistics || !executionContext.destinationState}
-                                                            >
-                                                                {destinationDistrictOptions.map((item: any) => (
-                                                                    <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                                ))}
-                                                            </Select>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <>
-                                                {showOriginLogisticsFields && (
-                                                    <div className="flex flex-col gap-4 p-4 md:p-5 rounded-3xl border border-default-200/60 bg-content1/50">
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                                <LuGlobe size={16} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">International</span>
-                                                                <span className="text-sm font-bold text-foreground">Origin</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex flex-col gap-3">
-                                                            {/* @ts-ignore */}
-                                                            <Autocomplete
-                                                                size="sm"
-                                                                label="Country"
-                                                                variant="bordered"
-                                                                classNames={{ base: "rounded-xl", listbox: "rounded-xl" }}
-                                                                selectedKey={executionContext.originCountry || null}
-                                                                items={countries}
-                                                                onSelectionChange={(key) => {
-                                                                    const value = String(key || "");
-                                                                    setExecutionContext((prev) => ({
-                                                                        ...prev,
-                                                                        originCountry: value,
-                                                                        originPort: "",
-                                                                    }));
-                                                                }}
-                                                            >
-                                                                {(item: any) => (
-                                                                    <AutocompleteItem key={item._id} textValue={item.name}>
-                                                                        {item.name}
-                                                                    </AutocompleteItem>
-                                                                )}
-                                                            </Autocomplete>
-                                                            {/* @ts-ignore */}
-                                                            <Autocomplete
-                                                                size="sm"
-                                                                label="Port"
-                                                                variant="bordered"
-                                                                classNames={{ base: "rounded-xl", listbox: "rounded-xl" }}
-                                                                selectedKey={executionContext.originPort || null}
-                                                                items={originPortOptions}
-                                                                onSelectionChange={(key) => {
-                                                                    setExecutionContext((prev) => ({ ...prev, originPort: String(key || "") }));
-                                                                }}
-                                                            >
-                                                                {(item: any) => (
-                                                                    <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
-                                                                        {item.loCode} - {item.name}
-                                                                    </AutocompleteItem>
-                                                                )}
-                                                            </Autocomplete>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {showDestinationLogisticsFields && (
-                                                    <div className="flex flex-col gap-4 p-4 md:p-5 rounded-3xl border border-default-200/60 bg-content1/50">
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                                <LuAnchor size={16} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">International</span>
-                                                                <span className="text-sm font-bold text-foreground">Destination</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex flex-col gap-3">
-                                                            {/* @ts-ignore */}
-                                                            <Autocomplete
-                                                                size="sm"
-                                                                label="Country"
-                                                                variant="bordered"
-                                                                classNames={{ base: "rounded-xl", listbox: "rounded-xl" }}
-                                                                selectedKey={executionContext.destinationCountry || null}
-                                                                items={countries}
-                                                                onSelectionChange={(key) => {
-                                                                    const value = String(key || "");
-                                                                    setExecutionContext((prev) => ({
-                                                                        ...prev,
-                                                                        destinationCountry: value,
-                                                                        destinationPort: "",
-                                                                    }));
-                                                                }}
-                                                            >
-                                                                {(item: any) => (
-                                                                    <AutocompleteItem key={item._id} textValue={item.name}>
-                                                                        {item.name}
-                                                                    </AutocompleteItem>
-                                                                )}
-                                                            </Autocomplete>
-                                                            {/* @ts-ignore */}
-                                                            <Autocomplete
-                                                                size="sm"
-                                                                label="Port"
-                                                                variant="bordered"
-                                                                classNames={{ base: "rounded-xl", listbox: "rounded-xl" }}
-                                                                selectedKey={executionContext.destinationPort || null}
-                                                                items={destinationPortOptions}
-                                                                onSelectionChange={(key) => {
-                                                                    setExecutionContext((prev) => ({ ...prev, destinationPort: String(key || "") }));
-                                                                }}
-                                                            >
-                                                                {(item: any) => (
-                                                                    <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
-                                                                        {item.loCode} - {item.name}
-                                                                    </AutocompleteItem>
-                                                                )}
-                                                            </Autocomplete>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                        <div className="md:col-span-2 flex flex-col gap-4 p-4 md:p-6 rounded-3xl border border-default-200/60 bg-content1/50">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                    <LuPackage size={16} />
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">Product Specs</span>
-                                                    <span className="text-sm font-bold text-foreground">Packaging Specifications</span>
+                                            )}
+                                            {showDestinationLogisticsFields && (
+                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-4 mb-2">
+                                                        <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner">
+                                                            <LuNavigation size={24} />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
+                                                            <span className="text-xl font-black text-foreground tracking-tighter">Ship To</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                        <Select
+                                                            size="sm"
+                                                            label="State"
+                                                            variant="bordered"
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const arr = Array.from(keys as Set<string>);
+                                                                const value = (arr[0] as string) || "";
+                                                                setExecutionContext((prev) => ({
+                                                                    ...prev,
+                                                                    destinationState: value,
+                                                                    destinationDistrict: "",
+                                                                }));
+                                                            }}
+                                                            isDisabled={!canEditDestinationLogistics}
+                                                        >
+                                                            {states.map((item: any) => (
+                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                            ))}
+                                                        </Select>
+                                                        <Select
+                                                            size="sm"
+                                                            label="District"
+                                                            variant="bordered"
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const arr = Array.from(keys as Set<string>);
+                                                                setExecutionContext((prev) => ({ ...prev, destinationDistrict: (arr[0] as string) || "" }));
+                                                            }}
+                                                            isDisabled={!canEditDestinationLogistics || !executionContext.destinationState}
+                                                        >
+                                                            {destinationDistrictOptions.map((item: any) => (
+                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                            ))}
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {showOriginLogisticsFields && (
+                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-4 mb-2">
+                                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                                            <LuGlobe size={24} />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Origin</span>
+                                                            <span className="text-xl font-black text-foreground tracking-tighter">Origin Country & Port</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                        {/* @ts-ignore */}
+                                                        <Autocomplete
+                                                            size="sm"
+                                                            label="Origin Country"
+                                                            variant="bordered"
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            selectedKey={executionContext.originCountry || null}
+                                                            items={countries}
+                                                            onSelectionChange={(key) => {
+                                                                const value = String(key || "");
+                                                                setExecutionContext((prev) => ({
+                                                                    ...prev,
+                                                                    originCountry: value,
+                                                                    originPort: "",
+                                                                }));
+                                                            }}
+                                                        >
+                                                            {(item: any) => (
+                                                                <AutocompleteItem key={item._id} textValue={item.name}>
+                                                                    {item.name}
+                                                                </AutocompleteItem>
+                                                            )}
+                                                        </Autocomplete>
+                                                        {/* @ts-ignore */}
+                                                        <Autocomplete
+                                                            size="sm"
+                                                            label="Port of Load"
+                                                            variant="bordered"
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            selectedKey={executionContext.originPort || null}
+                                                            items={originPortOptions}
+                                                            onSelectionChange={(key) => {
+                                                                setExecutionContext((prev) => ({ ...prev, originPort: String(key || "") }));
+                                                            }}
+                                                        >
+                                                            {(item: any) => (
+                                                                <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
+                                                                    {item.loCode} - {item.name}
+                                                                </AutocompleteItem>
+                                                            )}
+                                                        </Autocomplete>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {showDestinationLogisticsFields && (
+                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-4 mb-2">
+                                                        <div className="w-12 h-12 rounded-2xl bg-danger/10 flex items-center justify-center text-danger shadow-inner">
+                                                            <LuAnchor size={24} />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Destination</span>
+                                                            <span className="text-xl font-black text-foreground tracking-tighter">Dest. Country & Port</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                        {/* @ts-ignore */}
+                                                        <Autocomplete
+                                                            size="sm"
+                                                            label="Dest. Country"
+                                                            variant="bordered"
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            selectedKey={executionContext.destinationCountry || null}
+                                                            items={countries}
+                                                            onSelectionChange={(key) => {
+                                                                const value = String(key || "");
+                                                                setExecutionContext((prev) => ({
+                                                                    ...prev,
+                                                                    destinationCountry: value,
+                                                                    destinationPort: "",
+                                                                }));
+                                                            }}
+                                                        >
+                                                            {(item: any) => (
+                                                                <AutocompleteItem key={item._id} textValue={item.name}>
+                                                                    {item.name}
+                                                                </AutocompleteItem>
+                                                            )}
+                                                        </Autocomplete>
+                                                        {/* @ts-ignore */}
+                                                        <Autocomplete
+                                                            size="sm"
+                                                            label="Port of Discharge"
+                                                            variant="bordered"
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            selectedKey={executionContext.destinationPort || null}
+                                                            items={destinationPortOptions}
+                                                            onSelectionChange={(key) => {
+                                                                setExecutionContext((prev) => ({ ...prev, destinationPort: String(key || "") }));
+                                                            }}
+                                                        >
+                                                            {(item: any) => (
+                                                                <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
+                                                                    {item.loCode} - {item.name}
+                                                                </AutocompleteItem>
+                                                            )}
+                                                        </Autocomplete>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Section 2: Responsibility Map */}
+                            <div className="flex flex-col gap-10 p-8 rounded-[2.5rem] border border-default-200/60 bg-gradient-to-br from-white to-default-50/30 dark:from-transparent dark:to-default-100/5 shadow-inner">
+                                <div className="flex flex-col gap-2 border-b border-divider/50 pb-6">
+                                    <h3 className="text-2xl font-black text-foreground inline-flex items-center gap-3 tracking-tighter">
+                                        <LuClipboardCheck className="text-primary" size={26} />
+                                        Responsibility Map
+                                    </h3>
+                                    <p className="text-sm text-default-500 font-bold tracking-tight uppercase opacity-70">Ownership Allocation & Control Points</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                                    {responsibilityFieldConfig.map((field) => {
+                                        const currentValue = (responsibilityPlan as any)[field.key] || "";
+                                        const allowed = field.allowed;
+                                        const getOwnerStyles = (owner: string) => {
+                                            switch (owner) {
+                                                case "buyer": return "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none translate-y-[-2px]";
+                                                case "seller": return "bg-amber-500 text-white shadow-lg shadow-amber-200 dark:shadow-none translate-y-[-2px]";
+                                                case "obaol": return "bg-cyan-600 text-white shadow-lg shadow-cyan-200 dark:shadow-none translate-y-[-2px]";
+                                                default: return "bg-white text-primary";
+                                            }
+                                        };
+                                        return (
+                                            <div key={field.key} className="flex flex-col gap-5 p-6 rounded-[2rem] border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl transition-all duration-500 group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-primary/5 dark:bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 border border-primary-100/30 shadow-inner">
+                                                        {/* @ts-ignore */}
+                                                        {React.cloneElement(field.icon, { size: 22 })}
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-xs font-black text-foreground/90 uppercase tracking-widest leading-none mb-1">{field.label}</span>
+                                                        <span className="text-[10px] text-default-400 font-bold uppercase tracking-tighter opacity-70">Step Owner Selection</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 bg-default-100/80 dark:bg-black/40 p-1.5 rounded-2xl gap-2 border border-default-200/50 relative overflow-hidden">
+                                                    {allowed.map((option: string) => {
+                                                        const isSelected = currentValue === option;
+                                                        const canSelect = canEditResponsibilityPlan && (allowed.length > 1 || !isSelected);
+                                                        return (
+                                                            <button
+                                                                key={option}
+                                                                onClick={() => {
+                                                                    if (canSelect) {
+                                                                        setResponsibilityPlan((prev) => ({ ...prev, [field.key]: option as any }));
+                                                                    }
+                                                                }}
+                                                                disabled={!canSelect}
+                                                                className={`relative flex items-center justify-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-500
+                                                                    ${isSelected
+                                                                        ? `${getOwnerStyles(option)} z-10`
+                                                                        : "text-default-400 hover:text-default-700 hover:bg-white dark:hover:bg-default-200/20"
+                                                                    }
+                                                                    ${!canSelect && !isSelected ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
+                                                                `}
+                                                            >
+                                                                {ownerLabelByKey[option] || option}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
-                                            <Textarea
-                                                size="sm"
-                                                variant="flat"
-                                                value={packagingSpecifications}
-                                                onValueChange={setPackagingSpecifications}
-                                                isDisabled={!canEditResponsibilityPlan}
-                                                minRows={4}
-                                                placeholder="Enter dimensions, material, labels, stacking, handling notes..."
-                                                classNames={{
-                                                    input: "text-sm",
-                                                    inputWrapper: "bg-default-100/50 dark:bg-default-100/10 border-transparent hover:border-default-300 focus-within:border-primary transition-colors rounded-2xl"
-                                                }}
-                                            />
-                                            <Input
-                                                size="sm"
-                                                label="Route & Logistics Notes"
-                                                variant="bordered"
-                                                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
-                                                placeholder="Any additional notes for the logistics team..."
-                                                value={executionContext.routeNotes}
-                                                onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
-                                                isDisabled={!canEditRouteNotes}
-                                            />
+                                        );
+                                    })}
+                                </div>
+
+                                {executionContext.tradeType === "INTERNATIONAL" && (
+                                    <div className="rounded-[1.5rem] border border-primary-100/40 bg-primary-50/40 dark:bg-primary-900/10 px-8 py-5 text-xs text-primary-700 dark:text-primary-300 font-bold leading-relaxed flex items-center gap-5 shadow-sm">
+                                        <div className="w-3 h-3 rounded-full bg-primary animate-ping shrink-0" />
+                                        <p className="tracking-tight">Cargo Insurance is automatically synchronized with the owner handling Freight Forwarding & Logistics Operations.</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Section 3: Product Specs & Intelligence */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8 rounded-[2.5rem] border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
+                                <div className="lg:col-span-2 flex flex-col gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning shadow-inner">
+                                            <LuPackage size={24} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
+                                            <span className="text-xl font-black text-foreground tracking-tighter">Packaging Detail</span>
                                         </div>
                                     </div>
+                                    <Textarea
+                                        size="lg"
+                                        variant="flat"
+                                        value={packagingSpecifications}
+                                        onValueChange={setPackagingSpecifications}
+                                        isDisabled={!canEditResponsibilityPlan}
+                                        minRows={4}
+                                        placeholder="Specify packaging requirements (dimensions, weight, material, handling instructions...)"
+                                        classNames={{
+                                            input: "text-base font-medium",
+                                            inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-[2rem] p-6 h-auto"
+                                        }}
+                                    />
+                                </div>
 
-                                    <div className="flex flex-col gap-2">
+                                <div className="flex flex-col gap-8">
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                                <LuActivity size={20} />
+                                            </div>
+                                            <span className="text-sm font-black uppercase tracking-widest text-foreground">Route Notes</span>
+                                        </div>
+                                        <Input
+                                            size="lg"
+                                            variant="bordered"
+                                            classNames={{
+                                                inputWrapper: "rounded-2xl border-default-200 h-14 bg-white/50 dark:bg-white/5 shadow-sm",
+                                                input: "font-semibold"
+                                            }}
+                                            placeholder="Add logistics constraints..."
+                                            value={executionContext.routeNotes}
+                                            onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
+                                            isDisabled={!canEditRouteNotes}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {!hasPackagingSpecifications && (
-                                            <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/5 border border-danger/20 text-danger-700 animate-pulse">
-                                                <FiAlertCircle size={18} className="shrink-0" />
+                                            <div className="flex items-center gap-4 p-5 rounded-2xl bg-danger-50 dark:bg-danger-500/10 border border-danger-200 dark:border-danger-500/20 text-danger-700 dark:text-danger-400 transition-all">
+                                                <FiAlertCircle size={22} className="shrink-0 animate-bounce" />
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold">Action Required</span>
-                                                    <p className="text-xs opacity-90">Packaging specifications are mandatory before order conversion.</p>
+                                                    <span className="text-xs font-black uppercase tracking-widest">Mandatory</span>
+                                                    <p className="text-[10px] font-bold opacity-80 leading-tight">Packaging specs required for order generation.</p>
                                                 </div>
                                             </div>
                                         )}
 
                                         {executionContext.tradeType === "INTERNATIONAL" && (
-                                            <div className="flex items-start gap-3 p-4 rounded-xl bg-warning/5 border border-warning/20 text-warning-700">
-                                                <FiInfo size={18} className="mt-0.5 shrink-0" />
+                                            <div className="flex items-start gap-4 p-5 rounded-2xl bg-warning-50 dark:bg-warning-500/10 border border-warning-200 dark:border-warning-500/20 text-warning-700 dark:text-warning-400 transition-all">
+                                                <FiInfo size={22} className="mt-0.5 shrink-0" />
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold">International Logistics Info</span>
-                                                    <p className="text-xs opacity-90 leading-normal">
-                                                        Additional cost components apply: inland-to-port movement, export/import packaging, freight, and customs clearance.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {isAssociateResponsibilityLocked && (
-                                            <div className="flex items-center gap-3 p-4 rounded-xl bg-default-100 border border-default-200 text-default-600">
-                                                <LuShieldCheck size={18} className="shrink-0" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-bold">Immutable Area</span>
-                                                    <p className="text-xs opacity-90 text-default-500">Execution context is locked after finalization. Contact admin for edits.</p>
+                                                    <span className="text-xs font-black uppercase tracking-widest">Alert</span>
+                                                    <p className="text-[10px] font-bold opacity-80 leading-tight">Special customs and port handling costs will apply based on this context.</p>
                                                 </div>
                                             </div>
                                         )}
 
                                         {canEditResponsibilityPlan && (
-                                            <div className="flex flex-col gap-2 mt-2">
+                                            <div className="flex flex-col gap-3 mt-4">
                                                 <Button
-                                                    size="sm"
+                                                    size="lg"
                                                     color="primary"
-                                                    variant="flat"
+                                                    variant="shadow"
                                                     onPress={() => updateResponsibilityPlanMutation.mutate()}
                                                     isLoading={updateResponsibilityPlanMutation.isPending}
                                                     isDisabled={!isResponsibilityEventChanged}
-                                                    className="w-full h-10 font-bold"
+                                                    className="w-full h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                    startContent={!updateResponsibilityPlanMutation.isPending && <FiCheckCircle size={20} />}
                                                 >
-                                                    Save Responsibility Event
+                                                    Finalize Framework
                                                 </Button>
-                                                <span className="text-[10px] text-default-400 text-center uppercase tracking-widest font-bold">
-                                                    {updateResponsibilityPlanMutation.isPending
-                                                        ? "Saving updates..."
-                                                        : responsibilitySavedAt
-                                                            ? `Last saved ${dayjs(responsibilitySavedAt).format("DD MMM YYYY, hh:mm A")}`
-                                                            : "No unsaved changes"}
-                                                </span>
+                                                <div className="flex items-center justify-center gap-2 opacity-50">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-500">
+                                                        {updateResponsibilityPlanMutation.isPending
+                                                            ? "Synchronizing..."
+                                                            : responsibilitySavedAt
+                                                                ? `Last Sync: ${dayjs(responsibilitySavedAt).format("DD MMM, HH:mm")}`
+                                                                : "Awaiting sync"}
+                                                    </span>
+                                                    {responsibilitySavedAt && <div className="w-1 h-1 rounded-full bg-success" />}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
-                        </CardBody >
-                    </Card >
+                        </CardBody>
+                    </Card>
 
                     {/* Execution Inquiries */}
                     {
@@ -2277,335 +2179,490 @@ export default function EnquiryDetailsPage() {
                         </CardBody>
                     </Card>
                 </div >
+                <Divider className="my-6" />
 
-            </div>
+                {/* Bottom Action Hub */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8 bg-default-50/50 p-6 md:p-8 rounded-[40px] border border-divider">
+                    <div className="flex flex-col gap-1.5 text-center md:text-left">
+                        <h2 className="text-2xl font-black tracking-tight">Finalize & Execute</h2>
+                        <p className="text-default-500 text-sm font-medium">Review all details above before finalizing the execution plan.</p>
+                    </div>
 
-            <Modal
-                isOpen={inventoryAcceptOpen}
-                onOpenChange={(open) => {
-                    setInventoryAcceptOpen(open);
-                    if (!open) setSelectedInventoryId("");
-                    if (!open) {
-                        setAcceptAttempted(false);
-                        setInlineQuantity("");
-                        setInlineWarehouseName("");
-                        setInlineStateId("");
-                        setInlineDistrictId("");
-                    }
-                }}
-                isDismissable={false}
-                isKeyboardDismissDisabled
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">Select Inventory for Supplier Acceptance</ModalHeader>
-                    <ModalBody>
-                        <div className="flex flex-col gap-4">
-                            <div className="text-sm text-default-500">
-                                Reserve <span className="font-semibold text-foreground">{enquiry?.quantity || 0} MT</span> from the selected warehouse.
-                            </div>
-                            <div className="rounded-lg border border-default-200/60 bg-default-50/60 px-3 py-2 text-xs text-default-500">
-                                This inventory and location information is <span className="font-semibold">not visible to the buyer</span>. It is used only for internal documentation and fulfillment.
-                            </div>
+                    <div className="flex flex-wrap gap-4 justify-center md:justify-end items-center">
+                        {quotationId && (
+                            <Button
+                                color="primary"
+                                variant="bordered"
+                                className="w-full sm:w-auto font-black px-6 rounded-2xl h-12 text-xs tracking-wide border-divider"
+                                onPress={() => router.push(`/dashboard/documents/${quotationId}`)}
+                                startContent={<LuEye size={18} />}
+                            >
+                                View Quotation
+                            </Button>
+                        )}
+                        {!quotationId && canManageDocs && enquiry.sellerAcceptedAt && (
+                            <Button
+                                color="primary"
+                                variant="flat"
+                                className="w-full sm:w-auto font-black px-6 rounded-2xl h-12 text-xs tracking-wide"
+                                isLoading={createQuotationMutation.isPending}
+                                onPress={() => createQuotationMutation.mutate()}
+                                startContent={<FiPlus size={18} />}
+                            >
+                                Create Quotation
+                            </Button>
+                        )}
 
-                            {inventoryOptions.length > 0 ? (
-                                <div className="flex gap-2 p-1 bg-default-100 rounded-xl overflow-hidden">
-                                    <Button
-                                        size="sm"
-                                        variant={!isAddingNewInventory ? "solid" : "light"}
-                                        color={!isAddingNewInventory ? "primary" : "default"}
-                                        className="flex-1 font-bold h-8"
-                                        onPress={() => {
-                                            setIsAddingNewInventory(false);
-                                            setAcceptAttempted(false);
-                                        }}
-                                        data-sound="tab"
-                                        startContent={<FiList size={14} />}
-                                    >
-                                        Existing
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant={isAddingNewInventory ? "solid" : "light"}
-                                        color={isAddingNewInventory ? "primary" : "default"}
-                                        className="flex-1 font-bold h-8"
-                                        onPress={() => {
-                                            setIsAddingNewInventory(true);
-                                            setAcceptAttempted(false);
-                                        }}
-                                        data-sound="tab"
-                                        startContent={<FiPlus size={14} />}
-                                    >
-                                        New Stock
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
-                                    No existing inventory found. Please add a new warehouse and stock below.
-                                </div>
-                            )}
+                        {isSeller && !enquiry.sellerAcceptedAt && (
+                            <Button
+                                color="success"
+                                variant="solid"
+                                className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                isLoading={sellerAcceptMutation.isPending}
+                                onPress={() => setInventoryAcceptOpen(true)}
+                            >
+                                Accept Enquiry
+                            </Button>
+                        )}
 
-                            {!isAddingNewInventory && inventoryOptions.length > 0 ? (
-                                <>
-                                    <Select
-                                        label="Select Warehouse"
-                                        placeholder="Choose inventory"
-                                        selectedKeys={selectedInventoryId ? new Set([selectedInventoryId]) : new Set()}
-                                        renderValue={(items) => {
-                                            const item = items?.[0];
-                                            const data = (item as any)?.data as any;
-                                            if (!data) return "Choose inventory";
-                                            const name = data.warehouseName || "Warehouse";
-                                            return `${name} • ${data.availableQty} MT available`;
-                                        }}
-                                        onSelectionChange={(keys) => {
-                                            const arr = Array.from(keys as Set<string>);
-                                            const id = arr[0] || "";
-                                            setSelectedInventoryId(id);
-                                            setInlineQuantity("");
-                                            setAcceptAttempted(false);
-                                        }}
-                                    >
-                                        {inventoryOptions.map((row: any) => (
-                                            <SelectItem
-                                                key={row.invId}
-                                                value={row.invId}
-                                                isDisabled={row.availableQty <= 0}
-                                                textValue={row.warehouseName || "Warehouse"}
+                        {isBuyer && enquiry.sellerAcceptedAt && !enquiry.buyerConfirmedAt && (
+                            <Button
+                                color="primary"
+                                variant="solid"
+                                className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                isLoading={buyerConfirmMutation.isPending}
+                                onPress={() => buyerConfirmMutation.mutate()}
+                            >
+                                Mark All Good to Go
+                            </Button>
+                        )}
+
+                        {isAdmin && (
+                            <div className="flex flex-wrap gap-4 justify-center md:justify-end">
+                                {!isConvertedFlow && !isCompletedFlow && !isCancelled && enquiry.sellerAcceptedAt && enquiry.buyerConfirmedAt && (
+                                    <>
+                                        {!hasResponsibilitiesFinalized && (
+                                            <Tooltip
+                                                content={
+                                                    <div className="px-1 py-2">
+                                                        <div className="text-tiny font-bold uppercase tracking-wider mb-2 opacity-60">Missing Requirements</div>
+                                                        <ul className="flex flex-col gap-1.5">
+                                                            {!hasFullResponsibilityPlan && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Ownership Allocation</li>}
+                                                            {!hasExecutionContext && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Logistics Context</li>}
+                                                            {!hasPackagingSpecifications && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Packaging Specs</li>}
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                isDisabled={hasFullResponsibilityPlan && hasExecutionContext && hasPackagingSpecifications}
+                                                placement="top"
+                                                showArrow
+                                                closeDelay={0}
                                             >
-                                                {row.warehouseName || "Warehouse"} • {row.availableQty} MT available
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                </>
-                            ) : (
-                                <>
+                                                <div className="w-full sm:w-auto">
+                                                    <Button
+                                                        color="warning"
+                                                        variant="solid"
+                                                        className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                                        isLoading={finalizeResponsibilitiesMutation.isPending}
+                                                        isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
+                                                        onPress={() => finalizeResponsibilitiesMutation.mutate()}
+                                                        startContent={<FiCheckCircle size={18} />}
+                                                    >
+                                                        Finalize Responsibilities
+                                                    </Button>
+                                                </div>
+                                            </Tooltip>
+                                        )}
+                                        <Button
+                                            color="danger"
+                                            variant="light"
+                                            className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                            onPress={() => updateStatusMutation.mutate("CANCELLED")}
+                                            isLoading={updateStatusMutation.isPending}
+                                        >
+                                            Cancel Enquiry
+                                        </Button>
+                                        <Button
+                                            color="primary"
+                                            variant="solid"
+                                            className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
+                                            onPress={onOpen}
+                                            isDisabled={!hasResponsibilitiesFinalized}
+                                            startContent={<FiArrowRight size={18} />}
+                                        >
+                                            Convert to Order
+                                        </Button>
+                                    </>
+                                )}
+
+                                {normalizedStatus === "CONVERTED" && (
+                                    <div className="flex flex-wrap gap-4">
+                                        <Button
+                                            color="success"
+                                            variant="flat"
+                                            className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                            onPress={() => updateStatusMutation.mutate("CLOSED")}
+                                            isLoading={updateStatusMutation.isPending}
+                                        >
+                                            Complete Enquiry
+                                        </Button>
+                                        <Button
+                                            color="success"
+                                            variant="solid"
+                                            className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
+                                            isDisabled={!enquiryOrderId}
+                                            onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
+                                            startContent={<LuTruck size={18} />}
+                                        >
+                                            View Order
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Order Context View for non-admins */}
+                        {!isAdmin && (enquiry as any)?.order && (
+                            <Button
+                                color="success"
+                                variant="solid"
+                                className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
+                                onPress={() => router.push(`/dashboard/orders/${(enquiry as any).order}`)}
+                                startContent={<LuTruck size={18} />}
+                            >
+                                View Order
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                <Modal
+                    isOpen={inventoryAcceptOpen}
+                    onOpenChange={(open) => {
+                        setInventoryAcceptOpen(open);
+                        if (!open) setSelectedInventoryId("");
+                        if (!open) {
+                            setAcceptAttempted(false);
+                            setInlineQuantity("");
+                            setInlineWarehouseName("");
+                            setInlineStateId("");
+                            setInlineDistrictId("");
+                        }
+                    }}
+                    isDismissable={false}
+                    isKeyboardDismissDisabled
+                >
+                    <ModalContent>
+                        <ModalHeader className="flex flex-col gap-1">Select Inventory for Supplier Acceptance</ModalHeader>
+                        <ModalBody>
+                            <div className="flex flex-col gap-4">
+                                <div className="text-sm text-default-500">
+                                    Reserve <span className="font-semibold text-foreground">{enquiry?.quantity || 0} MT</span> from the selected warehouse.
+                                </div>
+                                <div className="rounded-lg border border-default-200/60 bg-default-50/60 px-3 py-2 text-xs text-default-500">
+                                    This inventory and location information is <span className="font-semibold">not visible to the buyer</span>. It is used only for internal documentation and fulfillment.
+                                </div>
+
+                                {inventoryOptions.length > 0 ? (
+                                    <div className="flex gap-2 p-1 bg-default-100 rounded-xl overflow-hidden">
+                                        <Button
+                                            size="sm"
+                                            variant={!isAddingNewInventory ? "solid" : "light"}
+                                            color={!isAddingNewInventory ? "primary" : "default"}
+                                            className="flex-1 font-bold h-8"
+                                            onPress={() => {
+                                                setIsAddingNewInventory(false);
+                                                setAcceptAttempted(false);
+                                            }}
+                                            data-sound="tab"
+                                            startContent={<FiList size={14} />}
+                                        >
+                                            Existing
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant={isAddingNewInventory ? "solid" : "light"}
+                                            color={isAddingNewInventory ? "primary" : "default"}
+                                            className="flex-1 font-bold h-8"
+                                            onPress={() => {
+                                                setIsAddingNewInventory(true);
+                                                setAcceptAttempted(false);
+                                            }}
+                                            data-sound="tab"
+                                            startContent={<FiPlus size={14} />}
+                                        >
+                                            New Stock
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
+                                        No existing inventory found. Please add a new warehouse and stock below.
+                                    </div>
+                                )}
+
+                                {!isAddingNewInventory && inventoryOptions.length > 0 ? (
+                                    <>
+                                        <Select
+                                            label="Select Warehouse"
+                                            placeholder="Choose inventory"
+                                            selectedKeys={selectedInventoryId ? new Set([selectedInventoryId]) : new Set()}
+                                            renderValue={(items) => {
+                                                const item = items?.[0];
+                                                const data = (item as any)?.data as any;
+                                                if (!data) return "Choose inventory";
+                                                const name = data.warehouseName || "Warehouse";
+                                                return `${name} • ${data.availableQty} MT available`;
+                                            }}
+                                            onSelectionChange={(keys) => {
+                                                const arr = Array.from(keys as Set<string>);
+                                                const id = arr[0] || "";
+                                                setSelectedInventoryId(id);
+                                                setInlineQuantity("");
+                                                setAcceptAttempted(false);
+                                            }}
+                                        >
+                                            {inventoryOptions.map((row: any) => (
+                                                <SelectItem
+                                                    key={row.invId}
+                                                    value={row.invId}
+                                                    isDisabled={row.availableQty <= 0}
+                                                    textValue={row.warehouseName || "Warehouse"}
+                                                >
+                                                    {row.warehouseName || "Warehouse"} • {row.availableQty} MT available
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Input
+                                            label="Warehouse Name"
+                                            placeholder="Enter warehouse name"
+                                            value={inlineWarehouseName}
+                                            onValueChange={setInlineWarehouseName}
+                                            variant="bordered"
+                                        />
+                                        {inventoryOptions.length === 0 && (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <Select
+                                                    label="State"
+                                                    placeholder="Select state"
+                                                    selectedKeys={inlineStateId ? new Set([inlineStateId]) : new Set()}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        const id = arr[0] || "";
+                                                        setInlineStateId(id);
+                                                        setInlineDistrictId("");
+                                                    }}
+                                                >
+                                                    {states.map((item: any) => (
+                                                        <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
+                                                            {item?.name || item?.stateName || "State"}
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+                                                <Select
+                                                    label="District"
+                                                    placeholder="Select district"
+                                                    selectedKeys={inlineDistrictId ? new Set([inlineDistrictId]) : new Set()}
+                                                    onSelectionChange={(keys) => {
+                                                        const arr = Array.from(keys as Set<string>);
+                                                        const id = arr[0] || "";
+                                                        setInlineDistrictId(id);
+                                                    }}
+                                                    isDisabled={!inlineStateId}
+                                                >
+                                                    {inlineDistrictOptions.map((item: any) => (
+                                                        <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
+                                                            {item?.name || item?.districtName || "District"}
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                <div className="grid grid-cols-2 gap-3">
                                     <Input
-                                        label="Warehouse Name"
-                                        placeholder="Enter warehouse name"
-                                        value={inlineWarehouseName}
-                                        onValueChange={setInlineWarehouseName}
+                                        label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
+                                        type="number"
+                                        placeholder="0"
+                                        value={inlineQuantity}
+                                        onValueChange={setInlineQuantity}
                                         variant="bordered"
                                     />
-                                    {inventoryOptions.length === 0 && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <Select
-                                                label="State"
-                                                placeholder="Select state"
-                                                selectedKeys={inlineStateId ? new Set([inlineStateId]) : new Set()}
-                                                onSelectionChange={(keys) => {
-                                                    const arr = Array.from(keys as Set<string>);
-                                                    const id = arr[0] || "";
-                                                    setInlineStateId(id);
-                                                    setInlineDistrictId("");
-                                                }}
-                                            >
-                                                {states.map((item: any) => (
-                                                    <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
-                                                        {item?.name || item?.stateName || "State"}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                            <Select
-                                                label="District"
-                                                placeholder="Select district"
-                                                selectedKeys={inlineDistrictId ? new Set([inlineDistrictId]) : new Set()}
-                                                onSelectionChange={(keys) => {
-                                                    const arr = Array.from(keys as Set<string>);
-                                                    const id = arr[0] || "";
-                                                    setInlineDistrictId(id);
-                                                }}
-                                                isDisabled={!inlineStateId}
-                                            >
-                                                {inlineDistrictOptions.map((item: any) => (
-                                                    <SelectItem key={getEntityId(item)} value={getEntityId(item)}>
-                                                        {item?.name || item?.districtName || "District"}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                    label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
-                                    type="number"
-                                    placeholder="0"
-                                    value={inlineQuantity}
-                                    onValueChange={setInlineQuantity}
-                                    variant="bordered"
-                                />
-                            </div>
-
-                            {selectedInventory && !isAddingNewInventory && (
-                                <div className="text-[10px] text-default-400 uppercase font-black px-1">
-                                    Current Stock: {selectedInventory.availableQty} MT available • {selectedInventory.reservedQty} MT reserved • {selectedInventory.quantity} MT total
                                 </div>
-                            )}
-                            {shouldShowInsufficient && (
-                                <div className="text-xs text-danger-600 font-semibold px-1">
-                                    Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.
-                                </div>
-                            )}
-                        </div>
-                    </ModalBody>
-                    <ModalFooter className="border-t border-divider">
-                        <Button variant="light" onPress={() => setInventoryAcceptOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            color="success"
-                            className="font-bold"
-                            onPress={handleInventoryAccept}
-                            isLoading={sellerAcceptMutation.isPending}
-                            isDisabled={
-                                (isAddingNewInventory || inventoryOptions.length === 0)
-                                    ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
-                                    : (!selectedInventoryId)
-                            }
-                        >
-                            Save & Accept Enquiry
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
 
-            {/* Conversion Modal */}
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Convert to Order</ModalHeader>
-                            <ModalBody>
-                                <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
-                                    <div className="rounded-lg bg-default-100 px-3 py-2 sm:col-span-2">
-                                        Packaging Specs: <b>{String(packagingSpecifications || "").trim() || "Not provided"}</b>
+                                {selectedInventory && !isAddingNewInventory && (
+                                    <div className="text-[10px] text-default-400 uppercase font-black px-1">
+                                        Current Stock: {selectedInventory.availableQty} MT available • {selectedInventory.reservedQty} MT reserved • {selectedInventory.quantity} MT total
                                     </div>
-                                    {executionContext.tradeType === "INTERNATIONAL" && (
-                                        <>
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                            {isFromIndia && (
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
-                                            )}
-                                            {isToIndia && (
-                                                <>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
-                                                </>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                                <Input
-                                    label="Initial Notes"
-                                    placeholder="Any specific instructions..."
-                                    value={conversionNote}
-                                    onValueChange={setConversionNote}
-                                />
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>Cancel</Button>
-                                <Button
-                                    color="primary"
-                                    onPress={() => convertMutation.mutate()}
-                                    isLoading={convertMutation.isPending}
-                                    isDisabled={!canConvert}
-                                >
-                                    Confirm Conversion
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
+                                )}
+                                {shouldShowInsufficient && (
+                                    <div className="text-xs text-danger-600 font-semibold px-1">
+                                        Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.
+                                    </div>
+                                )}
+                            </div>
+                        </ModalBody>
+                        <ModalFooter className="border-t border-divider">
+                            <Button variant="light" onPress={() => setInventoryAcceptOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                color="success"
+                                className="font-bold"
+                                onPress={handleInventoryAccept}
+                                isLoading={sellerAcceptMutation.isPending}
+                                isDisabled={
+                                    (isAddingNewInventory || inventoryOptions.length === 0)
+                                        ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
+                                        : (!selectedInventoryId)
+                                }
+                            >
+                                Save & Accept Enquiry
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
 
-            <Modal
-                isOpen={docActionOpen}
-                onOpenChange={setDocActionOpen}
-                isDismissable={false}
-                isKeyboardDismissDisabled
-            >
-                <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">
-                        {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
-                    </ModalHeader>
-                    <ModalBody>
-                        {String(docActionRule?.actionType || "") === "UPLOAD" && (
-                            <Input
-                                label="File URL"
-                                placeholder="https://..."
-                                value={docActionFileUrl}
-                                onChange={(e) => setDocActionFileUrl(e.target.value)}
-                            />
+                {/* Conversion Modal */}
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">Convert to Order</ModalHeader>
+                                <ModalBody>
+                                    <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                        <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
+                                        <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
+                                        <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
+                                        <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
+                                        <div className="rounded-lg bg-default-100 px-3 py-2 sm:col-span-2">
+                                            Packaging Specs: <b>{String(packagingSpecifications || "").trim() || "Not provided"}</b>
+                                        </div>
+                                        {executionContext.tradeType === "INTERNATIONAL" && (
+                                            <>
+                                                <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                                <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
+                                                {isFromIndia && (
+                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
+                                                )}
+                                                {isToIndia && (
+                                                    <>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
+                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <Input
+                                        label="Initial Notes"
+                                        placeholder="Any specific instructions..."
+                                        value={conversionNote}
+                                        onValueChange={setConversionNote}
+                                    />
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="danger" variant="light" onPress={onClose}>Cancel</Button>
+                                    <Button
+                                        color="primary"
+                                        onPress={() => convertMutation.mutate()}
+                                        isLoading={convertMutation.isPending}
+                                        isDisabled={!canConvert}
+                                    >
+                                        Confirm Conversion
+                                    </Button>
+                                </ModalFooter>
+                            </>
                         )}
-                        <div className="text-xs text-default-500">
-                            {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
-                        </div>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
-                            Cancel
-                        </Button>
-                        <Button
-                            color="primary"
-                            onPress={() => createDocMutation.mutate()}
-                            isLoading={createDocMutation.isPending}
-                            isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
-                        >
-                            {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                    </ModalContent>
+                </Modal>
 
-            <Modal
-                isOpen={reopenRequestOpen}
-                onOpenChange={(open) => {
-                    setReopenRequestOpen(open);
-                    if (!open) setReopenReason("");
-                }}
-                isDismissable={false}
-                isKeyboardDismissDisabled
-            >
-                <ModalContent>
-                    <ModalHeader>Request Reopen</ModalHeader>
-                    <ModalBody>
-                        <Textarea
-                            label="Reason (optional)"
-                            placeholder="Add a short reason for reopening this enquiry."
-                            minRows={3}
-                            value={reopenReason}
-                            onValueChange={setReopenReason}
-                        />
-                        <div className="text-xs text-default-500">
-                            This will be reviewed by admin. If approved, a new enquiry will be created.
-                        </div>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button variant="light" onPress={() => setReopenRequestOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            color="danger"
-                            onPress={() => reopenRequestMutation.mutate()}
-                            isLoading={reopenRequestMutation.isPending}
-                        >
-                            Submit Request
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+                <Modal
+                    isOpen={docActionOpen}
+                    onOpenChange={setDocActionOpen}
+                    isDismissable={false}
+                    isKeyboardDismissDisabled
+                >
+                    <ModalContent>
+                        <ModalHeader className="flex flex-col gap-1">
+                            {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
+                        </ModalHeader>
+                        <ModalBody>
+                            {String(docActionRule?.actionType || "") === "UPLOAD" && (
+                                <Input
+                                    label="File URL"
+                                    placeholder="https://..."
+                                    value={docActionFileUrl}
+                                    onChange={(e) => setDocActionFileUrl(e.target.value)}
+                                />
+                            )}
+                            <div className="text-xs text-default-500">
+                                {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
+                            </div>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
+                                Cancel
+                            </Button>
+                            <Button
+                                color="primary"
+                                onPress={() => createDocMutation.mutate()}
+                                isLoading={createDocMutation.isPending}
+                                isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
+                            >
+                                {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+
+                <Modal
+                    isOpen={reopenRequestOpen}
+                    onOpenChange={(open) => {
+                        setReopenRequestOpen(open);
+                        if (!open) setReopenReason("");
+                    }}
+                    isDismissable={false}
+                    isKeyboardDismissDisabled
+                >
+                    <ModalContent>
+                        <ModalHeader>Request Reopen</ModalHeader>
+                        <ModalBody>
+                            <Textarea
+                                label="Reason (optional)"
+                                placeholder="Add a short reason for reopening this enquiry."
+                                minRows={3}
+                                value={reopenReason}
+                                onValueChange={setReopenReason}
+                            />
+                            <div className="text-xs text-default-500">
+                                This will be reviewed by admin. If approved, a new enquiry will be created.
+                            </div>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="light" onPress={() => setReopenRequestOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                color="danger"
+                                onPress={() => reopenRequestMutation.mutate()}
+                                isLoading={reopenRequestMutation.isPending}
+                            >
+                                Submit Request
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            </div >
         </div >
     );
 }

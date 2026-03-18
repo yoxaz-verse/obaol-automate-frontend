@@ -34,29 +34,22 @@ export const showToastMessage = ({
   message,
   position = "top-right",
 }: ToastMessage) => {
+  const commonOptions: any = {
+    position: "top-right",
+    className: "z-[9999]",
+    style: {
+      zIndex: 9999,
+    },
+  };
+
   if (type === "success") {
-    toast.success(message, {
-      position: "top-right",
-      className: "z-50",
-      style: {
-        zIndex: 9999,
-      },
-    });
-  }
-  if (type === "error") {
-    toast.error(message, {
-      position: "top-right",
-    });
-  }
-  if (type === "warning") {
-    toast.warning(message, {
-      position: "top-right",
-    });
-  }
-  if (type === "info") {
-    toast.info(message, {
-      position: "top-right",
-    });
+    toast.success(message, commonOptions);
+  } else if (type === "error") {
+    toast.error(message, commonOptions);
+  } else if (type === "warning") {
+    toast.warning(message, commonOptions);
+  } else if (type === "info") {
+    toast.info(message, commonOptions);
   }
 };
 

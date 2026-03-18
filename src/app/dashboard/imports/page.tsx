@@ -233,6 +233,26 @@ export default function ImportsPage() {
   const canEditAny = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canEditListing = (listing: any) =>
     canEditAny || String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?._id || user?.id || "");
+  const associateCompanyId = String(user?.associateCompanyId || "");
+
+  const canViewSensitive = (listing: any) => {
+    if (roleLower === "admin") return true;
+    if (roleLower === "operator" || roleLower === "team") {
+      const assignedOperator = listing?.importerCompanyId?.assignedOperator;
+      return String(assignedOperator || "") === String(user?.id || "");
+    }
+    if (roleLower === "associate") {
+      const importerCompanyId = String(listing?.importerCompanyId?._id || listing?.importerCompanyId || "");
+      return Boolean(associateCompanyId && importerCompanyId && importerCompanyId === associateCompanyId);
+    }
+    return false;
+  };
+
+  const getDisplayPrice = (listing: any) => {
+    const price = Number(listing?.price || 0);
+    const commission = Number(listing?.adminCommission || 0);
+    return canViewSensitive(listing) ? price : price + commission;
+  };
 
   const editMutation = useMutation({
     mutationFn: (payload: { id: string; data: any }) => patchData(apiRoutes.imports.update(payload.id), payload.data),
@@ -324,17 +344,19 @@ export default function ImportsPage() {
                       <div className="text-sm">
                         Price:{" "}
                         <span className="font-semibold">
-                          {listing.price} / {listing.priceUnit}
+                          {getDisplayPrice(listing)} / {listing.priceUnit}
                         </span>
                       </div>
-                      {Number(listing.adminCommission || 0) > 0 && (
+                      {canViewSensitive(listing) && Number(listing.adminCommission || 0) > 0 && (
                         <div className="text-xs text-default-500">
                           OBAOL Commission: {listing.adminCommission} / {listing.priceUnit}
                         </div>
                       )}
-                      <div className="text-xs text-default-500">
-                        Importer: {listing.importerCompanyId?.name || "—"}
-                      </div>
+                      {canViewSensitive(listing) && (
+                        <div className="text-xs text-default-500">
+                          Importer: {listing.importerCompanyId?.name || "—"}
+                        </div>
+                      )}
                       <div className="flex gap-2 flex-wrap">
                         {activeTab === "all" && (
                           <Button
@@ -429,9 +451,11 @@ export default function ImportsPage() {
                       <div className="text-sm">
                         Quantity: <span className="font-semibold">{reservation.quantityRequested}</span>
                       </div>
-                      <div className="text-xs text-default-500">
-                        Importer: {reservation.listingId?.importerCompanyId?.name || "—"}
-                      </div>
+                      {canViewSensitive(reservation.listingId) && (
+                        <div className="text-xs text-default-500">
+                          Importer: {reservation.listingId?.importerCompanyId?.name || "—"}
+                        </div>
+                      )}
                     </CardBody>
                   </Card>
                 ))}

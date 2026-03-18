@@ -113,6 +113,7 @@ function OperatorRegisterForm() {
         district: form.district,
         languageKnown: form.languageKnown,
         workingHours: [],
+        joiningDate: new Date().toISOString(),
       };
 
       await postData(accountRoutes.operatorRegister, payload);

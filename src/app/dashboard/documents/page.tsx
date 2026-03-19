@@ -9,6 +9,7 @@ import AuthContext from "@/context/AuthContext";
 import Title from "@/components/titles";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
+import { DEFAULT_STALE_TIME, extractList, useDocuments } from "@/core/data";
 import { showToastMessage } from "@/utils/utils";
 
 const TYPE_TABS = [
@@ -55,27 +56,23 @@ export default function DocumentsPage() {
   const [ruleStageType, setRuleStageType] = useState("ORDER");
   const [ruleStageKey, setRuleStageKey] = useState("ORDER_CREATED");
 
-  const { data: docsResponse } = useQuery({
-    queryKey: ["trade-documents", typeTab, statusFilter, companyFilter],
-    queryFn: () =>
-      getData(apiRoutes.tradeDocuments.list, {
-        page: 1,
-        limit: 200,
-        ...(typeTab !== "ALL" && { type: typeTab }),
-        ...(statusFilter !== "ALL" && { status: statusFilter }),
-        ...(companyFilter && { companyId: companyFilter }),
-      }),
+  const { data: docsResponse } = useDocuments({
+    page: 1,
+    limit: 20,
+    ...(typeTab !== "ALL" && { type: typeTab }),
+    ...(statusFilter !== "ALL" && { status: statusFilter }),
+    ...(companyFilter && { companyId: companyFilter }),
   });
 
-  const documents = Array.isArray(docsResponse?.data?.data?.data)
-    ? docsResponse?.data?.data?.data
-    : (docsResponse?.data?.data || []);
+  const documents = docsResponse?.list ?? extractList(docsResponse?.raw ?? docsResponse);
 
   const { data: rulesResponse } = useQuery({
     queryKey: ["document-rules"],
     queryFn: () => getData(apiRoutes.documentRules.list),
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const rules = Array.isArray(rulesResponse?.data?.data) ? rulesResponse.data.data : [];
+  const rules = extractList(rulesResponse?.data);
   const stageOptions = ruleStageType === "INQUIRY" ? INQUIRY_STAGES : ORDER_STAGES;
   const stageRules = rules
     .filter((r: any) => String(r.stageType) === ruleStageType && String(r.stageKey) === ruleStageKey && r.isActive !== false)
@@ -83,13 +80,13 @@ export default function DocumentsPage() {
 
   const { data: companiesResponse } = useQuery({
     queryKey: ["doc-companies"],
-    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 1000 }),
+    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 200 }),
     enabled: canManage,
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
 
-  const companies = Array.isArray(companiesResponse?.data?.data?.data)
-    ? companiesResponse?.data?.data?.data
-    : (companiesResponse?.data?.data || []);
+  const companies = extractList(companiesResponse?.data);
 
   const filteredDocs = useMemo(() => {
     if (!search.trim()) return documents;

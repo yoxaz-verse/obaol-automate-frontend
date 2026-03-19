@@ -30,15 +30,15 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
     }
     if (type === "view") {
       return (
-        <Card className="bg-content1 shadow-none border border-default-200/60 h-full hover:bg-content2 transition-colors duration-300">
-          <Link href={data.link || "#"} className="w-full h-full flex flex-col items-center justify-center p-6 gap-3 group">
-            <div className="text-warning-500 text-3xl group-hover:scale-110 transition-transform duration-300">
+        <Card className="bg-content1/80 backdrop-blur-md shadow-sm border border-white/5 dark:border-default-200/10 h-full hover:bg-content2/90 hover:shadow-lg hover:border-warning-500/30 transition-all duration-300 group overflow-hidden">
+          <Link href={data.link || "#"} className="w-full h-full flex flex-col items-center justify-center p-3 sm:p-5 gap-2 group">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 text-xl sm:text-2xl group-hover:bg-warning-500 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-warning-500/40">
               {data.icon}
             </div>
-            <div className="font-semibold text-foreground text-sm text-center line-clamp-2 px-2 h-10 flex items-center justify-center">
+            <div className="font-black text-foreground text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-center line-clamp-1 px-1 mt-1 transition-all group-hover:text-warning-500">
               {data.name}
             </div>
-            <div className="text-[10px] text-default-400 group-hover:text-warning-500 transition-colors uppercase tracking-widest font-bold">
+            <div className="px-3 py-1 bg-default-100 dark:bg-white/5 rounded-full text-[8px] sm:text-[9px] text-default-400 group-hover:bg-warning-500 group-hover:text-white transition-all uppercase tracking-[0.2em] font-black border border-transparent dark:border-white/5">
               View
             </div>
           </Link>

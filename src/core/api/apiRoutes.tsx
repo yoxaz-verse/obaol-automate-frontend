@@ -66,8 +66,10 @@ const BASE_PATHS = {
   DOCUMENT_RULE: "/document-rules",
   ENQUIRY_RULE: "/enquiry-rules",
   ORDER_RULE: "/order-rules",
+  FLOW_RULE: "/flow-rules",
   IMPORTS: "/imports",
   IMPORT_RESERVATION: "/import-reservations",
+  WAREHOUSES: "/warehouses",
   DEMO: "/demo",
 };
 
@@ -124,7 +126,9 @@ export const inventoryReservationRoutes = createCRUDRoutes(
 export const sampleRequestRoutes = createCRUDRoutes(BASE_PATHS.SAMPLE_REQUEST);
 export const tradeDocumentRoutes = createCRUDRoutes(BASE_PATHS.TRADE_DOCUMENT);
 export const documentRuleRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_RULE);
+export const flowRuleRoutes = createCRUDRoutes(BASE_PATHS.FLOW_RULE);
 export const demoRoutes = createCRUDRoutes(BASE_PATHS.DEMO);
+export const warehouseRoutes = createCRUDRoutes(BASE_PATHS.WAREHOUSES);
 
 export const pincodeEntryRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.PINCODE_ENTRY),
@@ -413,6 +417,13 @@ export const apiRoutes = {
     update: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.DOCUMENT_RULE}/${id}`,
   },
+  flowRules: {
+    list: `${BASE_PATHS.FLOW_RULE}`,
+    create: `${BASE_PATHS.FLOW_RULE}`,
+    seed: `${BASE_PATHS.FLOW_RULE}/seed`,
+    update: (id: string) => `${BASE_PATHS.FLOW_RULE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.FLOW_RULE}/${id}`,
+  },
   enquiryRules: {
     list: `${BASE_PATHS.ENQUIRY_RULE}`,
     create: `${BASE_PATHS.ENQUIRY_RULE}`,
@@ -470,4 +481,14 @@ export const apiRoutes = {
   organizationReports: organizationReportRoutes,
   serviceRequests: serviceRequestRoutes,
   inventory: inventoryRoutes,
+  warehouses: {
+    list: "/warehouses",
+    create: "/warehouses",
+    update: (id: string) => `/warehouses/${id}`,
+    inbound: "/warehouse/inbound",
+    outbound: "/warehouse/outbound",
+    adjust: "/warehouse/adjust",
+    movements: "/warehouse/movements",
+    storageCharges: "/warehouse/storage-charges",
+  },
 };

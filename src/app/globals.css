@@ -69,3 +69,12 @@ h1 {
 .scrollbar-gutter-stable::-webkit-scrollbar-track {
   background: rgba(120, 120, 120, 0.12);
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

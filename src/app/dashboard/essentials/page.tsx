@@ -16,6 +16,7 @@ export default function Essentials() {
     { key: "certification", title: "Certifications" }, // Translate Title
     { key: "companyFunction", title: "Company Functions" },
     { key: "companySubFunction", title: "Company Sub-Functions" },
+    { key: "warehouse", title: "Warehouses" },
   ];
   const [company, setCompany] = React.useState("associateCompany");
   const companyTabs = [

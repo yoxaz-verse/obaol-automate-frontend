@@ -15,6 +15,8 @@ import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
+import { TbContainer } from "react-icons/tb";
+import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell } from "react-icons/fi";
@@ -76,7 +78,7 @@ export const sidebarOptions = [
   },
   {
     name: "Imports",
-    icon: <FiPackage />,
+    icon: <TbContainer />,
     link: "/dashboard/imports",
   },
   {
@@ -86,8 +88,18 @@ export const sidebarOptions = [
   },
   {
     name: "Inventory",
-    icon: <LuWarehouse />,
+    icon: <BsBoxes />,
     link: "/dashboard/inventory",
+  },
+  {
+    name: "Warehouses",
+    icon: <LuWarehouse />,
+    link: "/dashboard/warehouses",
+  },
+  {
+    name: "Rent Warehouse",
+    icon: <TbContainer />,
+    link: "/dashboard/warehouse-rent",
   },
   {
     name: "My Company",

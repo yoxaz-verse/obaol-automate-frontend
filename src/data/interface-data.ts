@@ -219,7 +219,7 @@ export interface FormField {
   required?: boolean; // For file inputs
   showWhen?: {
     key: string;
-    equals: string | boolean | number | null;
+    equals: string | boolean | number | null | Array<string | boolean | number | null>;
   };
   clearWhenHidden?: boolean;
 }

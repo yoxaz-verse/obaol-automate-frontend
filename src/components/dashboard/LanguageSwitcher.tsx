@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { LuLanguages } from "react-icons/lu";
+import { LuLanguages, LuCheck } from "react-icons/lu";
 import { languages, normalizeLanguageCode } from "@/data/languages";
 import { clearLanguageCookies, getLanguageCookie, setLanguageCookies } from "@/utils/languageCookie";
 import { showToastMessage } from "@/utils/utils";
@@ -9,12 +9,14 @@ import { useSoundEffect } from "@/context/SoundContext";
 
 export const LanguageSwitcher = () => {
   const [currentLang, setCurrentLang] = useState("en");
+  const [pendingLang, setPendingLang] = useState<string | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const { play } = useSoundEffect();
   const warningShownRef = useRef(false);
   const isSwitchingRef = useRef(false);
   const reloadTriggeredRef = useRef(false);
   const translationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
     if (process.env.NODE_ENV !== "production") {
@@ -58,23 +60,33 @@ export const LanguageSwitcher = () => {
     document.addEventListener("visibilitychange", syncFromPreference);
 
     return () => {
-      if (translationTimeoutRef.current) {
-        clearTimeout(translationTimeoutRef.current);
-        translationTimeoutRef.current = null;
-      }
+      if (translationTimeoutRef.current) clearTimeout(translationTimeoutRef.current);
+      if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
       window.removeEventListener("translation-unavailable", handleUnavailable);
       document.removeEventListener("visibilitychange", syncFromPreference);
     };
   }, []);
 
-  const changeLanguage = (nextCode: string) => {
+  // Cancel pending selection after 8 seconds of inaction
+  useEffect(() => {
+    if (pendingLang) {
+      if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = setTimeout(() => setPendingLang(null), 8000);
+    }
+    return () => {
+      if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
+    };
+  }, [pendingLang]);
+
+  const applyLanguage = (nextCode: string) => {
     const normalized = normalizeLanguageCode(nextCode);
     if (isSwitchingRef.current || reloadTriggeredRef.current) return;
-    if (normalized === currentLang) return;
+    if (normalized === currentLang) { setPendingLang(null); return; }
 
     warningShownRef.current = false;
     setIsSwitching(true);
     setCurrentLang(normalized);
+    setPendingLang(null);
     play("language");
 
     const selectedLang = languages.find((lang) => lang.code === normalized);
@@ -90,9 +102,7 @@ export const LanguageSwitcher = () => {
       setLanguageCookies(normalized);
     }
 
-    if (translationTimeoutRef.current) {
-      clearTimeout(translationTimeoutRef.current);
-    }
+    if (translationTimeoutRef.current) clearTimeout(translationTimeoutRef.current);
     translationTimeoutRef.current = setTimeout(() => {
       setIsSwitching(false);
       window.dispatchEvent(new Event("translation-end"));
@@ -105,19 +115,37 @@ export const LanguageSwitcher = () => {
     }, 120);
   };
 
+  const handleSelectChange = (nextCode: string) => {
+    const normalized = normalizeLanguageCode(nextCode);
+    if (normalized === currentLang) return;
+    // Stage it — require confirm click
+    setPendingLang(normalized);
+  };
+
+  const pendingLabel = pendingLang
+    ? languages.find((l) => l.code === pendingLang)?.name
+    : null;
+
   return (
-    <div className="flex items-center">
-      <div className="relative group">
+    // notranslate + translate="no" stops ALL translation engines from touching this element
+    <div className="flex items-center gap-2 notranslate" translate="no">
+      <div className="relative group notranslate" translate="no">
         <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-warning-500 w-4 h-4 z-10 pointer-events-none" />
         <select
-          className="appearance-none w-[150px] bg-default-100 hover:bg-default-200 transition-colors cursor-pointer text-foreground font-bold text-[11px] uppercase tracking-wider h-10 pl-9 pr-8 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20"
-          value={currentLang}
+          className="notranslate appearance-none w-[150px] bg-default-100 hover:bg-default-200 transition-colors cursor-pointer text-foreground font-bold text-[11px] uppercase tracking-wider h-10 pl-9 pr-8 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20"
+          value={pendingLang ?? currentLang}
           disabled={isSwitching}
-          onChange={(e) => changeLanguage(String(e.target.value || "en"))}
+          onChange={(e) => handleSelectChange(String(e.target.value || "en"))}
           aria-label="Select Language"
+          translate="no"
         >
           {languages.map((lang) => (
-            <option key={lang.code} value={lang.code} className="text-base font-medium text-foreground bg-content1 py-2">
+            <option
+              key={lang.code}
+              value={lang.code}
+              className="notranslate text-base font-medium text-foreground bg-content1 py-2"
+              translate="no"
+            >
               {lang.flag} {lang.name}
             </option>
           ))}
@@ -128,6 +156,19 @@ export const LanguageSwitcher = () => {
           </svg>
         </div>
       </div>
+
+      {/* Confirm button — only shows when a pending change is staged */}
+      {pendingLang && (
+        <button
+          onClick={() => applyLanguage(pendingLang)}
+          className="notranslate flex items-center gap-1 px-3 h-10 rounded-xl bg-warning-500 hover:bg-warning-600 active:scale-95 transition-all text-white font-black text-[10px] uppercase tracking-wide shadow-md shadow-warning-500/30 animate-in fade-in slide-in-from-right-2 duration-200"
+          title={`Apply ${pendingLabel}`}
+          translate="no"
+        >
+          <LuCheck size={14} />
+          <span className="notranslate" translate="no">Apply</span>
+        </button>
+      )}
     </div>
   );
 };

@@ -59,6 +59,7 @@ const SERVICE_TYPE_OPTIONS = [
   { key: "PACKAGING", label: "Packaging" },
   { key: "TRANSPORTATION", label: "Transportation" },
   { key: "CUSTOMS_CLEARANCE", label: "Customs Clearance" },
+  { key: "WAREHOUSING", label: "Warehousing" },
 ];
 
 const SERVICE_STATUS_OPTIONS = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
@@ -125,13 +126,13 @@ export default function ExecutionEnquiriesPage() {
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
 
   useEffect(() => {
-    patchData(apiRoutes.notifications.markSectionRead("execution"), {}).catch(() => {});
+    patchData(apiRoutes.notifications.markSectionRead("execution"), {}).catch(() => { });
   }, []);
   const myCompanyId = String(
     (user as any)?.associateCompany?._id ||
-      (user as any)?.associateCompany ||
-      (user as any)?.associateCompanyId ||
-      ""
+    (user as any)?.associateCompany ||
+    (user as any)?.associateCompanyId ||
+    ""
   );
 
   const typeFilters = [
@@ -142,6 +143,7 @@ export default function ExecutionEnquiriesPage() {
     { key: "SHIPPING", label: "Shipping" },
     { key: "PACKAGING", label: "Packaging" },
     { key: "QUALITY_TESTING", label: "Quality Testing" },
+    { key: "WAREHOUSING", label: "Warehousing" },
   ];
 
   const { data: enquiryRes, isLoading: isDealLoading } = useQuery({
@@ -244,8 +246,8 @@ export default function ExecutionEnquiriesPage() {
     const configuredInterests = Array.isArray((interestsStatusRes as any)?.data?.data?.companyInterests)
       ? (interestsStatusRes as any).data.data.companyInterests.map((x: any) => String(x || "").toUpperCase())
       : Array.isArray((user as any)?.companyInterests)
-      ? (user as any).companyInterests.map((x: any) => String(x || "").toUpperCase())
-      : [];
+        ? (user as any).companyInterests.map((x: any) => String(x || "").toUpperCase())
+        : [];
     const isSystemAdmin = isAdmin;
     const isProviderAssociate = roleLower === "associate";
 
@@ -491,8 +493,8 @@ export default function ExecutionEnquiriesPage() {
               <Button
                 color="primary"
                 size="md"
-                className="md:ml-auto font-semibold shadow-md"
-                startContent={<FiPlus size={16} />}
+                className="w-full md:w-auto md:ml-auto font-bold shadow-lg shadow-primary/20"
+                startContent={<FiPlus size={18} />}
                 onPress={() => setIsCreateModalOpen(true)}
               >
                 Create Partial Service
@@ -538,16 +540,16 @@ export default function ExecutionEnquiriesPage() {
                 <CardBody className="pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {enq.tasks.map((row: any) => (
-                        <Card key={row.key} className="border border-default-200 relative overflow-hidden">
-                          {/* Recently Opened / New Indicator Dot */}
-                          {enq.createdAt && (Date.now() - new Date(enq.createdAt).getTime() < 86400000) && (
-                              <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
-                                  <span className="relative flex h-2 w-2">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                                  </span>
-                              </div>
-                          )}
+                      <Card key={row.key} className="border border-default-200 relative overflow-hidden">
+                        {/* Recently Opened / New Indicator Dot */}
+                        {enq.createdAt && (Date.now() - new Date(enq.createdAt).getTime() < 86400000) && (
+                          <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                            </span>
+                          </div>
+                        )}
                         <CardHeader className="flex justify-between items-start gap-2">
                           <div>
                             <div className="font-semibold">{row.title}</div>
@@ -578,9 +580,9 @@ export default function ExecutionEnquiriesPage() {
                             <div>Total Bids: {Array.isArray(row.bids) ? row.bids.length : 0}</div>
                             <div>Committed Provider: {getName(row.committedProvider)}</div>
                             <div>Awarded Amount: {typeof row.bidAmount === "number" ? row.bidAmount : "-"}</div>
-                          {row.canViewBidDetails ? (
-                            <div className="mt-2 overflow-x-auto">
-                              <table className="w-full min-w-[320px] text-[11px]">
+                            {row.canViewBidDetails ? (
+                              <div className="mt-2 overflow-x-auto">
+                                <table className="w-full min-w-[320px] text-[11px]">
                                   <thead>
                                     <tr className="text-default-500">
                                       <th className="text-left py-1">Company</th>
@@ -622,8 +624,8 @@ export default function ExecutionEnquiriesPage() {
                               {(Array.isArray(row.candidateProviders) && row.candidateProviders.length > 0
                                 ? row.candidateProviders
                                 : Array.isArray(row.bids)
-                                ? row.bids.map((bid: any) => bid?.company).filter(Boolean)
-                                : []
+                                  ? row.bids.map((bid: any) => bid?.company).filter(Boolean)
+                                  : []
                               ).map((company: any, idx: number) => {
                                 const companyId = String(company?._id || company || "");
                                 const companyName = getName(company);
@@ -755,12 +757,12 @@ export default function ExecutionEnquiriesPage() {
                 <Card key={key} className="border border-default-200 shadow-sm relative overflow-hidden">
                   {/* Recently Opened / New Indicator Dot */}
                   {item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 86400000) && (
-                      <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
-                          <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                          </span>
-                      </div>
+                    <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                      </span>
+                    </div>
                   )}
                   <CardHeader className="flex justify-between items-start gap-3">
                     <div>
@@ -900,17 +902,17 @@ export default function ExecutionEnquiriesPage() {
 
                       {isAdmin
                         ? SERVICE_STATUS_OPTIONS.map((status) => (
-                            <Button
-                              key={`${key}-${status}`}
-                              size="sm"
-                              variant="light"
-                              isDisabled={item.status === status}
-                              isLoading={updateServiceStatusMutation.isPending}
-                              onPress={() => updateServiceStatusMutation.mutate({ id: key, status })}
-                            >
-                              {status}
-                            </Button>
-                          ))
+                          <Button
+                            key={`${key}-${status}`}
+                            size="sm"
+                            variant="light"
+                            isDisabled={item.status === status}
+                            isLoading={updateServiceStatusMutation.isPending}
+                            onPress={() => updateServiceStatusMutation.mutate({ id: key, status })}
+                          >
+                            {status}
+                          </Button>
+                        ))
                         : null}
                     </div>
                   </CardBody>

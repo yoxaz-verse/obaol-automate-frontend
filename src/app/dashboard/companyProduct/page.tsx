@@ -76,6 +76,7 @@ export default function CompanyProductPage() {
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(null);
   const [webFields, setWebFields] = useState<any>({});
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const operatorAssociateFormFields: FormField[] = [
     { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
@@ -434,14 +435,14 @@ export default function CompanyProductPage() {
     // Categorize using backend-provided stats
     const live = sortByName(
       allCompanies
-      .filter((c) => (c.stats?.liveProducts || 0) > 0)
-      .map(c => ({ ...c, productCount: c.stats?.liveProducts }))
+        .filter((c) => (c.stats?.liveProducts || 0) > 0)
+        .map(c => ({ ...c, productCount: c.stats?.liveProducts }))
     );
 
     const active = sortByName(
       allCompanies
-      .filter((c) => (c.stats?.totalProducts || 0) > 0 && (c.stats?.liveProducts || 0) === 0)
-      .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
+        .filter((c) => (c.stats?.totalProducts || 0) > 0 && (c.stats?.liveProducts || 0) === 0)
+        .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
     );
 
     const empty = sortByName(allCompanies.filter((c) => (c.stats?.totalProducts || 0) === 0));
@@ -449,15 +450,15 @@ export default function CompanyProductPage() {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const dormant = sortByName(
       allCompanies
-      .filter((c) => (c.stats?.totalProducts || 0) > 0)
-      .filter((c) => {
-        const supervisorObj = typeof (c as any).supervisor === "object" ? (c as any).supervisor : null;
-        const assignedObj = typeof (c as any).assignedOperator === "object" ? (c as any).assignedOperator : null;
-        const lastSeenAt = supervisorObj?.lastSeenAt || assignedObj?.lastSeenAt || null;
-        if (!lastSeenAt) return false;
-        return new Date(lastSeenAt) <= weekAgo;
-      })
-      .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
+        .filter((c) => (c.stats?.totalProducts || 0) > 0)
+        .filter((c) => {
+          const supervisorObj = typeof (c as any).supervisor === "object" ? (c as any).supervisor : null;
+          const assignedObj = typeof (c as any).assignedOperator === "object" ? (c as any).assignedOperator : null;
+          const lastSeenAt = supervisorObj?.lastSeenAt || assignedObj?.lastSeenAt || null;
+          if (!lastSeenAt) return false;
+          return new Date(lastSeenAt) <= weekAgo;
+        })
+        .map(c => ({ ...c, productCount: c.stats?.totalProducts }))
     );
 
     const selected = allCompanies.find(c => c._id === selectedCompanyId) || null;
@@ -520,7 +521,6 @@ export default function CompanyProductPage() {
     };
   };
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
@@ -534,136 +534,136 @@ export default function CompanyProductPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-                <AddModal
-                  buttonLabel="Add Associate to Company"
-                  currentTable="associate"
-                  formFields={operatorAssociateFormFields}
-                  apiEndpoint={associateRoutes.getAll}
-                  additionalVariable={{
-                    hasCompany: true,
-                    companyMode: "existing",
-                  }}
-                />
-                <AddModal
-                  buttonLabel="Add Company"
-                  currentTable="associateCompany"
-                  formFields={operatorCompanyFormFields}
-                  apiEndpoint={associateCompanyRoutes.getAll}
-                  additionalVariable={{
-                    assignedOperator: user?.id,
-                  }}
-                />
+              <AddModal
+                buttonLabel="Add Associate to Company"
+                currentTable="associate"
+                formFields={operatorAssociateFormFields}
+                apiEndpoint={associateRoutes.getAll}
+                additionalVariable={{
+                  hasCompany: true,
+                  companyMode: "existing",
+                }}
+              />
+              <AddModal
+                buttonLabel="Add Company"
+                currentTable="associateCompany"
+                formFields={operatorCompanyFormFields}
+                apiEndpoint={associateCompanyRoutes.getAll}
+                additionalVariable={{
+                  assignedOperator: user?.id,
+                }}
+              />
             </div>
           </div>
         </Card>
       )}
       <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px] relative">
         <Button
-            isIconOnly
-            variant="flat"
-            size="sm"
-            className={`absolute top-4 z-20 transition-all duration-300 dark:bg-default-100/30 border border-default-200/70 dark:border-default-500/40 ${isSidebarCollapsed ? "-left-3" : "left-[285px] lg:left-[325px]"}`}
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isIconOnly
+          variant="flat"
+          size="sm"
+          className={`absolute top-4 z-20 transition-all duration-300 dark:bg-default-100/30 border border-default-200/70 dark:border-default-500/40 ${isSidebarCollapsed ? "-left-3" : "left-[285px] lg:left-[325px]"}`}
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         >
-            {isSidebarCollapsed ? <LuChevronRight size={16} /> : <LuChevronLeft size={16} />}
+          {isSidebarCollapsed ? <LuChevronRight size={16} /> : <LuChevronLeft size={16} />}
         </Button>
 
         {/* --- Sidebar (Master) --- */}
         {!isSidebarCollapsed && (
           <div className="w-full md:w-[300px] lg:w-[340px] flex flex-col gap-3 flex-shrink-0 transition-all duration-300 animate-in slide-in-from-left duration-300">
-          <Card className="bg-content1 border border-default-200/80 shadow-sm h-full overflow-hidden flex flex-col">
-            {/* Sidebar header */}
-            <div className="px-4 pt-4 pb-3 border-b border-default-100">
-              <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
-              <Input
-                value={companySearch}
-                onChange={(event) => setCompanySearch(event.target.value)}
-                placeholder="Search company name"
-                size="sm"
-                variant="bordered"
-                classNames={{
-                  inputWrapper: "bg-background/50 border-default-200/70",
-                }}
-                isClearable
-                onClear={() => setCompanySearch("")}
-              />
-            </div>
+            <Card className="bg-content1 border border-default-200/80 shadow-sm h-full overflow-hidden flex flex-col">
+              {/* Sidebar header */}
+              <div className="px-4 pt-4 pb-3 border-b border-default-100">
+                <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
+                <Input
+                  value={companySearch}
+                  onChange={(event) => setCompanySearch(event.target.value)}
+                  placeholder="Search company name"
+                  size="sm"
+                  variant="bordered"
+                  classNames={{
+                    inputWrapper: "bg-background/50 border-default-200/70",
+                  }}
+                  isClearable
+                  onClear={() => setCompanySearch("")}
+                />
+              </div>
 
-            {/* Filter tabs */}
-            <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-default-100">
-              {(["live", "active", "empty", "dormant"] as const).map((tab) => {
-                const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
-                const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-danger-500";
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${activeTab === tab
-                      ? "bg-default-200 text-foreground"
-                      : "text-default-500 hover:text-foreground hover:bg-default-100"
-                      }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-                    <span className="capitalize">{tab === "dormant" ? "Dormant (7d)" : tab}</span>
-                    <span className={`text-[10px] font-bold px-1 rounded ${activeTab === tab ? "bg-foreground/10" : "bg-default-200/60"
-                      }`}>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Scrollable list */}
-            <div className="flex-1 overflow-y-auto px-3 pb-3 custom-scrollbar">
-              <div className="flex flex-col gap-1">
-                {filteredCompanies.map((company) => {
-                  const isActive = selectedCompanyId === company._id;
-                  const prodCount = (company as any).productCount;
-                  const isLive = (company.stats?.liveProducts || 0) > 0;
-                  const isDormant = activeTab === "dormant";
-
+              {/* Filter tabs */}
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-default-100">
+                {(["live", "active", "empty", "dormant"] as const).map((tab) => {
+                  const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
+                  const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-danger-500";
                   return (
                     <button
-                      key={company._id}
-                      onClick={() => setSelectedCompanyId(company._id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
-                        ? "bg-warning-500/10 border border-warning-500/30"
-                        : "border border-transparent hover:bg-default-100/80"
+                      key={tab}
+                      onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${activeTab === tab
+                        ? "bg-default-200 text-foreground"
+                        : "text-default-500 hover:text-foreground hover:bg-default-100"
                         }`}
                     >
-                      <Avatar
-                        size="sm"
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&bold=true`}
-                        className="flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className={`font-semibold truncate text-xs ${isActive ? "text-warning-600 dark:text-warning-400" : "text-foreground/80"
-                          }`}>{company.name}</div>
-                        {activeTab !== "empty" && (
-                          <div className="text-[10px] text-default-400 mt-0.5">
-                            {prodCount} {activeTab === "live" ? "live" : "products"}
-                          </div>
-                        )}
-                      </div>
-                      {isDormant ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-danger-500 shrink-0" />
-                      ) : isLive ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
-                      ) : null}
+                      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                      <span className="capitalize">{tab === "dormant" ? "Dormant (7d)" : tab}</span>
+                      <span className={`text-[10px] font-bold px-1 rounded ${activeTab === tab ? "bg-foreground/10" : "bg-default-200/60"
+                        }`}>{count}</span>
                     </button>
                   );
                 })}
-                {filteredCompanies.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 opacity-50">
-                    <svg className="w-8 h-8 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <p className="text-xs italic">No companies here.</p>
-                  </div>
-                )}
               </div>
-            </div>
-          </Card>
-        </div>
+
+              {/* Scrollable list */}
+              <div className="flex-1 overflow-y-auto px-3 pb-3 custom-scrollbar">
+                <div className="flex flex-col gap-1">
+                  {filteredCompanies.map((company) => {
+                    const isActive = selectedCompanyId === company._id;
+                    const prodCount = (company as any).productCount;
+                    const isLive = (company.stats?.liveProducts || 0) > 0;
+                    const isDormant = activeTab === "dormant";
+
+                    return (
+                      <button
+                        key={company._id}
+                        onClick={() => setSelectedCompanyId(company._id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
+                          ? "bg-warning-500/10 border border-warning-500/30"
+                          : "border border-transparent hover:bg-default-100/80"
+                          }`}
+                      >
+                        <Avatar
+                          size="sm"
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&bold=true`}
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold truncate text-xs ${isActive ? "text-warning-600 dark:text-warning-400" : "text-foreground/80"
+                            }`}>{company.name}</div>
+                          {activeTab !== "empty" && (
+                            <div className="text-[10px] text-default-400 mt-0.5">
+                              {prodCount} {activeTab === "live" ? "live" : "products"}
+                            </div>
+                          )}
+                        </div>
+                        {isDormant ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-danger-500 shrink-0" />
+                        ) : isLive ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                  {filteredCompanies.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 opacity-50">
+                      <svg className="w-8 h-8 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                      </svg>
+                      <p className="text-xs italic">No companies here.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </div>
         )}
 
         {/* --- Main Content (Detail) --- */}
@@ -673,19 +673,19 @@ export default function CompanyProductPage() {
               <>
                 {/* Detail header */}
                 <div className="px-6 py-5 border-b border-default-100">
-                    <div className="flex items-start justify-between gap-4">
-                      {/* Company identity */}
-                      <div className="flex items-center gap-4">
-                        <Avatar
-                          size="lg"
-                          src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
-                          className="border-2 border-default-200 shadow-sm shrink-0"
-                        />
-                        <div>
-                          <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Chip
-                              size="sm"
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Company identity */}
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        size="lg"
+                        src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
+                        className="border-2 border-default-200 shadow-sm shrink-0"
+                      />
+                      <div>
+                        <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Chip
+                            size="sm"
                             variant="flat"
                             color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : activeTab === "dormant" ? "danger" : "default"}
                             className="capitalize text-[10px] font-bold h-5"
@@ -701,30 +701,30 @@ export default function CompanyProductPage() {
                           {(selectedCompany as any).state?.name && (
                             <span className="text-[10px] text-default-400">{(selectedCompany as any).state.name}</span>
                           )}
-                          </div>
                         </div>
                       </div>
-                      {(() => {
-                        const customDomain = String(selectedCompany.customDomain || "").trim();
-                        const subdomain = String(selectedCompany.subdomain || "").trim();
-                        const isLive = Boolean((selectedCompany as any).isWebsiteLive);
-                        const portfolioUrl = customDomain
-                          ? `https://${customDomain}`
-                          : subdomain
-                            ? `https://${subdomain}.company.obaol.com`
-                            : "";
-                        if (!isLive || !portfolioUrl) return null;
-                        return (
-                          <a
-                            href={portfolioUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-full border border-default-200/70 bg-default-100/60 px-3 py-1 text-[11px] font-semibold text-default-700 hover:bg-default-200/70 dark:bg-default-50/10 dark:text-default-200"
-                          >
-                            View Portfolio
-                          </a>
-                        );
-                      })()}
+                    </div>
+                    {(() => {
+                      const customDomain = String(selectedCompany.customDomain || "").trim();
+                      const subdomain = String(selectedCompany.subdomain || "").trim();
+                      const isLive = Boolean((selectedCompany as any).isWebsiteLive);
+                      const portfolioUrl = customDomain
+                        ? `https://${customDomain}`
+                        : subdomain
+                          ? `https://${subdomain}.company.obaol.com`
+                          : "";
+                      if (!isLive || !portfolioUrl) return null;
+                      return (
+                        <a
+                          href={portfolioUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-full border border-default-200/70 bg-default-100/60 px-3 py-1 text-[11px] font-semibold text-default-700 hover:bg-default-200/70 dark:bg-default-50/10 dark:text-default-200"
+                        >
+                          View Portfolio
+                        </a>
+                      );
+                    })()}
 
                     {/* Assignment widget — Admin only */}
                     {roleLower === "admin" && (

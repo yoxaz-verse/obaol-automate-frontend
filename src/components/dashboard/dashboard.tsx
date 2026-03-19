@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -34,12 +34,11 @@ import InsightCard from "./InsightCard";
 import TrendChart from "./TrendChart";
 import EssentialTabContent from "./Essentials/essential-tab-content";
 import AuthContext from "@/context/AuthContext";
-import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { getData } from "@/core/api/apiHandler";
+import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
-
-const DEFAULT_STALE_TIME = 45 * 1000;
 
 const Dashboard: NextPage = () => {
   const { user } = useContext(AuthContext);
@@ -52,114 +51,51 @@ const Dashboard: NextPage = () => {
   const isAssociate = roleLower === "associate";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
 
-  const enquiriesQuery = useQuery({
-    queryKey: ["dashboardEnquiry", roleLower, userId],
-    queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 50 }),
-    enabled: !!userId,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
+  const [companyLookup, setCompanyLookup] = useState("");
+  const [associateLookup, setAssociateLookup] = useState("");
+
+  const {
+    enquiriesQuery,
+    ordersQuery,
+    trendQuery,
+    topProductsQuery,
+    systemMetricsQuery,
+    associateMetricsQuery,
+    operatorMetricsQuery,
+    approvalsAssociatesQuery,
+    approvalsCompaniesQuery,
+    enquiries,
+    orders,
+    trendList,
+    topProducts,
+    totalEnquiries,
+    totalOrders,
+  } = useDashboardData({
+    userId,
+    roleLower,
+    isAdmin,
+    isAssociate,
+    isOperatorUser,
   });
 
-  const ordersQuery = useQuery({
-    queryKey: ["dashboardOrder", roleLower, userId],
-    queryFn: () => getData(apiRoutes.orders.getAll, { page: 1, limit: 50 }),
-    enabled: !!userId,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const trendQuery = useQuery({
-    queryKey: ["enquiryTrends"],
-    queryFn: () => getData(apiRoutes.analytics.enquiryTrends, {}),
-    enabled: !!userId && isAdmin,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const topProductsQuery = useQuery({
-    queryKey: ["productPerformance"],
-    queryFn: () => getData(apiRoutes.analytics.productPerformance, { limit: 5 }),
-    enabled: !!userId && isAdmin,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const systemMetricsQuery = useQuery({
-    queryKey: ["systemMetrics"],
-    queryFn: () => getData(apiRoutes.analytics.systemMetrics, {}),
-    enabled: !!userId && isAdmin,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const associateMetricsQuery = useQuery({
-    queryKey: ["associateMetrics", userId],
-    queryFn: () => getData(apiRoutes.analytics.associateMetrics, {}),
-    enabled: !!userId && isAssociate,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const operatorMetricsQuery = useQuery({
-    queryKey: ["operatorMetrics", userId, roleLower],
-    queryFn: () => getData(apiRoutes.analytics.operatorMetrics, {}),
+  const companyDirectoryQuery = useQuery({
+    queryKey: ["operatorCompanyDirectory", userId],
+    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 200, sortBy: "name", sortOrder: "asc" }),
     enabled: !!userId && isOperatorUser,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });
 
-  const approvalsAssociatesQuery = useQuery({
-    queryKey: ["dashboardApprovalsAssociates"],
-    queryFn: () =>
-      getData(apiRoutes.approvals.associatesList, {
-        status: "PENDING_REVIEW",
-        page: 1,
-        limit: 1,
-      }),
-    enabled: !!userId && isAdmin,
+  const associateDirectoryQuery = useQuery({
+    queryKey: ["operatorAssociateDirectory", userId],
+    queryFn: () => getData(apiRoutes.associate.getAll, { page: 1, limit: 200, sortBy: "name", sortOrder: "asc" }),
+    enabled: !!userId && isOperatorUser,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });
 
-  const approvalsCompaniesQuery = useQuery({
-    queryKey: ["dashboardApprovalsCompanies"],
-    queryFn: () =>
-      getData(apiRoutes.approvals.companiesList, {
-        status: "PENDING_REVIEW",
-        page: 1,
-        limit: 1,
-      }),
-    enabled: !!userId && isAdmin,
-    staleTime: DEFAULT_STALE_TIME,
-    refetchOnWindowFocus: false,
-  });
-
-  const extractList = (raw: any): any[] => {
-    if (Array.isArray(raw)) return raw;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw?.data?.data)) return raw.data.data;
-    if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
-    return [];
-  };
-
-  const extractCount = (raw: any, list: any[]) => {
-    return (
-      raw?.totalCount ||
-      raw?.data?.totalCount ||
-      raw?.data?.data?.totalCount ||
-      raw?.data?.data?.data?.totalCount ||
-      list.length ||
-      0
-    );
-  };
-
-  const enquiries = extractList(enquiriesQuery.data);
-  const orders = extractList(ordersQuery.data);
-  const trendList = extractList(trendQuery.data);
-  const topProducts = extractList(topProductsQuery.data);
-
-  const totalEnquiries = extractCount(enquiriesQuery.data, enquiries);
-  const totalOrders = extractCount(ordersQuery.data, orders);
+  const directoryCompanies = extractList(companyDirectoryQuery.data);
+  const directoryAssociates = extractList(associateDirectoryQuery.data);
   const pendingEnquiries = enquiries.filter((item: any) => {
     const s = String(item?.status || "").toUpperCase();
     return !["COMPLETED", "CLOSED", "CANCELLED", "CONVERTED"].includes(s);
@@ -565,14 +501,18 @@ const Dashboard: NextPage = () => {
   const renderPartialService = () => (
     (isAdmin || isAssociate || isOperatorUser) ? (
       <Card className="border border-default-100 shadow-sm bg-content1/70">
-        <CardHeader className="flex items-center justify-between gap-3">
-          <div>
-            <h4 className="font-semibold text-foreground">Need Only One Service?</h4>
-            <p className="text-xs text-default-500">Create a partial service request for procurement, packaging, testing, transport, or customs.</p>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5">
+          <div className="flex-1">
+            <h4 className="font-black text-lg tracking-tight text-foreground mb-1">Need Only One Service?</h4>
+            <p className="text-xs text-default-500 max-w-lg leading-relaxed">
+              Create a partial service request for procurement, packaging, testing, transport, or customs.
+            </p>
           </div>
           <Button
             color="primary"
-            endContent={<FiArrowRight size={14} />}
+            size="md"
+            className="font-bold w-full sm:w-auto shadow-lg shadow-primary/20"
+            endContent={<FiArrowRight size={16} />}
             onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
           >
             Create Partial Service
@@ -933,6 +873,22 @@ const Dashboard: NextPage = () => {
   const renderOperatorDashboard = () => {
     const totalAssignedProducts = Number(operatorMetrics.totalAssignedProducts || 0);
     const liveAssignedProducts = Number(operatorMetrics.liveAssignedProducts || 0);
+    const companyNeedle = companyLookup.trim().toLowerCase();
+    const associateNeedle = associateLookup.trim().toLowerCase();
+    const matchedCompanies = companyNeedle
+      ? directoryCompanies.filter((item: any) =>
+          String(item?.name || "")
+            .toLowerCase()
+            .includes(companyNeedle)
+        )
+      : [];
+    const matchedAssociates = associateNeedle
+      ? directoryAssociates.filter((item: any) =>
+          String(item?.name || "")
+            .toLowerCase()
+            .includes(associateNeedle)
+        )
+      : [];
     return (
       <>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -969,6 +925,72 @@ const Dashboard: NextPage = () => {
           <Divider />
           <CardBody>
             <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user.id }} hideAdd={true} />
+          </CardBody>
+        </Card>
+
+        <Card className="border border-default-100 shadow-sm bg-content1/70">
+          <CardHeader className="flex flex-col gap-1">
+            <h4 className="font-semibold text-foreground">Directory Lookup</h4>
+            <p className="text-xs text-default-500">Check whether a company or associate already exists in the system.</p>
+          </CardHeader>
+          <Divider />
+          <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-semibold text-foreground">Company Finder</h5>
+                <span className="text-xs text-default-500">{directoryCompanies.length} total</span>
+              </div>
+              <input
+                value={companyLookup}
+                onChange={(event) => setCompanyLookup(event.target.value)}
+                placeholder="Search company name"
+                className="w-full rounded-xl border border-default-200 bg-content2 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <div className="space-y-2">
+                {companyNeedle ? (
+                  matchedCompanies.length ? (
+                    matchedCompanies.slice(0, 6).map((item: any) => (
+                      <div key={item?._id} className="flex items-center justify-between rounded-lg border border-default-200/70 bg-content1 px-3 py-2 text-xs text-default-600">
+                        <span className="font-medium text-foreground">{item?.name}</span>
+                        <span className="text-default-500">ID: {String(item?._id || "").slice(-6)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-default-500">No companies found for that search.</p>
+                  )
+                ) : (
+                  <p className="text-xs text-default-500">Type to search company names.</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-semibold text-foreground">Associate Finder</h5>
+                <span className="text-xs text-default-500">{directoryAssociates.length} total</span>
+              </div>
+              <input
+                value={associateLookup}
+                onChange={(event) => setAssociateLookup(event.target.value)}
+                placeholder="Search associate name"
+                className="w-full rounded-xl border border-default-200 bg-content2 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <div className="space-y-2">
+                {associateNeedle ? (
+                  matchedAssociates.length ? (
+                    matchedAssociates.slice(0, 6).map((item: any) => (
+                      <div key={item?._id} className="flex items-center justify-between rounded-lg border border-default-200/70 bg-content1 px-3 py-2 text-xs text-default-600">
+                        <span className="font-medium text-foreground">{item?.name}</span>
+                        <span className="text-default-500">{item?.email || "No email"}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-default-500">No associates found for that search.</p>
+                  )
+                ) : (
+                  <p className="text-xs text-default-500">Type to search associate names.</p>
+                )}
+              </div>
+            </div>
           </CardBody>
         </Card>
 

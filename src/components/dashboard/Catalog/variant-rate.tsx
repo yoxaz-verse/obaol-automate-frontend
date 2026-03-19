@@ -652,7 +652,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       (roleLower === "admin" || isOperatorUser || isAssociateUser);
                     if (rowItem.isMarketplaceView) {
                       return (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           {!isAdminUser && (
                             <AddToCatalogButton
                               rowItem={rowItem}
@@ -689,7 +689,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       );
                     }
                     return (
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-center">
                         {/* LiveToggle or Live Chip */}
                         {canManageRow(rowItem) ? (
                           <div className="flex flex-col items-center gap-1">
@@ -990,19 +990,19 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 }
               }}
               isDismissable={!inventorySubmitting}
-              size="lg"
+              size="md"
             >
               <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
                 <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
-                  <div className="flex items-center gap-4 pt-2">
-                    <div className="p-2.5 bg-warning/10 rounded-xl text-warning-500 shadow-sm shadow-warning/10">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 pt-1">
+                    <div className="p-2 bg-warning/10 rounded-xl text-warning-500 shadow-sm shadow-warning/10">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-black tracking-tight text-foreground">Add Inventory</h3>
-                      <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Stock in Metric Tonnes (MT)</p>
+                      <h3 className="text-base font-black tracking-tight text-foreground">Add Inventory</h3>
+                      <p className="text-[10px] text-default-400 font-bold uppercase tracking-widest mt-0.5">Stock in Metric Tonnes (MT)</p>
                     </div>
                   </div>
                 </ModalHeader>
@@ -1024,6 +1024,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                   {/* Quantity input */}
                   <Input
+                    size="sm"
                     label="Quantity (MT)"
                     type="number"
                     value={inventoryQty}
@@ -1049,8 +1050,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     Location, state, and district will be inherited from the rate record.
                   </div>
                 </ModalBody>
-                <ModalFooter className="border-t border-divider px-6 py-4 gap-3">
+                <ModalFooter className="border-t border-divider py-3 px-6 gap-2">
                   <Button
+                    size="sm"
                     variant="flat"
                     color="default"
                     onPress={() => setInventoryModalOpen(false)}
@@ -1060,14 +1062,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     Cancel
                   </Button>
                   <Button
+                    size="sm"
                     color="warning"
                     isLoading={inventorySubmitting}
                     className="font-bold"
-                    startContent={!inventorySubmitting ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    ) : undefined}
                     onPress={async () => {
                       if (!selectedInventoryRate) return;
                       const qty = Number(inventoryQty);
@@ -1252,30 +1250,36 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   const { user } = useContext(AuthContext);
   const [requestState, setRequestState] = useState("");
   const [requestDistrict, setRequestDistrict] = useState("");
-  const [requestCity, setRequestCity] = useState("");
+  const [requestDivision, setRequestDivision] = useState("");
   const [requestAddress, setRequestAddress] = useState("");
   const [requestPincode, setRequestPincode] = useState("");
   const [pincodeSearch, setPincodeSearch] = useState("");
+  const [requestedSampleQtyKg, setRequestedSampleQtyKg] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Dynamic Cities Fetching
-  const { data: cityResponse, isLoading: citiesLoading } = useQuery({
-    queryKey: ["request-cities", requestDistrict],
-    queryFn: () => getData(apiRoutes.city.getAll, { district: requestDistrict, limit: 1000 }),
+  // Dynamic Divisions Fetching
+  const { data: divisionResponse, isLoading: divisionsLoading } = useQuery({
+    queryKey: ["request-divisions", requestDistrict],
+    queryFn: () => getData(apiRoutes.division.getAll, { district: requestDistrict, limit: 1000 }),
     enabled: !!requestDistrict,
   });
 
   // Dynamic Pincodes Fetching
   const { data: pincodeResponse, isLoading: pincodesLoading } = useQuery({
-    queryKey: ["request-pincodes", pincodeSearch],
-    queryFn: () => getData(apiRoutes.pincodeEntry.getAll, { search: pincodeSearch, limit: 100 }),
-    enabled: !!pincodeSearch && pincodeSearch.length >= 2,
+    queryKey: ["request-pincodes", requestDivision, pincodeSearch],
+    queryFn: () =>
+      getData(apiRoutes.pincodeEntry.getAll, {
+        division: requestDivision,
+        search: pincodeSearch,
+        limit: 100,
+      }),
+    enabled: !!requestDivision && !!pincodeSearch && pincodeSearch.length >= 2,
   });
 
-  const cityOptions = useMemo(() => {
-    const raw = cityResponse?.data?.data?.data || cityResponse?.data?.data || cityResponse?.data || [];
+  const divisionOptions = useMemo(() => {
+    const raw = divisionResponse?.data?.data?.data || divisionResponse?.data?.data || divisionResponse?.data || [];
     return Array.isArray(raw) ? raw : [];
-  }, [cityResponse]);
+  }, [divisionResponse]);
 
   const pincodeOptions = useMemo(() => {
     const raw = pincodeResponse?.data?.data?.data || pincodeResponse?.data?.data || pincodeResponse?.data || [];
@@ -1287,10 +1291,17 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   }, [districts, requestState]);
 
   const handleSubmit = async () => {
-    if (!requestState || !requestDistrict || !requestCity) {
+    if (!requestState || !requestDistrict || !requestDivision) {
       showToastMessage({
         type: "error",
-        message: "Select state, district, and city.",
+        message: "Select state, district, and division.",
+      });
+      return;
+    }
+    if (!requestedSampleQtyKg || Number.isNaN(Number(requestedSampleQtyKg)) || Number(requestedSampleQtyKg) <= 0) {
+      showToastMessage({
+        type: "error",
+        message: "Enter sample quantity in kg.",
       });
       return;
     }
@@ -1315,9 +1326,10 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         variantRateId: variantRate._id,
         requestState,
         requestDistrict,
-        requestCity,
+        requestDivision,
         requestAddress: requestAddress.trim(),
         requestPincode: requestPincode.trim(),
+        requestedSampleQtyKg: Number(requestedSampleQtyKg),
       });
       showToastMessage({
         type: "success",
@@ -1325,9 +1337,10 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
       });
       setRequestState("");
       setRequestDistrict("");
-      setRequestCity("");
+      setRequestDivision("");
       setRequestAddress("");
       setRequestPincode("");
+      setRequestedSampleQtyKg("");
       onOpenChange();
     } catch (error: any) {
       showToastMessage({
@@ -1340,14 +1353,14 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   };
 
   const role = String(user?.role || "").toLowerCase();
-  if (role !== "associate") return null;
+  if (role !== "associate" && role !== "admin" && role !== "operator") return null;
 
   return (
     <div className="flex flex-col items-center gap-2">
       <Tooltip content="Request Sample">
         <span
           onClick={onOpen}
-          className="text-xl text-warning-500 cursor-pointer active:opacity-50 hover:text-warning-600 transition-all duration-200 transform hover:scale-110"
+          className="text-lg text-warning-500 cursor-pointer active:opacity-50 hover:text-warning-600 transition-all duration-200 transform hover:scale-110"
         >
           <FiPackage />
         </span>
@@ -1359,14 +1372,14 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         isDismissable={false}
         isKeyboardDismissDisabled={true}
         className="text-foreground mx-4"
-        size="lg"
+        size="md"
         backdrop="blur"
       >
         <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
-                <h3 className="text-xl font-black tracking-tight text-foreground">Request Sample</h3>
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-3 px-6">
+                <h3 className="text-lg font-black tracking-tight text-foreground">Request Sample</h3>
                 <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">
                   Confirm location for sample delivery
                 </p>
@@ -1374,6 +1387,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
               <ModalBody className="py-6 px-8 flex flex-col gap-6 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
+                    size="sm"
                     label="State"
                     labelPlacement="outside"
                     placeholder="Select state"
@@ -1383,8 +1397,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                       const value = Array.from(keys as Set<string>)[0] || "";
                       setRequestState(value);
                       setRequestDistrict("");
-                      setRequestCity("");
+                      setRequestDivision("");
                       setRequestPincode("");
+                      setPincodeSearch("");
                     }}
                   >
                     {states.map((state: any) => (
@@ -1393,7 +1408,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                       </SelectItem>
                     ))}
                   </Select>
+
                   <Select
+                    size="sm"
                     label="District"
                     labelPlacement="outside"
                     placeholder="Select district"
@@ -1403,8 +1420,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                     onSelectionChange={(keys) => {
                       const value = Array.from(keys as Set<string>)[0] || "";
                       setRequestDistrict(value);
-                      setRequestCity("");
+                      setRequestDivision("");
                       setRequestPincode("");
+                      setPincodeSearch("");
                     }}
                   >
                     {districtOptions.map((district: any) => (
@@ -1417,28 +1435,31 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
-                    label="City"
+                    size="sm"
+                    label="Division"
                     labelPlacement="outside"
-                    placeholder={citiesLoading ? "Loading cities..." : "Select city"}
+                    placeholder={divisionsLoading ? "Loading divisions..." : "Select division"}
                     variant="bordered"
-                    selectedKeys={requestCity ? [requestCity] : []}
-                    isDisabled={!requestDistrict || citiesLoading}
-                    isLoading={citiesLoading}
+                    selectedKeys={requestDivision ? [requestDivision] : []}
+                    isDisabled={!requestDistrict || divisionsLoading}
+                    isLoading={divisionsLoading}
                     onSelectionChange={(keys) => {
                       const value = Array.from(keys as Set<string>)[0] || "";
-                      setRequestCity(value);
+                      setRequestDivision(value);
                       setRequestPincode("");
+                      setPincodeSearch("");
                     }}
                   >
-                    {cityOptions.map((city: any) => (
-                      <SelectItem key={city._id} value={city._id}>
-                        {city.name}
+                    {divisionOptions.map((division: any) => (
+                      <SelectItem key={division._id} value={division._id}>
+                        {division.name}
                       </SelectItem>
                     ))}
                   </Select>
 
                   {/* @ts-ignore */}
                   <Autocomplete
+                    size="sm"
                     label="Pincode"
                     labelPlacement="outside"
                     placeholder={pincodesLoading ? "Searching..." : "Type pincode or office..."}
@@ -1446,6 +1467,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                     selectedKey={requestPincode || null}
                     isLoading={pincodesLoading}
                     allowsCustomValue={true}
+                    isDisabled={!requestDivision}
                     onSelectionChange={(key) => setRequestPincode(String(key || ""))}
                     onInputChange={(value) => {
                       setRequestPincode(value);
@@ -1462,6 +1484,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                 </div>
 
                 <Textarea
+                  size="sm"
                   label="Full Address"
                   labelPlacement="outside"
                   placeholder="Street, locality, landmark"
@@ -1469,6 +1492,18 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                   minRows={3}
                   value={requestAddress}
                   onValueChange={setRequestAddress}
+                />
+
+                <Input
+                  size="sm"
+                  label="Sample Qty (kg)"
+                  labelPlacement="outside"
+                  placeholder="Enter quantity in kg"
+                  variant="bordered"
+                  type="number"
+                  min={0}
+                  value={requestedSampleQtyKg}
+                  onValueChange={setRequestedSampleQtyKg}
                 />
 
                 <div className="flex items-start gap-2.5 p-3.5 bg-primary/5 rounded-2xl border border-primary/10">
@@ -1479,10 +1514,10 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                 </div>
               </ModalBody>
               <ModalFooter className="border-t border-divider py-3 px-6">
-                <Button variant="light" onPress={onClose} isDisabled={submitting}>
+                <Button size="sm" variant="light" onPress={onClose} isDisabled={submitting}>
                   Cancel
                 </Button>
-                <Button color="warning" onPress={handleSubmit} isLoading={submitting}>
+                <Button size="sm" color="warning" onPress={handleSubmit} isLoading={submitting}>
                   Request Sample
                 </Button>
               </ModalFooter>
@@ -1504,7 +1539,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
       <Tooltip content="Create Enquiry">
         <span
           onClick={onOpen}
-          className="text-xl text-primary cursor-pointer active:opacity-50 hover:text-primary-600 transition-all duration-200 transform hover:scale-110"
+          className="text-lg text-primary cursor-pointer active:opacity-50 hover:text-primary-600 transition-all duration-200 transform hover:scale-110"
         >
           <FiMessageSquare />
         </span>
@@ -1517,20 +1552,20 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
         isDismissable={false}
         isKeyboardDismissDisabled={true}
         className="text-foreground mx-4"
-        size="lg"
+        size="md"
         backdrop="blur"
       >
         <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
-                <div className="flex items-center gap-4 pt-2">
-                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary-500 shadow-sm shadow-primary/10">
-                    <FiMessageSquare size={22} />
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-3 px-6">
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="p-2 bg-primary/10 rounded-xl text-primary-500 shadow-sm shadow-primary/10">
+                    <FiMessageSquare size={18} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black tracking-tight text-foreground">New Enquiry</h3>
-                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Direct Manufacturer Protocol</p>
+                    <h3 className="text-lg font-black tracking-tight text-foreground">New Enquiry</h3>
+                    <p className="text-[10px] text-default-400 font-bold uppercase tracking-widest mt-0.5">Direct Manufacturer Protocol</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1828,7 +1863,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                   <select
                     value={buyerAssociateId}
                     onChange={(e) => setBuyerAssociateId(e.target.value)}
-                    className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                    className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                     required
                   >
                     <option value="">Select buyer</option>
@@ -1848,7 +1883,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-default-600">Full Name</label>
               <input
-                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required={!user}
@@ -1859,7 +1894,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-default-600">Phone Number</label>
               <input
-                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
@@ -1871,7 +1906,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-default-600">Quantity (Ton)</label>
               <input
-                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors"
+                className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                 type="number"
                 min={1}
                 value={quantity}
@@ -1886,7 +1921,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                 value={preferredIncotermId}
                 onChange={(e) => setPreferredIncotermId(e.target.value)}
                 disabled={incotermOptions.length === 0}
-                className="w-full rounded-md border border-default-300 bg-content1 text-foreground h-11 px-3 text-sm outline-none focus:border-primary transition-colors disabled:opacity-60"
+                className="w-full rounded-xl border border-default-200 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors disabled:opacity-60"
               >
                 <option value="">Choose incoterm</option>
                 {(Array.isArray(incotermOptions) ? incotermOptions : []).map((item: any) => {
@@ -1904,7 +1939,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           <div className="mt-4 flex flex-col gap-2">
             <label className="text-xs font-semibold text-default-600">Specification (Optional)</label>
             <textarea
-              className="w-full rounded-md border border-default-300 bg-content1 text-foreground min-h-[110px] px-3 py-2 text-sm outline-none focus:border-primary transition-colors resize-y"
+              className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground min-h-[90px] px-3 py-2 text-sm outline-none focus:border-primary transition-colors resize-y"
               value={specification}
               onChange={(e) => setSpecification(e.target.value)}
             />
@@ -1920,8 +1955,9 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           type="submit"
           isLoading={isLoading}
           color="primary"
-          className="font-semibold rounded-lg min-w-[220px]"
-          startContent={!isLoading && <FiMessageSquare size={16} />}
+          size="sm"
+          className="font-semibold rounded-lg min-w-[160px]"
+          startContent={!isLoading && <FiMessageSquare size={14} />}
         >
           {isLoading ? "Submitting..." : "Create Enquiry"}
         </Button>

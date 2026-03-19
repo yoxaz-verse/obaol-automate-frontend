@@ -134,8 +134,8 @@ export default function OrderDetailsPage() {
     });
 
     const { data: orderRulesResponse } = useQuery({
-        queryKey: ["order-rules"],
-        queryFn: () => getData(apiRoutes.orderRules.list),
+        queryKey: ["flow-rules", "TRADE_ORDER"],
+        queryFn: () => getData(apiRoutes.flowRules.list, { flowType: "TRADE_ORDER" }),
     });
     const enquiryRefId = (order as any)?.enquiry?._id || (order as any)?.enquiry;
     const { data: linkedEnquiry } = useQuery({

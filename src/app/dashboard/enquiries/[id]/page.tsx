@@ -183,8 +183,8 @@ export default function EnquiryDetailsPage() {
         enabled: Boolean(id),
     });
     const { data: enquiryRulesResponse } = useQuery({
-        queryKey: ["enquiry-rules"],
-        queryFn: () => getData(apiRoutes.enquiryRules.list),
+        queryKey: ["flow-rules", "TRADE_ENQUIRY"],
+        queryFn: () => getData(apiRoutes.flowRules.list, { flowType: "TRADE_ENQUIRY" }),
     });
     const quotationRows = Array.isArray(quotationResponse?.data?.data?.data)
         ? quotationResponse?.data?.data?.data
@@ -1614,22 +1614,22 @@ export default function EnquiryDetailsPage() {
                             <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
                         </CardHeader>
                         <Divider className="mt-4" />
-                        <CardBody className="flex flex-col gap-10 px-6 py-8 transition-all duration-300">
+                        <CardBody className="flex flex-col gap-10 px-6 py-6 transition-all duration-300">
                             {/* Section 1: Execution Context & Location Strategy */}
-                            <div className="flex flex-col gap-8 p-8 rounded-[2.5rem] border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
-                                <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
-                                    <LuNavigation size={180} />
+                            <div className="flex flex-col gap-8 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
+                                    <LuNavigation size={140} />
                                 </div>
 
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10 border-b border-divider/50 pb-8">
-                                    <div className="flex flex-col gap-2">
-                                        <h3 className="text-2xl font-black text-foreground inline-flex items-center gap-3 tracking-tighter">
-                                            <LuNavigation className="text-primary" size={26} />
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-divider/50 pb-6">
+                                    <div className="flex flex-col gap-1">
+                                        <h3 className="text-lg font-black text-foreground inline-flex items-center gap-2 tracking-tighter">
+                                            <LuNavigation className="text-primary" size={20} />
                                             Execution Context
                                         </h3>
-                                        <p className="text-sm text-default-500 font-bold tracking-tight uppercase opacity-70">Logistics Parameters & Trade Type</p>
+                                        <p className="text-xs text-default-500 font-bold tracking-tight uppercase opacity-70">Logistics Parameters & Trade Type</p>
                                     </div>
-                                    <div className="bg-default-200/50 dark:bg-black/40 p-1.5 rounded-2xl gap-1.5 border border-default-300/40 flex self-start md:self-center shadow-inner scale-110 md:mr-4">
+                                    <div className="bg-default-200/50 dark:bg-black/40 p-1.5 rounded-2xl gap-1.5 border border-default-300/40 flex self-start md:self-center shadow-inner md:mr-4">
                                         {["DOMESTIC", "INTERNATIONAL"].map((type) => {
                                             const isSelected = executionContext.tradeType === type;
                                             const canToggle = (isBuyer || isAdmin) && canEditResponsibilityPlan;
@@ -1649,7 +1649,7 @@ export default function EnquiryDetailsPage() {
                                                         }
                                                     }}
                                                     disabled={!canToggle}
-                                                    className={`px-8 h-11 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${isSelected
+                                                    className={`px-6 h-9 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${isSelected
                                                         ? "bg-white dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
                                                         : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
                                                         } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
@@ -1661,26 +1661,26 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                                     {executionContext.tradeType === "DOMESTIC" ? (
                                         <>
                                             {showOriginLogisticsFields && (
-                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-4 mb-2">
-                                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                                            <LuMapPin size={24} />
+                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                                            <LuMapPin size={20} />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
-                                                            <span className="text-xl font-black text-foreground tracking-tighter">Ship From</span>
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
+                                                            <span className="text-base font-black text-foreground tracking-tighter">Ship From</span>
                                                         </div>
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         <Select
                                                             size="sm"
                                                             label="State"
                                                             variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
                                                             selectedKeys={executionContext.originState ? [executionContext.originState] : []}
                                                             onSelectionChange={(keys) => {
                                                                 const arr = Array.from(keys as Set<string>);
@@ -1701,7 +1701,7 @@ export default function EnquiryDetailsPage() {
                                                             size="sm"
                                                             label="District"
                                                             variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
                                                             selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
                                                             onSelectionChange={(keys) => {
                                                                 const arr = Array.from(keys as Set<string>);
@@ -1717,22 +1717,22 @@ export default function EnquiryDetailsPage() {
                                                 </div>
                                             )}
                                             {showDestinationLogisticsFields && (
-                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-4 mb-2">
-                                                        <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner">
-                                                            <LuNavigation size={24} />
+                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner">
+                                                            <LuNavigation size={20} />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
-                                                            <span className="text-xl font-black text-foreground tracking-tighter">Ship To</span>
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
+                                                            <span className="text-base font-black text-foreground tracking-tighter">Ship To</span>
                                                         </div>
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         <Select
                                                             size="sm"
                                                             label="State"
                                                             variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
                                                             selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
                                                             onSelectionChange={(keys) => {
                                                                 const arr = Array.from(keys as Set<string>);
@@ -1753,7 +1753,7 @@ export default function EnquiryDetailsPage() {
                                                             size="sm"
                                                             label="District"
                                                             variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-12 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
                                                             selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
                                                             onSelectionChange={(keys) => {
                                                                 const arr = Array.from(keys as Set<string>);
@@ -1772,23 +1772,23 @@ export default function EnquiryDetailsPage() {
                                     ) : (
                                         <>
                                             {showOriginLogisticsFields && (
-                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-4 mb-2">
-                                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                                            <LuGlobe size={24} />
+                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                                            <LuGlobe size={20} />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Origin</span>
-                                                            <span className="text-xl font-black text-foreground tracking-tighter">Origin Country & Port</span>
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Origin</span>
+                                                            <span className="text-base font-black text-foreground tracking-tighter">Origin Country & Port</span>
                                                         </div>
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         {/* @ts-ignore */}
                                                         <Autocomplete
                                                             size="sm"
                                                             label="Origin Country"
                                                             variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
                                                             selectedKey={executionContext.originCountry || null}
                                                             items={countries}
                                                             onSelectionChange={(key) => {
@@ -1811,7 +1811,7 @@ export default function EnquiryDetailsPage() {
                                                             size="sm"
                                                             label="Port of Load"
                                                             variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
                                                             selectedKey={executionContext.originPort || null}
                                                             items={originPortOptions}
                                                             onSelectionChange={(key) => {
@@ -1828,23 +1828,23 @@ export default function EnquiryDetailsPage() {
                                                 </div>
                                             )}
                                             {showDestinationLogisticsFields && (
-                                                <div className="flex flex-col gap-6 p-6 rounded-[2.5rem] border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-4 mb-2">
-                                                        <div className="w-12 h-12 rounded-2xl bg-danger/10 flex items-center justify-center text-danger shadow-inner">
-                                                            <LuAnchor size={24} />
+                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <div className="w-10 h-10 rounded-2xl bg-danger/10 flex items-center justify-center text-danger shadow-inner">
+                                                            <LuAnchor size={20} />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Destination</span>
-                                                            <span className="text-xl font-black text-foreground tracking-tighter">Dest. Country & Port</span>
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Destination</span>
+                                                            <span className="text-base font-black text-foreground tracking-tighter">Dest. Country & Port</span>
                                                         </div>
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         {/* @ts-ignore */}
                                                         <Autocomplete
                                                             size="sm"
                                                             label="Dest. Country"
                                                             variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
                                                             selectedKey={executionContext.destinationCountry || null}
                                                             items={countries}
                                                             onSelectionChange={(key) => {
@@ -1867,7 +1867,7 @@ export default function EnquiryDetailsPage() {
                                                             size="sm"
                                                             label="Port of Discharge"
                                                             variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-12 border-default-200 shadow-sm" }}
+                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
                                                             selectedKey={executionContext.destinationPort || null}
                                                             items={destinationPortOptions}
                                                             onSelectionChange={(key) => {
@@ -1889,16 +1889,16 @@ export default function EnquiryDetailsPage() {
                             </div>
 
                             {/* Section 2: Responsibility Map */}
-                            <div className="flex flex-col gap-10 p-8 rounded-[2.5rem] border border-default-200/60 bg-gradient-to-br from-white to-default-50/30 dark:from-transparent dark:to-default-100/5 shadow-inner">
-                                <div className="flex flex-col gap-2 border-b border-divider/50 pb-6">
-                                    <h3 className="text-2xl font-black text-foreground inline-flex items-center gap-3 tracking-tighter">
-                                        <LuClipboardCheck className="text-primary" size={26} />
+                            <div className="flex flex-col gap-6 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-white to-default-50/30 dark:from-transparent dark:to-default-100/5 shadow-inner">
+                                <div className="flex flex-col gap-1 border-b border-divider/50 pb-4">
+                                    <h3 className="text-lg font-black text-foreground inline-flex items-center gap-2 tracking-tighter">
+                                        <LuClipboardCheck className="text-primary" size={20} />
                                         Responsibility Map
                                     </h3>
-                                    <p className="text-sm text-default-500 font-bold tracking-tight uppercase opacity-70">Ownership Allocation & Control Points</p>
+                                    <p className="text-xs text-default-500 font-bold tracking-tight uppercase opacity-70">Ownership Allocation & Control Points</p>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
                                     {responsibilityFieldConfig.map((field) => {
                                         const currentValue = (responsibilityPlan as any)[field.key] || "";
                                         const allowed = field.allowed;
@@ -1911,15 +1911,15 @@ export default function EnquiryDetailsPage() {
                                             }
                                         };
                                         return (
-                                            <div key={field.key} className="flex flex-col gap-5 p-6 rounded-[2rem] border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-primary/5 dark:bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 border border-primary-100/30 shadow-inner">
+                                            <div key={field.key} className="flex flex-col gap-4 p-4 rounded-2xl border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl transition-all duration-500 group">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-xl bg-primary/5 dark:bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 border border-primary-100/30 shadow-inner">
                                                         {/* @ts-ignore */}
-                                                        {React.cloneElement(field.icon, { size: 22 })}
+                                                        {React.cloneElement(field.icon, { size: 18 })}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
-                                                        <span className="text-xs font-black text-foreground/90 uppercase tracking-widest leading-none mb-1">{field.label}</span>
-                                                        <span className="text-[10px] text-default-400 font-bold uppercase tracking-tighter opacity-70">Step Owner Selection</span>
+                                                        <span className="text-[10px] font-black text-foreground/90 uppercase tracking-widest leading-none mb-1">{field.label}</span>
+                                                        <span className="text-[8px] text-default-400 font-bold uppercase tracking-tighter opacity-70">Step Owner Selection</span>
                                                     </div>
                                                 </div>
 
@@ -1936,7 +1936,7 @@ export default function EnquiryDetailsPage() {
                                                                     }
                                                                 }}
                                                                 disabled={!canSelect}
-                                                                className={`relative flex items-center justify-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-500
+                                                                className={`relative flex items-center justify-center py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-500
                                                                     ${isSelected
                                                                         ? `${getOwnerStyles(option)} z-10`
                                                                         : "text-default-400 hover:text-default-700 hover:bg-white dark:hover:bg-default-200/20"
@@ -1963,15 +1963,15 @@ export default function EnquiryDetailsPage() {
                             </div>
 
                             {/* Section 3: Product Specs & Intelligence */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8 rounded-[2.5rem] border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 rounded-3xl border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
                                 <div className="lg:col-span-2 flex flex-col gap-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning shadow-inner">
-                                            <LuPackage size={24} />
+                                        <div className="w-10 h-10 rounded-2xl bg-warning/10 flex items-center justify-center text-warning shadow-inner">
+                                            <LuPackage size={20} />
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
-                                            <span className="text-xl font-black text-foreground tracking-tighter">Packaging Detail</span>
+                                            <span className="text-base font-black text-foreground tracking-tighter">Packaging Detail</span>
                                         </div>
                                     </div>
                                     <Textarea
@@ -1984,7 +1984,7 @@ export default function EnquiryDetailsPage() {
                                         placeholder="Specify packaging requirements (dimensions, weight, material, handling instructions...)"
                                         classNames={{
                                             input: "text-base font-medium",
-                                            inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-[2rem] p-6 h-auto"
+                                            inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-2xl p-4 h-auto"
                                         }}
                                     />
                                 </div>

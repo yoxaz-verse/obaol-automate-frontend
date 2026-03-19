@@ -116,12 +116,12 @@ export default function DashboardLayout({
             )}
 
             <div
-              className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden px-4 md:px-0"
+              className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden px-1 md:px-0"
               style={{
                 paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))"
               }}
             >
-              <div className="max-w-full mx-auto w-full p-4 md:p-6 min-w-0">
+              <div className="max-w-full mx-auto w-full p-2 md:p-6 min-w-0">
                 {children}
               </div>
             </div>

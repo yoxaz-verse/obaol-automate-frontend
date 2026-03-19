@@ -21,19 +21,12 @@ import { Tabs, Tab } from "@nextui-org/tabs";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { DEFAULT_STALE_TIME, extractList, useImportReservations, useImportsList } from "@/core/data";
 import Title from "@/components/titles";
 import InlineLoader from "@/components/ui/InlineLoader";
 import { showToastMessage } from "@/utils/utils";
 
 type ImportTab = "all" | "mine" | "reservations";
-
-const toArray = (raw: any): any[] => {
-  if (Array.isArray(raw)) return raw;
-  if (Array.isArray(raw?.data)) return raw.data;
-  if (Array.isArray(raw?.data?.data)) return raw.data.data;
-  if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
-  return [];
-};
 
 export default function ImportsPage() {
   const { user } = useContext(AuthContext);
@@ -44,6 +37,7 @@ export default function ImportsPage() {
   const [manageOpen, setManageOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<any>(null);
+  const isFormOpen = createOpen || editOpen;
 
   const [createForm, setCreateForm] = useState({
     productId: "",
@@ -77,65 +71,80 @@ export default function ImportsPage() {
 
   const [reserveQty, setReserveQty] = useState("");
 
-  const { data: importsResponse, isLoading: importsLoading } = useQuery({
-    queryKey: ["imports", activeTab],
-    queryFn: () =>
-      getData(apiRoutes.imports.list, {
-        mine: activeTab === "mine",
-        limit: 200,
-      }),
-  });
+  const {
+    data: importsResponse,
+    isLoading: importsLoading,
+  } = useImportsList(
+    {
+      mine: activeTab === "mine",
+      limit: 20,
+    },
+    { enabled: true }
+  );
 
-  const { data: reservationsResponse, isLoading: reservationsLoading } = useQuery({
-    queryKey: ["import-reservations", activeTab, selectedListing?._id],
-    queryFn: () =>
-      getData(apiRoutes.importReservations.list, {
-        mine: activeTab === "reservations",
-        listingId: selectedListing?._id,
-        limit: 200,
-      }),
-    enabled: activeTab === "reservations" || !!selectedListing?._id,
-  });
+  const {
+    data: reservationsResponse,
+    isLoading: reservationsLoading,
+  } = useImportReservations(
+    {
+      mine: activeTab === "reservations",
+      listingId: selectedListing?._id,
+      limit: 20,
+    },
+    { enabled: activeTab === "reservations" || !!selectedListing?._id }
+  );
 
-  const imports = toArray(importsResponse?.data);
-  const reservations = toArray(reservationsResponse?.data);
+  const imports = importsResponse?.list ?? extractList(importsResponse?.raw ?? importsResponse);
+  const reservations = reservationsResponse?.list ?? extractList(reservationsResponse?.raw ?? reservationsResponse);
 
   const { data: countriesResponse } = useQuery({
     queryKey: ["countries"],
-    queryFn: () => getData(apiRoutes.country.getAll, { limit: 400 }),
+    queryFn: () => getData(apiRoutes.country.getAll, { limit: 200 }),
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const countries = toArray(countriesResponse?.data);
+  const countries = extractList(countriesResponse?.data);
   const india = useMemo(() => countries.find((c: any) => String(c?.name || "").toLowerCase() === "india"), [countries]);
 
   const { data: portsResponse } = useQuery({
     queryKey: ["sea-ports", india?._id],
-    queryFn: () => getData(apiRoutes.enquiry.seaPorts, { country: india?._id, limit: 2000 }),
-    enabled: !!india?._id,
+    queryFn: () => getData(apiRoutes.enquiry.seaPorts, { country: india?._id, limit: 500 }),
+    enabled: !!india?._id && isFormOpen,
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const ports = toArray(portsResponse?.data);
+  const ports = extractList(portsResponse?.data);
 
   const { data: productsResponse } = useQuery({
     queryKey: ["products"],
-    queryFn: () => getData(apiRoutes.product.getAll, { limit: 1000 }),
+    queryFn: () => getData(apiRoutes.product.getAll, { limit: 200 }),
+    enabled: isFormOpen,
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const products = toArray(productsResponse?.data);
+  const products = extractList(productsResponse?.data);
 
   const { data: companiesResponse } = useQuery({
     queryKey: ["associate-companies"],
-    queryFn: () => getData(apiRoutes.associateCompany.getAll, { limit: 1000 }),
+    queryFn: () => getData(apiRoutes.associateCompany.getAll, { limit: 200 }),
+    enabled: isFormOpen,
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const companies = toArray(companiesResponse?.data);
+  const companies = extractList(companiesResponse?.data);
 
   const { data: variantsResponse } = useQuery({
     queryKey: ["product-variants", createForm.productId],
     queryFn: () =>
       getData(apiRoutes.productVariant.getAll, {
-        limit: 1000,
+        limit: 200,
         product: createForm.productId || undefined,
       }),
-    enabled: !!createForm.productId,
+    enabled: !!createForm.productId && isFormOpen,
+    staleTime: DEFAULT_STALE_TIME,
+    refetchOnWindowFocus: false,
   });
-  const variants = toArray(variantsResponse?.data);
+  const variants = extractList(variantsResponse?.data);
 
   const createMutation = useMutation({
     mutationFn: (payload: any) => postData(apiRoutes.imports.create, payload),
@@ -236,6 +245,7 @@ export default function ImportsPage() {
   const associateCompanyId = String(user?.associateCompanyId || "");
 
   const canViewSensitive = (listing: any) => {
+    if (typeof listing?.canViewCommission === "boolean") return listing.canViewCommission;
     if (roleLower === "admin") return true;
     if (roleLower === "operator" || roleLower === "team") {
       const assignedOperator = listing?.importerCompanyId?.assignedOperator;
@@ -248,10 +258,16 @@ export default function ImportsPage() {
     return false;
   };
 
+  const canViewImporter = (listing: any) => {
+    if (typeof listing?.canViewImporter === "boolean") return listing.canViewImporter;
+    return canViewSensitive(listing);
+  };
+
   const getDisplayPrice = (listing: any) => {
-    const price = Number(listing?.price || 0);
-    const commission = Number(listing?.adminCommission || 0);
-    return canViewSensitive(listing) ? price : price + commission;
+    if (listing?.displayPrice !== undefined && listing?.displayPrice !== null) {
+      return listing.displayPrice;
+    }
+    return Number(listing?.price || 0);
   };
 
   const editMutation = useMutation({
@@ -321,11 +337,17 @@ export default function ImportsPage() {
                 {imports.map((listing: any) => (
                   <Card key={listing._id} className="border border-default-200">
                     <CardHeader className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <div className="text-lg font-semibold">{listing.commodityName}</div>
                         <Chip size="sm" color="warning" variant="flat">
                           {listing.status}
                         </Chip>
+                        {listing.expectedArrivalDate && (() => {
+                          const diffDays = Math.ceil((new Date(listing.expectedArrivalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                          if (diffDays > 0) return <Chip size="sm" color="primary" variant="flat">In {diffDays} {diffDays === 1 ? 'day' : 'days'}</Chip>;
+                          if (diffDays === 0) return <Chip size="sm" color="success" variant="flat">Arrives today</Chip>;
+                          return <Chip size="sm" color="danger" variant="flat">{Math.abs(diffDays)} {Math.abs(diffDays) === 1 ? 'day' : 'days'} ago</Chip>;
+                        })()}
                       </div>
                       <div className="text-sm text-default-500">
                         {listing.portName || "Port TBD"} • ETA{" "}
@@ -473,29 +495,29 @@ export default function ImportsPage() {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
       >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Create Import Listing</ModalHeader>
-            <ModalBody className="gap-4">
-              {needsCompanySelect && (
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Create Import Listing</ModalHeader>
+              <ModalBody className="gap-4">
+                {needsCompanySelect && (
+                  <Select
+                    label="Importer Company"
+                    selectedKeys={createForm.importerCompanyId ? [createForm.importerCompanyId] : []}
+                    onSelectionChange={(keys) => {
+                      const key = Array.from(keys)[0] as string | undefined;
+                      setCreateForm((prev) => ({ ...prev, importerCompanyId: key || "" }));
+                    }}
+                    popoverProps={{ shouldCloseOnBlur: false }}
+                  >
+                    {companies.map((company: any) => (
+                      <SelectItem key={company._id} value={company._id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
                 <Select
-                  label="Importer Company"
-                  selectedKeys={createForm.importerCompanyId ? [createForm.importerCompanyId] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setCreateForm((prev) => ({ ...prev, importerCompanyId: key || "" }));
-                  }}
-                  popoverProps={{ shouldCloseOnBlur: false }}
-                >
-                  {companies.map((company: any) => (
-                    <SelectItem key={company._id} value={company._id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-              <Select
                   label="Product"
                   selectedKeys={createForm.productId ? [createForm.productId] : []}
                   onSelectionChange={(keys) => {

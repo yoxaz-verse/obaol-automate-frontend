@@ -41,6 +41,7 @@ import {
   timeSheetRoutes,
   variantRateRoutes,
   workerRoutes,
+  warehouseRoutes,
 } from "@/core/api/apiRoutes";
 import { fetchDependentOptions } from "./fetchDependentOptions";
 
@@ -174,6 +175,7 @@ export const apiRoutesByRole: Record<string, string> = {
   jobType: jobTypeRoutes.getAll,
   language: languageRoutes.getAll,
   inventories: inventoryRoutes.getAll,
+  warehouse: warehouseRoutes.getAll,
 };
 
 export const initialTableConfig: Record<
@@ -3050,10 +3052,40 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
+      label: "Storage Location",
+      type: "select",
+      key: "storageLocation",
+      values: [
+        { key: "NONE", value: "No Warehouse" },
+        { key: "MY", value: "My Warehouse" },
+        { key: "RENTAL", value: "Available Warehouse" },
+      ],
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Warehouse",
+      type: "select",
+      key: "warehouseId",
+      dependsOn: "storageLocation",
+      dynamicValuesFn: (storageLocation: string) => {
+        const scope =
+          String(storageLocation || "").toUpperCase() === "MY"
+            ? "my"
+            : String(storageLocation || "").toUpperCase() === "RENTAL"
+              ? "available"
+              : "";
+        return fetchDependentOptions("warehouse", undefined, undefined, scope ? { scope } : undefined);
+      },
+      inForm: true,
+      inTable: false,
+      showWhen: { key: "storageLocation", equals: ["MY", "RENTAL"] },
+    },
+    {
       label: "Warehouse Name",
       type: "text",
       key: "warehouseName",
-      inForm: true,
+      inForm: false,
       inTable: true,
     },
     {
@@ -3081,6 +3113,88 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       required: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
+  warehouse: [
+    {
+      label: "Warehouse Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Category",
+      type: "select",
+      key: "category",
+      values: [
+        { key: "GENERAL", value: "General warehouse" },
+        { key: "COLD_STORAGE", value: "Cold storage" },
+        { key: "BONDED", value: "Bonded warehouse" },
+        { key: "AGRO", value: "Agro warehouse" },
+      ],
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Address",
+      type: "textarea",
+      key: "address",
+      inForm: true,
+      inTable: false,
+    },
+    {
+      label: "Storage Rate Per Unit",
+      type: "number",
+      key: "storageRatePerUnit",
+      inForm: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Unit",
+      type: "select",
+      key: "unit",
+      values: [
+        { key: "MT", value: "MT" },
+        { key: "KG", value: "KG" },
+      ],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Listing Type",
+      type: "select",
+      key: "listingType",
+      values: [
+        { key: "PRIVATE", value: "Private" },
+        { key: "RENTAL", value: "Rental" },
+      ],
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Rental Active",
+      type: "boolean",
+      key: "isRentalActive",
+      inForm: true,
+      inTable: true,
+    },
+    {
+      label: "Active",
+      type: "boolean",
+      key: "isActive",
+      inForm: true,
+      inTable: true,
     },
     {
       label: "Actions",

@@ -60,7 +60,11 @@ const AddForm: React.FC<AddFormProps> = ({
 
   const isFieldVisible = (field: FormField, data: Record<string, any>) => {
     if (!field.showWhen) return true;
-    return data[field.showWhen.key] === field.showWhen.equals;
+    const expected = field.showWhen.equals;
+    if (Array.isArray(expected)) {
+      return expected.includes(data[field.showWhen.key]);
+    }
+    return data[field.showWhen.key] === expected;
   };
 
   const getVisibleFormFields = (data: Record<string, any>) =>

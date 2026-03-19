@@ -235,7 +235,17 @@ export default function EditModal({
       }
     }
     setLoading(true);
-    const payload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
+    const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
+    const payload = { ...basePayload };
+    if (currentTable === "inventories" && !basePayload.storageLocation) {
+      delete payload.storageLocation;
+      delete payload.warehouseId;
+    }
+    formFields.forEach((field) => {
+      if (field.showWhen && !isFieldVisible(field, basePayload)) {
+        delete payload[field.key];
+      }
+    });
     mutation.mutate(payload);
   };
 
@@ -339,6 +349,16 @@ export default function EditModal({
   };
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  const isFieldVisible = (field: FormField, data: Record<string, any>) => {
+    if (!field.showWhen) return true;
+    const expected = field.showWhen.equals;
+    const current = data[field.showWhen.key];
+    if (Array.isArray(expected)) {
+      return expected.includes(current);
+    }
+    return current === expected;
+  };
 
   // 7) Render fields, disabling everything but `isLive` when locked
   const renderField = (f: FormField) => {
@@ -739,7 +759,7 @@ export default function EditModal({
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
-                  .filter((f) => f.inEdit && f.type !== "password")
+                  .filter((f) => f.inEdit && f.type !== "password" && isFieldVisible(f, formData))
                   .map((f, i) => (
                     <div key={i} className="mb-4">
                       {renderField(f)}

@@ -52,6 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 "/dashboard/orders",
                 "/dashboard/execution-enquiries",
                 "/dashboard/documents",
+                "/dashboard/warehouse-rent",
             ],
         },
         {
@@ -62,6 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             label: "Manage",
             links: [
                 "/dashboard/inventory",
+                "/dashboard/warehouses",
                 "/dashboard/company",
                 "/dashboard/companyProduct",
                 "/dashboard/notifications",
@@ -83,8 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             links: [
                 "/dashboard/documentation-rules",
                 "/dashboard/documentation-preview",
-                "/dashboard/enquiry-rules",
-                "/dashboard/order-rules",
+                "/dashboard/flow-rules",
                 "/dashboard/users",
                 "/dashboard/essentials",
                 "/dashboard/geosphere",
@@ -196,10 +197,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                                         onClick={(e) => handleOptionClick(e, option.link)}
                                         aria-busy={isPendingItem}
                                         className={`group relative flex items-center px-3 py-2.5 cursor-pointer rounded-lg transition-all duration-200 ${isActive
-                                                ? "bg-default-100/60 dark:bg-default-50/10 text-warning-600 dark:text-warning-400 font-semibold"
-                                                : isPendingItem
-                                                    ? "bg-warning-500/5 text-warning-500/70"
-                                                    : "text-default-500 hover:bg-default-100/50 hover:text-foreground font-medium"
+                                            ? "bg-default-100/60 dark:bg-default-50/10 text-warning-600 dark:text-warning-400 font-semibold"
+                                            : isPendingItem
+                                                ? "bg-warning-500/5 text-warning-500/70"
+                                                : "text-default-500 hover:bg-default-100/50 hover:text-foreground font-medium"
                                             } ${isCollapsed ? "justify-center" : "gap-3.5"}`}
                                     >
                                         {(isActive || isPendingItem) && (

@@ -252,14 +252,25 @@ export default function HeroSection() {
                 className="flex items-center gap-2 text-sm"
               >
                 <span className="text-foreground/40 font-medium">New to OBAOL?</span>
-                <Link
-                  href="/auth/register"
-                  className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
-                >
-                  <span className="relative z-10">Join Now</span>
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
-                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
-                </Link>
+                <div className="flex items-center flex-wrap justify-center gap-2">
+                  <Link
+                    href="/auth/register"
+                    className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
+                  >
+                    <span className="relative z-10">Join as Associate</span>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
+                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
+                  </Link>
+                  <span className="text-foreground/30 font-medium text-xs">OR</span>
+                  <Link
+                    href="/auth/operator/register"
+                    className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
+                  >
+                    <span className="relative z-10">Join as Operator</span>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
+                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
+                  </Link>
+                </div>
               </motion.div>
             )}
           </motion.div>

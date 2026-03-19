@@ -225,13 +225,13 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
   const joinCta = roleKey === "operator"
     ? {
-        title: "New Operator?",
-        description: "Create an operator account to access the portal",
-      }
+      title: "New Operator?",
+      description: "Create an operator account to access the portal",
+    }
     : {
-        title: "New Associate?",
-        description: "Create an account to start trading",
-      };
+      title: "New Associate?",
+      description: "Create an account to start trading",
+    };
 
   return (
     <AuthLayout
@@ -358,10 +358,10 @@ const LoginComponent = ({ role }: ILoginProps) => {
         >
           <Button
             className={`w-full font-bold shadow-xl transition-all duration-500 h-12 border-none
-              ${loginStatus === "success" 
-                ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success/20" 
-                : loginStatus === "error" 
-                  ? "bg-gradient-to-r from-danger-500 to-red-600 shadow-danger/20" 
+              ${loginStatus === "success"
+                ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success/20"
+                : loginStatus === "error"
+                  ? "bg-gradient-to-r from-danger-500 to-red-600 shadow-danger/20"
                   : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning/20"
               }`}
             color={loginStatus === "success" ? "success" : loginStatus === "error" ? "danger" : "warning"}
@@ -371,17 +371,49 @@ const LoginComponent = ({ role }: ILoginProps) => {
             size="lg"
             radius="lg"
           >
-            {isRoutingToRegister 
-              ? "Opening registration..." 
+            {isRoutingToRegister
+              ? "Opening registration..."
               : loginStatus === "success"
                 ? "Access Granted"
                 : loginStatus === "error"
                   ? "Check Credentials"
-                  : isLoading 
-                    ? "Verifying..." 
+                  : isLoading
+                    ? "Verifying..."
                     : "Sign In"}
           </Button>
         </motion.div>
+
+        <div className="mt-4 pt-2 w-full">
+          <div className="relative flex items-center mb-5">
+            <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+            <span className="flex-shrink-0 mx-4 text-default-400 text-[10px] uppercase tracking-widest font-bold">Role Switching</span>
+            <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+          </div>
+
+          {role === "Associate" ? (
+            <button
+              type="button"
+              onClick={() => router.push("/auth/operator")}
+              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-default-100/50 hover:bg-default-200/80 dark:bg-default-50/5 dark:hover:bg-default-100/20 text-foreground font-semibold transition-all duration-300 border border-default-200 cursor-pointer shadow-sm group/btn"
+            >
+              <span>Sign in as Operator</span>
+              <svg className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          ) : role === "Operator" || role === "team" ? (
+            <button
+              type="button"
+              onClick={() => router.push("/auth")}
+              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-default-100/50 hover:bg-default-200/80 dark:bg-default-50/5 dark:hover:bg-default-100/20 text-foreground font-semibold transition-all duration-300 border border-default-200 cursor-pointer shadow-sm group/btn"
+            >
+              <span>Sign in as Associate</span>
+              <svg className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          ) : null}
+        </div>
       </form>
     </AuthLayout>
   );

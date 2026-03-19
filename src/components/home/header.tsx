@@ -92,12 +92,21 @@ export default function Header() {
 
               {/* Create Account - Desktop */}
               {!loading && !isAuthenticated && (
-                <Link
-                  href="/auth/register"
-                  className="hidden xl:block text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
-                >
-                  Join Now
-                </Link>
+                <div className="hidden xl:flex items-center gap-3">
+                  <Link
+                    href="/auth/register"
+                    className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
+                  >
+                    Join as Associate
+                  </Link>
+                  <span className="text-foreground/30">•</span>
+                  <Link
+                    href="/auth/operator/register"
+                    className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
+                  >
+                    Join as Operator
+                  </Link>
+                </div>
               )}
 
               {/* CTA */}
@@ -211,13 +220,22 @@ export default function Header() {
                 </button>
 
                 {!loading && !isAuthenticated && (
-                  <Link
-                    href="/auth/register"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
-                  >
-                    Join Now
-                  </Link>
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Link
+                      href="/auth/register"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
+                    >
+                      Join as Associate
+                    </Link>
+                    <Link
+                      href="/auth/operator/register"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
+                    >
+                      Join as Operator
+                    </Link>
+                  </div>
                 )}
 
                 <div className="flex justify-center border-t border-foreground/5 pt-3">

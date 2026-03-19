@@ -24,6 +24,7 @@ import {
   jobRoleRoutes,
   jobTypeRoutes,
   languageRoutes,
+  warehouseRoutes,
   pincodeEntryRoutes,
   productRoutes,
   productVariantRoutes,
@@ -36,7 +37,7 @@ const getOptions = async (
   fieldKey: string,
   parentKey?: string,
   parentValue?: string | string[],
-  context?: { mode?: "associateForm" | "default" }
+  context?: { mode?: "associateForm" | "default"; scope?: string }
 ): Promise<{ key: string; value: string }[]> => {
   const lowerKey = fieldKey.toLowerCase();
 
@@ -97,6 +98,14 @@ const getOptions = async (
         params = { ...params };
       }
       const res = await getData(associateCompanyRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
+    }
+
+    if (lowerKey === "warehouse") {
+      if (context?.scope) {
+        params.scope = context.scope;
+      }
+      const res = await getData(warehouseRoutes.getAll, params);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 

@@ -65,7 +65,7 @@ export default function EnquiryPage() {
 
   const { data: sampleResponse } = useQuery({
     queryKey: ["sample-requests", activeView],
-    queryFn: () => getData(apiRoutes.sampleRequest.list, { page: 1, limit: 200 }),
+    queryFn: () => getData(apiRoutes.sampleRequest.list, { page: 1, limit: 20 }),
     enabled: activeView === "samples",
   });
 
@@ -172,7 +172,7 @@ export default function EnquiryPage() {
                 const productName = row?.variantRateId?.productVariant?.product?.name || "Product";
                 const buyerName = row?.buyerAssociateId?.name || "Buyer";
                 const supplierName = row?.supplierCompanyId?.name || "Supplier";
-                const location = `${row?.requestCity?.name || "City"}, ${row?.requestDistrict?.name || "District"}, ${row?.requestState?.name || "State"}`;
+                const location = `${row?.requestDivision?.name || row?.requestCity?.name || "Division"}, ${row?.requestDistrict?.name || "District"}, ${row?.requestState?.name || "State"}`;
                 const isBuyer = isAssociate && String(row?.buyerAssociateId?._id || row?.buyerAssociateId) === String(user?.id);
                 const isSupplier = isAssociate && associateCompanyId && String(row?.supplierCompanyId?._id || row?.supplierCompanyId) === String(associateCompanyId);
                 const canQuote = isSupplier && row.status === "REQUESTED";
@@ -188,6 +188,7 @@ export default function EnquiryPage() {
                     <div className="mt-2 text-xs text-default-500">Buyer: {buyerName}</div>
                     <div className="text-xs text-default-500">Supplier: {supplierName}</div>
                     <div className="text-xs text-default-500">Location: {location}</div>
+                    <div className="text-xs text-default-500">Requested Qty: {row?.requestedSampleQtyKg ? `${row.requestedSampleQtyKg} kg` : "—"}</div>
                     <div className="mt-2 text-xs text-default-500">
                       Supplier Quote: {row.supplierPrice ? `₹ ${row.supplierPrice}` : "—"} • Min Qty: {row.supplierMinQty || "—"}
                     </div>
@@ -276,7 +277,7 @@ export default function EnquiryPage() {
             api={apiRoutesByRole["enquiry"]}
             queryKey={["enquiry"]}
             page={1}
-            limit={50}
+            limit={20}
           >
             {(enquiryResponse: any) => {
               // Helper to extract array from paginated response

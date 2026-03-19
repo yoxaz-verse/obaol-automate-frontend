@@ -58,7 +58,7 @@ export default function OrdersPage() {
                 api={apiRoutes.orders.getAll}
                 queryKey={["orders"]}
                 page={1}
-                limit={50}
+                limit={20}
             >
                 {(orderResponse: any, refetch) => {
                     const extractOrders = (raw: any): any[] => {

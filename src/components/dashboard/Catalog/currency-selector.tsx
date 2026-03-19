@@ -27,7 +27,11 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   // Add more if needed
 };
 
-const CurrencySelector: React.FC = () => {
+interface CurrencySelectorProps {
+  isMobile?: boolean;
+}
+
+const CurrencySelector: React.FC<CurrencySelectorProps> = ({ isMobile }) => {
   const { selectedCurrency, setSelectedCurrency } = useCurrency();
   const { play } = useSoundEffect();
   const [currencies, setCurrencies] = useState<CurrencyMap>({});
@@ -50,16 +54,46 @@ const CurrencySelector: React.FC = () => {
   const currentSymbol = CURRENCY_SYMBOLS[currentCurrencyCode] || "";
   const currentCurrencyName = currencies[currentCurrencyCode] || currentCurrencyCode;
 
+  if (isMobile) {
+    return (
+      <div className="relative flex items-center w-full max-w-[140px]">
+        <div className="flex items-center gap-2 w-full px-3 py-2 bg-default-100/50 rounded-xl border border-default-200 justify-between cursor-pointer">
+          <div className="flex items-center gap-2">
+            <LuCircleDollarSign className="text-emerald-500 w-4 h-4 pointer-events-none" />
+            <span className="text-xs font-bold text-foreground pointer-events-none">
+              {currentCurrencyCode} {currentSymbol && `(${currentSymbol})`}
+            </span>
+          </div>
+          <LuChevronDown className="text-default-400 w-4 h-4 pointer-events-none" />
+        </div>
+        <select
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50 text-[16px]"
+          value={currentCurrencyCode}
+          onChange={(e) => {
+            play("cash");
+            setSelectedCurrency(e.target.value.toLowerCase());
+          }}
+        >
+          {Object.entries(currencies).map(([code, name]) => (
+            <option key={code} value={code}>
+              {code} - {name}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
   return (
-    <Dropdown placement="bottom-end" classNames={{ content: "bg-content1 border border-default-200" }}>
+    <Dropdown placement="bottom-end" classNames={{ base: "z-[9999999]", content: "bg-content1 border border-default-200 z-[9999999]" }}>
       <DropdownTrigger>
         <Button
           variant="light"
           radius="full"
-          className="flex items-center gap-2 px-3 min-w-[100px] bg-default-100/50 hover:bg-default-200/50 border border-transparent hover:border-default-200 transition-all font-medium text-xs h-10"
+          className="flex items-center gap-2 px-2 md:px-3 min-w-10 md:min-w-[100px] bg-default-100/50 hover:bg-default-200/50 border border-transparent hover:border-default-200 transition-all font-medium text-xs h-10"
         >
           <LuCircleDollarSign className="text-emerald-500 w-4 h-4" />
-          <span className="hidden sm:inline">
+          <span>
             {currentCurrencyCode} {currentSymbol && `(${currentSymbol})`}
           </span>
           <LuChevronDown className="text-default-400 w-3 h-3" />

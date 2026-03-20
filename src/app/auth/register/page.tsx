@@ -624,11 +624,12 @@ export default function RegisterPage() {
       leftPanel={{
         headline: "Become an",
         highlight: "OBAOL ASSOCIATE",
-        description: "Associates power verified agro commodity trade with inventory management and unified execution from anywhere in the world.",
+        description: "Join a high-performance network of manufacturers, traders, and logistics providers automating global agro-commodity trade.",
         points: [
-          "Access verified buyer-supplier opportunities across the network.",
-          "Manage inventory and coordinate procurement, transportation, and packaging on one platform.",
-          "Execute end-to-end workflows globally with OBAOL support before activation.",
+          "Manufacturers: Digitize your production tracking and connect with global buyers.",
+          "Commodity Traders: Gain access to verified trade flows and live market rates.",
+          "Service Providers: Offer your transportation, warehousing, or QC services to the network.",
+          "Importers & Exporters: Manage end-to-end documentation and compliance seamlessly.",
         ],
         footer: "Associate_Onboarding",
       }}
@@ -812,6 +813,21 @@ export default function RegisterPage() {
                     <Radio value="yes">Yes</Radio>
                     <Radio value="no">No (Individual for now)</Radio>
                   </RadioGroup>
+
+                  <div className="rounded-xl border border-warning-200/50 bg-warning-50/50 dark:bg-warning-900/10 p-3 flex flex-col gap-2 shadow-sm">
+                    <div className="text-xs font-bold text-warning-700 dark:text-warning-400 uppercase tracking-widest flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-warning-500 animate-pulse" />
+                      Who should join as an Associate?
+                    </div>
+                    <p className="text-[11px] text-foreground/70 leading-relaxed font-medium">
+                      The Associate network is designed for business entities and professional traders such as:
+                      <span className="block mt-1 font-bold text-foreground opacity-90 italic">
+                        Manufacturers, Market Brokers, Warehousing Partners, Transporters, or Traders.
+                      </span>
+                      If you&apos;re an independent professional and plan to register your company later, please select
+                      &quot;No (Individual for now)&quot; to begin.
+                    </p>
+                  </div>
 
                   {isCompanyFlow ? (
                     <>
@@ -1370,17 +1386,20 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
-      )}
+      )
+      }
 
-      {optionsError && (
-        <div className="mt-4 rounded-xl border border-danger-200 bg-danger-50/40 dark:bg-danger-900/15 p-3 text-xs text-danger-700 dark:text-danger-300 flex items-center justify-between gap-3">
-          <span>Could not load company/designation options. Please retry.</span>
-          <Button size="sm" color="danger" variant="flat" onPress={() => refetchOptions()}>
-            Retry
-          </Button>
-        </div>
-      )}
+      {
+        optionsError && (
+          <div className="mt-4 rounded-xl border border-danger-200 bg-danger-50/40 dark:bg-danger-900/15 p-3 text-xs text-danger-700 dark:text-danger-300 flex items-center justify-between gap-3">
+            <span>Could not load company/designation options. Please retry.</span>
+            <Button size="sm" color="danger" variant="flat" onPress={() => refetchOptions()}>
+              Retry
+            </Button>
+          </div>
+        )
+      }
 
-    </AuthLayout>
+    </AuthLayout >
   );
 }

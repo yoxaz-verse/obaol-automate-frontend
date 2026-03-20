@@ -23,6 +23,7 @@ interface Warehouse {
     name: string;
     address?: string;
     category?: "GENERAL" | "COLD_STORAGE" | "BONDED" | "AGRO";
+    allowedCategoryIds?: string[];
     storageRatePerUnit: number;
     unit: "KG" | "MT";
     isActive: boolean;
@@ -34,6 +35,7 @@ const EMPTY_WAREHOUSE = {
     name: "",
     address: "",
     category: "GENERAL" as const,
+    allowedCategoryIds: [] as string[],
     storageRatePerUnit: 0,
     unit: "MT" as const,
     isActive: true,
@@ -116,6 +118,18 @@ export default function WarehousesPage() {
         },
     });
 
+    const { data: categoriesData } = useQuery({
+        queryKey: ["warehouse-categories"],
+        queryFn: async () => {
+            const res: any = await getData(apiRoutes.category.getAll, { page: 1, limit: 500 });
+            const raw = res?.data?.data;
+            if (Array.isArray(raw?.data)) return raw.data;
+            if (Array.isArray(raw)) return raw;
+            if (Array.isArray(res?.data)) return res.data;
+            return [];
+        },
+    });
+
     const { data: movementsData, isLoading: loadingMovements } = useQuery({
         queryKey: ["warehouse-movements"],
         queryFn: async () => {
@@ -135,6 +149,8 @@ export default function WarehousesPage() {
     });
 
     const warehouses: Warehouse[] = Array.isArray(warehousesData) ? warehousesData : [];
+    const categories = Array.isArray(categoriesData) ? categoriesData : [];
+    const categoryNameMap = new Map(categories.map((cat: any) => [String(cat?._id || ""), cat?.name || ""]));
     const movements = Array.isArray(movementsData) ? movementsData : [];
     const charges = Array.isArray(chargesData) ? chargesData : [];
 
@@ -186,6 +202,7 @@ export default function WarehousesPage() {
             name: wh.name,
             address: wh.address || "",
             category: wh.category || "GENERAL",
+            allowedCategoryIds: Array.isArray(wh.allowedCategoryIds) ? wh.allowedCategoryIds : [],
             storageRatePerUnit: wh.storageRatePerUnit,
             unit: wh.unit,
             isActive: wh.isActive,
@@ -311,6 +328,15 @@ export default function WarehousesPage() {
                                                         </span>
                                                         <span className="font-bold text-foreground">₹{wh.storageRatePerUnit} / {wh.unit}</span>
                                                     </div>
+                                                    {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 pt-1">
+                                                            {wh.allowedCategoryIds.map((catId) => (
+                                                                <Chip key={catId} size="sm" variant="flat" className="text-[9px] font-bold uppercase tracking-wide">
+                                                                    {categoryNameMap.get(String(catId)) || "Category"}
+                                                                </Chip>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </CardBody>
                                             </Card>
                                         ))}
@@ -353,6 +379,15 @@ export default function WarehousesPage() {
                                                         </span>
                                                         <span className="font-bold text-foreground">₹{wh.storageRatePerUnit} / {wh.unit}</span>
                                                     </div>
+                                                    {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 pt-1">
+                                                            {wh.allowedCategoryIds.map((catId) => (
+                                                                <Chip key={catId} size="sm" variant="flat" className="text-[9px] font-bold uppercase tracking-wide">
+                                                                    {categoryNameMap.get(String(catId)) || "Category"}
+                                                                </Chip>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </CardBody>
                                             </Card>
                                         ))}
@@ -449,6 +484,34 @@ export default function WarehousesPage() {
                                 <SelectItem key="COLD_STORAGE">Cold storage</SelectItem>
                                 <SelectItem key="BONDED">Bonded warehouse</SelectItem>
                                 <SelectItem key="AGRO">Agro warehouse</SelectItem>
+                            </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
+                            <Select
+                                selectionMode="multiple"
+                                selectedKeys={warehouseForm.allowedCategoryIds}
+                                onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
+                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                                placeholder={categories.length ? "Select categories" : "No categories available"}
+                            >
+                                {categories.map((cat: any) => (
+                                    <SelectItem key={cat._id}>{cat.name}</SelectItem>
+                                ))}
+                            </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
+                            <Select
+                                selectionMode="multiple"
+                                selectedKeys={warehouseForm.allowedCategoryIds}
+                                onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
+                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                                placeholder={categories.length ? "Select categories" : "No categories available"}
+                            >
+                                {categories.map((cat: any) => (
+                                    <SelectItem key={cat._id}>{cat.name}</SelectItem>
+                                ))}
                             </Select>
                         </div>
                         <div className="flex flex-col gap-1.5">

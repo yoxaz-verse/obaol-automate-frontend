@@ -527,14 +527,21 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
         />
       </div>
 
-      <Modal isOpen={open} onOpenChange={setOpen} isDismissable={false} isKeyboardDismissDisabled>
+      <Modal
+        isOpen={open}
+        onOpenChange={setOpen}
+        isDismissable={false}
+        isKeyboardDismissDisabled
+        size="lg"
+        scrollBehavior="inside"
+      >
         <ModalContent className="bg-content1 text-foreground">
           {(onClose) => (
             <>
               <ModalHeader className="border-b border-divider">
                 {editing ? "Edit Stage" : "Create Stage"}
               </ModalHeader>
-              <ModalBody className="flex flex-col gap-4">
+              <ModalBody className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
                 <Input
                   label="Stage Key"
                   placeholder="E.g. INQUIRY_CREATED"

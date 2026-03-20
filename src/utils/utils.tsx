@@ -19,10 +19,7 @@ import { TbContainer } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
-import { FiBell } from "react-icons/fi";
-import { FiFlag } from "react-icons/fi";
-import { FiFileText } from "react-icons/fi";
-import { FiGlobe } from "react-icons/fi";
+import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3 } from "react-icons/fi";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -82,7 +79,7 @@ export const sidebarOptions = [
     link: "/dashboard/imports",
   },
   {
-    name: "Catalog", //Translate
+    name: "Global Catalog", //Translate
     icon: <GiBookAura />,
     link: "/dashboard/catalog",
   },
@@ -97,7 +94,7 @@ export const sidebarOptions = [
     link: "/dashboard/warehouses",
   },
   {
-    name: "Rent Warehouse",
+    name: "Warehouse Space",
     icon: <TbContainer />,
     link: "/dashboard/warehouse-rent",
   },
@@ -143,27 +140,27 @@ export const sidebarOptions = [
   },
   {
     name: "Documentation Rules",
-    icon: <FiFileText />,
+    icon: <FiEdit3 />,
     link: "/dashboard/documentation-rules",
   },
   {
     name: "Documentation Preview",
-    icon: <FiFileText />,
+    icon: <FiEye />,
     link: "/dashboard/documentation-preview",
   },
   {
     name: "Flow Rules",
-    icon: <FiFileText />,
+    icon: <FiActivity />,
     link: "/dashboard/flow-rules",
   },
   {
     name: "Order Rules",
-    icon: <FiFileText />,
+    icon: <FiPackage />,
     link: "/dashboard/order-rules",
   },
   {
     name: "Enquiry Rules",
-    icon: <FiFileText />,
+    icon: <FiSearch />,
     link: "/dashboard/enquiry-rules",
   },
   {

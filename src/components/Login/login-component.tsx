@@ -156,12 +156,12 @@ const LoginComponent = ({ role }: ILoginProps) => {
     associate: {
       headline: "OBAOL",
       highlight: "ASSOCIATE NETWORK",
-      description: "The Associate panel is designed for the core logistics and trading ecosystem participants.",
+      description: "Empowering manufacturers, traders, and logistics providers with a unified platform for global agro-trade automation.",
       points: [
-        "Company Owners & Manufacturers",
-        "Commodity Traders",
-        "Exporters & Importers",
-        "Ecosystem & Logistics Partners"
+        "Manufacturers: Streamline production and global distribution.",
+        "Traders: Access verified market opportunities and live rates.",
+        "Logistics: Provide warehousing and transport to active flows.",
+        "Exporters & Importers: Handle cross-border documentation seamlessly."
       ],
       footer: "Associate_Hub_Online"
     },
@@ -243,12 +243,12 @@ const LoginComponent = ({ role }: ILoginProps) => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="group/banner relative overflow-hidden rounded-xl border border-warning-500/10 bg-warning-500/5 p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-warning-500/10 transition-all duration-300"
+            className="group/banner relative overflow-hidden rounded-xl border border-warning-500/10 bg-warning-500/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:bg-warning-500/10 transition-all duration-300"
             onClick={handleCreateAccount}
           >
             <div className="flex flex-col">
               <span className="text-xs font-bold text-warning-600 dark:text-warning-400 uppercase tracking-widest">{joinCta.title}</span>
-              <span className="text-sm font-medium text-foreground/80">{joinCta.description}</span>
+              <span className="text-sm font-medium text-foreground/80 leading-snug">{joinCta.description}</span>
             </div>
             <div className="flex items-center gap-2 text-warning-500 font-bold text-sm group-hover/banner:translate-x-1 transition-transform duration-300">
               {isRoutingToRegister ? (
@@ -300,9 +300,9 @@ const LoginComponent = ({ role }: ILoginProps) => {
           endContent={
             <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
               {isVisible ? (
-                <IoEye className="text-2xl text-default-400 pointer-events-none" />
+                <IoEye className="text-2xl text-foreground/40 pointer-events-none" />
               ) : (
-                <IoEyeOff className="text-2xl text-default-400 pointer-events-none" />
+                <IoEyeOff className="text-2xl text-foreground/40 pointer-events-none" />
               )}
             </button>
           }
@@ -335,11 +335,11 @@ const LoginComponent = ({ role }: ILoginProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span className="text-sm text-default-500 group-hover:text-foreground transition-colors">Remember me</span>
+            <span className="text-sm text-foreground/50 group-hover:text-foreground transition-colors font-medium">Remember me</span>
           </label>
           <p
             onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
-            className="text-sm text-default-500 hover:text-foreground cursor-pointer transition-colors"
+            className="text-sm text-foreground/50 hover:text-foreground cursor-pointer transition-colors font-medium"
           >
             Forgot password?
           </p>
@@ -386,7 +386,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
         <div className="mt-4 pt-2 w-full">
           <div className="relative flex items-center mb-5">
             <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
-            <span className="flex-shrink-0 mx-4 text-default-400 text-[10px] uppercase tracking-widest font-bold">Role Switching</span>
+            <span className="flex-shrink-0 mx-4 text-foreground/40 text-[10px] uppercase tracking-widest font-bold">Role Switching</span>
             <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
           </div>
 

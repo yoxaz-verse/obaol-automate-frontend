@@ -176,7 +176,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     </span>
                                 </motion.h1>
                                 <motion.p
-                                    className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed"
+                                    className="text-lg text-foreground/70 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed"
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
@@ -188,7 +188,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         {leftPanel.points.map((point, idx) => (
                                             <motion.div
                                                 key={`${point}-${idx}`}
-                                                className="text-sm text-default-300 flex gap-3 items-start"
+                                                className="text-sm text-foreground/60 flex gap-3 items-start"
                                                 initial={{ opacity: 0, x: -10 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ duration: 0.3, delay: 0.6 + idx * 0.1 }}
@@ -217,7 +217,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     </span>
                                 </h1>
 
-                                <p className="text-lg text-default-400 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
+                                <p className="text-lg text-foreground/70 max-w-sm border-l-2 border-warning-500/50 pl-6 leading-relaxed">
                                     Empowering your business with intelligent, automated solutions.
                                 </p>
                             </>
@@ -225,7 +225,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     </div>
 
                     {/* Tech Decorators */}
-                    <div className="absolute bottom-12 left-12 flex gap-6 text-[10px] font-mono text-default-500 uppercase tracking-widest">
+                    <div className="absolute bottom-12 left-12 flex gap-6 text-[10px] font-mono text-foreground/50 uppercase tracking-widest">
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-success-500 rounded-full animate-pulse" />
                             {leftPanel?.footer || "System_Online"}
@@ -238,16 +238,26 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 <div className="w-full lg:w-7/12 flex flex-col h-full bg-transparent overflow-y-auto custom-scrollbar">
                     <div className="flex-grow flex items-center justify-center p-6 py-12">
                         <motion.div
-                            className={`w-full ${cardMaxWidthClass} relative`}
+                            className={`w-full ${cardMaxWidthClass} relative px-4 lg:px-0`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            {/* Mobile Logo */}
-                            <div className="lg:hidden mb-8 flex justify-center">
-                                <div className="relative w-12 h-12">
-                                    <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+                            {/* Mobile Logo & Branding */}
+                            <div className="lg:hidden mb-10 flex flex-col items-center text-center">
+                                <div className="relative w-16 h-16 mb-4">
+                                    <Image src="/logo.png" alt="Logo" fill className="object-contain drop-shadow-[0_0_15px_rgba(245,165,36,0.3)]" />
                                 </div>
+                                {leftPanel && (
+                                    <>
+                                        <h2 className="text-2xl font-black tracking-tighter text-foreground leading-tight">
+                                            {leftPanel.headline} <span className="text-warning-500">{leftPanel.highlight}</span>
+                                        </h2>
+                                        <p className="text-sm text-foreground/50 mt-1 max-w-[280px]">
+                                            {leftPanel.description}
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             {/* Top Content (Prompts, Banners) */}
@@ -264,7 +274,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                             {/* Glass Card */}
                             <motion.div
-                                className="relative bg-content1/90 dark:bg-content1/80 border border-default-200/50 rounded-2xl p-8 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden group/card"
+                                className="relative bg-content1/90 dark:bg-content1/80 border border-default-200/50 rounded-2xl p-6 lg:p-10 backdrop-blur-xl shadow-2xl overflow-hidden group/card"
                                 whileHover={{ boxShadow: "0 25px 50px -12px rgba(245, 165, 36, 0.15)" }}
                                 transition={{ duration: 0.4 }}
                             >
@@ -275,7 +285,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
                                         {title}
                                     </h2>
-                                    <p className="text-default-400 text-sm">
+                                    <p className="text-foreground/60 text-sm">
                                         {subtitle}
                                     </p>
                                 </div>
@@ -290,7 +300,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 </motion.div>
                             </motion.div>
 
-                            <div className="mt-8 text-center text-[10px] text-default-600 font-mono tracking-widest uppercase opacity-40">
+                            <div className="mt-8 text-center text-[10px] text-foreground/40 font-mono tracking-widest uppercase opacity-40">
                                 Obaol Automate &bull; Enterprise Access
                             </div>
                         </motion.div>

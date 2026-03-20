@@ -70,7 +70,7 @@ export default function CategoryDivision({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-3">
           <span className="w-8 h-px bg-orange-500/50 inline-block" />
-          Catalog
+          Global Catalog
         </h2>
       </div>
 

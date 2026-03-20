@@ -856,7 +856,25 @@ export default function OrderDetailsPage() {
                 <Card className="lg:col-span-2">
                     <CardHeader className="font-bold text-lg flex justify-between">
                         <span>Truck Loads & Dispatch</span>
-                        <Button size="sm" color="secondary" variant="flat" onPress={addTruck}>+ Add Truck</Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                size="sm"
+                                color="secondary"
+                                variant="flat"
+                                onPress={addTruck}
+                            >
+                                + Add Truck
+                            </Button>
+                            <Button
+                                size="sm"
+                                color="primary"
+                                variant="flat"
+                                onPress={() => updateMutation.mutate({ logistics: logisticsList })}
+                                isLoading={updateMutation.isPending}
+                            >
+                                Save Trucks
+                            </Button>
+                        </div>
                     </CardHeader>
                     <Divider />
                     <CardBody className="flex flex-col gap-8">

@@ -54,6 +54,7 @@ const BASE_PATHS = {
   JOB_TYPE: "/job-types",
   LANGUAGE: "/languages",
   INCOTERM: "/incoterms",
+  PAYMENT_TERM: "/payment-terms",
   COMPANY_FUNCTION: "/company-functions",
   COMPANY_SUB_FUNCTION: "/company-sub-functions",
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
@@ -258,6 +259,7 @@ export const jobRoleRoutes = createCRUDRoutes(BASE_PATHS.JOB_ROLE);
 export const jobTypeRoutes = createCRUDRoutes(BASE_PATHS.JOB_TYPE);
 export const languageRoutes = createCRUDRoutes(BASE_PATHS.LANGUAGE);
 export const incotermRoutes = createCRUDRoutes(BASE_PATHS.INCOTERM);
+export const paymentTermRoutes = createCRUDRoutes(BASE_PATHS.PAYMENT_TERM);
 export const companyFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION);
 export const companySubFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_SUB_FUNCTION);
 export const companyFunctionMappingRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION_MAPPING);
@@ -472,6 +474,7 @@ export const apiRoutes = {
   jobType: jobTypeRoutes,
   language: languageRoutes,
   incoterm: incotermRoutes,
+  paymentTerm: paymentTermRoutes,
   companyFunction: companyFunctionRoutes,
   companySubFunction: companySubFunctionRoutes,
   companyFunctionMapping: companyFunctionMappingRoutes,

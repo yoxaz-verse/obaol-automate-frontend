@@ -24,6 +24,7 @@ import {
   jobRoleRoutes,
   jobTypeRoutes,
   languageRoutes,
+  paymentTermRoutes,
   warehouseRoutes,
   pincodeEntryRoutes,
   productRoutes,
@@ -189,6 +190,11 @@ const getOptions = async (
         key: d._id,
         value: [d.code, d.name].filter(Boolean).join(" - ") || d.name || d.code || "Incoterm",
       }));
+    }
+
+    if (lowerKey === "paymentterm") {
+      const res = await getData(paymentTermRoutes.getAll, params);
+      return extractArray(res).map((d: any) => ({ key: d._id, value: d.label || "Payment Term" }));
     }
 
     if (lowerKey.includes("state")) {

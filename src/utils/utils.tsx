@@ -152,6 +152,11 @@ export const sidebarOptions = [
     link: "/dashboard/documentation-preview",
   },
   {
+    name: "Flow Rules",
+    icon: <FiFileText />,
+    link: "/dashboard/flow-rules",
+  },
+  {
     name: "Order Rules",
     icon: <FiFileText />,
     link: "/dashboard/order-rules",

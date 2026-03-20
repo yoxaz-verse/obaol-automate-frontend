@@ -170,6 +170,9 @@ export default function EnquiryDetailsPage() {
         destinationInspectionBy: "",
         finalDeliveryConfirmationBy: "",
     });
+    const [selectedIncotermId, setSelectedIncotermId] = useState<string>("");
+    const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string>("");
+    const [tradeTermsSavedAt, setTradeTermsSavedAt] = useState<string>("");
 
     // Fetch Enquiry Data
     const { data: enquiry, isLoading } = useQuery({
@@ -250,6 +253,10 @@ export default function EnquiryDetailsPage() {
     const { data: incotermResponse } = useQuery({
         queryKey: ["incoterms"],
         queryFn: () => getData(apiRoutes.incoterm.getAll),
+    });
+    const { data: paymentTermResponse } = useQuery({
+        queryKey: ["payment-terms"],
+        queryFn: () => getData(apiRoutes.paymentTerm.getAll),
     });
     const { data: statesResponse } = useQuery({
         queryKey: ["states"],
@@ -339,6 +346,8 @@ export default function EnquiryDetailsPage() {
             destinationPort: savedCtx.destinationPort || "",
             routeNotes: savedCtx.routeNotes || "",
         });
+        setSelectedIncotermId(String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || ""));
+        setSelectedPaymentTermId(String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || ""));
     }, [enquiry]);
     useEffect(() => {
         setResponsibilityPlan((prev) => {
@@ -739,6 +748,21 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to save responsibility plan.");
         },
     });
+    const updateTradeTermsMutation = useMutation({
+        mutationFn: () =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+                preferredIncoterm: selectedIncotermId || null,
+                paymentTermId: selectedPaymentTermId || null,
+            }),
+        onSuccess: () => {
+            toast.success("Trade terms updated.");
+            setTradeTermsSavedAt(new Date().toISOString());
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: () => {
+            toast.error("Failed to update trade terms.");
+        },
+    });
     const createDocMutation = useMutation({
         mutationFn: async () => {
             if (!docActionRule) throw new Error("No document rule selected.");
@@ -1048,6 +1072,9 @@ export default function EnquiryDetailsPage() {
     const isPackagingSpecificationsChanged =
         String(packagingSpecifications || "").trim() !== String((enquiry as any)?.packagingSpecifications || "").trim();
     const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged || isPackagingSpecificationsChanged;
+    const isTradeTermsChanged =
+        String(selectedIncotermId || "") !== String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "") ||
+        String(selectedPaymentTermId || "") !== String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
     const hasPackagingSpecifications = Boolean(String(packagingSpecifications || "").trim());
     // ─── Financial Calculations ───────────────────────────────────────────────
     const quantity = enquiry.quantity || 0;
@@ -1083,6 +1110,13 @@ export default function EnquiryDetailsPage() {
             : Array.isArray(incotermResponse?.data)
                 ? incotermResponse.data
                 : [];
+    const paymentTermOptions = Array.isArray(paymentTermResponse?.data?.data?.data)
+        ? paymentTermResponse.data.data.data
+        : Array.isArray(paymentTermResponse?.data?.data)
+            ? paymentTermResponse.data.data
+            : Array.isArray(paymentTermResponse?.data)
+                ? paymentTermResponse.data
+                : [];
     const parseMasterRows = (raw: any): any[] => {
         if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
         if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
@@ -1114,6 +1148,13 @@ export default function EnquiryDetailsPage() {
         const found = incotermOptions.find((it: any) => it?._id?.toString() === raw?.toString());
         if (!found) return /^[a-f0-9]{24}$/i.test(String(raw)) ? "Not specified" : String(raw);
         return [found.code, found.name].filter(Boolean).join(" — ");
+    })();
+    const paymentTermLabel = (() => {
+        const raw = (enquiry as any)?.paymentTermId;
+        if (!raw) return null;
+        if (typeof raw === "object") return raw.label || raw.name || null;
+        const found = paymentTermOptions.find((it: any) => it?._id?.toString() === raw?.toString());
+        return found?.label || (typeof raw === "string" ? raw : null);
     })();
     const specificationTextRaw = (enquiry as any).specifications || (enquiry as any).specification || "";
     const specificationText = String(specificationTextRaw).replace(/\s+Notes:/i, "\nNotes:");
@@ -1491,6 +1532,10 @@ export default function EnquiryDetailsPage() {
                                 <span className="text-[10px] uppercase font-bold text-default-400">Preferred Incoterm</span>
                                 <span className="text-sm font-semibold text-default-700">{preferredIncoterm || "Not specified"}</span>
                             </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Payment Term</span>
+                                <span className="text-sm font-semibold text-default-700">{paymentTermLabel || "Not specified"}</span>
+                            </div>
                             <div className="flex flex-col gap-2">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Buyer Specification</span>
                                 {isBuyer ? (
@@ -1615,6 +1660,72 @@ export default function EnquiryDetailsPage() {
                         </CardHeader>
                         <Divider className="mt-4" />
                         <CardBody className="flex flex-col gap-10 px-6 py-6 transition-all duration-300">
+                            <div className="flex flex-col gap-4 p-5 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Trade Terms</span>
+                                        <span className="text-base font-black text-foreground">Incoterms & Payment</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Button
+                                            size="sm"
+                                            color="primary"
+                                            variant="flat"
+                                            isDisabled={!canEditResponsibilityPlan || !isTradeTermsChanged}
+                                            isLoading={updateTradeTermsMutation.isPending}
+                                            onPress={() => updateTradeTermsMutation.mutate()}
+                                            className="font-bold"
+                                        >
+                                            Save Terms
+                                        </Button>
+                                        {tradeTermsSavedAt && (
+                                            <span className="text-xs text-default-400">
+                                                Saved {dayjs(tradeTermsSavedAt).format("DD MMM, HH:mm")}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Select
+                                        size="sm"
+                                        label="Incoterm"
+                                        variant="bordered"
+                                        selectedKeys={selectedIncotermId ? [selectedIncotermId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedIncotermId((arr[0] as string) || "");
+                                        }}
+                                        isDisabled={!canEditResponsibilityPlan}
+                                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                    >
+                                        {incotermOptions.map((item: any) => (
+                                            <SelectItem key={item._id} value={item._id}>
+                                                {[item.code, item.name].filter(Boolean).join(" — ")}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+
+                                    <Select
+                                        size="sm"
+                                        label="Payment Term"
+                                        variant="bordered"
+                                        selectedKeys={selectedPaymentTermId ? [selectedPaymentTermId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedPaymentTermId((arr[0] as string) || "");
+                                        }}
+                                        isDisabled={!canEditResponsibilityPlan}
+                                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
+                                    >
+                                        {paymentTermOptions.map((item: any) => (
+                                            <SelectItem key={item._id} value={item._id}>
+                                                {item.label || "Payment Term"}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            </div>
                             {/* Section 1: Execution Context & Location Strategy */}
                             <div className="flex flex-col gap-8 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
                                 <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">

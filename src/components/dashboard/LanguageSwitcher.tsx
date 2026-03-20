@@ -132,7 +132,7 @@ export const LanguageSwitcher = () => {
       <div className="relative group notranslate" translate="no">
         <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-warning-500 w-4 h-4 z-10 pointer-events-none" />
         <select
-          className="notranslate appearance-none w-[150px] bg-default-100 hover:bg-default-200 transition-colors cursor-pointer text-foreground font-bold text-[11px] uppercase tracking-wider h-10 pl-9 pr-8 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20"
+          className={`notranslate appearance-none ${pendingLang ? 'w-[125px]' : 'w-[140px]'} bg-default-100 hover:bg-default-200 transition-all cursor-pointer text-foreground font-bold text-[10px] uppercase tracking-wider h-9 pl-9 pr-6 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20`}
           value={pendingLang ?? currentLang}
           disabled={isSwitching}
           onChange={(e) => handleSelectChange(String(e.target.value || "en"))}
@@ -150,8 +150,8 @@ export const LanguageSwitcher = () => {
             </option>
           ))}
         </select>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-default-400 group-hover:text-default-600 transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-default-400 group-hover:text-default-600 transition-colors">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -161,11 +161,11 @@ export const LanguageSwitcher = () => {
       {pendingLang && (
         <button
           onClick={() => applyLanguage(pendingLang)}
-          className="notranslate flex items-center gap-1 px-3 h-10 rounded-xl bg-warning-500 hover:bg-warning-600 active:scale-95 transition-all text-white font-black text-[10px] uppercase tracking-wide shadow-md shadow-warning-500/30 animate-in fade-in slide-in-from-right-2 duration-200"
+          className="notranslate flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl bg-warning-500/10 hover:bg-warning-500/20 border border-warning-500/20 active:scale-95 transition-all text-warning-600 dark:text-warning-400 font-bold text-[10px] uppercase tracking-widest animate-in fade-in slide-in-from-right-2 duration-200"
           title={`Apply ${pendingLabel}`}
           translate="no"
         >
-          <LuCheck size={14} />
+          <LuCheck size={14} className="stroke-[2.5px]" />
           <span className="notranslate" translate="no">Apply</span>
         </button>
       )}

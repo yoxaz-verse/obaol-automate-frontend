@@ -38,16 +38,18 @@ export default function RulesSortableCard({ rule, onEdit, dragDisabled, badges =
           <Button size="sm" variant="flat" onPress={() => onEdit(rule)}>
             Edit
           </Button>
-          <Button
-            size="sm"
-            variant="light"
+          <button
             {...attributes}
             {...listeners}
-            isDisabled={dragDisabled}
+            disabled={dragDisabled}
             title={dragDisabled ? "Clear search to reorder" : "Drag to reorder"}
+            className={`flex items-center justify-center px-3 h-8 text-xs font-medium rounded-lg transition-colors ${dragDisabled
+                ? "opacity-50 cursor-not-allowed bg-transparent text-default-400"
+                : "bg-transparent hover:bg-default-100 text-default-600 cursor-grab active:cursor-grabbing"
+              }`}
           >
             Drag
-          </Button>
+          </button>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">

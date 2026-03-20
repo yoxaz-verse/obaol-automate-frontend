@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Products" },
+  { href: "/roles", label: "Roles" },
   { href: "/news", label: "News" },
   { href: "/faq", label: "FAQ" },
 ];

@@ -38,6 +38,7 @@ export default function Essentials() {
   const enquiryTabs = [
     { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
     { key: "incoterm", title: "Incoterms" }, // Preferred trade terms
+    { key: "paymentTerm", title: "Payment Terms" },
   ];
   return (
     <div className="flex items-center justify-center w-full min-w-0 max-w-full">

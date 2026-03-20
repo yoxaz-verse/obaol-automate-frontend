@@ -93,6 +93,8 @@ export const setLanguageCookies = (langCode: string): boolean => {
   const googtransValue = `/en/${normalized}`;
   const options = getCookieOptions();
 
+  // Clear any stale google translate cookies across domains before setting new one
+  clearGoogtransCookie();
   Cookies.set(LANGUAGE_COOKIE, normalized, options);
   Cookies.set(GOOGLE_TRANSLATE_COOKIE, googtransValue, options);
   if (typeof window !== "undefined") {
@@ -120,6 +122,7 @@ export const setGoogtransCookie = (langCode: string) => {
   const normalized = normalizeLanguageCode(langCode);
   const googtransValue = `/en/${normalized}`;
   const options = getCookieOptions();
+  clearGoogtransCookie();
   Cookies.set(GOOGLE_TRANSLATE_COOKIE, googtransValue, options);
 };
 

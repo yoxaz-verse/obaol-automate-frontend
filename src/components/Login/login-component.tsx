@@ -7,6 +7,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { FiArrowRight } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -157,25 +158,30 @@ const LoginComponent = ({ role }: ILoginProps) => {
       headline: "OBAOL",
       highlight: "ASSOCIATE NETWORK",
       description: "Empowering manufacturers, traders, and logistics providers with a unified platform for global agro-trade automation.",
-      points: [
-        "Manufacturers: Streamline production and global distribution.",
-        "Traders: Access verified market opportunities and live rates.",
-        "Logistics: Provide warehousing and transport to active flows.",
-        "Exporters & Importers: Handle cross-border documentation seamlessly."
+      tags: [
+        "Manufacturers",
+        "Traders",
+        "Logistics Providers",
+        "Exporters & Importers",
+        "Freight Forwarders",
+        "Warehouse Managers"
       ],
-      footer: "Associate_Hub_Online"
+      footer: "Associate_Hub_Online",
+      knowMoreLink: "/roles/associate"
     },
     operator: {
       headline: "OBAOL",
       highlight: "OPERATOR PORTAL",
       description: "Designed for internal operators, mediators, and individuals entering digital agro-trading.",
-      points: [
-        "Individuals starting digital agro-trading",
-        "Mediators dealing with multiple companies",
-        "Internal Operations & Team",
-        "New Entrants building their companies"
+      tags: [
+        "Individuals",
+        "Portfolio Managers",
+        "Digital Traders",
+        "Business Developers",
+        "Internal Operations"
       ],
-      footer: "Operator_Portal_v2"
+      footer: "Operator_Portal_v2",
+      knowMoreLink: "/roles/operator"
     },
     "project manager": {
       headline: "OBAOL",
@@ -413,6 +419,16 @@ const LoginComponent = ({ role }: ILoginProps) => {
               </svg>
             </button>
           ) : null}
+
+          <div className="mt-6 flex justify-center w-full">
+            <button
+              type="button"
+              onClick={() => router.push("/roles")}
+              className="text-xs text-foreground/50 hover:text-orange-500 font-medium transition-colors flex items-center gap-1"
+            >
+              Know more about platform roles <FiArrowRight size={12} />
+            </button>
+          </div>
         </div>
       </form>
     </AuthLayout>

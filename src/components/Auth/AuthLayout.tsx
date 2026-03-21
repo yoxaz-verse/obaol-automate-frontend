@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { FiArrowRight } from "react-icons/fi";
 
 interface AuthLayoutProps {
     title: string;
@@ -15,7 +17,9 @@ interface AuthLayoutProps {
         highlight?: string;
         description?: string;
         points?: string[];
+        tags?: string[];
         footer?: string;
+        knowMoreLink?: string;
     };
 }
 
@@ -198,6 +202,37 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                             </motion.div>
                                         ))}
                                     </div>
+                                )}
+                                {!!leftPanel.tags?.length && (
+                                    <div className="mt-8 flex flex-wrap gap-2 max-w-md">
+                                        {leftPanel.tags.map((tag, idx) => (
+                                            <motion.span
+                                                key={`${tag}-${idx}`}
+                                                className="px-2.5 py-1.5 rounded-lg bg-default-100/50 text-[11px] font-bold text-foreground border border-default-200/50 shadow-sm transition-colors hover:border-warning-500/30"
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3, delay: 0.6 + idx * 0.05 }}
+                                            >
+                                                {tag}
+                                            </motion.span>
+                                        ))}
+                                    </div>
+                                )}
+                                {leftPanel.knowMoreLink && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 1.0 }}
+                                        className="mt-8"
+                                    >
+                                        <Link
+                                            href={leftPanel.knowMoreLink}
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-warning-500/10 text-warning-500 font-semibold text-sm hover:bg-warning-500/20 transition-all border border-warning-500/20 backdrop-blur-sm group"
+                                        >
+                                            Know more about this role
+                                            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                        </Link>
+                                    </motion.div>
                                 )}
                             </>
                         ) : (

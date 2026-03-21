@@ -78,7 +78,7 @@ export default function RolesPage() {
                   <div className="mb-8 p-5 rounded-2xl bg-default-100/50 border border-default-200/50">
                     <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-3">Who can join?</p>
                     <div className="flex flex-wrap gap-2">
-                      {["Traders", "Import/Exporters", "Supplies", "Buyers", "Warehouse Managers", "Logistics", "Procurement"].map((tag) => (
+                      {["Traders", "Import/Exporters", "Suppliers", "Buyers", "Warehouse Managers", "Logistics", "Procurement", "Freight Forwarders", "Manufacturers"].map((tag) => (
                         <span key={tag} className="px-2.5 py-1 rounded-lg bg-background text-[11px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-orange-500/30">
                           {tag}
                         </span>

@@ -22,6 +22,7 @@ import {
   FiCpu,
   FiLayers,
   FiAperture,
+  FiNavigation,
 } from "react-icons/fi";
 
 /* ================= ANIMATION VARIANTS ================= */
@@ -104,11 +105,6 @@ const EcosystemChip = ({
         {label}
       </span>
 
-      {/* BENEFIT TOOLTIP */}
-      <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none whitespace-nowrap px-4 py-2 rounded-xl bg-orange-600 text-white text-[10px] font-bold shadow-2xl z-50 ${reverse ? "right-full mr-6" : "left-full ml-6"}`}>
-        <div className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-orange-600 rotate-45 ${reverse ? "-right-1" : "-left-1"}`} />
-        {benefit}
-      </div>
     </motion.div>
   );
 };
@@ -122,6 +118,21 @@ export default function HeroSection() {
   const [isSystemActive, setIsSystemActive] = useState(false);
   const [isAgroActive, setIsAgroActive] = useState(false);
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
+
+  // DYNAMIC STATE FOR HEADLINE SYNC
+  const [dynamicText, setDynamicText] = useState<{ text: string, isHeadline: boolean }>({ text: "Agro Commodity.", isHeadline: true });
+  const [gridColor, setGridColor] = useState("currentColor");
+
+  const handleChipHover = (active: boolean, role: string, benefitText: string, hexColor?: string) => {
+    setHoveredRole(active ? role : null);
+    if (active) {
+      setDynamicText({ text: benefitText, isHeadline: false });
+      if (hexColor) setGridColor(hexColor);
+    } else {
+      setDynamicText({ text: "Agro Commodity.", isHeadline: true });
+      setGridColor("currentColor");
+    }
+  };
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -197,11 +208,10 @@ export default function HeroSection() {
       <motion.div
         animate={{
           opacity: (isSystemActive || isAgroActive || !!hoveredRole) ? 0.25 : 0.08,
-          stroke: isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")
         }}
-        className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-1000 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
+        className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
         style={{
-          backgroundImage: `linear-gradient(to right, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")} 1px, transparent 1px), linear-gradient(to bottom, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")} 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(to right, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : gridColor)} 1px, transparent 1px), linear-gradient(to bottom, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : gridColor)} 1px, transparent 1px)`,
           backgroundSize: "4rem 4rem"
         }}
       />
@@ -284,33 +294,33 @@ export default function HeroSection() {
 
       {/* ================= ECOSYSTEM NODES ================= */}
       {showDesktopVisuals ? (
-        <div className="absolute inset-0 z-20 pointer-events-auto overflow-hidden">
+        <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
           {/* LEFT NODES */}
-          <div className="absolute top-[18%] left-[12%]">
-            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Sourcing coverage with OBAOL" color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SOURCE" : null)} />
+          <div className="absolute top-[16%] left-[10%] pointer-events-auto">
+            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Request/confirm sourcing actions in execution." color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SOURCE", "Request/confirm sourcing actions in execution.", "#f97316")} />
           </div>
-          <div className="absolute top-[42%] left-[8%]">
-            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Global transit with OBAOL" color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "CARGO" : null)} />
+          <div className="absolute top-[44%] left-[6%] pointer-events-auto">
+            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Track dispatch and shipment steps in execution." color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "CARGO", "Track dispatch and shipment steps in execution.", "#3b82f6")} />
           </div>
-          <div className="absolute top-[68%] left-[14%]">
-            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Trade security with OBAOL" color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SECURE" : null)} />
+          <div className="absolute top-[72%] left-[8%] pointer-events-auto">
+            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Record verification steps in execution (if used)." color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SECURE", "Record verification steps in execution (if used).", "#10b981")} />
           </div>
-          <div className="absolute top-[88%] left-[10%]">
-            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Secure better deals with OBAOL" color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "DEMAND" : null)} />
+          <div className="absolute top-[90%] left-[14%] pointer-events-auto">
+            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Manage buyer-side enquiry actions and confirmations." color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "DEMAND", "Manage buyer-side enquiry actions and confirmations.", "#a855f7")} />
           </div>
 
           {/* RIGHT NODES */}
-          <div className="absolute top-[12%] right-[14%]">
-            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Optimized storage with OBAOL" color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "STOCK" : null)} reverse />
+          <div className="absolute top-[14%] right-[10%] pointer-events-auto">
+            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Record inbound/outbound storage steps (if used)." color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "STOCK", "Record inbound/outbound storage steps (if used).", "#f97316")} reverse />
           </div>
-          <div className="absolute top-[38%] right-[10%]">
-            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Standardized quality with OBAOL" color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "PACK" : null)} reverse />
+          <div className="absolute top-[40%] right-[6%] pointer-events-auto">
+            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Record packaging readiness steps in execution." color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "PACK", "Record packaging readiness steps in execution.", "#ec4899")} reverse />
           </div>
-          <div className="absolute top-[62%] right-[16%]">
-            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Part of the OBAOL grid" color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SUPPLY" : null)} reverse />
+          <div className="absolute top-[68%] right-[8%] pointer-events-auto">
+            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Handle supplier-side enquiry actions in execution." color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SUPPLY", "Handle supplier-side enquiry actions in execution.", "#3b82f6")} reverse />
           </div>
-          <div className="absolute top-[84%] right-[12%]">
-            <EcosystemChip icon={<FiAperture size={15} />} label="Processor" benefit="Maximize output with OBAOL" color="text-emerald-500" custom={7} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "FINISH" : null)} reverse />
+          <div className="absolute top-[88%] right-[14%] pointer-events-auto">
+            <EcosystemChip icon={<FiNavigation size={15} />} label="Freight Forwarder" benefit="Track freight handoff steps in execution." color="text-lime-500" custom={7} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "FORWARD", "Track freight handoff steps in execution.", "#84cc16")} reverse />
           </div>
         </div>
       ) : (
@@ -362,11 +372,32 @@ export default function HeroSection() {
 
             <motion.h2
               variants={itemVariants}
-              className="w-fit mx-auto text-2xl sm:text-4xl md:text-6xl lg:text-[clamp(3.2rem,6vw,5.2rem)] font-black tracking-tighter text-foreground leading-none cursor-pointer select-none group px-4"
+              className="w-full relative flex flex-col items-center justify-center text-2xl sm:text-4xl md:text-6xl lg:text-[clamp(1.5rem,6vw,5.2rem)] font-black tracking-tighter text-foreground leading-none cursor-pointer select-none group px-4 min-h-[120px] md:min-h-[160px] overflow-hidden"
               onMouseEnter={() => setIsAgroActive(true)}
               onMouseLeave={() => setIsAgroActive(false)}
             >
-              <span className="group-hover:text-emerald-500 transition-colors duration-500">Agro Commodity.</span>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={dynamicText.text}
+                  initial={{ y: 30, opacity: 0, filter: "blur(10px)" }}
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  exit={{ y: -30, opacity: 0, filter: "blur(10px)" }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+                >
+                  <span className={`transition-all duration-1000 ease-out text-center px-4 w-full ${isAgroActive
+                    ? 'text-emerald-500 scale-105'
+                    : (dynamicText.isHeadline
+                      ? 'text-foreground'
+                      : 'text-foreground/80 italic font-bold uppercase tracking-[0.15em] animate-typewriter text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-5xl')
+                    }`}>
+                    {dynamicText.text}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
             </motion.h2>
           </div>
 

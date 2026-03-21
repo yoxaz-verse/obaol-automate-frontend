@@ -3,6 +3,7 @@
 import React from "react";
 import ParticleNetwork from "@/components/ui/particle-network";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function AboutSection() {
     return (
@@ -63,14 +64,34 @@ export default function AboutSection() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="relative h-[400px] md:h-[600px] w-full rounded-3xl overflow-hidden bg-black/5 border border-default-200/50 flex items-center justify-center shadow-none backdrop-blur-3xl group"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 via-transparent to-indigo-500/10 opacity-30 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none mix-blend-screen" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 via-transparent to-indigo-500/10 opacity-30 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none mix-blend-screen z-0" />
 
-                    <div className="absolute inset-0 z-0">
-                        <ParticleNetwork />
+
+
+                    {/* Glowing Arcane Aura Behind Subject */}
+                    <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-orange-500/30 blur-[100px] rounded-full z-0 group-hover:bg-orange-500/60 transition-colors duration-1000" />
+
+                    {/* The Person (Holographic/Arcane Blend) */}
+                    <div className="absolute inset-0 z-10 pointer-events-none">
+                        <div
+                            className="absolute inset-0"
+                            style={{
+                                WebkitMaskImage: 'linear-gradient(to top, transparent 0%, black 15%, black 100%)',
+                                maskImage: 'linear-gradient(to top, transparent 0%, black 15%, black 100%)'
+                            }}
+                        >
+                            <Image
+                                src="/images/Jacob-Alwin-Obaol.png"
+                                alt="Jacob Alwin, CEO OBAOL Supreme"
+                                fill
+                                className="object-cover object-center grayscale opacity-80 contrast-125 brightness-110 drop-shadow-[0_0_30px_rgba(245,165,36,0.3)] mix-blend-luminosity group-hover:mix-blend-normal group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 ease-out group-hover:scale-105"
+                                priority
+                            />
+                        </div>
                     </div>
 
                     {/* Inner glowing border */}
-                    <div className="absolute inset-0 rounded-3xl border border-white/5 pointer-events-none z-10" />
+                    <div className="absolute inset-0 rounded-3xl border border-white/5 pointer-events-none z-20" />
                 </motion.div>
             </div>
         </section>

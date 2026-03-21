@@ -297,30 +297,30 @@ export default function HeroSection() {
         <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
           {/* LEFT NODES */}
           <div className="absolute top-[16%] left-[10%] pointer-events-auto">
-            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Request/confirm sourcing actions in execution." color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SOURCE", "Request/confirm sourcing actions in execution.", "#f97316")} />
+            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Procurement assistance for any trade that needs it." color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SOURCE", "Procurement assistance for any trade that needs it.", "#f97316")} />
           </div>
           <div className="absolute top-[44%] left-[6%] pointer-events-auto">
-            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Track dispatch and shipment steps in execution." color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "CARGO", "Track dispatch and shipment steps in execution.", "#3b82f6")} />
+            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Logistics providers can take the shipment execution." color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "CARGO", "Logistics providers can take the shipment execution.", "#3b82f6")} />
           </div>
           <div className="absolute top-[72%] left-[8%] pointer-events-auto">
-            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Record verification steps in execution (if used)." color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SECURE", "Record verification steps in execution (if used).", "#10b981")} />
+            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Verification steps happen across the trade." color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SECURE", "Verification steps happen across the trade.", "#10b981")} />
           </div>
           <div className="absolute top-[90%] left-[14%] pointer-events-auto">
-            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Manage buyer-side enquiry actions and confirmations." color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "DEMAND", "Manage buyer-side enquiry actions and confirmations.", "#a855f7")} />
+            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Buyer enquiries and orders are transparent step-by-step." color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "DEMAND", "Buyer enquiries and orders are transparent step-by-step.", "#a855f7")} />
           </div>
 
           {/* RIGHT NODES */}
           <div className="absolute top-[14%] right-[10%] pointer-events-auto">
-            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Record inbound/outbound storage steps (if used)." color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "STOCK", "Record inbound/outbound storage steps (if used).", "#f97316")} reverse />
+            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Rent warehouse space or list your warehouse." color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "STOCK", "Rent warehouse space or list your warehouse.", "#f97316")} reverse />
           </div>
           <div className="absolute top-[40%] right-[6%] pointer-events-auto">
-            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Record packaging readiness steps in execution." color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "PACK", "Record packaging readiness steps in execution.", "#ec4899")} reverse />
+            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Packaging enquiries flow through the execution panel." color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "PACK", "Packaging enquiries flow through the execution panel.", "#ec4899")} reverse />
           </div>
           <div className="absolute top-[68%] right-[8%] pointer-events-auto">
-            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Handle supplier-side enquiry actions in execution." color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SUPPLY", "Handle supplier-side enquiry actions in execution.", "#3b82f6")} reverse />
+            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Suppliers list products and stand out in the market." color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SUPPLY", "Suppliers list products and stand out in the market.", "#3b82f6")} reverse />
           </div>
           <div className="absolute top-[88%] right-[14%] pointer-events-auto">
-            <EcosystemChip icon={<FiNavigation size={15} />} label="Freight Forwarder" benefit="Track freight handoff steps in execution." color="text-lime-500" custom={7} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "FORWARD", "Track freight handoff steps in execution.", "#84cc16")} reverse />
+            <EcosystemChip icon={<FiNavigation size={15} />} label="Freight Forwarder" benefit="Bid the freight forwarding part of execution." color="text-lime-500" custom={7} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "FORWARD", "Bid the freight forwarding part of execution.", "#84cc16")} reverse />
           </div>
         </div>
       ) : (

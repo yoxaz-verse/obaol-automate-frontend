@@ -33,15 +33,8 @@ export default function WhoCanUseObaol() {
   );
 
   return (
-    <motion.section
+    <section
       ref={sectionRef}
-      style={{
-        opacity,
-        y,
-        scale,
-        willChange: "transform, opacity",
-      }}
-
       className="relative py-32 md:py-48 px-4 sm:px-6 bg-background border-t border-white/5 overflow-hidden"
     >
       {/* Deep ambient background glows */}
@@ -58,7 +51,7 @@ export default function WhoCanUseObaol() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-foreground"
           >
             Built to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-400">Lower the Entry Barrier</span> to Commodity Trading
           </motion.h2>
@@ -202,7 +195,7 @@ export default function WhoCanUseObaol() {
           </p>
         </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 }
 

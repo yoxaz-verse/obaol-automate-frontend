@@ -87,15 +87,7 @@ export default function BrokenTradeExperience() {
     [0.94, 1, 1, 0.94]
   );
   return (
-    <motion.section
-
-      ref={sectionRef}
-      style={{
-        opacity,
-        y,
-        scale,
-        willChange: "transform, opacity",
-      }}
+    <section
       className="relative py-28 sm:py-40 px-4 sm:px-6 bg-background overflow-hidden"
     >
       {/* Ambient error glow */}
@@ -262,6 +254,6 @@ export default function BrokenTradeExperience() {
           </div>
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -157,14 +157,8 @@ export default function ResponsibilityTransferSection() {
   };
 
   return (
-    <motion.section
-      ref={sectionRef}
-      style={{
-        opacity,
-        y,
-        scale,
-        willChange: "transform, opacity",
-      }} className="relative py-40 px-6 bg-background border-t border-default-200 overflow-hidden"
+    <section
+      className="relative py-40 px-6 bg-background border-t border-default-200 overflow-hidden"
     >
       {/* Soft background continuity & Futuristic ambient glows */}
       <div className="absolute inset-0 pointer-events-none">
@@ -442,6 +436,6 @@ export default function ResponsibilityTransferSection() {
       </div>
 
 
-    </motion.section>
+    </section>
   );
 }

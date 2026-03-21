@@ -175,16 +175,8 @@ export default function HeroSection() {
     >
       {/* ================= BACKGROUND ================= */}
       <motion.div
-        style={{ y: bgY }}
         className="absolute inset-0 z-0 select-none pointer-events-none"
       >
-        <Image
-          src="/images/obaol_hero_premium.png"
-          alt="Premium Trade Map"
-          fill
-          priority
-          className="object-cover opacity-5 dark:opacity-20 grayscale saturate-0"
-        />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
       </motion.div>
 
@@ -335,7 +327,6 @@ export default function HeroSection() {
 
       {/* ================= MAIN CONTENT ================= */}
       <motion.div
-        style={{ y: contentY }}
         className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-center text-center w-full"
       >
         <motion.div

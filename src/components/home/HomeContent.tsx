@@ -128,22 +128,16 @@ export default function HomeContent() {
 
             {/* ── COVERAGE STRIP ── */}
             <section className="relative py-32 overflow-hidden bg-black text-white">
-                <Image
-                    src="/images/obaol_hero_premium.png"
-                    alt="Map"
-                    fill
-                    className="object-cover opacity-10 grayscale"
-                />
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
 
                 <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
                     <div className="max-w-3xl space-y-8">
                         <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
-                            Cross-border execution <br />
-                            <span className="text-orange-500">without the friction.</span>
+                            India-first execution <br />
+                            <span className="text-orange-500">from India to anywhere.</span>
                         </h2>
                         <p className="text-xl text-white/50 leading-relaxed font-medium">
-                            Coordinating verified sourcing, documentation, and logistics across <span className="text-white">India, GCC, Europe, and the United States.</span>
+                            Operations are currently India‑based. We support exports from India to global markets.
                         </p>
                         <div className="flex flex-wrap gap-10 pt-4">
                             {['INDIA', 'GCC', 'EUROPE', 'USA'].map(region => (

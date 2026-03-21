@@ -51,8 +51,7 @@ export default function StartedIn() {
       </div>
 
       {/* CONTENT (ANIMATED ONLY) */}
-      <motion.div
-        style={{ opacity, y }}
+      <div
         className="relative z-10 max-w-6xl mx-auto"
       >
         {/* Heading */}
@@ -130,7 +129,7 @@ export default function StartedIn() {
             ready to support global commodity trade execution.
           </p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

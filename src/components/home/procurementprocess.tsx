@@ -79,12 +79,7 @@ export default function ProcurementSpecialistSection() {
   );
   return (
 
-    <motion.section
-      ref={sectionRef}
-      style={{
-        opacity,
-        willChange: "opacity",
-      }}
+    <section
       className="relative py-20 md:py-40 px-4 sm:px-6 border-t border-white/5 bg-background overflow-hidden"
     >
       {/* Cinematic Background Ambient Glows & Grid */}
@@ -165,7 +160,7 @@ export default function ProcurementSpecialistSection() {
           />
         </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 }
 

@@ -43,15 +43,7 @@ export default function EndToEndSection() {
 
   return (
 
-    <motion.section
-
-      ref={sectionRef}
-      style={{
-        opacity,
-        y,
-        scale,
-        willChange: "transform, opacity",
-      }}
+    <section
       className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
     >
       {/* Deep Space Background Effects */}
@@ -233,7 +225,7 @@ export default function EndToEndSection() {
           />
         </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 }
 

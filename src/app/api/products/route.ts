@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
-
-const resolveBackendBase = (origin: string) => {
-    const explicit =
-        process.env.NEXT_PUBLIC_BACKEND_ORIGIN ||
-        process.env.NEXT_PUBLIC_OBAOL_API_BASE_URL ||
-        process.env.NEXT_PUBLIC_API_URL ||
-        "";
-    if (explicit) {
-        return explicit.replace(/\/+$/, "");
-    }
-    // Fall back to same-host proxy so public pages work without auth/CORS issues.
-    return origin;
-};
+import { buildPublicWebApiUrl } from "@/utils/publicApi";
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const origin = new URL(req.url).origin;
-        const backendBase = resolveBackendBase(origin);
         const slug = searchParams.get("slug") || "";
         const limit = searchParams.get("limit") || "300";
         const subCategory = searchParams.get("subCategory") || "";
@@ -25,13 +11,13 @@ export async function GET(req: Request) {
 
         let backendUrl = "";
         if (slug && summary === "1") {
-            backendUrl = `${backendBase}/api/v1/web/products/slug/${encodeURIComponent(slug)}/summary`;
+            backendUrl = buildPublicWebApiUrl(`/products/slug/${encodeURIComponent(slug)}/summary`);
         } else if (slug) {
-            backendUrl = `${backendBase}/api/v1/web/products/slug/${encodeURIComponent(slug)}`;
+            backendUrl = buildPublicWebApiUrl(`/products/slug/${encodeURIComponent(slug)}`);
         } else {
             const params = new URLSearchParams({ limit });
             if (subCategory) params.set("subCategory", subCategory);
-            backendUrl = `${backendBase}/api/v1/web/products?${params.toString()}`;
+            backendUrl = buildPublicWebApiUrl(`/products?${params.toString()}`);
         }
 
         const res = await fetch(backendUrl, {

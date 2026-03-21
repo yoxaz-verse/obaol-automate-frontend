@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import AboutContent1 from "./about.content.1.mdx";
 import AboutContent2 from "./about.content.2.mdx";
 import FadeIn from "./FadeIn";
@@ -9,7 +9,6 @@ import CTASection from "@/components/home/ctasection";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import WhoCanUseObaol from "@/components/home/tradeoperatinglayer";
 
-const BASE_URL = "https://obaol.com";
 const AboutSection = dynamic(() => import("@/components/home/aboutsection"), {
   loading: () => <section className="h-56 animate-pulse rounded-2xl bg-content2/70" />,
 });
@@ -17,32 +16,28 @@ const StartedIn = dynamic(() => import("@/components/home/startedin"), {
   loading: () => <section className="h-56 animate-pulse rounded-2xl bg-content2/70" />,
 });
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "About OBAOL Supreme | Trade Execution Platform",
   description:
-    "Learn about OBAOL Supreme, an execution-focused commodity trade platform built for reliable deal closure and operational accountability.",
-  alternates: {
-    canonical: `${BASE_URL}/about`,
-  },
-  openGraph: {
-    title: "About OBAOL Supreme | Trade Execution Platform",
-    description:
-      "Understand OBAOL’s mission, execution model, and role in structured commodity trade operations.",
-    url: `${BASE_URL}/about`,
-    type: "article",
-    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "About OBAOL" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "About OBAOL Supreme | Trade Execution Platform",
-    description:
-      "Execution-focused commodity trade platform for buyers, suppliers, and operators.",
-    images: ["/logo.png"],
-  },
-};
+    "Starting in India, OBAOL Supreme is an execution-focused commodity trade platform built for reliable deal closure and operational accountability as we expand globally.",
+  keywords: ["trade execution platform", "commodity operations", "supplier coordination", "buyer verification"],
+  path: "/about",
+  type: "article",
+});
+
+const webPageJsonLd = buildWebPageJsonLd({
+  title: "About OBAOL Supreme | Trade Execution Platform",
+  description:
+    "Understand OBAOL’s mission, execution model, and role in structured commodity trade operations.",
+  path: "/about",
+});
 export default function AboutPage() {
   return (
     <section>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+      />
       <Header />
       <WhoCanUseObaol />
       <ThemedContentWrapper>
@@ -53,6 +48,17 @@ export default function AboutPage() {
         </FadeIn>
         <FadeIn>
           <AboutContent2 />
+        </FadeIn>
+        <FadeIn>
+          <section className="rounded-2xl border border-default-200 bg-content1/70 p-6 md:p-8">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+              India-first execution, built for global expansion
+            </h2>
+            <p className="mt-3 text-default-600 max-w-3xl">
+              We start in India with procurement, warehousing, and logistics execution, while expanding
+              across global commodity corridors including the GCC, Europe, and North America.
+            </p>
+          </section>
         </FadeIn>
       </ThemedContentWrapper>
       <CTASection />

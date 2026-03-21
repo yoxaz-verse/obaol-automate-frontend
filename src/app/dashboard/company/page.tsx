@@ -63,6 +63,16 @@ const statusColor = (status: string) => {
   return "warning";
 };
 
+const getCompanyPreviewUrl = (company: any) => {
+  const customDomain = String(company?.customDomain || "").trim();
+  if (customDomain) return `https://${customDomain}`;
+  const subdomain = String(company?.subdomain || "").trim();
+  if (subdomain) return `https://${subdomain}.company.obaol.com`;
+  const slug = String(company?.slug || "").trim();
+  if (slug) return `https://obaol.com/obaol/${slug}`;
+  return "";
+};
+
 export default function CompanyWorkspacePage() {
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
@@ -204,6 +214,8 @@ export default function CompanyWorkspacePage() {
   });
 
   const company = companyQuery.data;
+  const previewUrl = getCompanyPreviewUrl(company);
+  const isWebsiteLive = Boolean((company as any)?.isWebsiteLive);
   const members = useMemo(() => (Array.isArray(membersQuery.data) ? membersQuery.data : []), [membersQuery.data]);
   const reports = useMemo(() => (Array.isArray(reportsQuery.data) ? reportsQuery.data : []), [reportsQuery.data]);
   const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
@@ -302,12 +314,31 @@ export default function CompanyWorkspacePage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold text-foreground">{company?.name || "My Company"}</h1>
               {isSupervisor ? (
                 <Chip color="warning" variant="flat" size="sm">
                   Supervisor
                 </Chip>
+              ) : null}
+              </div>
+              {previewUrl ? (
+                <div className="flex items-center gap-2">
+                  {!isWebsiteLive && (
+                    <Chip size="sm" variant="flat" color="warning">
+                      Preview
+                    </Chip>
+                  )}
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="flat"
+                    onPress={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    View Website
+                  </Button>
+                </div>
               ) : null}
             </div>
             <p className="text-default-600 text-sm">{company?.email || "-"} • {company?.phone || "-"}</p>

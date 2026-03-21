@@ -1,36 +1,116 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import ParticleNetwork from "@/components/ui/particle-network";
-import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
+import {
+  FiShield,
+  FiGlobe,
+  FiTarget,
+  FiZap,
+  FiArrowRight,
+  FiShoppingBag,
+  FiTruck,
+  FiCheckCircle,
+  FiUser,
+  FiBox,
+  FiArchive,
+  FiBriefcase,
+  FiCpu,
+  FiLayers,
+  FiAperture,
+} from "react-icons/fi";
 
-/* ================= CONTAINER REVEAL ================= */
+/* ================= ANIMATION VARIANTS ================= */
 
 const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: {
-      duration: 0.7,
-      ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.1,
+      staggerChildren: 0.15,
+      delayChildren: 0.2
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
   },
+};
+
+const floatingCardVariants = {
+  initial: { opacity: 0, scale: 0.8, y: 20 },
+  animate: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    y: [0, -10, 0],
+    transition: {
+      opacity: { duration: 0.8, delay: 0.8 + i * 0.2 },
+      scale: { duration: 0.8, delay: 0.8 + i * 0.2 },
+      y: {
+        duration: 4,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut",
+        delay: i * 0.5
+      }
+    }
+  })
+};
+
+/* ================= HELPER COMPONENTS ================= */
+
+const EcosystemChip = ({
+  icon,
+  label,
+  benefit,
+  color,
+  custom,
+  variants,
+  onHover,
+  reverse = false
+}: {
+  icon: React.ReactNode;
+  label: string;
+  benefit: string;
+  color: string;
+  custom: number;
+  variants: any;
+  onHover: (active: boolean) => void;
+  reverse?: boolean;
+}) => {
+  return (
+    <motion.div
+      custom={custom}
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+      className={`group relative flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-content1/40 backdrop-blur-xl border border-default-200 shadow-xl transition-all duration-500 hover:scale-110 hover:bg-content1/60 hover:border-orange-500/50 hover:shadow-[0_0_20px_rgba(234,88,12,0.3)] cursor-help ${reverse ? "flex-row-reverse" : ""}`}
+    >
+      <div className={`${color} transition-transform group-hover:scale-125 duration-500`}>
+        {icon}
+      </div>
+      <span className="text-[11px] font-black uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
+        {label}
+      </span>
+
+      {/* BENEFIT TOOLTIP */}
+      <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none whitespace-nowrap px-4 py-2 rounded-xl bg-orange-600 text-white text-[10px] font-bold shadow-2xl z-50 ${reverse ? "right-full mr-6" : "left-full ml-6"}`}>
+        <div className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-orange-600 rotate-45 ${reverse ? "-right-1" : "-left-1"}`} />
+        {benefit}
+      </div>
+    </motion.div>
+  );
 };
 
 export default function HeroSection() {
@@ -39,243 +119,307 @@ export default function HeroSection() {
   const { isAuthenticated, loading } = useContext(AuthContext);
   const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isSystemActive, setIsSystemActive] = useState(false);
+  const [isAgroActive, setIsAgroActive] = useState(false);
+  const [hoveredRole, setHoveredRole] = useState<string | null>(null);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const smoothMouseX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+  const smoothMouseY = useSpring(mouseY, { stiffness: 50, damping: 20 });
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 768px)");
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const moveX = (clientX - window.innerWidth / 2) / 30;
+      const moveY = (clientY - window.innerHeight / 2) / 30;
+      mouseX.set(moveX);
+      mouseY.set(moveY);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    const media = window.matchMedia("(min-width: 1024px)");
     const update = () => setShowDesktopVisuals(media.matches);
     update();
     media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      media.removeEventListener("change", update);
+    };
+  }, [mouseX, mouseY]);
 
-  /* ===== Parallax Scroll ===== */
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
 
-  const bgLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 28]), {
-    stiffness: 70,
-    damping: 24,
-    mass: 0.6,
-  });
-  const gridLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 14]), {
-    stiffness: 75,
-    damping: 24,
-    mass: 0.6,
-  });
-  const dockLayerY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 40]), {
-    stiffness: 70,
-    damping: 24,
-    mass: 0.6,
-  });
-  const particleOpacity = useTransform(scrollYProgress, [0, 1], [0.9, 0.72]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-[100vh] md:min-h-[110vh] bg-background flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background"
     >
-      {/* ================= AMBIENT BACKGROUNDS ================= */}
-
-      {/* Ambient blobs — softer in light mode via lower opacity */}
-      <motion.div style={{ y: bgLayerY }} className="absolute inset-0 pointer-events-none z-0">
-        {/* Top-left: primary hue */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-300/16 dark:bg-primary-500/10 blur-[120px] rounded-full" />
-        {/* Bottom-right: warm orange */}
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-orange-300/14 dark:bg-orange-500/10 blur-[150px] rounded-full" />
-        {/* Center subtle accent — barely visible in light */}
-        <div className="absolute top-[40%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[80%] h-[80%] bg-emerald-500/5 dark:bg-emerald-500/5 blur-[150px] rounded-full" />
-        {/* Light mode: clean top gradient wash */}
-        <div className="absolute inset-0 dark:hidden bg-gradient-to-b from-orange-50/80 via-orange-50/35 to-transparent" />
-        <div className="absolute inset-0 dark:hidden bg-[radial-gradient(circle_at_50%_22%,rgba(251,146,60,0.13),transparent_52%)]" />
+      {/* ================= BACKGROUND ================= */}
+      <motion.div
+        style={{ y: bgY }}
+        className="absolute inset-0 z-0 select-none pointer-events-none"
+      >
+        <Image
+          src="/images/obaol_hero_premium.png"
+          alt="Premium Trade Map"
+          fill
+          priority
+          className="object-cover opacity-5 dark:opacity-20 grayscale saturate-0"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
       </motion.div>
 
-      {/* Particle Network */}
-      {showDesktopVisuals ? (
-        <motion.div style={{ opacity: particleOpacity }} className="absolute inset-0 z-0 opacity-15 dark:opacity-35">
-          <ParticleNetwork />
-        </motion.div>
-      ) : null}
+      {/* ECO-GHOST BACKGROUND TEXT */}
+      <AnimatePresence>
+        {hoveredRole && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.1, y: -20 }}
+            className="absolute inset-0 z-5 flex items-center justify-center pointer-events-none select-none"
+          >
+            <span className="text-[15vw] font-black uppercase tracking-[0.2em] text-foreground/[0.03] dark:text-foreground/[0.04]">
+              {hoveredRole}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Subtle Realistic Glint Animation Styles */}
-      <style jsx global>{`
-        @keyframes subtle-glint {
-          0% { background-position: -200% center; }
-          45%, 100% { background-position: 200% center; }
-        }
-        .animate-subtle-glint {
-          background-size: 200% auto;
-          animation: subtle-glint 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-      `}</style>
-
-      {/* High-Tech Geometric Grid — theme-aware color */}
+      {/* Grid Overlay */}
       <motion.div
-        className="absolute inset-0 z-0 pointer-events-none opacity-[0.045] dark:opacity-[0.07] [mask-image:linear-gradient(to_bottom,black_20%,transparent_80%)]"
+        animate={{
+          opacity: (isSystemActive || isAgroActive || !!hoveredRole) ? 0.25 : 0.08,
+          stroke: isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")
+        }}
+        className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-1000 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
         style={{
-          y: gridLayerY,
-          backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px),
-                            linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
-          backgroundSize: "3rem 3rem",
+          backgroundImage: `linear-gradient(to right, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")} 1px, transparent 1px), linear-gradient(to bottom, ${isAgroActive ? "#10b981" : (isSystemActive ? "#ea580c" : "currentColor")} 1px, transparent 1px)`,
+          backgroundSize: "4rem 4rem"
         }}
       />
 
-      {/* Subtle Dock Image overlay at the bottom */}
-      {showDesktopVisuals ? (
-        <motion.div style={{ y: dockLayerY }} className="absolute bottom-0 w-full h-[60vh] pointer-events-none z-0">
-          <Image
-            src="/images/hero_dock.png"
-            alt="Global commodity trading infrastructure"
-            fill
-            priority
-            className="object-cover object-bottom opacity-10 dark:opacity-20 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]"
+      {/* ================= SYSTEM / AGRO HUD OVERLAY ================= */}
+      <AnimatePresence>
+        {isSystemActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-12 pointer-events-none overflow-hidden"
+          >
+            <div className="absolute inset-0 flex justify-around opacity-10">
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: "-100%" }}
+                  animate={{ y: "100%" }}
+                  transition={{ duration: 15 + i * 2, repeat: Infinity, ease: "linear" }}
+                  className="text-[10px] font-mono leading-none break-all w-2"
+                >
+                  {Array(100).fill(0).map(() => Math.round(Math.random())).join("")}
+                </motion.div>
+              ))}
+            </div>
+            <motion.div
+              initial={{ top: "-10%" }}
+              animate={{ top: "110%" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="absolute left-0 right-0 h-[1px] bg-orange-500/50 shadow-[0_0_15px_rgba(234,88,12,0.8)] z-20"
+            />
+            <div className="absolute top-10 right-10 flex flex-col items-end gap-1 font-mono text-[9px] text-orange-500/40 uppercase tracking-tighter">
+              <span>Core_Status: Active</span>
+              <span>Nodes_In_Sync: 8/8</span>
+              <span>Execution_Engine: v2.0.4-Stable</span>
+            </div>
+          </motion.div>
+        )}
+
+        {isAgroActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-12 pointer-events-none overflow-hidden"
+          >
+            <div className="absolute top-10 left-10 flex flex-col items-start gap-1 font-mono text-[9px] text-emerald-500/40 uppercase tracking-tighter">
+              <span className="text-emerald-500/60 font-black">Trade_Intelligence_Active</span>
+              <span>Global_Routes: 4,821 Active</span>
+              <span>Market_Volatility: 0.12% Low</span>
+              <span>Aggregate_Volume: 2.4M MT</span>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
+              <FiGlobe size={400} className="text-emerald-500" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ================= NETWORK CONNECTIONS ================= */}
+      <div className="absolute inset-0 z-15 pointer-events-none opacity-[0.05] dark:opacity-[0.1]">
+        <svg className="w-full h-full" preserveAspectRatio="none">
+          <motion.path
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            d="M 12% 15% Q 30% 35% 45% 45% T 88% 85%"
+            stroke={isAgroActive ? "#10b981" : "currentColor"} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
           />
-        </motion.div>
-      ) : null}
+          <motion.path
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" }}
+            d="M 88% 15% Q 70% 35% 55% 50% T 12% 85%"
+            stroke={isAgroActive ? "#10b981" : "currentColor"} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
+          />
+        </svg>
+      </div>
 
-      {/* Bottom fade to next section */}
-      <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+      {/* ================= ECOSYSTEM NODES ================= */}
+      {showDesktopVisuals ? (
+        <div className="absolute inset-0 z-20 pointer-events-auto overflow-hidden">
+          {/* LEFT NODES */}
+          <div className="absolute top-[18%] left-[12%]">
+            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Sourcing coverage with OBAOL" color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SOURCE" : null)} />
+          </div>
+          <div className="absolute top-[42%] left-[8%]">
+            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Global transit with OBAOL" color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "CARGO" : null)} />
+          </div>
+          <div className="absolute top-[68%] left-[14%]">
+            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Trade security with OBAOL" color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SECURE" : null)} />
+          </div>
+          <div className="absolute top-[88%] left-[10%]">
+            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Secure better deals with OBAOL" color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "DEMAND" : null)} />
+          </div>
 
-      {/* ================= CONTENT CONTAINER ================= */}
+          {/* RIGHT NODES */}
+          <div className="absolute top-[12%] right-[14%]">
+            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Optimized storage with OBAOL" color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "STOCK" : null)} reverse />
+          </div>
+          <div className="absolute top-[38%] right-[10%]">
+            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Standardized quality with OBAOL" color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "PACK" : null)} reverse />
+          </div>
+          <div className="absolute top-[62%] right-[16%]">
+            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Part of the OBAOL grid" color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "SUPPLY" : null)} reverse />
+          </div>
+          <div className="absolute top-[84%] right-[12%]">
+            <EcosystemChip icon={<FiAperture size={15} />} label="Processor" benefit="Maximize output with OBAOL" color="text-emerald-500" custom={7} variants={floatingCardVariants} onHover={(active) => setHoveredRole(active ? "FINISH" : null)} reverse />
+          </div>
+        </div>
+      ) : (
+        /* MOBILE ECOSYSTEM PREVIEW (Tiny floating icons) */
+        <div className="absolute inset-0 z-20 pointer-events-none opacity-20">
+          <div className="absolute top-[15%] left-[10%]"><FiShoppingBag size={14} className="text-orange-500" /></div>
+          <div className="absolute top-[25%] right-[12%]"><FiBox size={14} className="text-orange-500" /></div>
+          <div className="absolute top-[75%] left-[15%]"><FiTruck size={14} className="text-blue-500" /></div>
+          <div className="absolute top-[85%] right-[8%]"><FiLayers size={14} className="text-blue-500" /></div>
+        </div>
+      )}
+
+      {/* ================= MAIN CONTENT ================= */}
       <motion.div
-        className="relative z-20 w-full max-w-7xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center"
+        style={{ y: contentY }}
+        className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-center text-center w-full"
       >
-
-        {/* Floating System Status Badge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 inline-flex items-center gap-3 px-5 py-2 rounded-full border border-orange-500/30 bg-orange-500/10 backdrop-blur-md shadow-none"
-        >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500/80" />
-          </span>
-          <span className="text-xs font-bold text-orange-500 dark:text-orange-400 tracking-tight uppercase">System Protocol Active</span>
-        </motion.div>
-
         <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="relative max-w-5xl"
+          className="w-full max-w-4xl lg:max-w-5xl"
         >
-          {/* 1️⃣ HEADLINE */}
-          <motion.h1
-            variants={itemVariants}
-            className="relative text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] md:leading-[1.05] tracking-tight"
-          >
-            <motion.span className="relative z-10 block text-foreground">
-              The Operating System
-            </motion.span>
-            <span className="relative z-30 block text-foreground/55 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-none mt-2 mb-2">
-              for
-            </span>
-            <motion.span
-              className="relative z-20 block"
+          <div className="space-y-4">
+            <motion.p
+              variants={itemVariants}
+              className="text-[8px] sm:text-xs font-black uppercase tracking-[0.5em] text-orange-500 mb-6 md:mb-8"
             >
-              {/* Ultra-Narrow Subtle Shine Headline */}
-              <span className="relative inline-block pb-5 bg-[linear-gradient(110deg,#f97316_49%,#fed7aa_50%,#f97316_51%)] dark:bg-[linear-gradient(110deg,#f97316_49%,#ffedd5_50%,#f97316_51%)] bg-clip-text text-transparent animate-subtle-glint">
-                Agro Commodity Trade.
-              </span>
-            </motion.span>
-          </motion.h1>
+              The Go-To Platform for Agro Trade
+            </motion.p>
 
-          {/* 2️⃣ SUBTITLE */}
-          <motion.p
-            variants={itemVariants}
-            className="mt-12 max-w-3xl mx-auto text-lg md:text-xl lg:text-2xl text-foreground/60 font-medium leading-relaxed"
-          >
-            <span className="text-foreground font-semibold">OBAOL Supreme</span>{" "}
-            is an end-to-end trade execution environment. Discover verified partners, engage securely, and execute with absolute certainty.
-          </motion.p>
-
-          {/* 3️⃣ CLARIFICATION */}
-          <motion.p
-            variants={itemVariants}
-            className="mt-6 text-sm md:text-base text-foreground/40 font-semibold tracking-widest uppercase"
-          >
-            Designed for Domestic &amp; Global Supply Chains
-          </motion.p>
-
-          {/* 4️⃣ CTA — Premium Glassmorphic Button */}
-          <motion.div variants={itemVariants} className="mt-14 flex flex-col items-center gap-6 relative group">
-            <button
-              onClick={() => {
-                if (loading) return;
-                setIsNavigating(true);
-                router.push(isAuthenticated ? "/dashboard" : "/auth");
-              }}
-              disabled={isNavigating || loading}
-              className={[
-                "relative flex items-center justify-center gap-3 px-10 py-4 rounded-2xl overflow-hidden",
-                "transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]",
-                "bg-orange-500 hover:bg-orange-600 text-white",
-                "shadow-none hover:shadow-[0_0_28px_-4px_rgba(249,115,22,0.5)]",
-                "disabled:opacity-80 disabled:scale-100"
-              ].join(" ")}
+            <motion.h1
+              variants={itemVariants}
+              className="w-fit mx-auto text-3xl sm:text-5xl md:text-7xl lg:text-[clamp(4.2rem,8vw,7rem)] font-black tracking-tighter leading-[0.95] text-foreground cursor-pointer select-none group px-4"
+              onMouseEnter={() => setIsSystemActive(true)}
+              onMouseLeave={() => setIsSystemActive(false)}
             >
-              {/* Shimmer sweep */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-in-out skew-x-12" />
-
-              <span className="relative z-10 font-bold tracking-wide text-lg">
-                {isNavigating ? (
-                  <span className="flex items-center gap-3">
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Opening Experience...
-                  </span>
-                ) : (
-                  !loading && isAuthenticated ? "Go to Dashboard" : "Sign In to Access"
-                )}
+              The Operating <br />
+              <span className="italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent animate-subtle-glint group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all">
+                System
               </span>
+            </motion.h1>
 
-              {/* Arrow */}
-              {!isNavigating && (
-                <svg
-                  className="relative z-10 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              )}
-            </button>
+            <motion.div variants={itemVariants} className="flex items-center justify-center gap-4 py-2 md:py-4 opacity-30">
+              <div className="h-[1px] w-6 md:w-16 bg-foreground" />
+              <span className="text-sm md:text-xl font-medium italic">for</span>
+              <div className="h-[1px] w-6 md:w-16 bg-foreground" />
+            </motion.div>
 
-            {/* Premium Create Account Prompt */}
-            {!loading && !isAuthenticated && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="flex items-center gap-2 text-sm"
+            <motion.h2
+              variants={itemVariants}
+              className="w-fit mx-auto text-2xl sm:text-4xl md:text-6xl lg:text-[clamp(3.2rem,6vw,5.2rem)] font-black tracking-tighter text-foreground leading-none cursor-pointer select-none group px-4"
+              onMouseEnter={() => setIsAgroActive(true)}
+              onMouseLeave={() => setIsAgroActive(false)}
+            >
+              <span className="group-hover:text-emerald-500 transition-colors duration-500">Agro Commodity.</span>
+            </motion.h2>
+          </div>
+
+          <motion.div
+            variants={itemVariants}
+            className="mt-8 md:mt-12 max-w-2xl mx-auto space-y-8 md:space-y-12"
+          >
+            <p className="text-sm sm:text-lg md:text-xl text-foreground/60 font-medium leading-relaxed px-4">
+              A professional-grade execution platform connecting every participant
+              across the agro-grid. <span className="text-foreground font-bold">Designed to reduce friction.</span>
+            </p>
+
+            <div className="flex flex-col items-center gap-8 md:gap-10">
+              <button
+                onMouseEnter={() => setIsSystemActive(true)}
+                onMouseLeave={() => setIsSystemActive(false)}
+                onClick={() => {
+                  if (loading) return;
+                  setIsNavigating(true);
+                  router.push(isAuthenticated ? "/dashboard" : "/auth");
+                }}
+                className="group relative px-6 py-3.5 md:px-10 md:py-5 rounded-[2.5rem] bg-orange-600 hover:bg-orange-700 text-white font-black text-base md:text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 md:gap-4 border border-orange-400/20"
               >
-                <span className="text-foreground/40 font-medium">New to OBAOL?</span>
-                <div className="flex items-center flex-wrap justify-center gap-2">
-                  <Link
-                    href="/auth/register"
-                    className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
-                  >
-                    <span className="relative z-10">Join as Associate</span>
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
-                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
+                {isNavigating ? "Establishing..." : (isAuthenticated ? "Access Workspace" : "Sign In to Access")}
+                <FiArrowRight size={20} className="md:size-[24px] group-hover:translate-x-2 transition-transform" />
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+
+              {!loading && !isAuthenticated && (
+                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+                  <Link href="/auth/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
+                    Join as Associate
                   </Link>
-                  <span className="text-foreground/30 font-medium text-xs">OR</span>
-                  <Link
-                    href="/auth/operator/register"
-                    className="group/link relative py-1 px-2 text-orange-500 font-bold tracking-tight uppercase overflow-hidden"
-                  >
-                    <span className="relative z-10">Join as Operator</span>
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500/20 group-hover/link:h-full transition-all duration-300 rounded-sm" />
-                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover/link:w-full transition-all duration-300" />
+                  <Link href="/auth/operator/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
+                    Join as Operator
                   </Link>
                 </div>
-              </motion.div>
-            )}
+              )}
+            </div>
           </motion.div>
         </motion.div>
       </motion.div>
+
+      {/* Dynamic Cursor Light Overlay */}
+      <motion.div
+        className="absolute inset-0 z-40 pointer-events-none"
+        style={{
+          background: useTransform(
+            [smoothMouseX, smoothMouseY],
+            ([x, y]) => `radial-gradient(600px circle at calc(50% + ${x}px) calc(50% + ${y}px), ${isAgroActive ? "rgba(16,185,129,0.06)" : "rgba(249,115,22,0.06)"}, transparent 45%)`
+          )
+        }}
+      />
     </section>
   );
 }

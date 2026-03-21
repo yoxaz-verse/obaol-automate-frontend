@@ -14,6 +14,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/procurement`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/verification`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/export-resources`, priority: 0.8, changeFrequency: "monthly", lastModified },
+    { url: `${baseUrl}/news`, priority: 0.8, changeFrequency: "daily", lastModified },
+    { url: `${baseUrl}/roles`, priority: 0.7, changeFrequency: "monthly", lastModified },
+    { url: `${baseUrl}/roles/associate`, priority: 0.7, changeFrequency: "monthly", lastModified },
+    { url: `${baseUrl}/roles/operator`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/companies`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/obaol`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/product`, priority: 0.8, changeFrequency: "daily", lastModified },
@@ -39,7 +43,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified,
       }));
 
-    return [...staticEntries, ...productEntries];
+    const companiesRes = await fetch(
+      buildPublicWebApiUrl("/associate-companies?limit=2000&fields=slug,subdomain,customDomain"),
+      { cache: "no-store" }
+    );
+    const companiesBody = companiesRes.ok ? await companiesRes.json() : null;
+    const companyRows = Array.isArray(companiesBody?.data?.data)
+      ? companiesBody.data.data
+      : Array.isArray(companiesBody?.data)
+        ? companiesBody.data
+        : [];
+
+    const brandEntries: MetadataRoute.Sitemap = companyRows
+      .map((row: any) => String(row?.slug || row?.subdomain || "").trim())
+      .filter(Boolean)
+      .map((slug: string) => ({
+        url: `${baseUrl}/brand/${slug}`,
+        priority: 0.6,
+        changeFrequency: "monthly" as const,
+        lastModified,
+      }));
+
+    const catalogEntries: MetadataRoute.Sitemap = companyRows
+      .map((row: any) => String(row?.slug || "").trim())
+      .filter(Boolean)
+      .map((slug: string) => ({
+        url: `${baseUrl}/obaol/${slug}`,
+        priority: 0.6,
+        changeFrequency: "weekly" as const,
+        lastModified,
+      }));
+
+    return [...staticEntries, ...productEntries, ...brandEntries, ...catalogEntries];
   } catch {
     return staticEntries;
   }

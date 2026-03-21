@@ -21,9 +21,12 @@ export async function GET(req: Request) {
         const slug = searchParams.get("slug") || "";
         const limit = searchParams.get("limit") || "300";
         const subCategory = searchParams.get("subCategory") || "";
+        const summary = searchParams.get("summary") || "";
 
         let backendUrl = "";
-        if (slug) {
+        if (slug && summary === "1") {
+            backendUrl = `${backendBase}/api/v1/web/products/slug/${encodeURIComponent(slug)}/summary`;
+        } else if (slug) {
             backendUrl = `${backendBase}/api/v1/web/products/slug/${encodeURIComponent(slug)}`;
         } else {
             const params = new URLSearchParams({ limit });

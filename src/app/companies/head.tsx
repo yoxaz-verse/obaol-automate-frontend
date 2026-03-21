@@ -1,4 +1,7 @@
+import { DEFAULT_KEYWORDS, GEO_KEYWORDS } from "@/utils/seo";
+
 const URL = "https://obaol.com/companies";
+const KEYWORDS = [...DEFAULT_KEYWORDS, ...GEO_KEYWORDS, "partner companies", "supplier network"].join(", ");
 
 export default function CompaniesHead() {
   return (
@@ -6,15 +9,16 @@ export default function CompaniesHead() {
       <title>Partner Companies | OBAOL Supreme</title>
       <meta
         name="description"
-        content="Browse partner companies in the OBAOL network. Discover verified organizations participating in structured commodity trade execution."
+        content="Starting in India, browse partner companies in the OBAOL network and discover verified organizations participating in structured commodity trade execution as we expand globally."
       />
+      <meta name="keywords" content={KEYWORDS} />
       <link rel="canonical" href={URL} />
 
       <meta property="og:type" content="website" />
       <meta property="og:title" content="Partner Companies | OBAOL Supreme" />
       <meta
         property="og:description"
-        content="Explore companies operating in the OBAOL commodity trade network."
+        content="Starting in India, explore companies operating in the OBAOL commodity trade network as we expand globally."
       />
       <meta property="og:url" content={URL} />
       <meta property="og:image" content="https://obaol.com/logo.png" />
@@ -23,7 +27,7 @@ export default function CompaniesHead() {
       <meta name="twitter:title" content="Partner Companies | OBAOL Supreme" />
       <meta
         name="twitter:description"
-        content="Explore companies operating in the OBAOL commodity trade network."
+        content="Starting in India, explore companies operating in the OBAOL commodity trade network as we expand globally."
       />
       <meta name="twitter:image" content="https://obaol.com/logo.png" />
     </>

@@ -5,6 +5,7 @@ import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import Title from "@/components/titles";
 import AgroProductDisplay from "@/components/products/AgroProductDisplay";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
 const Obaol: NextPage = () => {
   const refetchData = () => {
@@ -16,6 +17,7 @@ const Obaol: NextPage = () => {
       <div className="w-[95%] py-8">
         {/* @ts-ignore */}
         <Spacer y={2} />
+        <IndiaFirstNote className="mb-6" />
         <AgroProductDisplay />
         {/* @ts-ignore */}
         <Spacer y={4} />

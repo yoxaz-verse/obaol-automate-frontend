@@ -8,6 +8,7 @@ import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import Link from "next/link";
 import { useCurrency } from "@/context/CurrencyContext";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
 const PublicCatalogPage = () => {
     const params = useParams();
@@ -60,6 +61,9 @@ const PublicCatalogPage = () => {
                     {companyInfo.name}
                 </h1>
                 <p className="text-default-500 mt-2 text-lg">Official Product Catalog</p>
+                <div className="mt-4 max-w-3xl">
+                    <IndiaFirstNote />
+                </div>
             </div>
 
             {/* Product Grid */}

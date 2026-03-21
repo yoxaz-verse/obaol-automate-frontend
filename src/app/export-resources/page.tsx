@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Header from "@/components/home/header";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import {
   EXPORT_RESOURCE_CATEGORIES,
   EXPORT_RESOURCES,
@@ -40,6 +41,9 @@ export default function ExportResourcesPage() {
           <p className="mt-2 text-sm md:text-base text-default-600">
             Verified official links for Indian exporters and agro trade operations.
           </p>
+        </div>
+        <div className="mb-8">
+          <IndiaFirstNote />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">

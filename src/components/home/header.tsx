@@ -7,16 +7,29 @@ import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button
+} from "@nextui-org/react";
 
-const NAV_LINKS = [
+const PRIMARY_NAV = [
   { href: "/about", label: "About" },
-  { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Products" },
   { href: "/roles", label: "Roles" },
+];
+
+const MORE_NAV = [
+  { href: "/why-obaol", label: "Why OBAOL" },
   { href: "/news", label: "News" },
   { href: "/faq", label: "FAQ" },
 ];
+
+const MOBILE_NAV = [...PRIMARY_NAV, ...MORE_NAV];
+
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -64,51 +77,93 @@ export default function Header() {
             </Link>
 
             {/* ── DESKTOP NAV ── */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
+            <nav className="hidden lg:flex items-center gap-1.5">
+              {PRIMARY_NAV.map((link) => (
                 <NavLink key={link.href} href={link.href}>
                   {link.label}
                 </NavLink>
               ))}
+
+              {/* Resources Dropdown */}
+              <Dropdown>
+                <DropdownTrigger>
+                  <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground rounded-lg hover:bg-foreground/[0.06] transition-all duration-200 outline-none">
+                    More
+                    <svg className="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="More options"
+                  className="w-48"
+                  itemClasses={{
+                    base: "rounded-xl gap-3",
+                  }}
+                >
+                  {MORE_NAV.map((link) => (
+                    <DropdownItem key={link.href} textValue={link.label}>
+                      <Link href={link.href} className="flex w-full px-1 py-1 text-sm font-medium text-foreground/70 hover:text-foreground">
+                        {link.label}
+                      </Link>
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </nav>
 
-            {/* ── ACTIONS ── */}
-            <div className="flex items-center gap-3">
-              {/* Theme switcher */}
-              <div className="hidden lg:block">
+            <div className="flex items-center gap-4">
+              {/* Utility Group */}
+              <div className="hidden lg:flex items-center gap-1.5 px-1.5 py-1 rounded-xl border border-foreground/10 bg-foreground/[0.03]">
                 <ThemeSwitcher />
+                <Link
+                  href="/developer"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground hover:bg-foreground/[0.08] transition-all"
+                  aria-label="Developer Mode"
+                  title="Developer Mode"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                  </svg>
+                </Link>
               </div>
 
-
-              <Link
-                href="/developer"
-                className="hidden lg:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/15 bg-foreground/[0.03] text-foreground/75 hover:text-foreground hover:bg-foreground/[0.08] transition-colors"
-                aria-label="Developer Mode"
-                title="Developer Mode"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
-                </svg>
-              </Link>
-
-              {/* Create Account - Desktop */}
+              {/* Create Account Dropdown */}
               {!loading && !isAuthenticated && (
-                <div className="hidden xl:flex items-center gap-3">
-                  <Link
-                    href="/auth/register"
-                    className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
-                  >
-                    Join as Associate
-                  </Link>
-                  <span className="text-foreground/30">•</span>
-                  <Link
-                    href="/auth/operator/register"
-                    className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors tracking-tight uppercase"
-                  >
-                    Join as Operator
-                  </Link>
+                <div className="hidden lg:block">
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <button className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold text-orange-500 uppercase tracking-wider hover:text-orange-600 transition-colors outline-none">
+                        Join OBAOL
+                        <svg className="w-2.5 h-2.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Registration options"
+                      className="w-56"
+                      itemClasses={{
+                        base: "rounded-xl",
+                      }}
+                    >
+                      <DropdownItem key="associate" textValue="Join as Associate">
+                        <Link href="/auth/register" className="flex flex-col gap-0.5 px-1 py-1">
+                          <span className="text-sm font-bold text-foreground">Join as Associate</span>
+                          <span className="text-[11px] text-foreground/50">For companies & traders</span>
+                        </Link>
+                      </DropdownItem>
+                      <DropdownItem key="operator" textValue="Join as Operator">
+                        <Link href="/auth/operator/register" className="flex flex-col gap-0.5 px-1 py-1">
+                          <span className="text-sm font-bold text-foreground">Join as Operator</span>
+                          <span className="text-[11px] text-foreground/50">For platform managers</span>
+                        </Link>
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
                 </div>
               )}
+
 
               {/* CTA */}
               <button
@@ -167,7 +222,7 @@ export default function Header() {
             className="fixed top-[72px] left-4 right-4 z-40 rounded-2xl border border-foreground/10 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden"
           >
             <nav className="flex flex-col p-4 gap-1">
-              {NAV_LINKS.map((link) => (
+              {MOBILE_NAV.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -271,8 +326,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
       className="relative px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground rounded-lg hover:bg-foreground/[0.06] transition-all duration-200 group"
     >
       {children}
-      {/* Animated underline dot */}
-      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-400 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200" />
     </Link>
+
   );
 }

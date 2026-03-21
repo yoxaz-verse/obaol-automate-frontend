@@ -8,6 +8,7 @@ import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
 const toRows = (res: any): any[] => {
     const raw = res?.data?.data;
@@ -101,6 +102,9 @@ export default function CompaniesPage() {
                 >
                     Trusted businesses powering the OBAOL trade network.
                 </motion.p>
+                <div className="mt-6 max-w-3xl mx-auto">
+                    <IndiaFirstNote />
+                </div>
 
                 {/* Search */}
                 <motion.div

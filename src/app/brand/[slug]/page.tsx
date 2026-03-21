@@ -29,6 +29,7 @@ import {
     LuExternalLink
 } from "react-icons/lu";
 import { useParams } from "next/navigation";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
 export default function BrandPage() {
     const params = useParams();
@@ -78,6 +79,9 @@ export default function BrandPage() {
                     Preview Mode: This brand page isn&apos;t live yet, but you&apos;re viewing the draft preview.
                 </div>
             )}
+            <div className="mx-auto max-w-6xl px-4 pt-8">
+                <IndiaFirstNote className="border-white/10 bg-white/5 text-white/70" />
+            </div>
             {/* Cinematic Hero Section */}
             <section className="relative h-[80vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
                 {/* Animated Background Overlay */}

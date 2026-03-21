@@ -7,6 +7,7 @@ import Script from "next/script";
 import TranslationEngine from "@/components/dashboard/TranslationEngine";
 import TopLoader from "@/components/ui/TopLoader";
 import SoundInitializer from "@/components/ui/SoundInitializer";
+import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -43,27 +44,16 @@ const devanagariFont = Noto_Sans_Devanagari({
 
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://obaol.com"),
+  metadataBase: new URL(BASE_URL),
 
   title: {
     default: "OBAOL Supreme — Commodity Trade Execution System",
-    template: "%s | OBAOL Supreme",
+    template: `%s | ${SITE_NAME}`,
   },
 
-  description:
-    "OBAOL Supreme is a software-led commodity trade execution system combining online coordination with on-ground support. We help buyers find verified suppliers, assist suppliers in reaching genuine buyers, and support documentation, logistics, packaging, and execution until trade closure.",
+  description: DEFAULT_DESCRIPTION,
 
-  keywords: [
-    "commodity trade execution",
-    "agro commodity trade support",
-    "buyer supplier coordination",
-    "commodity sourcing system",
-    "supplier buyer verification",
-    "import export trade execution",
-    "commodity logistics coordination",
-    "trade documentation support",
-    "physical commodity trading system",
-  ],
+  keywords: [...DEFAULT_KEYWORDS, ...GEO_KEYWORDS],
 
   authors: [{ name: "OBAOL" }],
   creator: "OBAOL",
@@ -84,11 +74,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://obaol.com",
+    url: BASE_URL,
     siteName: "OBAOL",
     title: "OBAOL Supreme — Where Commodity Trades Get Executed",
-    description:
-      "A hybrid online and offline system for commodity trade execution. OBAOL supports sourcing, buyer–supplier coordination, documentation, logistics, packaging, and on-ground execution oversight.",
+    description: DEFAULT_DESCRIPTION,
     images: [
       {
         url: "/logo.png",
@@ -102,8 +91,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "OBAOL — Commodity Trade Execution System",
-    description:
-      "Software-led coordination with real-world execution support for physical commodity trades.",
+    description: DEFAULT_DESCRIPTION,
     images: ["/logo.png"],
   },
 
@@ -254,11 +242,42 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "OBAOL",
-              url: "https://obaol.com",
-              logo: "https://obaol.com/logo.png",
-              description:
-                "Execution-focused commodity trade operating system for agro and physical commodities.",
+              url: BASE_URL,
+              logo: `${BASE_URL}/logo.png`,
+              description: DEFAULT_DESCRIPTION,
+              areaServed: [
+                { "@type": "Country", name: "India" },
+                { "@type": "Country", name: "United Arab Emirates" },
+                { "@type": "Country", name: "Saudi Arabia" },
+                { "@type": "Place", name: "European Union" },
+                { "@type": "Country", name: "United States" },
+              ],
+              serviceArea: `Primary market: ${PRIMARY_MARKET}. Expanding globally.`,
               sameAs: [],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: SITE_NAME,
+              url: BASE_URL,
+              areaServed: [
+                { "@type": "Country", name: "India" },
+                { "@type": "Country", name: "United Arab Emirates" },
+                { "@type": "Country", name: "Saudi Arabia" },
+                { "@type": "Place", name: "European Union" },
+                { "@type": "Country", name: "United States" },
+              ],
+              serviceArea: `Primary market: ${PRIMARY_MARKET}. Expanding globally.`,
+              potentialAction: {
+                "@type": "SearchAction",
+                target: `${BASE_URL}/product?q={search_term_string}`,
+                "query-input": "required name=search_term_string",
+              },
             }),
           }}
         />

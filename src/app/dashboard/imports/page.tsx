@@ -241,7 +241,7 @@ export default function ImportsPage() {
   const canSetCommission = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canEditAny = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canEditListing = (listing: any) =>
-    canEditAny || String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?._id || user?.id || "");
+    canEditAny || String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
   const associateCompanyId = String(user?.associateCompanyId || "");
 
   const canViewSensitive = (listing: any) => {

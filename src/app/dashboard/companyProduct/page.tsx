@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useContext, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -68,6 +69,7 @@ export default function CompanyProductPage() {
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("live"); // "live", "active", "empty", "dormant"
   const [detailTab, setDetailTab] = useState<string>("products"); // "products", "details", "associates", "web"
@@ -77,6 +79,7 @@ export default function CompanyProductPage() {
   const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(null);
   const [webFields, setWebFields] = useState<any>({});
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const companyIdParam = searchParams.get("companyId");
 
   const operatorAssociateFormFields: FormField[] = [
     { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
@@ -482,11 +485,24 @@ export default function CompanyProductPage() {
 
   const filteredCompanies = useMemo(() => {
     const needle = companySearch.trim().toLowerCase();
-    if (!needle) return displayedCompanies;
-    return allCompanies.filter((company) =>
-      String(company.name || "").toLowerCase().includes(needle)
+    const baseList = needle ? allCompanies : displayedCompanies;
+    const filtered = needle
+      ? baseList.filter((company) =>
+        String(company.name || "").toLowerCase().startsWith(needle)
+      )
+      : baseList;
+    return [...filtered].sort((a, b) =>
+      String(a?.name || "").localeCompare(String(b?.name || ""), "en", { sensitivity: "base" })
     );
   }, [allCompanies, displayedCompanies, companySearch]);
+
+  useEffect(() => {
+    if (!companyIdParam) return;
+    const match = allCompanies.find((company) => String(company._id) === String(companyIdParam));
+    if (match) {
+      setSelectedCompanyId(String(match._id));
+    }
+  }, [companyIdParam, allCompanies]);
 
   useEffect(() => {
     if (!filteredCompanies.length) {
@@ -557,6 +573,26 @@ export default function CompanyProductPage() {
           </div>
         </Card>
       )}
+      <Card className="mb-4 p-4 bg-content1 border border-default-200/80 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Company Search</h2>
+            <p className="text-xs text-default-500">Search by company name prefix.</p>
+          </div>
+          <Input
+            value={companySearch}
+            onChange={(event) => setCompanySearch(event.target.value)}
+            placeholder="Search company name"
+            size="sm"
+            variant="bordered"
+            classNames={{
+              inputWrapper: "bg-background/50 border-default-200/70",
+            }}
+            isClearable
+            onClear={() => setCompanySearch("")}
+          />
+        </div>
+      </Card>
       <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px] relative">
         <Button
           isIconOnly
@@ -575,18 +611,6 @@ export default function CompanyProductPage() {
               {/* Sidebar header */}
               <div className="px-4 pt-4 pb-3 border-b border-default-100">
                 <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
-                <Input
-                  value={companySearch}
-                  onChange={(event) => setCompanySearch(event.target.value)}
-                  placeholder="Search company name"
-                  size="sm"
-                  variant="bordered"
-                  classNames={{
-                    inputWrapper: "bg-background/50 border-default-200/70",
-                  }}
-                  isClearable
-                  onClear={() => setCompanySearch("")}
-                />
               </div>
 
               {/* Filter tabs */}

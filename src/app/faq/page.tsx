@@ -1,20 +1,34 @@
-import { Metadata } from "next";
+import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import Header from "@/components/home/header";
 import { FAQS, generateFaqSchema } from "./faqSchema";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
+  title: "Frequently Asked Questions | OBAOL",
+  description:
+    "Starting in India, get clear answers to common questions about OBAOL, its execution model, and who it is built for as we expand globally.",
+  keywords: ["OBAOL FAQ", "trade execution questions", "commodity platform"],
+  path: "/faq",
+});
+
+const webPageJsonLd = buildWebPageJsonLd({
   title: "Frequently Asked Questions | OBAOL",
   description:
     "Clear answers to common questions about OBAOL, its execution model, and who it is built for.",
-};
+  path: "/faq",
+});
 
 export default function FAQPage() {
   const faqSchema = generateFaqSchema();
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+      />
       <Header />
 
       {/* SEO: FAQ Schema */}
@@ -35,6 +49,9 @@ export default function FAQPage() {
             Clear answers to common questions about OBAOL and its
             execution-focused trade system.
           </p>
+          <div className="mt-6 max-w-3xl">
+            <IndiaFirstNote />
+          </div>
         </header>
 
         {/* FAQ List */}

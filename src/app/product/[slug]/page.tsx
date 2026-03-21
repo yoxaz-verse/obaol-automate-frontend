@@ -8,6 +8,8 @@ import { fetchCommodityFacts } from "@/utils/research";
 import ProductFacts from "@/components/product/ProductFacts";
 import ProductNews from "@/components/product/ProductNews";
 import { Spacer, Chip, Divider, Card, Image } from "@nextui-org/react";
+import { buildMetadata } from "@/utils/seo";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
 const BASE_URL = "https://obaol.com";
 
@@ -29,6 +31,12 @@ type ApiResponse = {
   data?: ProductDetails | null;
 };
 
+type ProductSummary = {
+  productId?: string;
+  productName?: string;
+  supplyLineCount?: number;
+};
+
 async function getProductDetails(slug: string): Promise<ProductDetails | null> {
   const nextPort = process.env.PORT || 3000;
   const origin = process.env.NEXTAUTH_URL || `http://localhost:${nextPort}`;
@@ -44,6 +52,24 @@ async function getProductDetails(slug: string): Promise<ProductDetails | null> {
     return body?.data || null;
   } catch (error) {
     console.error(`[ProductDetail] Error fetching product details:`, error);
+    return null;
+  }
+}
+
+async function getProductSummary(slug: string): Promise<ProductSummary | null> {
+  const nextPort = process.env.PORT || 3000;
+  const origin = process.env.NEXTAUTH_URL || `http://localhost:${nextPort}`;
+  const requestUrl = `${origin}/api/products?slug=${encodeURIComponent(slug)}&summary=1`;
+
+  try {
+    const res = await fetch(requestUrl, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.data || null;
+  } catch (error) {
+    console.error(`[ProductDetail] Error fetching product summary:`, error);
     return null;
   }
 }
@@ -85,41 +111,24 @@ export async function generateMetadata({
   const title = `${product.name} | Verified Commodity - OBAOL Supreme`;
   const description =
     product.description?.slice(0, 155) ||
-    `Explore ${product.name} on OBAOL with verified commodity context and execution support details. Browse verified suppliers and procurement flows.`;
+    `Starting in India, explore ${product.name} on OBAOL with verified commodity context and execution support. We are expanding globally across key corridors.`;
   const canonical = `${BASE_URL}/product/${product.slug}`;
 
-  return {
+  return buildMetadata({
     title,
     description,
     keywords: [
       product.name,
-      "Commodity Trading",
+      "commodity trading",
       product.subCategory?.name || "",
-      "B2B Trade",
-      "Agro Commodities",
-      "Export Import",
-      "Sourcing",
+      "b2b trade",
+      "agro commodities",
+      "export import",
+      "sourcing",
     ],
-    alternates: { canonical },
-    openGraph: {
-      type: "article",
-      title,
-      description,
-      url: canonical,
-      images: [{ url: "/logo.png", width: 1200, height: 630, alt: product.name }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ["/logo.png"],
-    },
-    other: {
-      "geo.region": "IN",
-      "geo.placename": "Global Commodity Market",
-      distribution: "global",
-    }
-  };
+    path: `/product/${product.slug}`,
+    type: "article",
+  }) as Metadata;
 }
 
 export default async function ProductDetailPage({
@@ -130,6 +139,8 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await getProductDetails(slug);
   if (!product) notFound();
+  const summary = await getProductSummary(slug);
+  const supplyLineCount = Number(summary?.supplyLineCount || 0);
 
   // Fetch research-based facts
   const facts = await fetchCommodityFacts(product.name);
@@ -148,12 +159,27 @@ export default async function ProductDetailPage({
     description: product.description || `${product.name} listed on OBAOL.`,
     category: product.subCategory?.category?.name || product.subCategory?.name || "Commodity",
     url: canonical,
-    areaServed: states.length ? states.map((stateName) => ({ "@type": "AdministrativeArea", name: stateName })) : undefined,
+    areaServed: states.length
+      ? states.map((stateName) => ({ "@type": "AdministrativeArea", name: stateName }))
+      : [
+          { "@type": "Country", name: "India" },
+          { "@type": "Country", name: "United Arab Emirates" },
+          { "@type": "Country", name: "Saudi Arabia" },
+          { "@type": "Place", name: "European Union" },
+          { "@type": "Country", name: "United States" },
+        ],
     brand: {
       "@type": "Organization",
       name: "OBAOL Supreme",
     },
     material: product.name,
+    additionalProperty: [
+      {
+        "@type": "PropertyValue",
+        name: "Supply lines",
+        value: supplyLineCount,
+      },
+    ],
     isRelatedTo: related.map(r => ({ "@type": "Product", name: r.name, url: `${BASE_URL}/product/${r.slug}` }))
   };
 
@@ -199,6 +225,18 @@ export default async function ProductDetailPage({
             <p className="mt-6 max-w-3xl text-lg md:text-xl text-default-600 leading-relaxed font-medium">
               {product.description || `High-quality ${product.name} trade facilitation with verified supply chains and execution support.`}
             </p>
+
+            <div className="mt-6 rounded-2xl border border-default-200 bg-content1/60 px-4 py-3 md:px-5 md:py-4">
+              <p className="text-sm md:text-base font-semibold text-foreground">
+                OBAOL tracks {supplyLineCount.toLocaleString()} supply lines for {product.name}.
+              </p>
+              <p className="text-xs md:text-sm text-default-500 mt-1">
+                These supply lines represent verified market presence and execution readiness across the OBAOL network.
+              </p>
+            </div>
+            <div className="mt-4">
+              <IndiaFirstNote />
+            </div>
           </div>
         </div>
       </section>

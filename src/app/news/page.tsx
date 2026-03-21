@@ -1,13 +1,13 @@
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import dynamic from "next/dynamic";
-import { Metadata } from "next";
+import { buildMetadata } from "@/utils/seo";
+import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
-const BASE_URL = "https://obaol.com";
-
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Trade News | OBAOL Supreme",
-  description: "Global agro‑trade news by continent and country. Track commodity market signals, logistics updates, and regional trade intelligence.",
+  description:
+    "Starting in India, track global agro-trade news by continent and country. Follow commodity market signals, logistics updates, and regional trade intelligence as we expand globally.",
   keywords: [
     "agro trade news",
     "commodity news",
@@ -17,23 +17,8 @@ export const metadata: Metadata = {
     "supply chain news",
     "freight updates",
   ],
-  alternates: {
-    canonical: `${BASE_URL}/news`,
-  },
-  openGraph: {
-    title: "Trade News | OBAOL Supreme",
-    description: "Curated agro‑trade updates from global sources by continent and country.",
-    url: `${BASE_URL}/news`,
-    type: "website",
-    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "OBAOL Trade News" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Trade News | OBAOL Supreme",
-    description: "Global agro‑trade news and commodity signals by region.",
-    images: ["/logo.png"],
-  },
-};
+  path: "/news",
+});
 
 const NewsPageContent = dynamic(() => import("@/components/news/NewsPageContent"), { ssr: false });
 
@@ -43,11 +28,11 @@ export default function NewsPage() {
     "@type": "CollectionPage",
     name: "OBAOL Trade News",
     description: "Global agro‑trade updates from curated RSS sources across continents.",
-    url: `${BASE_URL}/news`,
+    url: "https://obaol.com/news",
     isPartOf: {
       "@type": "WebSite",
       name: "OBAOL Supreme",
-      url: BASE_URL,
+      url: "https://obaol.com",
     },
   };
 
@@ -59,6 +44,9 @@ export default function NewsPage() {
       />
       <Header />
       <main className="pt-24 min-h-screen">
+        <div className="mx-auto w-[95%] max-w-6xl px-4 md:px-6 pb-6">
+          <IndiaFirstNote />
+        </div>
         <NewsPageContent variant="public" />
       </main>
       <Footer />

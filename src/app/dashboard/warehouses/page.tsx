@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, postData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -117,6 +117,14 @@ export default function WarehousesPage() {
             return res?.data?.data || res?.data || [];
         },
     });
+    const { data: warehousesAllData } = useQuery({
+        queryKey: ["warehouses", "all"],
+        queryFn: async () => {
+            const res: any = await getData(apiRoutes.warehouses.list, { scope: "all" });
+            return res?.data?.data || res?.data || [];
+        },
+        enabled: activeTab === "available" && roleLower === "admin",
+    });
 
     const { data: categoriesData } = useQuery({
         queryKey: ["warehouse-categories"],
@@ -149,6 +157,18 @@ export default function WarehousesPage() {
     });
 
     const warehouses: Warehouse[] = Array.isArray(warehousesData) ? warehousesData : [];
+    const allWarehouses: Warehouse[] = Array.isArray(warehousesAllData) ? warehousesAllData : [];
+    const availableWarehouses: Warehouse[] = useMemo(() => {
+        if (activeTab !== "available") return warehouses;
+        if (warehouses.length > 0) return warehouses;
+        if (roleLower !== "admin") return warehouses;
+        return allWarehouses.filter((wh) => {
+            const listingType = String(wh?.listingType || "").toUpperCase();
+            const rentalActive = wh?.isRentalActive === true || (wh as any)?.isRentalActive === "true" || (wh as any)?.isRentalActive === 1;
+            const active = wh?.isActive === true || (wh as any)?.isActive === "true" || (wh as any)?.isActive === 1;
+            return active && ((listingType === "RENTAL" && rentalActive) || (!wh?.listingType && rentalActive));
+        });
+    }, [activeTab, warehouses, allWarehouses, roleLower]);
     const categories = Array.isArray(categoriesData) ? categoriesData : [];
     const categoryNameMap = new Map(categories.map((cat: any) => [String(cat?._id || ""), cat?.name || ""]));
     const movements = Array.isArray(movementsData) ? movementsData : [];
@@ -348,10 +368,10 @@ export default function WarehousesPage() {
                 <Tab key="available" title={<div className="flex items-center gap-2"><TbContainer size={14} /><span>Available Warehouses</span></div>}>
                     {loadingWarehouses ? <LoadingState label="Loading warehouses…" />
                         : errorWarehouses ? <EmptyState icon={<FiAlertCircle />} title="Unable to load" description="Could not fetch warehouse data. Please try again." />
-                            : warehouses.length === 0 ? <EmptyState icon={<TbContainer />} title="No Rentals Available" description="No rental warehouses are listed right now." />
+                            : availableWarehouses.length === 0 ? <EmptyState icon={<TbContainer />} title="No Rentals Available" description="No rental warehouses are listed right now." />
                                 : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                                        {warehouses.map((wh) => (
+                                        {availableWarehouses.map((wh) => (
                                             <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-warning-500/30 transition-all duration-200">
                                                 <CardHeader className="flex items-start justify-between gap-3 pb-2 px-4 pt-4">
                                                     <div className="flex items-center gap-3 min-w-0">

@@ -357,7 +357,7 @@ export default function OrderDetailsPage() {
             );
             const map = new Map<string, any[]>();
             results.forEach((res, index) => {
-                const flowType = subflowTypes[index];
+                const flowType = String(subflowTypes[index]);
                 const rules = Array.isArray(res?.data?.data) ? res.data.data : [];
                 map.set(flowType, rules);
             });
@@ -474,640 +474,422 @@ export default function OrderDetailsPage() {
     const hasDocType = (type: string) => (docsForOrder || []).some((doc: any) => String(doc?.type || "") === type);
 
     return (
-        <div className="w-full p-6 flex flex-col gap-6">
-            <div className="flex justify-start">
-                <Button variant="light" onPress={() => router.back()}>
-                    Back
-                </Button>
+        <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-warning-500/30">
+            {/* Header: Elite Identification */}
+            <div className="flex items-center justify-between gap-6 pb-6 border-b border-divider">
+                <div className="flex items-center gap-5">
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        className="text-default-400 hover:text-warning-500 hover:bg-default-100 transition-all"
+                        onPress={() => router.back()}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    </Button>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">ORDER: {orderId?.slice(-8).toUpperCase()}</h1>
+                            <div className="px-2 py-0.5 rounded bg-warning-500 text-xs font-black text-black uppercase tracking-widest">LIVE EXECUTION</div>
+                        </div>
+                        <p className="text-sm font-bold text-default-500 mt-2 uppercase tracking-wider opacity-80">
+                            {isExternal ? "External Logistics Terminal" : `ENQUIRY REF: ${(order.enquiry?._id || order.enquiry)?.slice(-8).toUpperCase()}`}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-10">
+                    <div className="h-12 w-px bg-divider hidden md:block" />
+                    <div className="text-right">
+                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest mb-1">Workflow Stage</div>
+                        <div className="text-xl font-black text-foreground uppercase tracking-tight">{String(order.workflowStage || order.status || "").replaceAll("_", " ")}</div>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                        <div className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">Terminal Synced</div>
+                        <div className="text-sm font-black text-foreground/60 uppercase">{dayjs(order.updatedAt).fromNow()}</div>
+                    </div>
+                </div>
             </div>
-            {/* Header */}
-            <Card className="w-full bg-gradient-to-r from-blue-900 to-slate-900 text-white">
-                <CardHeader className="flex justify-between items-center px-6 py-6">
-                    <div className="flex flex-col gap-1">
-                        <h1 className="text-3xl font-bold">Order #{orderId?.slice(-6).toUpperCase()}</h1>
-                        {isExternal ? (
-                            <span className="opacity-80">External Order Execution</span>
-                        ) : (
-                            <span className="opacity-80">
-                                Generated from Enquiry #{(order.enquiry?._id || order.enquiry)?.slice(-6).toUpperCase()}
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                        <Chip className="capitalize font-bold" color="primary" size="lg">
-                            {String(order.workflowStage || order.status || "").replaceAll("_", " ")}
-                        </Chip>
-                        <span className="text-xs opacity-70">Last updated: {dayjs(order.updatedAt).fromNow()}</span>
-                    </div>
-                </CardHeader>
-            </Card>
 
             {isExternal && (
-                <Card className="w-full border border-default-200/60">
-                    <CardHeader className="font-bold text-lg">External Parties</CardHeader>
-                    <Divider />
-                    <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div className="rounded-lg border border-default-200/70 p-3">
-                            <div className="text-xs uppercase tracking-widest text-default-500">Buyer</div>
-                            <div className="text-base font-semibold">{(order as any)?.externalBuyer?.name || "Buyer"}</div>
-                            <div className="text-xs text-default-500">{(order as any)?.externalBuyer?.email || ""}</div>
-                            <div className="text-xs text-default-500">{(order as any)?.externalBuyer?.phone || ""}</div>
-                        </div>
-                        <div className="rounded-lg border border-default-200/70 p-3">
-                            <div className="text-xs uppercase tracking-widest text-default-500">Seller</div>
-                            <div className="text-base font-semibold">{(order as any)?.externalSeller?.name || "Seller"}</div>
-                            <div className="text-xs text-default-500">{(order as any)?.externalSeller?.email || ""}</div>
-                            <div className="text-xs text-default-500">{(order as any)?.externalSeller?.phone || ""}</div>
-                        </div>
-                        <div className="rounded-lg border border-default-200/70 p-3 md:col-span-2">
-                            <div className="text-xs uppercase tracking-widest text-default-500">Product</div>
-                            <div className="text-base font-semibold">
-                                {(order as any)?.externalProduct?.name || "Product"}
-                                {(order as any)?.externalProduct?.variant ? ` • ${(order as any)?.externalProduct?.variant}` : ""}
-                            </div>
-                            <div className="text-xs text-default-500">
-                                {(order as any)?.externalProduct?.quantity ? `${(order as any)?.externalProduct?.quantity} ` : ""}
-                                {(order as any)?.externalProduct?.unit || ""}
-                            </div>
-                        </div>
-                    </CardBody>
-                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
+                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">CONSIGNEE (BUYER)</div>
+                        <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalBuyer?.name || "Buyer"}</div>
+                        <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalBuyer?.email || "No email"}</div>
+                    </div>
+                    <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
+                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">CONSIGNOR (SELLER)</div>
+                        <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalSeller?.name || "Seller"}</div>
+                        <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalSeller?.email || "No email"}</div>
+                    </div>
+                    <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
+                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">PRODUCT SCOPE</div>
+                        <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalProduct?.name || "Product"}</div>
+                        <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalProduct?.quantity || "0"} {(order as any)?.externalProduct?.unit || ""}</div>
+                    </div>
+                </div>
             )}
 
-            {/* Status Stepper */}
-            <Card className="w-full shadow-sm border border-default-200/50">
-                <CardBody className="px-6 py-6">
-                    <Progress
-                        size="sm"
-                        radius="full"
-                        value={workflowStageOptions.length > 1 ? (Math.max(0, workflowStageOptions.indexOf(workflowStage)) / (workflowStageOptions.length - 1)) * 100 : 0}
-                        color={workflowStage === "TRADE_CLOSED" ? "success" : "primary"}
-                        className="mb-4"
-                    />
-                    <div className="flex flex-wrap items-center gap-2">
-                        {workflowStageOptions.map((step, index) => {
-                            const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
-                            const isCompleted = index < currentStepIndex;
-                            const isCurrent = index === currentStepIndex;
-                            return (
-                                <React.Fragment key={step}>
-                                    <div
-                                        className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
-                                            ? "bg-primary text-white border-primary"
-                                            : isCompleted
-                                                ? "bg-success/10 text-success-700 border-success/30"
-                                                : "bg-default-100 text-default-500 border-default-200"
-                                            }`}
-                                    >
-                                        {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
-                                    </div>
-                                    {index < workflowStageOptions.length - 1 && (
-                                        <span className="text-default-300 text-xs">→</span>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
+            {/* Status Pipeline: Modern Connected Flow */}
+            <div className="w-full relative py-6">
+                <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
+                <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
+                    {workflowStageOptions.map((step, index) => {
+                        const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
+                        const isCompleted = index < currentStepIndex;
+                        const isCurrent = index === currentStepIndex;
+                        return (
+                            <div key={step} className="flex flex-col items-center gap-4 min-w-[120px] shrink-0 group">
+                                <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-warning-500 border-warning-400 scale-125 shadow-[0_0_15px_rgba(245,165,36,0.6)]' :
+                                    isCompleted ? 'bg-success-500 border-success-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]' :
+                                        'bg-default-200 border-divider'
+                                    }`} />
+                                <div className={`text-xs font-black uppercase tracking-tight transition-colors text-center ${isCurrent ? 'text-warning-500' :
+                                    isCompleted ? 'text-success-500/80' :
+                                        'text-default-500 group-hover:text-default-700 dark:group-hover:text-default-300'
+                                    }`}>
+                                    {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Control Panel: Workflow Context */}
+                <div className="lg:col-span-1 flex flex-col gap-8">
+                    <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-warning-500/20 transition-all duration-700" />
+
+                        <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-warning-500 block shadow-[0_0_8px_rgba(245,165,36,0.6)]" />
+                            Execution Control
+                        </h2>
+
+                        <div className="flex flex-col gap-6">
+                            <Input
+                                label="TRACKING IDENTIFIER"
+                                placeholder="HEX-001X..."
+                                value={trackingId}
+                                onValueChange={setTrackingId}
+                                variant="bordered"
+                                classNames={{
+                                    label: "text-xs font-black text-default-400 tracking-wider",
+                                    input: "text-foreground font-black uppercase",
+                                    inputWrapper: "border-divider h-14 bg-default-100/50 hover:border-warning-500/40 transition-colors"
+                                }}
+                            />
+
+                            <Button
+                                color="warning"
+                                variant="solid"
+                                className="font-black text-sm uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(245,165,36,0.2)] hover:shadow-[0_15px_40px_rgba(245,165,36,0.3)] hover:-translate-y-0.5 transition-all"
+                                onClick={handleGeneralUpdate}
+                                isLoading={updateMutation.isPending}
+                            >
+                                Commit Plan Updates
+                            </Button>
+
+                            {planError && (
+                                <div className="rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 text-sm font-bold text-danger-400 uppercase tracking-tight leading-relaxed animate-pulse">
+                                    {planError}
+                                </div>
+                            )}
+
+                            <p className="text-xs font-bold text-default-400 uppercase tracking-wider leading-loose">
+                                Scheduling mode synchronization is required for subflow activation.
+                            </p>
+                        </div>
                     </div>
-                </CardBody>
-            </Card>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Status Actions */}
-                <Card className="lg:col-span-1">
-                    <CardHeader className="font-bold text-lg">Workflow Actions</CardHeader>
-                    <Divider />
-                    <CardBody className="flex flex-col gap-4">
-                        <Chip size="sm" variant="flat">
-                            {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
-                        </Chip>
+                {/* Strategic Milestones */}
+                <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
 
-                        <Input
-                            label="Internal Tracking ID"
-                            placeholder="e.g. OBA-2024-X100"
-                            value={trackingId}
-                            onValueChange={setTrackingId}
-                        />
-
-                        <Button color="primary" variant="shadow" className="mt-2" onClick={handleGeneralUpdate} isLoading={updateMutation.isPending}>
-                            Save Order Plan & Timeline
-                        </Button>
-                        {planError && (
-                            <div className="mt-2 rounded-lg border border-danger-200 bg-danger-50/70 px-3 py-2 text-xs text-danger-700">
-                                {planError}
+                    <div className="flex justify-between items-center mb-10">
+                        <h2 className="text-xs font-black uppercase tracking-widest text-foreground flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-primary-500 block shadow-[0_0_8px_rgba(0,111,238,0.6)]" />
+                            Strategic Milestones
+                        </h2>
+                        {isSchedulingFinalized && (
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-500 text-xs font-black uppercase tracking-wider">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                                Finalized
                             </div>
                         )}
-                        <p className="text-xs text-default-500">
-                            Scheduling mode and finalized date are required before saving execution updates.
-                        </p>
-                    </CardBody>
-                </Card>
+                    </div>
 
-            {/* Execution Milestones */}
-            <Card className="lg:col-span-2">
-                    <CardHeader className="font-bold text-lg">Execution Milestones</CardHeader>
-                    <Divider />
-                    <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Select
-                            label="Scheduling Mode"
+                            label="SCHEDULING PROTOCOL"
                             selectedKeys={milestones.schedulingMode ? [milestones.schedulingMode] : []}
                             onSelectionChange={(keys) => {
                                 const arr = Array.from(keys as Set<string>);
                                 updateMilestone("schedulingMode", String(arr[0] || ""));
                             }}
+                            variant="bordered"
+                            classNames={{
+                                label: "text-xs font-black tracking-wider text-default-400",
+                                trigger: "border-divider bg-default-100/50 h-14",
+                                value: "text-foreground font-black uppercase"
+                            }}
                         >
-                            <SelectItem key="IMMEDIATE" value="IMMEDIATE">Immediate</SelectItem>
-                            <SelectItem key="PLANNED" value="PLANNED">Planned</SelectItem>
-                            <SelectItem key="PHASED" value="PHASED">Phased</SelectItem>
+                            <SelectItem key="IMMEDIATE" value="IMMEDIATE" className="uppercase font-black text-xs">Immediate</SelectItem>
+                            <SelectItem key="PLANNED" value="PLANNED" className="uppercase font-black text-xs">Planned</SelectItem>
+                            <SelectItem key="PHASED" value="PHASED" className="uppercase font-black text-xs">Phased</SelectItem>
                         </Select>
+
                         <Input
                             type="date"
-                            label="Scheduling Finalized Date"
+                            label="DEADLINE FINALIZED"
                             value={milestones.schedulingFinalizedDate}
                             onValueChange={(v) => updateMilestone("schedulingFinalizedDate", v)}
+                            variant="bordered"
+                            classNames={{
+                                label: "text-xs font-black tracking-wider text-default-400",
+                                input: "text-foreground font-black",
+                                inputWrapper: "border-divider bg-default-100/50 h-14"
+                            }}
                         />
+
                         <Input
                             className="md:col-span-2"
-                            label="Scheduling Notes"
-                            placeholder="Plan summary before execution starts"
+                            label="EXECUTION NOTES"
+                            placeholder="Pipeline planning summary..."
                             value={milestones.schedulingNotes}
                             onValueChange={(v) => updateMilestone("schedulingNotes", v)}
+                            variant="bordered"
+                            classNames={{
+                                label: "text-xs font-black tracking-wider text-default-400",
+                                input: "text-foreground/70 font-medium",
+                                inputWrapper: "border-divider bg-default-100/50 h-14"
+                            }}
                         />
+
                         {!isSchedulingFinalized && (
-                            <div className="md:col-span-2 rounded-lg border border-warning-200 bg-warning-50/70 px-3 py-2 text-xs text-warning-700">
-                                Finalize scheduling first, then update procurement/quality/packaging/logistics milestones.
+                            <div className="md:col-span-2 p-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 text-sm font-bold text-warning-500 uppercase tracking-wide leading-relaxed">
+                                <span className="text-warning-600 mr-2 font-black">NOTICE:</span> Finalize execution dates to enable downstream processing and compliance locks.
                             </div>
                         )}
 
-                        {!!responsibilities.procurementBy && (
-                            <>
-                                <Input
-                                    type="date"
-                                    label={`Procurement Date (${getOwnerLabel(responsibilities.procurementBy)})`}
-                                    value={milestones.procurementDate}
-                                    onValueChange={(v) => updateMilestone("procurementDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                                <Input
-                                    type="date"
-                                    label="Source Inspection Date"
-                                    value={milestones.procurementInspectionDate}
-                                    onValueChange={(v) => updateMilestone("procurementInspectionDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                                <Input
-                                    type="date"
-                                    label="Procurement Completed Date"
-                                    value={milestones.procurementCompletedDate}
-                                    onValueChange={(v) => updateMilestone("procurementCompletedDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                            </>
-                        )}
-
-                        {!!responsibilities.qualityTestingBy && (
-                            <>
-                                <div className="md:col-span-2 flex items-center justify-between rounded-lg border border-default-200 px-3 py-2">
-                                    <span className="text-sm font-medium">Quality Testing Required</span>
-                                    <Switch
-                                        size="sm"
-                                        isSelected={milestones.qualityTestingRequired !== false}
-                                        onValueChange={(v) => updateMilestone("qualityTestingRequired", v)}
-                                        isDisabled={!isSchedulingFinalized}
-                                    />
+                        <div className="md:col-span-2 space-y-8">
+                            {!!responsibilities.procurementBy && (
+                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-6">
+                                    <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Procurement Pipeline</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <Input type="date" label="START" value={milestones.procurementDate} onValueChange={(v) => updateMilestone("procurementDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        <Input type="date" label="INSPECTION" value={milestones.procurementInspectionDate} onValueChange={(v) => updateMilestone("procurementInspectionDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        <Input type="date" label="COMPLETED" value={milestones.procurementCompletedDate} onValueChange={(v) => updateMilestone("procurementCompletedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                    </div>
                                 </div>
-                                {milestones.qualityTestingRequired !== false && (
-                                    <>
-                                        <Input
-                                            type="date"
-                                            label={`Sample Sent to Lab (${getOwnerLabel(responsibilities.qualityTestingBy)})`}
-                                            value={milestones.qualitySampleSentDate}
-                                            onValueChange={(v) => updateMilestone("qualitySampleSentDate", v)}
-                                            isDisabled={!isSchedulingFinalized}
-                                        />
-                                        <Input
-                                            label="Lab Name"
-                                            placeholder="e.g. SGS / NABL Lab"
-                                            value={milestones.labName}
-                                            onValueChange={(v) => updateMilestone("labName", v)}
-                                            isDisabled={!isSchedulingFinalized}
-                                        />
-                                        <Input
-                                            type="date"
-                                            label="Lab Report Due Date"
-                                            value={milestones.labExpectedReportDate}
-                                            onValueChange={(v) => updateMilestone("labExpectedReportDate", v)}
-                                            isDisabled={!isSchedulingFinalized}
-                                        />
-                                        <Input
-                                            type="date"
-                                            label="Lab Report Received Date"
-                                            value={milestones.labReportReceivedDate}
-                                            onValueChange={(v) => updateMilestone("labReportReceivedDate", v)}
-                                            isDisabled={!isSchedulingFinalized}
-                                        />
-                                        <Input
-                                            type="date"
-                                            label="Quality Approval Date"
-                                            value={milestones.qualityApprovedDate}
-                                            onValueChange={(v) => updateMilestone("qualityApprovedDate", v)}
-                                            isDisabled={!isSchedulingFinalized}
-                                        />
-                                    </>
+                            )}
+
+                            {!!responsibilities.qualityTestingBy && (
+                                <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Quality Assurance Terminal</div>
+                                        <Switch size="sm" color="warning" isSelected={milestones.qualityTestingRequired !== false} onValueChange={(v) => updateMilestone("qualityTestingRequired", v)} isDisabled={!isSchedulingFinalized} />
+                                    </div>
+                                    {milestones.qualityTestingRequired !== false && (
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <Input type="date" label="SAMPLE" value={milestones.qualitySampleSentDate} onValueChange={(v) => updateMilestone("qualitySampleSentDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input label="LAB" placeholder="NABL..." value={milestones.labName} onValueChange={(v) => updateMilestone("labName", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input type="date" label="DUE" value={milestones.labExpectedReportDate} onValueChange={(v) => updateMilestone("labExpectedReportDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input type="date" label="APPROVED" value={milestones.qualityApprovedDate} onValueChange={(v) => updateMilestone("qualityApprovedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {!!responsibilities.packagingBy && (
+                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
+                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Packaging Units</div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Input type="date" label="START" value={milestones.packagingStartDate} onValueChange={(v) => updateMilestone("packagingStartDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input type="date" label="DONE" value={milestones.packagingCompletedDate} onValueChange={(v) => updateMilestone("packagingCompletedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        </div>
+                                    </div>
                                 )}
-                            </>
-                        )}
+                                {!!responsibilities.transportBy && (
+                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
+                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Inland Logistics</div>
+                                        <Input type="date" label="DISPATCH" value={milestones.transportDispatchDate} onValueChange={(v) => updateMilestone("transportDispatchDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                    </div>
+                                )}
+                            </div>
 
-                        {!!responsibilities.packagingBy && (
-                            <>
-                                <Input
-                                    type="date"
-                                    label={`Packaging Start Date (${getOwnerLabel(responsibilities.packagingBy)})`}
-                                    value={milestones.packagingStartDate}
-                                    onValueChange={(v) => updateMilestone("packagingStartDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                                <Input
-                                    type="date"
-                                    label="Packaging Completed Date"
-                                    value={milestones.packagingCompletedDate}
-                                    onValueChange={(v) => updateMilestone("packagingCompletedDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                            </>
-                        )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {!!responsibilities.certificateBy && (
+                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
+                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Certification Protocol</div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Input type="date" label="REQUESTED" value={milestones.certificateRequestedDate} onValueChange={(v) => updateMilestone("certificateRequestedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input type="date" label="ISSUED" value={milestones.certificateIssuedDate} onValueChange={(v) => updateMilestone("certificateIssuedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        </div>
+                                    </div>
+                                )}
+                                {isInternational && !!responsibilities.shippingBy && (
+                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
+                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">International Freight</div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Input type="date" label="BOOKED" value={milestones.shippingBookedDate} onValueChange={(v) => updateMilestone("shippingBookedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                            <Input type="date" label="CUSTOMS" value={milestones.customsClearanceDate} onValueChange={(v) => updateMilestone("customsClearanceDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        {!!responsibilities.certificateBy && (
-                            <>
-                                <Input
-                                    type="date"
-                                    label={`Certificate Request Date (${getOwnerLabel(responsibilities.certificateBy)})`}
-                                    value={milestones.certificateRequestedDate}
-                                    onValueChange={(v) => updateMilestone("certificateRequestedDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                                <Input
-                                    type="date"
-                                    label="Certificate Issued Date"
-                                    value={milestones.certificateIssuedDate}
-                                    onValueChange={(v) => updateMilestone("certificateIssuedDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                            </>
-                        )}
-
-                        {!!responsibilities.transportBy && (
-                            <Input
-                                type="date"
-                                label={`Transport Dispatch Date (${getOwnerLabel(responsibilities.transportBy)})`}
-                                value={milestones.transportDispatchDate}
-                                onValueChange={(v) => updateMilestone("transportDispatchDate", v)}
-                                isDisabled={!isSchedulingFinalized}
-                            />
-                        )}
-
-                        {isInternational && !!responsibilities.shippingBy && (
-                            <>
-                                <Input
-                                    type="date"
-                                    label={`Shipping Booked Date (${getOwnerLabel(responsibilities.shippingBy)})`}
-                                    value={milestones.shippingBookedDate}
-                                    onValueChange={(v) => updateMilestone("shippingBookedDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                                <Input
-                                    type="date"
-                                    label="Customs Clearance Date"
-                                    value={milestones.customsClearanceDate}
-                                    onValueChange={(v) => updateMilestone("customsClearanceDate", v)}
-                                    isDisabled={!isSchedulingFinalized}
-                                />
-                            </>
-                        )}
-                    </CardBody>
-                </Card>
-
-                {/* Responsibility Owners */}
-                <Card className="lg:col-span-2">
-                    <CardHeader className="font-bold text-lg">Order Responsibilities</CardHeader>
-                    <Divider />
-                    <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Select
-                            label={`Procurement (${getOwnerLabel(order?.responsibilities?.procurementBy)})`}
-                            selectedKeys={responsibilities.procurementBy ? [responsibilities.procurementBy] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setResponsibilities((prev: any) => ({ ...prev, procurementBy: arr[0] || "" }));
-                            }}
-                        >
-                            {OWNER_OPTIONS.map((item) => (
-                                <SelectItem key={item.key} value={item.key}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                        <Select
-                            label={`Certificates (${getOwnerLabel(order?.responsibilities?.certificateBy)})`}
-                            selectedKeys={responsibilities.certificateBy ? [responsibilities.certificateBy] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setResponsibilities((prev: any) => ({ ...prev, certificateBy: arr[0] || "" }));
-                            }}
-                        >
-                            {OWNER_OPTIONS.map((item) => (
-                                <SelectItem key={item.key} value={item.key}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                        <Select
-                            label={`Transportation (${getOwnerLabel(order?.responsibilities?.transportBy)})`}
-                            selectedKeys={responsibilities.transportBy ? [responsibilities.transportBy] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setResponsibilities((prev: any) => ({ ...prev, transportBy: arr[0] || "" }));
-                            }}
-                        >
-                            {OWNER_OPTIONS.map((item) => (
-                                <SelectItem key={item.key} value={item.key}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                        {isInternational && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Ownership Matrix */}
+                <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" />
+                        Authority Configuration
+                    </h2>
+                    <div className="space-y-4">
+                        {[
+                            { key: "procurementBy", label: "Procurement" },
+                            { key: "certificateBy", label: "Certificates" },
+                            { key: "transportBy", label: "Transportation" },
+                            { key: "packagingBy", label: "Packaging" },
+                            { key: "qualityTestingBy", label: "Quality/QA" },
+                            ...(isInternational ? [{ key: "shippingBy", label: "Freight" }] : []),
+                        ].map((resp) => (
                             <Select
-                                label={`Shipping (${getOwnerLabel(order?.responsibilities?.shippingBy)})`}
-                                selectedKeys={responsibilities.shippingBy ? [responsibilities.shippingBy] : []}
+                                key={resp.key}
+                                label={resp.label.toUpperCase()}
+                                selectedKeys={responsibilities[resp.key] ? [responsibilities[resp.key]] : []}
                                 onSelectionChange={(keys) => {
                                     const arr = Array.from(keys as Set<string>);
-                                    setResponsibilities((prev: any) => ({ ...prev, shippingBy: arr[0] || "" }));
+                                    setResponsibilities((prev: any) => ({ ...prev, [resp.key]: arr[0] || "" }));
                                 }}
+                                variant="bordered"
+                                classNames={{ label: "text-xs font-black text-default-500", trigger: "border-divider bg-default-100/50 h-12" }}
                             >
                                 {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key}>
-                                        {item.label}
-                                    </SelectItem>
+                                    <SelectItem key={item.key} value={item.key} className="uppercase font-black text-xs">{item.label}</SelectItem>
                                 ))}
                             </Select>
-                        )}
-                        <Select
-                            label={`Packaging (${getOwnerLabel(order?.responsibilities?.packagingBy)})`}
-                            selectedKeys={responsibilities.packagingBy ? [responsibilities.packagingBy] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setResponsibilities((prev: any) => ({ ...prev, packagingBy: arr[0] || "" }));
-                            }}
-                        >
-                            {OWNER_OPTIONS.map((item) => (
-                                <SelectItem key={item.key} value={item.key}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                        <Select
-                            label={`Quality Testing & Assurance (${getOwnerLabel(order?.responsibilities?.qualityTestingBy)})`}
-                            selectedKeys={responsibilities.qualityTestingBy ? [responsibilities.qualityTestingBy] : []}
-                            onSelectionChange={(keys) => {
-                                const arr = Array.from(keys as Set<string>);
-                                setResponsibilities((prev: any) => ({ ...prev, qualityTestingBy: arr[0] || "" }));
-                            }}
-                        >
-                            {OWNER_OPTIONS.map((item) => (
-                                <SelectItem key={item.key} value={item.key}>
-                                    {item.label}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                    </CardBody>
-                </Card>
-                <Card className="lg:col-span-3">
-                    <CardHeader className="font-bold text-lg">Responsibility Layers</CardHeader>
-                    <Divider />
-                    <CardBody className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        {ownerLayers.map((layer) => {
-                            const assignedTasks = RESPONSIBILITY_TASKS.filter((task) => {
-                                if ('internationalOnly' in task && (task as any).internationalOnly && !isInternational) return false;
-                                return responsibilities?.[task.key] === layer.key;
-                            });
-                            return (
-                                <div key={layer.key} className="rounded-xl border border-default-200 p-4 bg-default-50/30">
-                                    <div className="font-semibold mb-3">{layer.title}</div>
-                                    {assignedTasks.length === 0 ? (
-                                        <p className="text-xs text-default-500">No responsibilities assigned.</p>
-                                    ) : (
-                                        <div className="flex flex-col gap-3">
-                                            {assignedTasks.map((task) => (
-                                                <div key={task.key} className="rounded-lg border border-default-200 px-3 py-2">
-                                                    <p className="text-sm font-medium">{task.label}</p>
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        {task.dateKeys.map((dateKey) => (
-                                                            <Chip key={dateKey} size="sm" variant="flat">
-                                                                {MILESTONE_LABELS[dateKey]}: {formatMilestoneDate(milestones?.[dateKey])}
-                                                            </Chip>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </CardBody>
-                </Card>
+                        ))}
+                    </div>
+                </div>
 
+                {/* Subflow Manifest */}
                 {subflowStatus.length > 0 && (
-                    <Card className="lg:col-span-3">
-                        <CardHeader className="font-bold text-lg">Subflow Status</CardHeader>
-                        <Divider />
-                        <CardBody className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl backdrop-blur-xl overflow-hidden">
+                        <div className="p-8 border-b border-divider flex justify-between items-center">
+                            <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 flex items-center gap-3">
+                                <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block animate-pulse" />
+                                Synchronized Pipelines
+                            </h2>
+                            <div className="text-xs font-black text-default-500 uppercase tracking-wider">Global Telemetry Active</div>
+                        </div>
+                        <div className="divide-y divide-divider/50">
                             {subflowStatus.map((flow) => (
-                                <div key={flow.type} className="rounded-xl border border-default-200 p-4 bg-default-50/30">
-                                    <div className="flex items-center justify-between">
-                                        <div className="font-semibold">{flow.label}</div>
-                                        <Chip size="sm" variant="flat" color={flow.isComplete ? "success" : "warning"}>
-                                            {flow.isComplete ? "Completed" : "In Progress"}
+                                <div key={flow.type} className="px-8 py-5 flex items-center justify-between hover:bg-default-100/50 transition-colors">
+                                    <div className="flex items-center gap-6">
+                                        <div className={`w-2 h-2 rounded-full ${flow.isComplete ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
+                                        <div>
+                                            <div className="text-sm font-black text-foreground uppercase tracking-wider">{flow.label}</div>
+                                            <div className="text-[9px] font-bold text-default-500 uppercase mt-1">STATUS: <span className="text-warning-500">{flow.currentLabel}</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-8">
+                                        {flow.isBlocking && (
+                                            <div className="px-3 py-1 rounded bg-danger-500/10 border border-danger-500/20 text-xs font-black text-danger-400 uppercase tracking-widest"> GATE: {flow.gateLabel} </div>
+                                        )}
+                                        <Chip size="sm" variant="dot" color={flow.isComplete ? "success" : "warning"} className="text-xs font-black uppercase border-divider bg-default-100/50">
+                                            {flow.isComplete ? "LIVE" : "ACTIVE"}
                                         </Chip>
                                     </div>
-                                    <div className="mt-2 text-xs text-default-500">
-                                        Current stage: <span className="font-medium text-default-700">{flow.currentLabel}</span>
-                                    </div>
-                                    {!flow.isComplete && (
-                                        <div className={`mt-2 rounded-lg px-2 py-1 text-xs ${flow.isBlocking ? "bg-danger-50 text-danger-700 border border-danger-200" : "bg-default-100 text-default-600 border border-default-200"}`}>
-                                            Required before {flow.gateLabel}
-                                        </div>
-                                    )}
-                                    {flow.dependsOn.length > 0 && (
-                                        <div className="mt-2 text-xs text-default-500">
-                                            Depends on: {flow.dependsOn.join(", ").replaceAll("_", " ")}
-                                        </div>
-                                    )}
                                 </div>
                             ))}
-                        </CardBody>
-                    </Card>
-                )}
-
-                {/* Logistics Details */}
-                <Card className="lg:col-span-2">
-                    <CardHeader className="font-bold text-lg flex justify-between">
-                        <span>Truck Loads & Dispatch</span>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                size="sm"
-                                color="secondary"
-                                variant="flat"
-                                onPress={addTruck}
-                            >
-                                + Add Truck
-                            </Button>
-                            <Button
-                                size="sm"
-                                color="primary"
-                                variant="flat"
-                                onPress={() => updateMutation.mutate({ logistics: logisticsList })}
-                                isLoading={updateMutation.isPending}
-                            >
-                                Save Trucks
-                            </Button>
                         </div>
-                    </CardHeader>
-                    <Divider />
-                    <CardBody className="flex flex-col gap-8">
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Fleet Ops */}
+                <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
+                    <div className="flex justify-between items-center mb-10">
+                        <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 flex items-center gap-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" /> Fleet Telemetry
+                        </h2>
+                        <div className="flex gap-2">
+                            <Button size="sm" color="warning" variant="flat" className="h-8 text-xs font-black uppercase px-4 rounded-lg" onPress={addTruck}> + UNIT </Button>
+                            <Button size="sm" color="warning" variant="solid" className="h-8 text-xs font-black uppercase px-4 rounded-lg shadow-lg shadow-warning-500/20" onPress={() => updateMutation.mutate({ logistics: logisticsList })} isLoading={updateMutation.isPending}> SYNC FLEET </Button>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
                         {logisticsList.length === 0 && (
-                            <div className="text-center py-10 text-default-400 italic">
-                                No trucks assigned to this order yet.
-                            </div>
+                            <div className="py-12 border border-dashed border-divider rounded-2xl text-center text-xs font-black text-default-400 uppercase tracking-widest"> No fleet units prioritized </div>
                         )}
                         {logisticsList.map((truck, index) => (
-                            <div key={index} className="p-5 border border-default-200 rounded-2xl relative bg-default-50/50">
-                                <div className="absolute top-4 right-4 text-xs font-bold text-default-300 uppercase">
-                                    Truck #{index + 1}
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                                    <Input
-                                        label="Vehicle Number"
-                                        placeholder="e.g. KA-01-AB-1234"
-                                        value={truck.vehicleNo}
-                                        onValueChange={(v) => updateTruck(index, "vehicleNo", v)}
-                                    />
-                                    <Input
-                                        label="Transport Company"
-                                        placeholder="e.g. Fast Movers Ltd."
-                                        value={truck.transportCompany}
-                                        onValueChange={(v) => updateTruck(index, "transportCompany", v)}
-                                    />
-                                    <Input
-                                        label="Driver Name"
-                                        value={truck.driverName}
-                                        onValueChange={(v) => updateTruck(index, "driverName", v)}
-                                    />
-                                    <Input
-                                        label="Driver Phone"
-                                        value={truck.driverPhone}
-                                        onValueChange={(v) => updateTruck(index, "driverPhone", v)}
-                                    />
-                                    <Input
-                                        label="Current Location"
-                                        className="md:col-span-2"
-                                        value={truck.currentLocation}
-                                        onValueChange={(v) => updateTruck(index, "currentLocation", v)}
-                                    />
-                                </div>
-                                <div className="flex justify-end mt-4">
-                                    <Button size="sm" color="danger" variant="light" onPress={() => removeTruck(index)}>Remove Truck</Button>
+                            <div key={index} className="p-6 rounded-2xl bg-default-100/50 border border-divider relative group hover:border-warning-500/30 transition-all">
+                                <Button isIconOnly size="sm" variant="light" className="absolute top-4 right-4 text-danger-400 group-hover:opacity-100 transition-opacity" onPress={() => removeTruck(index)}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                </Button>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input label="VEHICLE NO" value={truck.vehicleNo} onValueChange={(v) => updateTruck(index, "vehicleNo", v)} variant="underlined" classNames={{ label: "text-xs font-black", input: "text-foreground uppercase font-black" }} />
+                                    <Input label="OPERATOR" value={truck.transportCompany} onValueChange={(v) => updateTruck(index, "transportCompany", v)} variant="underlined" classNames={{ label: "text-xs font-black", input: "text-foreground uppercase font-black" }} />
+                                    <Input label="DRIVER" value={truck.driverName} onValueChange={(v) => updateTruck(index, "driverName", v)} variant="underlined" classNames={{ label: "text-xs font-black", input: "text-foreground uppercase font-black" }} />
+                                    <Input label="POSITION" value={truck.currentLocation} onValueChange={(v) => updateTruck(index, "currentLocation", v)} variant="underlined" classNames={{ label: "text-xs font-black", input: "text-foreground uppercase font-black" }} />
                                 </div>
                             </div>
                         ))}
-                    </CardBody>
-                </Card>
-            </div>
-
-            {/* Documents Section (Initial Placeholder) */}
-            <Card>
-                <CardHeader className="font-bold text-lg">Documents & Invoices</CardHeader>
-                <Divider />
-                <CardBody>
-                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-default-300 rounded-lg text-default-500">
-                        <p>Invoice Ninja Integration Pending</p>
-                        <Button size="sm" variant="light" color="primary" className="mt-2">Upload Manually</Button>
                     </div>
-                </CardBody>
-            </Card>
+                </div>
 
-            <Card className="lg:col-span-3">
-                <CardHeader className="font-bold text-lg">Documentation Checklist</CardHeader>
-                <Divider />
-                <CardBody className="flex flex-col gap-2">
-                    {rulesForStage.filter(canSeeRule).length === 0 ? (
-                        <div className="text-sm text-default-500">No documentation rules configured for this stage.</div>
-                    ) : (
-                        rulesForStage.filter(canSeeRule).map((rule: any) => {
-                            const hasDoc = hasDocType(String(rule.docType || ""));
-                            return (
-                                <div key={rule._id} className="flex items-center justify-between gap-3 border border-default-200/60 rounded-lg px-3 py-2">
-                                    <div className="text-sm">
-                                        <span className="font-medium">{rule.docType}</span>
-                                        <span className="text-default-500"> • {rule.responsibleRole} • {rule.actionType}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Chip size="sm" variant="flat" color={hasDoc ? "success" : "warning"}>
-                                            {hasDoc ? "Uploaded" : "Pending"}
-                                        </Chip>
+                {/* Compliance Center */}
+                <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" /> Compliance Registry
+                    </h2>
+                    <div className="space-y-3">
+                        {rulesForStage.filter(canSeeRule).length === 0 ? (
+                            <div className="py-12 border border-dashed border-divider rounded-2xl text-center text-xs font-black text-default-400 uppercase tracking-widest"> No verification required </div>
+                        ) : (
+                            rulesForStage.filter(canSeeRule).map((rule: any) => {
+                                const hasDoc = hasDocType(String(rule.docType || ""));
+                                return (
+                                    <div key={rule._id} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-warning-500/30 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
+                                            <div className="text-xs font-black text-foreground uppercase tracking-wider">{rule.docType}</div>
+                                        </div>
                                         {!hasDoc && canActOnRule(rule) && (
-                                            <Button
-                                                size="sm"
-                                                variant="flat"
-                                                onPress={() => {
-                                                    setDocActionRule(rule);
-                                                    setDocActionOpen(true);
-                                                }}
-                                            >
-                                                {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                                            <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black uppercase px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
+                                                {String(rule.actionType || "") === "UPLOAD" ? "UPLOAD" : "GENERATE"}
                                             </Button>
                                         )}
                                     </div>
-                                </div>
-                            );
-                        })
-                    )}
-                </CardBody>
-            </Card>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
 
-            <Modal
-                isOpen={docActionOpen}
-                onOpenChange={setDocActionOpen}
-                isDismissable={false}
-                isKeyboardDismissDisabled
-            >
+            <Modal isOpen={docActionOpen} onOpenChange={setDocActionOpen} className="bg-background border border-divider">
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">
-                        {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
-                    </ModalHeader>
+                    <ModalHeader className="text-sm font-black uppercase tracking-tighter text-foreground"> {docActionRule ? `${docActionRule.docType} ENTRY` : "Compliance Entry"} </ModalHeader>
                     <ModalBody>
                         {String(docActionRule?.actionType || "") === "UPLOAD" && (
-                            <Input
-                                label="File URL"
-                                placeholder="https://..."
-                                value={docActionFileUrl}
-                                onChange={(e) => setDocActionFileUrl(e.target.value)}
-                            />
+                            <Input label="REMOTE SECURE URL" placeholder="https://..." value={docActionFileUrl} onChange={(e) => setDocActionFileUrl(e.target.value)} variant="bordered" classNames={{ input: "text-foreground" }} />
                         )}
-                        <div className="text-xs text-default-500">
-                            {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
-                        </div>
+                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest mt-2">{docActionRule?.responsibleRole ? `PRIORITY: ${docActionRule.responsibleRole} AUTHORITY` : ""}</div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
-                            Cancel
-                        </Button>
-                        <Button
-                            color="primary"
-                            onPress={() => createDocMutation.mutate()}
-                            isLoading={createDocMutation.isPending}
-                            isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
-                        >
-                            {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
-                        </Button>
+                        <Button variant="light" className="text-default-400 font-black text-xs uppercase" onPress={() => setDocActionOpen(false)}> CANCEL </Button>
+                        <Button color="warning" className="font-black text-xs uppercase shadow-lg shadow-warning-500/20" onPress={() => createDocMutation.mutate()}> COMMIT TO REGISTRY </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

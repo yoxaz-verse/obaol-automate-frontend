@@ -1,113 +1,105 @@
 "use client";
 
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useMemo, useContext, useEffect } from "react";
 import {
   Card,
   CardBody,
   CardHeader,
   Button,
   Chip,
-  ButtonGroup,
-  Autocomplete,
-  AutocompleteItem,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Divider,
   Input,
-  Textarea,
   Select,
   SelectItem,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
+  Autocomplete,
+  AutocompleteItem,
+  Switch,
+  Textarea,
 } from "@nextui-org/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Title from "@/components/titles";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import AuthContext from "@/context/AuthContext";
 import { toast } from "react-toastify";
-import BrandedLoader from "@/components/ui/BrandedLoader";
-import { FiPlus, FiLayers, FiBriefcase } from "react-icons/fi";
+import {
+  FiNavigation,
+  FiArrowRight,
+  FiClock,
+  FiUser,
+  FiActivity,
+  FiCompass,
+  FiTerminal,
+  FiPackage,
+  FiGrid,
+  FiPlus,
+  FiSearch,
+  FiFilter,
+  FiMenu,
+  FiCpu,
+  FiBox,
+} from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
-type ServiceRequestRow = {
-  _id: string;
-  requestType: string;
-  title: string;
-  serviceSpecifications: string;
-  fromState?: { _id?: string; name?: string } | string;
-  fromDistrict?: { _id?: string; name?: string } | string;
-  toState?: { _id?: string; name?: string } | string;
-  toDistrict?: { _id?: string; name?: string } | string;
-  requiredFromDate?: string;
-  requiredToDate?: string;
-  status: string;
-  candidateProviders?: any[];
-  bids?: any[];
-  committedProvider?: any;
-  createdByCompanyId?: any;
-  bidAmount?: number;
-  commitNote?: string;
-  createdByRole?: string;
-  createdByAssociateId?: string;
-  createdAt?: string;
-};
+
+dayjs.extend(relativeTime);
 
 const SERVICE_TYPE_OPTIONS = [
-  { key: "PROCUREMENT", label: "Procurement" },
-  { key: "QUALITY_TESTING", label: "Quality Testing" },
   { key: "PACKAGING", label: "Packaging" },
+  { key: "QUALITY_TESTING", label: "Quality Testing" },
   { key: "TRANSPORTATION", label: "Transportation" },
-  { key: "CUSTOMS_CLEARANCE", label: "Customs Clearance" },
-  { key: "WAREHOUSING", label: "Warehousing" },
+  { key: "FREIGHT_FORWARDING", label: "Freight Forwarding" },
+  { key: "EXPORT_CUSTOMS", label: "Export Customs" },
+  { key: "IMPORT_CUSTOMS", label: "Import Customs" },
+  { key: "PORT_HANDLING", label: "Port Handling" },
+  { key: "INLAND_LOGISTICS", label: "Inland Logistics" },
+  { key: "INSPECTION", label: "Inspection" },
 ];
 
-const SERVICE_STATUS_OPTIONS = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+const SERVICE_STATUS_OPTIONS = ["OPEN", "BIDDING", "COMMITTED", "COMPLETED", "CANCELLED"];
 
-const formatDate = (value?: string) => {
-  if (!value) return "-";
-  try {
-    return new Date(value).toLocaleDateString("en-IN");
-  } catch {
-    return "-";
+// Data extraction helper for inconsistent API structures
+const extractArray = (response: any) => {
+  const axiosData = response?.data;
+  if (!axiosData) return [];
+  // Case 1: Nested in data.data (standard paginated payload)
+  if (Array.isArray(axiosData?.data)) return axiosData.data;
+  // Case 2: axiosData itself is the array
+  if (Array.isArray(axiosData)) return axiosData;
+  // Case 3: Double nested in data.data.data
+  if (Array.isArray(axiosData?.data?.data)) return axiosData.data.data;
+  // Case 4: Search for ANY property that is an array (fallback for custom keys like 'dealExecutions')
+  if (typeof axiosData === "object" && axiosData !== null) {
+    const anyArray = Object.values(axiosData).find((val) => Array.isArray(val));
+    if (anyArray) return anyArray as any[];
   }
-};
-
-const getName = (value: any) => {
-  if (!value) return "-";
-  if (typeof value === "string") return value;
-  return String(value?.name || value?._id || "-");
-};
-
-const getActiveBackendTarget = () =>
-  process.env.NEXT_PUBLIC_BACKEND_ORIGIN || "http://localhost:5001 (dev default)";
-
-const showServiceRequestApiUnavailableToast = (err: any): boolean => {
-  const status = err?.response?.status;
-  if (status === 404) {
-    toast.error(
-      `Service Requests API not available on current backend target. Check NEXT_PUBLIC_BACKEND_ORIGIN. Current target: ${getActiveBackendTarget()}`
-    );
-    return true;
-  }
-  return false;
+  return [];
 };
 
 export default function ExecutionEnquiriesPage() {
-  const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") === "service-requests" ? "service-requests" : "deal-execution";
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === "Admin" || user?.role === "Operator";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const myCompanyId = String((user as any)?.associateCompany?._id || (user as any)?.associateCompany || "");
 
-  const [activeTab, setActiveTab] = useState<"deal-execution" | "service-requests">(initialTab as any);
+  const [activeTab, setActiveTab] = useState("deal-execution");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [bidMap, setBidMap] = useState<Record<string, string>>({});
   const [noteMap, setNoteMap] = useState<Record<string, string>>({});
-  const [activeType, setActiveType] = useState<string>("ALL");
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<string>("ALL");
+  const [selectedExecutionCommitProvider, setSelectedExecutionCommitProvider] = useState<Record<string, string>>({});
+  const [selectedCommitProvider, setSelectedCommitProvider] = useState<Record<string, string>>({});
   const [createForm, setCreateForm] = useState({
-    requestType: "PACKAGING",
     title: "",
+    requestType: "PACKAGING" as any,
     serviceSpecifications: "",
     fromState: "",
     fromDistrict: "",
@@ -117,982 +109,833 @@ export default function ExecutionEnquiriesPage() {
     requiredToDate: "",
     createdByCompanyId: "",
   });
-  const [selectedCommitProvider, setSelectedCommitProvider] = useState<Record<string, string>>({});
-  const [selectedExecutionCommitProvider, setSelectedExecutionCommitProvider] = useState<Record<string, string>>({});
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const roleLower = String(user?.role || "").toLowerCase();
-  const isAdmin = roleLower === "admin";
-  const isOperatorUser = roleLower === "operator" || roleLower === "team";
+  // Filters & State for creation
+  const { data: statesResponse } = useQuery({
+    queryKey: ["states"],
+    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 100 }),
+  });
+  const states = useMemo(() => extractArray(statesResponse), [statesResponse]);
 
-  useEffect(() => {
-    patchData(apiRoutes.notifications.markSectionRead("execution"), {}).catch(() => { });
-  }, []);
-  const myCompanyId = String(
-    (user as any)?.associateCompany?._id ||
-    (user as any)?.associateCompany ||
-    (user as any)?.associateCompanyId ||
-    ""
-  );
+  const { data: fromDistrictsResponse } = useQuery({
+    queryKey: ["districts", createForm.fromState],
+    queryFn: () => getData(apiRoutes.district.getAll, { state: createForm.fromState, page: 1, limit: 100 }),
+    enabled: !!createForm.fromState,
+  });
+  const fromDistrictOptions = useMemo(() => extractArray(fromDistrictsResponse), [fromDistrictsResponse]);
 
-  const typeFilters = [
-    { key: "ALL", label: "All" },
-    { key: "PROCUREMENT", label: "Procurement" },
-    { key: "CERTIFICATION", label: "Certification" },
-    { key: "TRANSPORTATION", label: "Transportation" },
-    { key: "SHIPPING", label: "Shipping" },
-    { key: "PACKAGING", label: "Packaging" },
-    { key: "QUALITY_TESTING", label: "Quality Testing" },
-    { key: "WAREHOUSING", label: "Warehousing" },
-  ];
+  const { data: toDistrictsResponse } = useQuery({
+    queryKey: ["districts", createForm.toState],
+    queryFn: () => getData(apiRoutes.district.getAll, { state: createForm.toState, page: 1, limit: 100 }),
+    enabled: !!createForm.toState,
+  });
+  const toDistrictOptions = useMemo(() => extractArray(toDistrictsResponse), [toDistrictsResponse]);
 
-  const { data: enquiryRes, isLoading: isDealLoading } = useQuery({
-    queryKey: ["execution-enquiries"],
-    queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 200, sort: "createdAt:desc" }),
+  const { data: companiesResponse } = useQuery({
+    queryKey: ["associate-companies"],
+    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 1000 }),
+    enabled: isAdmin,
+  });
+  const companyOptions = useMemo(() => extractArray(companiesResponse), [companiesResponse]);
+
+  // Data Fetching — deal executions come from inquiries that have executionInquiries embedded
+  const { data: dealExecutionsResponse, isLoading: dealsLoading } = useQuery({
+    queryKey: ["deal-executions"],
+    queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 100, hasExecution: true }),
     enabled: activeTab === "deal-execution",
   });
 
-  const { data: interestsStatusRes } = useQuery({
-    queryKey: ["company-interests-status"],
-    queryFn: () => getData("/auth/company-interests/status"),
-    enabled: !!user?.id,
-  });
-
-  const {
-    data: serviceRequestRes,
-    isLoading: isServiceLoading,
-    isError: isServiceError,
-    error: serviceRequestError,
-  } = useQuery({
+  const { data: serviceRequestsResponse, isLoading: requestsLoading } = useQuery({
     queryKey: ["service-requests", serviceTypeFilter],
     queryFn: () =>
       getData(apiRoutes.serviceRequests.list, {
         page: 1,
-        limit: 200,
-        ...(serviceTypeFilter !== "ALL" ? { requestType: serviceTypeFilter } : {}),
+        limit: 100,
+        ...(serviceTypeFilter !== "ALL" && { requestType: serviceTypeFilter }),
       }),
     enabled: activeTab === "service-requests",
   });
 
-  const { data: statesResponse } = useQuery({
-    queryKey: ["states", "service-requests"],
-    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 500 }),
-    enabled: activeTab === "service-requests",
-  });
+  // Flatten embedded executionInquiries from enquiry list
+  const rawInquiries = useMemo(() => extractArray(dealExecutionsResponse), [dealExecutionsResponse]);
+  const serviceRequests = useMemo(() => extractArray(serviceRequestsResponse), [serviceRequestsResponse]);
+  const isServiceApiMissing = activeTab === "service-requests" && !serviceRequestsResponse?.data && !requestsLoading;
 
-  const { data: districtsResponse } = useQuery({
-    queryKey: ["districts", "service-requests"],
-    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
-    enabled: activeTab === "service-requests",
-  });
-
-  const { data: companiesResponse } = useQuery({
-    queryKey: ["service-requests-company-options"],
-    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 1000, sort: "name:asc" }),
-    enabled: activeTab === "service-requests" && isAdmin,
-  });
-
-  const states = useMemo(() => {
-    const raw = statesResponse?.data?.data;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw)) return raw;
-    return [];
-  }, [statesResponse]);
-
-  const districts = useMemo(() => {
-    const raw = districtsResponse?.data?.data;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw)) return raw;
-    return [];
-  }, [districtsResponse]);
-
-  const companyOptions = useMemo(() => {
-    const raw = companiesResponse?.data?.data;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw)) return raw;
-    return [];
-  }, [companiesResponse]);
-
-  const fromDistrictOptions = useMemo(
-    () => districts.filter((item: any) => String(item?.state?._id || item?.state || "") === createForm.fromState),
-    [districts, createForm.fromState]
-  );
-
-  const toDistrictOptions = useMemo(
-    () => districts.filter((item: any) => String(item?.state?._id || item?.state || "") === createForm.toState),
-    [districts, createForm.toState]
-  );
-
-  const enquiries = useMemo(() => {
-    const raw = enquiryRes?.data?.data;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw)) return raw;
-    return [];
-  }, [enquiryRes]);
-
-  const serviceRequests = useMemo<ServiceRequestRow[]>(() => {
-    const raw = serviceRequestRes?.data?.data;
-    if (Array.isArray(raw?.data)) return raw.data as ServiceRequestRow[];
-    if (Array.isArray(raw)) return raw as ServiceRequestRow[];
-    return [];
-  }, [serviceRequestRes]);
-
-  const isServiceApiMissing = Boolean(
-    isServiceError && (serviceRequestError as any)?.response?.status === 404
-  );
-
-  const rows = useMemo(() => {
-    const userId = user?.id?.toString();
-    const configuredInterests = Array.isArray((interestsStatusRes as any)?.data?.data?.companyInterests)
-      ? (interestsStatusRes as any).data.data.companyInterests.map((x: any) => String(x || "").toUpperCase())
-      : Array.isArray((user as any)?.companyInterests)
-        ? (user as any).companyInterests.map((x: any) => String(x || "").toUpperCase())
-        : [];
-    const isSystemAdmin = isAdmin;
-    const isProviderAssociate = roleLower === "associate";
-
-    return enquiries.flatMap((enq: any) => {
-      const buyerId = (enq?.buyerAssociateId?._id || enq?.buyerAssociateId || "").toString();
-      const sellerId = (enq?.sellerAssociateId?._id || enq?.sellerAssociateId || "").toString();
-      const isBuyer = userId && buyerId === userId;
-      const isSeller = userId && sellerId === userId;
-      const assignedOperatorId = (enq?.assignedOperatorId?._id || enq?.assignedOperatorId || "").toString();
-      const isAssignedOperator = Boolean(isOperatorUser && userId && assignedOperatorId === userId);
-      const createdById = String(enq?.createdBy?._id || enq?.createdBy || "");
-      const isCreatedByOperator = Boolean(isOperatorUser && userId && createdById === userId);
-      const canSeeEnquiry = isSystemAdmin || !isOperatorUser || isAssignedOperator || isCreatedByOperator;
-      if (!canSeeEnquiry) return [];
-
-      return (Array.isArray(enq?.executionInquiries) ? enq.executionInquiries : [])
-        .map((task: any, idx: number) => {
-          const owner = String(task?.ownerBy || "");
-          const candidates = Array.isArray(task?.candidateProviders) ? task.candidateProviders : [];
-          const providerCandidate = Boolean(
-            myCompanyId && candidates.some((c: any) => String(c?._id || c || "") === myCompanyId)
-          );
-          const canBid =
-            providerCandidate ||
-            (owner === "buyer" && isBuyer) ||
-            (owner === "seller" && isSeller);
-          const canCommit = isSystemAdmin || isAssignedOperator;
-          const canViewBidDetails = isSystemAdmin || isAssignedOperator || providerCandidate;
-          const typeUpper = String(task?.type || "").toUpperCase();
-          const matchesInterest = configuredInterests.length === 0 || configuredInterests.includes(typeUpper);
-          const shouldShowByDefault = isSystemAdmin || isAssignedOperator || !isProviderAssociate || (providerCandidate && matchesInterest);
-          if (!shouldShowByDefault) return null;
-
-          const productName = enq?.productId?.name || enq?.productVariant?.product?.name || "Unknown Product";
-          const variantName = enq?.productVariant?.name || enq?.variantId?.name || "Unknown Variant";
-          const buyerName = enq?.buyerAssociateId?.name || enq?.buyerAssociateName || "Buyer";
-          const sellerName = enq?.sellerAssociateId?.name || enq?.sellerAssociateName || "Supplier";
-
-          return {
-            key: `${enq?._id}-${task?.type}-${idx}`,
-            enquiryId: enq?._id,
-            enquiryCode: String(enq?._id || "").slice(-6).toUpperCase(),
-            anchorName: `${productName} - ${variantName}`,
-            productName,
-            variantName,
-            buyerName,
-            sellerName,
-            type: task?.type,
-            title: task?.title || task?.type,
-            ownerBy: owner,
-            status: task?.status || "OPEN",
-            bidAmount: task?.bidAmount,
-            commitNote: task?.commitNote,
-            details: task?.details || {},
-            candidateCount: candidates.length,
-            candidateProviders: candidates,
-            providerCandidate,
-            bids: Array.isArray(task?.bids) ? task.bids : [],
-            committedProvider: task?.committedProvider || null,
-            canBid,
-            canCommit,
-            canViewBidDetails,
-            matchesInterest,
-          };
-        })
-        .filter(Boolean) as any[];
-    });
-  }, [enquiries, user, interestsStatusRes, roleLower, myCompanyId, isAdmin, isOperatorUser]);
-
-  const filteredRows = useMemo(() => {
-    if (activeType === "ALL") return rows;
-    return rows.filter((row: any) => String(row?.type || "").toUpperCase() === activeType);
-  }, [rows, activeType]);
-
-  const enquiriesWithTasks = useMemo(() => {
-    const grouped: Record<string, any> = {};
-    for (const row of filteredRows) {
-      const key = String(row.enquiryId || "");
-      if (!grouped[key]) {
-        grouped[key] = {
-          enquiryId: row.enquiryId,
-          enquiryCode: row.enquiryCode,
-          anchorName: row.anchorName,
-          productName: row.productName,
-          variantName: row.variantName,
-          buyerName: row.buyerName,
-          sellerName: row.sellerName,
-          tradeType: row.details?.tradeType || "DOMESTIC",
-          from: row.details?.from || "N/A",
-          to: row.details?.to || "N/A",
-          tasks: [],
-        };
-      }
-      grouped[key].tasks.push(row);
-    }
-    return Object.values(grouped);
-  }, [filteredRows]);
-
-  const createServiceRequestMutation = useMutation({
-    mutationFn: () =>
-      postData(apiRoutes.serviceRequests.create, {
-        requestType: createForm.requestType,
-        title: createForm.title,
-        serviceSpecifications: createForm.serviceSpecifications,
-        fromState: createForm.fromState,
-        fromDistrict: createForm.fromDistrict,
-        toState: createForm.toState || null,
-        toDistrict: createForm.toDistrict || null,
-        requiredFromDate: createForm.requiredFromDate || null,
-        requiredToDate: createForm.requiredToDate || null,
-        createdByCompanyId: isAdmin ? createForm.createdByCompanyId || null : undefined,
-      }),
-    onSuccess: () => {
-      toast.success("Service request created.");
-      queryClient.invalidateQueries({ queryKey: ["service-requests"] });
-      setCreateForm({
-        requestType: "PACKAGING",
-        title: "",
-        serviceSpecifications: "",
-        fromState: "",
-        fromDistrict: "",
-        toState: "",
-        toDistrict: "",
-        requiredFromDate: "",
-        requiredToDate: "",
-        createdByCompanyId: "",
-      });
-      setIsCreateModalOpen(false);
-    },
-    onError: (err: any) => {
-      if (showServiceRequestApiUnavailableToast(err)) return;
-      toast.error(err?.response?.data?.message || "Failed to create service request.");
-    },
-  });
-
+  // Mutations
   const updateTaskMutation = useMutation({
-    mutationFn: async (payload: {
-      enquiryId: string;
-      type: string;
-      bidAmount?: number;
-      commitNote?: string;
-      status?: string;
-      committedProvider?: string;
-    }) => {
-      return patchData(`${apiRoutes.enquiry.getAll}/${payload.enquiryId}/execution-inquiries/${encodeURIComponent(payload.type)}`, {
+    mutationFn: (payload: { enquiryId: string; type: string; bidAmount?: number; commitNote?: string; committedProvider?: string; status?: string }) =>
+      patchData(`${apiRoutes.enquiry.getAll}/${payload.enquiryId}/execution-inquiries/${payload.type}`, {
         bidAmount: payload.bidAmount,
         commitNote: payload.commitNote,
-        status: payload.status,
         committedProvider: payload.committedProvider,
-      });
-    },
+        status: payload.status,
+      }),
     onSuccess: () => {
-      toast.success("Execution inquiry updated.");
-      queryClient.invalidateQueries({ queryKey: ["execution-enquiries"] });
+      toast.success("Task updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["deal-executions"] });
     },
-    onError: () => {
-      toast.error("Failed to update execution inquiry.");
-    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to update task"),
   });
 
   const bidServiceRequestMutation = useMutation({
     mutationFn: (payload: { id: string; amount: number; note: string }) =>
-      patchData(apiRoutes.serviceRequests.bid(payload.id), {
-        amount: payload.amount,
-        note: payload.note,
-      }),
+      postData(`${apiRoutes.serviceRequests.list}/${payload.id}/bid`, { amount: payload.amount, note: payload.note }),
     onSuccess: () => {
-      toast.success("Bid submitted.");
+      toast.success("Bid placed successfully");
       queryClient.invalidateQueries({ queryKey: ["service-requests"] });
     },
-    onError: (err: any) => {
-      if (showServiceRequestApiUnavailableToast(err)) return;
-      toast.error(err?.response?.data?.message || "Failed to submit bid.");
-    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to place bid"),
   });
 
   const commitServiceRequestMutation = useMutation({
     mutationFn: (payload: { id: string; committedProvider?: string; bidAmount?: number; commitNote?: string }) =>
-      patchData(apiRoutes.serviceRequests.commit(payload.id), payload),
+      postData(`${apiRoutes.serviceRequests.list}/${payload.id}/commit`, payload),
     onSuccess: () => {
-      toast.success("Service request committed.");
+      toast.success("Request committed successfully");
       queryClient.invalidateQueries({ queryKey: ["service-requests"] });
     },
-    onError: (err: any) => {
-      if (showServiceRequestApiUnavailableToast(err)) return;
-      toast.error(err?.response?.data?.message || "Failed to commit service request.");
-    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to commit request"),
   });
 
   const updateServiceStatusMutation = useMutation({
-    mutationFn: (payload: { id: string; status: string }) => patchData(apiRoutes.serviceRequests.status(payload.id), { status: payload.status }),
+    mutationFn: (payload: { id: string; status: string }) =>
+      patchData(`${apiRoutes.serviceRequests.list}/${payload.id}/status`, { status: payload.status }),
     onSuccess: () => {
-      toast.success("Service request status updated.");
+      toast.success("Status updated");
       queryClient.invalidateQueries({ queryKey: ["service-requests"] });
     },
-    onError: (err: any) => {
-      if (showServiceRequestApiUnavailableToast(err)) return;
-      toast.error(err?.response?.data?.message || "Failed to update status.");
-    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to update status"),
   });
 
-  const switchTab = (tab: "deal-execution" | "service-requests") => {
-    setActiveTab(tab);
-    const params = new URLSearchParams(searchParams.toString());
-    if (tab === "service-requests") params.set("tab", "service-requests");
-    else params.delete("tab");
-    router.replace(`/dashboard/execution-enquiries${params.toString() ? `?${params.toString()}` : ""}`);
-  };
+  const createServiceRequestMutation = useMutation({
+    mutationFn: () => postData(apiRoutes.serviceRequests.create, createForm),
+    onSuccess: () => {
+      toast.success("Service request created");
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["service-requests"] });
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to create request"),
+  });
 
-  const canCreateServiceRequest = isAdmin || isOperatorUser || roleLower === "associate";
+  // Build the enquiry-grouped task list from embedded executionInquiries
+  const enquiriesWithTasks = useMemo(() => {
+    const results = rawInquiries
+      .map((inquiry: any) => {
+        const tasks = (inquiry.executionInquiries || []).map((task: any) => ({
+          ...task,
+          key: `${inquiry._id}-${task.type}`,
+          enquiryId: inquiry._id,
+        }));
+        if (!tasks.length) return null;
+        return {
+          id: inquiry._id,
+          enquiryCode: inquiry.enquiryCode || (inquiry._id ? inquiry._id.slice(-6).toUpperCase() : "N/A"),
+          product: inquiry.productId?.name || inquiry.productVariant?.product?.name || "Global Commodity",
+          variant: inquiry.productVariant?.name || "Standard Variant",
+          buyer: inquiry.buyerAssociateId?.name || "Global Buyer",
+          seller: inquiry.sellerAssociateId?.name || "Global Seller",
+          tasks,
+        };
+      })
+      .filter(Boolean) as any[];
 
-  if ((activeTab === "deal-execution" && isDealLoading) || (activeTab === "service-requests" && isServiceLoading)) {
-    return <BrandedLoader message="Loading execution enquiries" />;
-  }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return results.filter(
+        (e) =>
+          e.enquiryCode.toLowerCase().includes(q) ||
+          e.product.toLowerCase().includes(q) ||
+          e.buyer.toLowerCase().includes(q) ||
+          e.seller.toLowerCase().includes(q)
+      );
+    }
+    return results;
+  }, [rawInquiries, searchQuery]);
+
+  const getName = (obj: any) => obj?.name || obj?.email || String(obj || "Unknown Entity");
+  const formatDate = (d: any) => (d ? dayjs(d).format("DD MMM, YYYY") : "-");
+
+  const SectionLoader = () => (
+    <div className="flex flex-col items-center justify-center py-24 gap-4">
+      <div className="w-12 h-12 border-2 border-warning-500/20 border-t-warning-500 rounded-full animate-spin" />
+      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500 animate-pulse">Syncing Tactical Data</p>
+    </div>
+  );
 
   return (
-    <section>
-      <Title title="Execution Enquiries Panel" />
-
-      <Card className="mt-3 border border-default-200 bg-content1/70">
-        <CardBody className="py-3">
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
-            <ButtonGroup radius="sm" variant="flat">
-              <Button
-                color={activeTab === "deal-execution" ? "warning" : "default"}
-                variant={activeTab === "deal-execution" ? "solid" : "flat"}
-                startContent={<FiLayers size={14} />}
-                onPress={() => switchTab("deal-execution")}
-              >
-                Deal Execution
-              </Button>
-              <Button
-                color={activeTab === "service-requests" ? "warning" : "default"}
-                variant={activeTab === "service-requests" ? "solid" : "flat"}
-                startContent={<FiBriefcase size={14} />}
-                onPress={() => switchTab("service-requests")}
-              >
-                Service Requests
-              </Button>
-            </ButtonGroup>
-
-            {activeTab === "service-requests" && canCreateServiceRequest && (
-              <Button
-                color="primary"
-                size="md"
-                className="w-full md:w-auto md:ml-auto font-bold shadow-lg shadow-primary/20"
-                startContent={<FiPlus size={18} />}
-                onPress={() => setIsCreateModalOpen(true)}
-              >
-                Create Partial Service
-              </Button>
-            )}
-          </div>
-        </CardBody>
-      </Card>
-
-      {activeTab === "deal-execution" && (
-        <>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {typeFilters.map((item) => (
-              <Chip
-                key={item.key}
-                variant={activeType === item.key ? "solid" : "flat"}
-                color={activeType === item.key ? "warning" : "default"}
-                className="cursor-pointer"
-                onClick={() => setActiveType(item.key)}
-              >
-                {item.label}
-              </Chip>
-            ))}
+    <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground selection:bg-warning-500/30">
+      {/* Dynamic Header: Command Interface */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-divider">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-warning-500 text-black shadow-lg shadow-warning-500/20">
+              <FiCpu className="text-2xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">Execution Ecosystem</h1>
+              <p className="text-xs font-bold text-default-500 mt-2 uppercase tracking-widest opacity-80">Autonomous Service Routing & Logistics Terminal</p>
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-5">
-            {enquiriesWithTasks.map((enq: any) => (
-              <Card key={enq.enquiryId} className="border border-default-200 shadow-sm">
-                <CardHeader className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-widest font-bold text-default-400">Execution Anchor</div>
-                    <div className="text-base font-bold text-foreground">{enq.anchorName}</div>
-                    <div className="text-xs text-default-500 mt-1">Enquiry #{enq.enquiryCode}</div>
-                  </div>
-                  <div className="rounded-md bg-default-100 p-2 text-xs text-default-600 min-w-[220px]">
-                    <div>Trade: {enq.tradeType}</div>
-                    <div>From: {enq.from}</div>
-                    <div>To: {enq.to}</div>
-                    <div>Buyer: {enq.buyerName}</div>
-                    <div>Supplier: {enq.sellerName}</div>
-                  </div>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {enq.tasks.map((row: any) => (
-                      <Card key={row.key} className="border border-default-200 relative overflow-hidden">
-                        {/* Recently Opened / New Indicator Dot */}
-                        {enq.createdAt && (Date.now() - new Date(enq.createdAt).getTime() < 86400000) && (
-                          <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                            </span>
-                          </div>
-                        )}
-                        <CardHeader className="flex justify-between items-start gap-2">
-                          <div>
-                            <div className="font-semibold">{row.title}</div>
-                            <div className="text-xs text-default-500">Owner: {String(row.ownerBy || "obaol").toUpperCase()}</div>
-                            <div className="text-[10px] text-default-400">Providers: {row.candidateCount || 0}</div>
-                          </div>
-                          <Chip size="sm" color={row.status === "COMPLETED" ? "success" : row.status === "IN_PROGRESS" ? "warning" : "default"} variant="flat">
-                            {row.status}
-                          </Chip>
-                        </CardHeader>
-                        <CardBody className="flex flex-col gap-3">
-                          {String(row.type || "").toUpperCase() === "PACKAGING" ? (
-                            <div className="rounded-md bg-default-100 p-2 text-xs text-default-600">
-                              <div>From State: {row.details?.fromState || "N/A"}</div>
-                              <div>From District: {row.details?.fromDistrict || "N/A"}</div>
-                              <div className="mt-1">Packaging Specs: {row.details?.packagingSpecifications || "Not provided"}</div>
-                              {row.providerCandidate ? <div className="mt-1 text-success">You are eligible to bid for this inquiry.</div> : null}
-                            </div>
-                          ) : (
-                            <div className="rounded-md bg-default-100 p-2 text-xs text-default-600">
-                              {row.details?.routeNotes ? <div>Notes: {row.details.routeNotes}</div> : <div>No additional notes.</div>}
-                              {row.providerCandidate ? <div className="mt-1 text-success">You are eligible to bid for this inquiry.</div> : null}
-                            </div>
-                          )}
+          <div className="flex items-center gap-1 mt-4">
+            <Button
+              size="sm"
+              variant={activeTab === "deal-execution" ? "solid" : "light"}
+              color={activeTab === "deal-execution" ? "warning" : "default"}
+              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-warning-500/20" : "opacity-60"}`}
+              onPress={() => setActiveTab("deal-execution")}
+            >
+              <FiActivity className="mr-2" /> Deal Execution
+            </Button>
+            <Button
+              size="sm"
+              variant={activeTab === "service-requests" ? "solid" : "light"}
+              color={activeTab === "service-requests" ? "warning" : "default"}
+              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "service-requests" ? "shadow-lg shadow-warning-500/20" : "opacity-60"}`}
+              onPress={() => setActiveTab("service-requests")}
+            >
+              <FiBox className="mr-2" /> Service Requests
+            </Button>
+          </div>
+        </div>
 
-                          <div className="rounded-md border border-default-200 bg-default-50/40 p-2 text-xs text-default-700">
-                            <div className="font-semibold mb-1">Bid Summary</div>
-                            <div>Total Bids: {Array.isArray(row.bids) ? row.bids.length : 0}</div>
-                            <div>Committed Provider: {getName(row.committedProvider)}</div>
-                            <div>Awarded Amount: {typeof row.bidAmount === "number" ? row.bidAmount : "-"}</div>
-                            {row.canViewBidDetails ? (
-                              <div className="mt-2 overflow-x-auto">
-                                <table className="w-full min-w-[320px] text-[11px]">
-                                  <thead>
-                                    <tr className="text-default-500">
-                                      <th className="text-left py-1">Company</th>
-                                      <th className="text-left py-1">Amount</th>
-                                      <th className="text-left py-1">Note</th>
-                                      <th className="text-left py-1">Status</th>
-                                      <th className="text-left py-1">Updated</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(Array.isArray(row.bids) ? row.bids : []).map((bid: any, bidIdx: number) => (
-                                      <tr key={`${row.key}-bid-${bidIdx}`} className="border-t border-default-200/60">
-                                        <td className="py-1">{getName(bid?.company)}</td>
-                                        <td className="py-1">
-                                          {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? bid.amount : "-"}
-                                        </td>
-                                        <td className="py-1">{String(bid?.note || "-")}</td>
-                                        <td className="py-1">{String(bid?.status || "SUBMITTED")}</td>
-                                        <td className="py-1">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+        <div className="flex items-center gap-3">
+          <Input
+            size="sm"
+            placeholder="Search Intelligence..."
+            radius="full"
+            startContent={<FiSearch className="text-default-400" />}
+            className="w-full md:w-64"
+            classNames={{
+              inputWrapper: "bg-default-100/50 backdrop-blur-md border border-divider h-10 px-4",
+              input: "text-xs font-bold"
+            }}
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
+          {activeTab === "service-requests" && (
+            <Button
+              isIconOnly
+              color="warning"
+              className="rounded-xl shadow-lg shadow-warning-500/20 h-10 w-10 min-w-0"
+              onPress={() => setIsCreateModalOpen(true)}
+            >
+              <FiPlus className="text-lg" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === "deal-execution" ? (
+          <motion.div
+            key="deal-exec"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex flex-col gap-6"
+          >
+            {dealsLoading && <SectionLoader />}
+            {!dealsLoading && enquiriesWithTasks.map((enq) => (
+              <motion.div
+                key={enq.id}
+                layout
+                className="group relative overflow-hidden rounded-[2rem] border border-divider bg-default-50/50 backdrop-blur-xl hover:bg-default-100/50 transition-all duration-500"
+              >
+                <div className="p-6 md:p-8">
+                  {/* Enquiry Header Card */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <div className="flex items-center gap-5">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-warning-400 to-warning-600 flex items-center justify-center text-black shadow-xl shrink-0">
+                        <FiTerminal className="text-2xl" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
+                            Anchor
+                          </span>
+                          <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                        </div>
+                        <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
+                        <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
+                          <span className="opacity-60">{enq.variant}</span>
+                          <span className="w-1 h-1 rounded-full bg-divider" />
+                          <span className="text-warning-500/80">{enq.tasks.length} Active Nodes</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-10">
+                      <div className="hidden lg:flex flex-col text-right">
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Entity Origin</span>
+                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
+                      </div>
+                      <div className="w-px h-10 bg-divider hidden lg:block" />
+                      <div className="flex flex-col text-right">
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
+                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Task Manifest */}
+                  <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-1 gap-3">
+                      {enq.tasks.map((task: any) => (
+                        <div
+                          key={task.key}
+                          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300 group/task"
+                        >
+                          <div className="flex items-center gap-5 min-w-0">
+                            <div className={`p-2.5 rounded-xl border border-divider ${task.status === "COMPLETED" ? "bg-success-500/10 text-success-500" : "bg-warning-500/10 text-warning-600"} shrink-0`}>
+                              <FiActivity className="text-lg" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-black text-foreground tracking-tight uppercase leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-black uppercase tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status}</span>
+                                {task.committedProvider && (
+                                  <>
+                                    <span className="text-xs text-default-400">•</span>
+                                    <span className="text-xs font-black text-foreground/70 uppercase truncate">Committed: {getName(task.committedProvider)}</span>
+                                  </>
+                                )}
                               </div>
-                            ) : (
-                              <div className="mt-1 text-default-500">Detailed bid amounts are restricted for this task.</div>
+                            </div>
+                          </div>
+
+                          {/* Selection & Note Area */}
+                          <div className="w-full lg:w-[350px] flex items-center gap-3">
+                            {task.canCommit && (
+                              /* @ts-ignore */
+                              <Autocomplete
+                                size="sm"
+                                placeholder="Select Entity"
+                                variant="bordered"
+                                radius="lg"
+                                selectedKey={selectedExecutionCommitProvider[task.key] || ""}
+                                onSelectionChange={(key) =>
+                                  setSelectedExecutionCommitProvider((prev) => ({ ...prev, [task.key]: String(key || "") }))
+                                }
+                                className="w-1/2"
+                                classNames={{
+                                  trigger: "h-8 min-h-0 text-xs bg-content2/50 border-default-200/50 px-3"
+                                }}
+                                items={(Array.isArray(task.candidateProviders) && task.candidateProviders.length > 0
+                                  ? task.candidateProviders
+                                  : Array.isArray(task.bids)
+                                    ? task.bids.map((bid: any) => bid?.company).filter(Boolean)
+                                    : []) as any[]}
+                              >
+                                {(company: any) => {
+                                  const cId = String(company?._id || company || "");
+                                  const cName = getName(company);
+                                  return (
+                                    <AutocompleteItem key={cId} textValue={cName} className="font-black text-xs">
+                                      {cName}
+                                    </AutocompleteItem>
+                                  );
+                                }}
+                              </Autocomplete>
+                            )}
+
+                            {(task.canBid || task.canCommit) && (
+                              <Input
+                                size="sm"
+                                placeholder="Execution note..."
+                                variant="bordered"
+                                radius="lg"
+                                className="w-1/2"
+                                classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
+                                value={noteMap[task.key] ?? (task.commitNote || "")}
+                                onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [task.key]: v }))}
+                              />
                             )}
                           </div>
 
-                          {row.canCommit ? (
-                            <Autocomplete
+                          {/* Quick Action Strip */}
+                          <div className="w-full lg:w-[150px] flex items-center gap-2 lg:justify-end">
+                            <Input
                               size="sm"
-                              label="Select Company to Commit (Optional)"
-                              selectedKey={selectedExecutionCommitProvider[row.key] || ""}
-                              onSelectionChange={(key) =>
-                                setSelectedExecutionCommitProvider((prev) => ({ ...prev, [row.key]: String(key || "") }))
-                              }
-                            >
-                              {(Array.isArray(row.candidateProviders) && row.candidateProviders.length > 0
-                                ? row.candidateProviders
-                                : Array.isArray(row.bids)
-                                  ? row.bids.map((bid: any) => bid?.company).filter(Boolean)
-                                  : []
-                              ).map((company: any, idx: number) => {
-                                const companyId = String(company?._id || company || "");
-                                const companyName = getName(company);
-                                return (
-                                  <AutocompleteItem key={companyId || `company-${idx}`} textValue={companyName}>
-                                    {companyName}
-                                  </AutocompleteItem>
-                                );
-                              })}
-                            </Autocomplete>
-                          ) : null}
+                              type="number"
+                              placeholder="Bid"
+                              variant="bordered"
+                              radius="lg"
+                              className="w-20"
+                              classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-2", input: "text-xs font-black" }}
+                              value={bidMap[task.key] ?? (task.bidAmount?.toString() || "")}
+                              onValueChange={(v) => setBidMap((prev) => ({ ...prev, [task.key]: v }))}
+                              isDisabled={!(task.canBid || task.canCommit)}
+                              startContent={<span className="text-default-400 text-xs font-black">₹</span>}
+                            />
+                            {task.canBid && (
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="warning"
+                                className="font-black text-xs uppercase tracking-wide rounded-lg h-8 px-4 shrink-0"
+                                isLoading={updateTaskMutation.isPending}
+                                onPress={() =>
+                                  updateTaskMutation.mutate({
+                                    enquiryId: task.enquiryId,
+                                    type: task.type,
+                                    bidAmount: Number(bidMap[task.key] || task.bidAmount || 0),
+                                    commitNote: noteMap[task.key] ?? task.commitNote,
+                                    status: isAdmin ? "IN_PROGRESS" : undefined,
+                                  })
+                                }
+                              >
+                                Quote
+                              </Button>
+                            )}
+                            {task.canCommit && (
+                              <Button
+                                size="sm"
+                                color="success"
+                                className="font-black text-xs uppercase tracking-wide rounded-lg h-8 px-4 shrink-0"
+                                isDisabled={!selectedExecutionCommitProvider[task.key]}
+                                isLoading={updateTaskMutation.isPending}
+                                onPress={() =>
+                                  updateTaskMutation.mutate({
+                                    enquiryId: task.enquiryId,
+                                    type: task.type,
+                                    bidAmount: Number(bidMap[task.key] || task.bidAmount || 0),
+                                    commitNote: noteMap[task.key] || task.commitNote,
+                                    committedProvider: selectedExecutionCommitProvider[task.key] || undefined,
+                                  })
+                                }
+                              >
+                                Commit
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
 
+            {!dealsLoading && enquiriesWithTasks.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
+                <FiCompass className="text-4xl animate-spin-slow" />
+                <div className="text-center">
+                  <h3 className="text-sm font-black uppercase tracking-widest">Void Detected</h3>
+                  <p className="font-black text-default-500 uppercase text-xs tracking-widest mt-2">All deal ecosystems are currently dormant or filtered.</p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="service-req"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            {isServiceApiMissing ? (
+              <Card className="mt-3 border border-danger-300 bg-danger-50/70 dark:bg-danger-950/20">
+                <CardBody className="py-3 text-sm text-danger-700 dark:text-danger-300">
+                  Service Requests API is currently unavailable. Please ensure the backend is running and try again.
+                </CardBody>
+              </Card>
+            ) : null}
+            <div className="mt-3 flex flex-wrap gap-2 items-center">
+              <Chip
+                variant={serviceTypeFilter === "ALL" ? "solid" : "flat"}
+                color={serviceTypeFilter === "ALL" ? "warning" : "default"}
+                className="cursor-pointer"
+                onClick={() => setServiceTypeFilter("ALL")}
+              >
+                All Types
+              </Chip>
+              {SERVICE_TYPE_OPTIONS.map((item) => (
+                <Chip
+                  key={item.key}
+                  variant={serviceTypeFilter === item.key ? "solid" : "flat"}
+                  color={serviceTypeFilter === item.key ? "warning" : "default"}
+                  className="cursor-pointer"
+                  onClick={() => setServiceTypeFilter(item.key)}
+                >
+                  {item.label}
+                </Chip>
+              ))}
+            </div>
+
+            {requestsLoading ? (
+              <SectionLoader />
+            ) : (
+              <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {serviceRequests.map((item) => {
+                  const key = String(item._id);
+                  const bids = Array.isArray(item.bids) ? item.bids : [];
+                  const candidates = Array.isArray(item.candidateProviders) ? item.candidateProviders : [];
+                  const commitOptions = candidates.length ? candidates : bids.map((bid: any) => bid?.company).filter(Boolean);
+                  const isCandidate = !!myCompanyId && candidates.some((provider: any) => String(provider?._id || provider) === myCompanyId);
+                  const creatorAssociateId = String((item as any)?.createdByAssociateId?._id || (item as any)?.createdByAssociateId || "");
+                  const isCreatorAssociate = roleLower === "associate" && creatorAssociateId === String(user?.id || "");
+                  const canViewServiceBidDetails = isAdmin || isCandidate || isCreatorAssociate;
+                  const canBid = roleLower === "associate" ? isCandidate : isAdmin;
+
+                  return (
+                    <Card key={key} className="border border-default-200/50 shadow-sm relative overflow-hidden bg-content1/70 backdrop-blur-md rounded-xl">
+                      {/* Recently Opened / New Indicator Dot */}
+                      {item.createdAt && Date.now() - new Date(item.createdAt).getTime() < 86400000 && (
+                        <div className="absolute top-1 right-1 z-20 flex items-center justify-center">
+                          <span className="relative flex h-1 w-1">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1 w-1 bg-success-500"></span>
+                          </span>
+                        </div>
+                      )}
+                      <CardHeader className="px-3 py-2 flex justify-between items-center gap-2 border-b border-default-100/50">
+                        <div className="flex items-center gap-3">
+                          <div className="text-xs uppercase tracking-widest font-black text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded w-fit">{item.requestType}</div>
+                          <div className="font-black text-sm text-foreground tracking-tight uppercase">{item.title}</div>
+                        </div>
+                        <div className={`text-xs font-black uppercase tracking-tight ${item.status === "COMPLETED" ? "text-success-600" : "text-warning-600"}`}>
+                          ● {item.status}
+                        </div>
+                      </CardHeader>
+                      <CardBody className="p-3 pt-2 flex flex-col gap-3">
+                        <div className="rounded-xl bg-default-100/40 p-3 text-sm text-default-600 border border-default-200/30">
+                          <div className="italic leading-relaxed font-bold">{item.serviceSpecifications}</div>
+                          <div className="mt-2 flex flex-wrap gap-3 pt-2 border-t border-default-200/50">
+                            <span className="text-xs font-black uppercase text-default-400 opacity-80">
+                              Window: {formatDate(item.requiredFromDate)} → {formatDate(item.requiredToDate)}
+                            </span>
+                            <span className="text-xs font-black uppercase text-default-400 opacity-80">Candidates: {candidates.length}</span>
+                            {isAdmin && <span className="text-xs font-black uppercase text-warning-600/60">Entity: {getName(item.createdByCompanyId)}</span>}
+                          </div>
+                        </div>
+
+                        <div className="rounded-xl border border-default-200/50 bg-default-50/40 p-3 text-xs text-default-700">
+                          <div className="flex items-center justify-between font-black uppercase text-xs tracking-widest text-default-400 mb-2 border-b border-default-200/30 pb-2">
+                            <span>Bid Summary</span>
+                            <span>Bids: {bids.length}</span>
+                          </div>
+                          {canViewServiceBidDetails ? (
+                            <div className="overflow-x-auto scrollbar-hide">
+                              <table className="w-full min-w-[320px] text-xs">
+                                <thead>
+                                  <tr className="text-default-400 font-black uppercase tracking-tight">
+                                    <th className="text-left py-1">Entity</th>
+                                    <th className="text-left py-1">Quote</th>
+                                    <th className="text-left py-1">Status</th>
+                                    <th className="text-left py-1">Meta</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {bids.map((bid: any, bidIdx: number) => (
+                                    <tr key={`${key}-service-bid-${bidIdx}`} className="border-t border-default-100/50 font-black">
+                                      <td className="py-1 truncate max-w-[120px] text-foreground">{getName(bid?.company)}</td>
+                                      <td className="py-1 text-warning-600 font-black">
+                                        {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? `₹${bid.amount.toLocaleString()}` : "-"}
+                                      </td>
+                                      <td className="py-1 text-default-500 opacity-80 text-xs">{String(bid?.status || "SUBMITTED")}</td>
+                                      <td className="py-1 text-xs text-default-400 opacity-60">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="mt-1 text-default-500">Detailed bid amounts are restricted for this request.</div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
                           <Input
                             size="sm"
                             type="number"
-                            label="Bid Amount"
-                            value={bidMap[row.key] ?? (row.bidAmount?.toString() || "")}
-                            onValueChange={(v) => setBidMap((prev) => ({ ...prev, [row.key]: v }))}
-                            isDisabled={!(row.canBid || row.canCommit)}
+                            placeholder="Bid amount"
+                            variant="bordered"
+                            radius="lg"
+                            classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
+                            value={bidMap[key] ?? ""}
+                            onValueChange={(v) => setBidMap((prev) => ({ ...prev, [key]: v }))}
+                            isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
                           />
-                          <Textarea
+                          <Input
                             size="sm"
-                            label="Commit Note"
-                            value={noteMap[row.key] ?? (row.commitNote || "")}
-                            onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [row.key]: v }))}
-                            isDisabled={!(row.canBid || row.canCommit)}
+                            placeholder="Note"
+                            variant="bordered"
+                            radius="lg"
+                            classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
+                            value={noteMap[key] ?? ""}
+                            onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [key]: v }))}
+                            isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
                           />
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="warning"
-                              isDisabled={!row.canBid}
-                              isLoading={updateTaskMutation.isPending}
-                              onPress={() =>
-                                updateTaskMutation.mutate({
-                                  enquiryId: row.enquiryId,
-                                  type: row.type,
-                                  bidAmount: Number(bidMap[row.key] || row.bidAmount || 0),
-                                  commitNote: noteMap[row.key] ?? row.commitNote,
-                                  status: isAdmin ? "IN_PROGRESS" : undefined,
-                                })
-                              }
-                            >
-                              Place Bid
-                            </Button>
-                            <Button
-                              size="sm"
-                              color="success"
-                              isDisabled={
-                                !row.canCommit || !selectedExecutionCommitProvider[row.key]
-                              }
-                              isLoading={updateTaskMutation.isPending}
-                              onPress={() =>
-                                updateTaskMutation.mutate({
-                                  enquiryId: row.enquiryId,
-                                  type: row.type,
-                                  bidAmount: Number(bidMap[row.key] || row.bidAmount || 0),
-                                  commitNote: noteMap[row.key] ?? row.commitNote,
-                                  committedProvider: selectedExecutionCommitProvider[row.key] || undefined,
-                                })
-                              }
-                            >
-                              Commit
-                            </Button>
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-          {enquiriesWithTasks.length === 0 && <div className="text-center text-default-500 py-16">No execution enquiries available yet.</div>}
-        </>
-      )}
-
-      {activeTab === "service-requests" && (
-        <>
-          {isServiceApiMissing ? (
-            <Card className="mt-3 border border-danger-300 bg-danger-50/70 dark:bg-danger-950/20">
-              <CardBody className="py-3 text-sm text-danger-700 dark:text-danger-300">
-                Service Requests API is unavailable on the current backend target.
-                {" "}
-                <span className="font-semibold">Current target:</span> {getActiveBackendTarget()}.
-              </CardBody>
-            </Card>
-          ) : null}
-          <div className="mt-3 flex flex-wrap gap-2 items-center">
-            <Chip
-              variant={serviceTypeFilter === "ALL" ? "solid" : "flat"}
-              color={serviceTypeFilter === "ALL" ? "warning" : "default"}
-              className="cursor-pointer"
-              onClick={() => setServiceTypeFilter("ALL")}
-            >
-              All Types
-            </Chip>
-            {SERVICE_TYPE_OPTIONS.map((item) => (
-              <Chip
-                key={item.key}
-                variant={serviceTypeFilter === item.key ? "solid" : "flat"}
-                color={serviceTypeFilter === item.key ? "warning" : "default"}
-                className="cursor-pointer"
-                onClick={() => setServiceTypeFilter(item.key)}
-              >
-                {item.label}
-              </Chip>
-            ))}
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {serviceRequests.map((item) => {
-              const key = String(item._id);
-              const bids = Array.isArray(item.bids) ? item.bids : [];
-              const candidates = Array.isArray(item.candidateProviders) ? item.candidateProviders : [];
-              const commitOptions = candidates.length
-                ? candidates
-                : bids.map((bid: any) => bid?.company).filter(Boolean);
-              const isCandidate = !!myCompanyId && candidates.some((provider: any) => String(provider?._id || provider) === myCompanyId);
-              const creatorAssociateId = String((item as any)?.createdByAssociateId?._id || (item as any)?.createdByAssociateId || "");
-              const isCreatorAssociate =
-                roleLower === "associate" &&
-                creatorAssociateId === String(user?.id || "");
-              const canViewServiceBidDetails = isAdmin || isCandidate || isCreatorAssociate;
-              const canBid = roleLower === "associate" ? isCandidate : isAdmin;
-
-              return (
-                <Card key={key} className="border border-default-200 shadow-sm relative overflow-hidden">
-                  {/* Recently Opened / New Indicator Dot */}
-                  {item.createdAt && (Date.now() - new Date(item.createdAt).getTime() < 86400000) && (
-                    <div className="absolute top-3 right-3 z-20 flex items-center justify-center">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                      </span>
-                    </div>
-                  )}
-                  <CardHeader className="flex justify-between items-start gap-3">
-                    <div>
-                      <div className="text-[10px] uppercase tracking-widest font-bold text-default-400">{item.requestType}</div>
-                      <div className="font-semibold text-base">{item.title}</div>
-                      <div className="text-xs text-default-500 mt-1">
-                        From: {getName(item.fromState)}, {getName(item.fromDistrict)}
-                        {item.toState || item.toDistrict ? ` | To: ${getName(item.toState)}, ${getName(item.toDistrict)}` : ""}
-                      </div>
-                    </div>
-                    <Chip size="sm" color={item.status === "COMPLETED" ? "success" : item.status === "IN_PROGRESS" ? "warning" : item.status === "CANCELLED" ? "danger" : "default"}>
-                      {item.status}
-                    </Chip>
-                  </CardHeader>
-                  <CardBody className="pt-0 flex flex-col gap-3">
-                    <div className="rounded-md bg-default-100 p-2 text-xs text-default-600">
-                      <div>{item.serviceSpecifications}</div>
-                      <div className="mt-1">Date Window: {formatDate(item.requiredFromDate)} → {formatDate(item.requiredToDate)}</div>
-                      <div className="mt-1">Candidate Providers: {candidates.length}</div>
-                      <div className="mt-1">Created By: {item.createdByRole || "-"}</div>
-                      {isAdmin ? <div className="mt-1">Company: {getName(item.createdByCompanyId)}</div> : null}
-                    </div>
-
-                    <div className="rounded-md border border-default-200 bg-default-50/40 p-2 text-xs text-default-700">
-                      <div className="font-semibold mb-1">Bid Summary</div>
-                      <div>Total Bids: {bids.length}</div>
-                      <div>Committed Provider: {getName(item.committedProvider)}</div>
-                      <div>Awarded Amount: {typeof item.bidAmount === "number" ? item.bidAmount : "-"}</div>
-                      {canViewServiceBidDetails ? (
-                        <div className="mt-2 overflow-x-auto">
-                          <table className="w-full min-w-[320px] text-[11px]">
-                            <thead>
-                              <tr className="text-default-500">
-                                <th className="text-left py-1">Company</th>
-                                <th className="text-left py-1">Amount</th>
-                                <th className="text-left py-1">Note</th>
-                                <th className="text-left py-1">Status</th>
-                                <th className="text-left py-1">Updated</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {bids.map((bid: any, bidIdx: number) => (
-                                <tr key={`${key}-service-bid-${bidIdx}`} className="border-t border-default-200/60">
-                                  <td className="py-1">{getName(bid?.company)}</td>
-                                  <td className="py-1">
-                                    {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? bid.amount : "-"}
-                                  </td>
-                                  <td className="py-1">{String(bid?.note || "-")}</td>
-                                  <td className="py-1">{String(bid?.status || "SUBMITTED")}</td>
-                                  <td className="py-1">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
                         </div>
-                      ) : (
-                        <div className="mt-1 text-default-500">Detailed bid amounts are restricted for this request.</div>
-                      )}
-                    </div>
 
-                    <Input
-                      size="sm"
-                      type="number"
-                      label="Bid Amount"
-                      value={bidMap[key] ?? ""}
-                      onValueChange={(v) => setBidMap((prev) => ({ ...prev, [key]: v }))}
-                      isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
-                    />
-                    <Textarea
-                      size="sm"
-                      label="Bid / Commit Note"
-                      value={noteMap[key] ?? ""}
-                      onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [key]: v }))}
-                      isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
-                    />
-
-                    {isAdmin && commitOptions.length > 0 && (
-                      <Autocomplete
-                        size="sm"
-                        label="Select Company to Commit (Optional)"
-                        selectedKey={selectedCommitProvider[key] || ""}
-                        onSelectionChange={(value) =>
-                          setSelectedCommitProvider((prev) => ({ ...prev, [key]: String(value || "") }))
-                        }
-                      >
-                        {commitOptions.map((company: any, idx: number) => {
-                          const companyId = String(company?._id || company || "");
-                          const companyName = String(company?.name || company || companyId);
-                          return (
-                            <AutocompleteItem key={companyId || `company-${idx}`} textValue={companyName}>
-                              {companyName}
-                            </AutocompleteItem>
-                          );
-                        })}
-                      </Autocomplete>
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        color="warning"
-                        isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
-                        isLoading={bidServiceRequestMutation.isPending}
-                        onPress={() =>
-                          bidServiceRequestMutation.mutate({
-                            id: key,
-                            amount: Number(bidMap[key] || 0),
-                            note: noteMap[key] || "",
-                          })
-                        }
-                      >
-                        Place Bid
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        color="success"
-                        isDisabled={
-                          !isAdmin ||
-                          item.status === "COMPLETED" ||
-                          item.status === "CANCELLED" ||
-                          (isAdmin && commitOptions.length > 0 ? !selectedCommitProvider[key] : false)
-                        }
-                        isLoading={commitServiceRequestMutation.isPending}
-                        onPress={() =>
-                          commitServiceRequestMutation.mutate({
-                            id: key,
-                            committedProvider: isAdmin ? selectedCommitProvider[key] : undefined,
-                            bidAmount: Number(bidMap[key] || item.bidAmount || 0),
-                            commitNote: noteMap[key] || item.commitNote || "",
-                          })
-                        }
-                      >
-                        Commit
-                      </Button>
-
-                      {isAdmin
-                        ? SERVICE_STATUS_OPTIONS.map((status) => (
-                          <Button
-                            key={`${key}-${status}`}
+                        {isAdmin && commitOptions.length > 0 && (
+                          /* @ts-ignore */
+                          <Autocomplete
                             size="sm"
-                            variant="light"
-                            isDisabled={item.status === status}
-                            isLoading={updateServiceStatusMutation.isPending}
-                            onPress={() => updateServiceStatusMutation.mutate({ id: key, status })}
+                            placeholder="Provider to Commit"
+                            variant="bordered"
+                            radius="lg"
+                            selectedKey={selectedCommitProvider[key] || ""}
+                            onSelectionChange={(value) => setSelectedCommitProvider((prev) => ({ ...prev, [key]: String(value || "") }))}
+                            classNames={{
+                              listbox: "bg-content1",
+                              trigger: "h-8 min-h-0 text-xs bg-content2/50 border-default-200/50 px-3",
+                            }}
+                            items={commitOptions}
                           >
-                            {status}
+                            {(company: any) => {
+                              const companyId = String(company?._id || company || "");
+                              const companyName = String(company?.name || company || companyId);
+                              return (
+                                <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
+                                  {companyName}
+                                </AutocompleteItem>
+                              );
+                            }}
+                          </Autocomplete>
+                        )}
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            color="warning"
+                            className="h-8 text-xs font-black uppercase"
+                            isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
+                            isLoading={bidServiceRequestMutation.isPending}
+                            onPress={() =>
+                              bidServiceRequestMutation.mutate({
+                                id: key,
+                                amount: Number(bidMap[key] || 0),
+                                note: noteMap[key] || "",
+                              })
+                            }
+                          >
+                            Place Bid
                           </Button>
-                        ))
-                        : null}
-                    </div>
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </div>
 
-          {serviceRequests.length === 0 && <div className="text-center text-default-500 py-16">No service requests available yet.</div>}
+                          <Button
+                            size="sm"
+                            color="success"
+                            className="h-8 text-xs font-black uppercase"
+                            isDisabled={
+                              !isAdmin ||
+                              item.status === "COMPLETED" ||
+                              item.status === "CANCELLED" ||
+                              (isAdmin && commitOptions.length > 0 ? !selectedCommitProvider[key] : false)
+                            }
+                            isLoading={commitServiceRequestMutation.isPending}
+                            onPress={() =>
+                              commitServiceRequestMutation.mutate({
+                                id: key,
+                                committedProvider: isAdmin ? selectedCommitProvider[key] : undefined,
+                                bidAmount: Number(bidMap[key] || item.bidAmount || 0),
+                                commitNote: noteMap[key] || item.commitNote || "",
+                              })
+                            }
+                          >
+                            Commit
+                          </Button>
 
-          <Modal
-            isOpen={isCreateModalOpen}
-            onOpenChange={(open) => setIsCreateModalOpen(open)}
-            size="2xl"
-            scrollBehavior="inside"
-            isDismissable={false}
-            isKeyboardDismissDisabled
-          >
-            <ModalContent>
-              {(closeModal) => (
-                <>
-                  <ModalHeader>Create Partial Service Request</ModalHeader>
-                  <ModalBody>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <Input
-                        label="Requested By"
-                        value={String(user?.name || user?.email || "-")}
-                        isReadOnly
-                      />
-                      {isAdmin ? (
-                        <Autocomplete
-                          label="Company Needing Service (Optional)"
-                          selectedKey={createForm.createdByCompanyId || ""}
-                          onSelectionChange={(value) =>
-                            setCreateForm((prev) => ({ ...prev, createdByCompanyId: String(value || "") }))
-                          }
+                          {isAdmin
+                            ? SERVICE_STATUS_OPTIONS.map((status) => (
+                              <Button
+                                key={`${key}-${status}`}
+                                size="sm"
+                                variant="light"
+                                className="h-8 text-xs font-black uppercase"
+                                isDisabled={item.status === status}
+                                isLoading={updateServiceStatusMutation.isPending}
+                                onPress={() => updateServiceStatusMutation.mutate({ id: key, status })}
+                              >
+                                {status}
+                              </Button>
+                            ))
+                            : null}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {!requestsLoading && serviceRequests.length === 0 && (
+              <div className="text-center font-bold uppercase tracking-widest text-xs text-default-500 py-16">No service requests available yet.</div>
+            )}
+
+            <Modal
+              isOpen={isCreateModalOpen}
+              onOpenChange={(open) => setIsCreateModalOpen(open)}
+              size="2xl"
+              scrollBehavior="inside"
+              isDismissable={false}
+              isKeyboardDismissDisabled
+            >
+              <ModalContent>
+                {(closeModal) => (
+                  <>
+                    <ModalHeader>Create Partial Service Request</ModalHeader>
+                    <ModalBody>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <Input label="Requested By" value={String((user as any)?.name || user?.email || "-")} isReadOnly />
+                        {isAdmin ? (
+                          /* @ts-ignore */
+                          <Autocomplete
+                            label="Target Company"
+                            placeholder="Select target company"
+                            variant="bordered"
+                            radius="lg"
+                            selectedKey={createForm.createdByCompanyId || ""}
+                            onSelectionChange={(value) => setCreateForm((prev) => ({ ...prev, createdByCompanyId: String(value || "") }))}
+                            items={companyOptions}
+                            classNames={{ trigger: "h-10 text-xs", listbox: "bg-content1" }}
+                          >
+                            {(company: any) => {
+                              const companyId = String(company?._id || "");
+                              const companyName = String(company?.name || companyId || "-");
+                              return (
+                                <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
+                                  {companyName}
+                                </AutocompleteItem>
+                              );
+                            }}
+                          </Autocomplete>
+                        ) : null}
+                        <Select
+                          label="Request Type"
+                          selectedKeys={[createForm.requestType]}
+                          onSelectionChange={(keys) => {
+                            const arr = Array.from(keys as Set<string>);
+                            setCreateForm((prev) => ({ ...prev, requestType: String(arr[0] || "PACKAGING") }));
+                          }}
                         >
-                          {companyOptions.map((company: any, idx: number) => {
-                            const companyId = String(company?._id || "");
-                            const companyName = String(company?.name || companyId || "-");
-                            return (
-                              <AutocompleteItem key={companyId || `company-${idx}`} textValue={companyName}>
-                                {companyName}
-                              </AutocompleteItem>
-                            );
-                          })}
-                        </Autocomplete>
-                      ) : null}
-                      <Select
-                        label="Request Type"
-                        selectedKeys={[createForm.requestType]}
-                        onSelectionChange={(keys) => {
-                          const arr = Array.from(keys as Set<string>);
-                          setCreateForm((prev) => ({ ...prev, requestType: String(arr[0] || "PACKAGING") }));
-                        }}
-                      >
-                        {SERVICE_TYPE_OPTIONS.map((item) => (
-                          <SelectItem key={item.key} value={item.key}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      <Input
-                        label="Title"
-                        value={createForm.title}
-                        onValueChange={(v) => setCreateForm((prev) => ({ ...prev, title: v }))}
-                      />
-                      <Select
-                        label="From State"
-                        selectedKeys={createForm.fromState ? [createForm.fromState] : []}
-                        onSelectionChange={(keys) => {
-                          const arr = Array.from(keys as Set<string>);
-                          const value = String(arr[0] || "");
-                          setCreateForm((prev) => ({ ...prev, fromState: value, fromDistrict: "" }));
-                        }}
-                      >
-                        {states.map((item: any) => (
-                          <SelectItem key={item._id} value={item._id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      <Select
-                        label="From District"
-                        selectedKeys={createForm.fromDistrict ? [createForm.fromDistrict] : []}
-                        isDisabled={!createForm.fromState}
-                        onSelectionChange={(keys) => {
-                          const arr = Array.from(keys as Set<string>);
-                          setCreateForm((prev) => ({ ...prev, fromDistrict: String(arr[0] || "") }));
-                        }}
-                      >
-                        {fromDistrictOptions.map((item: any) => (
-                          <SelectItem key={item._id} value={item._id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      <Select
-                        label="To State (Optional)"
-                        selectedKeys={createForm.toState ? [createForm.toState] : []}
-                        onSelectionChange={(keys) => {
-                          const arr = Array.from(keys as Set<string>);
-                          const value = String(arr[0] || "");
-                          setCreateForm((prev) => ({ ...prev, toState: value, toDistrict: "" }));
-                        }}
-                      >
-                        {states.map((item: any) => (
-                          <SelectItem key={item._id} value={item._id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      <Select
-                        label="To District (Optional)"
-                        selectedKeys={createForm.toDistrict ? [createForm.toDistrict] : []}
-                        isDisabled={!createForm.toState}
-                        onSelectionChange={(keys) => {
-                          const arr = Array.from(keys as Set<string>);
-                          setCreateForm((prev) => ({ ...prev, toDistrict: String(arr[0] || "") }));
-                        }}
-                      >
-                        {toDistrictOptions.map((item: any) => (
-                          <SelectItem key={item._id} value={item._id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      <Input
-                        type="date"
-                        label="Required From Date"
-                        value={createForm.requiredFromDate}
-                        onValueChange={(v) => setCreateForm((prev) => ({ ...prev, requiredFromDate: v }))}
-                      />
-                      <Input
-                        type="date"
-                        label="Required To Date"
-                        value={createForm.requiredToDate}
-                        onValueChange={(v) => setCreateForm((prev) => ({ ...prev, requiredToDate: v }))}
-                      />
-                    </div>
+                          {SERVICE_TYPE_OPTIONS.map((item) => (
+                            <SelectItem key={item.key} value={item.key}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Input
+                          label="Title"
+                          value={createForm.title}
+                          onValueChange={(v) => setCreateForm((prev) => ({ ...prev, title: v }))}
+                        />
+                        <Select
+                          label="From State"
+                          selectedKeys={createForm.fromState ? [createForm.fromState] : []}
+                          onSelectionChange={(keys) => {
+                            const arr = Array.from(keys as Set<string>);
+                            const value = String(arr[0] || "");
+                            setCreateForm((prev) => ({ ...prev, fromState: value, fromDistrict: "" }));
+                          }}
+                        >
+                          {states.map((item: any) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Select
+                          label="From District"
+                          selectedKeys={createForm.fromDistrict ? [createForm.fromDistrict] : []}
+                          isDisabled={!createForm.fromState}
+                          onSelectionChange={(keys) => {
+                            const arr = Array.from(keys as Set<string>);
+                            setCreateForm((prev) => ({ ...prev, fromDistrict: String(arr[0] || "") }));
+                          }}
+                        >
+                          {fromDistrictOptions.map((item: any) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Select
+                          label="To State (Optional)"
+                          selectedKeys={createForm.toState ? [createForm.toState] : []}
+                          onSelectionChange={(keys) => {
+                            const arr = Array.from(keys as Set<string>);
+                            const value = String(arr[0] || "");
+                            setCreateForm((prev) => ({ ...prev, toState: value, toDistrict: "" }));
+                          }}
+                        >
+                          {states.map((item: any) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Select
+                          label="To District (Optional)"
+                          selectedKeys={createForm.toDistrict ? [createForm.toDistrict] : []}
+                          isDisabled={!createForm.toState}
+                          onSelectionChange={(keys) => {
+                            const arr = Array.from(keys as Set<string>);
+                            setCreateForm((prev) => ({ ...prev, toDistrict: String(arr[0] || "") }));
+                          }}
+                        >
+                          {toDistrictOptions.map((item: any) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Input
+                          type="date"
+                          label="Required From Date"
+                          value={createForm.requiredFromDate}
+                          onValueChange={(v) => setCreateForm((prev) => ({ ...prev, requiredFromDate: v }))}
+                        />
+                        <Input
+                          type="date"
+                          label="Required To Date"
+                          value={createForm.requiredToDate}
+                          onValueChange={(v) => setCreateForm((prev) => ({ ...prev, requiredToDate: v }))}
+                        />
+                      </div>
 
-                    <Textarea
-                      label="Service Specifications"
-                      value={createForm.serviceSpecifications}
-                      onValueChange={(v) => setCreateForm((prev) => ({ ...prev, serviceSpecifications: v }))}
-                      minRows={5}
-                      placeholder="Enter full service requirement details."
-                    />
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button
-                      variant="light"
-                      onPress={() => {
-                        setIsCreateModalOpen(false);
-                        closeModal();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      color="primary"
-                      isLoading={createServiceRequestMutation.isPending}
-                      isDisabled={
-                        !createForm.requestType ||
-                        !createForm.title.trim() ||
-                        !createForm.serviceSpecifications.trim() ||
-                        !createForm.fromState ||
-                        !createForm.fromDistrict
-                      }
-                      onPress={() => createServiceRequestMutation.mutate()}
-                    >
-                      Create Request
-                    </Button>
-                  </ModalFooter>
-                </>
-              )}
-            </ModalContent>
-          </Modal>
-        </>
-      )}
+                      <Textarea
+                        label="Service Specifications"
+                        value={createForm.serviceSpecifications}
+                        onValueChange={(v) => setCreateForm((prev) => ({ ...prev, serviceSpecifications: v }))}
+                        minRows={5}
+                        placeholder="Enter full service requirement details."
+                      />
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button
+                        variant="light"
+                        onPress={() => {
+                          setIsCreateModalOpen(false);
+                          closeModal();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        color="primary"
+                        isLoading={createServiceRequestMutation.isPending}
+                        isDisabled={
+                          !createForm.requestType ||
+                          !createForm.title.trim() ||
+                          !createForm.serviceSpecifications.trim() ||
+                          !createForm.fromState ||
+                          !createForm.fromDistrict
+                        }
+                        onPress={() => createServiceRequestMutation.mutate()}
+                      >
+                        Create Request
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

@@ -41,6 +41,8 @@ import {
   FiFastForward,
   FiActivity,
   FiLayers,
+  FiArrowRight,
+  FiCheckCircle,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import RulesActionStrip from "@/components/rules/RulesActionStrip";
@@ -52,7 +54,7 @@ import DocRulesEditor from "@/components/rules/DocRulesEditor";
 const SUBFLOW_ICONS: Record<string, any> = {
   PROCUREMENT: FiShoppingCart,
   LOGISTICS: FiTruck,
-  INTERNAL_LOGISTICS: FiPackage,
+  INLAND_LOGISTICS: FiPackage,
   PACKAGING: FiBox,
   FREIGHT_FORWARDING: FiGlobe,
   INVENTORY: FiDatabase,
@@ -61,7 +63,7 @@ const SUBFLOW_ICONS: Record<string, any> = {
 const SUBFLOW_DESCRIPTIONS: Record<string, string> = {
   PROCUREMENT: "Sourcing and purchasing raw materials or products.",
   LOGISTICS: "Standard shipping and delivery operations.",
-  INTERNAL_LOGISTICS: "Movement of goods between internal warehouses or hubs.",
+  INLAND_LOGISTICS: "Movement of goods through inland hubs and routes.",
   PACKAGING: "Product labeling, boxing, and preparation for shipment.",
   FREIGHT_FORWARDING: "International cargo orchestration and documentation.",
   INVENTORY: "Stock management and storage allocation.",
@@ -96,7 +98,7 @@ const FLOW_TYPES = [
   { key: "WAREHOUSE", label: "Warehouse Flow" },
   { key: "PROCUREMENT", label: "Procurement Flow" },
   { key: "LOGISTICS", label: "Logistics Flow" },
-  { key: "INTERNAL_LOGISTICS", label: "Internal Logistics Flow" },
+  { key: "INLAND_LOGISTICS", label: "Inland Logistics Flow" },
   { key: "PACKAGING", label: "Packaging Flow" },
   { key: "FREIGHT_FORWARDING", label: "Freight Forwarding Flow" },
   { key: "INVENTORY", label: "Inventory Flow" },
@@ -105,7 +107,7 @@ const FLOW_TYPES = [
 const ORDER_SUBFLOWS = [
   { key: "PROCUREMENT", label: "Procurement" },
   { key: "LOGISTICS", label: "Logistics" },
-  { key: "INTERNAL_LOGISTICS", label: "Internal Logistics" },
+  { key: "INLAND_LOGISTICS", label: "Inland Logistics" },
   { key: "PACKAGING", label: "Packaging" },
   { key: "FREIGHT_FORWARDING", label: "Freight Forwarding" },
   { key: "INVENTORY", label: "Inventory" },
@@ -116,6 +118,8 @@ type SubflowConfig = {
   subflowType: string;
   startAtOrderStage: string;
   mustCompleteBeforeOrderStage: string;
+  biddingStartAtOrderStage?: string | null;
+  biddingEndAtOrderStage?: string | null;
   dependsOnSubflows: string[];
   isActive: boolean;
 };
@@ -127,7 +131,7 @@ const STAGE_DEFAULTS: Record<string, { stageKey: string; label: string }> = {
   WAREHOUSE: { stageKey: "INBOUND_REQUESTED", label: "Inbound Requested" },
   PROCUREMENT: { stageKey: "REQUESTED", label: "Requested" },
   LOGISTICS: { stageKey: "PICKUP_SCHEDULED", label: "Pickup Scheduled" },
-  INTERNAL_LOGISTICS: { stageKey: "VEHICLE_ASSIGNED", label: "Vehicle Assigned" },
+  INLAND_LOGISTICS: { stageKey: "VEHICLE_ASSIGNED", label: "Vehicle Assigned" },
   PACKAGING: { stageKey: "SPEC_RECEIVED", label: "Spec Received" },
   FREIGHT_FORWARDING: { stageKey: "BOOKING_REQUESTED", label: "Booking Requested" },
   INVENTORY: { stageKey: "STOCK_IN", label: "Stock In" },
@@ -155,7 +159,7 @@ const flowStageType = (flowType: string) => {
     [
       "PROCUREMENT",
       "LOGISTICS",
-      "INTERNAL_LOGISTICS",
+      "INLAND_LOGISTICS",
       "PACKAGING",
       "FREIGHT_FORWARDING",
       "INVENTORY",
@@ -257,6 +261,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
       subflowType: string;
       startAtOrderStage: string;
       mustCompleteBeforeOrderStage: string;
+      biddingStartAtOrderStage?: string | null;
+      biddingEndAtOrderStage?: string | null;
       dependsOnSubflows: string[];
       isActive: boolean;
     }) => {
@@ -264,6 +270,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
         return patchData(apiRoutes.orderSubflowConfigs.update(payload.id), {
           startAtOrderStage: payload.startAtOrderStage,
           mustCompleteBeforeOrderStage: payload.mustCompleteBeforeOrderStage,
+          biddingStartAtOrderStage: payload.biddingStartAtOrderStage,
+          biddingEndAtOrderStage: payload.biddingEndAtOrderStage,
           dependsOnSubflows: payload.dependsOnSubflows,
           isActive: payload.isActive,
         });
@@ -272,6 +280,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
         subflowType: payload.subflowType,
         startAtOrderStage: payload.startAtOrderStage,
         mustCompleteBeforeOrderStage: payload.mustCompleteBeforeOrderStage,
+        biddingStartAtOrderStage: payload.biddingStartAtOrderStage,
+        biddingEndAtOrderStage: payload.biddingEndAtOrderStage,
         dependsOnSubflows: payload.dependsOnSubflows,
         isActive: payload.isActive,
       });
@@ -372,35 +382,39 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
     if (flowType !== "TRADE_ORDER") return null;
     if (ORDER_SUBFLOWS.length === 0) return null;
     return (
-      <div className="rounded-xl border border-default-200/70 bg-content1/90 p-3">
-        <div className="text-[11px] font-semibold text-default-600 uppercase tracking-widest mb-2">
-          Subflow Indicator
+      <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4 p-1">
+          <FiActivity className="text-default-400 text-sm" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
+            Active Subflow Pipelines
+          </span>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {ORDER_SUBFLOWS.map((flow) => {
             const config = subflowConfigMap.get(flow.key);
-            if (!config) {
-              return (
-                <div key={flow.key} className="flex items-center justify-between text-xs text-default-500">
-                  <span className="font-semibold text-default-600">{flow.label}</span>
-                  <span className="italic">Not configured</span>
-                </div>
-              );
-            }
-            const startLabel =
-              orderStageLabelMap.get(String(config.startAtOrderStage)) || "Start not set";
-            const endLabel =
-              orderStageLabelMap.get(String(config.mustCompleteBeforeOrderStage)) || "End not set";
+            if (!config || !config.isActive) return null;
+
+            const startLabel = orderStageLabelMap.get(String(config.startAtOrderStage)) || "Start";
+            const endLabel = orderStageLabelMap.get(String(config.mustCompleteBeforeOrderStage)) || "End";
+
             return (
-              <div key={flow.key} className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-semibold text-default-700">{flow.label}</span>
-                <span className="px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-default-200">
-                  {startLabel}
-                </span>
-                <span className="text-default-400">→</span>
-                <span className="px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-default-200">
-                  {endLabel}
-                </span>
+              <div key={flow.key} className="group relative pl-4 border-l-2 border-default-200">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{flow.label}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning-500/10 text-warning-600 border border-warning-500/10">{startLabel}</span>
+                    <FiArrowRight size={10} className="text-default-300" />
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-default-100 text-default-500 border border-default-200">{endLabel}</span>
+                  </div>
+                </div>
+                {config.biddingStartAtOrderStage && (
+                  <div className="flex items-center gap-2 mt-1 px-2 py-0.5 rounded-lg bg-default-100/50 border border-default-100">
+                    <span className="text-[8px] font-black uppercase text-default-400">Bidding Window</span>
+                    <span className="text-[8px] font-bold text-default-400 italic">
+                      {orderStageLabelMap.get(String(config.biddingStartAtOrderStage))} ⇢ {orderStageLabelMap.get(String(config.biddingEndAtOrderStage)) || "End"}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -568,12 +582,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                 setFlowType(value);
               }}
               className="max-w-[260px]"
+              items={FLOW_TYPES}
             >
-              {FLOW_TYPES.map((flow) => (
-                <SelectItem key={flow.key} value={flow.key}>
+              {(flow) => (
+                <SelectItem key={flow.key} textValue={flow.label}>
                   {flow.label}
                 </SelectItem>
-              ))}
+              )}
             </Select>
           </div>
 
@@ -611,162 +626,252 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                   <div className="text-xs font-semibold text-default-600 uppercase tracking-widest mb-3">
                     Subflow Orchestration
                   </div>
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
                     {ORDER_SUBFLOWS.map((flow, index) => {
                       const config = subflowConfigMap.get(flow.key);
                       const startStage = config?.startAtOrderStage || orderStageOptions[0]?.key || "";
                       const endStage = config?.mustCompleteBeforeOrderStage || orderStageOptions[orderStageOptions.length - 1]?.key || "";
+                      const biddingStartStage = config?.biddingStartAtOrderStage || "";
+                      const biddingEndStage = config?.biddingEndAtOrderStage || "";
                       const Icon = SUBFLOW_ICONS[flow.key] || FiActivity;
                       const isActive = config?.isActive ?? false;
 
                       return (
                         <motion.div
                           key={flow.key}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.05 }}
-                          className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${isActive
-                            ? "bg-content1 border-default-200/60 shadow-md hover:shadow-xl hover:border-warning-400/30"
-                            : "bg-default-50/50 border-default-100 opacity-60 grayscale-[0.5]"
+                          className={`group relative flex flex-col rounded-2xl border-2 transition-all duration-300 overflow-hidden
+                            ${isActive
+                              ? "bg-content1 border-warning-500/20 shadow-md hover:border-warning-500/40"
+                              : "bg-default-50/20 border-default-100 opacity-60 grayscale scale-[0.98]"
                             }`}
                         >
-                          <div className={`absolute top-0 left-0 w-1 h-full transition-all duration-500 ${isActive ? "bg-warning-500 shadow-[2px_0_10px_rgba(245,158,11,0.2)]" : "bg-default-300"}`} />
+                          {/* Header Wrapper */}
+                          <div className={`p-4 flex items-center justify-between border-b ${isActive ? "bg-default-50/50 border-default-100" : "bg-default-50 border-default-100/50"}`}>
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
+                                ${isActive ? "bg-warning-500 text-white" : "bg-default-300 text-default-100"}`}>
+                                <Icon className="text-xl" />
+                              </div>
+                              <div>
+                                <h4 className="text-base font-black tracking-tight text-foreground uppercase">{flow.label}</h4>
+                                <p className="text-[10px] font-bold text-default-400 tracking-widest uppercase">Subflow Pipeline</p>
+                              </div>
+                            </div>
+                            <Switch
+                              size="sm"
+                              isSelected={isActive}
+                              onValueChange={(value) =>
+                                subflowMutation.mutate({
+                                  id: config?._id,
+                                  subflowType: flow.key,
+                                  startAtOrderStage: startStage,
+                                  mustCompleteBeforeOrderStage: endStage,
+                                  biddingStartAtOrderStage: biddingStartStage || null,
+                                  biddingEndAtOrderStage: biddingEndStage || null,
+                                  dependsOnSubflows: config?.dependsOnSubflows || [],
+                                  isActive: value,
+                                })
+                              }
+                              classNames={{ wrapper: "bg-default-200 active:scale-95 transition-transform" }}
+                            />
+                          </div>
 
-                          <div className="p-4 sm:p-5">
-                            <div className="flex items-start justify-between mb-5">
-                              <div className="flex gap-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${isActive ? "bg-warning-500/10 text-warning-600 shadow-inner" : "bg-default-200 text-default-400"
-                                  }`}>
-                                  <Icon className="text-xl" />
-                                </div>
-                                <div className="flex flex-col gap-0.5">
-                                  <div className="text-base font-black tracking-tight flex items-center gap-2">
-                                    {flow.label}
-                                    {isActive ? (
-                                      <span className="flex w-2 h-2 rounded-full bg-success-500 animate-pulse" />
-                                    ) : (
-                                      <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest bg-default-100 px-1.5 py-0.5 rounded">Off</span>
+                          {/* Config Body */}
+                          <div className="p-6 space-y-6">
+                            {/* Execution window */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <FiPlay className="text-default-400 text-xs" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-default-400">Execution Window</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1.5 block">Start Stage</label>
+                                  <Select
+                                    size="sm"
+                                    variant="bordered"
+                                    radius="lg"
+                                    selectedKeys={startStage ? [startStage] : []}
+                                    isDisabled={!isActive}
+                                    classNames={{ trigger: "h-10 bg-content2/50 border-default-200/60", value: "text-[11px] font-black uppercase" }}
+                                    onSelectionChange={(keys) => {
+                                      const next = String(Array.from(keys)[0] || "");
+                                      subflowMutation.mutate({
+                                        id: config?._id,
+                                        subflowType: flow.key,
+                                        startAtOrderStage: next,
+                                        mustCompleteBeforeOrderStage: endStage,
+                                        biddingStartAtOrderStage: biddingStartStage || null,
+                                        biddingEndAtOrderStage: biddingEndStage || null,
+                                        dependsOnSubflows: config?.dependsOnSubflows || [],
+                                        isActive: isActive,
+                                      });
+                                    }}
+                                    items={orderStageOptions}
+                                  >
+                                    {(stage: any) => (
+                                      <SelectItem key={stage.key} textValue={stage.label}>
+                                        <span className="text-[10px] font-bold uppercase">{stage.label}</span>
+                                      </SelectItem>
                                     )}
-                                  </div>
-                                  <p className="text-[11px] text-default-400 max-w-[200px] leading-tight font-medium">
-                                    {SUBFLOW_DESCRIPTIONS[flow.key] || "Automated trade execution sub-module."}
-                                  </p>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1.5 block">End Stage</label>
+                                  <Select
+                                    size="sm"
+                                    variant="bordered"
+                                    radius="lg"
+                                    selectedKeys={endStage ? [endStage] : []}
+                                    isDisabled={!isActive}
+                                    classNames={{ trigger: "h-10 bg-content2/50 border-default-200/60", value: "text-[11px] font-black uppercase" }}
+                                    onSelectionChange={(keys) => {
+                                      const next = String(Array.from(keys)[0] || "");
+                                      subflowMutation.mutate({
+                                        id: config?._id,
+                                        subflowType: flow.key,
+                                        startAtOrderStage: startStage,
+                                        mustCompleteBeforeOrderStage: next,
+                                        biddingStartAtOrderStage: biddingStartStage || null,
+                                        biddingEndAtOrderStage: biddingEndStage || null,
+                                        dependsOnSubflows: config?.dependsOnSubflows || [],
+                                        isActive: isActive,
+                                      });
+                                    }}
+                                    items={orderStageOptions}
+                                  >
+                                    {(stage: any) => (
+                                      <SelectItem key={stage.key} textValue={stage.label}>
+                                        <span className="text-[10px] font-bold uppercase">{stage.label}</span>
+                                      </SelectItem>
+                                    )}
+                                  </Select>
                                 </div>
                               </div>
-                              <Switch
+                            </div>
+
+                            {/* Bidding Window */}
+                            <div className="space-y-3 p-4 rounded-2xl bg-default-50/50 border border-default-100">
+                              <div className="flex items-center gap-2">
+                                <FiActivity className="text-default-400 text-xs" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-default-400">Bidding Window</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1.5 block">Bidding Start</label>
+                                  <Select
+                                    size="sm"
+                                    variant="flat"
+                                    radius="lg"
+                                    placeholder="None"
+                                    selectedKeys={biddingStartStage ? [biddingStartStage] : []}
+                                    isDisabled={!isActive}
+                                    classNames={{ trigger: "h-9 bg-content1 border-default-100/50", value: "text-[10px] font-bold uppercase" }}
+                                    onSelectionChange={(keys) => {
+                                      const next = String(Array.from(keys)[0] || "");
+                                      subflowMutation.mutate({
+                                        id: config?._id,
+                                        subflowType: flow.key,
+                                        startAtOrderStage: startStage,
+                                        mustCompleteBeforeOrderStage: endStage,
+                                        biddingStartAtOrderStage: next || null,
+                                        biddingEndAtOrderStage: biddingEndStage || null,
+                                        dependsOnSubflows: config?.dependsOnSubflows || [],
+                                        isActive: isActive,
+                                      });
+                                    }}
+                                    items={orderStageOptions}
+                                  >
+                                    {(stage: any) => (
+                                      <SelectItem key={stage.key} textValue={stage.label}>
+                                        <span className="text-[9px] font-bold uppercase">{stage.label}</span>
+                                      </SelectItem>
+                                    )}
+                                  </Select>
+                                </div>
+                                <div>
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1.5 block">Bidding End</label>
+                                  <Select
+                                    size="sm"
+                                    variant="flat"
+                                    radius="lg"
+                                    placeholder="None"
+                                    selectedKeys={biddingEndStage ? [biddingEndStage] : []}
+                                    isDisabled={!isActive}
+                                    classNames={{ trigger: "h-9 bg-content1 border-default-100/50", value: "text-[10px] font-bold uppercase" }}
+                                    onSelectionChange={(keys) => {
+                                      const next = String(Array.from(keys)[0] || "");
+                                      subflowMutation.mutate({
+                                        id: config?._id,
+                                        subflowType: flow.key,
+                                        startAtOrderStage: startStage,
+                                        mustCompleteBeforeOrderStage: endStage,
+                                        biddingStartAtOrderStage: biddingStartStage || null,
+                                        biddingEndAtOrderStage: next || null,
+                                        dependsOnSubflows: config?.dependsOnSubflows || [],
+                                        isActive: isActive,
+                                      });
+                                    }}
+                                    items={orderStageOptions}
+                                  >
+                                    {(stage: any) => (
+                                      <SelectItem key={stage.key} textValue={stage.label}>
+                                        <span className="text-[9px] font-bold uppercase">{stage.label}</span>
+                                      </SelectItem>
+                                    )}
+                                  </Select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Dependencies */}
+                            <div>
+                              <label className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-2 flex items-center gap-1.5">
+                                <FiLayers className="text-[8px]" /> Gates Execution Until
+                              </label>
+                              <Select
                                 size="sm"
-                                isSelected={isActive}
-                                onValueChange={(value) =>
+                                variant="bordered"
+                                radius="lg"
+                                selectionMode="multiple"
+                                placeholder="No dependencies"
+                                selectedKeys={new Set(config?.dependsOnSubflows || [])}
+                                isDisabled={!isActive}
+                                classNames={{ trigger: "min-h-10 py-1 bg-content2/30 border-default-100/60", value: "text-[10px] font-bold" }}
+                                onSelectionChange={(keys) => {
+                                  const nextDeps = Array.from(keys as Set<string>);
                                   subflowMutation.mutate({
                                     id: config?._id,
                                     subflowType: flow.key,
                                     startAtOrderStage: startStage,
                                     mustCompleteBeforeOrderStage: endStage,
-                                    dependsOnSubflows: config?.dependsOnSubflows || [],
-                                    isActive: value,
-                                  })
-                                }
-                                classNames={{ wrapper: "group-hover:scale-110 transition-transform shadow-sm" }}
-                              />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              <div className="flex flex-col gap-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-default-400 pl-1 flex items-center gap-1">
-                                  <FiPlay className="text-[9px]" /> Start
-                                </label>
-                                <Select
-                                  size="sm"
-                                  variant="bordered"
-                                  radius="lg"
-                                  selectedKeys={startStage ? [startStage] : []}
-                                  isDisabled={!isActive}
-                                  classNames={{ trigger: "h-11 bg-content2/40 border-default-200/50 hover:border-warning-500/50" }}
-                                  onSelectionChange={(keys) => {
-                                    const next = String(Array.from(keys)[0] || "");
-                                    subflowMutation.mutate({
-                                      id: config?._id,
-                                      subflowType: flow.key,
-                                      startAtOrderStage: next,
-                                      mustCompleteBeforeOrderStage: endStage,
-                                      dependsOnSubflows: config?.dependsOnSubflows || [],
-                                      isActive: isActive,
-                                    });
-                                  }}
-                                >
-                                  {orderStageOptions.map((stage) => (
-                                    <SelectItem key={stage.key} value={stage.key}>
-                                      {stage.label}
-                                    </SelectItem>
-                                  ))}
-                                </Select>
-                              </div>
-
-                              <div className="flex flex-col gap-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-default-400 pl-1 flex items-center gap-1">
-                                  <FiFastForward className="text-[9px]" /> Limit
-                                </label>
-                                <Select
-                                  size="sm"
-                                  variant="bordered"
-                                  radius="lg"
-                                  selectedKeys={endStage ? [endStage] : []}
-                                  isDisabled={!isActive}
-                                  classNames={{ trigger: "h-11 bg-content2/40 border-default-200/50 hover:border-warning-500/50" }}
-                                  onSelectionChange={(keys) => {
-                                    const next = String(Array.from(keys)[0] || "");
-                                    subflowMutation.mutate({
-                                      id: config?._id,
-                                      subflowType: flow.key,
-                                      startAtOrderStage: startStage,
-                                      mustCompleteBeforeOrderStage: next,
-                                      dependsOnSubflows: config?.dependsOnSubflows || [],
-                                      isActive: isActive,
-                                    });
-                                  }}
-                                >
-                                  {orderStageOptions.map((stage) => (
-                                    <SelectItem key={stage.key} value={stage.key}>
-                                      {stage.label}
-                                    </SelectItem>
-                                  ))}
-                                </Select>
-                              </div>
-
-                              <div className="flex flex-col gap-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-default-400 pl-1 flex items-center gap-1">
-                                  <FiLayers className="text-[9px]" /> Depends
-                                </label>
-                                <Select
-                                  size="sm"
-                                  variant="bordered"
-                                  radius="lg"
-                                  selectionMode="multiple"
-                                  selectedKeys={new Set(config?.dependsOnSubflows || [])}
-                                  isDisabled={!isActive}
-                                  placeholder="None"
-                                  classNames={{ trigger: "h-11 bg-content2/40 border-default-200/50 hover:border-warning-500/50" }}
-                                  onSelectionChange={(keys) => {
-                                    const nextDeps = Array.from(keys as Set<string>);
-                                    subflowMutation.mutate({
-                                      id: config?._id,
-                                      subflowType: flow.key,
-                                      startAtOrderStage: startStage,
-                                      mustCompleteBeforeOrderStage: endStage,
-                                      dependsOnSubflows: nextDeps,
-                                      isActive: isActive,
-                                    });
-                                  }}
-                                >
-                                  {ORDER_SUBFLOWS.filter((f) => f.key !== flow.key).map((f) => (
-                                    <SelectItem key={f.key} value={f.key}>
-                                      {f.label}
-                                    </SelectItem>
-                                  ))}
-                                </Select>
-                              </div>
+                                    biddingStartAtOrderStage: biddingStartStage || null,
+                                    biddingEndAtOrderStage: biddingEndStage || null,
+                                    dependsOnSubflows: nextDeps,
+                                    isActive: isActive,
+                                  });
+                                }}
+                                items={ORDER_SUBFLOWS.filter((f) => f.key !== flow.key)}
+                              >
+                                {(f: any) => (
+                                  <SelectItem key={f.key} textValue={f.label}>
+                                    <span className="text-xs font-bold">{f.label}</span>
+                                  </SelectItem>
+                                )}
+                              </Select>
                             </div>
                           </div>
+
+                          {/* Footer Info */}
+                          {isActive && (
+                            <div className="px-5 py-3 bg-success-500/5 flex items-center gap-2">
+                              <FiCheckCircle className="text-success-600 text-xs" />
+                              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600/80">Active Configuration</span>
+                            </div>
+                          )}
                         </motion.div>
                       );
                     })}
@@ -774,7 +879,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                   <div className="mt-5 flex items-center gap-2 p-3 rounded-xl bg-warning-500/5 border border-warning-500/10">
                     <FiAlertCircle className="text-warning-500 shrink-0" />
                     <span className="text-[10px] font-semibold text-warning-700/80 uppercase tracking-widest">
-                      Orchestration Warning: Subflows run in parallel but act as hard-gates for their configured 'Limit' stages.
+                      Subflows run in parallel and gate order stages. Bidding is allowed only between the configured bidding stages.
                     </span>
                   </div>
                 </div>
@@ -799,6 +904,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             onEdit={openEdit}
             onDragEnd={onDragEnd}
             sensors={sensors}
+            gridCols={flowType === "TRADE_ORDER" ? 2 : 1}
             renderBadges={(rule) => {
               const badges = [] as { label: string; colorClass?: string }[];
               if (flowType === "TRADE_ENQUIRY") {
@@ -836,7 +942,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     {renderSubflowIndicator()}
                   </div>
                 )}
-                <div className="flex flex-col gap-0 mb-6 sticky top-0 bg-content1/50 backdrop-blur-md z-10 py-1">
+                <div className="flex flex-col gap-0 mb-4 max-h-[300px] overflow-y-auto scrollbar-hide pr-1 border-b border-divider/30">
                   {sortedRules.map((rule: any, idx: number) => {
                     const isActiveStage = String(previewStage?.stageKey) === String(rule.stageKey);
                     const isLast = idx === sortedRules.length - 1;
@@ -845,14 +951,14 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                         <div className="flex flex-col items-center">
                           <button
                             onClick={() => setPreviewStageKey(rule.stageKey)}
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10 ${isActiveStage
-                              ? "bg-warning-500 border-warning-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]"
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10 shrink-0 ${isActiveStage
+                              ? "bg-warning-500 border-warning-500"
                               : "bg-content1 border-default-300 hover:border-warning-400"
                               }`}
                           >
-                            {isActiveStage ? <FiCheck className="text-white text-[10px] font-bold" /> : <div className="w-1.5 h-1.5 rounded-full bg-default-300" />}
+                            {isActiveStage ? <FiCheck className="text-white text-[9px] font-bold" /> : <div className="w-1.5 h-1.5 rounded-full bg-default-300" />}
                           </button>
-                          {!isLast && <div className={`w-0.5 flex-1 transition-colors duration-500 ${isActiveStage ? "bg-warning-500/30" : "bg-default-200/50"}`} />}
+                          {!isLast && <div className={`w-0.5 flex-1 min-h-[1.5rem] ${isActiveStage ? "bg-warning-500/30" : "bg-default-200/50"}`} />}
                         </div>
                         <button
                           onClick={() => setPreviewStageKey(rule.stageKey)}
@@ -900,7 +1006,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                   : "bg-content2/30 border-default-200/50 text-default-600 hover:border-default-300"
                                   }`}
                               >
-                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isDone ? "bg-success-500 text-white shadow-lg shadow-success-500/20" : "bg-default-200 text-default-400"
+                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isDone ? "bg-success-500 text-white" : "bg-default-200 text-default-400"
                                   }`}>
                                   {isDone && <FiCheck className="text-xs" />}
                                 </div>
@@ -943,7 +1049,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                   : "bg-content2/30 border-default-200/50 text-default-600 hover:border-default-300"
                                   }`}
                               >
-                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isUploaded ? "bg-primary-500 text-white shadow-lg shadow-primary-500/20" : "bg-default-200 text-default-400"
+                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isUploaded ? "bg-primary-500 text-white" : "bg-default-200 text-default-400"
                                   }`}>
                                   {isUploaded && <FiCheck className="text-xs" />}
                                 </div>
@@ -966,13 +1072,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                       )}
                     </div>
 
-                    <div className={`mt-8 p-4 rounded-2xl border flex items-center gap-3 transition-all duration-500 ${previewMissing.length === 0
-                      ? "bg-success-500/10 border-success-500/20 text-success-700 shadow-lg shadow-success-500/5 rotate-0"
+                    <div className={`mt-8 p-4 rounded-xl border flex items-center gap-3 transition-all duration-300 ${previewMissing.length === 0
+                      ? "bg-success-500/5 border-success-500/20 text-success-700 shadow-sm"
                       : "bg-content2/50 border-default-200 text-default-500"
                       }`}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${previewMissing.length === 0 ? "bg-success-500 text-white shadow-lg shadow-success-500/20" : "bg-default-200 text-default-400"
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${previewMissing.length === 0 ? "bg-success-500 text-white" : "bg-default-200 text-default-400"
                         }`}>
-                        {previewMissing.length === 0 ? <FiCheck className="text-xl" /> : <FiActivity className="text-lg animate-pulse" />}
+                        {previewMissing.length === 0 ? <FiCheck className="text-xl" /> : <FiActivity className="text-lg" />}
                       </div>
                       <div className="flex-1">
                         <div className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-0.5">Execution Status</div>
@@ -1037,12 +1143,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                         onSelectionChange={(keys) =>
                           setForm({ ...form, requiredActions: Array.from(keys as Set<string>) })
                         }
+                        items={ACTIONS.map(a => ({ key: a, label: a.replaceAll("_", " ") }))}
                       >
-                        {ACTIONS.map((action) => (
-                          <SelectItem key={action} value={action}>
-                            {action.replaceAll("_", " ")}
+                        {(action) => (
+                          <SelectItem key={action.key} textValue={action.label}>
+                            {action.label}
                           </SelectItem>
-                        ))}
+                        )}
                       </Select>
                     ) : (
                       <Input
@@ -1067,12 +1174,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     onSelectionChange={(keys) =>
                       setForm({ ...form, tradeType: Array.from(keys as Set<string>)[0] || "BOTH" })
                     }
+                    items={TRADE_TYPES.map(t => ({ key: t, label: t }))}
                   >
-                    {TRADE_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
+                    {(t) => (
+                      <SelectItem key={t.key} textValue={t.label}>
+                        {t.label}
                       </SelectItem>
-                    ))}
+                    )}
                   </Select>
                 )}
 

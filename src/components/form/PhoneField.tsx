@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Select, SelectItem, Input } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
 import { COMMON_DIAL_CODES, parsePhoneValue } from "@/utils/phone";
 
 type PhoneFieldProps = {
@@ -25,6 +25,9 @@ export default function PhoneField({
   className,
   onChange,
 }: PhoneFieldProps) {
+  const AutocompleteAny = Autocomplete as any;
+  const AutocompleteItemAny = AutocompleteItem as any;
+
   const parsed = useMemo(
     () =>
       parsePhoneValue({
@@ -37,51 +40,62 @@ export default function PhoneField({
 
   return (
     <div className={`w-full ${className || ""}`}>
-      <div className="mb-1.5 text-sm font-medium text-foreground/90">{label}</div>
-      <div className="flex w-full flex-col gap-2 md:flex-row md:items-start">
-        <Select
+      {label && <div className="mb-1.5 px-2 text-[10px] font-black uppercase tracking-widest text-default-400">{label}</div>}
+      <div className="flex w-full flex-row gap-0 items-center overflow-hidden">
+        <AutocompleteAny
           aria-label={`${label} country code`}
           size="sm"
-          className="w-full md:w-[68px]"
+          className="w-[100px] shrink-0"
+          variant="light"
           classNames={{
-            base: "w-full md:w-[68px]",
-            trigger: "px-1.5 min-h-[32px] h-[32px] shadow-none bg-default-100/70", 
-            value: "text-[11px] font-bold text-center",
-            innerWrapper: "gap-0",
+            base: "w-[100px] shrink-0",
+            listboxWrapper: "max-h-[300px]",
           }}
-          selectedKeys={parsed.countryCode ? [parsed.countryCode] : []}
-          isDisabled={disabled}
-          placeholder="+91"
-          onSelectionChange={(keys) => {
-            const selected = String(Array.from(keys)[0] || "+91");
+          inputProps={{
+            classNames: {
+              inputWrapper: "shadow-none bg-transparent border-none min-h-[44px] h-[44px] px-3",
+              input: "text-xs font-bold",
+            }
+          }}
+          disabledKeys={[]}
+          defaultSelectedKey={parsed.countryCode || "+91"}
+          onSelectionChange={(key: any) => {
+            const selected = String(key || "+91");
             onChange({
               countryCode: selected,
               national: parsed.national,
               e164: parsed.national ? `${selected}${parsed.national}` : "",
             });
           }}
-          disallowEmptySelection
-          selectionMode="single"
+          isClearable={false}
+          allowsCustomValue={false}
         >
           {COMMON_DIAL_CODES.map((item) => (
-            <SelectItem key={item.key} textValue={item.key}>
-              <span className="text-xs">{item.value}</span>
-            </SelectItem>
+            <AutocompleteItemAny key={item.key} textValue={item.key}>
+              <div className="flex items-center justify-between gap-2 w-full">
+                <span className="text-xs font-bold font-mono">{item.key}</span>
+                <span className="text-[10px] text-default-400 truncate">{item.value.split(" ").slice(1).join(" ")}</span>
+              </div>
+            </AutocompleteItemAny>
           ))}
-        </Select>
-        <div className="w-full flex-1">
+        </AutocompleteAny>
+
+        <div className="w-px h-6 bg-default-200 shrink-0" />
+
+        <div className="flex-1">
           <Input
             aria-label={label}
             name={name}
-            size="sm"
+            size="md"
             type="tel"
+            variant="light"
             isDisabled={disabled}
             placeholder="Phone number"
             value={parsed.national}
             className="w-full"
             classNames={{
-              inputWrapper: "bg-default-100/70",
-              input: "text-foreground",
+              inputWrapper: "bg-transparent border-none min-h-[44px] h-[44px] px-4 shadow-none",
+              input: "text-sm font-medium tracking-wide placeholder:text-default-300",
             }}
             onValueChange={(next) => {
               const national = String(next || "").replace(/\D/g, "");

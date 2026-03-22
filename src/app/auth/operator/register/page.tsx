@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -8,22 +8,29 @@ import {
   Input,
   Textarea,
   Checkbox,
+  Chip,
 } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import AuthLayout from "@/components/Auth/AuthLayout";
+
+const AutocompleteAny = Autocomplete as any;
 import PhoneField from "@/components/form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { showToastMessage } from "@/utils/utils";
 import { accountRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
 
 const EMPTY_LIST: any[] = [];
 
 function OperatorRegisterForm() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmittingSuccess, setIsSubmittingSuccess] = useState(false);
   const [formError, setFormError] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -69,26 +76,38 @@ function OperatorRegisterForm() {
     [districts, form.state]
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateStep = (step: number) => {
+    if (step === 1) {
+      if (!form.name || !form.email || !form.phone) return false;
+    }
+    if (step === 2) {
+      if (!form.password || !form.confirmPassword) return false;
+      if (form.password !== form.confirmPassword) return false;
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setFormError("");
+      setCurrentStep(prev => prev + 1);
+    } else {
+      setFormError("Please fill all required fields correctly.");
+    }
+  };
+
+  const handleBack = () => {
+    setFormError("");
+    setCurrentStep(prev => prev - 1);
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (isLoading) return;
     setFormError("");
-    if (!form.name || !form.email || !form.phone || !form.password) {
-      const msg = "Please fill all required fields.";
-      setFormError(msg);
-      showToastMessage({ type: "error", message: msg, position: "top-right" });
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      const msg = "Passwords do not match.";
-      setFormError(msg);
-      showToastMessage({ type: "error", message: msg, position: "top-right" });
-      return;
-    }
-    if (!form.state || !form.district) {
-      const msg = "Please complete all required selections.";
-      setFormError(msg);
-      showToastMessage({ type: "error", message: msg, position: "top-right" });
+
+    if (!form.address || !form.state || !form.district) {
+      setFormError("Please complete all required location fields.");
       return;
     }
 
@@ -117,164 +136,289 @@ function OperatorRegisterForm() {
       };
 
       await postData(accountRoutes.operatorRegister, payload);
+      setIsSubmittingSuccess(true);
       showToastMessage({
         type: "success",
         message: "Registration submitted for approval.",
         position: "top-right",
       });
-      router.push("/auth/operator/register/success");
+      setTimeout(() => {
+        router.push("/auth/operator/register/success");
+      }, 1500);
     } catch (error: any) {
+      setIsLoading(false);
       const errorMessage = error?.response?.data?.message || "Registration failed. Please try again.";
       setFormError(errorMessage);
       showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  const stepLabels = ["Profile", "Security", "Operational"];
+
   return (
     <AuthLayout
-      title="Operator Registration"
-      subtitle="Operational onboarding"
-      cardMaxWidthClass="max-w-[760px]"
+      title="Operator Onboarding"
+      subtitle={stepLabels[currentStep - 1]}
+      cardMaxWidthClass="max-w-[560px]"
       leftPanel={{
         headline: "OBAOL",
-        highlight: "OPERATOR ONBOARDING",
-        description: "Register your operator profile for verification and access.",
-        points: [
-          "Retired Custom Brokers & Professionals are welcome to join and execute trades.",
-          "Approval required before dashboard access.",
-          "You will receive updates on your email/phone.",
+        highlight: "OPERATOR PORTAL",
+        description: "Designed for internal operators, mediators, and individuals entering digital agro-trading.",
+        tags: [
+          "Individuals",
+          "Portfolio Managers",
+          "Digital Traders",
+          "Business Developers",
+          "Internal Operations",
+          "Retired Custom Brokers"
         ],
-        footer: "Operator_Onboarding",
+        footer: "Operator_Portal_v2",
+        knowMoreLink: "/roles/operator"
       }}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="mb-8">
+        <div className="flex items-center justify-between relative px-2">
+          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-default-100 -translate-y-1/2 z-0" />
+          <motion.div
+            className="absolute top-1/2 left-0 h-[2px] bg-warning-500 -translate-y-1/2 z-0"
+            initial={{ width: "0%" }}
+            animate={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+          />
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${s <= currentStep ? "bg-warning-500 text-white" : "bg-content2 text-default-400"
+                }`}
+            >
+              {s < currentStep ? <FiCheck /> : s}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-4"
+            >
+              <Input
+                label="Full Name"
+                placeholder="Enter your full name"
+                variant="bordered"
+                value={form.name}
+                onValueChange={(v) => setForm({ ...form, name: v })}
+                startContent={<FiUser className="text-default-400" />}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                isRequired
+              />
+              <Input
+                label="Email"
+                type="email"
+                placeholder="email@example.com"
+                variant="bordered"
+                value={form.email}
+                onValueChange={(v) => setForm({ ...form, email: v })}
+                startContent={<FiMail className="text-default-400" />}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                isRequired
+              />
+              <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden">
+                <PhoneField
+                  name="phone"
+                  label="Phone Number"
+                  value={form.phone}
+                  countryCodeValue={form.phoneCountryCode}
+                  nationalValue={form.phoneNational}
+                  onChange={(next) =>
+                    setForm({
+                      ...form,
+                      phone: next.e164,
+                      phoneCountryCode: next.countryCode,
+                      phoneNational: next.national,
+                    })
+                  }
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {currentStep === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-4"
+            >
+              <Input
+                label="Password"
+                placeholder="Choose a strong password"
+                variant="bordered"
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onValueChange={(v) => setForm({ ...form, password: v })}
+                startContent={<FiLock className="text-default-400" />}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                isRequired
+                endContent={
+                  <Button size="sm" variant="light" isIconOnly onPress={() => setShowPassword((prev) => !prev)}>
+                    <FiGlobe className={showPassword ? "text-warning-500" : "text-default-400"} />
+                  </Button>
+                }
+              />
+              <Input
+                label="Confirm Password"
+                placeholder="Verify your password"
+                variant="bordered"
+                type={showPassword ? "text" : "password"}
+                value={form.confirmPassword}
+                onValueChange={(v) => setForm({ ...form, confirmPassword: v })}
+                startContent={<FiLock className="text-default-400" />}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                isRequired
+              />
+              <Input
+                label="Referral Code"
+                placeholder="If any (Optional)"
+                variant="bordered"
+                value={form.referralCode}
+                onValueChange={(v) => setForm({ ...form, referralCode: v.toUpperCase() })}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-4"
+            >
+              <Textarea
+                label="Full Address"
+                placeholder="Detailed commercial or residential address"
+                variant="bordered"
+                value={form.address}
+                onValueChange={(v) => setForm({ ...form, address: v })}
+                startContent={<FiMapPin className="text-default-400 mt-1" />}
+                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                isRequired
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <AutocompleteAny
+                  label="State"
+                  variant="bordered"
+                  selectedKey={form.state || null}
+                  onSelectionChange={(key: any) =>
+                    setForm({ ...form, state: String(key || ""), district: "" })
+                  }
+                  isLoading={optionsLoading}
+                  defaultItems={states}
+                  classNames={{ base: "rounded-xl" }}
+                >
+                  {(item: any) => (
+                    <AutocompleteItem key={item._id} textValue={item.name}>
+                      {item.name}
+                    </AutocompleteItem>
+                  )}
+                </AutocompleteAny>
+                <AutocompleteAny
+                  label="District"
+                  variant="bordered"
+                  selectedKey={form.district || null}
+                  onSelectionChange={(key: any) =>
+                    setForm({ ...form, district: String(key || "") })
+                  }
+                  isLoading={optionsLoading}
+                  isDisabled={!form.state}
+                  defaultItems={filteredDistricts}
+                >
+                  {(item: any) => (
+                    <AutocompleteItem key={item._id} textValue={item.name}>
+                      {item.name}
+                    </AutocompleteItem>
+                  )}
+                </AutocompleteAny>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-black uppercase tracking-widest text-default-400">Languages Known</label>
+                <div className="flex flex-wrap gap-2">
+                  {languages.map((lang: any) => {
+                    const selected = form.languageKnown.includes(lang._id);
+                    return (
+                      <Chip
+                        key={lang._id}
+                        variant={selected ? "solid" : "bordered"}
+                        color={selected ? "warning" : "default"}
+                        className="cursor-pointer transition-all border-default-200"
+                        onClick={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            languageKnown: selected
+                              ? prev.languageKnown.filter((id) => id !== lang._id)
+                              : [...prev.languageKnown, lang._id],
+                          }));
+                        }}
+                      >
+                        {lang.name}
+                      </Chip>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {formError && (
-          <div className="rounded-lg border border-danger-400/40 bg-danger-500/10 px-4 py-2 text-sm text-danger-500">
+          <div className="rounded-xl border border-danger-400/40 bg-danger-500/10 px-4 py-3 text-sm font-medium text-danger-500">
             {formError}
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input label="Full Name" value={form.name} onValueChange={(v) => setForm({ ...form, name: v })} isRequired />
-          <Input label="Email" type="email" value={form.email} onValueChange={(v) => setForm({ ...form, email: v })} isRequired />
-          <PhoneField
-            name="phone"
-            label="Phone"
-            value={form.phone}
-            countryCodeValue={form.phoneCountryCode}
-            nationalValue={form.phoneNational}
-            onChange={(next) =>
-              setForm({
-                ...form,
-                phone: next.e164,
-                phoneCountryCode: next.countryCode,
-                phoneNational: next.national,
-              })
-            }
-          />
-          <Input
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            value={form.password}
-            onValueChange={(v) => setForm({ ...form, password: v })}
-            isRequired
-            endContent={
-              <Button size="sm" variant="light" onPress={() => setShowPassword((prev) => !prev)}>
-                {showPassword ? "Hide" : "Show"}
-              </Button>
-            }
-          />
-          <Input
-            label="Confirm Password"
-            type={showPassword ? "text" : "password"}
-            value={form.confirmPassword}
-            onValueChange={(v) => setForm({ ...form, confirmPassword: v })}
-            isRequired
-          />
-          <Input
-            label="Referral Code (optional)"
-            value={form.referralCode}
-            onValueChange={(v) => setForm({ ...form, referralCode: v.toUpperCase() })}
-          />
+
+        <div className="flex flex-col sm:flex-row gap-4 pt-6">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-1/3">
+            <Button
+              type="button"
+              variant="flat"
+              onPress={handleBack}
+              className="w-full h-12 rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
+              isDisabled={currentStep === 1 || isLoading || isSubmittingSuccess}
+              startContent={<FiChevronLeft />}
+            >
+              Back
+            </Button>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
+            <Button
+              color="warning"
+              className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
+                ${isSubmittingSuccess
+                  ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
+                  : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20 hover:shadow-warning-500/40"
+                }`}
+              isLoading={isLoading || isSubmittingSuccess}
+              onPress={() => (currentStep === 3 ? handleSubmit() : handleNext())}
+              endContent={isSubmittingSuccess ? <FiCheck /> : currentStep === 3 ? <FiCheck /> : <FiChevronRight />}
+            >
+              {isSubmittingSuccess
+                ? "Request Received"
+                : currentStep === 3
+                  ? (isLoading ? "Syncing Profile..." : "Submit for Approval")
+                  : "Continue Onboarding"}
+            </Button>
+          </motion.div>
         </div>
-
-        <Textarea
-          label="Address"
-          value={form.address}
-          onValueChange={(v) => setForm({ ...form, address: v })}
-          isRequired
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Autocomplete
-            label="State"
-            selectedKey={form.state || null}
-            onSelectionChange={(key) =>
-              setForm({ ...form, state: String(key || ""), district: "" })
-            }
-            isRequired
-            isLoading={optionsLoading}
-            defaultItems={states}
-          >
-            {(item: any) => (
-              <AutocompleteItem key={item._id} textValue={item.name}>
-                {item.name}
-              </AutocompleteItem>
-            )}
-          </Autocomplete>
-          <Autocomplete
-            label="District"
-            selectedKey={form.district || null}
-            onSelectionChange={(key) =>
-              setForm({ ...form, district: String(key || "") })
-            }
-            isRequired
-            isLoading={optionsLoading}
-            isDisabled={!form.state}
-            defaultItems={filteredDistricts}
-          >
-            {(item: any) => (
-              <AutocompleteItem key={item._id} textValue={item.name}>
-                {item.name}
-              </AutocompleteItem>
-            )}
-          </Autocomplete>
-        </div>
-
-        <div className="rounded-xl border border-default-200/70 p-3">
-          <div className="text-xs font-semibold text-default-500 mb-2">Languages Known</div>
-          <div className="flex flex-wrap gap-2">
-            {languages.map((lang: any) => {
-              const selected = form.languageKnown.includes(lang._id);
-              return (
-                <Checkbox
-                  key={lang._id}
-                  isSelected={selected}
-                  onValueChange={(checked) => {
-                    setForm((prev) => ({
-                      ...prev,
-                      languageKnown: checked
-                        ? [...prev.languageKnown, lang._id]
-                        : prev.languageKnown.filter((id) => id !== lang._id),
-                    }));
-                  }}
-                >
-                  {lang.name}
-                </Checkbox>
-              );
-            })}
-          </div>
-        </div>
-
-        <Button type="submit" color="warning" className="w-full font-semibold" isLoading={isLoading} isDisabled={isLoading}>
-          Submit for Approval
-        </Button>
-        {isLoading && (
-          <div className="text-xs text-default-500 text-center">
-            Submitting your registration. Please wait...
-          </div>
-        )}
       </form>
     </AuthLayout>
   );
@@ -282,7 +426,7 @@ function OperatorRegisterForm() {
 
 export default function OperatorRegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><FiGlobe className="animate-spin text-warning-500 text-3xl" /></div>}>
       <OperatorRegisterForm />
     </Suspense>
   );

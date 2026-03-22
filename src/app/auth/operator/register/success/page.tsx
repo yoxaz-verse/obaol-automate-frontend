@@ -3,48 +3,67 @@
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/Auth/AuthLayout";
+import { motion } from "framer-motion";
+import { FiCheckCircle, FiHome, FiLogIn } from "react-icons/fi";
 
 export default function OperatorRegisterSuccessPage() {
   const router = useRouter();
 
   return (
     <AuthLayout
-      title="Registration Submitted"
-      subtitle="Operator verification in progress"
-      cardMaxWidthClass="max-w-[620px]"
+      title="Application Received"
+      subtitle="Operator Onboarding"
+      cardMaxWidthClass="max-w-[560px]"
       leftPanel={{
-        headline: "Thank you for joining",
-        highlight: "OBAOL OPERATIONS",
-        description:
-          "Your operator profile is under review to keep the network secure and verified.",
+        headline: "Verification",
+        highlight: "IN PROGRESS",
+        description: "Your operator profile is being verified by our compliance team for network integrity.",
         points: [
-          "Our admin team will review your details.",
-          "Expected response time is within 1-2 working days.",
-          "You will receive updates on your email/phone.",
+          "Manual review of professional background",
+          "Verification of location and contact details",
+          "Account activation within 24-48 hours",
         ],
-        footer: "Operator_Verification",
+        footer: "OPERATOR_V3_SECURE",
       }}
     >
-      <div className="rounded-2xl border border-success-300/60 dark:border-success-300/30 bg-success-50/90 dark:bg-success-950/40 p-5 text-center">
-        <h2 className="text-xl font-semibold text-success-800 dark:text-success-100">
-          Your registration was submitted successfully.
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-success-700 dark:text-success-100/90">
-          Our admin team will contact you within <strong>1-2 working days</strong> after verification.
-        </p>
-      </div>
-
-      <div className="mt-6 flex flex-col sm:flex-row gap-3">
-        <Button
-          className="w-full border-default-200/60 dark:border-default-100/20 dark:text-default-100"
-          variant="bordered"
-          onPress={() => router.push("/")}
+      <div className="flex flex-col items-center text-center py-4">
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="w-20 h-20 rounded-full bg-success-500/10 flex items-center justify-center mb-6 border border-success-500/20 shadow-lg shadow-success-500/10"
         >
-          Go to Home
-        </Button>
-        <Button className="w-full font-semibold" color="warning" onPress={() => router.push("/auth/operator")}>
-          Go to Sign In
-        </Button>
+          <FiCheckCircle className="text-4xl text-success-500" />
+        </motion.div>
+
+        <h2 className="text-2xl font-black text-foreground mb-4">
+          Successfully Submitted
+        </h2>
+
+        <div className="p-6 rounded-[2.5rem] bg-content2/40 border border-default-200 relative overflow-hidden group mb-8">
+          <p className="text-sm leading-relaxed text-foreground/70 font-medium">
+            Our team will review your application and contact you within <span className="text-warning-500 font-bold">1-2 working days</span>. You will receive an update via email and SMS once your access is approved.
+          </p>
+        </div>
+
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Button
+            className="h-12 rounded-xl font-bold border-default-200"
+            variant="bordered"
+            onPress={() => router.push("/")}
+            startContent={<FiHome />}
+          >
+            Home
+          </Button>
+          <Button
+            className="h-12 rounded-xl font-bold border-warning-500/20 bg-warning-500/10 text-warning-500 shadow-lg shadow-warning-500/10"
+            variant="flat"
+            onPress={() => router.push("/auth/operator")}
+            startContent={<FiLogIn />}
+          >
+            Sign In
+          </Button>
+        </div>
       </div>
     </AuthLayout>
   );

@@ -427,6 +427,12 @@ export const apiRoutes = {
     update: (id: string) => `${BASE_PATHS.FLOW_RULE}/${id}`,
     delete: (id: string) => `${BASE_PATHS.FLOW_RULE}/${id}`,
   },
+  orderSubflowConfigs: {
+    list: `${BASE_PATHS.FLOW_RULE}/subflows`,
+    create: `${BASE_PATHS.FLOW_RULE}/subflows`,
+    update: (id: string) => `${BASE_PATHS.FLOW_RULE}/subflows/${id}`,
+    delete: (id: string) => `${BASE_PATHS.FLOW_RULE}/subflows/${id}`,
+  },
   enquiryRules: {
     list: `${BASE_PATHS.ENQUIRY_RULE}`,
     create: `${BASE_PATHS.ENQUIRY_RULE}`,

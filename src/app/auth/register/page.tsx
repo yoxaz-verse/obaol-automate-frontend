@@ -18,6 +18,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff, IoLockClosed, IoMail, IoPerson } from "react-icons/io5";
+import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { showToastMessage } from "@/utils/utils";
@@ -502,8 +503,10 @@ export default function RegisterPage() {
     setCurrentStep((prev) => Math.max(1, prev - 1) as StepKey);
   };
 
+  const [isSubmittingSuccess, setIsSubmittingSuccess] = useState(false);
+
   const handleSubmit = async () => {
-    if (isLoading) return;
+    if (isLoading || isSubmittingSuccess) return;
     if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
       showToastMessage({ type: "error", message: "Please complete required fields.", position: "top-right" });
       return;
@@ -598,21 +601,25 @@ export default function RegisterPage() {
       );
 
       if (response.data?.success) {
+        setIsSubmittingSuccess(true);
         showToastMessage({
           type: "success",
           message: response.data?.message || "Registration submitted for review.",
           position: "top-right",
         });
         play("success");
-        router.push("/auth/register/success");
+        setTimeout(() => {
+          router.push("/auth/register/success");
+        }, 1500);
+      } else {
+        setIsLoading(false);
       }
     } catch (error: any) {
+      setIsLoading(false);
       const errorMessage = error?.response?.data?.message || "Registration failed.";
       setErrors((prev) => ({ ...prev, general: errorMessage }));
       showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
       play("danger");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -622,17 +629,20 @@ export default function RegisterPage() {
       subtitle={stepTitle}
       cardMaxWidthClass="max-w-[620px]"
       leftPanel={{
-        headline: "Become an",
-        highlight: "OBAOL ASSOCIATE",
-        description: "Join a high-performance network of manufacturers, traders, and logistics providers automating global agro-commodity trade.",
-        points: [
-          "Manufacturers: Digitize your production tracking and connect with global buyers.",
-          "Commodity Traders: Gain access to verified trade flows and live market rates.",
-          "Service Providers: Offer your transportation, warehousing, or QC services to the network.",
-          "Importers & Exporters: Manage end-to-end documentation and compliance seamlessly.",
-          "Company Registration Mandatory: Requires valid legal entity status for onboarding.",
+        headline: "OBAOL",
+        highlight: "ASSOCIATE NETWORK",
+        description: "Empowering manufacturers, traders, and logistics providers with a unified platform for global agro-trade automation.",
+        tags: [
+          "Manufacturers",
+          "Traders",
+          "Logistics Providers",
+          "Exporters & Importers",
+          "Freight Forwarders",
+          "Warehouse Managers",
+          "Company Registration Mandatory"
         ],
-        footer: "Associate_Onboarding",
+        footer: "Associate_Hub_Online",
+        knowMoreLink: "/roles/associate"
       }}
     >
       {optionsLoading ? (
@@ -652,47 +662,40 @@ export default function RegisterPage() {
             e.preventDefault();
           }}
         >
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex-1">
-                <div className={`h-1.5 rounded-full ${step <= currentStep ? "bg-warning-500" : "bg-default-200"}`} />
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { id: 1, label: "Profile" },
-              { id: 2, label: "Company" },
-              { id: 3, label: "Capabilities" },
-              { id: 4, label: "Submit" },
-            ].map((step) => (
-              <Chip
-                key={step.id}
-                size="sm"
-                color={currentStep === step.id ? "warning" : "default"}
-                variant="flat"
-                className="cursor-pointer hover:bg-warning-100 transition-colors"
-                onClick={() => {
-                  if (step.id < currentStep) {
-                    setCurrentStep(step.id as StepKey);
-                  } else if (step.id > currentStep) {
-                    // Only allow jumping forward if current and intermediate steps are valid
-                    let canJump = true;
-                    for (let s = currentStep; s < step.id; s++) {
-                      if (!validateStep(s as StepKey)) {
-                        canJump = false;
-                        break;
-                      }
-                    }
-                    if (canJump) setCurrentStep(step.id as StepKey);
-                  }
-                }}
-              >
-                {step.label}
-              </Chip>
-            ))}
-            {/* Removed designation chip */}
+          <div className="mb-10">
+            <div className="flex items-center justify-between relative px-2 mb-6">
+              <div className="absolute top-1/2 left-0 w-full h-[2.5px] bg-default-100/50 -translate-y-1/2 z-0 rounded-full" />
+              <motion.div
+                className="absolute top-1/2 left-0 h-[2.5px] bg-warning-500 -translate-y-1/2 z-0 rounded-full"
+                initial={{ width: "0%" }}
+                animate={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              />
+              {[1, 2, 3, 4].map((s) => (
+                <div
+                  key={s}
+                  className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 shadow-sm border-2 ${s < currentStep
+                    ? "bg-warning-500 border-warning-500 text-white"
+                    : s === currentStep
+                      ? "bg-background border-warning-500 text-warning-500 scale-110 shadow-warning-500/20"
+                      : "bg-background border-default-200 text-default-400"
+                    }`}
+                >
+                  {s < currentStep ? <FiCheck className="text-sm stroke-[3]" /> : s}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between px-1">
+              {["Profile", "Company", "Capability", "Verify"].map((label, idx) => (
+                <span
+                  key={label}
+                  className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${idx + 1 <= currentStep ? "text-warning-500" : "text-default-400"
+                    }`}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 items-start">
@@ -700,78 +703,88 @@ export default function RegisterPage() {
               {currentStep === 1 && (
                 <motion.div
                   key="register-step-1"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-warning-200/40 bg-gradient-to-br from-warning-50/30 to-transparent dark:from-warning-900/10 p-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
                   <Input
                     type="text"
                     label="Full Name"
                     labelPlacement="outside"
                     placeholder="John Doe"
+                    variant="bordered"
                     value={formData.name}
                     onValueChange={(v) => setField("name", v)}
                     isInvalid={!!errors.name}
                     errorMessage={errors.name}
                     startContent={<IoPerson className="text-default-400" />}
+                    classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                   />
                   <Input
                     type="email"
                     label="Email Address"
                     labelPlacement="outside"
                     placeholder="name@company.com"
+                    variant="bordered"
                     value={formData.email}
                     onValueChange={(v) => setField("email", v)}
                     isInvalid={!!errors.email}
                     errorMessage={errors.email}
                     startContent={<IoMail className="text-default-400" />}
+                    classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                   />
                   <div className="md:col-span-2">
-                    <PhoneField
-                      name="phone"
-                      label="Phone Number"
-                      value={formData.phone}
-                      countryCodeValue={formData.phoneCountryCode}
-                      nationalValue={formData.phoneNational}
-                      onChange={(next) => {
-                        setField("phone", next.e164);
-                        setField("phoneCountryCode", next.countryCode);
-                        setField("phoneNational", next.national);
-                      }}
-                    />
-                    {errors.phone ? <p className="text-danger text-xs mt-1">{errors.phone}</p> : null}
+                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                      <PhoneField
+                        name="phone"
+                        label="Primary Phone Number"
+                        value={formData.phone}
+                        countryCodeValue={formData.phoneCountryCode}
+                        nationalValue={formData.phoneNational}
+                        onChange={(next) => {
+                          setField("phone", next.e164);
+                          setField("phoneCountryCode", next.countryCode);
+                          setField("phoneNational", next.national);
+                        }}
+                      />
+                    </div>
+                    {errors.phone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phone}</p> : null}
                   </div>
                   <div className="md:col-span-2">
-                    <PhoneField
-                      name="phoneSecondary"
-                      label="Secondary Phone Number"
-                      value={formData.phoneSecondary}
-                      countryCodeValue={formData.phoneSecondaryCountryCode}
-                      nationalValue={formData.phoneSecondaryNational}
-                      onChange={(next) => {
-                        setField("phoneSecondary", next.e164);
-                        setField("phoneSecondaryCountryCode", next.countryCode);
-                        setField("phoneSecondaryNational", next.national);
-                      }}
-                    />
-                    {errors.phoneSecondary ? <p className="text-danger text-xs mt-1">{errors.phoneSecondary}</p> : null}
+                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                      <PhoneField
+                        name="phoneSecondary"
+                        label="Secondary Phone (Optional)"
+                        value={formData.phoneSecondary}
+                        countryCodeValue={formData.phoneSecondaryCountryCode}
+                        nationalValue={formData.phoneSecondaryNational}
+                        onChange={(next) => {
+                          setField("phoneSecondary", next.e164);
+                          setField("phoneSecondaryCountryCode", next.countryCode);
+                          setField("phoneSecondaryNational", next.national);
+                        }}
+                      />
+                    </div>
+                    {errors.phoneSecondary ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phoneSecondary}</p> : null}
                   </div>
 
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <Input
                       type={showPassword ? "text" : "password"}
                       label="Password"
                       labelPlacement="outside"
                       placeholder="Create a secure password"
+                      variant="bordered"
                       value={formData.password}
                       onValueChange={(v) => setField("password", v)}
                       isInvalid={!!errors.password}
                       errorMessage={errors.password}
                       startContent={<IoLockClosed className="text-default-400" />}
+                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                       endContent={
-                        <button type="button" onClick={() => setShowPassword((prev) => !prev)}>
+                        <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
                           {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
                         </button>
                       }
@@ -781,13 +794,15 @@ export default function RegisterPage() {
                       label="Confirm Password"
                       labelPlacement="outside"
                       placeholder="Repeat your password"
+                      variant="bordered"
                       value={formData.confirmPassword}
                       onValueChange={(v) => setField("confirmPassword", v)}
                       isInvalid={!!errors.confirmPassword}
                       errorMessage={errors.confirmPassword}
                       startContent={<IoLockClosed className="text-default-400" />}
+                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                       endContent={
-                        <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)}>
+                        <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
                           {showConfirmPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
                         </button>
                       }
@@ -799,61 +814,54 @@ export default function RegisterPage() {
               {currentStep === 2 && (
                 <motion.div
                   key="register-step-2"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col gap-4 rounded-2xl border border-primary-200/30 bg-gradient-to-br from-primary-50/20 to-transparent dark:from-primary-900/10 p-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col gap-6"
                 >
-                  <RadioGroup
-                    label="Are you representing a company?"
-                    orientation="horizontal"
-                    value={formData.hasCompany}
-                    onValueChange={(v) => setField("hasCompany", v)}
-                  >
-                    <Radio value="yes">Yes</Radio>
-                    <Radio value="no">No (Individual for now)</Radio>
-                  </RadioGroup>
-
-                  <div className="rounded-xl border border-warning-200/50 bg-warning-50/50 dark:bg-warning-900/10 p-3 flex flex-col gap-2 shadow-sm">
-                    <div className="text-xs font-bold text-warning-700 dark:text-warning-400 uppercase tracking-widest flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-warning-500 animate-pulse" />
-                      Who should join as an Associate?
-                    </div>
-                    <p className="text-[11px] text-foreground/70 leading-relaxed font-medium">
-                      The Associate network is designed for business entities and professional traders such as:
-                      <span className="block mt-1 font-bold text-foreground opacity-90 italic">
-                        Manufacturers, Market Brokers, Warehousing Partners, Transporters, or Traders.
-                      </span>
-                      If you&apos;re an independent professional and plan to register your company later, please select
-                      &quot;No (Individual for now)&quot; to begin.
-                    </p>
+                  <div className="p-5 rounded-[2rem] bg-content2/40 border border-default-200">
+                    <RadioGroup
+                      label={<span className="text-xs font-black uppercase tracking-widest text-default-400">Representation</span>}
+                      orientation="horizontal"
+                      value={formData.hasCompany}
+                      onValueChange={(v) => setField("hasCompany", v)}
+                      classNames={{ wrapper: "gap-6" }}
+                    >
+                      <Radio value="yes" classNames={{ label: "text-sm font-bold" }}>Yes, I have a company</Radio>
+                      <Radio value="no" classNames={{ label: "text-sm font-bold" }}>No, as Individual</Radio>
+                    </RadioGroup>
                   </div>
 
                   {isCompanyFlow ? (
                     <>
-                      <RadioGroup
-                        label="Is your company already on OBAOL?"
-                        orientation="horizontal"
-                        value={formData.companyMode}
-                        onValueChange={(v) => setField("companyMode", v)}
-                      >
-                        <Radio value="existing">Yes, select existing</Radio>
-                        <Radio value="new">No, add new company</Radio>
-                      </RadioGroup>
+                      <div className="p-5 rounded-[2rem] bg-orange-500/5 border border-orange-500/10">
+                        <RadioGroup
+                          label={<span className="text-xs font-black uppercase tracking-widest text-orange-500">Record Status</span>}
+                          orientation="horizontal"
+                          value={formData.companyMode}
+                          onValueChange={(v) => setField("companyMode", v)}
+                          classNames={{ wrapper: "gap-6" }}
+                        >
+                          <Radio value="existing" classNames={{ label: "text-sm font-bold" }}>Existing on OBAOL</Radio>
+                          <Radio value="new" classNames={{ label: "text-sm font-bold" }}>Register New Company</Radio>
+                        </RadioGroup>
+                      </div>
 
                       {formData.companyMode === "existing" && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           <AutocompleteAny
-                            label="Select Existing Company"
+                            label="Find Company"
                             labelPlacement="outside"
+                            variant="bordered"
                             defaultItems={existingCompanies}
                             selectedKey={formData.associateCompanyId || null}
                             onSelectionChange={(key: any) => setField("associateCompanyId", String(key || ""))}
-                            placeholder={existingCompanies.length ? "Search your company" : "No existing companies found"}
+                            placeholder={existingCompanies.length ? "Search by name..." : "No companies found"}
                             isInvalid={!!errors.associateCompanyId}
                             errorMessage={errors.associateCompanyId}
                             isDisabled={!hasExistingCompanyOptions}
+                            classNames={{ base: "rounded-xl", inputWrapper: "h-12 border-default-200" }}
                           >
                             {(item: any) => (
                               <AutocompleteItem key={item._id} textValue={item.name}>
@@ -861,73 +869,55 @@ export default function RegisterPage() {
                               </AutocompleteItem>
                             )}
                           </AutocompleteAny>
-                          <div className="rounded-xl border border-default-200/70 bg-default-50/40 dark:bg-default-100/5 p-3">
-                            <div className="text-xs uppercase tracking-wide text-default-500 mb-2">Company Functions (Read Only)</div>
-                            {selectedExistingCompanyInterests.length > 0 ? (
-                              <div className="flex flex-wrap gap-2">
-                                {selectedExistingCompanyInterests.map((interest: string) => (
-                                  <Chip key={interest} size="sm" color="primary" variant="flat">
-                                    {interest.replace(/_/g, " ")}
-                                  </Chip>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-xs text-default-500">No functions configured yet for this company.</p>
-                            )}
-                          </div>
                         </div>
                       )}
 
                       {isNewCompany && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Input
-                            label="Company Name"
+                            label="Legal Company Name"
                             labelPlacement="outside"
+                            variant="bordered"
+                            placeholder="Enter legal name"
                             value={formData.companyName}
                             onValueChange={(v) => setField("companyName", v)}
                             isInvalid={!!errors.companyName}
                             errorMessage={errors.companyName}
+                            classNames={{ inputWrapper: "h-12 border-default-200" }}
                           />
                           <Input
-                            label="Company Email"
+                            label="Corporate Email"
                             labelPlacement="outside"
+                            variant="bordered"
+                            placeholder="corp@company.com"
                             value={formData.companyEmail}
                             onValueChange={(v) => setField("companyEmail", v)}
                             isInvalid={!!errors.companyEmail}
                             errorMessage={errors.companyEmail}
+                            classNames={{ inputWrapper: "h-12 border-default-200" }}
                           />
                           <div className="md:col-span-2">
-                            <PhoneField
-                              name="companyPhone"
-                              label="Company Phone"
-                              value={formData.companyPhone}
-                              countryCodeValue={formData.companyPhoneCountryCode}
-                              nationalValue={formData.companyPhoneNational}
-                              onChange={(next) => {
-                                setField("companyPhone", next.e164);
-                                setField("companyPhoneCountryCode", next.countryCode);
-                                setField("companyPhoneNational", next.national);
-                              }}
-                            />
-                            {errors.companyPhone ? <p className="text-danger text-xs mt-1">{errors.companyPhone}</p> : null}
-                          </div>
-                          <div className="md:col-span-2">
-                            <PhoneField
-                              name="companyPhoneSecondary"
-                              label="Company Secondary Phone (Optional)"
-                              value={formData.companyPhoneSecondary}
-                              countryCodeValue={formData.companyPhoneSecondaryCountryCode}
-                              nationalValue={formData.companyPhoneSecondaryNational}
-                              onChange={(next) => {
-                                setField("companyPhoneSecondary", next.e164);
-                                setField("companyPhoneSecondaryCountryCode", next.countryCode);
-                                setField("companyPhoneSecondaryNational", next.national);
-                              }}
-                            />
+                            <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                              <PhoneField
+                                name="companyPhone"
+                                label="Company Contact"
+                                value={formData.companyPhone}
+                                countryCodeValue={formData.companyPhoneCountryCode}
+                                nationalValue={formData.companyPhoneNational}
+                                onChange={(next) => {
+                                  setField("companyPhone", next.e164);
+                                  setField("companyPhoneCountryCode", next.countryCode);
+                                  setField("companyPhoneNational", next.national);
+                                }}
+                              />
+                            </div>
+                            {errors.companyPhone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.companyPhone}</p> : null}
                           </div>
                           <Select
-                            label="Company Type"
+                            label="Type of Entity"
                             labelPlacement="outside"
+                            variant="bordered"
+                            placeholder="Select type"
                             selectedKeys={formData.companyType ? [formData.companyType] : []}
                             onSelectionChange={(keys) => {
                               const selected = Array.from(keys as Set<string>)[0] || "";
@@ -936,6 +926,7 @@ export default function RegisterPage() {
                             isInvalid={!!errors.companyType}
                             errorMessage={errors.companyType}
                             isDisabled={!hasCompanyTypeOptions}
+                            classNames={{ trigger: "h-12 border-default-200" }}
                           >
                             {companyTypes.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>
@@ -943,69 +934,75 @@ export default function RegisterPage() {
                               </SelectItem>
                             ))}
                           </Select>
-                          <RadioGroup
-                            label="Company Geography"
-                            orientation="horizontal"
-                            value={formData.companyGeoType}
-                            onValueChange={(v) => setCompanyGeoType(v as "INDIAN" | "INTERNATIONAL")}
-                            className="md:col-span-2"
-                          >
-                            <Radio value="INDIAN">Indian Company</Radio>
-                            <Radio value="INTERNATIONAL">International Company</Radio>
-                          </RadioGroup>
+                          <div className="p-4 rounded-2xl bg-content2/30 border border-default-200 md:col-span-2">
+                            <RadioGroup
+                              label={<span className="text-[10px] font-black uppercase tracking-widest text-default-400">Jurisdiction</span>}
+                              orientation="horizontal"
+                              value={formData.companyGeoType}
+                              onValueChange={(v) => setCompanyGeoType(v as "INDIAN" | "INTERNATIONAL")}
+                              classNames={{ wrapper: "gap-8" }}
+                            >
+                              <Radio value="INDIAN" classNames={{ label: "text-sm font-bold" }}>Indian Hub</Radio>
+                              <Radio value="INTERNATIONAL" classNames={{ label: "text-sm font-bold" }}>International</Radio>
+                            </RadioGroup>
+                          </div>
+
                           <Textarea
-                            label="Full Company Address"
+                            label="Registered Office Address"
                             labelPlacement="outside"
+                            variant="bordered"
+                            placeholder="Complete physical address"
                             value={formData.companyAddress}
                             onValueChange={(v) => setField("companyAddress", v)}
                             isInvalid={!!errors.companyAddress}
                             errorMessage={errors.companyAddress}
                             className="md:col-span-2"
+                            classNames={{ inputWrapper: "border-default-200" }}
                           />
+
                           {formData.companyGeoType === "INTERNATIONAL" ? (
                             <>
                               <Input
-                                label="Country Name"
+                                label="Country"
                                 labelPlacement="outside"
+                                variant="bordered"
                                 value={formData.companyCountry}
                                 onValueChange={(v) => setField("companyCountry", v)}
                                 isInvalid={!!errors.companyCountry}
                                 errorMessage={errors.companyCountry}
-                                placeholder="Type country name (e.g., United Arab Emirates)"
+                                placeholder="e.g. UAE, Singapore"
+                                classNames={{ inputWrapper: "h-12 border-default-200" }}
                               />
                               <Input
-                                label="Legal Number"
+                                label="Tax/Legal ID"
                                 labelPlacement="outside"
+                                variant="bordered"
                                 value={formData.companyLegalNumber}
                                 onValueChange={(v) => setField("companyLegalNumber", v)}
                                 isInvalid={!!errors.companyLegalNumber}
                                 errorMessage={errors.companyLegalNumber}
-                              />
-                              <Textarea
-                                label="Legal Information"
-                                labelPlacement="outside"
-                                value={formData.companyLegalInformation}
-                                onValueChange={(v) => setField("companyLegalInformation", v)}
-                                isInvalid={!!errors.companyLegalInformation}
-                                errorMessage={errors.companyLegalInformation}
-                                className="md:col-span-2"
-                                placeholder="Mention legal framework followed and registration details."
+                                classNames={{ inputWrapper: "h-12 border-default-200" }}
                               />
                             </>
                           ) : (
                             <>
                               <Input
-                                label="GST Number"
+                                label="GSTIN Number"
                                 labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="15-digit GSTIN"
                                 value={formData.companyGstin}
                                 onValueChange={(v) => setField("companyGstin", v.toUpperCase())}
                                 isInvalid={!!errors.companyGstin}
                                 errorMessage={errors.companyGstin}
                                 className="md:col-span-2"
+                                classNames={{ inputWrapper: "h-12 border-default-200" }}
                               />
                               <Select
                                 label="State"
                                 labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="Select"
                                 selectedKeys={formData.companyState ? [formData.companyState] : []}
                                 onSelectionChange={(keys) => {
                                   const selected = Array.from(keys as Set<string>)[0] || "";
@@ -1013,16 +1010,17 @@ export default function RegisterPage() {
                                 }}
                                 isInvalid={!!errors.companyState}
                                 errorMessage={errors.companyState}
+                                classNames={{ trigger: "h-12 border-default-200" }}
                               >
                                 {states.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>
-                                    {item.name}
-                                  </SelectItem>
+                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                                 ))}
                               </Select>
                               <Select
                                 label="District"
                                 labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="Select"
                                 selectedKeys={formData.companyDistrict ? [formData.companyDistrict] : []}
                                 onSelectionChange={(keys) => {
                                   const selected = Array.from(keys as Set<string>)[0] || "";
@@ -1031,55 +1029,12 @@ export default function RegisterPage() {
                                 isInvalid={!!errors.companyDistrict}
                                 errorMessage={errors.companyDistrict}
                                 isDisabled={!formData.companyState}
+                                classNames={{ trigger: "h-12 border-default-200" }}
                               >
                                 {filteredDistricts.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>
-                                    {item.name}
-                                  </SelectItem>
+                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                                 ))}
                               </Select>
-                              <Select
-                                label="Division"
-                                labelPlacement="outside"
-                                selectedKeys={formData.companyDivision ? [formData.companyDivision] : []}
-                                onSelectionChange={(keys) => {
-                                  const selected = Array.from(keys as Set<string>)[0] || "";
-                                  setCompanyLocationField("companyDivision", selected);
-                                }}
-                                isInvalid={!!errors.companyDivision}
-                                errorMessage={errors.companyDivision}
-                                isDisabled={!formData.companyDistrict}
-                              >
-                                {filteredDivisions.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>
-                                    {item.name}
-                                  </SelectItem>
-                                ))}
-                              </Select>
-                              <Select
-                                label="Pincode (Optional)"
-                                labelPlacement="outside"
-                                placeholder={isPincodesLoading ? "Loading pincodes..." : "Select pincode"}
-                                selectedKeys={formData.companyPincodeEntry ? [formData.companyPincodeEntry] : []}
-                                onSelectionChange={(keys) => {
-                                  const selected = Array.from(keys as Set<string>)[0] || "";
-                                  setCompanyLocationField("companyPincodeEntry", selected);
-                                }}
-                                isDisabled={!formData.companyDivision || isPincodesLoading}
-                                startContent={isPincodesLoading ? <Spinner size="sm" color="current" /> : null}
-                              >
-                                {filteredPincodes.map((item: any) => (
-                                  <SelectItem key={item._id} value={item._id}>
-                                    {item.pincode} - {item.officename}
-                                  </SelectItem>
-                                ))}
-                              </Select>
-                              {formData.companyState && filteredDistricts.length === 0 ? (
-                                <p className="md:col-span-2 text-xs text-default-500">No districts found for the selected state.</p>
-                              ) : null}
-                              {formData.companyDistrict && filteredDivisions.length === 0 ? (
-                                <p className="md:col-span-2 text-xs text-default-500">No divisions found for the selected district.</p>
-                              ) : null}
                             </>
                           )}
                         </div>
@@ -1087,103 +1042,30 @@ export default function RegisterPage() {
                     </>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <RadioGroup
-                        label="Your Geography"
-                        orientation="horizontal"
-                        value={formData.associateGeoType}
-                        onValueChange={(v) => setAssociateGeoType(v as "INDIAN" | "INTERNATIONAL")}
-                        className="md:col-span-2"
-                      >
-                        <Radio value="INDIAN">India</Radio>
-                        <Radio value="INTERNATIONAL">Outside India</Radio>
-                      </RadioGroup>
+                      <div className="p-4 rounded-2xl bg-content2/30 border border-default-200 md:col-span-2">
+                        <RadioGroup
+                          label={<span className="text-[10px] font-black uppercase tracking-widest text-default-400">Geography</span>}
+                          orientation="horizontal"
+                          value={formData.associateGeoType}
+                          onValueChange={(v) => setAssociateGeoType(v as "INDIAN" | "INTERNATIONAL")}
+                          classNames={{ wrapper: "gap-8" }}
+                        >
+                          <Radio value="INDIAN" classNames={{ label: "text-sm font-bold" }}>India</Radio>
+                          <Radio value="INTERNATIONAL" classNames={{ label: "text-sm font-bold" }}>International</Radio>
+                        </RadioGroup>
+                      </div>
                       <Textarea
-                        label="Full Address"
+                        label="Home Address"
                         labelPlacement="outside"
+                        variant="bordered"
+                        placeholder="Residential or office address"
                         value={formData.associateAddress}
                         onValueChange={(v) => setField("associateAddress", v)}
                         isInvalid={!!errors.associateAddress}
                         errorMessage={errors.associateAddress}
                         className="md:col-span-2"
+                        classNames={{ inputWrapper: "border-default-200" }}
                       />
-                      {formData.associateGeoType === "INTERNATIONAL" ? (
-                        <Input
-                          label="Country Name"
-                          labelPlacement="outside"
-                          value={formData.associateCountry}
-                          onValueChange={(v) => setField("associateCountry", v)}
-                          isInvalid={!!errors.associateCountry}
-                          errorMessage={errors.associateCountry}
-                          placeholder="Type country name"
-                          className="md:col-span-2"
-                        />
-                      ) : (
-                        <>
-                          <Select
-                            label="State"
-                            labelPlacement="outside"
-                            selectedKeys={formData.associateState ? [formData.associateState] : []}
-                            onSelectionChange={(keys) => {
-                              const selected = Array.from(keys as Set<string>)[0] || "";
-                              setAssociateLocationField("associateState", selected);
-                            }}
-                            isInvalid={!!errors.associateState}
-                            errorMessage={errors.associateState}
-                          >
-                            {states.map((item: any) => (
-                              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                            ))}
-                          </Select>
-                          <Select
-                            label="District"
-                            labelPlacement="outside"
-                            selectedKeys={formData.associateDistrict ? [formData.associateDistrict] : []}
-                            onSelectionChange={(keys) => {
-                              const selected = Array.from(keys as Set<string>)[0] || "";
-                              setAssociateLocationField("associateDistrict", selected);
-                            }}
-                            isInvalid={!!errors.associateDistrict}
-                            errorMessage={errors.associateDistrict}
-                            isDisabled={!formData.associateState}
-                          >
-                            {districts.filter((d: any) => d.state === formData.associateState).map((item: any) => (
-                              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                            ))}
-                          </Select>
-                          <Select
-                            label="Division"
-                            labelPlacement="outside"
-                            selectedKeys={formData.associateDivision ? [formData.associateDivision] : []}
-                            onSelectionChange={(keys) => {
-                              const selected = Array.from(keys as Set<string>)[0] || "";
-                              setAssociateLocationField("associateDivision", selected);
-                            }}
-                            isInvalid={!!errors.associateDivision}
-                            errorMessage={errors.associateDivision}
-                            isDisabled={!formData.associateDistrict}
-                          >
-                            {divisions.filter((d: any) => d.district === formData.associateDistrict).map((item: any) => (
-                              <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                            ))}
-                          </Select>
-                          <Select
-                            label="Pincode (Optional)"
-                            labelPlacement="outside"
-                            placeholder={isPincodesLoading ? "Loading pincodes..." : "Select pincode"}
-                            selectedKeys={formData.associatePincodeEntry ? [formData.associatePincodeEntry] : []}
-                            onSelectionChange={(keys) => {
-                              const selected = Array.from(keys as Set<string>)[0] || "";
-                              setAssociateLocationField("associatePincodeEntry", selected);
-                            }}
-                            isDisabled={!formData.associateDivision || isPincodesLoading}
-                            startContent={isPincodesLoading ? <Spinner size="sm" color="current" /> : null}
-                          >
-                            {dynamicPincodes.map((item: any) => (
-                              <SelectItem key={item._id} value={item._id}>{item.pincode} - {item.officename}</SelectItem>
-                            ))}
-                          </Select>
-                        </>
-                      )}
                     </div>
                   )}
                 </motion.div>
@@ -1192,100 +1074,69 @@ export default function RegisterPage() {
               {currentStep === 3 && (
                 <motion.div
                   key="register-step-3"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col gap-4 rounded-2xl border border-success-200/30 bg-gradient-to-br from-success-50/20 to-transparent dark:from-success-900/10 p-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col gap-6"
                 >
-                  <div className="rounded-xl border border-primary-300/80 bg-primary-50 p-3 text-sm text-primary-900 dark:border-primary-300/70 dark:bg-primary-900/50 dark:text-primary-50">
-                    Select your company&apos;s capabilities. Choose <strong>1 to 10</strong> sub-functions that best describe what your company does.
+                  <div className="p-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 text-xs font-black uppercase tracking-widest text-warning-500 text-center">
+                    Select 1 to 10 company capabilities
                   </div>
+
                   {isNewCompany ? (
-                    <>
-                      <div className="flex flex-col gap-4">
-                        {groupedCompanyFunctions.map((fn: any) => {
-                          const fnSubFunctions = Array.isArray(fn?.subFunctions) ? fn.subFunctions : [];
-                          if (!fnSubFunctions.length) return null;
-                          return (
-                            <div key={String(fn?._id || "")} className="rounded-xl border border-default-200 bg-default-50/40 dark:bg-default-100/5 p-3">
-                              <div className="mb-2 flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-foreground">{fn?.name || "Function"}</p>
-                                <span className="text-[11px] text-default-500">
-                                  {fnSubFunctions.length} sub-functions
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {fnSubFunctions.map((sub: any) => {
-                                  const subId = String(sub?._id || "");
-                                  const isSelected = formData.companySubFunctionIds.includes(subId);
-                                  const isDisabled = !isSelected && formData.companySubFunctionIds.length >= 10;
-                                  return (
-                                    <button
-                                      key={subId}
-                                      type="button"
-                                      disabled={isDisabled}
-                                      onClick={() => {
-                                        setFormData((prev) => {
-                                          const current = Array.isArray(prev.companySubFunctionIds) ? prev.companySubFunctionIds : [];
-                                          if (isSelected) {
-                                            return { ...prev, companySubFunctionIds: current.filter((id) => id !== subId) };
-                                          }
-                                          if (current.length >= 10) return prev;
-                                          return { ...prev, companySubFunctionIds: [...current, subId] };
-                                        });
-                                        if (errors.companySubFunctionIds) {
-                                          setErrors((prev) => ({ ...prev, companySubFunctionIds: "" }));
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                      {groupedCompanyFunctions.map((fn: any) => {
+                        const fnSubFunctions = Array.isArray(fn?.subFunctions) ? fn.subFunctions : [];
+                        if (!fnSubFunctions.length) return null;
+                        return (
+                          <div key={String(fn?._id || "")} className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-default-400 pl-2">{fn?.name}</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {fnSubFunctions.map((sub: any) => {
+                                const subId = String(sub?._id || "");
+                                const isSelected = formData.companySubFunctionIds.includes(subId);
+                                const isDisabled = !isSelected && formData.companySubFunctionIds.length >= 10;
+                                return (
+                                  <button
+                                    key={subId}
+                                    type="button"
+                                    disabled={isDisabled}
+                                    onClick={() => {
+                                      setFormData((prev) => {
+                                        const current = Array.isArray(prev.companySubFunctionIds) ? prev.companySubFunctionIds : [];
+                                        if (isSelected) {
+                                          return { ...prev, companySubFunctionIds: current.filter((id) => id !== subId) };
                                         }
-                                      }}
-                                      className={`w-full text-left rounded-lg border px-3 py-2 transition-all duration-150 ${isSelected
-                                        ? "border-warning-500 bg-warning-50 dark:bg-warning-900/20"
-                                        : isDisabled
-                                          ? "border-default-200 bg-default-50/50 dark:bg-default-100/5 opacity-40 cursor-not-allowed"
-                                          : "border-default-200 bg-default-50/50 dark:bg-default-100/5 hover:border-warning-300 hover:bg-warning-50/30 dark:hover:bg-warning-900/10"
-                                        }`}
-                                    >
-                                      <div className="flex items-center justify-between gap-2">
-                                        <div className="min-w-0">
-                                          <p className={`text-sm font-medium truncate ${isSelected ? "text-warning-700 dark:text-warning-400" : "text-foreground"}`}>
-                                            {sub?.name || "Sub-function"}
-                                          </p>
-                                          {sub?.description ? (
-                                            <p className="text-xs text-default-500 mt-0.5 line-clamp-1">{sub.description}</p>
-                                          ) : null}
-                                        </div>
-                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected
-                                          ? "border-warning-500 bg-warning-500"
-                                          : "border-default-300"
-                                          }`}>
-                                          {isSelected ? <span className="block w-1.5 h-1.5 rounded-full bg-white" /> : null}
-                                        </div>
+                                        if (current.length >= 10) return prev;
+                                        return { ...prev, companySubFunctionIds: [...current, subId] };
+                                      });
+                                      if (errors.companySubFunctionIds) setErrors((prev) => ({ ...prev, companySubFunctionIds: "" }));
+                                    }}
+                                    className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
+                                      ? "border-warning-500 bg-warning-500/10 shadow-lg shadow-warning-500/5 ring-1 ring-warning-500/20"
+                                      : isDisabled
+                                        ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
+                                        : "border-default-200 bg-content2/20 hover:border-warning-500/50 hover:bg-content2/40"
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-warning-500 bg-warning-500" : "border-default-300"}`}>
+                                        {isSelected && <FiCheck className="text-[10px] text-white stroke-[4]" />}
                                       </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                                      <p className={`text-xs font-bold ${isSelected ? "text-warning-600" : "text-foreground/70"}`}>{sub?.name}</p>
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
-                          );
-                        })}
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-default-500">
-                        <span>
-                          {formData.companySubFunctionIds.length} / 10 selected
-                        </span>
-                        {formData.companySubFunctionIds.length >= 10 && (
-                          <span className="text-warning-600 font-semibold">Maximum reached</span>
-                        )}
-                      </div>
-
-                      {errors.companySubFunctionIds ? (
-                        <p className="text-danger text-xs">{errors.companySubFunctionIds}</p>
-                      ) : null}
-                    </>
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <div className="rounded-xl border border-default-200 bg-default-50/40 dark:bg-default-100/5 p-3 text-sm text-default-600 dark:text-default-300">
-                      Capability selection is required only when adding a new company.
+                    <div className="py-12 text-center bg-content2/20 rounded-[2rem] border-2 border-dashed border-default-200">
+                      <p className="text-sm text-default-400 font-bold italic">Capabilities are linked to the selected company profile.</p>
                     </div>
                   )}
                 </motion.div>
@@ -1294,33 +1145,37 @@ export default function RegisterPage() {
               {currentStep === 4 && (
                 <motion.div
                   key="register-step-4"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col gap-4 rounded-2xl border border-success-200/30 bg-gradient-to-br from-success-50/20 to-transparent dark:from-success-900/10 p-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col gap-6"
                 >
-                  <RadioGroup
-                    label="How should admin contact you for verification?"
-                    orientation="horizontal"
-                    value={formData.contactPreference}
-                    onValueChange={(v) => setField("contactPreference", v)}
-                  >
-                    <Radio value="phone">Phone</Radio>
-                    <Radio value="email">Email</Radio>
-                  </RadioGroup>
-
-                  <Textarea
-                    label="Additional Note (Optional)"
-                    labelPlacement="outside"
-                    placeholder="Share anything useful for verification call."
-                    value={formData.contactNotes}
-                    onValueChange={(v) => setField("contactNotes", v)}
-                  />
-                  <div className="rounded-xl border border-warning-400/80 bg-warning-100/95 dark:border-warning-300/70 dark:bg-warning-500/20 p-4 text-sm text-warning-900 dark:text-warning-100 leading-relaxed font-semibold text-center shadow-sm">
-                    As we only deal with registered and authenticated users, your details have been forwarded for verification. Our team will contact you soon and will reach out to you when your account is validated.
+                  <div className="p-5 rounded-[2.5rem] bg-success-500/5 border border-success-500/10">
+                    <RadioGroup
+                      label={<span className="text-[10px] font-black uppercase tracking-widest text-success-500">Contact Preference</span>}
+                      orientation="horizontal"
+                      value={formData.contactPreference}
+                      onValueChange={(v) => setField("contactPreference", v)}
+                      classNames={{ wrapper: "gap-8" }}
+                    >
+                      <Radio value="phone" classNames={{ label: "text-sm font-bold" }}>Phone</Radio>
+                      <Radio value="email" classNames={{ label: "text-sm font-bold" }}>Email</Radio>
+                    </RadioGroup>
                   </div>
 
+                  <Textarea
+                    label="Verification Notes"
+                    labelPlacement="outside"
+                    variant="bordered"
+                    placeholder="Provide any additional context for our verification team..."
+                    value={formData.contactNotes}
+                    onValueChange={(v) => setField("contactNotes", v)}
+                    classNames={{ inputWrapper: "border-default-200" }}
+                  />
+                  <div className="p-6 rounded-[2.5rem] bg-warning-500/5 border border-warning-500/20 text-sm text-warning-600 leading-relaxed font-bold text-center italic shadow-inner">
+                    &quot;Authorized access only. Your details will be reviewed within 24-48 hours. A verification call may be initiated to finalize onboarding.&quot;
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1344,36 +1199,39 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button
-              type="button"
-              variant="flat"
-              className="w-full sm:w-auto"
-              isDisabled={currentStep === 1 || isLoading}
-              onPress={handleBack}
-            >
-              Back
-            </Button>
-            {currentStep < 4 ? (
+          <div className="flex flex-col sm:flex-row gap-4 pt-8">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-1/3">
               <Button
                 type="button"
-                color="warning"
-                className="w-full sm:flex-1 font-semibold"
-                onPress={handleNext}
+                variant="flat"
+                className="w-full h-12 rounded-xl font-bold bg-default-100/50 hover:bg-default-200/80 transition-all border border-default-200"
+                isDisabled={currentStep === 1 || isLoading || isSubmittingSuccess}
+                onPress={handleBack}
+                startContent={<FiChevronLeft />}
               >
-                Continue
+                Back
               </Button>
-            ) : (
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
               <Button
                 color="warning"
-                className="w-full sm:flex-1 font-bold"
-                type="button"
-                isLoading={isLoading}
-                onPress={handleSubmit}
+                className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
+                  ${isSubmittingSuccess
+                    ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
+                    : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20 hover:shadow-warning-500/40"
+                  }`}
+                onPress={() => (currentStep === 4 ? handleSubmit() : handleNext())}
+                isLoading={isLoading || isSubmittingSuccess}
+                endContent={isSubmittingSuccess ? <FiCheck /> : currentStep === 4 ? <FiCheck /> : <FiChevronRight />}
               >
-                {isLoading ? "Submitting..." : "Submit Registration"}
+                {isSubmittingSuccess
+                  ? "Submission Received"
+                  : currentStep === 4
+                    ? (isLoading ? "Verifying Details..." : "Submit for Approval")
+                    : "Continue Onboarding"}
               </Button>
-            )}
+            </motion.div>
           </div>
 
           <div className="text-center mt-2 text-sm text-default-500">

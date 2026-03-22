@@ -7,7 +7,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiArrowRight } from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -105,12 +105,14 @@ const LoginComponent = ({ role }: ILoginProps) => {
         code: error.code
       });
 
+      const backendData = error?.response?.data;
       const apiErrorMessage = error?.code === "SESSION_COOKIE_BLOCKED"
-        ? "Session cookie was blocked by browser privacy settings. Allow cookies for obaol.com/api.obaol.com and retry."
+        ? "Session cookie was blocked by browser privacy settings. Lower your shields for obaol.com and retry."
         : error.message === "Network Error" || error.code === "ERR_NETWORK"
-          ? "Network Error: The request was blocked by the browser (CORS) or the server is unreachable. Please check your connection."
-          : (error.response?.data?.message ||
-            "Invalid email or password. Please try again.");
+          ? "Connection refused. Please check your internet or retry later."
+          : (backendData?.status === "rejected" || backendData?.isRejected || String(backendData?.message).toLowerCase().includes("rejected"))
+            ? "Your account verification has been rejected by the administrator. Contact support for more details."
+            : (backendData?.message || "Invalid credentials. Please verify your email/password.");
 
       setErrorMessage(apiErrorMessage);
 
@@ -354,9 +356,20 @@ const LoginComponent = ({ role }: ILoginProps) => {
         </div>
 
         {errorMessage && (
-          <div className="p-3 rounded-lg bg-danger-50 text-danger text-sm text-center border border-danger-200">
-            {errorMessage}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-xl bg-danger-500/10 border border-danger-500/20 flex items-center gap-3 text-danger-600 dark:text-danger-400 text-sm font-semibold shadow-sm overflow-hidden relative group"
+          >
+            <div className="shrink-0 w-8 h-8 rounded-full bg-danger-500/20 flex items-center justify-center">
+              <FiAlertCircle className="text-lg" />
+            </div>
+            <div className="flex-1 leading-relaxed">
+              {errorMessage}
+            </div>
+            {/* Ambient pulse */}
+            <div className="absolute inset-0 bg-danger-500/5 animate-pulse pointer-events-none" />
+          </motion.div>
         )}
 
         <motion.div

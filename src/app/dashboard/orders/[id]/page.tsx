@@ -137,6 +137,10 @@ export default function OrderDetailsPage() {
         queryKey: ["flow-rules", "TRADE_ORDER"],
         queryFn: () => getData(apiRoutes.flowRules.list, { flowType: "TRADE_ORDER" }),
     });
+    const { data: subflowConfigResponse } = useQuery({
+        queryKey: ["order-subflows"],
+        queryFn: () => getData(apiRoutes.orderSubflowConfigs.list),
+    });
     const enquiryRefId = (order as any)?.enquiry?._id || (order as any)?.enquiry;
     const { data: linkedEnquiry } = useQuery({
         queryKey: ["order-enquiry", enquiryRefId],
@@ -335,6 +339,32 @@ export default function OrderDetailsPage() {
         setLogisticsList(logisticsList.filter((_, i) => i !== index));
     };
 
+    const subflowConfigs = Array.isArray(subflowConfigResponse?.data?.data) ? subflowConfigResponse.data.data : [];
+    const subflowTypes = Array.from(
+        new Set(
+            subflowConfigs
+                .filter((config: any) => config?.isActive !== false)
+                .map((config: any) => String(config.subflowType || "").toUpperCase())
+                .filter(Boolean)
+        )
+    );
+    const { data: subflowRulesResponse } = useQuery({
+        queryKey: ["subflow-rules", subflowTypes.join("|")],
+        enabled: subflowTypes.length > 0,
+        queryFn: async () => {
+            const results = await Promise.all(
+                subflowTypes.map((type) => getData(apiRoutes.flowRules.list, { flowType: type }))
+            );
+            const map = new Map<string, any[]>();
+            results.forEach((res, index) => {
+                const flowType = subflowTypes[index];
+                const rules = Array.isArray(res?.data?.data) ? res.data.data : [];
+                map.set(flowType, rules);
+            });
+            return map;
+        },
+    });
+
     if (isLoading) return <BrandedLoader message="Loading order details" />;
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
@@ -372,6 +402,13 @@ export default function OrderDetailsPage() {
     const stageLabelMap = new Map(
         orderRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
     );
+    const orderStageRank = new Map<string, number>();
+    orderRules.forEach((r: any) => {
+        if (!r?.stageKey) return;
+        if (r?.isActive === false) return;
+        if (r?.tradeType && r.tradeType !== "BOTH" && String(r.tradeType) !== tradeType) return;
+        orderStageRank.set(String(r.stageKey).toUpperCase(), Number(r.sortOrder || 0));
+    });
     const workflowStageOptions = sortedOrderStages.length > 0
         ? sortedOrderStages
         : ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", "QUALITY_VERIFIED", "COMPLIANCE_APPROVED", "PACKING_COMPLETED", "READY_FOR_SHIPMENT", "SHIPPED", "DELIVERED", "PAYMENT_PENDING", "PAYMENT_COMPLETED", "TRADE_CLOSED"];
@@ -386,6 +423,32 @@ export default function OrderDetailsPage() {
             (r.tradeType === "BOTH" || r.tradeType === tradeType)
         )
         .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+
+    const subflowStatus = subflowConfigs
+        .filter((config: any) => config?.isActive !== false)
+        .map((config: any) => {
+            const type = String(config.subflowType || "").toUpperCase();
+            const flowRules = subflowRulesResponse?.get?.(type) || [];
+            const sortedFlowRules = [...flowRules].sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+            const lastStage = sortedFlowRules.length ? sortedFlowRules[sortedFlowRules.length - 1] : null;
+            const currentStage = String((order as any)?.subflowStages?.[type] || "").toUpperCase();
+            const isComplete = Boolean(lastStage && currentStage && String(lastStage.stageKey) === currentStage);
+            const gateStage = String(config.mustCompleteBeforeOrderStage || "").toUpperCase();
+            const gateLabel = stageLabelMap.get(gateStage) || gateStage;
+            const currentRank = orderStageRank.get(String(workflowStage).toUpperCase()) ?? 0;
+            const gateRank = orderStageRank.get(gateStage) ?? 0;
+            const isBlocking = !isComplete && currentRank >= gateRank;
+            return {
+                type,
+                label: type.replaceAll("_", " "),
+                currentStage: currentStage || "NOT_STARTED",
+                currentLabel: currentStage ? (flowRules.find((r: any) => String(r.stageKey).toUpperCase() === currentStage)?.label || currentStage) : "Not started",
+                isComplete,
+                isBlocking,
+                gateLabel,
+                dependsOn: Array.isArray(config.dependsOnSubflows) ? config.dependsOnSubflows : [],
+            };
+        });
     const canSeeRule = (rule: any) => {
         const visibility = String(rule.visibility || "BOTH");
         if (roleLower === "admin" || roleLower === "operator" || roleLower === "team") return true;
@@ -851,6 +914,38 @@ export default function OrderDetailsPage() {
                         })}
                     </CardBody>
                 </Card>
+
+                {subflowStatus.length > 0 && (
+                    <Card className="lg:col-span-3">
+                        <CardHeader className="font-bold text-lg">Subflow Status</CardHeader>
+                        <Divider />
+                        <CardBody className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {subflowStatus.map((flow) => (
+                                <div key={flow.type} className="rounded-xl border border-default-200 p-4 bg-default-50/30">
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-semibold">{flow.label}</div>
+                                        <Chip size="sm" variant="flat" color={flow.isComplete ? "success" : "warning"}>
+                                            {flow.isComplete ? "Completed" : "In Progress"}
+                                        </Chip>
+                                    </div>
+                                    <div className="mt-2 text-xs text-default-500">
+                                        Current stage: <span className="font-medium text-default-700">{flow.currentLabel}</span>
+                                    </div>
+                                    {!flow.isComplete && (
+                                        <div className={`mt-2 rounded-lg px-2 py-1 text-xs ${flow.isBlocking ? "bg-danger-50 text-danger-700 border border-danger-200" : "bg-default-100 text-default-600 border border-default-200"}`}>
+                                            Required before {flow.gateLabel}
+                                        </div>
+                                    )}
+                                    {flow.dependsOn.length > 0 && (
+                                        <div className="mt-2 text-xs text-default-500">
+                                            Depends on: {flow.dependsOn.join(", ").replaceAll("_", " ")}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </CardBody>
+                    </Card>
+                )}
 
                 {/* Logistics Details */}
                 <Card className="lg:col-span-2">

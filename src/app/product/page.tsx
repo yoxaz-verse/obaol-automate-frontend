@@ -54,7 +54,7 @@ export default function ProductPage() {
                 cats.add(p.subCategory.name);
             }
         });
-        const categoryPriority = ["Spices", "Rices", "Pulses"];
+        const categoryPriority = ["Spices", "Rices", "Pulses", "Grains", "Buffalo", "Coconut", "Coffee"];
         const allCats = Array.from(cats);
         const hasAll = allCats.includes("All");
         const rest = allCats.filter((c) => c !== "All");
@@ -79,15 +79,14 @@ export default function ProductPage() {
             return matchesSearch && matchesCategory;
         });
         const namePriority: Record<string, number> = {
-            gum: 0,
-            garlic: 1,
+            // Priority over categories can be added here if specific products need to be first
         };
-        const categoryPriority = ["Spices", "Rices", "Pulses"];
+        const categoryPriority = ["Spices", "Rices", "Pulses", "Grains", "Pulses", "Buffalo", "Coconut"];
         return filtered.sort((a, b) => {
             const aName = a.name?.toLowerCase() || "";
             const bName = b.name?.toLowerCase() || "";
-            const aNameRank = namePriority[aName] ?? 2;
-            const bNameRank = namePriority[bName] ?? 2;
+            const aNameRank = namePriority[aName] ?? 100;
+            const bNameRank = namePriority[bName] ?? 100;
             if (aNameRank !== bNameRank) return aNameRank - bNameRank;
 
             const aCat = a.subCategory?.name || "";

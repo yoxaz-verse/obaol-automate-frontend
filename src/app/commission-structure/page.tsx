@@ -310,7 +310,7 @@ export default function CommissionStructurePage() {
                   <h4 className="text-sm font-black text-secondary-600 uppercase tracking-widest mb-2">The L3+ Dividend Rule</h4>
                   <p className="text-xs text-default-500 font-medium leading-relaxed mb-4">
                     The 10% Executive Pool is shared among all leaders at L3 and above.
-                    To maintain a balanced ecosystem, a **Max Individual Cap of 5%** is applied.
+                    To maintain a balanced ecosystem, a <b className="text-foreground">Max Individual Cap of 5%</b> is applied.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
@@ -325,6 +325,93 @@ export default function CommissionStructurePage() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </motion.div>
+
+            {/* Visual Hierarchy Graph */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mt-16 p-8 md:p-12 rounded-[3rem] bg-content1/50 border border-default-200/50 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-500/20 to-transparent" />
+
+              <div className="text-center mb-16">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-default-400 mb-2">Visual Logic</h3>
+                <h2 className="text-3xl font-black">Commission <span className="text-primary-500">Eco-System</span></h2>
+              </div>
+
+              <div className="relative max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-stretch pt-8">
+                {/* Execution Pillar - Independent */}
+                <div className="flex-1 flex flex-col items-center justify-end pb-8">
+                  <div className="p-8 rounded-[3rem] bg-content1 border-2 border-warning-500/20 shadow-2xl relative group w-full max-w-[320px] text-center">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-warning-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-warning-500/20">
+                      Independent Track
+                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-warning-600 mb-2">Execution Pillar</div>
+                    <div className="text-4xl font-black mb-1 text-foreground">40%</div>
+                    <div className="text-sm font-bold text-warning-600">Deal Closer</div>
+                    <p className="text-[10px] text-default-400 mt-4 font-medium leading-relaxed opacity-80">
+                      Dedicated exclusively to the account executive who closed the trade.
+                      No overrides apply to this pillar.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Divider Line */}
+                <div className="hidden md:block w-px bg-default-200/50 self-stretch my-16 relative">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1 bg-background text-[10px] font-black text-default-400 uppercase tracking-widest border border-default-200 rounded-full">VS</div>
+                </div>
+
+                {/* Portfolio Track - Hierarchical */}
+                <div className="flex-[1.5] flex flex-col items-center gap-8">
+                  {/* L3+ Node */}
+                  <div className="w-full max-w-[300px] p-6 rounded-[2.5rem] bg-gradient-to-b from-secondary-500 to-secondary-600 text-white text-center shadow-xl shadow-secondary-500/20 relative z-20">
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Layer 03+ (Executive)</div>
+                    <div className="text-xl font-black mb-1">Ecosystem Dividend</div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[10px] font-black uppercase">
+                      10% Portfolio Share
+                    </div>
+                  </div>
+
+                  <div className="w-0.5 h-8 bg-secondary-500/30" />
+
+                  {/* L2 Node */}
+                  <div className="w-full max-w-[260px] p-5 rounded-3xl bg-content1 border-2 border-secondary-500/20 text-center shadow-lg relative z-20">
+                    <div className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1">Layer 02 (Team)</div>
+                    <div className="text-lg font-black text-secondary-600 mb-1">L2 Team Leader</div>
+                    <div className="text-xs font-bold text-default-500">8% Override</div>
+                  </div>
+
+                  <div className="w-0.5 h-8 bg-primary-500/20" />
+
+                  {/* L1 Node */}
+                  <div className="w-full max-w-[220px] p-5 rounded-2xl bg-content1 border-2 border-primary-500/30 text-center shadow-md relative z-20">
+                    <div className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1">Layer 01 (Direct)</div>
+                    <div className="text-base font-black text-primary-600 mb-1">L1 Direct Mentor</div>
+                    <div className="text-[11px] font-bold text-default-500">12% Hierarchy Override</div>
+                  </div>
+
+                  <div className="w-0.5 h-8 bg-primary-500/40" />
+
+                  {/* Owner Node */}
+                  <div className="w-full max-w-[320px] p-8 rounded-[3rem] bg-content1 border-2 border-primary-500/40 text-center shadow-2xl relative z-20 ring-4 ring-primary-500/5">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-primary-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20">
+                      Portfolio Base
+                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-primary-600 mb-2">Portfolio Pillar</div>
+                    <div className="text-4xl font-black mb-1 text-foreground">30%</div>
+                    <div className="text-lg font-bold text-primary-600">Portfolio Owner</div>
+                    <p className="text-[10px] text-default-400 mt-4 font-medium leading-relaxed opacity-80 italic">
+                      The core asset manager who generates the portfolio value.
+                      Total Pillar Share: 60%.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Background Decoration */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '40px 40px' }} />
               </div>
             </motion.div>
           </motion.div>
@@ -408,7 +495,7 @@ export default function CommissionStructurePage() {
                     <h5 className="text-lg font-black mb-1 text-primary-600">The Power of Choice</h5>
                     <p className="text-xs text-default-500 font-medium leading-relaxed">
                       You can be just a Closer (40%), or just a Portfolio Owner (30%).
-                      But a **Network Leader** captures the Management pool overrides while continuing to close high-value trades.
+                      But a <b className="text-foreground">Network Leader</b> captures the Management pool overrides while continuing to close high-value trades.
                     </p>
                   </div>
                 </div>

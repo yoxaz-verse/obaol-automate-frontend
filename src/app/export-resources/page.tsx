@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Header from "@/components/home/header";
+import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import {
   EXPORT_RESOURCE_CATEGORIES,
@@ -114,6 +115,7 @@ export default function ExportResourcesPage() {
           </div>
         )}
       </section>
+      <Footer />
     </main>
   );
 }

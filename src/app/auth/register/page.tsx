@@ -630,6 +630,7 @@ export default function RegisterPage() {
           "Commodity Traders: Gain access to verified trade flows and live market rates.",
           "Service Providers: Offer your transportation, warehousing, or QC services to the network.",
           "Importers & Exporters: Manage end-to-end documentation and compliance seamlessly.",
+          "Company Registration Mandatory: Requires valid legal entity status for onboarding.",
         ],
         footer: "Associate_Onboarding",
       }}

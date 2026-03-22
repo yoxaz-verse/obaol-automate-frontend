@@ -162,7 +162,7 @@ function SystemLine({
       className={`flex items-center justify-between px-5 py-4 rounded-xl border transition-all duration-300 backdrop-blur-sm cursor-default
         ${highlight
           ? "border-orange-500/40 text-orange-400 bg-orange-500/10 shadow-[0_0_20px_rgba(251,146,60,0.1)]"
-          : "border-white/5 text-default-400 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 hover:text-default-300"
+          : "border-default-100 text-foreground/70 bg-white/[0.02] hover:bg-white/[0.05] hover:border-orange-500/20 hover:text-foreground/90"
         }`}
     >
       <span className="font-medium">{label}</span>

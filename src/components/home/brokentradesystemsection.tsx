@@ -154,7 +154,7 @@ export default function BrokenTradeExperience() {
                       }`} />
                     <span
                       className={`absolute top-6 whitespace-nowrap text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${isActive ? "text-red-400" :
-                        isPast ? "text-orange-400/70" : "text-default-500/50"
+                        isPast ? "text-orange-400/70" : "text-foreground/40"
                         }`}
                     >
                       {f.stage}
@@ -207,7 +207,7 @@ export default function BrokenTradeExperience() {
                   <span className="text-red-400">—</span> {current.failure}
                 </h3>
 
-                <p className="mt-6 text-default-500 text-base sm:text-lg md:text-xl leading-relaxed">
+                <p className="mt-6 text-foreground/70 text-base sm:text-lg md:text-xl leading-relaxed">
                   {current.detail}
                 </p>
               </motion.div>
@@ -217,7 +217,7 @@ export default function BrokenTradeExperience() {
           {/* Controls */}
           <div className="relative z-10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6 mt-auto">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-bold tracking-widest uppercase text-default-500">
+              <span className="text-sm font-bold tracking-widest uppercase text-foreground/50">
                 Stage {index + 1}
               </span>
               <span className="text-default-600">/</span>
@@ -245,15 +245,17 @@ export default function BrokenTradeExperience() {
         </motion.div>
 
         {/* End Note */}
-        {index === FAILURES.length - 1 && (
-          <div className="mt-10 sm:mt-16 max-w-3xl">
-            <p className="text-xs sm:text-sm text-default-500">
-              This is not a rare failure — this is how most commodity trades
-              operate today.
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+        {
+          index === FAILURES.length - 1 && (
+            <div className="mt-10 sm:mt-16 max-w-3xl">
+              <p className="text-xs sm:text-sm text-foreground/50 italic">
+                This is not a rare failure — this is how most commodity trades
+                operate today.
+              </p>
+            </div>
+          )
+        }
+      </div >
+    </section >
   );
 }

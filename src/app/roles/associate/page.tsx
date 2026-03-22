@@ -80,11 +80,16 @@ export default function AssociateRolePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
               >
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex flex-wrap gap-3 mb-6">
                   <div className="w-12 h-12 rounded-xl bg-orange-600/20 border border-orange-600/30 flex items-center justify-center text-orange-500 shadow-inner">
                     <FiBriefcase size={24} />
                   </div>
-                  <span className="text-orange-500 font-bold uppercase tracking-[0.2em] text-xs">Primary Execution Force</span>
+                  <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-orange-500 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center">
+                    Primary Execution Force
+                  </div>
+                  <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 font-bold uppercase tracking-[0.1em] text-[10px] flex items-center">
+                    Company Registration Mandatory
+                  </div>
                 </div>
                 <h1 className="text-5xl md:text-7xl font-extrabold text-foreground tracking-tighter leading-[1.05] overflow-visible">
                   The <span className="inline-block px-1 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">Associate</span> <br />

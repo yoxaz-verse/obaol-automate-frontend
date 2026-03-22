@@ -51,7 +51,7 @@ export default function StatementSection() {
                         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-                        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-default-400 tracking-tight"
+                        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-foreground/70 tracking-tight"
                     >
                         Not a Marketplace.
                     </motion.p>
@@ -90,7 +90,7 @@ export default function StatementSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-80px" }}
                     transition={{ duration: 1.0, delay: 1.2, ease: "easeOut" }}
-                    className="mt-10 text-sm md:text-base text-default-400 tracking-wide uppercase font-medium"
+                    className="mt-10 text-sm md:text-base text-foreground/60 tracking-wide uppercase font-medium"
                 >
                     Discovery → Verification → Execution → Settlement
                 </motion.p>

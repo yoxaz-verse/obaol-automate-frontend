@@ -78,7 +78,7 @@ export default function RolesPage() {
                   <div className="mb-8 p-5 rounded-2xl bg-default-100/50 border border-default-200/50">
                     <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-3">Who can join?</p>
                     <div className="flex flex-wrap gap-2">
-                      {["Traders", "Import/Exporters", "Suppliers", "Buyers", "Warehouse Managers", "Logistics", "Procurement", "Freight Forwarders", "Manufacturers"].map((tag) => (
+                      {["Traders", "Import/Exporters", "Suppliers", "Buyers", "Warehouse Managers", "Logistics", "Procurement", "Freight Forwarders", "Manufacturers", "Company Registration Mandatory"].map((tag) => (
                         <span key={tag} className="px-2.5 py-1 rounded-lg bg-background text-[11px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-orange-500/30">
                           {tag}
                         </span>
@@ -100,13 +100,21 @@ export default function RolesPage() {
                     ))}
                   </div>
 
-                  <Link
-                    href="/roles/associate"
-                    className="flex items-center justify-between w-full p-5 rounded-2xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
-                  >
-                    <span>Who can be an Associate?</span>
-                    <FiArrowRight className="group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                  <div className="flex flex-col gap-3 mt-auto">
+                    <Link
+                      href="/auth/register"
+                      className="flex items-center justify-center w-full p-4 rounded-2xl bg-orange-600 text-white font-bold transition-all hover:bg-orange-700 shadow-lg shadow-orange-600/20 active:scale-[0.98]"
+                    >
+                      Register Associate
+                    </Link>
+                    <Link
+                      href="/roles/associate"
+                      className="flex items-center justify-between w-full p-4 rounded-2xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
+                    >
+                      <span className="text-sm">Who can be an Associate?</span>
+                      <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
 
                   {/* Decorative background number */}
                   <span className="absolute -bottom-10 -right-6 text-[180px] font-black text-foreground/[0.03] select-none pointer-events-none">01</span>
@@ -139,7 +147,7 @@ export default function RolesPage() {
                   <div className="mb-8 p-5 rounded-2xl bg-default-100/50 border border-default-200/50">
                     <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-3">Who can join?</p>
                     <div className="flex flex-wrap gap-2">
-                      {["Individuals", "Portfolio Managers", "Digital Traders", "Business Developers"].map((tag) => (
+                      {["Individuals", "Portfolio Managers", "Digital Traders", "Business Developers", "Retired Custom Brokers", "Retired Professionals"].map((tag) => (
                         <span key={tag} className="px-2.5 py-1 rounded-lg bg-background text-[11px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-orange-500/30">
                           {tag}
                         </span>
@@ -163,13 +171,23 @@ export default function RolesPage() {
                   </div>
 
 
-                  <Link
-                    href="/roles/operator"
-                    className="flex items-center justify-between w-full p-5 rounded-2xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
-                  >
-                    <span>Who can be an Operator?</span>
-                    <FiArrowRight className="group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                  <div className="flex flex-col gap-3 mt-auto">
+                    <Link
+                      href="https://forms.obaol.com/operator"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-full p-4 rounded-2xl bg-orange-600 text-white font-bold transition-all hover:bg-orange-700 shadow-lg shadow-orange-600/20 active:scale-[0.98]"
+                    >
+                      Join as Operator
+                    </Link>
+                    <Link
+                      href="/roles/operator"
+                      className="flex items-center justify-between w-full p-4 rounded-2xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
+                    >
+                      <span className="text-sm">Who can be an Operator?</span>
+                      <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
 
                   {/* Decorative background number */}
                   <span className="absolute -bottom-10 -right-6 text-[180px] font-black text-foreground/[0.03] select-none pointer-events-none">02</span>

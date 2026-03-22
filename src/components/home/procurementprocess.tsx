@@ -214,14 +214,14 @@ function FlowStep({
         <div className={`md:clear-both p-4 sm:p-5 md:p-6 rounded-2xl backdrop-blur-xl border transition-all duration-500
           ${highlight
             ? "bg-orange-500/[0.03] border-orange-500/30 shadow-none"
-            : "bg-white/[0.02] border-default-100/50 hover:bg-white/[0.04] hover:border-default-200"
+            : "bg-white/[0.02] border-default-200/50 hover:bg-white/[0.04] hover:border-default-300"
           }`}
         >
           <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight">
             {title}
           </h3>
 
-          <p className="mt-2.5 md:mt-3 text-sm sm:text-base text-default-500 leading-relaxed">
+          <p className="mt-2.5 md:mt-3 text-sm sm:text-base text-foreground/70 leading-relaxed">
             {desc}
           </p>
         </div>
@@ -241,7 +241,7 @@ function ContextCard({ title, text }: { title: string; text: string }) {
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       <h4 className="font-bold text-xl md:text-2xl text-foreground tracking-tight">{title}</h4>
-      <p className="mt-4 text-base text-default-500 leading-relaxed">{text}</p>
+      <p className="mt-4 text-base text-foreground/70 leading-relaxed">{text}</p>
     </motion.div>
   );
 }

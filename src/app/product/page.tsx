@@ -54,17 +54,51 @@ export default function ProductPage() {
                 cats.add(p.subCategory.name);
             }
         });
-        return Array.from(cats);
+        const categoryPriority = ["Spices", "Rices", "Pulses"];
+        const allCats = Array.from(cats);
+        const hasAll = allCats.includes("All");
+        const rest = allCats.filter((c) => c !== "All");
+        rest.sort((a, b) => {
+            const aIndex = categoryPriority.indexOf(a);
+            const bIndex = categoryPriority.indexOf(b);
+            const aRank = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+            const bRank = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+            if (aRank !== bRank) return aRank - bRank;
+            return a.localeCompare(b);
+        });
+        return hasAll ? ["All", ...rest] : rest;
     }, [products]);
 
     const filteredProducts = useMemo(() => {
-        return products.filter((p) => {
+        const filtered = products.filter((p) => {
             const matchesSearch =
                 p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.description?.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesCategory =
                 activeCategory === "All" || p.subCategory?.name === activeCategory;
             return matchesSearch && matchesCategory;
+        });
+        const namePriority: Record<string, number> = {
+            gum: 0,
+            garlic: 1,
+        };
+        const categoryPriority = ["Spices", "Rices", "Pulses"];
+        return filtered.sort((a, b) => {
+            const aName = a.name?.toLowerCase() || "";
+            const bName = b.name?.toLowerCase() || "";
+            const aNameRank = namePriority[aName] ?? 2;
+            const bNameRank = namePriority[bName] ?? 2;
+            if (aNameRank !== bNameRank) return aNameRank - bNameRank;
+
+            const aCat = a.subCategory?.name || "";
+            const bCat = b.subCategory?.name || "";
+            const aCatIndex = categoryPriority.indexOf(aCat);
+            const bCatIndex = categoryPriority.indexOf(bCat);
+            const aCatRank = aCatIndex === -1 ? Number.MAX_SAFE_INTEGER : aCatIndex;
+            const bCatRank = bCatIndex === -1 ? Number.MAX_SAFE_INTEGER : bCatIndex;
+            if (aCatRank !== bCatRank) return aCatRank - bCatRank;
+
+            return a.name.localeCompare(b.name);
         });
     }, [products, searchQuery, activeCategory]);
 

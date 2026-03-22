@@ -70,80 +70,87 @@ const translateText = async (text: string, targetLang: string) => {
 };
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const continent = searchParams.get("continent") || "Global";
-  const country = searchParams.get("country") || "";
-  const search = searchParams.get("search") || "";
-  const limit = Math.min(Number(searchParams.get("limit") || 100), 200);
-  const translate = searchParams.get("translate") !== "0";
-  const targetLang = searchParams.get("lang") || "en";
+  try {
+    const { searchParams } = new URL(req.url);
+    const continent = searchParams.get("continent") || "Global";
+    const country = searchParams.get("country") || "";
+    const search = searchParams.get("search") || "";
+    const limit = Math.min(Number(searchParams.get("limit") || 100), 200);
+    const translate = searchParams.get("translate") !== "0";
+    const targetLang = searchParams.get("lang") || "en";
 
-  const cacheKey = `${continent}::${country || "ALL"}::${search || "NONE"}::${limit}::${translate ? targetLang : "raw"}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.createdAt < TTL_MS) {
-    return NextResponse.json({ success: true, data: cached.items });
+    const cacheKey = `${continent}::${country || "ALL"}::${search || "NONE"}::${limit}::${translate ? targetLang : "raw"}`;
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.createdAt < TTL_MS) {
+      return NextResponse.json({ success: true, data: cached.items });
+    }
+
+    const feeds = newsFeeds.filter((feed) => {
+      const matchContinent = continent === "Global" ? true : feed.continent === continent;
+      const matchCountry = country ? feed.country === country : true;
+      return matchContinent && matchCountry;
+    });
+
+    const feedResults = await Promise.all(
+      feeds.map(async (feed) => {
+        try {
+          // Increase timeout to 12s for global resilience
+          const xml = await withTimeout(feed.rssUrl, 12000);
+          const parsed = await parser.parseString(xml);
+          const feedLang = String((parsed as any)?.language || "").toLowerCase();
+          let items = (parsed.items || [])
+            .map((item) => normalizeItem(item, feed))
+            .filter((item) => item.title && item.link);
+
+          // Search filtering logic
+          if (search.trim()) {
+            const needle = search.toLowerCase();
+            items = items.filter(item =>
+              [item.title, item.summary].some(text => String(text || "").toLowerCase().includes(needle))
+            );
+          }
+
+          if (translate && items.length > 0) {
+            const shouldTranslateFeed = feedLang && !feedLang.startsWith("en");
+            items = await Promise.all(
+              items.map(async (item) => {
+                const needsTranslate =
+                  shouldTranslateFeed ||
+                  hasNonAscii(item.title) ||
+                  hasNonAscii(item.summary || "");
+                if (!needsTranslate) return item;
+                const translatedTitle = await translateText(item.title, targetLang);
+                const translatedSummary = item.summary
+                  ? await translateText(item.summary, targetLang)
+                  : item.summary;
+                return { ...item, title: translatedTitle, summary: translatedSummary };
+              })
+            );
+          }
+          return items;
+        } catch (err) {
+          console.error(`[NewsAPI] Error fetching feed ${feed.id}:`, err);
+          return [];
+        }
+      })
+    );
+
+    const flat = feedResults.flat();
+    const sorted = flat.sort((a, b) => {
+      const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    const result = sorted.slice(0, limit);
+    cache.set(cacheKey, { createdAt: Date.now(), items: result });
+
+    return NextResponse.json({ success: true, data: result });
+  } catch (err: any) {
+    console.error("[NewsAPI] Unexpected error:", err);
+    return NextResponse.json(
+      { success: false, message: err?.message || "Failed to load news." },
+      { status: 500 }
+    );
   }
-
-  const feeds = newsFeeds.filter((feed) => {
-    const matchContinent = continent === "Global" ? true : feed.continent === continent;
-    const matchCountry = country ? feed.country === country : true;
-    return matchContinent && matchCountry;
-  });
-
-  const feedResults = await Promise.all(
-    feeds.map(async (feed) => {
-      try {
-        // Increase timeout to 12s for global resilience
-        const xml = await withTimeout(feed.rssUrl, 12000);
-        const parsed = await parser.parseString(xml);
-        const feedLang = String((parsed as any)?.language || "").toLowerCase();
-        let items = (parsed.items || [])
-          .map((item) => normalizeItem(item, feed))
-          .filter((item) => item.title && item.link);
-
-        // Search filtering logic
-        if (search.trim()) {
-          const needle = search.toLowerCase();
-          items = items.filter(item =>
-            [item.title, item.summary].some(text => String(text || "").toLowerCase().includes(needle))
-          );
-        }
-
-        if (translate && items.length > 0) {
-          const shouldTranslateFeed = feedLang && !feedLang.startsWith("en");
-          items = await Promise.all(
-            items.map(async (item) => {
-              const needsTranslate =
-                shouldTranslateFeed ||
-                hasNonAscii(item.title) ||
-                hasNonAscii(item.summary || "");
-              if (!needsTranslate) return item;
-              const translatedTitle = await translateText(item.title, targetLang);
-              const translatedSummary = item.summary
-                ? await translateText(item.summary, targetLang)
-                : item.summary;
-              return { ...item, title: translatedTitle, summary: translatedSummary };
-            })
-          );
-        }
-        return items;
-      } catch (err) {
-        console.error(`[NewsAPI] Error fetching feed ${feed.id}:`, err);
-        return [];
-      }
-    })
-  );
-
-  const flat = feedResults.flat();
-  const sorted = flat.sort((a, b) => {
-    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-    return bTime - aTime;
-  });
-
-  const result = sorted.slice(0, limit);
-  cache.set(cacheKey, { createdAt: Date.now(), items: result });
-
-  return NextResponse.json({ success: true, data: result });
 }
-

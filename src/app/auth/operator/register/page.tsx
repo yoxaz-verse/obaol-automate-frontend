@@ -142,7 +142,7 @@ function OperatorRegisterForm() {
         highlight: "OPERATOR ONBOARDING",
         description: "Register your operator profile for verification and access.",
         points: [
-          "Submit full profile details for internal review.",
+          "Retired Custom Brokers & Professionals are welcome to join and execute trades.",
           "Approval required before dashboard access.",
           "You will receive updates on your email/phone.",
         ],

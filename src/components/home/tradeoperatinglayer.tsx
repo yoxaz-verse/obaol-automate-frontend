@@ -185,7 +185,7 @@ export default function WhoCanUseObaol() {
           transition={{ duration: 1, delay: 0.5 }}
           className="max-w-4xl mt-32 mx-auto text-center p-8 rounded-2xl bg-default-50/[0.03] border border-default-200/30"
         >
-          <p className="text-default-400 text-sm leading-relaxed">
+          <p className="text-foreground/70 text-sm leading-relaxed">
             <span className="text-orange-400/80 font-semibold uppercase tracking-widest block mb-2 text-xs">The OBAOL Standard</span>
             OBAOL does not promise shortcuts or guaranteed profits. It provides
             a standardized system where participants earn by executing real work
@@ -232,7 +232,7 @@ function BenefitRow({
       {/* POINTS */}
       <ul className="space-y-4 relative z-10">
         {points.map((point, i) => (
-          <li key={i} className="flex items-start text-sm text-default-400 group-hover:text-default-300 transition-colors leading-relaxed">
+          <li key={i} className="flex items-start text-sm text-foreground/70 group-hover:text-foreground/90 transition-colors leading-relaxed">
             <span className="mr-3 mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-400/50 shrink-0" />
             <span>{point}</span>
           </li>

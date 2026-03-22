@@ -164,7 +164,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
         "Logistics Providers",
         "Exporters & Importers",
         "Freight Forwarders",
-        "Warehouse Managers"
+        "Warehouse Managers",
+        "Company Registration Mandatory"
       ],
       footer: "Associate_Hub_Online",
       knowMoreLink: "/roles/associate"
@@ -178,7 +179,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
         "Portfolio Managers",
         "Digital Traders",
         "Business Developers",
-        "Internal Operations"
+        "Internal Operations",
+        "Retired Custom Brokers"
       ],
       footer: "Operator_Portal_v2",
       knowMoreLink: "/roles/operator"

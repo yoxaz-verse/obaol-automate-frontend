@@ -267,7 +267,7 @@ function TimeCompare({
           transition={{ type: "spring", stiffness: 300 }}
           className="p-8 rounded-2xl border border-default-200/50 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.04] transition-all duration-300 relative overflow-hidden"
         >
-          <span className="text-xs uppercase tracking-widest text-default-500 font-bold block mb-2">
+          <span className="text-xs uppercase tracking-widest text-foreground/50 font-bold block mb-2">
             Traditional Method
           </span>
           <ul className="mt-6 space-y-4 relative z-10">
@@ -278,13 +278,13 @@ function TimeCompare({
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="flex items-center justify-between text-sm md:text-base text-default-400 py-3 border-b border-white/5 last:border-0"
+                className="flex items-center justify-between text-sm md:text-base text-foreground/70 py-3 border-b border-default-100 last:border-0"
               >
                 <div className="flex items-center gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-default-600" />
                   <span>{s.label}</span>
                 </div>
-                <span className="text-default-500 font-medium whitespace-nowrap ml-4">{s.time}</span>
+                <span className="text-foreground/60 font-medium whitespace-nowrap ml-4">{s.time}</span>
               </motion.li>
             ))}
           </ul>
@@ -302,7 +302,7 @@ function TimeCompare({
           {/* Cleaned up OBAOL card */}
 
 
-          <span className="text-xs uppercase tracking-widest font-bold relative z-10 text-default-400 block mb-2">
+          <span className="text-xs uppercase tracking-widest font-bold relative z-10 text-foreground/50 block mb-2">
             With
             <span className="text-orange-400 ml-1">OBAOL</span>
           </span>
@@ -314,7 +314,7 @@ function TimeCompare({
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="flex items-center justify-between text-sm md:text-base text-default-300 py-3 border-b border-orange-500/10 last:border-0"
+                className="flex items-center justify-between text-sm md:text-base text-foreground/80 py-3 border-b border-orange-500/10 last:border-0"
               >
                 <div className="flex items-center gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />

@@ -404,7 +404,7 @@ export default function ResponsibilityTransferSection() {
                           <p className="text-sm font-bold text-foreground tracking-wide">
                             {stage?.label}
                           </p>
-                          <p className="mt-1.5 text-xs text-default-400 leading-relaxed">
+                          <p className="mt-1.5 text-xs text-foreground/70 leading-relaxed">
                             {stage?.obaolDesc}
                           </p>
                         </div>
@@ -427,7 +427,7 @@ export default function ResponsibilityTransferSection() {
             Trading is no longer a collection of disconnected steps.
           </p>
 
-          <p className="mt-4 text-default-500 leading-relaxed">
+          <p className="mt-4 text-foreground/60 leading-relaxed">
             OBAOL replaces fragmented tools and informal coordination with a
             single structured execution system built for real-world commodity
             trade.

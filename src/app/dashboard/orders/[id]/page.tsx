@@ -22,6 +22,8 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
+    Accordion,
+    AccordionItem,
     Progress,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
@@ -318,6 +320,37 @@ export default function OrderDetailsPage() {
     ] as const;
     const formatMilestoneDate = (value: any) => (value ? dayjs(value).format("DD MMM YYYY") : "Pending");
 
+    const SUBFLOW_DATE_MAP: Record<string, { key: string; label: string; type: string }[]> = {
+        PROCUREMENT: [
+            { key: "procurementDate", label: "START DATE", type: "date" },
+            { key: "procurementInspectionDate", label: "INSPECTION DATE", type: "date" },
+            { key: "procurementCompletedDate", label: "COMPLETION DATE", type: "date" },
+        ],
+        PACKAGING: [
+            { key: "packagingStartDate", label: "PACKING START", type: "date" },
+            { key: "packagingCompletedDate", label: "PACKING DONE", type: "date" },
+        ],
+        INLAND_LOGISTICS: [
+            { key: "transportDispatchDate", label: "DISPATCH DATE", type: "date" },
+        ],
+        LOGISTICS: [
+            { key: "transportDispatchDate", label: "DISPATCH DATE", type: "date" },
+        ],
+        CERTIFICATION: [
+            { key: "certificateRequestedDate", label: "REQUESTED DATE", type: "date" },
+            { key: "certificateIssuedDate", label: "ISSUED DATE", type: "date" },
+        ],
+        FREIGHT_FORWARDING: [
+            { key: "shippingBookedDate", label: "BOOKING DATE", type: "date" },
+            { key: "customsClearanceDate", label: "CUSTOMS DATE", type: "date" },
+        ],
+        QUALITY_QA: [
+            { key: "qualitySampleSentDate", label: "SAMPLE SENT", type: "date" },
+            { key: "labExpectedReportDate", label: "LAB ETA", type: "date" },
+            { key: "qualityApprovedDate", label: "APPROVAL DATE", type: "date" },
+        ],
+    };
+
     const addTruck = () => {
         setLogisticsList([...logisticsList, {
             vehicleNo: "",
@@ -433,6 +466,9 @@ export default function OrderDetailsPage() {
             const lastStage = sortedFlowRules.length ? sortedFlowRules[sortedFlowRules.length - 1] : null;
             const currentStage = String((order as any)?.subflowStages?.[type] || "").toUpperCase();
             const isComplete = Boolean(lastStage && currentStage && String(lastStage.stageKey) === currentStage);
+            const currentIndex = sortedFlowRules.findIndex((rule: any) => String(rule.stageKey || "").toUpperCase() === currentStage);
+            const completedCount = currentIndex >= 0 ? currentIndex + 1 : 0;
+            const totalCount = sortedFlowRules.length;
             const gateStage = String(config.mustCompleteBeforeOrderStage || "").toUpperCase();
             const gateLabel = stageLabelMap.get(gateStage) || gateStage;
             const currentRank = orderStageRank.get(String(workflowStage).toUpperCase()) ?? 0;
@@ -447,6 +483,14 @@ export default function OrderDetailsPage() {
                 isBlocking,
                 gateLabel,
                 dependsOn: Array.isArray(config.dependsOnSubflows) ? config.dependsOnSubflows : [],
+                stages: sortedFlowRules.map((rule: any) => ({
+                    stageKey: String(rule.stageKey || "").toUpperCase(),
+                    label: rule.label || rule.stageKey,
+                    description: rule.description || "",
+                })),
+                currentIndex,
+                completedCount,
+                totalCount,
             };
         });
     const canSeeRule = (rule: any) => {
@@ -556,10 +600,10 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Control Panel: Workflow Context */}
                 <div className="lg:col-span-1 flex flex-col gap-8">
-                    <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                    <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group h-full">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-warning-500/20 transition-all duration-700" />
 
                         <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
@@ -591,37 +635,34 @@ export default function OrderDetailsPage() {
                                 Commit Plan Updates
                             </Button>
 
-                            {planError && (
-                                <div className="rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 text-sm font-bold text-danger-400 uppercase tracking-tight leading-relaxed animate-pulse">
-                                    {planError}
-                                </div>
-                            )}
-
-                            <p className="text-xs font-bold text-default-400 uppercase tracking-wider leading-loose">
-                                Scheduling mode synchronization is required for subflow activation.
+                            <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest leading-loose opacity-60">
+                                Global telemetry synchronization is active.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Strategic Milestones */}
-                <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                {/* Strategic Milestones: Global Summary */}
+                <div className="lg:col-span-3 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
 
-                    <div className="flex justify-between items-center mb-10">
-                        <h2 className="text-xs font-black uppercase tracking-widest text-foreground flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-primary-500 block shadow-[0_0_8px_rgba(0,111,238,0.6)]" />
-                            Strategic Milestones
-                        </h2>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 className="text-xs font-black uppercase tracking-widest text-foreground flex items-center gap-3 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-primary-500 block shadow-[0_0_8px_rgba(0,111,238,0.6)]" />
+                                Strategic Command
+                            </h2>
+                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest ml-5">Global Planning & Date Summary</p>
+                        </div>
                         {isSchedulingFinalized && (
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-500 text-xs font-black uppercase tracking-wider">
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-success-500/10 border border-success-500/20 text-success-500 text-[10px] font-black uppercase tracking-[0.2em]">
                                 <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
-                                Finalized
+                                Plan Finalized
                             </div>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <Select
                             label="SCHEDULING PROTOCOL"
                             selectedKeys={milestones.schedulingMode ? [milestones.schedulingMode] : []}
@@ -631,9 +672,9 @@ export default function OrderDetailsPage() {
                             }}
                             variant="bordered"
                             classNames={{
-                                label: "text-xs font-black tracking-wider text-default-400",
+                                label: "text-[10px] font-black tracking-widest text-default-400",
                                 trigger: "border-divider bg-default-100/50 h-14",
-                                value: "text-foreground font-black uppercase"
+                                value: "text-foreground font-black uppercase text-xs"
                             }}
                         >
                             <SelectItem key="IMMEDIATE" value="IMMEDIATE" className="uppercase font-black text-xs">Immediate</SelectItem>
@@ -648,100 +689,42 @@ export default function OrderDetailsPage() {
                             onValueChange={(v) => updateMilestone("schedulingFinalizedDate", v)}
                             variant="bordered"
                             classNames={{
-                                label: "text-xs font-black tracking-wider text-default-400",
-                                input: "text-foreground font-black",
+                                label: "text-[10px] font-black tracking-widest text-default-400",
+                                input: "text-foreground font-black text-xs",
                                 inputWrapper: "border-divider bg-default-100/50 h-14"
                             }}
                         />
 
                         <Input
-                            className="md:col-span-2"
                             label="EXECUTION NOTES"
-                            placeholder="Pipeline planning summary..."
+                            placeholder="Planning summary..."
                             value={milestones.schedulingNotes}
                             onValueChange={(v) => updateMilestone("schedulingNotes", v)}
                             variant="bordered"
                             classNames={{
-                                label: "text-xs font-black tracking-wider text-default-400",
-                                input: "text-foreground/70 font-medium",
+                                label: "text-[10px] font-black tracking-widest text-default-400",
+                                input: "text-foreground/70 font-medium text-xs",
                                 inputWrapper: "border-divider bg-default-100/50 h-14"
                             }}
                         />
+                    </div>
 
-                        {!isSchedulingFinalized && (
-                            <div className="md:col-span-2 p-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 text-sm font-bold text-warning-500 uppercase tracking-wide leading-relaxed">
-                                <span className="text-warning-600 mr-2 font-black">NOTICE:</span> Finalize execution dates to enable downstream processing and compliance locks.
-                            </div>
-                        )}
-
-                        <div className="md:col-span-2 space-y-8">
-                            {!!responsibilities.procurementBy && (
-                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-6">
-                                    <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Procurement Pipeline</div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <Input type="date" label="START" value={milestones.procurementDate} onValueChange={(v) => updateMilestone("procurementDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        <Input type="date" label="INSPECTION" value={milestones.procurementInspectionDate} onValueChange={(v) => updateMilestone("procurementInspectionDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        <Input type="date" label="COMPLETED" value={milestones.procurementCompletedDate} onValueChange={(v) => updateMilestone("procurementCompletedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {[
+                            { label: "Procurement", date: milestones.procurementCompletedDate, color: "warning" },
+                            { label: "Packaging", date: milestones.packagingCompletedDate, color: "warning" },
+                            { label: "Logistics", date: milestones.transportDispatchDate, color: "warning" },
+                            { label: "QA/Testing", date: milestones.qualityApprovedDate, color: "warning" },
+                            { label: "Certification", date: milestones.certificateIssuedDate, color: "warning" },
+                            { label: "Freight", date: milestones.customsClearanceDate, color: "warning" },
+                        ].map((m) => (
+                            <div key={m.label} className="p-3 rounded-2xl border border-divider bg-default-50/50 flex flex-col gap-1.5 group/m hover:border-warning-500/30 transition-colors">
+                                <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">{m.label}</div>
+                                <div className={`text-[10px] font-black uppercase tracking-tight ${m.date ? "text-foreground" : "text-default-300 italic"}`}>
+                                    {m.date ? dayjs(m.date).format("DD MMM YY") : "Not Set"}
                                 </div>
-                            )}
-
-                            {!!responsibilities.qualityTestingBy && (
-                                <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Quality Assurance Terminal</div>
-                                        <Switch size="sm" color="warning" isSelected={milestones.qualityTestingRequired !== false} onValueChange={(v) => updateMilestone("qualityTestingRequired", v)} isDisabled={!isSchedulingFinalized} />
-                                    </div>
-                                    {milestones.qualityTestingRequired !== false && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            <Input type="date" label="SAMPLE" value={milestones.qualitySampleSentDate} onValueChange={(v) => updateMilestone("qualitySampleSentDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input label="LAB" placeholder="NABL..." value={milestones.labName} onValueChange={(v) => updateMilestone("labName", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input type="date" label="DUE" value={milestones.labExpectedReportDate} onValueChange={(v) => updateMilestone("labExpectedReportDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input type="date" label="APPROVED" value={milestones.qualityApprovedDate} onValueChange={(v) => updateMilestone("qualityApprovedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {!!responsibilities.packagingBy && (
-                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
-                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Packaging Units</div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input type="date" label="START" value={milestones.packagingStartDate} onValueChange={(v) => updateMilestone("packagingStartDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input type="date" label="DONE" value={milestones.packagingCompletedDate} onValueChange={(v) => updateMilestone("packagingCompletedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        </div>
-                                    </div>
-                                )}
-                                {!!responsibilities.transportBy && (
-                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
-                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Inland Logistics</div>
-                                        <Input type="date" label="DISPATCH" value={milestones.transportDispatchDate} onValueChange={(v) => updateMilestone("transportDispatchDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                    </div>
-                                )}
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {!!responsibilities.certificateBy && (
-                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
-                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">Certification Protocol</div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input type="date" label="REQUESTED" value={milestones.certificateRequestedDate} onValueChange={(v) => updateMilestone("certificateRequestedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input type="date" label="ISSUED" value={milestones.certificateIssuedDate} onValueChange={(v) => updateMilestone("certificateIssuedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        </div>
-                                    </div>
-                                )}
-                                {isInternational && !!responsibilities.shippingBy && (
-                                    <div className="p-6 rounded-2xl bg-default-100/20 border border-divider space-y-4">
-                                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest">International Freight</div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input type="date" label="BOOKED" value={milestones.shippingBookedDate} onValueChange={(v) => updateMilestone("shippingBookedDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                            <Input type="date" label="CUSTOMS" value={milestones.customsClearanceDate} onValueChange={(v) => updateMilestone("customsClearanceDate", v)} variant="underlined" classNames={{ label: "text-sm font-black", input: "text-foreground" }} isDisabled={!isSchedulingFinalized} />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -755,28 +738,37 @@ export default function OrderDetailsPage() {
                     </h2>
                     <div className="space-y-4">
                         {[
-                            { key: "procurementBy", label: "Procurement" },
-                            { key: "certificateBy", label: "Certificates" },
-                            { key: "transportBy", label: "Transportation" },
-                            { key: "packagingBy", label: "Packaging" },
-                            { key: "qualityTestingBy", label: "Quality/QA" },
-                            ...(isInternational ? [{ key: "shippingBy", label: "Freight" }] : []),
+                            { key: "procurementBy", label: "Procurement", date: milestones.procurementCompletedDate },
+                            { key: "certificateBy", label: "Certificates", date: milestones.certificateIssuedDate },
+                            { key: "transportBy", label: "Transportation", date: milestones.transportDispatchDate },
+                            { key: "packagingBy", label: "Packaging", date: milestones.packagingCompletedDate },
+                            { key: "qualityTestingBy", label: "Quality/QA", date: milestones.qualityApprovedDate },
+                            ...(isInternational ? [{ key: "shippingBy", label: "Freight", date: milestones.customsClearanceDate }] : []),
                         ].map((resp) => (
-                            <Select
-                                key={resp.key}
-                                label={resp.label.toUpperCase()}
-                                selectedKeys={responsibilities[resp.key] ? [responsibilities[resp.key]] : []}
-                                onSelectionChange={(keys) => {
-                                    const arr = Array.from(keys as Set<string>);
-                                    setResponsibilities((prev: any) => ({ ...prev, [resp.key]: arr[0] || "" }));
-                                }}
-                                variant="bordered"
-                                classNames={{ label: "text-xs font-black text-default-500", trigger: "border-divider bg-default-100/50 h-12" }}
-                            >
-                                {OWNER_OPTIONS.map((item) => (
-                                    <SelectItem key={item.key} value={item.key} className="uppercase font-black text-xs">{item.label}</SelectItem>
-                                ))}
-                            </Select>
+                            <div key={resp.key} className="flex flex-col gap-2">
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-[10px] font-black text-default-400 uppercase tracking-widest">{resp.label}</label>
+                                    {resp.date && (
+                                        <div className="text-[9px] font-black text-warning-500 bg-warning-500/10 px-2 py-0.5 rounded-md border border-warning-500/20">
+                                            {dayjs(resp.date).format("DD MMM")}
+                                        </div>
+                                    )}
+                                </div>
+                                <Select
+                                    selectedKeys={responsibilities[resp.key] ? [responsibilities[resp.key]] : []}
+                                    onSelectionChange={(keys) => {
+                                        const arr = Array.from(keys as Set<string>);
+                                        setResponsibilities((prev: any) => ({ ...prev, [resp.key]: arr[0] || "" }));
+                                    }}
+                                    variant="bordered"
+                                    classNames={{ trigger: "border-divider bg-default-100/50 h-12" }}
+                                    placeholder="Select Authority"
+                                >
+                                    {OWNER_OPTIONS.map((item) => (
+                                        <SelectItem key={item.key} value={item.key} className="uppercase font-black text-xs">{item.label}</SelectItem>
+                                    ))}
+                                </Select>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -784,33 +776,144 @@ export default function OrderDetailsPage() {
                 {/* Subflow Manifest */}
                 {subflowStatus.length > 0 && (
                     <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl backdrop-blur-xl overflow-hidden">
-                        <div className="p-8 border-b border-divider flex justify-between items-center">
-                            <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 flex items-center gap-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block animate-pulse" />
-                                Synchronized Pipelines
-                            </h2>
-                            <div className="text-xs font-black text-default-500 uppercase tracking-wider">Global Telemetry Active</div>
+                        <div className="p-8 border-b border-divider flex justify-between items-end">
+                            <div>
+                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-warning-500 flex items-center gap-3 mb-2">
+                                    <span className="w-2 h-2 rounded-full bg-warning-500 block animate-pulse shadow-[0_0_12px_rgba(245,165,36,0.6)]" />
+                                    Synchronized Pipelines
+                                </h2>
+                                <p className="text-[11px] font-black text-default-400 uppercase tracking-widest max-w-xs leading-relaxed">
+                                    Consolidated telemetry for parallel subflow execution and gate-locking.
+                                </p>
+                            </div>
+                            <div className="text-[10px] font-black text-default-500 uppercase tracking-[0.1em] bg-default-100/50 px-4 py-1.5 rounded-full border border-divider">Global Telemetry Active</div>
                         </div>
-                        <div className="divide-y divide-divider/50">
-                            {subflowStatus.map((flow) => (
-                                <div key={flow.type} className="px-8 py-5 flex items-center justify-between hover:bg-default-100/50 transition-colors">
-                                    <div className="flex items-center gap-6">
-                                        <div className={`w-2 h-2 rounded-full ${flow.isComplete ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
-                                        <div>
-                                            <div className="text-sm font-black text-foreground uppercase tracking-wider">{flow.label}</div>
-                                            <div className="text-[9px] font-bold text-default-500 uppercase mt-1">STATUS: <span className="text-warning-500">{flow.currentLabel}</span></div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-8">
-                                        {flow.isBlocking && (
-                                            <div className="px-3 py-1 rounded bg-danger-500/10 border border-danger-500/20 text-xs font-black text-danger-400 uppercase tracking-widest"> GATE: {flow.gateLabel} </div>
-                                        )}
-                                        <Chip size="sm" variant="dot" color={flow.isComplete ? "success" : "warning"} className="text-xs font-black uppercase border-divider bg-default-100/50">
-                                            {flow.isComplete ? "LIVE" : "ACTIVE"}
-                                        </Chip>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="p-6">
+                            <Accordion selectionMode="multiple" variant="splitted" className="gap-4 px-0">
+                                {subflowStatus.map((flow) => {
+                                    const dateFields = SUBFLOW_DATE_MAP[flow.type] || [];
+                                    return (
+                                        <AccordionItem
+                                            key={flow.type}
+                                            aria-label={flow.label}
+                                            title={
+                                                <div className="flex items-center justify-between gap-4 w-full h-full relative group/item">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className={`w-3 h-3 rounded-full transition-all duration-700 ${flow.isComplete ? "bg-success-500 shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-warning-500 shadow-[0_0_15px_rgba(245,165,36,0.6)] animate-pulse"}`} />
+                                                        <div className="flex flex-col gap-1.5 text-left">
+                                                            <div className="text-sm font-black text-foreground uppercase tracking-tight group-hover/item:text-warning-500 transition-colors">{flow.label}</div>
+                                                            <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
+                                                                <div className="text-[9px] font-black uppercase tracking-widest bg-default-200/50 dark:bg-default-50/10 px-2 py-0.5 rounded-md border border-divider">
+                                                                    <span className="text-default-400 mr-1.5">STATUS:</span>
+                                                                    <span className="text-warning-500">{flow.currentLabel}</span>
+                                                                </div>
+                                                                {flow.isBlocking && (
+                                                                    <div className="text-[9px] font-black uppercase tracking-widest bg-danger-500/10 dark:bg-danger-500/5 px-2 py-0.5 rounded-md border border-danger-500/20 text-danger-500">
+                                                                        <span className="text-danger-400/50 mr-1.5 ">GATE:</span> {flow.gateLabel}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-6">
+                                                        <Chip
+                                                            size="sm"
+                                                            variant="flat"
+                                                            color={flow.isComplete ? "success" : "warning"}
+                                                            className="text-[10px] font-black uppercase tracking-widest border border-divider bg-default-50/50"
+                                                        >
+                                                            {flow.isComplete ? "COMPLETED" : "PROCESSING"}
+                                                        </Chip>
+                                                    </div>
+                                                </div>
+                                            }
+                                            classNames={{
+                                                base: "bg-default-50/20 border border-divider rounded-[1.5rem] shadow-sm hover:border-warning-500/30 transition-all px-2",
+                                                trigger: "py-5",
+                                                content: "pt-2 pb-8 px-4",
+                                                title: "w-full"
+                                            }}
+                                        >
+                                            <div className="flex flex-col gap-8">
+                                                {/* Parallel Dates Section */}
+                                                {dateFields.length > 0 && (
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 rounded-[1.5rem] bg-default-100/20 border border-divider shadow-inner group/dates relative overflow-hidden">
+                                                        <div className="absolute top-0 left-0 w-1 h-full bg-warning-500/20" />
+                                                        {dateFields.map((field) => (
+                                                            <div key={field.key} className="flex flex-col gap-2.5">
+                                                                <label className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] px-0.5">{field.label}</label>
+                                                                <Input
+                                                                    type="date"
+                                                                    value={milestones[field.key]}
+                                                                    onValueChange={(v) => updateMilestone(field.key, v)}
+                                                                    variant="flat"
+                                                                    size="sm"
+                                                                    radius="lg"
+                                                                    classNames={{
+                                                                        input: "text-foreground font-black text-xs h-10",
+                                                                        inputWrapper: "bg-background/50 hover:bg-default-100 border border-divider/50 shadow-sm"
+                                                                    }}
+                                                                    isDisabled={!isSchedulingFinalized}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between px-2">
+                                                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">
+                                                            Subflow Progression Pipeline
+                                                        </div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-warning-500 bg-warning-500/10 px-3 py-1 rounded-full border border-warning-500/20">
+                                                            {flow.totalCount > 0 ? Math.round((flow.completedCount / flow.totalCount) * 100) : 0}% OVERALL
+                                                        </div>
+                                                    </div>
+                                                    <Progress
+                                                        size="sm"
+                                                        value={flow.totalCount > 0 ? (flow.completedCount / flow.totalCount) * 100 : 0}
+                                                        color={flow.isComplete ? "success" : "warning"}
+                                                        className="shadow-sm rounded-full overflow-hidden"
+                                                    />
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
+                                                        {flow.stages.map((stage: any, idx: number) => {
+                                                            const isCompleted = flow.currentIndex >= 0 && idx < flow.currentIndex;
+                                                            const isCurrent = flow.currentIndex === idx;
+                                                            const statusLabel = isCurrent ? "Live" : isCompleted ? "Complete" : "Queued";
+                                                            return (
+                                                                <div
+                                                                    key={`${flow.type}-${stage.stageKey}`}
+                                                                    className={`p-4 rounded-2xl border flex flex-col gap-2.5 transition-all duration-300 relative overflow-hidden group/stage ${isCurrent
+                                                                        ? "border-warning-500/50 bg-warning-500/10 shadow-lg shadow-warning-500/5"
+                                                                        : isCompleted
+                                                                            ? "border-success-500/30 bg-success-500/5 grayscale-[0.5] opacity-80"
+                                                                            : "border-divider bg-default-100/30 hover:bg-default-100/50"
+                                                                        }`}
+                                                                >
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="text-[11px] font-black uppercase tracking-tight text-foreground flex items-center gap-2">
+                                                                            <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? "bg-warning-500 animate-pulse" : isCompleted ? "bg-success-500" : "bg-default-300"}`} />
+                                                                            {stage.label}
+                                                                        </div>
+                                                                        <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${isCurrent ? "text-warning-500 border-warning-500/30 bg-warning-500/10" : isCompleted ? "text-success-500 border-success-500/30 bg-success-500/10" : "text-default-400 border-divider"
+                                                                            }`}>
+                                                                            {statusLabel}
+                                                                        </div>
+                                                                    </div>
+                                                                    {stage.description ? (
+                                                                        <div className="text-[10px] text-default-500 font-medium leading-relaxed mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{stage.description}</div>
+                                                                    ) : null}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </AccordionItem>
+                                    );
+                                })}
+                            </Accordion>
                         </div>
                     </div>
                 )}

@@ -33,15 +33,23 @@ import {
   FiUser,
   FiActivity,
   FiCompass,
-  FiTerminal,
-  FiPackage,
-  FiGrid,
   FiPlus,
   FiSearch,
   FiFilter,
   FiMenu,
   FiCpu,
   FiBox,
+  FiShare2,
+  FiTruck,
+  FiAnchor,
+  FiShoppingCart,
+  FiShield,
+  FiLayers,
+  FiZap,
+  FiPackage,
+  FiFileText,
+  FiCheckCircle,
+  FiGlobe,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
@@ -142,7 +150,7 @@ export default function ExecutionEnquiriesPage() {
   const { data: dealExecutionsResponse, isLoading: dealsLoading } = useQuery({
     queryKey: ["deal-executions"],
     queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 100, hasExecution: true }),
-    enabled: activeTab === "deal-execution",
+    enabled: activeTab === "deal-execution" || activeTab === "execution-bidding",
   });
 
   const { data: serviceRequestsResponse, isLoading: requestsLoading } = useQuery({
@@ -153,13 +161,25 @@ export default function ExecutionEnquiriesPage() {
         limit: 100,
         ...(serviceTypeFilter !== "ALL" && { requestType: serviceTypeFilter }),
       }),
-    enabled: activeTab === "service-requests",
+    enabled: activeTab === "service-requests" || activeTab === "execution-bidding",
   });
+
+  const { data: subflowResponse } = useQuery({
+    queryKey: ["order-subflows"],
+    queryFn: () => getData(apiRoutes.orderSubflowConfigs.list),
+  });
+
+  const subflowConfigs = useMemo(() => {
+    return Array.isArray(subflowResponse?.data?.data) ? subflowResponse?.data?.data : [];
+  }, [subflowResponse]);
 
   // Flatten embedded executionInquiries from enquiry list
   const rawInquiries = useMemo(() => extractArray(dealExecutionsResponse), [dealExecutionsResponse]);
   const serviceRequests = useMemo(() => extractArray(serviceRequestsResponse), [serviceRequestsResponse]);
-  const isServiceApiMissing = activeTab === "service-requests" && !serviceRequestsResponse?.data && !requestsLoading;
+  const isServiceApiMissing =
+    (activeTab === "service-requests" || activeTab === "execution-bidding") &&
+    !serviceRequestsResponse?.data &&
+    !requestsLoading;
 
   // Mutations
   const updateTaskMutation = useMutation({
@@ -232,8 +252,70 @@ export default function ExecutionEnquiriesPage() {
           enquiryCode: inquiry.enquiryCode || (inquiry._id ? inquiry._id.slice(-6).toUpperCase() : "N/A"),
           product: inquiry.productId?.name || inquiry.productVariant?.product?.name || "Global Commodity",
           variant: inquiry.productVariant?.name || "Standard Variant",
-          buyer: inquiry.buyerAssociateId?.name || "Global Buyer",
-          seller: inquiry.sellerAssociateId?.name || "Global Seller",
+          buyer:
+            [inquiry.executionContext?.destinationDistrict, inquiry.executionContext?.destinationState]
+              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
+              .join(", ")
+            || inquiry.buyerAssociateId?.address
+            || "Unknown Destination",
+          seller:
+            [inquiry.executionContext?.originDistrict, inquiry.executionContext?.originState]
+              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
+              .join(", ")
+            || inquiry.sellerAssociateId?.address
+            || "Unknown Origin",
+          buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
+          sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
+          assignedOperatorId: String(inquiry.assignedOperatorId?._id || inquiry.assignedOperatorId || ""),
+          tasks,
+        };
+      })
+      .filter(Boolean) as any[];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return results.filter(
+        (e) =>
+          e.enquiryCode.toLowerCase().includes(q) ||
+          e.product.toLowerCase().includes(q) ||
+          e.buyer.toLowerCase().includes(q) ||
+          e.seller.toLowerCase().includes(q)
+      );
+    }
+    return results;
+  }, [rawInquiries, searchQuery]);
+
+  const enquiriesWithOpenTasks = useMemo(() => {
+    const results = rawInquiries
+      .map((inquiry: any) => {
+        const tasks = (inquiry.executionInquiries || [])
+          .map((task: any) => ({
+            ...task,
+            key: `${inquiry._id}-${task.type}`,
+            enquiryId: inquiry._id,
+          }))
+          .filter((task: any) => String(task.status || "").toUpperCase() === "OPEN");
+        if (!tasks.length) return null;
+        return {
+          id: inquiry._id,
+          enquiryCode: inquiry.enquiryCode || (inquiry._id ? inquiry._id.slice(-6).toUpperCase() : "N/A"),
+          product: inquiry.productId?.name || inquiry.productVariant?.product?.name || "Global Commodity",
+          variant: inquiry.productVariant?.name || "Standard Variant",
+          buyer:
+            [inquiry.executionContext?.destinationDistrict, inquiry.executionContext?.destinationState]
+              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
+              .join(", ") ||
+            inquiry.buyerAssociateId?.address ||
+            "Unknown Destination",
+          seller:
+            [inquiry.executionContext?.originDistrict, inquiry.executionContext?.originState]
+              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
+              .join(", ") ||
+            inquiry.sellerAssociateId?.address ||
+            "Unknown Origin",
+          buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
+          sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
+          assignedOperatorId: String(inquiry.assignedOperatorId?._id || inquiry.assignedOperatorId || ""),
           tasks,
         };
       })
@@ -269,10 +351,10 @@ export default function ExecutionEnquiriesPage() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-warning-500 text-black shadow-lg shadow-warning-500/20">
-              <FiCpu className="text-2xl" />
+              <FiGlobe className="text-2xl" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">Execution Ecosystem</h1>
+              <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">Agro Trading Ecosystem</h1>
               <p className="text-xs font-bold text-default-500 mt-2 uppercase tracking-widest opacity-80">Autonomous Service Routing & Logistics Terminal</p>
             </div>
           </div>
@@ -286,6 +368,15 @@ export default function ExecutionEnquiriesPage() {
               onPress={() => setActiveTab("deal-execution")}
             >
               <FiActivity className="mr-2" /> Deal Execution
+            </Button>
+            <Button
+              size="sm"
+              variant={activeTab === "execution-bidding" ? "solid" : "light"}
+              color={activeTab === "execution-bidding" ? "warning" : "default"}
+              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-warning-500/20" : "opacity-60"}`}
+              onPress={() => setActiveTab("execution-bidding")}
+            >
+              <FiZap className="mr-2" /> Execution Bidding
             </Button>
             <Button
               size="sm"
@@ -346,9 +437,6 @@ export default function ExecutionEnquiriesPage() {
                   {/* Enquiry Header Card */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-warning-400 to-warning-600 flex items-center justify-center text-black shadow-xl shrink-0">
-                        <FiTerminal className="text-2xl" />
-                      </div>
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
@@ -367,7 +455,7 @@ export default function ExecutionEnquiriesPage() {
 
                     <div className="flex items-center gap-10">
                       <div className="hidden lg:flex flex-col text-right">
-                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Entity Origin</span>
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
                         <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
                       </div>
                       <div className="w-px h-10 bg-divider hidden lg:block" />
@@ -378,140 +466,61 @@ export default function ExecutionEnquiriesPage() {
                     </div>
                   </div>
 
-                  {/* Task Manifest */}
-                  <div className="flex flex-col gap-3">
-                    <div className="grid grid-cols-1 gap-3">
-                      {enq.tasks.map((task: any) => (
-                        <div
-                          key={task.key}
-                          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300 group/task"
-                        >
+                  {/* Task Manifest (Flow View) */}
+                  <div className="relative flex flex-col gap-0 border-l-2 border-divider ml-8 pl-8">
+                    {enq.tasks.map((task: any, idx: number) => (
+                      <div
+                        key={task.key}
+                        className="relative pb-8 last:pb-0"
+                      >
+                        {/* Flow Node Pulse */}
+                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-warning-500 flex items-center justify-center z-10">
+                          <div className={`w-1.5 h-1.5 rounded-full ${task.status === "COMPLETED" ? "bg-success-500" : "bg-warning-500 animate-pulse"}`} />
+                        </div>
+
+                        <div className="flex items-start justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300 group/task">
                           <div className="flex items-center gap-5 min-w-0">
                             <div className={`p-2.5 rounded-xl border border-divider ${task.status === "COMPLETED" ? "bg-success-500/10 text-success-500" : "bg-warning-500/10 text-warning-600"} shrink-0`}>
-                              <FiActivity className="text-lg" />
+                              {(() => {
+                                const type = String(task.type || "").toUpperCase();
+                                if (type.includes("PROCUREMENT")) return <FiShoppingCart className="text-lg" />;
+                                if (type.includes("TRANSPORTATION")) return <FiTruck className="text-lg" />;
+                                if (type.includes("SHIPPING") || type.includes("PORT")) return <FiAnchor className="text-lg" />;
+                                if (type.includes("PACKAGING")) return <FiPackage className="text-lg" />;
+                                if (type.includes("TESTING") || type.includes("INSURANCE") || type.includes("CUSTOMS")) return <FiShield className="text-lg" />;
+                                return <FiActivity className="text-lg" />;
+                              })()}
                             </div>
                             <div className="min-w-0">
                               <h4 className="text-sm font-black text-foreground tracking-tight uppercase leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
                               <div className="flex items-center gap-2">
-                                <span className={`text-xs font-black uppercase tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status}</span>
+                                <span className={`text-xs font-black uppercase tracking-widest ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500 opacity-60"}`}>{task.status || "IDLE"}</span>
                                 {task.committedProvider && (
                                   <>
                                     <span className="text-xs text-default-400">•</span>
-                                    <span className="text-xs font-black text-foreground/70 uppercase truncate">Committed: {getName(task.committedProvider)}</span>
+                                    <span className="text-xs font-black text-foreground/70 uppercase truncate">{getName(task.committedProvider)}</span>
                                   </>
                                 )}
                               </div>
+                              {task.details && Object.keys(task.details).some(k => task.details[k]) && (
+                                <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500 uppercase tracking-tight">
+                                  {task.details.routeNotes && <span>Route: {task.details.routeNotes}</span>}
+                                  {task.details.packagingSpecifications && <span>Pkg: {task.details.packagingSpecifications}</span>}
+                                  {task.details.fromDistrict && <span>From: {task.details.fromDistrict}</span>}
+                                </div>
+                              )}
                             </div>
                           </div>
 
-                          {/* Selection & Note Area */}
-                          <div className="w-full lg:w-[350px] flex items-center gap-3">
-                            {task.canCommit && (
-                              /* @ts-ignore */
-                              <Autocomplete
-                                size="sm"
-                                placeholder="Select Entity"
-                                variant="bordered"
-                                radius="lg"
-                                selectedKey={selectedExecutionCommitProvider[task.key] || ""}
-                                onSelectionChange={(key) =>
-                                  setSelectedExecutionCommitProvider((prev) => ({ ...prev, [task.key]: String(key || "") }))
-                                }
-                                className="w-1/2"
-                                classNames={{
-                                  trigger: "h-8 min-h-0 text-xs bg-content2/50 border-default-200/50 px-3"
-                                }}
-                                items={(Array.isArray(task.candidateProviders) && task.candidateProviders.length > 0
-                                  ? task.candidateProviders
-                                  : Array.isArray(task.bids)
-                                    ? task.bids.map((bid: any) => bid?.company).filter(Boolean)
-                                    : []) as any[]}
-                              >
-                                {(company: any) => {
-                                  const cId = String(company?._id || company || "");
-                                  const cName = getName(company);
-                                  return (
-                                    <AutocompleteItem key={cId} textValue={cName} className="font-black text-xs">
-                                      {cName}
-                                    </AutocompleteItem>
-                                  );
-                                }}
-                              </Autocomplete>
-                            )}
-
-                            {(task.canBid || task.canCommit) && (
-                              <Input
-                                size="sm"
-                                placeholder="Execution note..."
-                                variant="bordered"
-                                radius="lg"
-                                className="w-1/2"
-                                classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
-                                value={noteMap[task.key] ?? (task.commitNote || "")}
-                                onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [task.key]: v }))}
-                              />
-                            )}
-                          </div>
-
-                          {/* Quick Action Strip */}
-                          <div className="w-full lg:w-[150px] flex items-center gap-2 lg:justify-end">
-                            <Input
-                              size="sm"
-                              type="number"
-                              placeholder="Bid"
-                              variant="bordered"
-                              radius="lg"
-                              className="w-20"
-                              classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-2", input: "text-xs font-black" }}
-                              value={bidMap[task.key] ?? (task.bidAmount?.toString() || "")}
-                              onValueChange={(v) => setBidMap((prev) => ({ ...prev, [task.key]: v }))}
-                              isDisabled={!(task.canBid || task.canCommit)}
-                              startContent={<span className="text-default-400 text-xs font-black">₹</span>}
-                            />
-                            {task.canBid && (
-                              <Button
-                                size="sm"
-                                variant="flat"
-                                color="warning"
-                                className="font-black text-xs uppercase tracking-wide rounded-lg h-8 px-4 shrink-0"
-                                isLoading={updateTaskMutation.isPending}
-                                onPress={() =>
-                                  updateTaskMutation.mutate({
-                                    enquiryId: task.enquiryId,
-                                    type: task.type,
-                                    bidAmount: Number(bidMap[task.key] || task.bidAmount || 0),
-                                    commitNote: noteMap[task.key] ?? task.commitNote,
-                                    status: isAdmin ? "IN_PROGRESS" : undefined,
-                                  })
-                                }
-                              >
-                                Quote
-                              </Button>
-                            )}
-                            {task.canCommit && (
-                              <Button
-                                size="sm"
-                                color="success"
-                                className="font-black text-xs uppercase tracking-wide rounded-lg h-8 px-4 shrink-0"
-                                isDisabled={!selectedExecutionCommitProvider[task.key]}
-                                isLoading={updateTaskMutation.isPending}
-                                onPress={() =>
-                                  updateTaskMutation.mutate({
-                                    enquiryId: task.enquiryId,
-                                    type: task.type,
-                                    bidAmount: Number(bidMap[task.key] || task.bidAmount || 0),
-                                    commitNote: noteMap[task.key] || task.commitNote,
-                                    committedProvider: selectedExecutionCommitProvider[task.key] || undefined,
-                                  })
-                                }
-                              >
-                                Commit
-                              </Button>
-                            )}
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col text-right">
+                              <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">State</span>
+                              <span className={`text-xs font-black uppercase ${task.status === "COMPLETED" ? "text-success-500" : "text-warning-500"}`}>{task.status === "COMPLETED" ? "Verified" : "Syncing"}</span>
+                            </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -526,6 +535,542 @@ export default function ExecutionEnquiriesPage() {
                 </div>
               </div>
             )}
+          </motion.div>
+        ) : activeTab === "execution-bidding" ? (
+          <motion.div
+            key="execution-bidding"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex flex-col gap-10"
+          >
+            {/* Execution Bids */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-black uppercase tracking-widest text-warning-500">Execution Bids</h2>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400">
+                  OPEN TASKS
+                </span>
+              </div>
+
+              {dealsLoading && <SectionLoader />}
+              {!dealsLoading && enquiriesWithOpenTasks.map((enq) => (
+                <motion.div
+                  key={`bidding-${enq.id}`}
+                  layout
+                  className="group relative overflow-hidden rounded-[2rem] border border-divider bg-default-50/50 backdrop-blur-xl hover:bg-default-100/50 transition-all duration-500"
+                >
+                  <div className="p-6 md:p-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                      <div className="flex items-center gap-5">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
+                              Anchor
+                            </span>
+                            <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                          </div>
+                          <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
+                          <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
+                            <span className="opacity-60">{enq.variant}</span>
+                            <span className="w-1 h-1 rounded-full bg-divider" />
+                            <span className="text-warning-500/80">{enq.tasks.length} Open Nodes</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-10">
+                        <div className="hidden lg:flex flex-col text-right">
+                          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
+                          <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
+                        </div>
+                        <div className="w-px h-10 bg-divider hidden lg:block" />
+                        <div className="flex flex-col text-right">
+                          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
+                          <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative flex flex-col gap-6 border-l-2 border-divider ml-8 pl-8">
+                      {enq.tasks.map((task: any) => {
+                        const key = task.key;
+                        const candidates = Array.isArray(task.candidateProviders) ? task.candidateProviders : [];
+                        const bids = Array.isArray(task.bids) ? task.bids : [];
+                        const commitOptions = candidates.length ? candidates : bids.map((bid: any) => bid?.company).filter(Boolean);
+                        const isCandidate = !!myCompanyId && candidates.some((provider: any) => String(provider?._id || provider) === myCompanyId);
+                        const ownerBy = String(task.ownerBy || "").toLowerCase();
+                        const isBuyerOwner = ownerBy === "buyer" && enq.buyerCompanyId && enq.buyerCompanyId === myCompanyId;
+                        const isSellerOwner = ownerBy === "seller" && enq.sellerCompanyId && enq.sellerCompanyId === myCompanyId;
+                        const canBid = isAdmin || (roleLower === "associate" && (isCandidate || isBuyerOwner || isSellerOwner));
+                        const isOperatorUser = user?.role === "Operator" || user?.role === "team";
+                        const isAssignedOperator = isOperatorUser && enq.assignedOperatorId && enq.assignedOperatorId === String(user?.id || "");
+                        const canCommit = isAdmin || isAssignedOperator;
+                        const canViewBidDetails = isAdmin || isCandidate || isBuyerOwner || isSellerOwner;
+
+                        return (
+                          <div key={key} className="relative">
+                            <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-warning-500 flex items-center justify-center z-10">
+                              <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                            </div>
+
+                            <div className="p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300">
+                              <div className="flex items-start justify-between gap-4 mb-4">
+                                <div className="flex items-center gap-5 min-w-0">
+                                  <div className="p-2.5 rounded-xl border border-divider bg-warning-500/10 text-warning-600 shrink-0">
+                                    {(() => {
+                                      const type = String(task.type || "").toUpperCase();
+                                      if (type.includes("PROCUREMENT")) return <FiShoppingCart className="text-lg" />;
+                                      if (type.includes("TRANSPORTATION")) return <FiTruck className="text-lg" />;
+                                      if (type.includes("SHIPPING") || type.includes("PORT")) return <FiAnchor className="text-lg" />;
+                                      if (type.includes("PACKAGING")) return <FiPackage className="text-lg" />;
+                                      if (type.includes("TESTING") || type.includes("INSURANCE") || type.includes("CUSTOMS")) return <FiShield className="text-lg" />;
+                                      return <FiActivity className="text-lg" />;
+                                    })()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h4 className="text-sm font-black text-foreground tracking-tight uppercase leading-none mb-1">{String(task.type || "").replaceAll("_", " ")}</h4>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-black uppercase tracking-widest text-warning-500 opacity-60">{task.status || "OPEN"}</span>
+                                      {task.committedProvider && (
+                                        <>
+                                          <span className="text-xs text-default-400">•</span>
+                                          <span className="text-xs font-black text-foreground/70 uppercase truncate">{getName(task.committedProvider)}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                    {task.details && Object.keys(task.details).some((k: any) => task.details[k]) && (
+                                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500 uppercase tracking-tight">
+                                        {task.details.routeNotes && <span>Route: {task.details.routeNotes}</span>}
+                                        {task.details.packagingSpecifications && <span>Pkg: {task.details.packagingSpecifications}</span>}
+                                        {task.details.fromDistrict && <span>From: {task.details.fromDistrict}</span>}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  {(() => {
+                                    const flowConf = subflowConfigs.find((c: any) => c.subflowType === String(task.type || "").toUpperCase());
+                                    if (flowConf?.biddingEndAtOrderStage) {
+                                      return (
+                                        <div className="flex flex-col items-end">
+                                          <span className="text-[9px] font-black text-warning-600/80 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-1">
+                                            <FiZap size={10} className={task.status === "OPEN" ? "animate-pulse" : ""} /> Bidding Closes At
+                                          </span>
+                                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border leading-none tracking-tight ${task.status === "OPEN" ? "text-warning-700 bg-warning-500/20 border-warning-500/30 shadow-sm" : "text-default-500 bg-default-100 border-divider"
+                                            }`}>
+                                            {String(flowConf.biddingEndAtOrderStage).replaceAll("_", " ")}
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <div className="flex flex-col items-end">
+                                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${task.status === "OPEN" ? "text-warning-500" : "text-default-400"}`}>Bidding Status</span>
+                                        <span className={`text-[10px] font-black uppercase ${task.status === "OPEN" ? "text-warning-600" : "text-default-500"}`}>{task.status === "OPEN" ? "IN PROCESS" : "CLOSED"}</span>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+
+                              <div className="rounded-xl border border-default-200/50 bg-default-50/40 p-2 text-xs text-default-700 mb-4 mx-2">
+                                {canViewBidDetails && bids.length > 0 && (
+                                  <div className="overflow-x-auto scrollbar-hide mb-2 border-b border-default-200/30 pb-2">
+                                    <table className="w-full min-w-[280px] text-[10px]">
+                                      <thead>
+                                        <tr className="text-default-400 font-black uppercase tracking-tight">
+                                          <th className="text-left py-0.5">Entity</th>
+                                          <th className="text-left py-0.5">Quote</th>
+                                          <th className="text-left py-0.5">Status</th>
+                                          <th className="text-left py-0.5">Meta</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {bids.map((bid: any, bidIdx: number) => (
+                                          <tr key={`${key}-task-bid-${bidIdx}`} className="border-t border-default-100/50 font-bold">
+                                            <td className="py-0.5 truncate max-w-[100px] text-foreground">{getName(bid?.company)}</td>
+                                            <td className="py-0.5 text-warning-600">
+                                              {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? `₹${bid.amount.toLocaleString()}` : "-"}
+                                            </td>
+                                            <td className="py-0.5 text-default-500 opacity-80">{String(bid?.status || "SUBMITTED")}</td>
+                                            <td className="py-0.5 text-default-400 opacity-60">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+
+                              {task.status !== "COMPLETED" && task.status !== "CANCELLED" && (
+                                <>
+                                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-3 mx-2">
+                                    <div className="flex-1 w-full">
+                                      <Input
+                                        type="number"
+                                        placeholder="Bid amount"
+                                        variant="flat"
+                                        radius="md"
+                                        classNames={{ inputWrapper: "h-8 min-h-[32px] bg-content2/30 px-3", input: "text-xs font-black", innerWrapper: "pb-1" }}
+                                        value={bidMap[key] ?? ""}
+                                        onValueChange={(v) => setBidMap((prev) => ({ ...prev, [key]: v }))}
+                                        isDisabled={!canBid}
+                                      />
+                                    </div>
+                                    <div className="flex-[1.5] w-full flex gap-2 items-center">
+                                      <Input
+                                        placeholder="Note"
+                                        variant="flat"
+                                        radius="md"
+                                        classNames={{ inputWrapper: "h-8 min-h-[32px] bg-content2/30 px-3", input: "text-xs font-black", innerWrapper: "pb-1" }}
+                                        value={noteMap[key] ?? ""}
+                                        onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [key]: v }))}
+                                        isDisabled={!canBid}
+                                      />
+                                      <Button
+                                        color="warning"
+                                        className="h-8 min-w-0 px-4 text-[10px] font-black uppercase tracking-widest"
+                                        isDisabled={!canBid}
+                                        isLoading={updateTaskMutation.isPending}
+                                        onPress={() =>
+                                          updateTaskMutation.mutate({
+                                            enquiryId: task.enquiryId,
+                                            type: task.type,
+                                            bidAmount: Number(bidMap[key] || 0),
+                                            commitNote: noteMap[key] || "",
+                                          })
+                                        }
+                                      >
+                                        Place Bid
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  {canCommit && commitOptions.length > 0 && (
+                                    <div className="flex flex-col sm:flex-row items-center gap-2 mt-2 mx-2 pb-2">
+                                      <div className="flex-1 w-full">
+                                        {/* @ts-ignore */}
+                                        <Autocomplete
+                                          placeholder="Provider to Commit"
+                                          variant="flat"
+                                          radius="md"
+                                          selectedKey={selectedExecutionCommitProvider[key] || ""}
+                                          onSelectionChange={(value) =>
+                                            setSelectedExecutionCommitProvider((prev) => ({ ...prev, [key]: String(value || "") }))
+                                          }
+                                          classNames={{ listbox: "bg-content1", trigger: "h-8 min-h-[32px] text-xs bg-content2/50 px-3 py-0" }}
+                                          items={commitOptions}
+                                        >
+                                          {(company: any) => {
+                                            const companyId = String(company?._id || company || "");
+                                            const companyName = String(company?.name || company?.companyName || companyId);
+                                            return (
+                                              <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
+                                                {companyName}
+                                              </AutocompleteItem>
+                                            );
+                                          }}
+                                        </Autocomplete>
+                                      </div>
+                                      <div className="flex items-center sm:w-auto w-full justify-end">
+                                        <Button
+                                          color="success"
+                                          className="h-8 min-w-0 px-6 text-[10px] font-black uppercase text-white shadow-md shadow-success-500/20 tracking-widest"
+                                          isDisabled={commitOptions.length > 0 ? !selectedExecutionCommitProvider[key] : false}
+                                          isLoading={updateTaskMutation.isPending}
+                                          onPress={() =>
+                                            updateTaskMutation.mutate({
+                                              enquiryId: task.enquiryId,
+                                              type: task.type,
+                                              committedProvider: selectedExecutionCommitProvider[key],
+                                              status: "IN_PROGRESS",
+                                            })
+                                          }
+                                        >
+                                          Commit
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {!dealsLoading && enquiriesWithOpenTasks.length === 0 && (
+                <div className="text-center font-bold uppercase tracking-widest text-xs text-default-500 py-12">
+                  No open execution bids right now.
+                </div>
+              )}
+            </div>
+
+            {/* Service Request Bids */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-black uppercase tracking-widest text-warning-500">Service Request Bids</h2>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400">OPEN REQUESTS</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 items-center">
+                <Chip
+                  variant={serviceTypeFilter === "ALL" ? "solid" : "flat"}
+                  color={serviceTypeFilter === "ALL" ? "warning" : "default"}
+                  className="cursor-pointer"
+                  onClick={() => setServiceTypeFilter("ALL")}
+                >
+                  All Types
+                </Chip>
+                {SERVICE_TYPE_OPTIONS.map((item) => (
+                  <Chip
+                    key={item.key}
+                    variant={serviceTypeFilter === item.key ? "solid" : "flat"}
+                    color={serviceTypeFilter === item.key ? "warning" : "default"}
+                    className="cursor-pointer"
+                    onClick={() => setServiceTypeFilter(item.key)}
+                  >
+                    {item.label}
+                  </Chip>
+                ))}
+              </div>
+
+              {requestsLoading ? (
+                <SectionLoader />
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {serviceRequests
+                    .filter((item) => ["OPEN", "BIDDING"].includes(String(item.status || "").toUpperCase()))
+                    .filter((item) => {
+                      if (!searchQuery.trim()) return true;
+                      const q = searchQuery.toLowerCase();
+                      return (
+                        String(item.title || "").toLowerCase().includes(q) ||
+                        String(item.serviceSpecifications || "").toLowerCase().includes(q) ||
+                        String(item.requestType || "").toLowerCase().includes(q)
+                      );
+                    })
+                    .map((item) => {
+                      const key = String(item._id);
+                      const bids = Array.isArray(item.bids) ? item.bids : [];
+                      const candidates = Array.isArray(item.candidateProviders) ? item.candidateProviders : [];
+                      const commitOptions = candidates.length ? candidates : bids.map((bid: any) => bid?.company).filter(Boolean);
+                      const isCandidate = !!myCompanyId && candidates.some((provider: any) => String(provider?._id || provider) === myCompanyId);
+                      const creatorAssociateId = String((item as any)?.createdByAssociateId?._id || (item as any)?.createdByAssociateId || "");
+                      const isCreatorAssociate = roleLower === "associate" && creatorAssociateId === String(user?.id || "");
+                      const canViewServiceBidDetails = isAdmin || isCandidate || isCreatorAssociate;
+                      const canBid = roleLower === "associate" ? isCandidate : isAdmin;
+
+                      return (
+                        <Card key={key} className="border border-default-200/50 shadow-sm relative overflow-hidden bg-content1/70 backdrop-blur-md rounded-xl">
+                          {item.createdAt && Date.now() - new Date(item.createdAt).getTime() < 86400000 && (
+                            <div className="absolute top-1 right-1 z-20 flex items-center justify-center">
+                              <span className="relative flex h-1 w-1">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1 w-1 bg-success-500"></span>
+                              </span>
+                            </div>
+                          )}
+                          <CardHeader className="px-3 py-2 flex justify-between items-center gap-2 border-b border-default-100/50">
+                            <div className="flex items-center gap-3">
+                              <div className="text-xs uppercase tracking-widest font-black text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded w-fit">{item.requestType}</div>
+                              <div className="font-black text-sm text-foreground tracking-tight uppercase">{item.title}</div>
+                            </div>
+                            <div className={`text-xs font-black uppercase tracking-tight ${item.status === "COMPLETED" ? "text-success-600" : "text-warning-600"}`}>
+                              ● {item.status}
+                            </div>
+                          </CardHeader>
+                          <CardBody className="p-3 pt-2 flex flex-col gap-3">
+                            <div className="rounded-xl bg-default-100/40 p-3 text-sm text-default-600 border border-default-200/30">
+                              <div className="italic leading-relaxed font-bold">{item.serviceSpecifications}</div>
+                              <div className="mt-3 flex flex-wrap gap-4 pt-3 border-t border-default-200/50">
+                                <div className="flex flex-col gap-1 text-xs">
+                                  <span className="font-black uppercase tracking-[0.2em] text-default-400 text-[9px]">Execution Window</span>
+                                  <span className="font-black text-foreground/80">{formatDate(item.requiredFromDate)} → {formatDate(item.requiredToDate)}</span>
+                                </div>
+                                {item.requiredFromDate && (
+                                  <div className="flex flex-col gap-1 text-xs border-l border-default-200/60 pl-4">
+                                    <span className="font-black uppercase tracking-[0.2em] text-warning-600/80 flex items-center gap-1 text-[9px]">
+                                      <FiZap size={10} className="animate-pulse" /> Bidding Closes Before
+                                    </span>
+                                    <span className="font-black text-warning-700">{formatDate(item.requiredFromDate)}</span>
+                                  </div>
+                                )}
+                                <div className="flex flex-col gap-1 text-xs border-l border-default-200/60 pl-4">
+                                  <span className="font-black uppercase tracking-[0.2em] text-default-400 text-[9px]">Candidates</span>
+                                  <span className="font-black text-foreground/80">{candidates.length} Entities</span>
+                                </div>
+                                {isAdmin && (
+                                  <div className="flex flex-col gap-1 text-xs border-l border-warning-200/40 pl-4">
+                                    <span className="font-black uppercase tracking-[0.2em] text-warning-500/80 text-[9px]">Origin Entity</span>
+                                    <span className="font-black text-warning-700/80">{getName(item.createdByCompanyId)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="rounded-xl border border-default-200/50 bg-default-50/40 p-3 text-xs text-default-700">
+                              <div className="flex items-center justify-between font-black uppercase text-xs tracking-widest text-default-400 mb-2 border-b border-default-200/30 pb-2">
+                                <span>Bid Summary</span>
+                                <span>Bids: {bids.length}</span>
+                              </div>
+                              {canViewServiceBidDetails ? (
+                                <div className="overflow-x-auto scrollbar-hide">
+                                  <table className="w-full min-w-[320px] text-xs">
+                                    <thead>
+                                      <tr className="text-default-400 font-black uppercase tracking-tight">
+                                        <th className="text-left py-1">Entity</th>
+                                        <th className="text-left py-1">Quote</th>
+                                        <th className="text-left py-1">Status</th>
+                                        <th className="text-left py-1">Meta</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {bids.map((bid: any, bidIdx: number) => (
+                                        <tr key={`${key}-service-bid-${bidIdx}`} className="border-t border-default-100/50 font-black">
+                                          <td className="py-1 truncate max-w-[120px] text-foreground">{getName(bid?.company)}</td>
+                                          <td className="py-1 text-warning-600 font-black">
+                                            {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? `₹${bid.amount.toLocaleString()}` : "-"}
+                                          </td>
+                                          <td className="py-1 text-default-500 opacity-80 text-xs">{String(bid?.status || "SUBMITTED")}</td>
+                                          <td className="py-1 text-xs text-default-400 opacity-60">{formatDate(bid?.updatedAt || bid?.createdAt)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="mt-1 text-default-500">Detailed bid amounts are restricted for this request.</div>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                size="sm"
+                                type="number"
+                                placeholder="Bid amount"
+                                variant="bordered"
+                                radius="lg"
+                                classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
+                                value={bidMap[key] ?? ""}
+                                onValueChange={(v) => setBidMap((prev) => ({ ...prev, [key]: v }))}
+                                isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
+                              />
+                              <Input
+                                size="sm"
+                                placeholder="Note"
+                                variant="bordered"
+                                radius="lg"
+                                classNames={{ inputWrapper: "h-8 min-h-0 bg-content2/30 border-default-200/50 px-3", input: "text-xs font-black" }}
+                                value={noteMap[key] ?? ""}
+                                onValueChange={(v) => setNoteMap((prev) => ({ ...prev, [key]: v }))}
+                                isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
+                              />
+                            </div>
+
+                            {isAdmin && commitOptions.length > 0 && (
+                              /* @ts-ignore */
+                              <Autocomplete
+                                size="sm"
+                                placeholder="Provider to Commit"
+                                variant="bordered"
+                                radius="lg"
+                                selectedKey={selectedCommitProvider[key] || ""}
+                                onSelectionChange={(value) => setSelectedCommitProvider((prev) => ({ ...prev, [key]: String(value || "") }))}
+                                classNames={{
+                                  listbox: "bg-content1",
+                                  trigger: "h-8 min-h-0 text-xs bg-content2/50 border-default-200/50 px-3",
+                                }}
+                                items={commitOptions}
+                              >
+                                {(company: any) => {
+                                  const companyId = String(company?._id || company || "");
+                                  const companyName = String(company?.name || company?.companyName || companyId);
+                                  return (
+                                    <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
+                                      {companyName}
+                                    </AutocompleteItem>
+                                  );
+                                }}
+                              </Autocomplete>
+                            )}
+
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="warning"
+                                className="h-8 text-xs font-black uppercase"
+                                isDisabled={!canBid || item.status === "COMPLETED" || item.status === "CANCELLED"}
+                                isLoading={bidServiceRequestMutation.isPending}
+                                onPress={() =>
+                                  bidServiceRequestMutation.mutate({
+                                    id: key,
+                                    amount: Number(bidMap[key] || 0),
+                                    note: noteMap[key] || "",
+                                  })
+                                }
+                              >
+                                Place Bid
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                color="success"
+                                className="h-8 text-xs font-black uppercase"
+                                isDisabled={
+                                  !isAdmin ||
+                                  item.status === "COMPLETED" ||
+                                  item.status === "CANCELLED" ||
+                                  (isAdmin && commitOptions.length > 0 ? !selectedCommitProvider[key] : false)
+                                }
+                                isLoading={commitServiceRequestMutation.isPending}
+                                onPress={() =>
+                                  commitServiceRequestMutation.mutate({
+                                    id: key,
+                                    committedProvider: isAdmin ? selectedCommitProvider[key] : undefined,
+                                    bidAmount: Number(bidMap[key] || item.bidAmount || 0),
+                                    commitNote: noteMap[key] || item.commitNote || "",
+                                  })
+                                }
+                              >
+                                Commit
+                              </Button>
+
+                              {isAdmin
+                                ? SERVICE_STATUS_OPTIONS.map((status) => (
+                                  <Button
+                                    key={`${key}-${status}`}
+                                    size="sm"
+                                    variant="light"
+                                    className="h-8 text-xs font-black uppercase"
+                                    isDisabled={item.status === status}
+                                    isLoading={updateServiceStatusMutation.isPending}
+                                    onPress={() => updateServiceStatusMutation.mutate({ id: key, status })}
+                                  >
+                                    {status}
+                                  </Button>
+                                ))
+                                : null}
+                            </div>
+                          </CardBody>
+                        </Card>
+                      );
+                    })}
+                </div>
+              )}
+
+              {!requestsLoading &&
+                serviceRequests.filter((item) => ["OPEN", "BIDDING"].includes(String(item.status || "").toUpperCase())).length === 0 && (
+                  <div className="text-center font-bold uppercase tracking-widest text-xs text-default-500 py-12">
+                    No open service bids right now.
+                  </div>
+                )}
+            </div>
           </motion.div>
         ) : (
           <motion.div

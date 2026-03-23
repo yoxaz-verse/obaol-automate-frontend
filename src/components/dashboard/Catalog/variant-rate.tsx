@@ -25,7 +25,7 @@ import {
   Autocomplete,
   AutocompleteItem,
 } from "@nextui-org/react";
-import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX } from "react-icons/fi";
+import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiShoppingBag, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -644,6 +644,35 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   TableData={finalTableData}
                   columns={columns}
                   isLoading={false}
+                  emptyContent={
+                    rate === "catalogItem" && isAssociateUser && finalTableData.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                            <FiShoppingBag size={48} strokeWidth={1.5} />
+                          </div>
+                          <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                            <FiPlus size={16} strokeWidth={3} />
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Your Catalog is Empty</h3>
+                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                          Personalize your catalog to share best rates with your buyers. Discover and add global products from the marketplace.
+                        </p>
+                        <Button
+                          color="warning"
+                          variant="shadow"
+                          size="lg"
+                          className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-warning-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
+                          onPress={() => router.push("/dashboard/marketplace")}
+                          startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
+                        >
+                          Explore Marketplace
+                        </Button>
+                      </div>
+                    ) : null
+                  }
                   otherModal={(rowItem: any) => {
                     const canAddInventory =
                       showInventoryStatus &&
@@ -842,6 +871,25 @@ const VariantRate: React.FC<VariantRateProps> = ({
               </TableFrame>
             </section >
             <section className="md:hidden space-y-2">
+              {finalTableData.length === 0 && rate === "catalogItem" && isAssociateUser && (
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-content2/50 rounded-3xl border border-divider/50">
+                  <div className="p-5 bg-warning-500/10 rounded-2xl text-warning-500 mb-5">
+                    <FiShoppingBag size={40} />
+                  </div>
+                  <h3 className="text-lg font-black text-foreground uppercase tracking-tight">Your Catalog is Empty</h3>
+                  <p className="text-xs text-default-500 mt-2 mb-6 leading-relaxed">
+                    Personalize your catalog by adding products from the marketplace.
+                  </p>
+                  <Button
+                    color="warning"
+                    variant="shadow"
+                    className="font-black px-8 rounded-xl h-12 text-xs uppercase tracking-widest text-black"
+                    onPress={() => router.push("/dashboard/marketplace")}
+                  >
+                    Explore Marketplace
+                  </Button>
+                </div>
+              )}
               {finalTableData.map((item: any, index: number) => {
                 const isLive = item.isLive;
                 const canAddInventory =
@@ -1256,6 +1304,22 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   const [pincodeSearch, setPincodeSearch] = useState("");
   const [requestedSampleQtyKg, setRequestedSampleQtyKg] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Use a debounced search for pincode to avoid too many API calls
+  const [debouncedPincodeSearch, setDebouncedPincodeSearch] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedPincodeSearch(pincodeSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [pincodeSearch]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsSuccess(false);
+    }
+  }, [isOpen]);
 
   // Dynamic Divisions Fetching
   const { data: divisionResponse, isLoading: divisionsLoading } = useQuery({
@@ -1266,14 +1330,14 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 
   // Dynamic Pincodes Fetching
   const { data: pincodeResponse, isLoading: pincodesLoading } = useQuery({
-    queryKey: ["request-pincodes", requestDivision, pincodeSearch],
+    queryKey: ["request-pincodes", requestDivision, debouncedPincodeSearch],
     queryFn: () =>
       getData(apiRoutes.pincodeEntry.getAll, {
         division: requestDivision,
-        search: pincodeSearch,
+        search: debouncedPincodeSearch,
         limit: 100,
       }),
-    enabled: !!requestDivision && !!pincodeSearch && pincodeSearch.length >= 2,
+    enabled: !!requestDivision,
   });
 
   const divisionOptions = useMemo(() => {
@@ -1335,13 +1399,13 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         type: "success",
         message: "Sample request sent to supplier.",
       });
+      setIsSuccess(true);
       setRequestState("");
       setRequestDistrict("");
       setRequestDivision("");
       setRequestAddress("");
       setRequestPincode("");
       setRequestedSampleQtyKg("");
-      onOpenChange();
     } catch (error: any) {
       showToastMessage({
         type: "error",
@@ -1385,135 +1449,168 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                 </p>
               </ModalHeader>
               <ModalBody className="py-6 px-8 flex flex-col gap-6 overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Select
-                    size="sm"
-                    label="State"
-                    labelPlacement="outside"
-                    placeholder="Select state"
-                    variant="bordered"
-                    selectedKeys={requestState ? [requestState] : []}
-                    onSelectionChange={(keys) => {
-                      const value = Array.from(keys as Set<string>)[0] || "";
-                      setRequestState(value);
-                      setRequestDistrict("");
-                      setRequestDivision("");
-                      setRequestPincode("");
-                      setPincodeSearch("");
-                    }}
+                {isSuccess ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-10 gap-6 text-center"
                   >
-                    {states.map((state: any) => (
-                      <SelectItem key={state._id} value={state._id}>
-                        {state.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
+                    <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-2">
+                      <FiCheckCircle className="text-success text-5xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-black text-2xl tracking-tight text-foreground uppercase">Request Sent!</h3>
+                      <p className="text-sm text-default-500 font-medium max-w-[240px] leading-relaxed">
+                        Your sample request has been successfully submitted to the supplier.
+                      </p>
+                    </div>
+                    <Button
+                      className="font-black uppercase tracking-widest mt-4 px-10 shadow-lg shadow-success/20"
+                      color="success"
+                      variant="shadow"
+                      onPress={onClose}
+                    >
+                      Acknowledge
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        size="sm"
+                        label="State"
+                        labelPlacement="outside"
+                        placeholder="Select state"
+                        variant="bordered"
+                        selectedKeys={requestState ? [requestState] : []}
+                        onSelectionChange={(keys) => {
+                          const value = Array.from(keys as Set<string>)[0] || "";
+                          setRequestState(value);
+                          setRequestDistrict("");
+                          setRequestDivision("");
+                          setRequestPincode("");
+                          setPincodeSearch("");
+                        }}
+                      >
+                        {states.map((state: any) => (
+                          <SelectItem key={state._id} value={state._id}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
 
-                  <Select
-                    size="sm"
-                    label="District"
-                    labelPlacement="outside"
-                    placeholder="Select district"
-                    variant="bordered"
-                    selectedKeys={requestDistrict ? [requestDistrict] : []}
-                    isDisabled={!requestState}
-                    onSelectionChange={(keys) => {
-                      const value = Array.from(keys as Set<string>)[0] || "";
-                      setRequestDistrict(value);
-                      setRequestDivision("");
-                      setRequestPincode("");
-                      setPincodeSearch("");
-                    }}
-                  >
-                    {districtOptions.map((district: any) => (
-                      <SelectItem key={district._id} value={district._id}>
-                        {district.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
+                      <Select
+                        size="sm"
+                        label="District"
+                        labelPlacement="outside"
+                        placeholder="Select district"
+                        variant="bordered"
+                        selectedKeys={requestDistrict ? [requestDistrict] : []}
+                        isDisabled={!requestState}
+                        onSelectionChange={(keys) => {
+                          const value = Array.from(keys as Set<string>)[0] || "";
+                          setRequestDistrict(value);
+                          setRequestDivision("");
+                          setRequestPincode("");
+                          setPincodeSearch("");
+                        }}
+                      >
+                        {districtOptions.map((district: any) => (
+                          <SelectItem key={district._id} value={district._id}>
+                            {district.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Select
-                    size="sm"
-                    label="Division"
-                    labelPlacement="outside"
-                    placeholder={divisionsLoading ? "Loading divisions..." : "Select division"}
-                    variant="bordered"
-                    selectedKeys={requestDivision ? [requestDivision] : []}
-                    isDisabled={!requestDistrict || divisionsLoading}
-                    isLoading={divisionsLoading}
-                    onSelectionChange={(keys) => {
-                      const value = Array.from(keys as Set<string>)[0] || "";
-                      setRequestDivision(value);
-                      setRequestPincode("");
-                      setPincodeSearch("");
-                    }}
-                  >
-                    {divisionOptions.map((division: any) => (
-                      <SelectItem key={division._id} value={division._id}>
-                        {division.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        size="sm"
+                        label="Division"
+                        labelPlacement="outside"
+                        placeholder={divisionsLoading ? "Loading divisions..." : "Select division"}
+                        variant="bordered"
+                        selectedKeys={requestDivision ? [requestDivision] : []}
+                        isDisabled={!requestDistrict || divisionsLoading}
+                        isLoading={divisionsLoading}
+                        onSelectionChange={(keys) => {
+                          const value = Array.from(keys as Set<string>)[0] || "";
+                          setRequestDivision(value);
+                          setRequestPincode("");
+                          setPincodeSearch("");
+                        }}
+                      >
+                        {divisionOptions.map((division: any) => (
+                          <SelectItem key={division._id} value={division._id}>
+                            {division.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
 
-                  {/* @ts-ignore */}
-                  <Autocomplete
-                    size="sm"
-                    label="Pincode"
-                    labelPlacement="outside"
-                    placeholder={pincodesLoading ? "Searching..." : "Type pincode or office..."}
-                    variant="bordered"
-                    selectedKey={requestPincode || null}
-                    isLoading={pincodesLoading}
-                    allowsCustomValue={true}
-                    isDisabled={!requestDivision}
-                    onSelectionChange={(key) => setRequestPincode(String(key || ""))}
-                    onInputChange={(value) => {
-                      setRequestPincode(value);
-                      setPincodeSearch(value);
-                    }}
-                  >
-                    {pincodeOptions.map((p: any) => (
-                      /* @ts-ignore */
-                      <AutocompleteItem key={p.pincode} textValue={p.pincode}>
-                        {p.pincode} - {p.officename}
-                      </AutocompleteItem>
-                    ))}
-                  </Autocomplete>
-                </div>
+                      {/* @ts-ignore */}
+                      <Autocomplete
+                        size="sm"
+                        label="Pincode"
+                        labelPlacement="outside"
+                        placeholder={pincodesLoading ? "Searching..." : "Type pincode or office..."}
+                        variant="bordered"
+                        isLoading={pincodesLoading}
+                        allowsCustomValue={true}
+                        isDisabled={!requestDivision}
+                        onSelectionChange={(id) => {
+                          const selected = pincodeOptions.find((p: any) => p._id === id);
+                          if (selected) {
+                            setRequestPincode(selected.pincode);
+                            setPincodeSearch(selected.pincode);
+                          }
+                        }}
+                        onInputChange={(value) => {
+                          setRequestPincode(value);
+                          setPincodeSearch(value);
+                        }}
+                      >
+                        {pincodeOptions.map((p: any) => (
+                          /* @ts-ignore */
+                          <AutocompleteItem key={p._id} textValue={p.pincode}>
+                            {p.pincode} - {p.officename}
+                          </AutocompleteItem>
+                        ))}
+                      </Autocomplete>
+                    </div>
 
-                <Textarea
-                  size="sm"
-                  label="Full Address"
-                  labelPlacement="outside"
-                  placeholder="Street, locality, landmark"
-                  variant="bordered"
-                  minRows={3}
-                  value={requestAddress}
-                  onValueChange={setRequestAddress}
-                />
+                    <Textarea
+                      size="sm"
+                      label="Full Address"
+                      labelPlacement="outside"
+                      placeholder="Street, locality, landmark"
+                      variant="bordered"
+                      minRows={3}
+                      value={requestAddress}
+                      onValueChange={setRequestAddress}
+                    />
 
-                <Input
-                  size="sm"
-                  label="Sample Qty (kg)"
-                  labelPlacement="outside"
-                  placeholder="Enter quantity in kg"
-                  variant="bordered"
-                  type="number"
-                  min={0}
-                  value={requestedSampleQtyKg}
-                  onValueChange={setRequestedSampleQtyKg}
-                />
+                    <Input
+                      size="sm"
+                      label="Sample Qty (kg)"
+                      labelPlacement="outside"
+                      placeholder="Enter quantity in kg"
+                      variant="bordered"
+                      type="number"
+                      min={0}
+                      value={requestedSampleQtyKg}
+                      onValueChange={setRequestedSampleQtyKg}
+                    />
 
-                <div className="flex items-start gap-2.5 p-3.5 bg-primary/5 rounded-2xl border border-primary/10">
-                  <FiInfo className="text-primary mt-0.5 shrink-0" size={16} />
-                  <p className="text-xs text-default-600 leading-relaxed font-medium">
-                    Are you sure you want to request a sample? The supplier will provide the minimum available quantity and a corresponding quote.
-                  </p>
-                </div>
+                    <div className="flex items-start gap-2.5 p-3.5 bg-primary/5 rounded-2xl border border-primary/10">
+                      <FiInfo className="text-primary mt-0.5 shrink-0" size={16} />
+                      <p className="text-xs text-default-600 leading-relaxed font-medium">
+                        Are you sure you want to request a sample? The supplier will provide the minimum available quantity and a corresponding quote.
+                      </p>
+                    </div>
+                  </>
+                )}
               </ModalBody>
-              <ModalFooter className="border-t border-divider py-3 px-6">
+              <ModalFooter className={`border-t border-divider py-3 px-6 ${isSuccess ? "hidden" : "flex"}`}>
                 <Button size="sm" variant="light" onPress={onClose} isDisabled={submitting}>
                   Cancel
                 </Button>

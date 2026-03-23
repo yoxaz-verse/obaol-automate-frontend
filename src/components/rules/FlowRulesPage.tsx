@@ -43,6 +43,9 @@ import {
   FiLayers,
   FiArrowRight,
   FiCheckCircle,
+  FiShield,
+  FiAnchor,
+  FiZap,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import RulesActionStrip from "@/components/rules/RulesActionStrip";
@@ -54,10 +57,12 @@ import DocRulesEditor from "@/components/rules/DocRulesEditor";
 const SUBFLOW_ICONS: Record<string, any> = {
   PROCUREMENT: FiShoppingCart,
   LOGISTICS: FiTruck,
-  INLAND_LOGISTICS: FiPackage,
-  PACKAGING: FiBox,
+  INLAND_LOGISTICS: FiTruck, // Using truck for inland as well
+  PACKAGING: FiPackage,
   FREIGHT_FORWARDING: FiGlobe,
-  INVENTORY: FiDatabase,
+  INVENTORY: FiBox,
+  SHIPPING: FiAnchor,
+  CUSTOMS: FiShield,
 };
 
 const SUBFLOW_DESCRIPTIONS: Record<string, string> = {
@@ -185,6 +190,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
   const [previewStageKey, setPreviewStageKey] = useState<string>("");
   const [previewActionState, setPreviewActionState] = useState<Record<string, boolean>>({});
   const [previewDocState, setPreviewDocState] = useState<Record<string, boolean>>({});
+  const [subflowErrors, setSubflowErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState<RuleForm>({
     flowType: defaultFlowType,
@@ -286,11 +292,26 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
         isActive: payload.isActive,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables: any) => {
       showToastMessage({ type: "success", message: "Subflow configuration saved.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["order-subflows"] });
+      const subflowType = String(variables?.subflowType || "");
+      if (subflowType) {
+        setSubflowErrors((prev) => {
+          const next = { ...prev };
+          delete next[subflowType];
+          return next;
+        });
+      }
     },
-    onError: (error: any) => {
+    onError: (error: any, variables: any) => {
+      const subflowType = String(variables?.subflowType || "");
+      if (subflowType) {
+        setSubflowErrors((prev) => ({
+          ...prev,
+          [subflowType]: error?.response?.data?.message || "Failed to save subflow configuration.",
+        }));
+      }
       showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to save subflow configuration.", position: "top-right" });
     },
   });
@@ -333,6 +354,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
     orderStageOptions.forEach((stage) => map.set(stage.key, stage.label));
     return map;
   }, [orderStageOptions]);
+
+  const normalizeBiddingStage = (value?: string | null) => {
+    if (!value) return "";
+    if (value === "NONE" || value === "NULL") return "";
+    if (!orderStageLabelMap.has(value)) return "";
+    return value;
+  };
 
   const stageDocRules = useMemo(() => {
     if (!previewStage?.stageKey || !stageType) return [];
@@ -382,14 +410,19 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
     if (flowType !== "TRADE_ORDER") return null;
     if (ORDER_SUBFLOWS.length === 0) return null;
     return (
-      <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5 shadow-sm">
-        <div className="flex items-center gap-2 mb-4 p-1">
-          <FiActivity className="text-default-400 text-sm" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
-            Active Subflow Pipelines
-          </span>
+      <div className="rounded-[2rem] border border-divider bg-content1 shadow-2xl shadow-black/5 overflow-hidden">
+        <div className="bg-default-50/50 px-6 py-4 border-b border-divider flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-warning-500/10 rounded-xl text-warning-600">
+              <FiActivity size={18} />
+            </div>
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-foreground/80">
+              Flow Manifest
+            </span>
+          </div>
+          <span className="text-[10px] font-black text-default-400 bg-default-100 px-2 py-0.5 rounded-full uppercase">Pipeline</span>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="p-6 flex flex-col gap-5">
           {ORDER_SUBFLOWS.map((flow) => {
             const config = subflowConfigMap.get(flow.key);
             if (!config || !config.isActive) return null;
@@ -398,19 +431,23 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             const endLabel = orderStageLabelMap.get(String(config.mustCompleteBeforeOrderStage)) || "End";
 
             return (
-              <div key={flow.key} className="group relative pl-4 border-l-2 border-default-200">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{flow.label}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-warning-500/10 text-warning-600 border border-warning-500/10">{startLabel}</span>
-                    <FiArrowRight size={10} className="text-default-300" />
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-default-100 text-default-500 border border-default-200">{endLabel}</span>
+              <div key={flow.key} className="group relative pl-5 border-l-2 border-warning-500/30 hover:border-warning-500 transition-colors duration-300">
+                <div className="flex flex-col gap-2.5 mb-2">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{flow.label}</span>
+                    <span className="text-[9px] font-black text-default-400 uppercase tracking-widest opacity-60">Subflow Node</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-default-50/50 p-1.5 rounded-xl border border-divider self-start">
+                    <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-warning-500 text-black shadow-sm uppercase">{startLabel}</span>
+                    <FiArrowRight size={12} className="text-default-400 mx-1 shrink-0" />
+                    <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-background border border-divider text-default-500 uppercase shadow-sm">{endLabel}</span>
                   </div>
                 </div>
                 {config.biddingStartAtOrderStage && (
-                  <div className="flex items-center gap-2 mt-1 px-2 py-0.5 rounded-lg bg-default-100/50 border border-default-100">
-                    <span className="text-[8px] font-black uppercase text-default-400">Bidding Window</span>
-                    <span className="text-[8px] font-bold text-default-400 italic">
+                  <div className="flex items-center gap-3 mt-2 px-3 py-1.5 rounded-xl bg-warning-500/5 border border-warning-500/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                    <span className="text-[9px] font-black uppercase text-warning-700 tracking-widest">Bidding Window:</span>
+                    <span className="text-[9px] font-black text-warning-600 italic tracking-tight">
                       {orderStageLabelMap.get(String(config.biddingStartAtOrderStage))} ⇢ {orderStageLabelMap.get(String(config.biddingEndAtOrderStage)) || "End"}
                     </span>
                   </div>
@@ -631,10 +668,11 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                       const config = subflowConfigMap.get(flow.key);
                       const startStage = config?.startAtOrderStage || orderStageOptions[0]?.key || "";
                       const endStage = config?.mustCompleteBeforeOrderStage || orderStageOptions[orderStageOptions.length - 1]?.key || "";
-                      const biddingStartStage = config?.biddingStartAtOrderStage || "";
-                      const biddingEndStage = config?.biddingEndAtOrderStage || "";
+                      const biddingStartStage = normalizeBiddingStage(config?.biddingStartAtOrderStage);
+                      const biddingEndStage = normalizeBiddingStage(config?.biddingEndAtOrderStage);
                       const Icon = SUBFLOW_ICONS[flow.key] || FiActivity;
                       const isActive = config?.isActive ?? false;
+                      const errorMessage = subflowErrors[flow.key];
 
                       return (
                         <motion.div
@@ -642,22 +680,22 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.05 }}
-                          className={`group relative flex flex-col rounded-2xl border-2 transition-all duration-300 overflow-hidden
+                          className={`group relative flex flex-col rounded-[2rem] border-2 transition-all duration-500 overflow-hidden
                             ${isActive
-                              ? "bg-content1 border-warning-500/20 shadow-md hover:border-warning-500/40"
-                              : "bg-default-50/20 border-default-100 opacity-60 grayscale scale-[0.98]"
+                              ? "bg-content1 border-warning-500/20 shadow-2xl shadow-warning-500/5 hover:border-warning-500/40"
+                              : "bg-default-50/10 border-default-100 opacity-40 grayscale scale-[0.98]"
                             }`}
                         >
                           {/* Header Wrapper */}
-                          <div className={`p-4 flex items-center justify-between border-b ${isActive ? "bg-default-50/50 border-default-100" : "bg-default-50 border-default-100/50"}`}>
-                            <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
-                                ${isActive ? "bg-warning-500 text-white" : "bg-default-300 text-default-100"}`}>
-                                <Icon className="text-xl" />
+                          <div className={`p-6 flex items-center justify-between border-b ${isActive ? "bg-default-50/50 border-default-100" : "bg-default-50 border-default-100/50"}`}>
+                            <div className="flex items-center gap-5">
+                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg
+                                ${isActive ? "bg-gradient-to-br from-warning-400 to-warning-600 text-black shadow-warning-500/20" : "bg-default-200 text-default-400"}`}>
+                                <Icon size={24} strokeWidth={2.5} />
                               </div>
                               <div>
-                                <h4 className="text-base font-black tracking-tight text-foreground uppercase">{flow.label}</h4>
-                                <p className="text-[10px] font-bold text-default-400 tracking-widest uppercase">Subflow Pipeline</p>
+                                <h4 className="text-lg font-black tracking-tight text-foreground uppercase">{flow.label}</h4>
+                                <p className="text-[10px] font-black text-default-400 tracking-[0.25em] uppercase mt-0.5">Execution Subflow</p>
                               </div>
                             </div>
                             <Switch
@@ -767,7 +805,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                     variant="flat"
                                     radius="lg"
                                     placeholder="None"
-                                    selectedKeys={biddingStartStage ? [biddingStartStage] : []}
+                                    selectedKeys={biddingStartStage ? [biddingStartStage] : ["__NONE__"]}
                                     isDisabled={!isActive}
                                     classNames={{ trigger: "h-9 bg-content1 border-default-100/50", value: "text-[10px] font-bold uppercase" }}
                                     onSelectionChange={(keys) => {
@@ -777,7 +815,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                         subflowType: flow.key,
                                         startAtOrderStage: startStage,
                                         mustCompleteBeforeOrderStage: endStage,
-                                        biddingStartAtOrderStage: next || null,
+                                        biddingStartAtOrderStage: next === "__NONE__" ? null : next || null,
                                         biddingEndAtOrderStage: biddingEndStage || null,
                                         dependsOnSubflows: config?.dependsOnSubflows || [],
                                         isActive: isActive,
@@ -785,6 +823,9 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                     }}
                                     items={orderStageOptions}
                                   >
+                                    <SelectItem key="__NONE__" textValue="None">
+                                      <span className="text-[9px] font-bold uppercase">None</span>
+                                    </SelectItem>
                                     {(stage: any) => (
                                       <SelectItem key={stage.key} textValue={stage.label}>
                                         <span className="text-[9px] font-bold uppercase">{stage.label}</span>
@@ -799,7 +840,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                     variant="flat"
                                     radius="lg"
                                     placeholder="None"
-                                    selectedKeys={biddingEndStage ? [biddingEndStage] : []}
+                                    selectedKeys={biddingEndStage ? [biddingEndStage] : ["__NONE__"]}
                                     isDisabled={!isActive}
                                     classNames={{ trigger: "h-9 bg-content1 border-default-100/50", value: "text-[10px] font-bold uppercase" }}
                                     onSelectionChange={(keys) => {
@@ -810,13 +851,16 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                         startAtOrderStage: startStage,
                                         mustCompleteBeforeOrderStage: endStage,
                                         biddingStartAtOrderStage: biddingStartStage || null,
-                                        biddingEndAtOrderStage: next || null,
+                                        biddingEndAtOrderStage: next === "__NONE__" ? null : next || null,
                                         dependsOnSubflows: config?.dependsOnSubflows || [],
                                         isActive: isActive,
                                       });
                                     }}
                                     items={orderStageOptions}
                                   >
+                                    <SelectItem key="__NONE__" textValue="None">
+                                      <span className="text-[9px] font-bold uppercase">None</span>
+                                    </SelectItem>
                                     {(stage: any) => (
                                       <SelectItem key={stage.key} textValue={stage.label}>
                                         <span className="text-[9px] font-bold uppercase">{stage.label}</span>
@@ -870,6 +914,12 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                             <div className="px-5 py-3 bg-success-500/5 flex items-center gap-2">
                               <FiCheckCircle className="text-success-600 text-xs" />
                               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600/80">Active Configuration</span>
+                            </div>
+                          )}
+                          {errorMessage && (
+                            <div className="px-5 py-3 bg-danger-500/5 flex items-center gap-2 border-t border-danger-500/10">
+                              <FiAlertCircle className="text-danger-500 text-xs" />
+                              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-danger-500/80">{errorMessage}</span>
                             </div>
                           )}
                         </motion.div>
@@ -942,32 +992,61 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     {renderSubflowIndicator()}
                   </div>
                 )}
-                <div className="flex flex-col gap-0 mb-4 max-h-[300px] overflow-y-auto scrollbar-hide pr-1 border-b border-divider/30">
+                <div className="flex flex-col gap-0 mb-8 max-h-[400px] overflow-y-auto scrollbar-hide pr-1 border-b border-divider/30 pb-4">
                   {sortedRules.map((rule: any, idx: number) => {
                     const isActiveStage = String(previewStage?.stageKey) === String(rule.stageKey);
                     const isLast = idx === sortedRules.length - 1;
+
+                    // Check if this stage is within ANY bidding window
+                    let isBiddingStage = false;
+                    Object.values(subflowConfigMap).forEach((config: any) => {
+                      if (!config.isActive || !config.biddingStartAtOrderStage) return;
+                      const stages = sortedRules.map(r => r.stageKey);
+                      const startIdx = stages.indexOf(config.biddingStartAtOrderStage);
+                      const endIdx = stages.indexOf(config.biddingEndAtOrderStage || stages[stages.length - 1]);
+                      if (idx >= startIdx && idx <= endIdx) isBiddingStage = true;
+                    });
+
                     return (
-                      <div key={rule._id || rule.stageKey} className="flex gap-4">
+                      <div key={rule._id || rule.stageKey} className="flex gap-6 group/item">
                         <div className="flex flex-col items-center">
                           <button
                             onClick={() => setPreviewStageKey(rule.stageKey)}
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10 shrink-0 ${isActiveStage
-                              ? "bg-warning-500 border-warning-500"
-                              : "bg-content1 border-default-300 hover:border-warning-400"
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 z-10 shrink-0 ${isActiveStage
+                              ? "bg-warning-500 border-warning-500 shadow-lg shadow-warning-500/40"
+                              : isBiddingStage
+                                ? "bg-content1 border-warning-500/40"
+                                : "bg-content1 border-default-300 hover:border-warning-400"
                               }`}
                           >
-                            {isActiveStage ? <FiCheck className="text-white text-[9px] font-bold" /> : <div className="w-1.5 h-1.5 rounded-full bg-default-300" />}
+                            {isActiveStage ? (
+                              <FiCheck className="text-white text-[10px] font-black" />
+                            ) : isBiddingStage ? (
+                              <div className="w-1.5 h-1.5 rounded-full bg-warning-500/60 animate-pulse" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-default-300" />
+                            )}
                           </button>
-                          {!isLast && <div className={`w-0.5 flex-1 min-h-[1.5rem] ${isActiveStage ? "bg-warning-500/30" : "bg-default-200/50"}`} />}
+                          {!isLast && (
+                            <div className={`w-0.5 flex-1 min-h-[2.5rem] transition-colors duration-500 ${isActiveStage ? "bg-warning-500/50" : "bg-divider/40"
+                              }`} />
+                          )}
                         </div>
                         <button
                           onClick={() => setPreviewStageKey(rule.stageKey)}
-                          className={`flex-1 pb-4 text-left group transition-all duration-300 ${isActiveStage ? "translate-x-1" : ""}`}
+                          className={`flex-1 pb-6 text-left group transition-all duration-500 ${isActiveStage ? "translate-x-2" : ""}`}
                         >
-                          <div className={`text-xs font-black uppercase tracking-widest transition-colors ${isActiveStage ? "text-warning-600" : "text-default-500 group-hover:text-default-700"}`}>
-                            {rule.label || rule.stageKey}
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={`text-xs font-black uppercase tracking-[0.15em] transition-colors ${isActiveStage ? "text-warning-600" : "text-default-500 group-hover/item:text-default-800"}`}>
+                              {rule.label || rule.stageKey}
+                            </div>
+                            {isBiddingStage && (
+                              <span className="text-[9px] font-black uppercase tracking-widest text-warning-500/80 flex items-center gap-1 bg-warning-500/5 px-2 py-0.5 rounded-md border border-warning-500/10">
+                                <FiZap size={8} className="animate-pulse" /> Bidding
+                              </span>
+                            )}
                           </div>
-                          <div className={`text-[10px] font-bold transition-opacity ${isActiveStage ? "text-warning-500/70" : "text-default-400 opacity-50"}`}>
+                          <div className={`text-[10px] font-black transition-opacity uppercase tracking-widest ${isActiveStage ? "text-warning-500/60" : "text-default-400 opacity-40"}`}>
                             {rule.stageKey}
                           </div>
                         </button>
@@ -985,14 +1064,17 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     className="space-y-6"
                   >
                     <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-3 flex items-center gap-2">
-                        <div className="w-1 h-3 bg-warning-500 rounded-full" />
-                        Required Actions
+                      <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-400 mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
+                          <span>Required Actions</span>
+                        </div>
+                        <span className="text-[9px] opacity-40">STAGE PROTOCOL</span>
                       </div>
-                      <div className="space-y-2 pl-3">
+                      <div className="space-y-3 pl-3">
                         {(previewStage?.requiredActions || []).length === 0 ? (
-                          <div className="text-[11px] italic text-default-400 flex items-center gap-2 bg-default-50 p-2 rounded-lg border border-dashed border-default-200">
-                            None configured for this stage.
+                          <div className="text-[11px] font-black uppercase tracking-widest text-default-400 flex items-center gap-2 bg-default-50/50 p-4 rounded-2xl border border-dashed border-default-200 ml-1">
+                            None configured for this stage
                           </div>
                         ) : (
                           (previewStage?.requiredActions || []).map((action: string) => {
@@ -1001,14 +1083,14 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                               <motion.label
                                 whileTap={{ scale: 0.98 }}
                                 key={action}
-                                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all cursor-pointer ${isDone
-                                  ? "bg-success-500/5 border-success-500/20 text-success-700"
-                                  : "bg-content2/30 border-default-200/50 text-default-600 hover:border-default-300"
+                                className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer ${isDone
+                                  ? "bg-success-500/5 border-success-500/20 text-success-700 shadow-sm"
+                                  : "bg-content2/10 border-divider text-default-600 hover:border-default-300"
                                   }`}
                               >
-                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isDone ? "bg-success-500 text-white" : "bg-default-200 text-default-400"
+                                <div className={`w-6 h-6 rounded-xl flex items-center justify-center transition-all shadow-sm ${isDone ? "bg-success-500 text-white" : "bg-default-200 text-default-400"
                                   }`}>
-                                  {isDone && <FiCheck className="text-xs" />}
+                                  {isDone && <FiCheck size={14} strokeWidth={3} />}
                                 </div>
                                 <input
                                   type="checkbox"
@@ -1018,7 +1100,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                     setPreviewActionState((prev) => ({ ...prev, [action]: !prev[action] }))
                                   }
                                 />
-                                <span className="text-xs font-bold tracking-tight">{action.replaceAll("_", " ")}</span>
+                                <span className="text-xs font-black uppercase tracking-tight">{action.replaceAll("_", " ")}</span>
                               </motion.label>
                             );
                           })
@@ -1027,16 +1109,19 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     </div>
 
                     <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-3 flex items-center gap-2">
-                        <div className="w-1 h-3 bg-primary-500 rounded-full" />
-                        Document Protocol
+                      <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-400 mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-4 bg-primary-500 rounded-full" />
+                          <span>Document Protocol</span>
+                        </div>
+                        <span className="text-[9px] opacity-40">COMPLIANCE</span>
                       </div>
                       {!showDocRules ? (
-                        <div className="text-[11px] italic text-default-400 pl-3">Standard flow (no documents).</div>
+                        <div className="text-[11px] font-black uppercase tracking-widest text-default-400 pl-4">Standard flow (no documents).</div>
                       ) : stageDocRules.length === 0 ? (
-                        <div className="text-[11px] italic text-default-400 pl-3 bg-default-50 p-2 rounded-lg border border-dashed border-default-200 ml-3">No documents required at this stage.</div>
+                        <div className="text-[11px] font-black uppercase tracking-widest text-default-400 py-4 px-6 bg-default-50/50 rounded-2xl border border-dashed border-default-200 ml-4">No documents required</div>
                       ) : (
-                        <div className="space-y-2 pl-3">
+                        <div className="space-y-3 pl-4">
                           {stageDocRules.map((doc: any) => {
                             const key = String(doc.docType);
                             const isUploaded = Boolean(previewDocState[key]);
@@ -1044,14 +1129,14 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                               <motion.label
                                 whileTap={{ scale: 0.98 }}
                                 key={key}
-                                className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all cursor-pointer ${isUploaded
-                                  ? "bg-primary-500/5 border-primary-500/20 text-primary-700"
-                                  : "bg-content2/30 border-default-200/50 text-default-600 hover:border-default-300"
+                                className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer ${isUploaded
+                                  ? "bg-primary-500/5 border-primary-500/20 text-primary-700 shadow-sm"
+                                  : "bg-content2/10 border-divider text-default-600 hover:border-default-300"
                                   }`}
                               >
-                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isUploaded ? "bg-primary-500 text-white" : "bg-default-200 text-default-400"
+                                <div className={`w-6 h-6 rounded-xl flex items-center justify-center transition-all shadow-sm ${isUploaded ? "bg-primary-500 text-white" : "bg-default-200 text-default-400"
                                   }`}>
-                                  {isUploaded && <FiCheck className="text-xs" />}
+                                  {isUploaded && <FiCheck size={14} strokeWidth={3} />}
                                 </div>
                                 <input
                                   type="checkbox"
@@ -1062,8 +1147,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                   }
                                 />
                                 <div className="flex flex-col">
-                                  <span className="text-xs font-bold tracking-tight">{key.replaceAll("_", " ")}</span>
-                                  <span className="text-[9px] font-black opacity-50 uppercase tracking-widest">{doc.responsibleRole}</span>
+                                  <span className="text-xs font-black uppercase tracking-tight leading-none mb-1">{key.replaceAll("_", " ")}</span>
+                                  <span className="text-[9px] font-black opacity-50 uppercase tracking-[0.2em]">{doc.responsibleRole}</span>
                                 </div>
                               </motion.label>
                             );

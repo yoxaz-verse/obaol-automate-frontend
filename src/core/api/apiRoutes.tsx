@@ -390,9 +390,16 @@ export const apiRoutes = {
   sampleRequest: {
     list: `${BASE_PATHS.SAMPLE_REQUEST}`,
     create: `${BASE_PATHS.SAMPLE_REQUEST}`,
+    getOne: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}`,
     quote: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/quote`,
     decision: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/decision`,
     markup: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/markup`,
+    paymentReceived: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/payment-received`,
+    packagingStart: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/packaging-start`,
+    packaged: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/packaged`,
+    courierSubmit: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/courier-submit`,
+    inTransit: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/in-transit`,
+    receiptConfirm: (id: string) => `${BASE_PATHS.SAMPLE_REQUEST}/${id}/receipt-confirm`,
   },
   imports: {
     list: `${BASE_PATHS.IMPORTS}`,
@@ -400,6 +407,9 @@ export const apiRoutes = {
     update: (id: string) => `${BASE_PATHS.IMPORTS}/${id}`,
     close: (id: string) => `${BASE_PATHS.IMPORTS}/${id}/close`,
     reserve: (id: string) => `${BASE_PATHS.IMPORTS}/${id}/reservations`,
+    reservationEdit: (id: string, reservationId: string) => `${BASE_PATHS.IMPORTS}/${id}/reservations/${reservationId}/edit`,
+    reservationCancel: (id: string, reservationId: string) => `${BASE_PATHS.IMPORTS}/${id}/reservations/${reservationId}/cancel`,
+    reservationLock: (id: string, reservationId: string) => `${BASE_PATHS.IMPORTS}/${id}/reservations/${reservationId}/lock`,
   },
   importReservations: {
     list: `${BASE_PATHS.IMPORT_RESERVATION}`,

@@ -17,7 +17,7 @@ export default function TableFrame({
 }: TableFrameProps) {
   return (
     <div
-      className={`w-full min-w-0 max-w-full overflow-hidden ${
+      className={`w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden scrollbar-gutter-stable overscroll-x-contain touch-pan-x ${
         withTopGap ? "pt-2" : ""
       } ${withBottomGap ? "pb-2" : ""} ${className}`.trim()}
     >

@@ -15,6 +15,7 @@ import {
   Input,
   Textarea,
   Switch as HeroSwitch,
+  Divider as HeroDivider,
 } from "@heroui/react";
 
 const Tabs = HeroTabs as any;
@@ -22,9 +23,12 @@ const Tab = HeroTab as any;
 const Chip = HeroChip as any;
 const Select = HeroSelect as any;
 const Switch = HeroSwitch as any;
-import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuExternalLink, LuInfo, LuCopy, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+const Divider = HeroDivider as any;
+import { LuGlobe, LuMail, LuPhone, LuMapPin, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuImage, LuBriefcase, LuTags, LuLayoutDashboard, LuPlus, LuExternalLink, LuInfo, LuCopy, LuChevronLeft, LuChevronRight, LuSearch } from "react-icons/lu";
+import { FiEdit2 } from "react-icons/fi";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import AddModal from "@/components/CurdTable/add-model";
+import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData } from "@/core/api/apiHandler";
 import {
@@ -78,8 +82,11 @@ export default function CompanyProductPage() {
   const [isEditingWeb, setIsEditingWeb] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(null);
   const [webFields, setWebFields] = useState<any>({});
+  const [aboutUsError, setAboutUsError] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const companyIdParam = searchParams.get("companyId");
+  const ABOUT_US_MIN = 120;
+  const ABOUT_US_MAX = 800;
 
   const operatorAssociateFormFields: FormField[] = [
     { label: "Associate Name", type: "text", key: "name", inForm: true, inTable: false, required: true },
@@ -371,6 +378,18 @@ export default function CompanyProductPage() {
     },
   });
 
+  const validateAboutUs = (value: string) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return "";
+    if (trimmed.length < ABOUT_US_MIN) {
+      return `About Us should be at least ${ABOUT_US_MIN} characters.`;
+    }
+    if (trimmed.length > ABOUT_US_MAX) {
+      return `About Us should be at most ${ABOUT_US_MAX} characters.`;
+    }
+    return "";
+  };
+
   const handleWebFieldChange = (field: string, value: any) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
@@ -383,6 +402,9 @@ export default function CompanyProductPage() {
       }));
     } else {
       setWebFields((prev: any) => ({ ...prev, [field]: value }));
+    }
+    if (field === "aboutUs") {
+      setAboutUsError(validateAboutUs(value));
     }
   };
 
@@ -400,6 +422,7 @@ export default function CompanyProductPage() {
       customDomain: selectedCompany?.customDomain || "",
       isWebsiteLive: selectedCompany?.isWebsiteLive || false,
     });
+    setAboutUsError(validateAboutUs(selectedCompany?.aboutUs || ""));
     setIsEditingWeb(true);
   };
 
@@ -539,149 +562,133 @@ export default function CompanyProductPage() {
 
 
   return (
-    <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
-      {isOperatorUser && (
-        <Card className="mb-4 p-4 bg-background/60 backdrop-blur-md border-none shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wide text-default-500">Onboarding Actions</div>
-              <p className="text-xs text-default-500 mt-0.5">
-                Add associates and companies with full registration details.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <AddModal
-                buttonLabel="Add Associate to Company"
-                currentTable="associate"
-                formFields={operatorAssociateFormFields}
-                apiEndpoint={associateRoutes.getAll}
-                additionalVariable={{
-                  hasCompany: true,
-                  companyMode: "existing",
-                }}
-              />
-              <AddModal
-                buttonLabel="Add Company"
-                currentTable="associateCompany"
-                formFields={operatorCompanyFormFields}
-                apiEndpoint={associateCompanyRoutes.getAll}
-                additionalVariable={{
-                  assignedOperator: user?.id,
-                }}
-              />
-            </div>
+    <div className="p-8 md:p-12 max-w-[1800px] mx-auto min-h-screen bg-transparent">
+      {/* --- ELITE TOP COMMAND BAR --- */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="flex items-center gap-6">
+          <div className="w-1.5 h-12 bg-warning-500 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.4)]" />
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase italic leading-none">Catalog Intelligence</h1>
+            <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.3em] mt-2 opacity-70">Fleet Management & Multi-Entity Product Allocation</p>
           </div>
-        </Card>
-      )}
-      <Card className="mb-4 p-4 bg-content1 border border-default-200/80 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Company Search</h2>
-            <p className="text-xs text-default-500">Search by company name prefix.</p>
-          </div>
-          <Input
-            value={companySearch}
-            onChange={(event) => setCompanySearch(event.target.value)}
-            placeholder="Search company name"
-            size="sm"
-            variant="bordered"
-            classNames={{
-              inputWrapper: "bg-background/50 border-default-200/70",
-            }}
-            isClearable
-            onClear={() => setCompanySearch("")}
-          />
         </div>
-      </Card>
-      <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-180px)] min-h-[600px] relative">
-        <Button
-          isIconOnly
-          variant="flat"
-          size="sm"
-          className={`absolute top-4 z-20 transition-all duration-300 dark:bg-default-100/30 border border-default-200/70 dark:border-default-500/40 ${isSidebarCollapsed ? "-left-3" : "left-[285px] lg:left-[325px]"}`}
-          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        >
-          {isSidebarCollapsed ? <LuChevronRight size={16} /> : <LuChevronLeft size={16} />}
-        </Button>
 
-        {/* --- Sidebar (Master) --- */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 bg-foreground/[0.03] backdrop-blur-xl p-2 rounded-[2.5rem] border border-foreground/5 shadow-2xl">
+          <div className="relative group min-w-[320px]">
+            <LuSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-default-400 group-focus-within:text-warning-500 transition-colors z-10" size={18} />
+            <Input
+              value={companySearch}
+              onChange={(event) => setCompanySearch(event.target.value)}
+              placeholder="SEARCH ENTITY PREFIX..."
+              variant="flat"
+              classNames={{
+                input: "font-bold text-[11px] tracking-widest uppercase pl-8",
+                inputWrapper: "h-14 bg-transparent group-hover:bg-foreground/[0.02] border-none shadow-none px-6 ring-0 focus-within:ring-0",
+              }}
+              isClearable
+              onClear={() => setCompanySearch("")}
+            />
+          </div>
+          
+          {isOperatorUser && (
+            <div className="flex items-center gap-2 pr-2">
+              <div className="h-8 w-[1px] bg-foreground/10 mx-2 hidden md:block" />
+              <div className="flex gap-2">
+                <AddModal
+                  buttonLabel="ADD ASSOCIATE"
+                  currentTable="associate"
+                  formFields={operatorAssociateFormFields}
+                  apiEndpoint={associateRoutes.getAll}
+                  additionalVariable={{ hasCompany: true, companyMode: "existing" }}
+                />
+                <AddModal
+                  buttonLabel="INITIALIZE COMPANY"
+                  currentTable="associateCompany"
+                  formFields={operatorCompanyFormFields}
+                  apiEndpoint={associateCompanyRoutes.getAll}
+                  additionalVariable={{ assignedOperator: user?.id }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-10 h-[calc(100vh-280px)] min-h-[700px] relative">
+        {/* --- TACTICAL SIDEBAR (ENTITY LIST) --- */}
         {!isSidebarCollapsed && (
-          <div className="w-full md:w-[300px] lg:w-[340px] flex flex-col gap-3 flex-shrink-0 transition-all duration-300 animate-in slide-in-from-left duration-300">
-            <Card className="bg-content1 border border-default-200/80 shadow-sm h-full overflow-hidden flex flex-col">
-              {/* Sidebar header */}
-              <div className="px-4 pt-4 pb-3 border-b border-default-100">
-                <h2 className="text-sm font-bold text-foreground/90 tracking-tight mb-3">Companies</h2>
-              </div>
-
-              {/* Filter tabs */}
-              <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-default-100">
-                {(["live", "active", "empty", "dormant"] as const).map((tab) => {
-                  const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
-                  const dotColor = tab === "live" ? "bg-success-500" : tab === "active" ? "bg-warning-500" : tab === "empty" ? "bg-default-400" : "bg-danger-500";
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${activeTab === tab
-                        ? "bg-default-200 text-foreground"
-                        : "text-default-500 hover:text-foreground hover:bg-default-100"
+          <div className="w-full lg:w-[380px] flex flex-col gap-6 flex-shrink-0 animate-in slide-in-from-left duration-700">
+            <Card className="bg-foreground/[0.01] border border-foreground/5 backdrop-blur-3xl shadow-none rounded-[3rem] h-full overflow-hidden flex flex-col">
+              {/* STATUS MATRIX SELECTOR */}
+              <div className="px-8 pt-10 pb-6 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[11px] font-black text-default-400 uppercase tracking-[0.4em] italic mb-1">Entity Clusters</h3>
+                  <span className="text-[10px] font-bold text-default-300 px-2 py-0.5 rounded-full border border-default-100">{allCompanies.length} Total</span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 bg-foreground/[0.04] p-1.5 rounded-[1.5rem] border border-foreground/5 shadow-inner">
+                  {(["live", "active", "empty", "dormant"] as const).map((tab) => {
+                    const count = tab === "live" ? liveCompanies.length : tab === "active" ? activeCompanies.length : tab === "empty" ? emptyCompanies.length : dormantCompanies.length;
+                    const isActive = activeTab === tab;
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => { setActiveTab(tab); setSelectedCompanyId(null); }}
+                        className={`flex items-center justify-between gap-1.5 px-4 h-10 rounded-xl transition-all duration-300 ${isActive
+                          ? "bg-background text-foreground shadow-xl scale-[1.02] border border-foreground/5"
+                          : "text-default-400 hover:text-foreground hover:bg-foreground/5"
                         }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-                      <span className="capitalize">{tab === "dormant" ? "Dormant (7d)" : tab}</span>
-                      <span className={`text-[10px] font-bold px-1 rounded ${activeTab === tab ? "bg-foreground/10" : "bg-default-200/60"
-                        }`}>{count}</span>
-                    </button>
-                  );
-                })}
+                      >
+                        <span className="text-[10px] font-black uppercase tracking-widest">{tab === "dormant" ? "Idle" : tab}</span>
+                        <Chip size="sm" variant="flat" className={`h-5 min-w-[24px] font-black text-[9px] ${isActive ? "bg-warning-500 text-black border-none" : "bg-foreground/5"}`}>{count}</Chip>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Scrollable list */}
-              <div className="flex-1 overflow-y-auto px-3 pb-3 custom-scrollbar">
-                <div className="flex flex-col gap-1">
+              <Divider className="opacity-40" />
+
+              {/* DYNAMIC SCROLL FEED */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar group/list">
+                <div className="flex flex-col gap-2">
                   {filteredCompanies.map((company) => {
                     const isActive = selectedCompanyId === company._id;
                     const prodCount = (company as any).productCount;
                     const isLive = (company.stats?.liveProducts || 0) > 0;
-                    const isDormant = activeTab === "dormant";
 
                     return (
-                      <button
+                      <motion.button
                         key={company._id}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => setSelectedCompanyId(company._id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
-                          ? "bg-warning-500/10 border border-warning-500/30"
-                          : "border border-transparent hover:bg-default-100/80"
-                          }`}
+                        className={`group relative flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all duration-300 text-left overflow-hidden ${isActive
+                          ? "bg-warning-500/10 border border-warning-500/20"
+                          : "border border-transparent hover:bg-foreground/[0.03]"
+                        }`}
                       >
-                        <Avatar
-                          size="sm"
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&bold=true`}
-                          className="flex-shrink-0"
-                        />
+                        {isActive && (
+                          <div className="absolute left-0 top-3 bottom-3 w-1 bg-warning-500 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
+                        )}
+                        
+
                         <div className="flex-1 min-w-0">
-                          <div className={`font-semibold truncate text-xs ${isActive ? "text-warning-600 dark:text-warning-400" : "text-foreground/80"
+                          <div className={`font-black truncate text-xs tracking-tight uppercase leading-none transition-colors ${isActive ? "text-warning-500" : "text-foreground/80"
                             }`}>{company.name}</div>
-                          {activeTab !== "empty" && (
-                            <div className="text-[10px] text-default-400 mt-0.5">
-                              {prodCount} {activeTab === "live" ? "live" : "products"}
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest opacity-60 italic">Nodes:</span>
+                            <span className="text-[10px] font-black text-default-500 uppercase">{prodCount || "00"} Unit Payload</span>
+                          </div>
                         </div>
-                        {isDormant ? (
-                          <span className="w-1.5 h-1.5 rounded-full bg-danger-500 shrink-0" />
-                        ) : isLive ? (
-                          <span className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
-                        ) : null}
-                      </button>
+                      </motion.button>
                     );
                   })}
+
                   {filteredCompanies.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 opacity-50">
-                      <svg className="w-8 h-8 text-default-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                      </svg>
-                      <p className="text-xs italic">No companies here.</p>
+                    <div className="flex flex-col items-center justify-center py-20 opacity-30 italic">
+                      <LuInfo size={32} className="mb-4 text-default-300" />
+                      <p className="text-[10px] font-black uppercase tracking-widest">Zero Entities Detected</p>
                     </div>
                   )}
                 </div>
@@ -690,175 +697,137 @@ export default function CompanyProductPage() {
           </div>
         )}
 
-        {/* --- Main Content (Detail) --- */}
+        {/* --- MAIN INTELLIGENCE HUB (DETAIL) --- */}
         <div className="flex-1 min-w-0">
-          <Card className="h-full bg-content1 border border-default-200/80 shadow-sm overflow-hidden flex flex-col min-w-0 max-w-full">
+          <Card className="h-full bg-foreground/[0.01] border border-foreground/5 backdrop-blur-3xl shadow-none rounded-[3rem] overflow-hidden flex flex-col min-w-0 max-w-full">
             {selectedCompany ? (
               <>
-                {/* Detail header */}
-                <div className="px-6 py-5 border-b border-default-100">
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Company identity */}
-                    <div className="flex items-center gap-4">
-                      <Avatar
-                        size="lg"
-                        src={selectedCompany.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany.name)}&background=random&color=fff&bold=true`}
-                        className="border-2 border-default-200 shadow-sm shrink-0"
-                      />
-                      <div>
-                        <h1 className="text-xl font-bold text-foreground tracking-tight leading-tight">{selectedCompany.name}</h1>
-                        <div className="flex items-center gap-2 mt-1">
+                {/* HUB HEADER */}
+                <div className="px-10 py-10 border-b border-foreground/5 bg-foreground/[0.01]">
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+                    {/* Entity Branding */}
+                    <div className="flex items-center gap-6">
+                      <div className="flex flex-col gap-2">
+                        <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase italic leading-[0.8]">{selectedCompany.name}</h1>
+                        <div className="flex items-center gap-3 mt-2">
                           <Chip
                             size="sm"
-                            variant="flat"
-                            color={activeTab === "live" ? "success" : activeTab === "active" ? "warning" : activeTab === "dormant" ? "danger" : "default"}
-                            className="capitalize text-[10px] font-bold h-5"
+                            variant="shadow"
+                            className={`font-black uppercase text-[9px] tracking-widest h-6 px-3 border-none ${activeTab === "live" ? "bg-success-500 text-black" : activeTab === "active" ? "bg-warning-500 text-black" : "bg-default-400 text-white"}`}
                           >
-                            {activeTab === "live"
-                              ? "● Live"
-                              : activeTab === "active"
-                                ? "◌ Active"
-                                : activeTab === "dormant"
-                                  ? "● Dormant"
-                                  : "○ Empty"}
+                            {activeTab === "live" ? "● LIVE_REACH" : activeTab === "active" ? "◌ ACTIVE_POOL" : "○ EMPTY_BUFFER"}
                           </Chip>
                           {(selectedCompany as any).state?.name && (
-                            <span className="text-[10px] text-default-400">{(selectedCompany as any).state.name}</span>
+                            <span className="text-[10px] font-black text-default-400 uppercase tracking-widest italic opacity-60">
+                              <LuMapPin className="inline mr-1" size={10} />
+                              {(selectedCompany as any).state.name} Territory
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    {(() => {
-                      const customDomain = String(selectedCompany.customDomain || "").trim();
-                      const subdomain = String(selectedCompany.subdomain || "").trim();
-                      const isLive = Boolean((selectedCompany as any).isWebsiteLive);
-                      const portfolioUrl = customDomain
-                        ? `https://${customDomain}`
-                        : subdomain
-                          ? `https://${subdomain}.company.obaol.com`
-                          : "";
-                      if (!isLive || !portfolioUrl) return null;
-                      return (
-                        <a
-                          href={portfolioUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full border border-default-200/70 bg-default-100/60 px-3 py-1 text-[11px] font-semibold text-default-700 hover:bg-default-200/70 dark:bg-default-50/10 dark:text-default-200"
-                        >
-                          View Portfolio
-                        </a>
-                      );
-                    })()}
 
-                    {/* Assignment widget — Admin only */}
-                    {roleLower === "admin" && (
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Overseer</div>
-                        {!isAssigning ? (
-                          <div className="flex items-center gap-2">
-                            {selectedCompany.assignedOperator ? (
-                              <div className="flex items-center gap-2">
-                                {(() => {
-                                  const operatorObj = typeof selectedCompany.assignedOperator === "object" ? selectedCompany.assignedOperator : null;
-                                  const presence = resolvePresence(operatorObj);
-                                  return (
-                                    <div className="flex items-center gap-2 bg-default-100 px-2.5 py-1.5 rounded-lg">
-                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${presence.online ? "bg-success-500" : "bg-default-400"}`} />
-                                      <div className="flex flex-col leading-tight">
-                                        <span className="text-xs font-bold text-foreground/80">{operatorObj?.name || "Unknown"}</span>
-                                        <span className="text-[10px] text-default-400">{presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}</span>
-                                      </div>
-                                    </div>
-                                  );
-                                })()}
+                    <div className="flex items-center gap-4">
+                      {(() => {
+                        const customDomain = String(selectedCompany.customDomain || "").trim();
+                        const subdomain = String(selectedCompany.subdomain || "").trim();
+                        const isLive = Boolean((selectedCompany as any).isWebsiteLive);
+                        const portfolioUrl = customDomain ? `https://${customDomain}` : subdomain ? `https://${subdomain}.company.obaol.com` : "";
+                        if (!isLive || !portfolioUrl) return null;
+                        return (
+                          <Button
+                            as="a"
+                            href={portfolioUrl}
+                            target="_blank"
+                            variant="flat"
+                            className="bg-foreground/5 font-black uppercase text-[10px] tracking-widest h-12 px-6 rounded-2xl"
+                            endContent={<LuExternalLink size={14} />}
+                          >
+                            PORTFOLIO LIVE
+                          </Button>
+                        );
+                      })()}
+
+                      {/* Overseer Widget */}
+                      {roleLower === "admin" && (
+                        <div className="bg-foreground/[0.03] p-1.5 rounded-2xl border border-foreground/5 flex items-center gap-3">
+                          {!isAssigning ? (
+                            <div className="flex items-center gap-4 pl-3">
+                              <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none">OVERSEER</span>
+                                {selectedCompany.assignedOperator ? (
+                                  <span className="text-xs font-black text-foreground mt-1 uppercase italic transition-all group-hover:text-warning-500">
+                                    {(typeof selectedCompany.assignedOperator === 'object' ? selectedCompany.assignedOperator.name : "UNKNOWN")}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs font-black text-default-300 mt-1 uppercase italic">UNASSIGNED</span>
+                                )}
                               </div>
-                            ) : (
-                              <span className="text-xs text-default-400 italic">Not assigned</span>
-                            )}
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              className="text-warning-500"
-                              onClick={() => {
-                                setSelectedOperatorId(typeof selectedCompany.assignedOperator === 'object' ? selectedCompany.assignedOperator._id : null);
-                                setIsAssigning(true);
-                              }}
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <Select
-                              size="sm"
-                              placeholder="Assign Operator"
-                              className="w-44"
-                              selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
-                              onSelectionChange={(keys: any) => setSelectedOperatorId(Array.from(keys)[0] as string)}
-                            >
-                              {allOperators.map((emp) => (
-                                <SelectItem key={emp._id} textValue={emp.name}>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium">{emp.name}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </Select>
-                            <Button size="sm" color="warning" isLoading={assignMutation.isPending} onClick={handleAssign}>Save</Button>
-                            <Button size="sm" variant="light" onClick={() => setIsAssigning(false)}>Cancel</Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Operator view */}
-                    {isOperatorUser && selectedCompany.assignedOperator && (
-                      <div className="flex items-center gap-2 bg-success-50 dark:bg-success-900/20 px-3 py-1.5 rounded-lg border border-success-200/60 shrink-0">
-                        {(() => {
-                          const operatorObj = typeof selectedCompany.assignedOperator === "object" ? selectedCompany.assignedOperator : null;
-                          const presence = resolvePresence(operatorObj);
-                          return (
-                            <>
-                              <div className={`w-1.5 h-1.5 rounded-full ${presence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
-                              <span className="text-[10px] font-bold text-success-700 dark:text-success-300">
-                                Your supervision • {presence.online ? "Online" : `Last seen ${presence.lastSeenLabel}`}
-                              </span>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    )}
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                className="bg-foreground/5 rounded-xl hover:bg-warning-500/10 hover:text-warning-500 transition-all"
+                                onClick={() => {
+                                  setSelectedOperatorId(typeof selectedCompany.assignedOperator === 'object' ? selectedCompany.assignedOperator._id : null);
+                                  setIsAssigning(true);
+                                }}
+                              >
+                                <FiEdit2 size={16} />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Select
+                                size="sm"
+                                placeholder="Select Operator"
+                                className="w-48"
+                                classNames={{ trigger: "bg-transparent border-none shadow-none" }}
+                                selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
+                                onSelectionChange={(keys: any) => setSelectedOperatorId(Array.from(keys)[0] as string)}
+                              >
+                                {allOperators.map((emp) => (
+                                  <SelectItem key={emp._id} textValue={emp.name} className="font-bold uppercase text-xs">
+                                    {emp.name}
+                                  </SelectItem>
+                                ))}
+                              </Select>
+                              <Button size="sm" color="warning" variant="shadow" className="font-black" isLoading={assignMutation.isPending} onClick={handleAssign}>CONFIRM</Button>
+                              <Button isIconOnly size="sm" variant="light" onClick={() => setIsAssigning(false)}>×</Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4 custom-scrollbar min-w-0 max-w-full">
-                  <div className="mb-5">
+                <div className="flex-1 overflow-y-auto px-10 pb-12 pt-8 custom-scrollbar min-w-0 max-w-full">
+                  <div className="mb-10">
                     <Tabs
                       aria-label="Detail Sections"
                       selectedKey={detailTab}
                       onSelectionChange={(key: any) => setDetailTab(key as string)}
                       variant="underlined"
                       color="warning"
-                      size="sm"
                       classNames={{
-                        tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                        cursor: "w-full bg-warning-500",
-                        tab: "max-w-fit px-0 h-10",
-                        tabContent: "text-default-500 group-data-[selected=true]:text-warning-500 font-semibold text-xs",
+                        tabList: "gap-12 w-full relative rounded-none p-0 border-b border-foreground/5",
+                        cursor: "w-full bg-warning-500 h-1 rounded-full shadow-[0_-2px_10px_rgba(234,179,8,0.5)]",
+                        tab: "max-w-fit px-4 h-12",
+                        tabContent: "text-[11px] font-black uppercase tracking-[0.2em] group-data-[selected=true]:text-warning-500 transition-all",
                       }}
                     >
-                      <Tab key="products" title="Products" />
-                      <Tab key="details" title="Details" />
-                      <Tab key="associates" title="Associates" />
-                      <Tab key="web" title="Web Content" />
+                      <Tab key="products" title="ALLOCATION_MAP" />
+                      <Tab key="details" title="ENTITY_PROFILE" />
+                      <Tab key="associates" title="HUMAN_RESOURCES" />
+                      <Tab key="web" title="DIGITAL_CONTENT" />
                     </Tabs>
                   </div>
 
                   {detailTab === "products" && (
-                    <>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
                       {activeTab !== "empty" ? (
                         <VariantRate
                           rate="variantRate"
@@ -868,251 +837,271 @@ export default function CompanyProductPage() {
                           }}
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-center py-20">
-                          <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-8 h-8 text-default-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in zoom-in duration-700">
+                          <div className="relative mb-10">
+                            <div className="absolute inset-0 bg-warning-500/10 blur-[50px] rounded-full" />
+                            <div className="w-24 h-24 bg-foreground/[0.03] rounded-[2rem] border border-foreground/5 flex items-center justify-center relative z-10">
+                              <LuTags size={32} className="text-warning-500 opacity-60" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-background rounded-xl border border-foreground/10 flex items-center justify-center shadow-lg">
+                              <LuPlus className="text-warning-500" size={16} />
+                            </div>
                           </div>
-                          <h4 className="font-bold text-foreground/80">Allocation Required</h4>
-                          <p className="text-default-400 text-sm mt-1 max-w-[280px]">
-                            This company has no active products or rates. Go to the Catalog to assign products.
+                          
+                          <h4 className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none mb-4">ALLOCATION_MISSING</h4>
+                          <div className="w-12 h-1 bg-warning-500/30 rounded-full mx-auto mb-6" />
+                          
+                          <p className="text-default-400 text-[10px] font-bold uppercase tracking-[0.2em] max-w-[320px] leading-relaxed opacity-60">
+                            No active product mappings or rate cards detected for this entity. Initialize core parameters via the Global Catalog.
                           </p>
+
+                          <div className="mt-10 px-6 py-2 border border-foreground/5 rounded-full bg-foreground/[0.02]">
+                             <span className="text-[9px] font-black text-default-300 uppercase tracking-widest italic">PROTOCOL_PENDING // AWAITING_CATALOG_SYNC</span>
+                          </div>
                         </div>
                       )}
-                    </>
+                    </motion.div>
                   )}
 
                   {detailTab === "details" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
-                      <Card className="p-4 border-none bg-default-50 shadow-none">
-                        <div className="text-[10px] font-bold text-default-400 uppercase mb-3">Contact Information</div>
-                        <div className="space-y-3">
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">Email</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).email}</span>
-                          </div>
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">Phone</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).phone}</span>
-                          </div>
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">Secondary Phone</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).phoneSecondary}</span>
-                          </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                    >
+                      <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem]">
+                        <div className="flex items-center gap-3 mb-8">
+                          <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
+                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Communication_Gateways</h3>
+                        </div>
+                        <div className="space-y-6">
+                          {[
+                            { label: "PRIMARY_EMAIL", value: (selectedCompany as any).email || "NOT_FOUND", icon: LuMail },
+                            { label: "VOICE_LINE_01", value: (selectedCompany as any).phone || "NOT_FOUND", icon: LuPhone },
+                            { label: "SEC_VOICE_LINE", value: (selectedCompany as any).phoneSecondary || "NOT_FOUND", icon: LuPhone },
+                          ].map((item, idx) => (
+                            <div key={idx} className="flex flex-col gap-1 group/item">
+                              <span className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none flex items-center gap-2">
+                                <item.icon size={10} className="text-warning-500/50" />
+                                {item.label}
+                              </span>
+                              <span className="text-sm font-black text-foreground uppercase tracking-tight truncate group-hover/item:text-warning-500 transition-colors">
+                                {item.value}
+                              </span>
+                            </div>
+                          ))}
+                          
                           {(selectedCompany as any).website && (
-                            <div className="flex justify-between border-b border-divider pb-2">
-                              <span className="text-xs text-default-500">Website</span>
-                              <a
+                             <div className="pt-4 mt-4 border-t border-foreground/5">
+                              <Button
+                                as="a"
                                 href={(selectedCompany as any).website?.startsWith('http') ? (selectedCompany as any).website : `https://${(selectedCompany as any).website}`}
                                 target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs font-semibold text-primary-500 hover:underline"
+                                variant="flat"
+                                className="w-full bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest h-12 rounded-xl"
+                                startContent={<LuGlobe size={14} />}
                               >
-                                Visit Site
-                              </a>
-                            </div>
+                                ACCESS_PORTAL
+                              </Button>
+                             </div>
                           )}
                         </div>
                       </Card>
 
-                      <Card className="p-4 border-none bg-default-50 shadow-none">
-                        <div className="text-[10px] font-bold text-default-400 uppercase mb-3">Location & Type</div>
-                        <div className="space-y-3">
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">State</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).state?.name || "N/A"}</span>
-                          </div>
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">District</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).district?.name || "N/A"}</span>
-                          </div>
-                          <div className="flex justify-between border-b border-divider pb-2">
-                            <span className="text-xs text-default-500">Company Type</span>
-                            <span className="text-xs font-semibold">{(selectedCompany as any).companyType?.name || "N/A"}</span>
-                          </div>
+                      <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem]">
+                        <div className="flex items-center gap-3 mb-8">
+                          <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
+                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Geospatial_Meta</h3>
+                        </div>
+                        <div className="space-y-6">
+                          {[
+                            { label: "STATE_PROVINCE", value: (selectedCompany as any).state?.name || "UNSET", icon: LuMapPin },
+                            { label: "DISTRICT_ZONE", value: (selectedCompany as any).district?.name || "UNSET", icon: LuMapPin },
+                            { label: "ENTITY_CLASSIFICATION", value: (selectedCompany as any).companyType?.name || "UNSET", icon: LuBriefcase },
+                          ].map((item, idx) => (
+                            <div key={idx} className="flex flex-col gap-1 group/item">
+                              <span className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none flex items-center gap-2">
+                                <item.icon size={10} className="text-warning-500/50" />
+                                {item.label}
+                              </span>
+                              <span className="text-sm font-black text-foreground uppercase tracking-tight truncate">
+                                {item.value}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </Card>
-                    </div>
+                    </motion.div>
                   )}
 
                   {detailTab === "associates" && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="grid grid-cols-1 xl:grid-cols-2 gap-4"
+                    >
                       {(associatesData?.data?.data?.data || []).length > 0 ? (
                         (associatesData.data.data.data as any[]).map((associate) => {
                           const isSupervisor = (selectedCompany as any).supervisor === associate._id || (selectedCompany as any).supervisor?._id === associate._id;
                           const presence = resolvePresence(associate);
                           return (
-                            <Card key={associate._id} className="p-4 border-none bg-default-50 shadow-none flex flex-row items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <Avatar
-                                  size="sm"
-                                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(associate.name)}&background=random&color=fff&bold=true`}
-                                />
-                                <div>
-                                  <div className="text-sm font-bold flex items-center gap-2">
-                                    {associate.name}
-                                    {isSupervisor && (
-                                      <Chip size="sm" color="success" variant="flat" className="h-5 text-[9px] font-black uppercase">Supervisor</Chip>
-                                    )}
-                                    <Chip
-                                      size="sm"
-                                      variant="flat"
-                                      color={presence.online ? "success" : "default"}
-                                      className="h-5 text-[9px] font-bold uppercase"
-                                    >
-                                      {presence.online ? "Online" : "Offline"}
-                                    </Chip>
-                                  </div>
-                                  <div className="text-[10px] text-default-400">
-                                    {associate.email} • {associate.phone} • Last seen {presence.lastSeenLabel}
+                            <motion.div key={associate._id} whileHover={{ y: -4 }}>
+                              <Card className="p-6 border-none bg-foreground/[0.02] shadow-none rounded-[2rem] flex flex-row items-center justify-between gap-6 hover:bg-foreground/[0.04] transition-all">
+                                <div className="flex items-center gap-4">
+                                  <Avatar
+                                    size="md"
+                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(associate.name)}&background=18181b&color=fff&bold=true`}
+                                    className="w-14 h-14 rounded-2xl border border-foreground/5 shadow-xl"
+                                  />
+                                  <div className="flex flex-col gap-1">
+                                    <div className="text-xs font-black uppercase tracking-tight flex items-center gap-2">
+                                      {associate.name}
+                                      {isSupervisor && (
+                                        <Chip size="sm" variant="shadow" className="h-5 bg-success-500 text-black text-[8px] font-black uppercase tracking-widest border-none">CORE_SUPERVISOR</Chip>
+                                      )}
+                                    </div>
+                                    <div className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-70">
+                                      {associate.email}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <div className={`w-1.5 h-1.5 rounded-full ${presence.online ? "bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-default-300"}`} />
+                                      <span className="text-[9px] font-black text-default-400 uppercase italic">
+                                        {presence.online ? "ACTIVE_STREAM" : `LAST_INTERACTED ${presence.lastSeenLabel}`}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant={isSupervisor ? "flat" : "ghost"}
-                                color={isSupervisor ? "success" : "warning"}
-                                disabled={isSupervisor}
-                                isLoading={setSupervisorMutation.isPending && setSupervisorMutation.variables === associate._id}
-                                onClick={() => setSupervisorMutation.mutate(associate._id)}
-                              >
-                                {isSupervisor ? "Main Supervisor" : "Set as Supervisor"}
-                              </Button>
-                            </Card>
+                                <Button
+                                  size="sm"
+                                  variant={isSupervisor ? "flat" : "ghost"}
+                                  className={`h-10 px-6 rounded-xl font-black uppercase text-[9px] tracking-widest ${isSupervisor ? "bg-success-500/10 text-success-500" : "border-foreground/10 text-default-500 hover:bg-warning-500 hover:text-black hover:border-none"}`}
+                                  disabled={isSupervisor}
+                                  isLoading={setSupervisorMutation.isPending && setSupervisorMutation.variables === associate._id}
+                                  onClick={() => setSupervisorMutation.mutate(associate._id)}
+                                >
+                                  {isSupervisor ? "PRIMARY_HEAD" : "SET_HEAD"}
+                                </Button>
+                              </Card>
+                            </motion.div>
                           );
                         })
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-20 opacity-50">
-                          <p className="text-xs italic">No associates found for this company.</p>
+                        <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-30 italic">
+                          <p className="text-[10px] font-black uppercase tracking-[0.5em]">Zero Resources In Pool</p>
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   )}
 
                   {detailTab === "web" && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
                       {!isEditingWeb ? (
-                        <div className="flex flex-col gap-6">
-                          <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-foreground">Website Content Summary</h3>
-                            <div className="flex gap-2">
-                              {selectedCompany?.website && (
-                                <Button
-                                  size="sm"
-                                  color="primary"
-                                  variant="flat"
-                                  onClick={() => window.open(selectedCompany.website?.startsWith('http') ? selectedCompany.website : `https://${selectedCompany.website}`, '_blank')}
-                                  startContent={<LuExternalLink className="w-4 h-4" />}
-                                >
-                                  Visit Website
-                                </Button>
-                              )}
+                        <div className="flex flex-col gap-10">
+                          <div className="flex justify-between items-center bg-foreground/[0.02] p-6 rounded-[2rem] border border-foreground/5">
+                            <div className="flex flex-col">
+                              <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Web_Asset_Intelligence</h3>
+                              <p className="text-[9px] font-bold text-default-400 uppercase mt-1">Global digital presence & SEO mapping</p>
+                            </div>
+                            <div className="flex gap-3">
                               <Button
                                 size="sm"
                                 color="warning"
-                                variant="flat"
+                                variant="shadow"
                                 onClick={startEditingWeb}
-                                startContent={<LuLayoutDashboard className="w-4 h-4" />}
+                                className="font-black uppercase text-[10px] tracking-widest h-10 px-6 rounded-xl"
+                                startContent={<LuLayoutDashboard size={14} />}
                               >
-                                Edit Content
+                                OVERRIDE_CONTENT
                               </Button>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="md:col-span-1 p-4 border-none bg-default-50 shadow-none flex flex-col items-center justify-center gap-4">
-                              <div className="text-[10px] font-bold text-default-400 uppercase w-full">Logo & Banner</div>
-                              <Avatar
-                                size="xl"
-                                src={selectedCompany?.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany?.name || "")}&background=random&color=fff&bold=true`}
-                                className="w-24 h-24 border-4 border-white dark:border-default-200"
-                              />
-                              <div className="w-full h-32 rounded-lg bg-default-200 overflow-hidden relative">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <Card className="md:col-span-1 p-8 border-none bg-foreground/[0.02] shadow-none rounded-[3rem] flex flex-col items-center gap-6 group">
+                              <div className="text-[9px] font-black text-default-400 uppercase tracking-widest w-full">IDENTITY_ASSETS</div>
+                              <div className="relative">
+                                <Avatar
+                                  size="xl"
+                                  src={selectedCompany?.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompany?.name || "")}&background=18181b&color=fff&size=256&bold=true`}
+                                  className="w-32 h-32 rounded-[2.5rem] border-4 border-background shadow-2xl group-hover:scale-105 transition-transform"
+                                />
+                                <div className="absolute -bottom-2 -right-2 bg-success-500 w-6 h-6 rounded-full border-4 border-background shadow-lg" />
+                              </div>
+                              <div className="w-full h-40 rounded-[2rem] bg-foreground/5 overflow-hidden relative border border-foreground/5">
                                 {selectedCompany?.banner ? (
-                                  <img src={selectedCompany.banner} alt="Banner" className="w-full h-full object-cover" />
+                                  <img src={selectedCompany.banner} alt="Banner" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-default-400 text-xs italic">No banner set</div>
+                                  <div className="w-full h-full flex flex-col items-center justify-center text-default-300 gap-2">
+                                    <LuImage size={24} className="opacity-20" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40 italic">NO_BANNER_DETECTED</span>
+                                  </div>
                                 )}
                               </div>
                             </Card>
 
-                            <Card className="md:col-span-2 p-4 border-none bg-default-50 shadow-none space-y-4">
-                              <div>
-                                <div className="text-[10px] font-bold text-default-400 uppercase mb-1">Tagline</div>
-                                <p className="text-sm font-semibold">{selectedCompany?.description || "No tagline set"}</p>
+                            <Card className="md:col-span-2 p-10 border-none bg-foreground/[0.02] shadow-none rounded-[3rem] flex flex-col gap-10">
+                              <div className="flex flex-col gap-2">
+                                <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">TACTICAL_TAGLINE</div>
+                                <p className="text-xl font-black text-foreground uppercase tracking-tight italic leading-tight">"{selectedCompany?.description || "QUALITY_SOURCE_UNDEFINED"}"</p>
                               </div>
-                              <div>
-                                <div className="text-[10px] font-bold text-default-400 uppercase mb-1">About Us</div>
-                                <p className="text-xs text-default-600 leading-relaxed line-clamp-4">{selectedCompany?.aboutUs || "No company bio provided."}</p>
+                              <div className="flex flex-col gap-2">
+                                <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">ENTITY_SYNOPSIS</div>
+                                <p className="text-xs font-bold text-default-500 uppercase tracking-wider leading-relaxed opacity-80">{selectedCompany?.aboutUs || "BIO_DATA_MISSING_IN_CORE_REPOSITORY"}</p>
                               </div>
                               <div className="flex flex-wrap gap-2">
                                 {selectedCompany?.tags?.map((tag: string) => (
-                                  <Chip key={tag} size="sm" variant="flat" color="warning" className="text-[9px] font-bold uppercase">{tag}</Chip>
-                                )) || <span className="text-[10px] italic text-default-400">No tags added</span>}
+                                  <Chip key={tag} size="sm" variant="flat" className="bg-warning-500/10 text-warning-500 font-black uppercase text-[8px] tracking-widest h-6 border none"># {tag}</Chip>
+                                )) || <span className="text-[9px] font-black text-default-300 uppercase italic">ZERO_TAGS_LINKED</span>}
                               </div>
                             </Card>
                           </div>
 
-                          <Card className="p-4 border-none bg-default-50 shadow-none space-y-4">
-                            <div className="text-[10px] font-bold text-default-400 uppercase">Online Presence</div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              <div className="flex items-center gap-2">
-                                <LuGlobe className="text-warning-500 w-4 h-4" />
-                                <a
-                                  href={selectedCompany?.website?.startsWith('http') ? selectedCompany.website : `https://${selectedCompany.website}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs truncate text-primary-500 hover:underline font-medium"
-                                >
-                                  {selectedCompany?.website || "No website link"}
-                                </a>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <LuLinkedin className="text-default-400 w-4 h-4" />
-                                <span className="text-xs truncate">{selectedCompany?.socialLinks?.linkedin || "No LinkedIn"}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <LuFacebook className="text-default-400 w-4 h-4" />
-                                <span className="text-xs truncate">{selectedCompany?.socialLinks?.facebook || "No Facebook"}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <LuTwitter className="text-default-400 w-4 h-4" />
-                                <span className="text-xs truncate">{selectedCompany?.socialLinks?.twitter || "No Twitter"}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <LuInstagram className="text-default-400 w-4 h-4" />
-                                <span className="text-xs truncate">{selectedCompany?.socialLinks?.instagram || "No Instagram"}</span>
-                              </div>
-                            </div>
-                          </Card>
+                          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                            <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem] flex flex-col gap-8">
+                               <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">SOCIAL_SIGNAL_MATRIX</div>
+                               <div className="grid grid-cols-2 gap-6">
+                                  {[
+                                    { icon: LuGlobe, label: "MAIN_DOMAIN", value: selectedCompany?.website },
+                                    { icon: LuLinkedin, label: "LINKEDIN_ID", value: selectedCompany?.socialLinks?.linkedin },
+                                    { icon: LuFacebook, label: "FACEBOOK_ID", value: selectedCompany?.socialLinks?.facebook },
+                                    { icon: LuTwitter, label: "X_PLATFORM", value: selectedCompany?.socialLinks?.twitter },
+                                  ].map((p, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 group/link cursor-pointer">
+                                      <div className="w-8 h-8 rounded-lg bg-foreground/5 flex items-center justify-center group-hover/link:bg-warning-500 transition-colors">
+                                        <p.icon size={14} className="group-hover/link:text-black" />
+                                      </div>
+                                      <div className="flex flex-col min-w-0">
+                                        <span className="text-[8px] font-black text-default-300 uppercase tracking-widest leading-none">{p.label}</span>
+                                        <span className="text-[11px] font-black text-foreground uppercase truncate mt-1">{p.value || "NOT_LINKED"}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                               </div>
+                            </Card>
 
-                          <Card className="p-4 border-none bg-default-50 shadow-none space-y-4">
-                            <div className="flex justify-between items-center">
-                              <div className="text-[10px] font-bold text-default-400 uppercase">Domain & Publishing</div>
-                              <Chip size="sm" color={selectedCompany?.isWebsiteLive ? "success" : "default"} variant="flat" className="h-5 text-[9px] font-black uppercase">
-                                {selectedCompany?.isWebsiteLive ? "Live" : "Draft"}
-                              </Chip>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-1">
-                                <div className="text-xs font-semibold text-foreground/80">Default Link</div>
-                                <div className="text-[11px] text-primary-500 font-mono bg-primary-50/50 p-2 rounded border border-primary-100/50">
-                                  {selectedCompany?.subdomain ? `${selectedCompany.subdomain}.company.obaol.com` : "None set"}
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <div className="text-xs font-semibold text-foreground/80">Custom Domain</div>
-                                <div className="text-[11px] text-default-600 font-mono bg-default-100 p-2 rounded border border-divider">
-                                  {selectedCompany?.customDomain || "No custom domain linked"}
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
+                            <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem] flex flex-col gap-8">
+                               <div className="flex justify-between items-center">
+                                  <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">DOMAIN_ROUTING</div>
+                                  <Chip size="sm" variant="shadow" className={`h-6 text-[8px] font-black uppercase tracking-widest border-none ${selectedCompany?.isWebsiteLive ? "bg-success-500 text-black" : "bg-default-400 text-white"}`}>
+                                    {selectedCompany?.isWebsiteLive ? "ACTIVE_STREAM" : "DRAFT_MODE"}
+                                  </Chip>
+                               </div>
+                               <div className="grid grid-cols-1 gap-6">
+                                  <div className="bg-background/50 p-4 rounded-2xl border border-foreground/5">
+                                    <span className="text-[8px] font-black text-default-400 uppercase tracking-widest mb-1 block">OBAOL_NODE_ENDPOINT</span>
+                                    <span className="text-[11px] font-black text-warning-500 uppercase tracking-widest italic">{selectedCompany?.subdomain ? `${selectedCompany.subdomain}.company.obaol.com` : "ENDPOINT_NOT_ALLOCATED"}</span>
+                                  </div>
+                                  <div className="bg-background/50 p-4 rounded-2xl border border-foreground/5">
+                                    <span className="text-[8px] font-black text-default-400 uppercase tracking-widest mb-1 block">CUSTOM_ALIAS_DOMAIN</span>
+                                    <span className="text-[11px] font-black text-foreground uppercase tracking-widest italic">{selectedCompany?.customDomain || "ALIAS_NOT_CONFIGURED"}</span>
+                                  </div>
+                               </div>
+                            </Card>
+                          </div>
 
-                          <Card className="p-4 border-none bg-default-50 shadow-none space-y-4">
-                            <div className="text-[10px] font-bold text-default-400 uppercase">Portfolio Links</div>
-                            <div className="space-y-4 text-xs">
+                          <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem] flex flex-col gap-8">
+                            <div className="text-[9px] font-black text-default-400 uppercase tracking-widest">PORTFOLIO_LINKS</div>
+                            <div className="space-y-6">
                               {(() => {
                                 const customDomain = String(selectedCompany?.customDomain || "").trim();
                                 const subdomain = String(selectedCompany?.subdomain || "").trim();
@@ -1201,188 +1190,106 @@ export default function CompanyProductPage() {
                           </Card>
                         </div>
                       ) : (
-                        <div className="space-y-6">
-                          <Card className="p-6 border-none bg-default-50 shadow-none space-y-6">
-                            <div className="flex justify-between items-center border-b border-divider pb-4">
-                              <h3 className="text-lg font-bold">Edit Web Content</h3>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="light" onClick={() => setIsEditingWeb(false)}>Cancel</Button>
+                        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                          <Card className="p-10 border-none bg-foreground/[0.02] shadow-none rounded-[3.5rem] flex flex-col gap-10">
+                            <div className="flex justify-between items-center border-b border-foreground/5 pb-8">
+                              <div className="flex flex-col">
+                                <h3 className="text-xl font-black text-foreground uppercase tracking-tight italic leading-none">ASSET_OVERRIDE_CONSOLE</h3>
+                                <p className="text-[9px] font-bold text-default-400 uppercase mt-2 tracking-widest">Global entity parameter modification</p>
+                              </div>
+                              <div className="flex gap-3">
+                                <Button size="sm" variant="flat" onClick={() => setIsEditingWeb(false)} className="h-12 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest">ABORT</Button>
                                 <Button
                                   size="sm"
                                   color="warning"
+                                  variant="shadow"
                                   isLoading={updateCompanyMutation.isPending}
-                                  onClick={() => updateCompanyMutation.mutate(webFields)}
+                                  onClick={() => {
+                                    const nextError = validateAboutUs(webFields.aboutUs || "");
+                                    setAboutUsError(nextError);
+                                    if (nextError) return;
+                                    updateCompanyMutation.mutate(webFields);
+                                  }}
+                                  className="h-12 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest"
                                 >
-                                  Save Changes
+                                  EXECUTE_CHANGES
                                 </Button>
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                              <div className="space-y-6">
-                                <Input
-                                  label="Logo URL"
-                                  placeholder="https://example.com/logo.png"
-                                  value={webFields.logo}
-                                  onValueChange={(val) => handleWebFieldChange('logo', val)}
-                                  size="sm"
-                                  labelPlacement="outside"
-                                  startContent={<LuImage className="text-default-400" />}
-                                  className="max-w-full"
-                                />
-                                <Input
-                                  label="Banner URL"
-                                  placeholder="https://example.com/banner.jpg"
-                                  value={webFields.banner}
-                                  onValueChange={(val) => handleWebFieldChange('banner', val)}
-                                  size="sm"
-                                  labelPlacement="outside"
-                                  startContent={<LuImage className="text-default-400" />}
-                                  className="max-w-full"
-                                />
-                                <Input
-                                  label="Company Website"
-                                  placeholder="https://company.com"
-                                  value={webFields.website}
-                                  onValueChange={(val) => handleWebFieldChange('website', val)}
-                                  size="sm"
-                                  labelPlacement="outside"
-                                  startContent={<LuGlobe className="text-default-400" />}
-                                  className="max-w-full"
-                                />
-                                <Input
-                                  label="Tagline"
-                                  placeholder="Pure quality, directly from source"
-                                  value={webFields.description}
-                                  onValueChange={(val) => handleWebFieldChange('description', val)}
-                                  size="sm"
-                                  labelPlacement="outside"
-                                  startContent={<LuBriefcase className="text-default-400" />}
-                                  className="max-w-full"
-                                />
-                                <Input
-                                  label="Tags (comma separated)"
-                                  placeholder="Exporter, Farmer, Organic"
-                                  value={webFields.tags?.join(', ')}
-                                  onValueChange={(val) => handleWebFieldChange('tags', val.split(',').map(t => t.trim()).filter(t => t))}
-                                  size="sm"
-                                  labelPlacement="outside"
-                                  startContent={<LuTags className="text-default-400" />}
-                                  className="max-w-full"
-                                />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                              <div className="space-y-8">
+                                {[
+                                  { label: "LOGO_ASSET_URI", key: "logo", placeholder: "HTTPS://NODE.CDN/LOGO.PNG", icon: LuImage },
+                                  { label: "BANNER_ASSET_URI", key: "banner", placeholder: "HTTPS://NODE.CDN/BANNER.JPG", icon: LuImage },
+                                  { label: "EXTERNAL_WEBSITE_LINK", key: "website", placeholder: "HTTPS://DOMAIN.COM", icon: LuGlobe },
+                                  { label: "CORE_TAGLINE", key: "description", placeholder: "GLOBAL RECOGNITION TAGLINE", icon: LuBriefcase },
+                                ].map((field) => (
+                                  <Input
+                                    key={field.key}
+                                    label={field.label}
+                                    placeholder={field.placeholder}
+                                    value={webFields[field.key]}
+                                    onValueChange={(val) => handleWebFieldChange(field.key, val)}
+                                    size="lg"
+                                    labelPlacement="outside"
+                                    variant="flat"
+                                    classNames={{
+                                      input: "font-bold text-xs uppercase tracking-widest",
+                                      inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
+                                      label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
+                                    }}
+                                    startContent={<field.icon className="text-warning-500/50 mr-2" size={18} />}
+                                  />
+                                ))}
                               </div>
 
-                              <div className="space-y-6">
+                              <div className="space-y-8">
                                 <Textarea
-                                  label="About Us"
-                                  placeholder="Describe the company's legacy and mission..."
+                                  label="ENTITY_EPILOGUE (ABOUT_US)"
+                                  placeholder="SYSTEM DESCRIPTION OF OPERATIONS AND CAPABILITIES..."
                                   value={webFields.aboutUs}
                                   onValueChange={(val) => handleWebFieldChange('aboutUs', val)}
-                                  size="sm"
+                                  size="lg"
                                   labelPlacement="outside"
-                                  minRows={6}
-                                  className="max-w-full"
+                                  minRows={8}
+                                  variant="flat"
+                                  classNames={{
+                                    input: "font-bold text-xs uppercase tracking-widest leading-relaxed",
+                                    inputWrapper: "bg-foreground/5 hover:bg-foreground/10 border-none rounded-[2rem] p-6 transition-all",
+                                    label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
+                                  }}
+                                  isInvalid={Boolean(aboutUsError)}
+                                  errorMessage={aboutUsError}
                                 />
-                                <div className="text-[10px] font-bold text-default-400 uppercase mb-2">Social Media Profiles</div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <Input
-                                    label="LinkedIn"
-                                    placeholder="Username"
-                                    value={webFields.socialLinks?.linkedin}
-                                    onValueChange={(val) => handleWebFieldChange('socialLinks.linkedin', val)}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<LuLinkedin className="text-default-400" />}
-                                  />
-                                  <Input
-                                    label="Facebook"
-                                    placeholder="Username"
-                                    value={webFields.socialLinks?.facebook}
-                                    onValueChange={(val) => handleWebFieldChange('socialLinks.facebook', val)}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<LuFacebook className="text-default-400" />}
-                                  />
-                                  <Input
-                                    label="Twitter"
-                                    placeholder="Username"
-                                    value={webFields.socialLinks?.twitter}
-                                    onValueChange={(val) => handleWebFieldChange('socialLinks.twitter', val)}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<LuTwitter className="text-default-400" />}
-                                  />
-                                  <Input
-                                    label="Instagram"
-                                    placeholder="Username"
-                                    value={webFields.socialLinks?.instagram}
-                                    onValueChange={(val) => handleWebFieldChange('socialLinks.instagram', val)}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<LuInstagram className="text-default-400" />}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="border-t border-divider pt-6 space-y-6">
-                              <div className="flex justify-between items-center">
-                                <div>
-                                  <h4 className="text-sm font-bold">Domain & Publishing Settings</h4>
-                                  <p className="text-[10px] text-default-400">Configure how users access this company website.</p>
-                                </div>
-                                <Switch
-                                  size="sm"
-                                  color="success"
-                                  isSelected={webFields.isWebsiteLive}
-                                  onValueChange={(val) => handleWebFieldChange('isWebsiteLive', val)}
-                                >
-                                  <span className="text-xs font-bold uppercase">{webFields.isWebsiteLive ? 'Live' : 'Hidden'}</span>
-                                </Switch>
-                              </div>
-
-                              <div className="p-4 bg-primary-50/30 border border-primary-100 rounded-2xl space-y-3">
-                                <div className="flex items-center gap-2 text-primary-600">
-                                  <LuInfo className="w-4 h-4" />
-                                  <span className="text-xs font-bold uppercase tracking-wider">How to link your website</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div className="space-y-1">
-                                    <div className="text-[11px] font-bold text-foreground">1. Default Subdomain</div>
-                                    <p className="text-[10px] text-default-500 leading-relaxed">Choose a unique name to host your site on our platform instantly (e.g., <span className="text-primary-600 font-mono">mahindra.company.obaol.com</span>).</p>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <div className="text-[11px] font-bold text-foreground">2. Custom Domain (Advanced)</div>
-                                    <p className="text-[10px] text-default-500 leading-relaxed">To use your own domain (e.g., <span className="text-primary-600 font-mono">www.yourbrand.com</span>), point your DNS <strong>CNAME</strong> record to <span className="text-primary-600 font-mono bg-white px-1 border rounded">brand.obaol.com</span></p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                
                                 <div className="space-y-4">
-                                  <Input
-                                    label="OBAOL Subdomain"
-                                    placeholder="brandname"
-                                    value={webFields.subdomain}
-                                    onValueChange={(val) => handleWebFieldChange('subdomain', val.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<span className="text-default-400 text-xs font-mono">https://</span>}
-                                    endContent={<span className="text-default-400 text-[10px] font-mono whitespace-nowrap">.company.obaol.com</span>}
-                                    description={webFields.subdomain ? "Your brand experience will be live at this link." : "Enter a unique handle for your brand."}
-                                  />
-                                </div>
-                                <div className="space-y-4">
-                                  <Input
-                                    label="Custom Branding Domain"
-                                    placeholder="www.yourbrand.com"
-                                    value={webFields.customDomain}
-                                    onValueChange={(val) => handleWebFieldChange('customDomain', val.toLowerCase())}
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    startContent={<LuGlobe className="text-default-400 w-4 h-4" />}
-                                    description="Requires DNS CNAME record pointing to brand.obaol.com"
-                                  />
+                                  <span className="text-[9px] font-black text-default-400 uppercase tracking-[0.3em] ml-2 block">SOCIAL_SIGNAL_MAPS</span>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                      { label: "LINKED_IN", key: "socialLinks.linkedin", icon: LuLinkedin },
+                                      { label: "FACEBOOK", key: "socialLinks.facebook", icon: LuFacebook },
+                                      { label: "TWITTER_X", key: "socialLinks.twitter", icon: LuTwitter },
+                                      { label: "INSTAGRAM", key: "socialLinks.instagram", icon: LuInstagram },
+                                    ].map((s) => (
+                                      <Input
+                                        key={s.key}
+                                        label={s.label}
+                                        placeholder="HANDLE_ID"
+                                        value={s.key.includes('.') ? webFields.socialLinks?.[s.key.split('.')[1]] : webFields[s.key]}
+                                        onValueChange={(val) => handleWebFieldChange(s.key, val)}
+                                        size="sm"
+                                        labelPlacement="outside"
+                                        variant="flat"
+                                        classNames={{
+                                          input: "font-bold text-[10px] uppercase",
+                                          inputWrapper: "h-12 bg-foreground/5 border-none rounded-xl",
+                                          label: "text-[8px] font-black uppercase tracking-widest opacity-50 mb-1 ml-1"
+                                        }}
+                                        startContent={<s.icon className="text-default-400" size={14} />}
+                                      />
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -1395,20 +1302,32 @@ export default function CompanyProductPage() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center p-10">
-                <div className="w-24 h-24 bg-warning-50 rounded-full flex items-center justify-center mb-6">
-                  <svg className="w-12 h-12 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
+              <div className="flex flex-col items-center justify-center h-full text-center p-20 animate-in fade-in zoom-in duration-1000">
+                <div className="relative mb-12">
+                   <div className="absolute inset-0 bg-warning-500 blur-[80px] opacity-20 animate-pulse rounded-full" />
+                   <div className="w-40 h-40 bg-foreground/[0.03] backdrop-blur-3xl rounded-[3rem] border border-foreground/5 flex items-center justify-center relative z-10 shadow-2xl">
+                    <LuBriefcase className="w-16 h-16 text-warning-500 opacity-80" />
+                   </div>
+                   <div className="absolute -top-4 -right-4 w-12 h-12 bg-background rounded-2xl border border-foreground/10 flex items-center justify-center shadow-xl animate-bounce">
+                     <LuSearch className="text-warning-500" size={24} />
+                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-foreground/90 uppercase tracking-tight">Select a Company</h3>
-                <p className="text-default-500 max-w-[320px] mt-2 text-sm leading-relaxed">
+                
+                <h3 className="text-5xl font-black text-foreground uppercase tracking-tighter italic leading-none mb-6">AWAITING_SELECTION</h3>
+                <div className="w-20 h-1.5 bg-warning-500 rounded-full mx-auto mb-8 shadow-[0_0_20px_rgba(234,179,8,0.4)]" />
+                
+                <p className="text-default-400 max-w-[480px] mx-auto text-xs font-bold uppercase tracking-[0.2em] leading-relaxed opacity-60">
                   {activeTab === "live"
-                    ? "Choose a live company to manage their current in-market rates."
+                    ? "Establish a connection with an active market entity to initialize product parameter management and real-time rate oversight."
                     : activeTab === "active"
-                      ? "Pick an active company to review or take their products live."
-                      : "Select an empty company to begin their first product allocation."}
+                      ? "Select a validated entity from the active pool to begin the transition into full market reach and product finalization."
+                      : "Engage with an uninitialized entity to commence the primary product allocation cycle and digital branding setup."}
                 </p>
+                
+                <div className="mt-12 flex items-center gap-4 bg-foreground/[0.03] px-6 py-3 rounded-full border border-foreground/5 italic">
+                  <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">SYSTEM_READY // READY_FOR_ENTITY_INPUT</span>
+                </div>
               </div>
             )}
           </Card>

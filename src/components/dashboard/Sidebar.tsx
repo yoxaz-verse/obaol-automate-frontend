@@ -50,6 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             links: [
                 "/dashboard/enquiries",
                 "/dashboard/orders",
+                "/dashboard/external-orders",
+                "/dashboard/sample-requests",
                 "/dashboard/execution-enquiries",
                 "/dashboard/documents",
                 "/dashboard/warehouse-rent",
@@ -163,8 +165,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                     />
                 </div>
                 {!isCollapsed && (
-                    <span className="font-extrabold text-sm tracking-[0.25em] text-foreground/80 whitespace-nowrap uppercase select-none opacity-90">
-                        SUPREME
+                    <span className="font-bold text-[14px] tracking-widest text-foreground/90 whitespace-nowrap uppercase select-none flex flex-col leading-none">
+                        OBAOL
+                        <span className="text-[7px] font-semibold text-default-400 tracking-[0.3em] mt-1">CORE TELEMETRY</span>
                     </span>
                 )}
             </div>
@@ -180,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                     return (
                         <div key={section.label || index} className="space-y-1.5">
                             {!isCollapsed && section.label && (
-                                <div className="px-2 pt-1 text-[10px] uppercase tracking-[0.25em] text-default-400/80 font-semibold">
+                                <div className="px-2 pt-1 text-[9px] uppercase tracking-widest text-default-400 font-semibold opacity-70">
                                     {section.label}
                                 </div>
                             )}
@@ -255,7 +258,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             {/* Footer */}
             {!isCollapsed && (
                 <div className="p-4 border-t border-default-200/30">
-                    <p className="text-[9px] text-default-400/80 text-center uppercase tracking-[0.2em] font-bold">
+                    <p className="text-[9px] text-default-400 text-center uppercase tracking-widest font-semibold opacity-60">
                         &copy; {new Date().getFullYear()} Obaol
                     </p>
                 </div>

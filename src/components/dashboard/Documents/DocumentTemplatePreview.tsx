@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Card, CardBody, CardHeader, Chip, Divider } from "@nextui-org/react";
 
 const DOC_LABELS: Record<string, string> = {
+  LOI: "Letter of Intent",
   QUOTATION: "Quotation",
   PROFORMA_INVOICE: "Proforma Invoice",
   INVOICE: "Invoice",
@@ -16,11 +17,20 @@ const DOC_LABELS: Record<string, string> = {
   FUMIGATION_CERTIFICATE: "Fumigation Certificate",
   BILL_OF_LADING: "Bill of Lading",
   AIR_WAYBILL: "Air Waybill",
+  LORRY_RECEIPT: "Lorry Receipt",
+  LCL_DRAFT: "LCL Draft",
   INSURANCE_CERTIFICATE: "Insurance Certificate",
   PAYMENT_ADVICE: "Payment Advice",
 };
 
 const FIELD_MAPS: Record<string, { section: string; fields: string[] }[]> = {
+  LOI: [
+    { section: "Header", fields: ["Company Logo", "Document Number", "Date", "Status"] },
+    { section: "Parties", fields: ["Buyer", "Seller", "Consignee"] },
+    { section: "Line Items", fields: ["Product", "Variant", "Qty", "Rate/KG", "Amount"] },
+    { section: "Totals", fields: ["Subtotal", "Commission", "Tax", "Grand Total"] },
+    { section: "Terms", fields: ["Payment Terms", "Delivery Terms", "Notes"] },
+  ],
   QUOTATION: [
     { section: "Header", fields: ["Company Logo", "Document Number", "Date", "Status"] },
     { section: "Parties", fields: ["Buyer", "Seller", "Consignee"] },
@@ -82,6 +92,16 @@ const FIELD_MAPS: Record<string, { section: string; fields: string[] }[]> = {
     { section: "Shipment", fields: ["Consignee", "Port of Loading", "Port of Discharge", "Vessel"] },
     { section: "Cargo", fields: ["Packages", "Gross Weight", "Net Weight"] },
   ],
+  LORRY_RECEIPT: [
+    { section: "Header", fields: ["LR Number", "Date", "Carrier"] },
+    { section: "Shipment", fields: ["Consignee", "Origin", "Destination", "Vehicle"] },
+    { section: "Cargo", fields: ["Packages", "Gross Weight", "Net Weight"] },
+  ],
+  LCL_DRAFT: [
+    { section: "Header", fields: ["Draft No.", "Date", "Carrier"] },
+    { section: "Shipment", fields: ["Consignee", "Port of Loading", "Port of Discharge", "Vessel"] },
+    { section: "Cargo", fields: ["Packages", "Gross Weight", "Net Weight"] },
+  ],
   AIR_WAYBILL: [
     { section: "Header", fields: ["AWB Number", "Date", "Carrier"] },
     { section: "Shipment", fields: ["Consignee", "Origin", "Destination", "Flight"] },
@@ -115,7 +135,7 @@ const templateByType = (docType: string) => {
   const type = String(docType || "").toUpperCase();
   if (["PACKING_LIST"].includes(type)) return "packing";
   if (["QUALITY_CERTIFICATE", "INSPECTION_CERTIFICATE", "PHYTOSANITARY_CERTIFICATE", "FUMIGATION_CERTIFICATE"].includes(type)) return "certificate";
-  if (["BILL_OF_LADING", "AIR_WAYBILL"].includes(type)) return "shipping";
+  if (["BILL_OF_LADING", "AIR_WAYBILL", "LORRY_RECEIPT", "LCL_DRAFT"].includes(type)) return "shipping";
   if (["INSURANCE_CERTIFICATE"].includes(type)) return "insurance";
   if (["PAYMENT_ADVICE"].includes(type)) return "payment";
   return "commercial";

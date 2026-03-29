@@ -8,7 +8,7 @@ import { getDeveloperToken, setDeveloperToken } from "@/utils/developerSession";
 
 declare global {
   interface Window {
-    google?: any;
+    google: any;
   }
 }
 

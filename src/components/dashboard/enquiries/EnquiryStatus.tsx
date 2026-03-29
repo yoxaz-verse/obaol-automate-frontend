@@ -14,7 +14,7 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({ status }) => {
         if (normalize.includes("quot") || normalize.includes("progress") || normalize.includes("process"))
             return { color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)", step: 1, label: s.includes("quot") ? "Quoted" : "Processing" };
         if (normalize.includes("convert"))
-            return { color: "#0ea5e9", bg: "rgba(14, 165, 233, 0.1)", step: 2, label: "Converted" };
+            return { color: "#6366f1", bg: "rgba(99, 102, 241, 0.1)", step: 2, label: "Converted" };
         if (normalize.includes("complete") || normalize.includes("order"))
             return { color: "#22c55e", bg: "rgba(34, 197, 94, 0.1)", step: 3, label: "Completed" };
         if (normalize.includes("reject") || normalize.includes("cancel"))

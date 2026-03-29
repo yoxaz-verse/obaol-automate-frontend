@@ -4,7 +4,6 @@ import React, { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { brandPublicRoutes } from "@/core/api/apiRoutes";
-import { variantRateRoutes } from "@/core/api/apiRoutes";
 import {
     Avatar,
     Button as HeroButton,
@@ -25,7 +24,6 @@ import {
     LuArrowRight,
     LuShoppingBag,
     LuInfo,
-    LuStar,
     LuExternalLink
 } from "react-icons/lu";
 import { useParams } from "next/navigation";
@@ -50,7 +48,11 @@ export default function BrandPage() {
         queryFn: () => getData(`${brandPublicRoutes.products}/${company._id}`),
     });
 
-    const products = productsData?.data?.data || [];
+    const products = productsData?.data?.data?.products || [];
+
+    const capabilityLabels = (Array.isArray(company?.serviceCapabilities) ? company.serviceCapabilities : [])
+        .map((cap: string) => String(cap || "").toLowerCase().replace(/_/g, " "))
+        .map((cap: string) => cap.replace(/\b\w/g, (c) => c.toUpperCase()));
 
     if (isCompanyLoading) {
         return (
@@ -116,9 +118,9 @@ export default function BrandPage() {
                     </div>
                     <Button
                         className="mt-12 h-16 px-10 rounded-full bg-gradient-to-r from-warning-500 to-orange-600 font-bold text-lg uppercase tracking-widest shadow-[0_0_40px_rgba(255,165,0,0.4)] hover:shadow-[0_0_60px_rgba(255,165,0,0.6)] transition-all group"
-                        onClick={() => document.getElementById('marketplace')?.scrollIntoView({ behavior: 'smooth' })}
+                        onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                     >
-                        Explore Marketplace
+                        View Products
                         <LuArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
                     </Button>
                 </div>
@@ -139,11 +141,11 @@ export default function BrandPage() {
                         <div className="grid grid-cols-2 gap-6 pt-8">
                             <Card className="bg-white/5 border-white/10 p-6 shadow-none">
                                 <div className="text-3xl font-bold mb-1 text-warning-500">01.</div>
-                                <div className="text-sm font-bold uppercase text-white/60">Quality Tech</div>
+                                <div className="text-sm font-bold uppercase text-white/60">Direct Trade Focus</div>
                             </Card>
                             <Card className="bg-white/5 border-white/10 p-6 shadow-none">
                                 <div className="text-3xl font-bold mb-1 text-primary-500">02.</div>
-                                <div className="text-sm font-bold uppercase text-white/60">Global Reach</div>
+                                <div className="text-sm font-bold uppercase text-white/60">Execution Visibility</div>
                             </Card>
                         </div>
                     </div>
@@ -155,16 +157,26 @@ export default function BrandPage() {
                             </div>
                             <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
                                 <LuGlobe className="text-warning-500" />
-                                Online Footprint
+                                Company Presence
                             </h3>
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                                    <span className="text-white/40 uppercase text-xs font-black">Official HQ</span>
-                                    <span className="text-sm font-medium">{company.address || "Global Offices"}</span>
+                                    <span className="text-white/40 uppercase text-xs font-black">Headquarters</span>
+                                    <span className="text-sm font-medium">{company.address || "Location not listed"}</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Capabilities</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {capabilityLabels.length > 0 ? capabilityLabels.map((cap: string) => (
+                                            <Chip key={cap} size="sm" variant="flat" color="warning" className="bg-white/5 border-white/10 text-[10px] font-black uppercase tracking-widest">{cap}</Chip>
+                                        )) : (
+                                            <span className="text-xs text-white/40">No capabilities listed yet.</span>
+                                        )}
+                                    </div>
                                 </div>
                                 {company.website && (
                                     <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                                        <span className="text-white/40 uppercase text-xs font-black">Nexus Link</span>
+                                        <span className="text-white/40 uppercase text-xs font-black">Website</span>
                                         <a href={company.website} className="text-sm font-medium text-warning-500 hover:underline">{company.website}</a>
                                     </div>
                                 )}
@@ -180,16 +192,13 @@ export default function BrandPage() {
                 </div>
             </section>
 
-            {/* Marketplace Section - Future Grid */}
-            <section id="marketplace" className="py-32 bg-[rgba(255,255,255,0.02)] border-y border-white/5">
+            {/* Products Coverage Section */}
+            <section id="products" className="py-32 bg-[rgba(255,255,255,0.02)] border-y border-white/5">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="space-y-4">
-                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Live Marketplace</h2>
-                            <p className="text-default-400 max-w-xl">Curated live products and variants available for immediate procurement. Real-time rates fueled by OBAOL intelligence.</p>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-warning-500">
-                            <span className="animate-pulse">●</span> Data Verified
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Products Covered</h2>
+                            <p className="text-default-400 max-w-xl">Product coverage shared by the company across marketplace and catalog listings. Pricing is not shown here.</p>
                         </div>
                     </div>
 
@@ -199,31 +208,31 @@ export default function BrandPage() {
                         </div>
                     ) : products.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {products.map((rate: any) => (
-                                <Card key={rate._id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all rounded-[30px] p-8 overflow-hidden group shadow-none">
+                            {products.map((product: any) => (
+                                <Card key={product.productId} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all rounded-[30px] p-8 overflow-hidden group shadow-none">
                                     <div className="absolute -top-10 -right-10 w-40 h-40 bg-warning-500/10 blur-[50px] group-hover:bg-warning-500/20 transition-all" />
                                     <div className="relative z-10 space-y-6">
                                         <div className="flex justify-between items-start">
                                             <div className="w-12 h-12 rounded-2xl bg-warning-500/20 flex items-center justify-center text-warning-500 italic font-black text-xl">
-                                                {rate.product?.name?.charAt(0)}
+                                                {String(product.productName || "").charAt(0)}
                                             </div>
-                                            <Chip size="sm" color="success" variant="flat" className="h-5 text-[9px] font-black uppercase">In Stock</Chip>
+                                            <Chip size="sm" color="warning" variant="flat" className="h-5 text-[9px] font-black uppercase">Coverage</Chip>
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-black text-white/40 uppercase tracking-widest mb-1">{rate.product?.name}</h4>
-                                            <h3 className="text-2xl font-bold">{rate.variant?.name}</h3>
+                                            <h4 className="text-sm font-black text-white/40 uppercase tracking-widest mb-1">Product</h4>
+                                            <h3 className="text-2xl font-bold">{product.productName}</h3>
                                         </div>
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-3xl font-black text-warning-500">₹{rate.directTradeRate}</span>
-                                            <span className="text-xs text-white/40 uppercase font-bold">/ MT</span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {Array.isArray(product.variants) && product.variants.length > 0 ? (
+                                                product.variants.map((variant: any) => (
+                                                    <Chip key={variant.id} size="sm" variant="flat" color="primary" className="text-[10px] font-black uppercase tracking-widest">
+                                                        {variant.name}
+                                                    </Chip>
+                                                ))
+                                            ) : (
+                                                <span className="text-xs text-white/40">No variants listed.</span>
+                                            )}
                                         </div>
-                                        <Button
-                                            fullWidth
-                                            className="h-14 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-[0.2em] hover:bg-warning-500 transition-colors"
-                                            onClick={() => alert('Order flow integration coming soon!')}
-                                        >
-                                            Place Order
-                                        </Button>
                                     </div>
                                 </Card>
                             ))}
@@ -231,8 +240,8 @@ export default function BrandPage() {
                     ) : (
                         <div className="text-center py-40 border border-dashed border-white/10 rounded-[40px]">
                             <LuShoppingBag className="w-16 h-16 mx-auto mb-6 text-white/20" />
-                            <h3 className="text-xl font-bold mb-2">Marketplace Empty</h3>
-                            <p className="text-white/40">This brand hasn&apos;t allocated any products to the live marketplace yet.</p>
+                            <h3 className="text-xl font-bold mb-2">No products published yet</h3>
+                            <p className="text-white/40">This company hasn&apos;t shared any product coverage here yet.</p>
                         </div>
                     )}
                 </div>

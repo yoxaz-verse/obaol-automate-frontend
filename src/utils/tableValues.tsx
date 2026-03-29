@@ -221,6 +221,7 @@ export const initialTableConfig: Record<
     values?: { key: string; value: string }[];
     accept?: string;
     required?: boolean;
+    showWhen?: { key: string; equals: any[] };
   }[]
 > = {
   // Start of User
@@ -231,6 +232,7 @@ export const initialTableConfig: Record<
       filterType: "text",
       key: "name",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -240,6 +242,7 @@ export const initialTableConfig: Record<
       filterType: "text",
       key: "email",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -273,6 +276,7 @@ export const initialTableConfig: Record<
       type: "text",
       key: "name",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -281,6 +285,7 @@ export const initialTableConfig: Record<
       type: "number",
       key: "phone",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -289,6 +294,7 @@ export const initialTableConfig: Record<
       type: "email",
       key: "email",
       inForm: true,
+      inEdit: true,
       inTable: true,
       required: true,
     },
@@ -3117,8 +3123,8 @@ export const initialTableConfig: Record<
       key: "storageLocation",
       values: [
         { key: "NONE", value: "No Warehouse" },
+        { key: "PRIVATE", value: "Private Location" },
         { key: "MY", value: "My Warehouse" },
-        { key: "RENTAL", value: "Available Warehouse" },
       ],
       inForm: true,
       inTable: false,
@@ -3132,14 +3138,12 @@ export const initialTableConfig: Record<
         const scope =
           String(storageLocation || "").toUpperCase() === "MY"
             ? "my"
-            : String(storageLocation || "").toUpperCase() === "RENTAL"
-              ? "available"
-              : "";
+            : "";
         return fetchDependentOptions("warehouse", undefined, undefined, scope ? { scope } : undefined);
       },
       inForm: true,
       inTable: false,
-      showWhen: { key: "storageLocation", equals: ["MY", "RENTAL"] },
+      showWhen: { key: "storageLocation", equals: ["MY"] },
     },
     {
       label: "Warehouse Name",

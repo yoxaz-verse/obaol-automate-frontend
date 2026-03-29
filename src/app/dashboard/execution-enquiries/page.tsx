@@ -61,12 +61,12 @@ dayjs.extend(relativeTime);
 const SERVICE_TYPE_OPTIONS = [
   { key: "PACKAGING", label: "Packaging" },
   { key: "QUALITY_TESTING", label: "Quality Testing" },
-  { key: "TRANSPORTATION", label: "Transportation" },
+  { key: "TRANSPORTATION", label: "Inland Transportation" },
   { key: "FREIGHT_FORWARDING", label: "Freight Forwarding" },
   { key: "EXPORT_CUSTOMS", label: "Export Customs" },
   { key: "IMPORT_CUSTOMS", label: "Import Customs" },
   { key: "PORT_HANDLING", label: "Port Handling" },
-  { key: "INLAND_LOGISTICS", label: "Inland Logistics" },
+  { key: "INLAND_TRANSPORTATION", label: "Inland Transportation" },
   { key: "INSPECTION", label: "Inspection" },
 ];
 

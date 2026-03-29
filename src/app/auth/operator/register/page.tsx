@@ -24,6 +24,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
 
 const EMPTY_LIST: any[] = [];
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+const decodeJwt = (token: string): any => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+};
 
 function OperatorRegisterForm() {
   const router = useRouter();
@@ -32,6 +47,13 @@ function OperatorRegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmittingSuccess, setIsSubmittingSuccess] = useState(false);
   const [formError, setFormError] = useState("");
+  const [googleSignUp, setGoogleSignUp] = useState(false);
+  const [googleIdToken, setGoogleIdToken] = useState("");
+  const [googleReady, setGoogleReady] = useState(false);
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "available" | "exists" | "error">("idle");
+  const [emailCheckMessage, setEmailCheckMessage] = useState("");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -68,6 +90,53 @@ function OperatorRegisterForm() {
     retry: 1,
   });
 
+  useEffect(() => {
+    if (!googleClientId || typeof window === "undefined") return;
+    if (document.getElementById("google-gsi-script")) {
+      setGoogleReady(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "google-gsi-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setGoogleReady(true);
+    document.body.appendChild(script);
+    return () => {
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+  }, [googleClientId]);
+
+  useEffect(() => {
+    if (!googleReady) return;
+    if (!window?.google?.accounts?.id) return;
+    const container = document.getElementById("google-register-operator");
+    if (!container) return;
+    const buttonWidth = Math.min(360, Math.max(240, container.clientWidth || 320));
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: (resp: { credential?: string }) => {
+        if (!resp?.credential) return;
+        const payload = decodeJwt(resp.credential);
+        setGoogleIdToken(resp.credential);
+        setGoogleSignUp(true);
+        setForm((prev) => ({
+          ...prev,
+          name: prev.name || payload?.name || "",
+          email: prev.email || payload?.email || "",
+        }));
+      },
+    });
+    window.google.accounts.id.renderButton(container, {
+      theme: "outline",
+      size: "large",
+      width: buttonWidth,
+      text: "continue_with",
+      shape: "pill",
+    });
+  }, [googleReady, googleClientId]);
+
   const languages = Array.isArray(optionsResponse?.languages) ? optionsResponse.languages : EMPTY_LIST;
   const states = Array.isArray(optionsResponse?.states) ? optionsResponse.states : EMPTY_LIST;
   const districts = Array.isArray(optionsResponse?.districts) ? optionsResponse.districts : EMPTY_LIST;
@@ -81,8 +150,10 @@ function OperatorRegisterForm() {
       if (!form.name || !form.email || !form.phone) return false;
     }
     if (step === 2) {
-      if (!form.password || !form.confirmPassword) return false;
-      if (form.password !== form.confirmPassword) return false;
+      if (!googleSignUp) {
+        if (!form.password || !form.confirmPassword) return false;
+        if (form.password !== form.confirmPassword) return false;
+      }
     }
     return true;
   };
@@ -101,6 +172,39 @@ function OperatorRegisterForm() {
     setCurrentStep(prev => prev - 1);
   };
 
+  const handleEmailVerify = async () => {
+    if (!form.email.trim()) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage("Please enter an email first.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage("Invalid email format.");
+      return;
+    }
+    setIsCheckingEmail(true);
+    setEmailCheckStatus("idle");
+    setEmailCheckMessage("");
+    try {
+      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+      const res = await getData(`${apiRoot}/auth/email-status`, { email: form.email.trim() });
+      if (res?.data?.exists) {
+        setEmailCheckStatus("exists");
+        setEmailCheckMessage("This email is already registered — please sign in.");
+      } else {
+        setEmailCheckStatus("available");
+        setEmailCheckMessage("Email available.");
+      }
+    } catch (error: any) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage(error?.response?.data?.message || "Unable to verify email.");
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (isLoading) return;
@@ -108,6 +212,10 @@ function OperatorRegisterForm() {
 
     if (!form.address || !form.state || !form.district) {
       setFormError("Please complete all required location fields.");
+      return;
+    }
+    if (googleSignUp && !googleIdToken) {
+      setFormError("Google sign-up token missing. Please retry Google sign-up.");
       return;
     }
 
@@ -135,7 +243,17 @@ function OperatorRegisterForm() {
         joiningDate: new Date().toISOString(),
       };
 
-      await postData(accountRoutes.operatorRegister, payload);
+      if (googleSignUp) {
+        const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+        await postData(`${apiRoot}/auth/google`, {
+          idToken: googleIdToken,
+          role: "Operator",
+          intent: "register",
+          registerPayload: payload,
+        });
+      } else {
+        await postData(accountRoutes.operatorRegister, payload);
+      }
       setIsSubmittingSuccess(true);
       showToastMessage({
         type: "success",
@@ -197,6 +315,18 @@ function OperatorRegisterForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex flex-col items-center gap-3">
+          {googleClientId ? (
+            <div id="google-register-operator" className="w-full" />
+          ) : (
+            <p className="text-xs text-warning-500">Google sign-up is not configured.</p>
+          )}
+          {googleSignUp && (
+            <p className="text-xs text-success-500 font-semibold">
+              Google sign-up active. Complete the form to finish registration.
+            </p>
+          )}
+        </div>
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
             <motion.div
@@ -212,21 +342,49 @@ function OperatorRegisterForm() {
                 variant="bordered"
                 value={form.name}
                 onValueChange={(v) => setForm({ ...form, name: v })}
+                isReadOnly={googleSignUp}
                 startContent={<FiUser className="text-default-400" />}
                 classNames={{ inputWrapper: "rounded-xl border-default-200" }}
                 isRequired
               />
-              <Input
-                label="Email"
-                type="email"
-                placeholder="email@example.com"
-                variant="bordered"
-                value={form.email}
-                onValueChange={(v) => setForm({ ...form, email: v })}
-                startContent={<FiMail className="text-default-400" />}
-                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
-                isRequired
-              />
+              <div className="flex flex-col gap-2">
+                <Input
+                  label="Email"
+                  type="email"
+                  placeholder="email@example.com"
+                  variant="bordered"
+                  value={form.email}
+                  onValueChange={(v) => {
+                    setForm({ ...form, email: v });
+                    setEmailCheckStatus("idle");
+                    setEmailCheckMessage("");
+                  }}
+                  isReadOnly={googleSignUp}
+                  startContent={<FiMail className="text-default-400" />}
+                  classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                  isRequired
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="bg-default-100 text-default-600 border border-default-200"
+                    isLoading={isCheckingEmail}
+                    onPress={handleEmailVerify}
+                  >
+                    Verify Email
+                  </Button>
+                  {emailCheckStatus !== "idle" && (
+                    <span className={`text-xs font-semibold ${emailCheckStatus === "available"
+                      ? "text-success-500"
+                      : emailCheckStatus === "exists"
+                        ? "text-danger-500"
+                        : "text-warning-500"
+                      }`}>
+                      {emailCheckMessage}
+                    </span>
+                  )}
+                </div>
+              </div>
               <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden">
                 <PhoneField
                   name="phone"
@@ -255,33 +413,37 @@ function OperatorRegisterForm() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-4"
             >
-              <Input
-                label="Password"
-                placeholder="Choose a strong password"
-                variant="bordered"
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onValueChange={(v) => setForm({ ...form, password: v })}
-                startContent={<FiLock className="text-default-400" />}
-                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
-                isRequired
-                endContent={
-                  <Button size="sm" variant="light" isIconOnly onPress={() => setShowPassword((prev) => !prev)}>
-                    <FiGlobe className={showPassword ? "text-warning-500" : "text-default-400"} />
-                  </Button>
-                }
-              />
-              <Input
-                label="Confirm Password"
-                placeholder="Verify your password"
-                variant="bordered"
-                type={showPassword ? "text" : "password"}
-                value={form.confirmPassword}
-                onValueChange={(v) => setForm({ ...form, confirmPassword: v })}
-                startContent={<FiLock className="text-default-400" />}
-                classNames={{ inputWrapper: "rounded-xl border-default-200" }}
-                isRequired
-              />
+              {!googleSignUp && (
+                <>
+                  <Input
+                    label="Password"
+                    placeholder="Choose a strong password"
+                    variant="bordered"
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onValueChange={(v) => setForm({ ...form, password: v })}
+                    startContent={<FiLock className="text-default-400" />}
+                    classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                    isRequired
+                    endContent={
+                      <Button size="sm" variant="light" isIconOnly onPress={() => setShowPassword((prev) => !prev)}>
+                        <FiGlobe className={showPassword ? "text-warning-500" : "text-default-400"} />
+                      </Button>
+                    }
+                  />
+                  <Input
+                    label="Confirm Password"
+                    placeholder="Verify your password"
+                    variant="bordered"
+                    type={showPassword ? "text" : "password"}
+                    value={form.confirmPassword}
+                    onValueChange={(v) => setForm({ ...form, confirmPassword: v })}
+                    startContent={<FiLock className="text-default-400" />}
+                    classNames={{ inputWrapper: "rounded-xl border-default-200" }}
+                    isRequired
+                  />
+                </>
+              )}
               <Input
                 label="Referral Code"
                 placeholder="If any (Optional)"

@@ -15,6 +15,7 @@ import AuthLayout from "../Auth/AuthLayout";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { useSoundEffect } from "@/context/SoundContext";
 
+
 interface ILoginProps {
   role: string;
 }
@@ -32,9 +33,12 @@ const LoginComponent = ({ role }: ILoginProps) => {
   const [isRoutingToRegister, setIsRoutingToRegister] = useState(false);
   const registerRouteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { play } = useSoundEffect();
+  const roleLower = String(role || "").toLowerCase();
 
   const router = useRouter();
-  const { isAuthenticated, loading, login, user } = useContext(AuthContext);
+  const { isAuthenticated, loading, login, loginWithGoogle, user } = useContext(AuthContext);
+  const [googleReady, setGoogleReady] = useState(false);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   useEffect(() => {
     return () => {
@@ -47,8 +51,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      const roleLower = String(user?.role || "").toLowerCase();
-      if (roleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
+      const authRoleLower = String(user?.role || "").toLowerCase();
+      if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
         showToastMessage({
           type: "warning",
           message: "Company interests are not configured. Update them from My Company for execution matching.",
@@ -58,6 +62,63 @@ const LoginComponent = ({ role }: ILoginProps) => {
       router.push("/dashboard");
     }
   }, [isAuthenticated, loading, router, user]);
+
+  useEffect(() => {
+    if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
+    if (!googleClientId || typeof window === "undefined") return;
+    if (document.getElementById("google-gsi-script")) {
+      setGoogleReady(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "google-gsi-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setGoogleReady(true);
+    document.body.appendChild(script);
+    return () => {
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+  }, [role, googleClientId]);
+
+  useEffect(() => {
+    if (!googleReady) return;
+    if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
+    if (!window?.google?.accounts?.id) return;
+    const container = document.getElementById(`google-login-${roleLower}`);
+    if (!container) return;
+    const buttonWidth = Math.min(400, Math.max(280, container.clientWidth || 320));
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: async (resp: { credential?: string }) => {
+        try {
+          if (!resp?.credential) throw new Error("Google credential not returned.");
+          setIsLoading(true);
+          await loginWithGoogle({
+            idToken: resp.credential,
+            role: roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate",
+            rememberMe,
+          });
+          setLoginStatus("success");
+        } catch (error: any) {
+          const message = error?.response?.data?.message || error?.message || "Google login failed.";
+          setErrorMessage(message);
+          setLoginStatus("error");
+          showToastMessage({ type: "error", message, position: "top-right" });
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
+    window.google.accounts.id.renderButton(container, {
+      theme: "filled_black",
+      size: "large",
+      width: buttonWidth,
+      text: "continue_with",
+      shape: "pill",
+    });
+  }, [googleReady, role, googleClientId, loginWithGoogle, rememberMe]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,7 +196,6 @@ const LoginComponent = ({ role }: ILoginProps) => {
       setIsRoutingToRegister(false);
       registerRouteTimeoutRef.current = null;
     }, 6000);
-    const roleLower = String(role || "").toLowerCase();
     if (roleLower === "operator" || roleLower === "team") {
       router.push("/auth/operator/register");
       return;
@@ -225,7 +285,6 @@ const LoginComponent = ({ role }: ILoginProps) => {
     }
   };
 
-  const roleLower = String(role || "").toLowerCase();
   const roleKey = roleLower === "operator" || roleLower === "team" ? "operator" : roleLower;
   const currentRoleContent = roleContent[roleKey] || null;
 
@@ -403,6 +462,21 @@ const LoginComponent = ({ role }: ILoginProps) => {
                     : "Sign In"}
           </Button>
         </motion.div>
+
+        {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && (
+          <div className="mt-4 flex flex-col items-center gap-3">
+            <div className="relative flex items-center w-full">
+              <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+              <span className="flex-shrink-0 mx-4 text-foreground/40 text-[10px] uppercase tracking-widest font-bold">Or</span>
+              <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+            </div>
+            {googleClientId ? (
+              <div id={`google-login-${roleLower}`} className="w-full" />
+            ) : (
+              <p className="text-xs text-warning-500">Google login is not configured.</p>
+            )}
+          </div>
+        )}
 
         <div className="mt-4 pt-2 w-full">
           <div className="relative flex items-center mb-5">

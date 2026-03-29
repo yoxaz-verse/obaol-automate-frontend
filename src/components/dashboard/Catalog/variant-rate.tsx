@@ -28,6 +28,7 @@ import {
 import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiShoppingBag, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import AssociateSearch from "../Users/AssociateSearch";
 
 import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
@@ -254,6 +255,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   if (!showInventoryStatus) {
     columns = columns.filter((column: any) => column.uid !== "inventoryStatus");
+  }
+  if (isMarketplaceView) {
+    columns = columns.filter((column: any) => column.uid !== "inventoryQty");
   }
 
   if (
@@ -586,29 +590,33 @@ const VariantRate: React.FC<VariantRateProps> = ({
         return (
           <div className="w-full max-w-full min-w-0">
             {(!hideBuiltInFilters || (!displayOnly && rate === "variantRate" && canAddOwnRate)) && (
-              <div className="flex justify-between items-center gap-3 mb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-foreground/[0.03] p-4 rounded-[2rem] border border-foreground/5 backdrop-blur-md shadow-inner">
                 {!hideBuiltInFilters && (
-                  <DynamicFilter
-                    currentTable={"variantRate"}
-                    formFields={filterVariantRateFormFields}
-                    onApply={handleFiltersUpdate}
-                    searchValue={search}
-                    onSearchChange={setSearch}
-                    searchPlaceholder="Search rates..."
-                  />
+                  <div className="w-full sm:flex-1">
+                    <DynamicFilter
+                      currentTable={"variantRate"}
+                      formFields={filterVariantRateFormFields}
+                      onApply={handleFiltersUpdate}
+                      searchValue={search}
+                      onSearchChange={setSearch}
+                      searchPlaceholder="Search marketplace rates..."
+                    />
+                  </div>
                 )}
                 {!displayOnly && rate === "variantRate" && canAddOwnRate && (
-                  <AddModal
-                    buttonLabel="Add"
-                    currentTable={rate}
-                    formFields={variantRateFormFields}
-                    apiEndpoint={apiRoutesByRole[rate]}
-                    refetchData={refetchData}
-                    additionalVariable={{
-                      ...(productVariantValue && { productVariant: productVariantValue._id }),
-                      ...(user?.role === "Associate" && { associate: user?.id }),
-                    }}
-                  />
+                  <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
+                    <AddModal
+                      buttonLabel="Post New Rate"
+                      currentTable={rate}
+                      formFields={variantRateFormFields}
+                      apiEndpoint={apiRoutesByRole[rate]}
+                      refetchData={refetchData}
+                      additionalVariable={{
+                        ...(productVariantValue && { productVariant: productVariantValue._id }),
+                        ...(user?.role === "Associate" && { associate: user?.id }),
+                      }}
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -671,6 +679,48 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           Explore Marketplace
                         </Button>
                       </div>
+                    ) : (isMarketplaceView && canAddOwnRate && finalTableData.length === 0) ? (
+                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-primary-500 shadow-xl">
+                            <FiPackage size={48} strokeWidth={1.5} />
+                          </div>
+                          <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                            <FiPlus size={16} strokeWidth={3} />
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Live Products Found</h3>
+                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                          Be the first to list your products in the live market. Redirect to your personal catalog to set live rates for the network.
+                        </p>
+                        <Button
+                          color="primary"
+                          variant="shadow"
+                          size="lg"
+                          className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-primary-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all"
+                          onPress={() => router.push("/dashboard/product")}
+                          startContent={<FiPlusCircle size={20} strokeWidth={2.5} />}
+                        >
+                          Add Products to Market
+                        </Button>
+                      </div>
+                    ) : (additionalParams?.isLive === true && finalTableData.length === 0) ? (
+                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                            <FiShoppingBag size={48} strokeWidth={1.5} />
+                          </div>
+                          <div className="absolute -bottom-2 -right-2 p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
+                            <FiInfo size={16} strokeWidth={3} />
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Products Live</h3>
+                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                          You haven't activated any products for the live market yet. Switch to your general product list and toggle them live to start trading.
+                        </p>
+                      </div>
                     ) : null
                   }
                   otherModal={(rowItem: any) => {
@@ -681,7 +731,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       (roleLower === "admin" || isOperatorUser || isAssociateUser);
                     if (rowItem.isMarketplaceView) {
                       return (
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-3">
                           {!isAdminUser && (
                             <AddToCatalogButton
                               rowItem={rowItem}
@@ -718,7 +768,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       );
                     }
                     return (
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-3">
                         {/* LiveToggle or Live Chip */}
                         {canManageRow(rowItem) ? (
                           <div className="flex flex-col items-center gap-1">
@@ -751,7 +801,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         ) : (
                           <div className="flex flex-col items-center gap-1">
                             {rowItem.isLive ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 {/* @ts-ignore */}
                                 <Chip color={"success"} variant="dot" size="sm">
                                   Live
@@ -791,7 +841,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   Not Live
                                 </span>
                                 {isAdminUser && !rowItem.isCatalogView && (
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-3">
                                     <CreateEnquiryButton
                                       productVariant={
                                         rowItem.productVariantId ||
@@ -1305,6 +1355,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   const [requestedSampleQtyKg, setRequestedSampleQtyKg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [buyerAssociateId, setBuyerAssociateId] = useState("");
+  const [buyerAssociateName, setBuyerAssociateName] = useState("");
 
   // Use a debounced search for pincode to avoid too many API calls
   const [debouncedPincodeSearch, setDebouncedPincodeSearch] = useState("");
@@ -1318,6 +1371,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIsSuccess(false);
+      setIsConfirming(false);
+      setBuyerAssociateId("");
+      setBuyerAssociateName("");
     }
   }, [isOpen]);
 
@@ -1334,7 +1390,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     queryFn: () =>
       getData(apiRoutes.pincodeEntry.getAll, {
         division: requestDivision,
-        search: debouncedPincodeSearch,
+        ...(debouncedPincodeSearch ? { search: debouncedPincodeSearch } : {}),
         limit: 100,
       }),
     enabled: !!requestDivision,
@@ -1354,7 +1410,51 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     return districts.filter((d: any) => String(d.state?._id || d.state) === String(requestState));
   }, [districts, requestState]);
 
-  const handleSubmit = async () => {
+  const role = String(user?.role || "").toLowerCase();
+  const isAdminOrOperator = role === "admin" || role === "operator";
+  const buyerIdForSample = isAdminOrOperator ? buyerAssociateId : String(user?.id || "");
+  const sampleCooldownDays = 7;
+
+  const { data: recentSampleResponse } = useQuery({
+    queryKey: ["sample-requests", "cooldown", variantRate?._id, buyerIdForSample],
+    queryFn: () =>
+      getData(apiRoutes.sampleRequest.list, {
+        page: 1,
+        limit: 1,
+        variantRateId: variantRate?._id,
+        ...(buyerIdForSample ? { buyerAssociateId: buyerIdForSample } : {}),
+      }),
+    enabled: Boolean(variantRate?._id) && Boolean(buyerIdForSample),
+  });
+
+  const recentSampleRows = Array.isArray(recentSampleResponse?.data?.data?.data)
+    ? recentSampleResponse?.data?.data?.data
+    : (recentSampleResponse?.data?.data || []);
+  const latestSample = recentSampleRows?.[0] || null;
+  const latestRequestedAt = latestSample?.requestedAt ? new Date(latestSample.requestedAt) : null;
+  const latestStatus = String(latestSample?.status || "").toUpperCase();
+  const cooldownMs = sampleCooldownDays * 24 * 60 * 60 * 1000;
+  const nextAllowedAt = latestRequestedAt ? new Date(latestRequestedAt.getTime() + cooldownMs) : null;
+  const isCooldownActive =
+    Boolean(latestRequestedAt) &&
+    !["REJECTED", "CANCELLED"].includes(latestStatus) &&
+    nextAllowedAt !== null &&
+    nextAllowedAt.getTime() > Date.now();
+  const remainingDays = nextAllowedAt
+    ? Math.max(1, Math.ceil((nextAllowedAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
+    : 0;
+  const cooldownLabel = isCooldownActive
+    ? `Sample already requested. Try again in ${remainingDays} day${remainingDays === 1 ? "" : "s"}.`
+    : "Request Sample";
+
+  const handleSubmit = () => {
+    if (isAdminOrOperator && !buyerAssociateId) {
+      showToastMessage({
+        type: "error",
+        message: "Select a buyer associate.",
+      });
+      return;
+    }
     if (!requestState || !requestDistrict || !requestDivision) {
       showToastMessage({
         type: "error",
@@ -1383,7 +1483,11 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
       });
       return;
     }
-    if (!window.confirm("Are you sure you want to request a sample?")) return;
+    setIsConfirming(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    showToastMessage({ type: "info", message: "Authorizing sample dispatch protocol..." });
     setSubmitting(true);
     try {
       await postData(apiRoutes.sampleRequest.create, {
@@ -1394,19 +1498,32 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         requestAddress: requestAddress.trim(),
         requestPincode: requestPincode.trim(),
         requestedSampleQtyKg: Number(requestedSampleQtyKg),
+        ...(isAdminOrOperator ? { buyerAssociateId } : {}),
       });
       showToastMessage({
         type: "success",
         message: "Sample request sent to supplier.",
       });
       setIsSuccess(true);
+      setIsConfirming(false);
+      queryClient.invalidateQueries({ queryKey: ["sample-requests", "cooldown", variantRate?._id, buyerIdForSample] });
       setRequestState("");
       setRequestDistrict("");
       setRequestDivision("");
       setRequestAddress("");
       setRequestPincode("");
       setRequestedSampleQtyKg("");
+      setBuyerAssociateId("");
+      setBuyerAssociateName("");
     } catch (error: any) {
+      if (error?.response?.status === 409) {
+        showToastMessage({
+          type: "error",
+          message: error?.response?.data?.message || "Sample already requested. Please try again later.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["sample-requests", "cooldown", variantRate?._id, buyerIdForSample] });
+        return;
+      }
       showToastMessage({
         type: "error",
         message: error?.response?.data?.message || "Unable to request sample.",
@@ -1416,17 +1533,24 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     }
   };
 
-  const role = String(user?.role || "").toLowerCase();
-  if (role !== "associate" && role !== "admin" && role !== "operator") return null;
+  if (role !== "associate" && role !== "admin" && role !== "operator" && role !== "team") return null;
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Tooltip content="Request Sample">
+      <Tooltip content={cooldownLabel} closeDelay={0}>
         <span
-          onClick={onOpen}
-          className="text-lg text-warning-500 cursor-pointer active:opacity-50 hover:text-warning-600 transition-all duration-200 transform hover:scale-110"
+          onClick={() => {
+            if (isCooldownActive) return;
+            onOpen();
+          }}
+          className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+            isCooldownActive
+              ? "bg-success-500/10 text-success-500 cursor-not-allowed"
+              : "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 cursor-pointer active:opacity-50"
+          }`}
         >
-          <FiPackage />
+          <FiPackage size={20} className={isCooldownActive ? "text-success-600/80" : "text-orange-600/80"} />
+          <div className="h-[2px]" />
         </span>
       </Tooltip>
       <Modal
@@ -1439,16 +1563,21 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         size="md"
         backdrop="blur"
       >
-        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[90vh] overflow-hidden">
+        <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider max-h-[95vh] overflow-hidden rounded-[2.5rem] shadow-2xl">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-3 px-6">
-                <h3 className="text-lg font-black tracking-tight text-foreground">Request Sample</h3>
-                <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">
-                  Confirm location for sample delivery
-                </p>
+              <ModalHeader className="flex flex-col gap-1 border-b border-divider/50 pb-4 px-8 bg-foreground/[0.02]">
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="p-2.5 bg-orange-500/10 rounded-2xl text-orange-500 shadow-inner">
+                    <FiPackage size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black tracking-tight text-foreground uppercase">Request Sample</h3>
+                    <p className="text-[10px] text-default-400 font-bold uppercase tracking-widest mt-0.5">Logistics Protocol & Sample Dispatch</p>
+                  </div>
+                </div>
               </ModalHeader>
-              <ModalBody className="py-6 px-8 flex flex-col gap-6 overflow-y-auto">
+              <ModalBody className="py-8 px-8 flex flex-col gap-6 overflow-y-auto">
                 {isSuccess ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -1473,15 +1602,82 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                       Acknowledge
                     </Button>
                   </motion.div>
+                ) : isConfirming ? (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex flex-col gap-6"
+                   >
+                     <div className="p-6 bg-warning-500/5 rounded-[2rem] border border-warning-500/10 backdrop-blur-md">
+                        <div className="flex items-center gap-3 mb-4">
+                           <div className="p-2 bg-warning-500/10 rounded-xl text-warning-500">
+                              <FiInfo size={18} />
+                           </div>
+                           <h4 className="text-sm font-black uppercase tracking-widest">Protocol Review</h4>
+                        </div>
+                        <div className="space-y-4">
+                           {isAdminOrOperator && (
+                              <div className="flex justify-between items-start py-2 border-b border-divider/30">
+                                 <span className="text-[10px] font-black uppercase text-default-400 tracking-widest mt-1">Authorized Associate</span>
+                                 <span className="text-sm font-black text-right max-w-[200px]">{buyerAssociateName || "Not Identified"}</span>
+                              </div>
+                           )}
+                           <div className="flex justify-between items-center py-2 border-b border-divider/30">
+                              <span className="text-[10px] font-black uppercase text-default-400 tracking-widest">State</span>
+                              <span className="text-sm font-bold">{states.find(s => s._id === requestState)?.name || "N/A"}</span>
+                           </div>
+                           <div className="flex justify-between items-center py-2 border-b border-divider/30">
+                              <span className="text-[10px] font-black uppercase text-default-400 tracking-widest">District</span>
+                              <span className="text-sm font-bold">{districtOptions.find(d => d._id === requestDistrict)?.name || "N/A"}</span>
+                           </div>
+                           <div className="flex justify-between items-center py-2 border-b border-divider/30">
+                              <span className="text-[10px] font-black uppercase text-default-400 tracking-widest">Quantity</span>
+                              <span className="text-sm font-black text-warning-500">{requestedSampleQtyKg} KG</span>
+                           </div>
+                           <div className="flex flex-col gap-1 py-1">
+                              <span className="text-[10px] font-black uppercase text-default-400 tracking-widest mb-1">Dispatch Point</span>
+                              <span className="text-xs font-semibold leading-relaxed text-default-600 italic">
+                                 {requestAddress}, {requestPincode}
+                              </span>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="flex items-start gap-4 p-4 bg-primary/5 rounded-[1.5rem] border border-primary/10">
+                        <FiCheckCircle className="text-primary mt-0.5 shrink-0" size={18} />
+                        <p className="text-[11px] text-default-600 leading-relaxed font-semibold">
+                           Authorized officers will process this request for immediate preparation. Once initiated, the protocol cannot be cancelled from the marketplace.
+                        </p>
+                     </div>
+                  </motion.div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {isAdminOrOperator && (
+                      <div className="flex flex-col gap-1.5 p-5 bg-foreground/[0.03] border border-divider/50 rounded-3xl mb-2">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 ml-1 mb-2">Buyer Associate Selection</h4>
+                        <div className="w-full">
+                           <AssociateSearch 
+                             onSelect={(associate) => {
+                               setBuyerAssociateId(associate?._id || "");
+                               setBuyerAssociateName(associate?.name || "");
+                             }}
+                             onSearchChange={(name) => setBuyerAssociateName(name)}
+                           />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <Select
-                        size="sm"
-                        label="State"
+                        size="md"
+                        label="State Protocol"
                         labelPlacement="outside"
                         placeholder="Select state"
                         variant="bordered"
+                        className="font-medium"
+                        classNames={{
+                          label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                          trigger: "h-12 rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                        }}
                         selectedKeys={requestState ? [requestState] : []}
                         onSelectionChange={(keys) => {
                           const value = Array.from(keys as Set<string>)[0] || "";
@@ -1493,18 +1689,23 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                         }}
                       >
                         {states.map((state: any) => (
-                          <SelectItem key={state._id} value={state._id}>
+                          <SelectItem key={state._id} value={state._id} className="rounded-xl">
                             {state.name}
                           </SelectItem>
                         ))}
                       </Select>
 
                       <Select
-                        size="sm"
-                        label="District"
+                        size="md"
+                        label="District Registry"
                         labelPlacement="outside"
                         placeholder="Select district"
                         variant="bordered"
+                        className="font-medium"
+                        classNames={{
+                          label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                          trigger: "h-12 rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                        }}
                         selectedKeys={requestDistrict ? [requestDistrict] : []}
                         isDisabled={!requestState}
                         onSelectionChange={(keys) => {
@@ -1516,20 +1717,25 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                         }}
                       >
                         {districtOptions.map((district: any) => (
-                          <SelectItem key={district._id} value={district._id}>
+                          <SelectItem key={district._id} value={district._id} className="rounded-xl">
                             {district.name}
                           </SelectItem>
                         ))}
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <Select
-                        size="sm"
-                        label="Division"
+                        size="md"
+                        label="Postal Division"
                         labelPlacement="outside"
                         placeholder={divisionsLoading ? "Loading divisions..." : "Select division"}
                         variant="bordered"
+                        className="font-medium"
+                        classNames={{
+                          label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                          trigger: "h-12 rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                        }}
                         selectedKeys={requestDivision ? [requestDivision] : []}
                         isDisabled={!requestDistrict || divisionsLoading}
                         isLoading={divisionsLoading}
@@ -1541,7 +1747,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                         }}
                       >
                         {divisionOptions.map((division: any) => (
-                          <SelectItem key={division._id} value={division._id}>
+                          <SelectItem key={division._id} value={division._id} className="rounded-xl">
                             {division.name}
                           </SelectItem>
                         ))}
@@ -1549,11 +1755,12 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 
                       {/* @ts-ignore */}
                       <Autocomplete
-                        size="sm"
-                        label="Pincode"
+                        size="md"
+                        label="Pincode Lookup"
                         labelPlacement="outside"
-                        placeholder={pincodesLoading ? "Searching..." : "Type pincode or office..."}
+                        placeholder={pincodesLoading ? "Searching..." : "Pincode or Office"}
                         variant="bordered"
+                        className="font-medium"
                         isLoading={pincodesLoading}
                         allowsCustomValue={true}
                         isDisabled={!requestDivision}
@@ -1568,54 +1775,96 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                           setRequestPincode(value);
                           setPincodeSearch(value);
                         }}
+                        inputProps={{
+                          classNames: {
+                            inputWrapper: "h-12 rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                            label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                            input: "text-sm",
+                          }
+                        }}
+                        popoverProps={{
+                          offset: 10,
+                          className: "rounded-2xl border border-divider shadow-2xl bg-content1 backdrop-blur-xl",
+                          placement: "bottom"
+                        }}
+                        itemHeight={75}
+                        maxListboxHeight={450}
+                        listboxProps={{
+                          className: "p-2"
+                        }}
                       >
                         {pincodeOptions.map((p: any) => (
-                          /* @ts-ignore */
-                          <AutocompleteItem key={p._id} textValue={p.pincode}>
-                            {p.pincode} - {p.officename}
+                          <AutocompleteItem 
+                            key={p._id} 
+                            textValue={p.pincode}
+                            className="rounded-xl px-4 py-2"
+                            description={`${p.officename} - ${p.divisionname}`}
+                          >
+                            {p.pincode}
                           </AutocompleteItem>
                         ))}
                       </Autocomplete>
                     </div>
 
                     <Textarea
-                      size="sm"
-                      label="Full Address"
+                      size="md"
+                      label="Detailed Delivery Address"
                       labelPlacement="outside"
-                      placeholder="Street, locality, landmark"
+                      placeholder="Street, locality, landmark..."
                       variant="bordered"
                       minRows={3}
+                      classNames={{
+                        label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                        inputWrapper: "rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                      }}
                       value={requestAddress}
                       onValueChange={setRequestAddress}
                     />
 
                     <Input
-                      size="sm"
-                      label="Sample Qty (kg)"
+                      size="md"
+                      label="Target Quantity (KG)"
                       labelPlacement="outside"
                       placeholder="Enter quantity in kg"
                       variant="bordered"
+                      className="font-medium"
+                      classNames={{
+                        label: "text-[10px] font-black uppercase tracking-widest text-default-400 mb-1.5",
+                        inputWrapper: "h-12 rounded-2xl border-divider/50 hover:border-primary transition-colors",
+                      }}
                       type="number"
                       min={0}
                       value={requestedSampleQtyKg}
                       onValueChange={setRequestedSampleQtyKg}
                     />
 
-                    <div className="flex items-start gap-2.5 p-3.5 bg-primary/5 rounded-2xl border border-primary/10">
-                      <FiInfo className="text-primary mt-0.5 shrink-0" size={16} />
-                      <p className="text-xs text-default-600 leading-relaxed font-medium">
-                        Are you sure you want to request a sample? The supplier will provide the minimum available quantity and a corresponding quote.
+                    <div className="flex items-start gap-4 p-4 bg-orange-500/5 rounded-[1.5rem] border border-orange-500/10 backdrop-blur-md">
+                      <FiInfo className="text-orange-500 mt-0.5 shrink-0" size={18} />
+                      <p className="text-[11px] text-default-600 leading-relaxed font-semibold">
+                        Confirming this protocol will notify the manufacturer to prepare sample dispatch. Standard minimum quantities apply.
                       </p>
                     </div>
                   </>
                 )}
               </ModalBody>
-              <ModalFooter className={`border-t border-divider py-3 px-6 ${isSuccess ? "hidden" : "flex"}`}>
-                <Button size="sm" variant="light" onPress={onClose} isDisabled={submitting}>
-                  Cancel
+              <ModalFooter className={`border-t border-divider/50 py-4 px-8 bg-foreground/[0.01] items-center justify-between ${isSuccess ? "hidden" : "flex"}`}>
+                <Button 
+                   size="md" 
+                   variant="light" 
+                   onPress={() => isConfirming ? setIsConfirming(false) : onClose()} 
+                   isDisabled={submitting}
+                   className="rounded-xl font-bold uppercase tracking-widest text-[10px]"
+                >
+                  {isConfirming ? "Back to Edit" : "Cancel"}
                 </Button>
-                <Button size="sm" color="warning" onPress={handleSubmit} isLoading={submitting}>
-                  Request Sample
+                <Button 
+                   size="lg" 
+                   color={isConfirming ? "success" : "warning"}
+                   onPress={() => isConfirming ? handleFinalSubmit() : handleSubmit()} 
+                   isLoading={submitting}
+                   className="rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-orange-500/20 px-8"
+                >
+                  {isConfirming ? "Authorize Sample Dispatch" : "Request Sample Dispatch"}
                 </Button>
               </ModalFooter>
             </>
@@ -1633,12 +1882,13 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2 ">
-      <Tooltip content="Create Enquiry">
+      <Tooltip content="Create Enquiry" closeDelay={0}>
         <span
           onClick={onOpen}
-          className="text-lg text-primary cursor-pointer active:opacity-50 hover:text-primary-600 transition-all duration-200 transform hover:scale-110"
+          className="flex flex-col items-center justify-center p-2 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 cursor-pointer active:opacity-50 transition-all duration-200"
         >
-          <FiMessageSquare />
+          <FiMessageSquare size={20} className="text-primary-600/80" />
+          <div className="h-[2px]" />
         </span>
       </Tooltip>
       {/* @ts-ignore */}
@@ -2123,12 +2373,20 @@ const AddToCatalogButton: React.FC<AddToCatalogButtonProps> = ({
 
   return (
     <>
-      <Tooltip content={rowItem.isAdded ? "Already in Catalog" : "Add to Catalog"}>
+      <Tooltip content={rowItem.isAdded ? "Already in Catalog" : "Add to Catalog"} closeDelay={0}>
         <span
           onClick={!rowItem.isAdded ? onOpen : undefined}
-          className={`text-lg cursor-pointer active:opacity-50 transition-colors ${rowItem.isAdded ? "text-success cursor-default" : "text-primary hover:text-primary-600"}`}
+          className={`flex flex-col items-center justify-center p-2 rounded-xl cursor-pointer active:opacity-50 transition-all duration-200 ${
+            rowItem.isAdded 
+              ? "bg-success-500/10 text-success-500 cursor-default" 
+              : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500"
+          }`}
         >
-          {rowItem.isAdded ? <FiCheckCircle size={22} /> : <FiPlusCircle size={22} />}
+          {rowItem.isAdded 
+            ? <FiCheckCircle size={20} className="text-success-600/80" /> 
+            : <FiPlusCircle size={20} className="text-blue-600/80" />
+          }
+          <div className="h-[2px]" />
         </span>
       </Tooltip>
 

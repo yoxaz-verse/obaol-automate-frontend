@@ -58,7 +58,7 @@ export default function CommissionStructurePage() {
     <section className="min-h-screen bg-background text-foreground selection:bg-warning-500/30">
       <Header />
       <ThemedContentWrapper>
-        <div className="mx-auto max-w-6xl px-4 pt-32 pb-24">
+        <div className="mx-auto max-w-6xl px-4 pt-24 md:pt-32 pb-16 md:pb-24">
 
           {/* Hero Section */}
           <motion.div
@@ -69,10 +69,10 @@ export default function CommissionStructurePage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20 text-warning-600 text-xs font-bold uppercase tracking-widest mb-4">
               <FiPieChart className="text-sm" /> Rewards & Incentives
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+            <h1 className="text-3xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
               Transparent <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-amber-600">Commission</span> Framework
             </h1>
-            <p className="text-lg text-default-500 font-medium leading-relaxed">
+            <p className="text-base md:text-lg text-default-500 font-medium leading-relaxed">
               OBAOL empowers contributors with a clear profit-sharing model designed to reward activation, execution, and leadership.
             </p>
           </motion.div>
@@ -86,7 +86,7 @@ export default function CommissionStructurePage() {
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
           >
             <Card className="bg-content1/50 backdrop-blur-md border-default-200/60 shadow-xl overflow-hidden group">
-              <CardBody className="p-8">
+              <CardBody className="p-5 md:p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-600 shadow-inner group-hover:scale-110 transition-transform">
                     <FiTrendingUp className="text-2xl" />
@@ -100,12 +100,12 @@ export default function CommissionStructurePage() {
                   <p className="text-default-500 leading-relaxed font-medium">
                     Every completed trade generates a commission pool from the company’s net profit. This pool is split between Closing and Management.
                   </p>
-                  <div className="p-6 rounded-2xl bg-gradient-to-br from-warning-500 to-amber-600 text-white shadow-2xl relative overflow-hidden group">
+                  <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-warning-500 to-amber-600 text-white shadow-2xl relative overflow-hidden group">
                     <div className="relative z-10 flex items-end gap-2">
-                      <span className="text-5xl font-black tracking-tighter">30%</span>
-                      <span className="text-sm font-bold uppercase opacity-80 mb-2 tracking-widest">Of Net Profit</span>
+                      <span className="text-4xl md:text-5xl font-black tracking-tighter">30%</span>
+                      <span className="text-[10px] md:text-sm font-bold uppercase opacity-80 mb-1 md:mb-2 tracking-widest">Of Net Profit</span>
                     </div>
-                    <FiDollarSign className="absolute -bottom-4 -right-4 text-8xl opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-700" />
+                    <FiDollarSign className="absolute -bottom-4 -right-4 text-6xl md:text-8xl opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-700" />
                   </div>
                   <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-warning-600 bg-warning-500/5 p-3 rounded-xl border border-warning-500/10 mt-4">
                     <FiInfo className="text-xs" />
@@ -116,7 +116,7 @@ export default function CommissionStructurePage() {
             </Card>
 
             <Card className="bg-content1/50 backdrop-blur-md border-default-200/60 shadow-xl overflow-hidden group">
-              <CardBody className="p-8">
+              <CardBody className="p-5 md:p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-600 shadow-inner group-hover:scale-110 transition-transform">
                     <FiZap className="text-2xl" />
@@ -188,12 +188,12 @@ export default function CommissionStructurePage() {
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-125 transition-transform pointer-events-none">
                   <FiUserCheck className="text-8xl" />
                 </div>
-                <CardBody className="p-8">
+                <CardBody className="p-6 md:p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-warning-500/10 text-warning-600">
                       <FiUserCheck className="text-xl" />
                     </div>
-                    <div className="text-3xl font-black tracking-tighter text-foreground">40%</div>
+                    <div className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">40%</div>
                   </div>
                   <h3 className="text-lg font-black mb-3 text-warning-600">Deal Closer</h3>
                   <p className="text-xs text-default-500 leading-relaxed font-medium mb-4">The closer who converts an inquiry into a successfully finalized trade.</p>
@@ -208,12 +208,12 @@ export default function CommissionStructurePage() {
                 <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-125 transition-transform pointer-events-none">
                   <FiBriefcase className="text-8xl" />
                 </div>
-                <CardBody className="p-8">
+                <CardBody className="p-6 md:p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary-500/10 text-primary-600">
                       <FiBriefcase className="text-xl" />
                     </div>
-                    <div className="text-3xl font-black tracking-tighter text-foreground">60%</div>
+                    <div className="text-2xl md:text-3xl font-black tracking-tighter text-foreground">60%</div>
                   </div>
                   <h3 className="text-lg font-black mb-3 text-primary-600">Supplier Portfolio Management</h3>
                   <p className="text-xs text-default-500 leading-relaxed font-medium mb-4">A shared pool for the supplier owner and their leadership hierarchy.</p>
@@ -235,7 +235,7 @@ export default function CommissionStructurePage() {
           >
             <div className="mb-10 text-center max-w-2xl mx-auto px-4">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-default-400 mb-2">Section 04</h3>
-              <h2 className="text-3xl font-black mb-4">The <span className="text-secondary-500">Portfolio Management</span> Split</h2>
+              <h2 className="text-2xl md:text-3xl font-black mb-4">The <span className="text-secondary-500">Portfolio Management</span> Split</h2>
               <p className="text-default-500 font-medium text-sm leading-relaxed">
                 Leaders earn by supporting the Supplier Portfolio Owner.
                 The hierarchy rewards those who manage and mentor the contributors responsible for supplier assets.
@@ -282,8 +282,8 @@ export default function CommissionStructurePage() {
                 }
               ].map((item, i) => (
                 <div key={i} className="flex flex-col group">
-                  <Card className={`bg-content1/50 backdrop-blur-md border-default-200/60 shadow-xl p-1 h-full transition-all group-hover:scale-[1.02] ${item.tier === 'Owner' ? 'border-primary-500/30 ring-1 ring-primary-500/10' : ''}`}>
-                    <CardBody className="p-6 text-center flex flex-col items-center">
+                  <Card className={`bg-content1/50 backdrop-blur-md border-default-200/60 shadow-xl p-0.5 md:p-1 h-full transition-all group-hover:scale-[1.02] ${item.tier === 'Owner' ? 'border-primary-500/30 ring-1 ring-primary-500/10' : ''}`}>
+                    <CardBody className="p-4 md:p-6 text-center flex flex-col items-center">
                       <div className={`text-2xl font-black ${item.color === 'primary' ? 'text-primary-500' : 'text-secondary-500'} mb-1`}>{item.share}</div>
                       <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2">{item.tier}: {item.label}</div>
                       <div className="px-2 py-0.5 rounded-full bg-default-100 text-[8px] font-black uppercase tracking-tighter text-default-400 mb-4">{item.rule}</div>
@@ -339,7 +339,7 @@ export default function CommissionStructurePage() {
 
               <div className="text-center mb-16">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-default-400 mb-2">Visual Logic</h3>
-                <h2 className="text-3xl font-black">Commission <span className="text-primary-500">Eco-System</span></h2>
+                <h2 className="text-2xl md:text-3xl font-black">Commission <span className="text-primary-500">Eco-System</span></h2>
               </div>
 
               <div className="relative max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-stretch pt-8">
@@ -350,7 +350,7 @@ export default function CommissionStructurePage() {
                       Independent Track
                     </div>
                     <div className="text-[10px] font-black uppercase tracking-widest text-warning-600 mb-2">Execution Pillar</div>
-                    <div className="text-4xl font-black mb-1 text-foreground">40%</div>
+                    <div className="text-3xl md:text-4xl font-black mb-1 text-foreground">40%</div>
                     <div className="text-sm font-bold text-warning-600">Deal Closer</div>
                     <p className="text-[10px] text-default-400 mt-4 font-medium leading-relaxed opacity-80">
                       Dedicated exclusively to the account executive who closed the trade.
@@ -401,8 +401,8 @@ export default function CommissionStructurePage() {
                       Portfolio Base
                     </div>
                     <div className="text-[10px] font-black uppercase tracking-widest text-primary-600 mb-2">Portfolio Pillar</div>
-                    <div className="text-4xl font-black mb-1 text-foreground">30%</div>
-                    <div className="text-lg font-bold text-primary-600">Portfolio Owner</div>
+                    <div className="text-3xl md:text-4xl font-black mb-1 text-foreground">30%</div>
+                    <div className="text-base md:text-lg font-bold text-primary-600">Portfolio Owner</div>
                     <p className="text-[10px] text-default-400 mt-4 font-medium leading-relaxed opacity-80 italic">
                       The core asset manager who generates the portfolio value.
                       Total Pillar Share: 60%.
@@ -432,7 +432,7 @@ export default function CommissionStructurePage() {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-500/10 border border-secondary-500/20 text-secondary-600 text-[10px] font-black uppercase tracking-widest mb-4">
                       <FiTrendingUp className="text-xs" /> Evolution Roadmap
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight">
+                    <h2 className="text-2xl md:text-5xl font-black mb-6 leading-tight">
                       How <span className="text-secondary-500">You</span> Become a Leader
                     </h2>
                     <p className="text-default-500 font-medium leading-relaxed italic">
@@ -517,7 +517,7 @@ export default function CommissionStructurePage() {
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-600 text-[10px] font-black uppercase tracking-widest mb-6">
                   <FiZap className="text-xs" /> Dynamic Simulator
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight">
+                <h2 className="text-2xl md:text-4xl font-black mb-6 leading-tight">
                   Simulator: <span className="text-primary-500">Live Rewards</span>
                 </h2>
                 <div className="space-y-8">
@@ -525,10 +525,10 @@ export default function CommissionStructurePage() {
                     Adjust the <span className="text-foreground font-black">Net Profit</span> below to see how the commission pool is split between execution and assets in real-time.
                   </p>
 
-                  <div className="p-8 rounded-[2rem] bg-default-50 border-2 border-primary-500/10 shadow-inner">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-xs font-black uppercase text-default-400 tracking-widest">Company Net Profit</span>
-                      <span className="text-3xl font-black text-foreground">₹{profit.toLocaleString()}</span>
+                  <div className="p-5 md:p-8 rounded-[2rem] bg-default-50 border-2 border-primary-500/10 shadow-inner">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
+                      <span className="text-[10px] md:text-xs font-black uppercase text-default-400 tracking-widest leading-none">Company Net Profit</span>
+                      <span className="text-xl md:text-3xl font-black text-foreground leading-none">₹{profit.toLocaleString()}</span>
                     </div>
 
                     <input
@@ -541,12 +541,12 @@ export default function CommissionStructurePage() {
                       className="w-full h-2 bg-default-200 rounded-lg appearance-none cursor-pointer accent-primary-500 mb-8"
                     />
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black uppercase text-primary-600 tracking-widest">Shareable Pool (30%)</span>
-                        <span className="text-[10px] font-bold text-default-400 opacity-60 uppercase">Distributable Total</span>
+                        <span className="text-[10px] md:text-xs font-black uppercase text-primary-600 tracking-widest leading-none">Shareable Pool (30%)</span>
+                        <span className="text-[9px] md:text-[10px] font-bold text-default-400 opacity-60 uppercase mt-1 leading-none">Distributable Total</span>
                       </div>
-                      <span className="text-4xl font-black text-primary-500">₹{shares.totalPool.toLocaleString()}</span>
+                      <span className="text-2xl md:text-4xl font-black text-primary-500 leading-none">₹{shares.totalPool.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -563,17 +563,17 @@ export default function CommissionStructurePage() {
                   <motion.div
                     key={i}
                     layout
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-content2/30 border border-default-200/50 transition-all hover:bg-content2/50"
+                    className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-content2/30 border border-default-200/50 transition-all hover:bg-content2/50"
                   >
-                    <div className={`w-10 h-10 rounded-xl bg-content1 flex items-center justify-center ${row.color} shadow-sm`}>
-                      <row.icon className="text-lg" />
+                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl bg-content1 flex items-center justify-center ${row.color} shadow-sm shrink-0`}>
+                      <row.icon className="text-base md:text-lg" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-end">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-default-500 leading-none">{row.label}</span>
-                        <span className="text-[10px] font-black text-default-400 bg-content1 px-1.5 py-0.5 rounded-lg border border-default-100 leading-none">{row.pct}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-end gap-2">
+                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-default-500 leading-none truncate">{row.label}</span>
+                        <span className="text-[9px] text-default-400 leading-none font-bold">{row.pct}</span>
                       </div>
-                      <div className="text-lg font-black text-foreground mt-1">₹{row.amt.toLocaleString()}</div>
+                      <div className="text-base md:text-lg font-black text-foreground mt-1 leading-none">₹{row.amt.toLocaleString()}</div>
                     </div>
                   </motion.div>
                 ))}

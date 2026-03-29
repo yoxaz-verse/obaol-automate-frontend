@@ -13,26 +13,39 @@ import { DEFAULT_STALE_TIME, extractList, useDocuments } from "@/core/data";
 import { showToastMessage } from "@/utils/utils";
 
 const TYPE_TABS = [
-  { key: "ALL", label: "All" },
+  { key: "ALL", label: "All Documents" },
+  { key: "LOI", label: "LOI" },
   { key: "QUOTATION", label: "Quotations" },
-  { key: "PROFORMA_INVOICE", label: "Proforma" },
-  { key: "INVOICE", label: "Invoices" },
+  { key: "PROFORMA_INVOICE", label: "Proforma Invoice" },
+  { key: "INVOICE", label: "Invoice History" },
   { key: "PURCHASE_ORDER", label: "Purchase Orders" },
   { key: "SALES_CONTRACT", label: "Sales Contract" },
   { key: "PACKING_LIST", label: "Packing List" },
-  { key: "QUALITY_CERTIFICATE", label: "Quality Certificate" },
-  { key: "INSPECTION_CERTIFICATE", label: "Inspection Certificate" },
-  { key: "PHYTOSANITARY_CERTIFICATE", label: "Phytosanitary Certificate" },
-  { key: "FUMIGATION_CERTIFICATE", label: "Fumigation Certificate" },
+  { key: "QUALITY_CERTIFICATE", label: "Quality Audit" },
+  { key: "INSPECTION_CERTIFICATE", label: "Inspection Docs" },
+  { key: "PHYTOSANITARY_CERTIFICATE", label: "Phytosanitary" },
+  { key: "FUMIGATION_CERTIFICATE", label: "Fumigation" },
   { key: "BILL_OF_LADING", label: "Bill of Lading" },
   { key: "AIR_WAYBILL", label: "Air Waybill" },
-  { key: "INSURANCE_CERTIFICATE", label: "Insurance Certificate" },
+  { key: "LORRY_RECEIPT", label: "Lorry Receipt" },
+  { key: "LCL_DRAFT", label: "LCL Draft" },
+  { key: "INSURANCE_CERTIFICATE", label: "Insurance" },
   { key: "PAYMENT_ADVICE", label: "Payment Advice" },
 ];
 
 const STATUS_OPTIONS = ["ALL", "DRAFT", "SENT", "ACCEPTED", "REJECTED", "CANCELLED"];
 const STAGE_TYPES = ["INQUIRY", "ORDER"];
-const INQUIRY_STAGES = ["INQUIRY_CREATED", "QUOTATION_SUBMITTED", "QUOTATION_REVISED", "PROFORMA_ISSUED", "PURCHASE_ORDER_RECEIVED", "ORDER_CONFIRMED"];
+const INQUIRY_STAGES = [
+  "ENQUIRY_CREATED",
+  "LOI_ACCEPTED_QTY_CONFIRMED",
+  "QUOTATION_REVISION",
+  "QUOTATION_CREATED",
+  "QUOTATION_DECISION",
+  "RESPONSIBILITIES_FINALIZED",
+  "PROFORMA_ISSUED",
+  "OTHER_DOCUMENTS",
+  "PURCHASE_ORDER_CREATED",
+];
 const ORDER_STAGES = ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", "QUALITY_VERIFIED", "COMPLIANCE_APPROVED", "PACKING_COMPLETED", "READY_FOR_SHIPMENT", "SHIPPED", "DELIVERED", "PAYMENT_PENDING", "PAYMENT_COMPLETED", "TRADE_CLOSED"];
 
 export default function DocumentsPage() {
@@ -152,54 +165,65 @@ export default function DocumentsPage() {
     <section className="">
       <Title title="Documents" />
 
-      <div className="mx-2 md:mx-6 mb-4 flex flex-col gap-4">
-        <div className="rounded-xl border border-default-200/70 bg-content1/95 p-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-            <div className="font-semibold">Required Documents (by stage)</div>
-            <div className="flex gap-3 flex-wrap">
+      <div className="mx-4 md:mx-10 mb-10 flex flex-col gap-8">
+        <div className="rounded-[2rem] border border-foreground/5 bg-foreground/[0.02] backdrop-blur-3xl p-8 shadow-sm">
+          <div className="flex items-center justify-between gap-6 flex-wrap mb-6">
+            <div className="flex flex-col gap-1">
+               <h3 className="text-xl font-bold text-foreground">Compliance Gateway</h3>
+               <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Required documentation by trade stage.</p>
+            </div>
+            <div className="flex gap-4 flex-wrap">
               <Select
                 className="w-40"
-                label="Stage Type"
+                variant="flat"
+                classNames={{ trigger: "h-11 rounded-xl bg-foreground/5 border-none" }}
+                label="Process Stream"
                 selectedKeys={[ruleStageType]}
                 onSelectionChange={(keys) => {
                   const next = String(Array.from(keys)[0] || "ORDER");
                   setRuleStageType(next);
-                  setRuleStageKey(next === "INQUIRY" ? "INQUIRY_CREATED" : "ORDER_CREATED");
+                  setRuleStageKey(next === "INQUIRY" ? "ENQUIRY_CREATED" : "ORDER_CREATED");
                 }}
               >
-                {STAGE_TYPES.map((t) => (<SelectItem key={t}>{t}</SelectItem>))}
+                {STAGE_TYPES.map((t) => (<SelectItem key={t} className="capitalize">{t.toLowerCase()}</SelectItem>))}
               </Select>
               <Select
                 className="w-56"
-                label="Stage"
+                variant="flat"
+                classNames={{ trigger: "h-11 rounded-xl bg-foreground/5 border-none" }}
+                label="Operation Phase"
                 selectedKeys={[ruleStageKey]}
                 onSelectionChange={(keys) => setRuleStageKey(String(Array.from(keys)[0] || ""))}
               >
-                {stageOptions.map((t) => (<SelectItem key={t}>{t}</SelectItem>))}
+                {stageOptions.map((t) => (<SelectItem key={t} className="capitalize">{t.toLowerCase().replace(/_/g, " ")}</SelectItem>))}
               </Select>
             </div>
           </div>
           {stageRules.length === 0 ? (
-            <div className="text-sm text-default-500">No rules configured for this stage.</div>
+            <div className="text-xs font-medium text-default-400 bg-foreground/[0.01] rounded-2xl p-8 border border-dashed border-foreground/10 text-center">No rules configured for this operational phase.</div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {stageRules.map((rule: any) => (
-                <div key={rule._id} className="flex items-center justify-between gap-3 border border-default-200/60 rounded-lg px-3 py-2">
-                  <div className="text-sm">
-                    <span className="font-medium">{rule.docType}</span>
-                    <span className="text-default-500"> • {rule.responsibleRole} • {rule.actionType} • {rule.visibility}</span>
+                <div key={rule._id} className="flex items-center justify-between gap-4 border border-foreground/5 rounded-2xl px-5 py-4 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-colors">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-bold text-foreground uppercase tracking-tight">{rule.docType.replace(/_/g, " ")}</span>
+                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-60">
+                      {rule.responsibleRole} • {rule.actionType} • {rule.visibility}
+                    </span>
                   </div>
                   {canManage && (
                     <Button
                       size="sm"
                       variant="flat"
+                      color="primary"
+                      className="h-8 rounded-lg font-bold uppercase tracking-wider text-[9px] px-4"
                       onPress={() => {
                         setCreateMode(rule.actionType === "UPLOAD" ? "UPLOAD" : "CREATE");
                         setCreateType(rule.docType);
                         setCreateOpen(true);
                       }}
                     >
-                      {rule.actionType === "UPLOAD" ? "Upload" : "Create"}
+                      {rule.actionType === "UPLOAD" ? "Upload" : "Draft"}
                     </Button>
                   )}
                 </div>
@@ -207,16 +231,17 @@ export default function DocumentsPage() {
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center justify-between gap-6 flex-wrap">
           <Tabs
             selectedKey={typeTab}
             onSelectionChange={(key) => setTypeTab(String(key))}
             variant="underlined"
+            color="primary"
             classNames={{
-              tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-              cursor: "w-full bg-primary h-[2px]",
-              tab: "max-w-fit px-0 h-10",
-              tabContent: "group-data-[selected=true]:text-primary font-black uppercase tracking-widest text-[10px] opacity-70 group-data-[selected=true]:opacity-100",
+              tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40 flex-nowrap overflow-x-auto no-scrollbar",
+              cursor: "bg-primary w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.3)]",
+              tab: "max-w-fit px-4 h-12 transition-all duration-300",
+              tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary"
             }}
           >
             {TYPE_TABS.map((tab) => (
@@ -224,35 +249,41 @@ export default function DocumentsPage() {
             ))}
           </Tabs>
           {canManage && (
-            <Button color="primary" onPress={() => setCreateOpen(true)}>
-              Create Document
+            <Button color="primary" className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] px-6" onPress={() => setCreateOpen(true)}>
+              Initialize Document
             </Button>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           <Input
-            className="w-full md:w-80"
-            placeholder="Search document number or company"
+            className="w-full md:w-96"
+            placeholder="Search Identifier or Entity..."
+            variant="flat"
+            classNames={{ inputWrapper: "h-11 rounded-xl bg-foreground/[0.03] border-none", input: "text-xs font-semibold" }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <Select
             className="w-48"
-            label="Status"
+            variant="flat"
+            classNames={{ trigger: "h-11 rounded-xl bg-foreground/[0.03] border-none" }}
+            label="Filter Status"
             selectedKeys={[statusFilter]}
             onSelectionChange={(keys) => setStatusFilter(String(Array.from(keys)[0] || "ALL"))}
           >
             {STATUS_OPTIONS.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
+              <SelectItem key={status} value={status} className="capitalize">
+                {status.toLowerCase()}
               </SelectItem>
             ))}
           </Select>
           {canManage && (
             <Select
               className="w-64"
-              label="Company"
+              variant="flat"
+              classNames={{ trigger: "h-11 rounded-xl bg-foreground/[0.03] border-none" }}
+              label="Mapping Entity"
               selectedKeys={companyFilter ? [companyFilter] : []}
               onSelectionChange={(keys) => setCompanyFilter(String(Array.from(keys)[0] || ""))}
             >
@@ -265,16 +296,16 @@ export default function DocumentsPage() {
           )}
         </div>
 
-        <div className="rounded-xl border border-default-200/70 bg-content1/95 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase text-default-500 border-b border-default-200/60">
+        <div className="rounded-[2.5rem] border border-foreground/5 bg-foreground/[0.01] overflow-hidden">
+          <table className="w-full text-[11px] font-bold uppercase tracking-tight">
+            <thead className="text-[9px] font-bold uppercase tracking-[0.2em] text-default-400 border-b border-foreground/5 bg-foreground/[0.02]">
               <tr>
-                <th className="text-left px-4 py-3">Document</th>
-                <th className="text-left px-4 py-3">Type</th>
-                <th className="text-left px-4 py-3">Company</th>
-                <th className="text-left px-4 py-3">Amount</th>
-                <th className="text-left px-4 py-3">Status</th>
-                <th className="text-left px-4 py-3">Created</th>
+                <th className="text-left px-8 py-5">Document ID</th>
+                <th className="text-left px-8 py-5">Classification</th>
+                <th className="text-left px-8 py-5">Mapping Entity</th>
+                <th className="text-left px-8 py-5 text-warning font-black">Trade Load</th>
+                <th className="text-left px-8 py-5">Process Status</th>
+                <th className="text-left px-8 py-5">Sync Log</th>
               </tr>
             </thead>
             <tbody>
@@ -288,15 +319,22 @@ export default function DocumentsPage() {
                 filteredDocs.map((doc: any, idx: number) => (
                   <tr
                     key={doc._id}
-                    className={`border-t border-default-200/60 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""} cursor-pointer hover:bg-default-100/30`}
+                    className="border-t border-foreground/5 bg-transparent cursor-pointer hover:bg-foreground/[0.03] transition-colors"
                     onClick={() => router.push(`/dashboard/documents/${doc._id}`)}
                   >
-                    <td className="px-4 py-3 font-medium">{doc.documentNumber}</td>
-                    <td className="px-4 py-3">{doc.type?.replaceAll("_", " ")}</td>
-                    <td className="px-4 py-3">{doc?.seller?.name || "-"}</td>
-                    <td className="px-4 py-3">₹ {Number(doc?.totals?.grandTotal || 0).toFixed(2)}</td>
-                    <td className="px-4 py-3">{doc.status}</td>
-                    <td className="px-4 py-3">{doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : "-"}</td>
+                    <td className="px-8 py-5 font-bold text-foreground">{doc.documentNumber}</td>
+                    <td className="px-8 py-5 text-default-500 font-medium">{doc.type?.replace(/_/g, " ")}</td>
+                    <td className="px-8 py-5 text-foreground">{doc?.seller?.name || "-"}</td>
+                    <td className="px-8 py-5 text-warning">₹ {Number(doc?.totals?.grandTotal || 0).toLocaleString()}</td>
+                    <td className="px-8 py-5">
+                       <span className={`px-3 py-1 rounded-lg text-[9px] font-bold border border-foreground/5 ${
+                         doc.status === "ACCEPTED" ? "bg-success-500/10 text-success" : 
+                         doc.status === "REJECTED" ? "bg-danger-500/10 text-danger" : "bg-warning-500/10 text-warning"
+                       }`}>
+                         {doc.status.replace(/_/g, " ")}
+                       </span>
+                    </td>
+                    <td className="px-8 py-5 text-default-400 font-medium">{doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : "-"}</td>
                   </tr>
                 ))
               )}

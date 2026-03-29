@@ -78,13 +78,13 @@ export default function DeleteModal({
               {triggerText}
             </Button>
           ) : (
-            <Tooltip color="danger" content="Delete">
+            <Tooltip color="danger" content="Remove Record" closeDelay={0}>
               <span
                 onClick={onOpen}
-                className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-danger transition-colors"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-danger-500/10 hover:bg-danger-500/20 cursor-pointer active:opacity-50 group transition-all"
               >
-                <FiTrash2 size={18} className="text-default-400 group-hover:text-danger" />
-                <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+                <FiTrash2 size={20} className="text-danger-500/80 group-hover:text-danger-600 transition-colors" />
+                <div className="h-[2px]" />
               </span>
             </Tooltip>
           )}

@@ -10,6 +10,7 @@ import { showToastMessage } from "@/utils/utils";
 import Link from "next/link";
 
 const DOC_TYPES = [
+  "LOI",
   "QUOTATION",
   "PROFORMA_INVOICE",
   "INVOICE",
@@ -22,11 +23,23 @@ const DOC_TYPES = [
   "FUMIGATION_CERTIFICATE",
   "BILL_OF_LADING",
   "AIR_WAYBILL",
+  "LORRY_RECEIPT",
+  "LCL_DRAFT",
   "INSURANCE_CERTIFICATE",
   "PAYMENT_ADVICE",
 ];
 const STAGE_TYPES = ["INQUIRY", "ORDER"];
-const INQUIRY_STAGES = ["INQUIRY_CREATED", "QUOTATION_SUBMITTED", "QUOTATION_REVISED", "PROFORMA_ISSUED", "PURCHASE_ORDER_RECEIVED", "ORDER_CONFIRMED"];
+const INQUIRY_STAGES = [
+  "ENQUIRY_CREATED",
+  "LOI_ACCEPTED_QTY_CONFIRMED",
+  "QUOTATION_REVISION",
+  "QUOTATION_CREATED",
+  "QUOTATION_DECISION",
+  "RESPONSIBILITIES_FINALIZED",
+  "PROFORMA_ISSUED",
+  "OTHER_DOCUMENTS",
+  "PURCHASE_ORDER_CREATED",
+];
 const ORDER_STAGES = ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", "QUALITY_VERIFIED", "COMPLIANCE_APPROVED", "PACKING_COMPLETED", "READY_FOR_SHIPMENT", "SHIPPED", "DELIVERED", "PAYMENT_PENDING", "PAYMENT_COMPLETED", "TRADE_CLOSED"];
 const RESPONSIBLE_ROLES = ["BUYER", "SELLER", "OBAOL", "PACKAGING", "QUALITY", "TRANSPORT", "SHIPPING"];
 const ACTION_TYPES = ["CREATE", "UPLOAD"];
@@ -41,7 +54,7 @@ export default function DocumentationRulesPage() {
   const [form, setForm] = useState<any>({
     docType: "QUOTATION",
     stageType: "INQUIRY",
-    stageKey: "INQUIRY_CREATED",
+    stageKey: "ENQUIRY_CREATED",
     responsibleRole: "SELLER",
     actionType: "CREATE",
     visibility: "BOTH",
@@ -114,7 +127,7 @@ export default function DocumentationRulesPage() {
     setForm({
       docType: "QUOTATION",
       stageType: "INQUIRY",
-      stageKey: "INQUIRY_CREATED",
+      stageKey: "ENQUIRY_CREATED",
       responsibleRole: "SELLER",
       actionType: "CREATE",
       visibility: "BOTH",
@@ -146,7 +159,7 @@ export default function DocumentationRulesPage() {
   const stageOptions = form.stageType === "INQUIRY" ? INQUIRY_STAGES : ORDER_STAGES;
 
   const [previewStageType, setPreviewStageType] = useState<string>("INQUIRY");
-  const [previewStageKey, setPreviewStageKey] = useState<string>("INQUIRY_CREATED");
+  const [previewStageKey, setPreviewStageKey] = useState<string>("ENQUIRY_CREATED");
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
 
   const handleRowSelect = (rule: any) => {
@@ -271,7 +284,7 @@ export default function DocumentationRulesPage() {
               onSelectionChange={(keys) => {
                 const next = String(Array.from(keys)[0] || "INQUIRY");
                 setPreviewStageType(next);
-                setPreviewStageKey(next === "INQUIRY" ? "INQUIRY_CREATED" : "ORDER_CREATED");
+                setPreviewStageKey(next === "INQUIRY" ? "ENQUIRY_CREATED" : "ORDER_CREATED");
               }}
             >
               {STAGE_TYPES.map((t) => (
@@ -324,7 +337,7 @@ export default function DocumentationRulesPage() {
             </Select>
             <Select label="Stage Type" selectedKeys={[form.stageType]} onSelectionChange={(keys) => {
               const next = String(Array.from(keys)[0] || "INQUIRY");
-              setForm({ ...form, stageType: next, stageKey: next === "INQUIRY" ? "INQUIRY_CREATED" : "ORDER_CREATED" });
+              setForm({ ...form, stageType: next, stageKey: next === "INQUIRY" ? "ENQUIRY_CREATED" : "ORDER_CREATED" });
             }}>
               {STAGE_TYPES.map((t) => (<SelectItem key={t}>{t}</SelectItem>))}
             </Select>

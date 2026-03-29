@@ -716,13 +716,13 @@ export default function EditModal({
   return (
     <>
       {!isControlled && (
-        <Tooltip content="Edit">
+        <Tooltip content="Edit Record" closeDelay={0}>
           <span
-            className="flex flex-col items-center gap-1 cursor-pointer active:opacity-50 group hover:text-warning-500 transition-colors"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-warning-500/10 hover:bg-warning-500/20 cursor-pointer active:opacity-50 group transition-all"
             onClick={() => setOpen(true)}
           >
-            <FiEdit2 size={18} className="text-default-400 group-hover:text-warning-500" />
-            <div className="h-[10px]" /> {/* Spacer to align with LiveToggle status text */}
+            <FiEdit2 size={20} className="text-warning-500/80 group-hover:text-warning-600 transition-colors" />
+            <div className="h-[2px]" />
           </span>
         </Tooltip>
       )}

@@ -13,22 +13,31 @@ import {
   Skeleton,
 } from "@nextui-org/react";
 import {
-  FiActivity,
-  FiArrowRight,
-  FiBox,
-  FiCheckCircle,
-  FiClock,
-  FiLayers,
-  FiPackage,
-  FiSearch,
-  FiShoppingBag,
-  FiAnchor,
-  FiSend,
-  FiShield,
-  FiTruck,
-  FiTrendingUp,
-  FiUsers,
-} from "react-icons/fi";
+  LuActivity,
+  LuArrowRight,
+  LuBox,
+  LuCheck,
+  LuClock,
+  LuLayers,
+  LuPackage,
+  LuSearch,
+  LuShoppingBag,
+  LuAnchor,
+  LuSend,
+  LuShield,
+  LuTruck,
+  LuTrendingUp,
+  LuUsers,
+  LuChevronRight,
+  LuPlus,
+  LuFileText,
+  LuSearch as LuSearchIcon,
+  LuZap,
+  LuInfo as LuAlertIcon,
+  LuHistory,
+  LuAirplay as LuRadioIcon
+} from "react-icons/lu";
+import GlobalSearch from "./GlobalSearch";
 import DashboardTile from "./dashboard-tile";
 import InsightCard from "./InsightCard";
 import TrendChart from "./TrendChart";
@@ -50,6 +59,12 @@ const Dashboard: NextPage = () => {
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
+  const hubTitle = isAdmin ? "Admin Panel" : isOperatorUser ? "Operations Hub" : "Associate Hub";
+  const hubSubtitle = isAdmin
+    ? "System oversight active."
+    : isOperatorUser
+      ? "Mission overview active."
+      : "Account overview active.";
 
   const [companyLookup, setCompanyLookup] = useState("");
   const [associateLookup, setAssociateLookup] = useState("");
@@ -378,35 +393,77 @@ const Dashboard: NextPage = () => {
         : false;
 
   const renderActionCenter = () => (
-    <Card className="lg:col-span-2 border border-default-100 shadow-sm bg-content1/70">
-      <CardHeader>
-        <h4 className="font-semibold text-foreground">Action Center</h4>
+    <Card className="lg:col-span-2 border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem]">
+      <CardHeader className="px-8 pt-8">
+        <div className="flex flex-col gap-1">
+          <h4 className="font-bold text-foreground">Task Overview</h4>
+          <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Management priorities and active triggers.</p>
+        </div>
       </CardHeader>
-      <Divider />
-      <CardBody className="space-y-3">
+      <Divider className="my-4 mx-8 w-auto opacity-50" />
+      <CardBody className="px-8 pb-8 space-y-4">
         {actionCenterItems.map((item) => (
-          <div key={item.label} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-default-200/60 rounded-xl p-3 bg-content1/70">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">{item.label}</span>
-                <Chip color={item.color} variant="flat" size="sm">
-                  {item.value}
-                </Chip>
-              </div>
-              <p className="text-xs text-default-500 mt-1">{item.detail}</p>
+           <div key={item.label} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-foreground/5 rounded-2xl p-4 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-all">
+             <div className="min-w-0">
+               <div className="flex items-center gap-3">
+                 <span className="text-sm font-black text-foreground uppercase tracking-tight">{item.label}</span>
+                 <Chip size="sm" variant="flat" color={item.color} className="font-bold border-none h-6 bg-foreground/5">
+                   {item.value}
+                 </Chip>
+               </div>
+               <p className="text-[11px] font-medium text-default-500 mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{item.detail}</p>
+             </div>
+             <Button
+               size="sm"
+               variant="flat"
+               color={item.color}
+               className="h-9 min-w-24 rounded-xl font-bold uppercase tracking-wider text-[10px] border border-foreground/5 shadow-sm"
+               endContent={<LuChevronRight className="w-3.5 h-3.5" />}
+               onPress={() => router.push(item.route)}
+             >
+               Open Hub
+             </Button>
+           </div>
+         ))}
+
+         {isAssociate && (
+            <div className="flex flex-col gap-1.5 p-5 bg-primary/5 border border-primary/10 rounded-2xl group transition-all hover:bg-primary/10">
+               <div className="flex items-center gap-2 mb-1">
+                  <LuZap className="text-primary" size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary">Modular Service Request</span>
+               </div>
+               <div className="flex items-center justify-between gap-4">
+                  <p className="text-[11px] font-semibold text-default-600 leading-tight">Create specialized procurement, packaging, or custom transit protocols.</p>
+                  <Button 
+                    size="sm" 
+                    color="primary" 
+                    variant="flat" 
+                    className="h-8 rounded-lg font-bold text-[10px] uppercase tracking-widest"
+                    onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
+                  >
+                     Initiate
+                  </Button>
+               </div>
             </div>
-            <Button
-              size="sm"
-              variant="flat"
-              color={item.color}
-              endContent={<FiArrowRight className="w-3.5 h-3.5" />}
-              onPress={() => router.push(item.route)}
-            >
-              Open
-            </Button>
-          </div>
-        ))}
-        <div className="border border-default-200/60 rounded-xl p-3 bg-content1/70">
+         )}
+
+         {isAssociate && associateActionRequired > 0 && (
+            <div className="p-5 bg-danger/5 border border-danger/10 rounded-2xl animate-in slide-in-from-right duration-500">
+               <div className="flex items-center gap-2 mb-3">
+                  <LuAlertIcon className="text-danger" size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-danger">Urgency Protocol Required</span>
+               </div>
+               <div className="space-y-3">
+                  <div className="flex items-center justify-between text-[11px] font-bold">
+                     <span className="text-default-600">High Priority Enquiries</span>
+                     <span className="text-danger">{associateActionRequired} Action(s)</span>
+                  </div>
+                  <Progress value={100} size="sm" color="danger" className="opacity-20" />
+               </div>
+            </div>
+         )}
+
+         <div className="border border-foreground/[0.05] rounded-2xl p-4 bg-foreground/[0.01]">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-foreground">Pending Actions</span>
             <Button
@@ -419,7 +476,7 @@ const Dashboard: NextPage = () => {
             </Button>
           </div>
           {pendingActionsList.length === 0 ? (
-            <div className="text-xs text-default-500">No pending actions right now.</div>
+            <div className="text-[11px] font-semibold text-default-400 italic py-4 text-center">You don’t have any enquiries yet</div>
           ) : (
             <div className="space-y-2">
               {pendingActionsList.map((item) => (
@@ -445,77 +502,69 @@ const Dashboard: NextPage = () => {
   );
 
   const renderRecentActivity = () => (
-    <Card className="border border-default-100 shadow-sm bg-content1/70">
-      <CardHeader>
-        <h4 className="font-semibold text-foreground">Recent Activity</h4>
+    <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem]">
+      <CardHeader className="px-8 pt-8">
+        <h4 className="font-bold text-foreground">Flux Telemetry</h4>
       </CardHeader>
-      <Divider />
-      <CardBody className="space-y-3">
+      <Divider className="my-4 mx-8 w-auto opacity-50" />
+      <CardBody className="px-8 pb-8 space-y-4">
         {enquiriesQuery.isLoading || ordersQuery.isLoading ? (
           Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="space-y-2">
+            <div key={idx} className="space-y-3">
               <Skeleton className="h-4 w-2/3 rounded-lg" />
-              <Skeleton className="h-3 w-1/2 rounded-lg" />
+              <Skeleton className="h-3 w-1/2 rounded-lg opacity-60" />
             </div>
           ))
         ) : activityFeed.length > 0 ? (
           activityFeed.map((item) => (
-            <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-2">
+            <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-4 p-2 rounded-xl border border-transparent hover:border-foreground/5 hover:bg-foreground/[0.01] transition-all group">
               <div className="min-w-0">
-                <div className="font-medium text-foreground truncate">
-                  {item.type} #{String(item.id || "").slice(-6).toUpperCase()}
+                <div className="font-bold text-foreground uppercase tracking-tight group-hover:text-primary transition-colors">
+                  {item.type} <span className="text-[10px] text-default-400 ml-1 font-medium">{String(item.id || "").slice(-6).toUpperCase()}</span>
                 </div>
-                <div className="text-xs text-default-500 truncate">{item.status}</div>
+                <div className="text-[10px] text-default-500 uppercase tracking-widest font-bold opacity-60">{String(item.status || "").replace(/_/g, " ")}</div>
               </div>
-              <Chip size="sm" variant="flat">
+              <span className="text-[9px] font-bold text-default-400 bg-foreground/5 px-2 py-1 rounded-md uppercase tracking-widest whitespace-nowrap">
                 {new Date(item.at).toLocaleDateString()}
-              </Chip>
+              </span>
             </div>
           ))
         ) : (
-          <div className="text-xs text-default-400">
+          <div className="text-[11px] font-medium text-default-500 italic opacity-60">
             {isAssociate
-              ? "No associate activity yet. Start from Marketplace or Enquiries."
+              ? "No associate telemetry detected. Initialize marketplace interaction."
               : isOperatorUser
-                ? "No assigned activity yet. Check your companies and enquiries."
-                : "No recent activity available yet."}
+                ? "No assigned activity telemetry. Check company mappings."
+                : "No recent activity detected in the flux stream."}
           </div>
         )}
       </CardBody>
     </Card>
   );
 
-  const renderShortcuts = () => (
-    <div>
-      <h3 className="text-sm font-bold uppercase tracking-wider text-default-500 mb-3">Priority Shortcuts</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {prioritizedLinks.map((option, index) => (
-          <div key={`${option.link}-${index}`} className="aspect-square">
-            <DashboardTile data={option} type="view" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   const renderPartialService = () => (
     (isAdmin || isAssociate || isOperatorUser) ? (
-      <Card className="border border-default-100 shadow-sm bg-content1/70">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 p-5">
+      <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 p-10">
           <div className="flex-1">
-            <h4 className="font-black text-lg tracking-tight text-foreground mb-1">Need Only One Service?</h4>
-            <p className="text-xs text-default-500 max-w-lg leading-relaxed">
-              Create a partial service request for procurement, packaging, testing, transport, or customs.
+             <div className="flex items-center gap-3 mb-3">
+               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+               <span className="text-[10px] font-bold tracking-widest uppercase text-primary">Service Modularization</span>
+             </div>
+            <h4 className="font-bold text-2xl tracking-tight text-foreground mb-2">Need a Specific Logistics Core?</h4>
+            <p className="text-sm text-default-500 max-w-lg leading-relaxed font-medium">
+              Create a partial service request for localized procurement, high-spec packaging, testing, transit, or customs clearance.
             </p>
           </div>
           <Button
             color="primary"
-            size="md"
-            className="font-bold w-full sm:w-auto shadow-lg shadow-primary/20"
-            endContent={<FiArrowRight size={16} />}
+            size="lg"
+            className="h-14 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
+            endContent={<LuArrowRight size={18} />}
             onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
           >
-            Create Partial Service
+            Create Modular Service
           </Button>
         </CardHeader>
       </Card>
@@ -528,20 +577,20 @@ const Dashboard: NextPage = () => {
       : [];
 
     const map: Record<string, { label: string; icon: React.ReactNode }> = {
-      BUYER: { label: "Buyer", icon: <FiShoppingBag size={14} /> },
-      SUPPLIER: { label: "Supplier", icon: <FiPackage size={14} /> },
-      PROCUREMENT_PARTNER: { label: "Procurement", icon: <FiSearch size={14} /> },
-      PACKAGING_PARTNER: { label: "Packaging", icon: <FiBox size={14} /> },
-      LOGISTICS_PARTNER: { label: "Logistics", icon: <FiTruck size={14} /> },
-      INLAND_LOGISTICS: { label: "Logistics", icon: <FiTruck size={14} /> },
-      OCEAN_FREIGHT: { label: "Ocean Freight", icon: <FiAnchor size={14} /> },
-      SEA_FREIGHT_FORWARDING: { label: "Ocean Freight", icon: <FiAnchor size={14} /> },
-      AIR_FREIGHT: { label: "Air Freight", icon: <FiSend size={14} /> },
-      AIR_FREIGHT_FORWARDING: { label: "Air Freight", icon: <FiSend size={14} /> },
-      CUSTOMS_CLEARANCE: { label: "Customs", icon: <FiShield size={14} /> },
-      WAREHOUSING: { label: "Warehousing", icon: <FiLayers size={14} /> },
-      QUALITY_TESTING_PARTNER: { label: "Quality", icon: <FiCheckCircle size={14} /> },
-      CERTIFICATION_PARTNER: { label: "Certification", icon: <FiCheckCircle size={14} /> },
+      BUYER: { label: "Buyer", icon: <LuShoppingBag size={14} /> },
+      SUPPLIER: { label: "Supplier", icon: <LuPackage size={14} /> },
+      PROCUREMENT_PARTNER: { label: "Procurement", icon: <LuSearch size={14} /> },
+      PACKAGING_PARTNER: { label: "Packaging", icon: <LuBox size={14} /> },
+      LOGISTICS_PARTNER: { label: "Inland Transportation", icon: <LuTruck size={14} /> },
+      INLAND_TRANSPORTATION: { label: "Inland Transportation", icon: <LuTruck size={14} /> },
+      OCEAN_FREIGHT: { label: "Ocean Freight", icon: <LuAnchor size={14} /> },
+      SEA_FREIGHT_FORWARDING: { label: "Ocean Freight", icon: <LuAnchor size={14} /> },
+      AIR_FREIGHT: { label: "Air Freight", icon: <LuSend size={14} /> },
+      AIR_FREIGHT_FORWARDING: { label: "Air Freight", icon: <LuSend size={14} /> },
+      CUSTOMS_CLEARANCE: { label: "Customs", icon: <LuShield size={14} /> },
+      WAREHOUSING: { label: "Warehousing", icon: <LuLayers size={14} /> },
+      QUALITY_TESTING_PARTNER: { label: "Quality", icon: <LuCheck size={14} /> },
+      CERTIFICATION_PARTNER: { label: "Certification", icon: <LuCheck size={14} /> },
     };
 
     const seen = new Set<string>();
@@ -562,7 +611,7 @@ const Dashboard: NextPage = () => {
     const interests = Array.isArray(user?.companyInterests)
       ? user?.companyInterests.map((value) => String(value || "").toUpperCase())
       : [];
-    const hasLogistics = interests.includes("LOGISTICS_PARTNER") || interests.includes("INLAND_LOGISTICS");
+    const hasLogistics = interests.includes("LOGISTICS_PARTNER") || interests.includes("INLAND_TRANSPORTATION");
     const hasProcurement = interests.includes("PROCUREMENT_PARTNER");
     const hasPackaging = interests.includes("PACKAGING_PARTNER");
     const hasQuality = interests.includes("QUALITY_TESTING_PARTNER") || interests.includes("CERTIFICATION_PARTNER");
@@ -591,7 +640,7 @@ const Dashboard: NextPage = () => {
             key={item.label}
             title={item.label}
             metric={Number(item.value || 0).toLocaleString()}
-            icon={item.color === "warning" ? <FiClock size={18} /> : item.color === "primary" ? <FiActivity size={18} /> : <FiShoppingBag size={18} />}
+            icon={item.color === "warning" ? <LuClock size={18} /> : item.color === "primary" ? <LuActivity size={18} /> : <LuShoppingBag size={18} />}
             footer={<span className="text-xs text-default-500">{item.detail}</span>}
           />
         ))}
@@ -605,25 +654,25 @@ const Dashboard: NextPage = () => {
             value: `${Number(systemMetrics.newEnquiriesToday ?? 0)} today`,
             isPositive: true,
           }}
-          icon={<FiActivity size={18} />}
+          icon={<LuActivity size={18} />}
           footer={<span className="text-xs text-default-500">All-time inbound enquiry volume</span>}
         />
         <InsightCard
           title="Pending Actions"
           metric={adminActionRequired.toLocaleString()}
-          icon={<FiClock size={18} />}
+          icon={<LuClock size={18} />}
           footer={<span className="text-xs text-default-500">Need acceptance/confirmation/conversion</span>}
         />
         <InsightCard
           title="Orders In Progress"
           metric={activeOrders.toLocaleString()}
-          icon={<FiShoppingBag size={18} />}
+          icon={<LuShoppingBag size={18} />}
           footer={<span className="text-xs text-default-500">Operational orders currently active</span>}
         />
         <InsightCard
           title="Completion Rate"
           metric={`${orderCompletionPct}%`}
-          icon={<FiCheckCircle size={18} />}
+          icon={<LuCheck size={18} />}
           footer={<span className="text-xs text-default-500">Completed orders out of all created orders</span>}
         />
       </div>
@@ -656,7 +705,7 @@ const Dashboard: NextPage = () => {
                   size="sm"
                   variant="flat"
                   color="primary"
-                  endContent={<FiArrowRight className="w-3.5 h-3.5" />}
+                  endContent={<LuArrowRight className="w-3.5 h-3.5" />}
                   onPress={() => router.push("/dashboard/enquiries")}
                 >
                   View Enquiries
@@ -702,7 +751,6 @@ const Dashboard: NextPage = () => {
         </Card>
       </div>
 
-      {renderShortcuts()}
       {renderPartialService()}
     </>
   );
@@ -731,142 +779,134 @@ const Dashboard: NextPage = () => {
         </Card>
       )}
 
-      <Card className="border border-default-100 shadow-sm bg-content1/70">
-        <CardHeader className="pb-2">
-          <h4 className="font-semibold text-foreground">Your Roles</h4>
-        </CardHeader>
-        <Divider />
-        <CardBody className="flex flex-wrap gap-2">
-          {associateInterestChips.length > 0 ? (
-            associateInterestChips.map((chip) => (
-              <Chip key={chip.label} color="primary" variant="flat" startContent={chip.icon}>
-                {chip.label}
-              </Chip>
-            ))
-          ) : (
-            <div className="text-xs text-default-500">No responsibilities configured yet.</div>
-          )}
-        </CardBody>
-      </Card>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <InsightCard
           title="Action Required"
           metric={associateActionRequired.toLocaleString()}
-          icon={<FiClock size={18} />}
+          icon={<LuClock size={18} />}
           footer={<span className="text-xs text-default-500">Pending your accept/confirm actions</span>}
         />
         <InsightCard
           title="Buying Enquiries"
           metric={(Number(associateMetrics.totalInquiries || associateBuyingCount) || 0).toLocaleString()}
-          icon={<FiShoppingBag size={18} />}
+          icon={<LuShoppingBag size={18} />}
           footer={<span className="text-xs text-default-500">Enquiries where you are buyer-side</span>}
         />
         <InsightCard
           title="Selling Enquiries"
           metric={associateSellingCount.toLocaleString()}
-          icon={<FiPackage size={18} />}
+          icon={<LuPackage size={18} />}
           footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
         />
         <InsightCard
           title="Active Orders"
           metric={activeOrders.toLocaleString()}
-          icon={<FiTrendingUp size={18} />}
+          icon={<LuTrendingUp size={18} />}
           footer={<span className="text-xs text-default-500">Orders currently active</span>}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardBody className="space-y-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
+          <CardBody className="p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-foreground">Execution Panel</h4>
-              <FiActivity className="text-default-400" />
+              <h4 className="font-bold text-foreground text-xs">Execution Panel</h4>
+              <LuActivity className="text-default-400" size={14} />
             </div>
-            <p className="text-xs text-default-500">{getAssociateOpsHint("execution")}</p>
-            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/execution-enquiries")}>
-              Open Execution
+            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("execution")}</p>
+            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-lg font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/execution-enquiries")}>
+              Control Feed
             </Button>
           </CardBody>
         </Card>
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardBody className="space-y-3">
+        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
+          <CardBody className="p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-foreground">Documents</h4>
-              <FiCheckCircle className="text-default-400" />
+              <h4 className="font-bold text-foreground text-xs">Documents</h4>
+              <LuCheck className="text-default-400 group-hover:text-primary transition-colors" size={14} />
             </div>
-            <p className="text-xs text-default-500">{getAssociateOpsHint("documents")}</p>
-            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/documents")}>
-              View Documents
+            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("documents")}</p>
+            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/documents")}>
+              Protocol Hub
             </Button>
           </CardBody>
         </Card>
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardBody className="space-y-3">
+        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
+          <CardBody className="p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-foreground">Enquiries</h4>
-              <FiShoppingBag className="text-default-400" />
+              <h4 className="font-bold text-foreground text-xs">Enquiries</h4>
+              <LuShoppingBag className="text-default-400 group-hover:text-primary transition-colors" size={14} />
             </div>
-            <p className="text-xs text-default-500">{getAssociateOpsHint("enquiries")}</p>
-            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/enquiries")}>
-              Open Enquiries
+            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("enquiries")}</p>
+            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/enquiries")}>
+              Market Stream
             </Button>
           </CardBody>
         </Card>
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardBody className="space-y-3">
+        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
+          <CardBody className="p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-foreground">Orders</h4>
-              <FiPackage className="text-default-400" />
+              <h4 className="font-bold text-foreground text-xs">Orders</h4>
+              <LuPackage className="text-default-400 group-hover:text-primary transition-colors" size={14} />
             </div>
-            <p className="text-xs text-default-500">{getAssociateOpsHint("orders")}</p>
-            <Button size="sm" variant="flat" color="primary" onPress={() => router.push("/dashboard/orders")}>
-              Open Orders
+            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("orders")}</p>
+            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/orders")}>
+              Active Missions
             </Button>
           </CardBody>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <InsightCard
-          title="Marketplace"
-          metric={Number(associateMetrics.obaolCatalogCount || 0).toLocaleString()}
-          icon={<FiShoppingBag size={18} />}
-          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/marketplace")}>Explore</Button>}
-        />
-        <InsightCard
-          title="Catalog"
-          metric={Number(associateMetrics.obaolCatalogCount || 0).toLocaleString()}
-          icon={<FiLayers size={18} />}
-          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/catalog")}>View Catalog</Button>}
-        />
-        <InsightCard
-          title="My Products"
-          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
-          icon={<FiPackage size={18} />}
-          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/product")}>Manage</Button>}
-        />
-        <InsightCard
-          title="Inventory"
-          metric={Number(associateMetrics.liveProducts || 0).toLocaleString()}
-          icon={<FiBox size={18} />}
-          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/inventory")}>Open</Button>}
-        />
-        <InsightCard
-          title="Imports"
-          metric="New"
-          icon={<FiPackage size={18} />}
-          footer={<Button size="sm" variant="flat" onPress={() => router.push("/dashboard/imports")}>Open</Button>}
-        />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-6">
+           <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem] overflow-hidden">
+              <CardHeader className="px-8 pt-8">
+                 <div className="flex items-center gap-2">
+                    <LuRadioIcon className="text-primary animate-pulse" size={18} />
+                    <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Intelligence Stream</h4>
+                 </div>
+              </CardHeader>
+              <Divider className="my-4 mx-8 w-auto opacity-50" />
+              <CardBody className="px-8 pb-8 space-y-4">
+                 <div className="space-y-4">
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">System Update</span>
+                       <p className="text-xs font-bold text-foreground leading-snug">Autonomous marketplace engine v2.0 deployed.</p>
+                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">2h ago</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500">Market Insight</span>
+                       <p className="text-xs font-bold text-foreground leading-snug">New logistics corridor opened for sea-freight.</p>
+                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">5h ago</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-success-500">Engagement</span>
+                       <p className="text-xs font-bold text-foreground leading-snug">Higher volume of enquiries detected in your region.</p>
+                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">1d ago</span>
+                    </div>
+                 </div>
+              </CardBody>
+           </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {renderActionCenter()}
-        {renderRecentActivity()}
+           <Card className="border border-foreground/5 shadow-none bg-foreground/10 backdrop-blur-3xl rounded-[2rem] overflow-hidden group cursor-pointer hover:bg-foreground/20 transition-all border-dashed">
+              <CardBody className="p-8 flex items-center justify-between">
+                 <div className="flex flex-col gap-1">
+                    <h4 className="font-black text-foreground uppercase tracking-widest text-[10px]">History Log</h4>
+                    <p className="text-xs text-default-500 font-medium">Review your telemetry.</p>
+                 </div>
+                 <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground opacity-50 group-hover:opacity-100 transition-opacity">
+                    <LuHistory size={20} />
+                 </div>
+              </CardBody>
+           </Card>
+        </div>
+        <div className="lg:col-span-3 space-y-6">
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+             {renderActionCenter()}
+             {renderRecentActivity()}
+           </div>
+        </div>
       </div>
-
-      {renderShortcuts()}
-      {renderPartialService()}
     </>
   );
 
@@ -889,140 +929,214 @@ const Dashboard: NextPage = () => {
             .includes(associateNeedle)
         )
       : [];
+    const ongoingEnquiries = enquiries.filter((item: any) => {
+      const assigned = (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId
+        || (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
+      if (!assigned) return false;
+      const status = String(item?.status || "").toUpperCase();
+      return !["COMPLETED", "CLOSED", "CANCELLED"].includes(status);
+    }).slice(0, 5);
+
     return (
       <>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <InsightCard
             title="Pending Assigned Enquiries"
             metric={Number(operatorMetrics.pendingAssignedEnquiries || 0).toLocaleString()}
-            icon={<FiClock size={18} />}
+            icon={<LuClock size={18} />}
             footer={<span className="text-xs text-default-500">Assigned enquiries awaiting next action</span>}
           />
           <InsightCard
             title="Assigned Companies"
             metric={Number(operatorMetrics.assignedCompanies || 0).toLocaleString()}
-            icon={<FiUsers size={18} />}
+            icon={<LuUsers size={18} />}
             footer={<span className="text-xs text-default-500">Companies currently mapped to you</span>}
           />
           <InsightCard
             title="Live-rate Gap"
             metric={Math.max(totalAssignedProducts - liveAssignedProducts, 0).toLocaleString()}
-            icon={<FiTrendingUp size={18} />}
+            icon={<LuTrendingUp size={18} />}
             footer={<span className="text-xs text-default-500">Assigned products not yet live</span>}
           />
           <InsightCard
             title="Assigned Products"
             metric={`${liveAssignedProducts}/${totalAssignedProducts}`}
-            icon={<FiBox size={18} />}
+            icon={<LuBox size={18} />}
             footer={<span className="text-xs text-default-500">Live products out of assigned products</span>}
           />
         </div>
-
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader>
-            <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user.id }} hideAdd={true} />
-          </CardBody>
-        </Card>
-
-        <Card className="border border-default-100 shadow-sm bg-content1/70">
-          <CardHeader className="flex flex-col gap-1">
-            <h4 className="font-semibold text-foreground">Directory Lookup</h4>
-            <p className="text-xs text-default-500">Check whether a company or associate already exists in the system.</p>
-          </CardHeader>
-          <Divider />
-          <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h5 className="text-sm font-semibold text-foreground">Company Finder</h5>
-                <span className="text-xs text-default-500">{directoryCompanies.length} total</span>
-              </div>
-              <input
-                value={companyLookup}
-                onChange={(event) => setCompanyLookup(event.target.value)}
-                placeholder="Search company name"
-                className="w-full rounded-xl border border-default-200 bg-content2 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <div className="space-y-2">
-                {companyNeedle ? (
-                  matchedCompanies.length ? (
-                    matchedCompanies.slice(0, 6).map((item: any) => (
-                      <div key={item?._id} className="flex items-center justify-between rounded-lg border border-default-200/70 bg-content1 px-3 py-2 text-xs text-default-600">
-                        <span className="font-medium text-foreground">{item?.name}</span>
-                        <span className="text-default-500">ID: {String(item?._id || "").slice(-6)}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-default-500">No companies found for that search.</p>
-                  )
-                ) : (
-                  <p className="text-xs text-default-500">Type to search company names.</p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h5 className="text-sm font-semibold text-foreground">Associate Finder</h5>
-                <span className="text-xs text-default-500">{directoryAssociates.length} total</span>
-              </div>
-              <input
-                value={associateLookup}
-                onChange={(event) => setAssociateLookup(event.target.value)}
-                placeholder="Search associate name"
-                className="w-full rounded-xl border border-default-200 bg-content2 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <div className="space-y-2">
-                {associateNeedle ? (
-                  matchedAssociates.length ? (
-                    matchedAssociates.slice(0, 6).map((item: any) => (
-                      <div key={item?._id} className="flex items-center justify-between rounded-lg border border-default-200/70 bg-content1 px-3 py-2 text-xs text-default-600">
-                        <span className="font-medium text-foreground">{item?.name}</span>
-                        <span className="text-default-500">{item?.email || "No email"}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-default-500">No associates found for that search.</p>
-                  )
-                ) : (
-                  <p className="text-xs text-default-500">Type to search associate names.</p>
-                )}
-              </div>
-            </div>
-          </CardBody>
-        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {renderActionCenter()}
           {renderRecentActivity()}
         </div>
 
-        {renderShortcuts()}
+        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem] overflow-hidden">
+           <CardHeader className="px-8 pt-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                 <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Ongoing Enquiry Pipeline</h4>
+              </div>
+              <Button size="sm" variant="light" className="text-[10px] font-bold uppercase tracking-widest" onPress={() => router.push("/dashboard/enquiries")}>
+                 Full Feed
+              </Button>
+           </CardHeader>
+           <Divider className="my-4 mx-8 w-auto opacity-50" />
+           <CardBody className="px-8 pb-8">
+              {ongoingEnquiries.length > 0 ? (
+                 <div className="space-y-4">
+                    {ongoingEnquiries.map((item: any) => (
+                       <div key={item._id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border border-foreground/5 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-all group">
+                          <div className="flex items-center gap-4">
+                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
+                                {String(item._id).slice(-2).toUpperCase()}
+                             </div>
+                             <div>
+                                <div className="text-[11px] font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">
+                                   Enquiry #{String(item._id).slice(-6).toUpperCase()}
+                                </div>
+                                <div className="text-[10px] text-default-400 font-bold uppercase tracking-tight mt-0.5">
+                                   {item.buyerAssociateId?.name || "Anonymous Buyer"}
+                                </div>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-6 mt-4 md:mt-0">
+                             <div className="flex flex-col items-end">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-default-400">Status</span>
+                                <Chip size="sm" variant="flat" color="primary" className="h-6 font-bold uppercase text-[9px] border-none bg-primary/10">
+                                   {String(item.status).replace(/_/g, " ")}
+                                </Chip>
+                             </div>
+                             <Button 
+                                size="sm" 
+                                variant="flat" 
+                                className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-foreground/5"
+                                onPress={() => router.push(`/dashboard/enquiries/${item._id}`)}
+                             >
+                                Track
+                             </Button>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              ) : (
+                 <div className="py-12 text-center text-[11px] font-bold text-default-400 italic">No ongoing enquiries detected in your pipeline.</div>
+              )}
+           </CardBody>
+        </Card>
+
+        <Card className="border border-default-100 shadow-sm bg-content1/70 rounded-3xl overflow-hidden">
+          <CardHeader className="px-6 pt-6">
+            <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
+          </CardHeader>
+          <Divider className="my-4" />
+          <CardBody className="px-6 pb-6">
+            <EssentialTabContent essentialName="researchedCompany" filter={{ submittedByOperator: user?.id }} hideAdd={true} />
+          </CardBody>
+        </Card>
+
+        <Card className="border border-default-100 shadow-sm bg-content1/70 rounded-3xl overflow-hidden">
+          <CardHeader className="flex flex-col gap-1 px-6 pt-6">
+            <h4 className="font-semibold text-foreground">Directory Lookup</h4>
+            <p className="text-xs text-default-500">Check whether a company or associate already exists in the system.</p>
+          </CardHeader>
+          <Divider className="my-4" />
+          <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-6 pb-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-semibold text-foreground uppercase tracking-tight">Company Finder</h5>
+                <span className="text-xs text-default-500 font-bold">{directoryCompanies.length} total</span>
+              </div>
+              <input
+                value={companyLookup}
+                onChange={(event) => setCompanyLookup(event.target.value)}
+                placeholder="Search company name"
+                className="w-full rounded-2xl border border-default-200 bg-content2 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
+              />
+              <div className="space-y-2">
+                {companyNeedle ? (
+                  matchedCompanies.length ? (
+                    matchedCompanies.slice(0, 6).map((item: any) => (
+                      <div key={item?._id} className="flex items-center justify-between rounded-xl border border-default-200/50 bg-content1 px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
+                        <span className="font-bold text-foreground">{item?.name}</span>
+                        <span className="text-[10px] uppercase font-black text-default-400">ID: {String(item?._id || "").slice(-6)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-default-500 italic">No companies found for that search.</p>
+                  )
+                ) : (
+                  <p className="text-[10px] text-default-400 uppercase font-black tracking-widest">Awaiting input...</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-semibold text-foreground uppercase tracking-tight">Associate Finder</h5>
+                <span className="text-xs text-default-500 font-bold">{directoryAssociates.length} total</span>
+              </div>
+              <input
+                value={associateLookup}
+                onChange={(event) => setAssociateLookup(event.target.value)}
+                placeholder="Search associate name"
+                className="w-full rounded-2xl border border-default-200 bg-content2 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
+              />
+              <div className="space-y-2">
+                {associateNeedle ? (
+                  matchedAssociates.length ? (
+                    matchedAssociates.slice(0, 6).map((item: any) => (
+                      <div key={item?._id} className="flex items-center justify-between rounded-xl border border-default-200/50 bg-content1 px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
+                        <span className="font-bold text-foreground">{item?.name}</span>
+                        <span className="text-[10px] font-bold text-default-400">{item?.email || "No email"}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-default-500 italic">No associates found for that search.</p>
+                  )
+                ) : (
+                  <p className="text-[10px] text-default-400 uppercase font-black tracking-widest">Awaiting input...</p>
+                )}
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
         {renderPartialService()}
       </>
     );
   };
 
   return (
-    <div className="w-full p-4 md:p-6 space-y-6">
-      <Card className="border-none shadow-md bg-gradient-to-r from-slate-900 via-cyan-900 to-teal-700 text-white">
-        <CardBody className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Operations Command Center</h1>
-              <p className="text-sm md:text-base text-white/85">
-                Welcome back, {welcomeName}. Track your priorities, activity, and progress from one screen.
-              </p>
+    <div className="w-full p-4 md:p-6 space-y-8">
+      <Card className="border border-foreground/5 shadow-none bg-foreground/[0.04] backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
+        <CardBody className="p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div className="space-y-4 flex-1">
+              <div className="flex items-center gap-3">
+                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                 <span className="text-[10px] font-black tracking-widest uppercase text-primary">System Online</span>
+              </div>
+              <div className="space-y-1">
+                <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic">{hubTitle}</h1>
+                <p className="text-sm text-default-500 font-bold uppercase tracking-tight">
+                  Welcome, <span className="text-foreground">{welcomeName}</span>. {hubSubtitle}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Chip size="sm" variant="flat" className="bg-white/20 text-white border border-white/20 font-semibold">
-                {role || "User"}
-              </Chip>
-              <Chip size="sm" variant="flat" className="bg-white/20 text-white border border-white/20 font-semibold">
-                {activeOrders} Active Orders
-              </Chip>
+            
+            <div className="flex flex-col md:flex-row items-center gap-5">
+              <div className="w-full md:w-auto md:min-w-[320px]">
+                <GlobalSearch />
+              </div>
+              <div className="hidden md:block h-6 w-px bg-foreground/5" />
+              <div className="flex items-center gap-2.5">
+                <Chip variant="flat" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 bg-foreground/5 border border-foreground/5">
+                  {role || "User"}
+                </Chip>
+                <Chip variant="flat" color="primary" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 border border-primary/20">
+                  {activeOrders} Active Missions
+                </Chip>
+              </div>
             </div>
           </div>
         </CardBody>

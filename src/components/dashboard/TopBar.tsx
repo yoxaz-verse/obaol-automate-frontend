@@ -133,7 +133,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   const mobileSections = [
     { label: "", links: ["/dashboard"] },
     { label: "Product", links: ["/dashboard/product", "/dashboard/catalog", "/dashboard/marketplace", "/dashboard/imports"] },
-    { label: "Execution", links: ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/execution-enquiries", "/dashboard/documents"] },
+    { label: "Execution", links: ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/external-orders", "/dashboard/sample-requests", "/dashboard/execution-enquiries", "/dashboard/documents"] },
     { label: "News", links: ["/dashboard/news"] },
     { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/companyProduct", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },

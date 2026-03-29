@@ -18,6 +18,7 @@ import Image from "next/image";
 import EmptyState from "../ui/EmptyState";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
+import { getLanguageCookie } from "@/utils/languageCookie";
 
 export default function CommonTable({
   TableData = [], // Default value as an empty array
@@ -152,7 +153,7 @@ export default function CommonTable({
 
         case "action":
           return (
-            <div className="relative inline-flex w-fit mx-auto flex-nowrap items-center justify-center gap-2 whitespace-nowrap">
+            <div className="relative inline-flex w-fit mx-auto flex-nowrap items-center justify-center gap-4 whitespace-nowrap">
               {viewModal && viewModal(item)}
               {editModal && editModal(item)}
               {otherModal && otherModal(item)}
@@ -181,6 +182,23 @@ export default function CommonTable({
     const end = start + rowsPerPage;
     return TableData ? TableData.slice(start, end) : [];
   }, [page, TableData]);
+
+  const dataSignature = React.useMemo(() => {
+    if (!Array.isArray(TableData) || TableData.length === 0) return "empty";
+    const first = (TableData[0] as any)?._id || (TableData[0] as any)?.id || "";
+    const last = (TableData[TableData.length - 1] as any)?._id || (TableData[TableData.length - 1] as any)?.id || "";
+    return `${TableData.length}:${String(first)}:${String(last)}`;
+  }, [TableData]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const preferred = getLanguageCookie();
+    if (!preferred || preferred === "en") return;
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("translation-reapply"));
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [dataSignature]);
 
   if (isLoading) {
     return (
@@ -273,7 +291,7 @@ export default function CommonTable({
                   align={isActionColumn(column.uid) ? "center" : (column.align || "start")}
                   className={
                     isActionColumn(column.uid)
-                      ? "whitespace-nowrap w-[1%] !min-w-0 !px-2 text-center"
+                      ? "whitespace-nowrap min-w-[150px] px-4 text-center"
                       : "whitespace-nowrap min-w-[140px]"
                   }
                 >
@@ -289,7 +307,7 @@ export default function CommonTable({
                     <TableCell
                       className={
                         isActionColumn(columnKey)
-                          ? "w-[1%] !min-w-0 !px-2 text-center"
+                          ? "min-w-[150px] px-4 text-center"
                           : "min-w-[140px]"
                       }
                     >

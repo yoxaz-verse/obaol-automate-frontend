@@ -7,6 +7,7 @@ import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTe
 import Link from "next/link";
 
 const DOC_TYPES = [
+  "LOI",
   "QUOTATION",
   "PROFORMA_INVOICE",
   "INVOICE",
@@ -19,6 +20,8 @@ const DOC_TYPES = [
   "FUMIGATION_CERTIFICATE",
   "BILL_OF_LADING",
   "AIR_WAYBILL",
+  "LORRY_RECEIPT",
+  "LCL_DRAFT",
   "INSURANCE_CERTIFICATE",
   "PAYMENT_ADVICE",
 ];

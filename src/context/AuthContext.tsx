@@ -15,6 +15,7 @@ interface AuthState {
 export interface User {
   id: string;
   email: string;
+  name?: string;
   role: string;
   associateCompanyId?: string | null;
   companyInterestsConfigured?: boolean;
@@ -29,6 +30,7 @@ export interface User {
 
 interface AuthContextProps extends AuthState {
   login: (data: LoginData) => Promise<void>;
+  loginWithGoogle: (data: GoogleLoginData) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -39,12 +41,19 @@ interface LoginData {
   rememberMe?: boolean;
 }
 
+interface GoogleLoginData {
+  idToken: string;
+  role: string;
+  rememberMe?: boolean;
+}
+
 const AuthContext = createContext<AuthContextProps>({
   isAuthenticated: false,
   user: null,
   loading: true, // Initial loading state
-  login: async () => {},
-  logout: async () => {},
+  login: async () => { },
+  loginWithGoogle: async () => { },
+  logout: async () => { },
 });
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
@@ -97,6 +106,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const loginWithGoogle = async (data: GoogleLoginData) => {
+    try {
+      const response = await postData("/auth/google", {
+        idToken: data.idToken,
+        role: data.role,
+        intent: "login",
+        rememberMe: Boolean(data.rememberMe),
+      });
+
+      if (response.data.success) {
+        try {
+          const userResponse = await getData("/verify-token");
+          if (userResponse.data.success) {
+            setAuth({
+              isAuthenticated: true,
+              user: userResponse.data.user,
+              loading: false,
+            });
+          } else {
+            throw new Error("Failed to retrieve user data");
+          }
+        } catch (verifyError: any) {
+          const verifyStatus = Number(verifyError?.response?.status || 0);
+          if (verifyStatus === 401) {
+            const blockedError: any = new Error(
+              "Session cookie was blocked by browser privacy settings. Allow cookies for obaol.com/api.obaol.com and retry."
+            );
+            blockedError.code = "SESSION_COOKIE_BLOCKED";
+            throw blockedError;
+          }
+          throw verifyError;
+        }
+      } else {
+        throw new Error(response.data.message || "Google login failed");
+      }
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      setAuth((prev) => ({ ...prev, loading: false }));
+      throw error;
+    }
+  };
+
   // Function to handle logout
   const logout = async () => {
     try {
@@ -129,7 +180,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   // Check authentication status on mount
   useEffect(() => {
-    
+
     const checkAuth = async () => {
       try {
         const response = await getData("/verify-token");
@@ -167,7 +218,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout }}>
+    <AuthContext.Provider value={{ ...auth, login, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

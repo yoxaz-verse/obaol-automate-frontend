@@ -2,13 +2,13 @@
 
 import React, { useEffect } from "react";
 import { Button } from "@heroui/react";
-import { Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Select, SelectItem, Divider } from "@nextui-org/react";
+import { Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { deleteData, patchData, postData } from "@/core/api/apiHandler";
-import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiSearch } from "react-icons/fi";
+import { FiMessageSquare, FiCheckCircle, FiPackage, FiArrowRight, FiSearch } from "react-icons/fi";
 import { LuPlus, LuShoppingBag, LuBookOpen } from "react-icons/lu";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
 import AuthContext from "@/context/AuthContext";
@@ -18,32 +18,15 @@ import { showToastMessage } from "@/utils/utils";
 export default function OrdersPage() {
     const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string>("All");
-    const [scopeTab, setScopeTab] = React.useState<"internal" | "external">("internal");
     const [navigatingId, setNavigatingId] = React.useState<string | null>(null);
     const [demoLoading, setDemoLoading] = React.useState(false);
     const [demoClearing, setDemoClearing] = React.useState(false);
-    const [externalOpen, setExternalOpen] = React.useState(false);
-    const [externalLoading, setExternalLoading] = React.useState(false);
-    const [externalForm, setExternalForm] = React.useState({
-        buyerName: "",
-        buyerEmail: "",
-        buyerPhone: "",
-        sellerName: "",
-        sellerEmail: "",
-        sellerPhone: "",
-        productName: "",
-        productVariant: "",
-        quantity: "",
-        unit: "MT",
-        tradeType: "DOMESTIC",
-    });
     const [createOrderOpen, setCreateOrderOpen] = React.useState(false);
     const { user } = React.useContext(AuthContext);
     const { play } = useSoundEffect();
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const canUseDemo = roleLower === "admin";
-    const canCreateExternal = roleLower === "admin" || roleLower === "operator" || roleLower === "team" || roleLower === "associate";
     const canCreateInternal = roleLower === "admin" || roleLower === "associate";
 
     useEffect(() => {
@@ -85,13 +68,26 @@ export default function OrdersPage() {
                             item?.enquiry?.assignedOperatorId ||
                             ""
                         ).toString();
-                        return Boolean(user?.id && assignedOperatorId === String(user.id));
+                        const supplierOperatorId = (
+                            item?.enquiry?.supplierOperatorId?._id ||
+                            item?.enquiry?.supplierOperatorId ||
+                            ""
+                        ).toString();
+                        const dealCloserOperatorId = (
+                            item?.enquiry?.dealCloserOperatorId?._id ||
+                            item?.enquiry?.dealCloserOperatorId ||
+                            ""
+                        ).toString();
+                        return Boolean(
+                            user?.id &&
+                            (assignedOperatorId === String(user.id) ||
+                                supplierOperatorId === String(user.id) ||
+                                dealCloserOperatorId === String(user.id))
+                        );
                     });
 
-                    const filteredByScope = ordersData.filter((item: any) => scopeTab === "external"
-                        ? Boolean(item?.isExternal)
-                        : !item?.isExternal);
-                    const scopedFiltered = filteredByScope.filter((item: any) => {
+                    const scopedFiltered = ordersData.filter((item: any) => {
+                        if (item?.isExternal) return false;
                         if (!isOperatorUser) return true;
                         if (item?.isExternal) return true;
                         const assignedOperatorId = (
@@ -99,7 +95,22 @@ export default function OrdersPage() {
                             item?.enquiry?.assignedOperatorId ||
                             ""
                         ).toString();
-                        return Boolean(user?.id && assignedOperatorId === String(user.id));
+                        const supplierOperatorId = (
+                            item?.enquiry?.supplierOperatorId?._id ||
+                            item?.enquiry?.supplierOperatorId ||
+                            ""
+                        ).toString();
+                        const dealCloserOperatorId = (
+                            item?.enquiry?.dealCloserOperatorId?._id ||
+                            item?.enquiry?.dealCloserOperatorId ||
+                            ""
+                        ).toString();
+                        return Boolean(
+                            user?.id &&
+                            (assignedOperatorId === String(user.id) ||
+                                supplierOperatorId === String(user.id) ||
+                                dealCloserOperatorId === String(user.id))
+                        );
                     });
 
                     return (
@@ -178,56 +189,43 @@ export default function OrdersPage() {
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <Tabs
                                                 aria-label="Order Scope"
-                                                color="secondary"
+                                                color="warning"
                                                 variant="underlined"
-                                                selectedKey={scopeTab}
-                                                onSelectionChange={(key) => {
-                                                    setScopeTab(key as "internal" | "external");
-                                                    setSelectedTab("All");
-                                                }}
+                                                selectedKey="internal"
+                                                onSelectionChange={() => setSelectedTab("All")}
                                                 classNames={{
-                                                    tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                                    cursor: "w-full bg-warning h-[3px]",
-                                                    tab: "max-w-fit px-0 h-10",
-                                                    tabContent: "group-data-[selected=true]:text-warning font-black uppercase tracking-widest text-[11px]"
+                                                    tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
+                                                    cursor: "bg-warning w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(255,193,7,0.2)]",
+                                                    tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
+                                                    tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
                                                 }}
                                             >
-                                                <Tab key="internal" title="Internal Orders" />
-                                                <Tab key="external" title="External Orders" />
+                                                <Tab key="internal" title="Orders" />
                                             </Tabs>
                                             <div className="flex gap-2">
                                                 {canCreateInternal && (
                                                     <Button
                                                         size="sm"
-                                                        className="bg-primary text-white font-black px-4 shadow-lg shadow-primary/20"
+                                                        className="bg-primary text-white font-bold px-4 shadow-md shadow-primary/20 h-9 rounded-xl"
                                                         startContent={<LuPlus size={18} />}
                                                         onPress={() => setCreateOrderOpen(true)}
                                                     >
                                                         Create Order
-                                                    </Button>
-                                                )}
-                                                {scopeTab === "external" && canCreateExternal && (
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-warning text-white"
-                                                        onPress={() => setExternalOpen(true)}
-                                                    >
-                                                        Create External Order
-                                                    </Button>
+                                                     </Button>
                                                 )}
                                             </div>
                                         </div>
                                         <Tabs
                                             aria-label="Order Stages"
-                                            color="secondary"
+                                            color="warning"
                                             variant="underlined"
                                             selectedKey={selectedTab}
                                             onSelectionChange={(key) => setSelectedTab(key as string)}
                                             classNames={{
-                                                tabList: "gap-4 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                                cursor: "w-full bg-warning h-[3px]",
-                                                tab: "max-w-fit px-0 h-10",
-                                                tabContent: "group-data-[selected=true]:text-warning font-black uppercase tracking-widest text-[11px]"
+                                                tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                                                cursor: "bg-warning w-full h-[2.5px] rounded-t-full",
+                                                tab: "max-w-fit px-4 h-10 transition-all duration-300",
+                                                tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-500 group-data-[selected=true]:text-warning"
                                             }}
                                         >
                                             <Tab key="All" title="All Orders" />
@@ -259,7 +257,7 @@ export default function OrdersPage() {
                                                             }}
                                                             action={
                                                                 <Button
-                                                                    className="bg-warning text-white font-semibold shadow-md h-8 min-w-[96px] px-4 border border-warning-600/60"
+                                                                    className="bg-warning text-white font-semibold shadow-md h-9 min-w-[96px] px-4 rounded-xl"
                                                                     size="sm"
                                                                     isLoading={navigatingId === String(orderId)}
                                                                     onPress={() => {
@@ -268,7 +266,7 @@ export default function OrdersPage() {
                                                                         router.push(`/dashboard/orders/${String(orderId)}`);
                                                                     }}
                                                                 >
-                                                                    {navigatingId === String(orderId) ? "" : "Manage"}
+                                                                    {navigatingId === String(orderId) ? "Managing..." : "Manage Order"}
                                                                 </Button>
                                                             }
                                                         />
@@ -279,7 +277,7 @@ export default function OrdersPage() {
 
                                     {scopedFiltered.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-16 px-6 bg-content1/50 rounded-[2.5rem] border border-divider border-dashed max-w-4xl mx-auto w-full group transition-all hover:bg-content1/80">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                                            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mb-6 group-hover:scale-105 transition-transform duration-500 shadow-inner">
                                                 <LuShoppingBag size={32} />
                                             </div>
                                             <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 text-center">Start Your First Trade</h3>
@@ -311,11 +309,11 @@ export default function OrdersPage() {
 
                                             <Button
                                                 color="primary"
-                                                className="font-black px-10 h-14 rounded-2xl shadow-2xl shadow-primary/40 text-sm tracking-widest hover:scale-105 active:scale-95 transition-all"
+                                                className="font-bold px-10 h-11 rounded-xl shadow-lg shadow-primary/20 text-sm tracking-wide hover:scale-105 active:scale-95 transition-all"
                                                 onPress={() => router.push("/dashboard/marketplace")}
                                                 endContent={<FiArrowRight className="ml-1" />}
                                             >
-                                                EXPLORE MARKETPLACE
+                                                Explore Marketplace
                                             </Button>
                                         </div>
                                     )}
@@ -338,7 +336,7 @@ export default function OrdersPage() {
                                                         onClose();
                                                     }}
                                                 >
-                                                    <div className="p-3 bg-primary/20 text-primary rounded-xl group-hover:scale-110 transition-transform">
+                                                    <div className="p-3 bg-primary/20 text-primary rounded-xl group-hover:scale-105 transition-transform">
                                                         <LuShoppingBag size={24} />
                                                     </div>
                                                     <div className="flex-1">
@@ -355,7 +353,7 @@ export default function OrdersPage() {
                                                         onClose();
                                                     }}
                                                 >
-                                                    <div className="p-3 bg-warning/20 text-warning rounded-xl group-hover:scale-110 transition-transform">
+                                                    <div className="p-3 bg-warning/20 text-warning rounded-xl group-hover:scale-105 transition-transform">
                                                         <LuBookOpen size={24} />
                                                     </div>
                                                     <div className="flex-1">
@@ -382,113 +380,6 @@ export default function OrdersPage() {
                                 </ModalContent>
                             </Modal>
 
-                            <Modal isOpen={externalOpen} onOpenChange={setExternalOpen} size="2xl" backdrop="blur">
-                                <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
-                                    {(onClose) => (
-                                        <>
-                                            <ModalHeader className="px-6 pt-6">
-                                                <h3 className="text-xl font-black tracking-tight">Create External Order</h3>
-                                            </ModalHeader>
-                                            <ModalBody className="gap-4 px-6 py-2">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="flex flex-col gap-3">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-default-400">Buyer Information</span>
-                                                        <Input label="Name" size="sm" variant="bordered" value={externalForm.buyerName} onValueChange={(v) => setExternalForm({ ...externalForm, buyerName: v })} />
-                                                        <Input label="Email" size="sm" variant="bordered" value={externalForm.buyerEmail} onValueChange={(v) => setExternalForm({ ...externalForm, buyerEmail: v })} />
-                                                        <Input label="Phone" size="sm" variant="bordered" value={externalForm.buyerPhone} onValueChange={(v) => setExternalForm({ ...externalForm, buyerPhone: v })} />
-                                                    </div>
-                                                    <div className="flex flex-col gap-3">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-default-400">Seller Information</span>
-                                                        <Input label="Name" size="sm" variant="bordered" value={externalForm.sellerName} onValueChange={(v) => setExternalForm({ ...externalForm, sellerName: v })} />
-                                                        <Input label="Email" size="sm" variant="bordered" value={externalForm.sellerEmail} onValueChange={(v) => setExternalForm({ ...externalForm, sellerEmail: v })} />
-                                                        <Input label="Phone" size="sm" variant="bordered" value={externalForm.sellerPhone} onValueChange={(v) => setExternalForm({ ...externalForm, sellerPhone: v })} />
-                                                    </div>
-                                                </div>
-                                                <Divider className="my-2" />
-                                                <div className="flex flex-col gap-3">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400">Product Details</span>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        <Input label="Product Name" size="sm" variant="bordered" value={externalForm.productName} onValueChange={(v) => setExternalForm({ ...externalForm, productName: v })} />
-                                                        <Input label="Variant" size="sm" variant="bordered" value={externalForm.productVariant} onValueChange={(v) => setExternalForm({ ...externalForm, productVariant: v })} />
-                                                        <Input label="Quantity" size="sm" variant="bordered" value={externalForm.quantity} onValueChange={(v) => setExternalForm({ ...externalForm, quantity: v })} />
-                                                        <Input label="Unit" size="sm" variant="bordered" value={externalForm.unit} onValueChange={(v) => setExternalForm({ ...externalForm, unit: v })} />
-                                                        <Select
-                                                            label="Trade Type"
-                                                            size="sm"
-                                                            variant="bordered"
-                                                            selectedKeys={[externalForm.tradeType]}
-                                                            onSelectionChange={(keys) => {
-                                                                const arr = Array.from(keys as Set<string>);
-                                                                setExternalForm({ ...externalForm, tradeType: String(arr[0] || "DOMESTIC") });
-                                                            }}
-                                                        >
-                                                            <SelectItem key="DOMESTIC" value="DOMESTIC">Domestic</SelectItem>
-                                                            <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">International</SelectItem>
-                                                        </Select>
-                                                    </div>
-                                                </div>
-                                            </ModalBody>
-                                            <ModalFooter className="px-6 pb-6 pt-4">
-                                                <Button variant="light" onPress={onClose} className="font-bold">Cancel</Button>
-                                                <Button
-                                                    className="bg-warning text-white font-black px-6 shadow-lg shadow-warning/20"
-                                                    isLoading={externalLoading}
-                                                    onPress={async () => {
-                                                        if (externalLoading) return;
-                                                        if (!externalForm.buyerName || !externalForm.sellerName || !externalForm.productName || !externalForm.tradeType) {
-                                                            showToastMessage({
-                                                                type: "error",
-                                                                message: "Buyer, seller, product, and trade type are required.",
-                                                                position: "top-right",
-                                                            });
-                                                            return;
-                                                        }
-                                                        setExternalLoading(true);
-                                                        try {
-                                                            await postData(apiRoutes.orders.createExternal, {
-                                                                externalTradeType: externalForm.tradeType,
-                                                                externalBuyer: {
-                                                                    name: externalForm.buyerName,
-                                                                    email: externalForm.buyerEmail,
-                                                                    phone: externalForm.buyerPhone,
-                                                                },
-                                                                externalSeller: {
-                                                                    name: externalForm.sellerName,
-                                                                    email: externalForm.sellerEmail,
-                                                                    phone: externalForm.sellerPhone,
-                                                                },
-                                                                externalProduct: {
-                                                                    name: externalForm.productName,
-                                                                    variant: externalForm.productVariant,
-                                                                    quantity: externalForm.quantity ? Number(externalForm.quantity) : null,
-                                                                    unit: externalForm.unit,
-                                                                },
-                                                            });
-                                                            showToastMessage({
-                                                                type: "success",
-                                                                message: "External order created.",
-                                                                position: "top-right",
-                                                            });
-                                                            refetch?.();
-                                                            setExternalOpen(false);
-                                                        } catch (error: any) {
-                                                            showToastMessage({
-                                                                type: "error",
-                                                                message: error?.response?.data?.message || "Unable to create external order.",
-                                                                position: "top-right",
-                                                            });
-                                                        } finally {
-                                                            setExternalLoading(false);
-                                                        }
-                                                    }}
-                                                >
-                                                    Create Order
-                                                </Button>
-                                            </ModalFooter>
-                                        </>
-                                    )}
-                                </ModalContent>
-                            </Modal>
                         </div>
                     );
                 }}

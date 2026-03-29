@@ -26,11 +26,6 @@ export default function Footer() {
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <MdPhone className="text-foreground text-lg" />
-                <a href="tel:+917306096941" className="hover:text-foreground transition-colors">
-                  +91 (730) 609-6941                </a>
-              </div>
-              <div className="flex items-center gap-3">
                 <FaWhatsapp className="text-green-500 text-lg" />
                 <a
                   href="https://wa.me/919019351483"

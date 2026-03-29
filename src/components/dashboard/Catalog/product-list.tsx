@@ -1,18 +1,14 @@
 "use client";
 import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
-import Title from "@/components/titles";
-import { } from "@/core/api/apiRoutes";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
-import { Accordion, AccordionItem, Divider, Spacer, Chip } from "@heroui/react";
+import { Accordion, AccordionItem } from "@heroui/react";
 import React, { useState, useContext } from "react";
 import VariantRate from "./variant-rate";
 import UserDeleteModal from "@/components/CurdTable/delete";
 import EditModal from "@/components/CurdTable/edit-model";
-import { FiCheckCircle } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
-
-// ... other imports
+import { FiPackage, FiLayers, FiInfo, FiCheckCircle, FiGrid, FiDatabase } from "react-icons/fi";
 
 interface IProductList {
   product: any;
@@ -20,31 +16,49 @@ interface IProductList {
   onProductDeleted: () => void;
   myCatalogItems: any[];
 }
+
 export const ProductList = ({ product, setProduct, myCatalogItems }: IProductList) => {
   const tableConfig = { ...initialTableConfig };
   const [isDeleted, setIsDeleted] = useState(false);
   const { user } = useContext(AuthContext);
 
   const refetchData = () => {
-    // ✅ Trigger deletion effect
-    console.log(product);
-
     setIsDeleted(true);
   };
 
   return product ? (
-    <section>
-      <div className="flex justify-between items-start border-b border-foreground/10 pb-6 mb-8">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+    <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* ─── Product Tactical Header ─────────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-b border-foreground/5 pb-12 mb-12 relative">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20 shadow-lg shadow-warning-500/5">
+              <FiPackage size={24} />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500 opacity-80">Product Record</span>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Active in Catalog</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 className="text-5xl font-black tracking-tighter text-foreground mb-4 leading-[0.9] uppercase hyphens-auto text-left">
             {product.name}
           </h2>
+
           {product.description && (
-            <p className="text-default-400 mt-2 text-sm max-w-2xl leading-relaxed">{product.description}</p>
+            <div className="relative pl-6 border-l-2 border-warning-500/20 py-1 text-left">
+              <p className="text-default-500 text-sm max-w-3xl leading-relaxed font-medium">
+                {product.description}
+              </p>
+            </div>
           )}
         </div>
+
         {user?.role !== "Associate" && (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-3 items-center bg-foreground/[0.03] p-2.5 rounded-[2.5rem] border border-foreground/5 backdrop-blur-md self-start shrink-0 shadow-xl">
             <EditModal
               _id={product._id}
               initialData={product}
@@ -54,7 +68,8 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
               )}
               apiEndpoint={apiRoutesByRole["product"]}
               refetchData={refetchData}
-            />{" "}
+            />
+            <div className="w-px h-8 bg-foreground/10" />
             <UserDeleteModal
               _id={product._id}
               name={product.name}
@@ -81,21 +96,45 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
           const productVariantValue = productVariantData?.data || [];
 
           return (
-            <section>
-              {productVariantFormFields && (
-                <AddModal
-                  name="Product Variant"
-                  currentTable={"ProductVariant"}
-                  formFields={productVariantFormFields}
-                  apiEndpoint={apiRoutesByRole["productVariant"]}
-                  refetchData={refetchData}
-                  additionalVariable={{ product: product._id }}
-                />
-              )}
-              <div className="h-1" />
+            <div className="space-y-10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-1 h-8 bg-warning-500 rounded-full" />
+                  <div>
+                    <h3 className="text-2xl font-black text-foreground tracking-tight uppercase">Product Variants</h3>
+                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Specifications & Real-time Market Rates</p>
+                  </div>
+                </div>
+                {productVariantFormFields && user?.role !== "Associate" && (
+                  <div className="shadow-2xl shadow-warning-500/10 rounded-[1.5rem] overflow-hidden">
+                    <AddModal
+                      name="Product Variant"
+                      buttonLabel="Create New Variant"
+                      currentTable={"ProductVariant"}
+                      formFields={productVariantFormFields}
+                      apiEndpoint={apiRoutesByRole["productVariant"]}
+                      refetchData={refetchData}
+                      additionalVariable={{ product: product._id }}
+                    />
+                  </div>
+                )}
+              </div>
+
               {productVariantValue && (
-                <>
-                  <Accordion key={product._id} className="px-0 ml-4">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* @ts-ignore */}
+                  <Accordion
+                    key={product._id}
+                    className="px-0 gap-6"
+                    variant="splitted"
+                    itemClasses={{
+                      base: "group/item py-0 mb-6 bg-foreground/[0.02] dark:bg-foreground/[0.01] border border-foreground/[0.06] rounded-[2.5rem] transition-all duration-300 hover:bg-foreground/[0.04] !shadow-none data-[open=true]:bg-foreground/[0.03] data-[open=true]:border-warning-500/20 data-[open=true]:rounded-[3rem] data-[open=true]:shadow-2xl data-[open=true]:shadow-warning-500/5",
+                      title: "font-black text-lg tracking-wide text-foreground/90 py-5",
+                      trigger: "px-8 py-6 rounded-[2.5rem]",
+                      content: "px-8 pb-8 pt-2",
+                      indicator: "text-default-400 group-data-[open=true]/item:rotate-180",
+                    }}
+                  >
                     {productVariantValue.map((variant: any) => {
                       const safeItems = Array.isArray(myCatalogItems) ? myCatalogItems : [];
                       const isAdded = safeItems.some(item =>
@@ -107,33 +146,44 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                           key={variant._id}
                           aria-label={variant.name}
                           title={
-                            <div className="flex items-center justify-between w-full px-2 py-2">
-                              <span className="font-bold text-lg tracking-wide text-foreground/90">{variant.name}</span>
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex flex-col">
+                                <span className="text-2xl font-black uppercase tracking-tight">{variant.name}</span>
+                                {isAdded && <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-0.5">Active in my catalog</span>}
+                              </div>
                               {isAdded && (
-                                <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-bold shadow-[0_0_12px_rgba(251,146,60,0.15)] border border-orange-500/20">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                                  IN MY CATALOG
-                                </span>
+                                <div className="hidden sm:flex items-center gap-2.5 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-warning-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black border border-orange-500/20 shadow-xl shadow-orange-500/5 transition-all">
+                                  <span className="relative flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                                  </span>
+                                  MANAGED
+                                </div>
                               )}
                             </div>
                           }
-                          className={`group mb-4 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(251,146,60,0.05)] ${isAdded ? "border-l-4 !border-l-orange-500" : ""}`}
                         >
                           {variant.description && (
-                            <p className="text-default-500 text-sm px-4 pt-1 pb-2 leading-relaxed">
-                              {variant.description}
-                            </p>
+                            <div className="mb-10 ml-0 relative text-left">
+                              <p className="text-default-500 text-base leading-relaxed max-w-3xl font-medium">
+                                {variant.description}
+                              </p>
+                            </div>
                           )}
-                          <div className="h-6" />
-                          <div className="space-y-6">
+
+                          <div className="space-y-12">
                             {user?.role === "Associate" ? (
-                              <>
-                                <div className="px-4 pb-5 pt-2 space-y-6">
-                                  {isAdded && (
-                                    <div>
-                                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 mb-3 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500" /> My Added Rates
-                                      </p>
+                              <div className="space-y-12">
+                                {isAdded && (
+                                  <div className="animate-in fade-in slide-in-from-top-2 duration-500">
+                                    <div className="flex items-center gap-4 mb-8 text-left">
+                                      <div className="h-[1px] flex-1 bg-gradient-to-r from-warning-500/50 to-transparent" />
+                                      <div className="flex items-center gap-2">
+                                        <FiCheckCircle className="text-warning-500" size={14} />
+                                        <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-warning-500">Proprietary Assets</h4>
+                                      </div>
+                                    </div>
+                                    <div className="bg-content1/40 border border-divider/50 rounded-[2.5rem] p-8 backdrop-blur-md shadow-inner text-left">
                                       <VariantRate
                                         productVariant={variant}
                                         rate="catalogItem"
@@ -143,12 +193,18 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                                         }}
                                       />
                                     </div>
-                                  )}
+                                  </div>
+                                )}
 
-                                  <div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-3 flex items-center gap-2">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-default-400" /> Marketplace Rates
-                                    </p>
+                                <div>
+                                  <div className="flex items-center gap-4 mb-8 text-left">
+                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-default-300/30 to-transparent" />
+                                    <div className="flex items-center gap-2">
+                                      <FiGrid className="text-default-400" size={14} />
+                                      <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Global Liquidity</h4>
+                                    </div>
+                                  </div>
+                                  <div className="bg-foreground/[0.01] border border-divider/20 rounded-[2.5rem] p-8 backdrop-blur-sm text-left">
                                     <VariantRate
                                       productVariant={variant}
                                       rate="variantRate"
@@ -156,26 +212,32 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                                     />
                                   </div>
                                 </div>
-                              </>
+                              </div>
                             ) : (
-                              /* Standard View for Admin/Others (No filtering) */
-                              <div className="px-4 pb-5 pt-2">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 mb-3">All Rates</p>
-                                <VariantRate
-                                  productVariant={variant}
-                                  rate="variantRate"
-                                />
+                              /* Standard View for Admin/Others */
+                              <div className="animate-in fade-in duration-500">
+                                <div className="flex items-center gap-4 mb-8 text-left">
+                                  <div className="h-[1px] flex-1 bg-gradient-to-r from-warning-500/50 to-transparent" />
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-warning-500">Unified Rate Ledger</h4>
+                                  </div>
+                                </div>
+                                <div className="bg-foreground/[0.01] border border-divider/50 rounded-[3rem] p-8 shadow-inner overflow-hidden text-left">
+                                  <VariantRate
+                                    productVariant={variant}
+                                    rate="variantRate"
+                                  />
+                                </div>
                               </div>
                             )}
-                          </div>
-                          {user?.role !== "Associate" && (
-                            <>
-                              <div className="h-4" />
-                              <Divider />
-                              <div className="h-5" />
-                              <div className="flex items-center justify-between px-1">
-                                <p className="text-xs font-bold uppercase tracking-wider text-default-400">Variant Management</p>
-                                <div className="flex gap-4 items-center">
+
+                            {user?.role !== "Associate" && (
+                              <div className="mt-12 pt-10 border-t border-divider/30 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                <div className="flex items-center gap-3 text-default-400/60 bg-default-100/30 px-5 py-2 rounded-full border border-divider/20 text-left">
+                                  <FiInfo size={16} />
+                                  <p className="text-[11px] font-black uppercase tracking-[0.2em]">Administrative Shell — Variant {variant._id.slice(-6).toUpperCase()}</p>
+                                </div>
+                                <div className="flex gap-4 items-center bg-foreground/[0.04] p-2.5 rounded-[2rem] border border-divider/40 backdrop-blur-sm shadow-xl">
                                   <EditModal
                                     _id={variant._id}
                                     initialData={variant}
@@ -185,39 +247,41 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
                                     )}
                                     apiEndpoint={apiRoutesByRole["productVariant"]}
                                     refetchData={refetchData}
-                                  />{" "}
+                                  />
+                                  <div className="w-px h-8 bg-divider" />
                                   <UserDeleteModal
                                     _id={variant._id}
                                     name={variant.name}
-                                    deleteApiEndpoint={
-                                      apiRoutesByRole["productVariant"]
-                                    }
+                                    deleteApiEndpoint={apiRoutesByRole["productVariant"]}
                                     refetchData={refetchData}
                                   />
                                 </div>
                               </div>
-                            </>
-                          )}
+                            )}
+                          </div>
                         </AccordionItem>
                       );
                     })}
                   </Accordion>
-                </>
+                </div>
               )}
-            </section>
+            </div>
           );
         }}
       </QueryComponent >
     </section >
   ) : (
-    <div className="h-full flex flex-col items-center justify-center text-center gap-4 text-default-400">
-      <div className="w-20 h-20 rounded-full bg-foreground/5 flex items-center justify-center mb-4">
-        <svg className="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
+    <div className="h-full flex flex-col items-center justify-center text-center gap-6 py-20 animate-in fade-in duration-700">
+      <div className="relative">
+        <div className="absolute inset-0 bg-warning-500/10 blur-3xl rounded-full animate-pulse scale-150" />
+        <div className="relative w-32 h-32 rounded-[3rem] bg-foreground/5 flex items-center justify-center border border-foreground/10 rotate-6 hover:rotate-0 transition-transform duration-500">
+          <FiPackage size={48} className="opacity-20" />
+        </div>
       </div>
-      <h3 className="text-xl font-bold text-foreground">No Product Selected</h3>
-      <p className="text-sm max-w-[250px] leading-relaxed">Select a product from the catalog on the left to view its variants and rates.</p>
+      <div>
+        <h3 className="text-3xl font-black text-foreground tracking-tight uppercase">Operational Deadlock</h3>
+        <p className="text-default-400 text-sm max-w-[320px] leading-relaxed mt-2 font-medium">Select a commodity from the master catalog system to initialize the detailed variant registry.</p>
+      </div>
     </div>
   );
 };

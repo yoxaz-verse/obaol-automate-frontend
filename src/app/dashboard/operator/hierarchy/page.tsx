@@ -3,10 +3,11 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
-import { FiChevronDown, FiChevronUp, FiMinus, FiPlus, FiRefreshCw, FiX } from "react-icons/fi";
+import { FiAward, FiBriefcase, FiChevronDown, FiChevronUp, FiMaximize, FiMinus, FiMinusCircle, FiMousePointer, FiPlus, FiPlusCircle, FiRefreshCw, FiShield, FiTarget, FiUsers, FiX, FiZap } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { AnimatePresence, motion } from "framer-motion";
 
 type OperatorBasic = {
   operatorId: string;
@@ -216,10 +217,10 @@ const findPathToNode = (node: TreeNode | null, targetId: string, path: string[] 
 };
 
 const toneByKind: Record<TreeNodeKind, string> = {
-  self: "border-primary-400 bg-primary-100/70 dark:bg-primary-500/20 text-primary-700 dark:text-primary-200",
-  direct_team: "border-success-400 bg-success-100/70 dark:bg-success-500/20 text-success-700 dark:text-success-200",
-  team: "border-success-300 bg-success-100/60 dark:bg-success-500/15 text-success-700 dark:text-success-200",
-  leadership: "border-warning-400 bg-warning-100/70 dark:bg-warning-500/20 text-warning-700 dark:text-warning-200",
+  self: "border-primary-500/30 bg-primary-500/5 text-primary-600 dark:text-primary-400 shadow-[0_0_20px_rgba(59,130,246,0.1)]",
+  direct_team: "border-success-500/30 bg-success-500/5 text-success-600 dark:text-success-400 shadow-[0_0_20px_rgba(34,197,94,0.1)]",
+  team: "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.05)]",
+  leadership: "border-warning-500/30 bg-warning-500/5 text-warning-600 dark:text-warning-400 shadow-[0_0_20px_rgba(245,165,36,0.1)]",
 };
 
 type BranchProps = {
@@ -245,78 +246,92 @@ function HierarchyBranch({
   const canLazyLoad = node.__meta.hasLazyChildren && !node.__meta.loaded;
   const isExpandedVisible = hasRenderedChildren && !isCollapsed;
 
-  let actionLabel = "";
-  let actionKind: "load_expand" | "expand" | "collapse" | null = null;
   let actionIcon: JSX.Element | null = null;
+  let actionKind: "load_expand" | "expand" | "collapse" | null = null;
+
   if (loadingChildren) {
-    actionLabel = "Loading...";
-    actionIcon = <FiRefreshCw className="animate-spin" size={12} />;
+    actionIcon = <FiRefreshCw className="animate-spin text-primary" size={14} />;
   } else if (canLazyLoad) {
-    actionLabel = "Load & Expand";
     actionKind = "load_expand";
-    actionIcon = <FiChevronDown size={12} />;
+    actionIcon = <FiPlusCircle className="text-primary group-hover:scale-125 transition-transform" size={18} />;
   } else if (isExpandedVisible) {
-    actionLabel = "Collapse";
     actionKind = "collapse";
-    actionIcon = <FiChevronUp size={12} />;
+    actionIcon = <FiMinusCircle className="text-default-400 group-hover:scale-125 transition-transform" size={18} />;
   } else if (hasRenderedChildren) {
-    actionLabel = "Expand";
     actionKind = "expand";
-    actionIcon = <FiChevronDown size={12} />;
+    actionIcon = <FiPlusCircle className="text-primary group-hover:scale-125 transition-transform" size={18} />;
   }
 
   return (
     <li className="hierarchy-node" data-node-id={node.__meta.id}>
-      <button
-        type="button"
-        onClick={() => onSelect(node.__meta)}
-        className={`w-[220px] rounded-xl border px-3 py-2 shadow-md text-left ${toneByKind[node.__meta.kind]} bg-content1/95 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300`}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-semibold">{toName(node.name)}</p>
-          <span className="rounded-full border border-current/30 px-2 py-0.5 text-[10px] font-semibold">
-            {String(node.attributes?.level || `L${node.__meta.level}`)}
-          </span>
-        </div>
-        <p className="mt-1 text-[11px] opacity-85">
-          Team <span className="font-semibold">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)}</span>
-        </p>
-      </button>
+      <div className="flex flex-col items-center">
+        <button
+          type="button"
+          onClick={() => onSelect(node.__meta)}
+          className={`w-[260px] group/node relative rounded-xl border-l-[6px] border px-5 py-4 text-left ${toneByKind[node.__meta.kind]} bg-content1 shadow-sm hover:shadow-md hover:border-primary-500/50 transition-all duration-200 outline-none select-none`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-[13px] font-black uppercase tracking-tight text-foreground leading-tight">{toName(node.name)}</p>
+              <div className="mt-3 flex items-center gap-4">
+                <div className="flex items-center gap-1.5 opacity-40">
+                  <FiUsers size={11} />
+                  <span className="text-[9px] font-black uppercase tracking-widest">{String(node.attributes?.teamSize || node.__meta.teamSize || 0)} NODES</span>
+                </div>
+                {node.__meta.totalCommission > 0 && (
+                  <div className="flex items-center gap-1.5 text-primary-500">
+                    <FiZap size={11} />
+                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">₹{formatCurrency(node.__meta.totalCommission)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="shrink-0 flex flex-col items-end gap-1">
+              <span className="rounded bg-black/5 dark:bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-default-500 leading-none">
+                {String(node.attributes?.level || `L${node.__meta.level}`)}
+              </span>
+            </div>
+          </div>
 
-      <div className="mt-3 flex justify-center gap-2">
-        {actionLabel ? (
-          <Button
-            size="sm"
-            variant="flat"
-            className="h-8 min-w-[124px] text-xs font-medium"
-            isDisabled={loadingChildren || !actionKind}
-            startContent={actionIcon}
-            onPress={() => {
-              if (!actionKind) return;
-              onToggle(node, actionKind);
-            }}
-          >
-            {actionLabel}
-          </Button>
-        ) : null}
+          {actionIcon && (
+            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (actionKind) onToggle(node, actionKind);
+                }}
+                className="w-5 h-5 rounded-full bg-content2 border border-divider flex items-center justify-center shadow-lg hover:bg-primary-500 hover:text-white transition-all text-default-400"
+              >
+                {actionIcon}
+              </button>
+            </div>
+          )}
+        </button>
       </div>
 
-      {loadingChildren ? <p className="mt-1 text-[11px] text-default-500">Loading branch...</p> : null}
-
-      {hasRenderedChildren && !isCollapsed ? (
-        <ul className="hierarchy-list">
-          {children.map((child) => (
-            <HierarchyBranch
-              key={child.__meta.id}
-              node={child}
-              collapsedByNode={collapsedByNode}
-              loadingChildrenByNode={loadingChildrenByNode}
-              onSelect={onSelect}
-              onToggle={onToggle}
-            />
-          ))}
-        </ul>
-      ) : null}
+      <AnimatePresence mode="popLayout">
+        {hasRenderedChildren && !isCollapsed && (
+          <motion.ul
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "circOut" }}
+            className="hierarchy-list"
+          >
+            {children.map((child) => (
+              <HierarchyBranch
+                key={child.__meta.id}
+                node={child}
+                collapsedByNode={collapsedByNode}
+                loadingChildrenByNode={loadingChildrenByNode}
+                onSelect={onSelect}
+                onToggle={onToggle}
+              />
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </li>
   );
 }
@@ -722,21 +737,26 @@ export default function OperatorHierarchyPage() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Operator Network</h1>
-        <p className="text-sm text-default-500">
-          Visual leadership structure for mentor chain, direct team, and growth visibility.
-        </p>
-      </div>
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-xl bg-primary-500 text-white flex items-center justify-center">
+              <FiTarget size={18} />
+            </div>
+            <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter">Operator Network</h1>
+          </div>
+          <p className="text-sm font-bold text-default-400 uppercase tracking-widest max-w-xl">
+            Visual leadership structure for mentor chain, direct team, and growth visibility.
+          </p>
+        </div>
 
-      {isAdmin ? (
-        <Card className="border border-default-200/80">
-          <CardBody className="gap-2">
-            <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
+        {isAdmin && (
+          <div className="min-w-[280px]">
+            <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 ml-1">Network Inspector</p>
             <select
               value={selectedOperatorId}
               onChange={(event) => setSelectedOperatorId(String(event.target.value || ""))}
-              className="h-10 rounded-lg border border-default-300 bg-content1 px-3 text-sm text-foreground"
+              className="w-full h-12 rounded-[1rem] border border-divider bg-content1/50 backdrop-blur-md px-4 text-xs font-black uppercase tracking-wider text-foreground hover:border-primary-500/50 transition-colors cursor-pointer outline-none"
             >
               {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
               {operatorOptions.map((option: any) => (
@@ -745,76 +765,66 @@ export default function OperatorHierarchyPage() {
                 </option>
               ))}
             </select>
-          </CardBody>
-        </Card>
-      ) : null}
+          </div>
+        )}
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
-        <Card className="border border-default-200/80">
-          <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Operator Name</p>
-            <p className="text-lg font-semibold text-foreground truncate">{toName(operator.name)}</p>
-          </CardBody>
-        </Card>
-        <Card className="border border-default-200/80">
-          <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Operator Level</p>
-            <p className="text-lg font-semibold text-foreground">L{operatorLevel}</p>
-          </CardBody>
-        </Card>
-        <Card className="border border-default-200/80">
-          <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Mentor Name</p>
-            <p className="text-lg font-semibold text-foreground truncate">{mentor ? toName(mentor.name) : "No mentor"}</p>
-          </CardBody>
-        </Card>
-        <Card className="border border-default-200/80">
-          <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Team Size</p>
-            <p className="text-lg font-semibold text-foreground">{teamSizeFromSummary}</p>
-          </CardBody>
-        </Card>
-        <Card className="border border-default-200/80">
-          <CardBody>
-            <p className="text-xs uppercase tracking-wide text-default-500">Total Commission</p>
-            <p className="text-lg font-semibold text-foreground">₹{formatCurrency(summary.totalEarnings || 0)}</p>
-          </CardBody>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {[
+          { label: "Active Agent", value: toName(operator.name), icon: <FiBriefcase className="text-primary-500" />, sub: "Identity" },
+          { label: "Vantage Level", value: `L${operatorLevel}`, icon: <FiAward className="text-warning-500" />, sub: "Rank" },
+          { label: "Strategic Mentor", value: mentor ? toName(mentor.name) : "Autonomous", icon: <FiTarget className="text-secondary-500" />, sub: "Upline" },
+          { label: "Network Size", value: networkCount, icon: <FiUsers className="text-success-500" />, sub: "Members" },
+          { label: "Total Yield", value: `₹${formatCurrency(summary.totalEarnings || 0)}`, icon: <FiZap className="text-yellow-500" />, sub: "Commissions" },
+        ].map((card, i) => (
+          <Card key={i} className="border border-divider/50 bg-white/50 dark:bg-black/20 backdrop-blur-xl shadow-none rounded-[1.5rem] group hover:border-primary-500/30 transition-all duration-300">
+            <CardBody className="p-5 flex flex-row items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-default-100 dark:bg-default-800 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                {card.icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-0.5">{card.label}</p>
+                <p className="text-base font-black text-foreground truncate leading-tight uppercase tracking-tighter">{card.value}</p>
+                <p className="text-[8px] font-bold text-default-300 uppercase tracking-widest mt-1">{card.sub}</p>
+              </div>
+            </CardBody>
+          </Card>
+        ))}
       </div>
 
-      <Card className="border border-default-200/80 overflow-hidden">
-        <CardBody className="space-y-3 p-0">
-          <div className="sticky top-0 z-10 border-b border-default-200/70 bg-content1/90 px-4 py-3 backdrop-blur">
-            <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
-              <p className="text-xs text-default-500">
-                Drag to move, scroll to zoom, click node for details.
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-primary-100 px-2 py-1 text-[10px] font-semibold text-primary-700 dark:bg-primary-500/20 dark:text-primary-200">Self</span>
-                <span className="rounded-full bg-success-100 px-2 py-1 text-[10px] font-semibold text-success-700 dark:bg-success-500/20 dark:text-success-200">Team</span>
-                <span className="rounded-full bg-warning-100 px-2 py-1 text-[10px] font-semibold text-warning-700 dark:bg-warning-500/20 dark:text-warning-200">Leadership</span>
+      <Card className="border border-divider/40 bg-white/5 dark:bg-black/10 rounded-2xl overflow-hidden shadow-none">
+        <CardBody className="p-0 relative h-[620px]">
+          {/* Diagnostic Hub Header */}
+          <div className="absolute top-6 left-6 z-40 bg-content1 border border-divider p-4 rounded-xl shadow-xl space-y-4 pointer-events-auto backdrop-blur-md max-w-[240px]">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 leading-none mb-1.5">Network Telemetry</h3>
+              <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest leading-relaxed">Direct Pointer Control • Multi-Axis Scaling</p>
+            </div>
+            <div className="flex items-center gap-4 pt-3 border-t border-divider">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-primary-500" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-default-400">SELF</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded bg-success-500" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-default-400">TEAM</span>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="flat" onPress={() => applyZoom(zoom - 0.1)}>
-                <FiMinus />
-              </Button>
-              <span className="min-w-14 text-center text-xs text-default-500">{Math.round(zoom * 100)}%</span>
-              <Button size="sm" variant="flat" onPress={() => applyZoom(zoom + 0.1)}>
-                <FiPlus />
-              </Button>
-              <Button size="sm" variant="flat" onPress={resetView}>
-                Reset View
-              </Button>
-              <Button size="sm" variant="flat" onPress={centerOnSelf}>
-                Center on You
-              </Button>
-              <Button size="sm" variant="flat" onPress={collapseAll}>
-                Collapse All
-              </Button>
-              <Button size="sm" variant="flat" onPress={expandDirectTeam}>
-                Expand Direct Team
-              </Button>
+          </div>
+
+          {/* Precision Controllers */}
+          <div className="absolute top-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
+            <div className="bg-content1 border border-divider p-1 rounded-xl shadow-xl pointer-events-auto flex flex-col">
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Zoom In" onPress={() => applyZoom(zoom + 0.1)}><FiPlus /></Button>
+              <div className="h-px bg-divider mx-1" />
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Zoom Out" onPress={() => applyZoom(zoom - 0.1)}><FiMinus /></Button>
+            </div>
+            <div className="bg-content1 border border-divider p-1 rounded-xl shadow-xl pointer-events-auto flex gap-1">
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Collapse All" onPress={collapseAll}><FiMinusCircle /></Button>
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Expand Direct" onPress={expandDirectTeam}><FiPlusCircle /></Button>
+              <div className="w-px bg-divider my-1" />
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Sync Target" onPress={centerOnSelf}><FiMousePointer /></Button>
+              <Button isIconOnly variant="light" size="sm" radius="md" title="Reset View" onPress={resetView}><FiMaximize /></Button>
             </div>
           </div>
 
@@ -827,11 +837,14 @@ export default function OperatorHierarchyPage() {
             onPointerMove={onViewportPointerMove}
             onPointerUp={stopPanning}
             onPointerCancel={stopPanning}
-            className={`overflow-auto rounded-xl border border-default-200/70 bg-content1/80 p-4 outline-none ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
+            className={`w-full h-full outline-none select-none ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
           >
             <div
-              className={`min-w-[900px] origin-top ${isPanning ? "" : "transition-transform duration-150"}`}
-              style={{ transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})` }}
+              className="origin-top p-40"
+              style={{
+                transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`,
+                transition: isPanning ? 'none' : 'transform 0.2s cubic-bezier(0, 0, 0.2, 1)'
+              }}
             >
               <ul className="hierarchy-root">
                 <HierarchyBranch
@@ -860,106 +873,157 @@ export default function OperatorHierarchyPage() {
       </Card>
 
       {selectedNode ? (
-        <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-[1px]" onClick={() => setSelectedMeta(null)}>
-          <div
-            className="absolute inset-x-0 bottom-0 max-h-[82vh] rounded-t-2xl border border-default-200/80 bg-content1 p-4 shadow-2xl sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[360px] sm:max-h-none sm:rounded-none"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Operator Details</h3>
-              <Button isIconOnly size="sm" variant="light" onPress={() => setSelectedMeta(null)}>
-                <FiX />
-              </Button>
-            </div>
-
-            <div className="mt-4 space-y-3 text-sm">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-default-500">Operator Name</p>
-                <p className="font-medium text-foreground">{toName(selectedNodeFromTree?.name || selectedNode.id)}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-default-500">Level</p>
-                <p className="font-medium text-foreground">L{Math.max(1, selectedNode.level || 1)}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-default-500">Mentor</p>
-                <p className="font-medium text-foreground">{toName(selectedNode.mentorName || "-")}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-default-500">Team Size</p>
-                <p className="font-medium text-foreground">{toNumber(selectedNode.teamSize)}</p>
+        <AnimatePresence>
+          <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-[2px]" onClick={() => setSelectedMeta(null)}>
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 180 }}
+              className="absolute inset-y-0 right-0 w-full sm:w-[420px] bg-content1 border-l border-divider p-8 shadow-[-20px_0_50px_rgba(0,0,0,0.2)] flex flex-col"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary-500 mb-1">Node Inspector</h3>
+                  <p className="text-xl font-black text-foreground tracking-tight uppercase">Agent Intelligence</p>
+                </div>
+                <Button isIconOnly size="md" variant="light" radius="full" className="hover:bg-default-100" onPress={() => setSelectedMeta(null)}>
+                  <FiX size={20} />
+                </Button>
               </div>
 
-              {selectedSummaryQuery.isFetching ? (
-                <div className="rounded-lg border border-default-200/70 p-3 text-default-500 flex items-center gap-2">
-                  <FiRefreshCw className="animate-spin" /> Loading metrics...
-                </div>
-              ) : hasRestrictedMetrics ? (
-                <div className="rounded-lg border border-warning-300/70 bg-warning-500/10 p-3 text-warning-700 dark:text-warning-300">
-                  Metrics are restricted for this node with your current access scope.
-                </div>
-              ) : selectedSummaryQuery.isError ? (
-                <div className="rounded-lg border border-danger-300/70 bg-danger-500/10 p-3 text-danger-700 dark:text-danger-300">
-                  Unable to load metrics for this node.
-                </div>
-              ) : (
-                <>
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-default-500">Total Commission</p>
-                    <p className="font-medium text-foreground">₹{formatCurrency(selectedSummary.totalEarnings || 0)}</p>
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-8">
+                <div className="flex flex-col items-center py-6 bg-default-100/30 rounded-3xl border border-divider/50">
+                  <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-3xl font-black shadow-xl mb-4 border-4 border-white/10">
+                    {toName(selectedNodeFromTree?.name || selectedNode.id).charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-default-500">Deals Closed</p>
-                    <p className="font-medium text-foreground">{toNumber(selectedSummary.dealsClosed)}</p>
+                  <h4 className="text-lg font-black text-foreground uppercase tracking-tight">{toName(selectedNodeFromTree?.name || selectedNode.id)}</h4>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mt-1">
+                    Ranked L{Math.max(1, selectedNode.level || 1)} Operative
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl border border-divider bg-default-50/50">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-1">Network Mentor</p>
+                    <p className="font-black text-foreground uppercase truncate">{toName(selectedNode.mentorName || "-")}</p>
                   </div>
-                </>
-              )}
-            </div>
+                  <div className="p-4 rounded-2xl border border-divider bg-default-50/50">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-1">Direct Force</p>
+                    <p className="font-black text-foreground uppercase truncate">{toNumber(selectedNode.teamSize)} Nodes</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h5 className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-500 border-b border-divider pb-2">Yield Telemetry</h5>
+
+                  {selectedSummaryQuery.isFetching ? (
+                    <div className="rounded-2xl border border-divider p-6 text-default-500 flex flex-col items-center gap-3 animate-pulse">
+                      <FiRefreshCw className="animate-spin text-primary" size={24} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Synchronizing...</span>
+                    </div>
+                  ) : hasRestrictedMetrics ? (
+                    <div className="rounded-2xl border border-warning-500/20 bg-warning-500/5 p-6 text-center space-y-2">
+                      <FiShield className="mx-auto text-warning-500" size={24} />
+                      <p className="text-[10px] font-black text-warning-600 uppercase tracking-widest">Access Restricted</p>
+                      <p className="text-[11px] font-medium text-default-500 leading-relaxed">Financial metrics are isolated for nodes outside your immediate leadership scope.</p>
+                    </div>
+                  ) : selectedSummaryQuery.isError ? (
+                    <div className="rounded-2xl border border-danger-500/20 bg-danger-500/5 p-6 text-center">
+                      <p className="text-[10px] font-black text-danger-600 uppercase">Telemetry Link Failed</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-4 rounded-2xl border border-divider/50 bg-success-500/5 group hover:border-success-500/30 transition-all">
+                        <div className="flex items-center gap-3 text-success-600">
+                          <FiZap size={18} />
+                          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Total Earnings</span>
+                        </div>
+                        <span className="text-lg font-black text-success-700 tracking-tighter">₹{formatCurrency(selectedSummary.totalEarnings || 0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-4 rounded-2xl border border-divider/50 bg-primary-500/5 group hover:border-primary-500/30 transition-all">
+                        <div className="flex items-center gap-3 text-primary-600">
+                          <FiBriefcase size={18} />
+                          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Closed Trades</span>
+                        </div>
+                        <span className="text-lg font-black text-primary-700 tracking-tighter">{toNumber(selectedSummary.dealsClosed)} UNIT</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-auto pt-8">
+                <Button
+                  className="w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest bg-foreground text-background shadow-xl hover:-translate-y-1 transition-all"
+                  onPress={() => setSelectedMeta(null)}
+                >
+                  Mission Complete
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </div>
+        </AnimatePresence>
       ) : null}
 
       <style jsx>{`
         .hierarchy-root,
         .hierarchy-root ul {
           margin: 0;
-          padding: 1.2rem 0 0;
+          padding: 2rem 0 0;
           position: relative;
           display: flex;
           justify-content: center;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .hierarchy-root li {
           list-style: none;
           text-align: center;
           position: relative;
-          padding: 1.2rem 0.8rem 0;
+          padding: 2.5rem 0.5rem 0;
         }
 
+        /* The horizontal bar connecting siblings */
         .hierarchy-root li::before,
         .hierarchy-root li::after {
           content: "";
           position: absolute;
           top: 0;
           right: 50%;
-          border-top: 1px solid rgba(148, 163, 184, 0.28);
+          border-top: 3px solid rgba(148, 163, 184, 0.6);
           width: 50%;
-          height: 1.2rem;
+          height: 2.5rem;
+          z-index: 0;
         }
 
         .hierarchy-root li::after {
           right: auto;
           left: 50%;
-          border-left: 1px solid rgba(148, 163, 184, 0.28);
+          border-left: 3px solid rgba(148, 163, 184, 0.6);
         }
 
-        .hierarchy-root li:only-child::after,
-        .hierarchy-root li:only-child::before {
+        /* Remove the horizontal bar for single child */
+        .hierarchy-root li:only-child::before,
+        .hierarchy-root li:only-child::after {
           display: none;
         }
 
+        /* But single child still needs a vertical line up */
         .hierarchy-root li:only-child {
-          padding-top: 0;
+          padding-top: 2.5rem;
+        }
+        
+        .hierarchy-root li:only-child::before {
+          content: "";
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 50%;
+          border-left: 3px solid rgba(148, 163, 184, 0.6);
+          width: 0;
+          height: 2.5rem;
         }
 
         .hierarchy-root li:first-child::before,
@@ -968,22 +1032,24 @@ export default function OperatorHierarchyPage() {
         }
 
         .hierarchy-root li:last-child::before {
-          border-right: 1px solid rgba(148, 163, 184, 0.28);
-          border-radius: 0 5px 0 0;
+          border-right: 3px solid rgba(148, 163, 184, 0.6);
+          border-radius: 0 1.5rem 0 0;
         }
 
         .hierarchy-root li:first-child::after {
-          border-radius: 5px 0 0 0;
+          border-radius: 1.5rem 0 0 0;
         }
 
+        /* The vertical line from parent down to children */
         .hierarchy-root ul ul::before {
           content: "";
           position: absolute;
           top: 0;
           left: 50%;
-          border-left: 1px solid rgba(148, 163, 184, 0.28);
+          border-left: 3px solid rgba(148, 163, 184, 0.6);
           width: 0;
-          height: 1.2rem;
+          height: 2.5rem;
+          z-index: 0;
         }
       `}</style>
     </div>

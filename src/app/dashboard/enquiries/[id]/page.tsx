@@ -4,6 +4,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes, inventoryRoutes, inventoryReservationRoutes } from "@/core/api/apiRoutes";
@@ -30,15 +31,18 @@ import {
     Breadcrumbs,
     BreadcrumbItem,
     Tooltip,
+    Checkbox,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo, FiArrowRight } from "react-icons/fi";
+import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo, FiArrowRight, FiEdit3 } from "react-icons/fi";
 import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity } from "react-icons/lu";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
+import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
+import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 
 type ResponsibilityPlan = {
     procurementBy: "buyer" | "seller" | "obaol" | "";
@@ -120,15 +124,20 @@ export default function EnquiryDetailsPage() {
     const queryClient = useQueryClient();
     const { convertRate } = useCurrency();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onOpenChange: onFinalizeOpenChange } = useDisclosure();
     const [conversionNote, setConversionNote] = useState("");
     const { user } = useContext(AuthContext);
     const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
+    const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState<string>("");
+    const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState<string>("");
     const [commitUntil, setCommitUntil] = useState<string>("");
     const [buyerSpecification, setBuyerSpecification] = useState<string>("");
     const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
     const [specSavedAt, setSpecSavedAt] = useState<string>("");
     const [responsibilitySavedAt, setResponsibilitySavedAt] = useState<string>("");
-    const [workflowStage, setWorkflowStage] = useState<string>("INQUIRY_CREATED");
+    const [inlandTransportSegments, setInlandTransportSegments] = useState<Array<{ label: string; from: string; to: string }>>([]);
+    const [workflowStage, setWorkflowStage] = useState<string>("ENQUIRY_CREATED");
+    const [importDeliveryMode, setImportDeliveryMode] = useState<string>("");
     const [inventoryAcceptOpen, setInventoryAcceptOpen] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
     const [isAddingNewInventory, setIsAddingNewInventory] = useState(false);
@@ -140,8 +149,23 @@ export default function EnquiryDetailsPage() {
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
     const [docActionFileUrl, setDocActionFileUrl] = useState("");
+    const [docViewerOpen, setDocViewerOpen] = useState(false);
+    const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
     const [reopenRequestOpen, setReopenRequestOpen] = useState(false);
     const [reopenReason, setReopenReason] = useState("");
+    const [clarificationOpen, setClarificationOpen] = useState(false);
+    const [clarificationRate, setClarificationRate] = useState("");
+    const [clarificationReasonRate, setClarificationReasonRate] = useState(false);
+    const [clarificationReasonPayment, setClarificationReasonPayment] = useState(false);
+    const [clarificationReasonTimeline, setClarificationReasonTimeline] = useState(false);
+    const [clarificationCommunicated, setClarificationCommunicated] = useState(false);
+    const [clarificationDeliveryMode, setClarificationDeliveryMode] = useState<"DELIVER_TO_LOCATION" | "PRODUCT_READY" | "">("");
+    const [clarificationDeliveryDate, setClarificationDeliveryDate] = useState("");
+    const [revisionError, setRevisionError] = useState("");
+    const [revisionReplyError, setRevisionReplyError] = useState("");
+    const [revisionReplySuccess, setRevisionReplySuccess] = useState("");
+    const [revisionConfirmError, setRevisionConfirmError] = useState("");
+    const [revisionReplies, setRevisionReplies] = useState<Array<{ key: string; acknowledged: boolean; counterRate?: string }>>([]);
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
         tradeType: "DOMESTIC",
         originCountry: "",
@@ -173,6 +197,7 @@ export default function EnquiryDetailsPage() {
     const [selectedIncotermId, setSelectedIncotermId] = useState<string>("");
     const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string>("");
     const [tradeTermsSavedAt, setTradeTermsSavedAt] = useState<string>("");
+    const [assignmentSavedAt, setAssignmentSavedAt] = useState<string>("");
 
     // Fetch Enquiry Data
     const { data: enquiry, isLoading } = useQuery({
@@ -194,6 +219,7 @@ export default function EnquiryDetailsPage() {
         : (quotationResponse?.data?.data || []);
     const quotationDoc = quotationRows?.[0] || null;
     const quotationId = quotationDoc?._id || null;
+    const quotationStatus = String(quotationDoc?.status || "").toUpperCase();
     const { data: operators } = useQuery({
         queryKey: ["operators"],
         queryFn: () => getData(apiRoutes.operator.getAll),
@@ -299,8 +325,39 @@ export default function EnquiryDetailsPage() {
         queryFn: () => getData(apiRoutes.tradeDocuments.list, { enquiryId: id, page: 1, limit: 200 }),
         enabled: Boolean(id),
     });
+
+    const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
+        ? incotermResponse.data.data.data
+        : Array.isArray(incotermResponse?.data?.data)
+            ? incotermResponse.data.data
+            : Array.isArray(incotermResponse?.data)
+                ? incotermResponse.data
+                : [];
+    const paymentTermOptions = Array.isArray(paymentTermResponse?.data?.data?.data)
+        ? paymentTermResponse.data.data.data
+        : Array.isArray(paymentTermResponse?.data?.data)
+            ? paymentTermResponse.data.data
+            : Array.isArray(paymentTermResponse?.data)
+                ? paymentTermResponse.data
+                : [];
+    const parseMasterRows = (raw: any): any[] => {
+        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
+        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
+        if (Array.isArray(raw?.data?.data)) return raw.data.data;
+        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw)) return raw;
+        return [];
+    };
+    const getEntityId = (value: any): string => String(value?._id || value?.id || value || "");
+    const states = parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted);
+    const districts = parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted);
+    const countries = parseMasterRows(countriesResponse).filter((item: any) => !item?.isDeleted);
+    const originSeaPorts = parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted);
+    const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
     const enquiryPackagingSpecificationsValue = (enquiry as any)?.packagingSpecifications || "";
+    const isImportEnquiry = String((enquiry as any)?.sourceType || "").toUpperCase() === "IMPORT" || Boolean((enquiry as any)?.importListingId);
     useEffect(() => {
         setBuyerSpecification(enquirySpecificationValue);
     }, [enquirySpecificationValue]);
@@ -309,13 +366,37 @@ export default function EnquiryDetailsPage() {
     }, [enquiryPackagingSpecificationsValue]);
     useEffect(() => {
         if (!enquiry) return;
+        const docs = Array.isArray(enquiryDocsResponse?.data?.data?.data)
+            ? enquiryDocsResponse?.data?.data?.data
+            : Array.isArray(enquiryDocsResponse?.data?.data)
+                ? enquiryDocsResponse?.data?.data
+                : Array.isArray(enquiryDocsResponse?.data)
+                    ? enquiryDocsResponse?.data
+                    : [];
+        const hasSubmittedDoc = (type: string) =>
+            docs.some((doc: any) => String(doc?.type || "").toUpperCase() === type && String(doc?.status || "").toUpperCase() !== "DRAFT");
+        const hasDocType = (type: string) =>
+            docs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
         const fallbackStage = (() => {
-            if ((enquiry as any)?.order) return "ORDER_CONFIRMED";
-            if (enquiry?.buyerConfirmedAt) return "PURCHASE_ORDER_RECEIVED";
-            if (enquiry?.sellerAcceptedAt) return "QUOTATION_SUBMITTED";
-            return "INQUIRY_CREATED";
+            if (isImportEnquiry) return "QUOTATION_REVISION";
+            if ((enquiry as any)?.poSubmittedAt) return "PURCHASE_ORDER_CREATED";
+            if ((enquiry as any)?.otherDocsCompletedAt) return "PURCHASE_ORDER_CREATED";
+            if ((enquiry as any)?.proformaCreatedAt) return "OTHER_DOCUMENTS";
+            if ((enquiry as any)?.responsibilitiesFinalizedAt) return "PROFORMA_ISSUED";
+            if ((enquiry as any)?.buyerConfirmedAt) return "RESPONSIBILITIES_FINALIZED";
+            if ((enquiry as any)?.quotationCreatedAt) return "QUOTATION_DECISION";
+            if ((enquiry as any)?.revisionRequestedAt) return "QUOTATION_REVISION";
+            if ((enquiry as any)?.supplierQtyConfirmedAt) return "QUOTATION_REVISION";
+            if ((enquiry as any)?.loiSubmittedAt) return "LOI_ACCEPTED_QTY_CONFIRMED";
+            if (hasSubmittedDoc("PURCHASE_ORDER")) return "PURCHASE_ORDER_CREATED";
+            if (hasSubmittedDoc("PROFORMA_INVOICE")) return "OTHER_DOCUMENTS";
+            if (hasSubmittedDoc("QUOTATION")) return "QUOTATION_DECISION";
+            return "ENQUIRY_CREATED";
         })();
         setWorkflowStage(String((enquiry as any)?.workflowStage || fallbackStage));
+        setImportDeliveryMode(String((enquiry as any)?.importDeliveryMode || ""));
+        setSelectedSupplierOperatorId(String((enquiry as any)?.supplierOperatorId?._id || (enquiry as any)?.supplierOperatorId || ""));
+        setSelectedDealCloserOperatorId(String((enquiry as any)?.dealCloserOperatorId?._id || (enquiry as any)?.dealCloserOperatorId || ""));
         const savedPlan = (enquiry as any)?.responsibilityPlan || {};
         const savedCtx = (enquiry as any)?.executionContext || {};
         setResponsibilityPlan({
@@ -348,7 +429,33 @@ export default function EnquiryDetailsPage() {
         });
         setSelectedIncotermId(String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || ""));
         setSelectedPaymentTermId(String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || ""));
-    }, [enquiry]);
+        const threadItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
+        if (threadItems.length) {
+            setRevisionReplies(threadItems.map((item: any) => ({
+                key: String(item?.key || "").toUpperCase(),
+                acknowledged: Boolean(item?.supplierAcknowledged),
+                counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
+            })));
+        } else {
+            setRevisionReplies([]);
+        }
+    }, [enquiry, enquiryDocsResponse, isImportEnquiry]);
+    useEffect(() => {
+        if (!enquiry) return;
+        if (inlandTransportSegments.length > 0) return;
+        const tasks = Array.isArray((enquiry as any)?.executionInquiries)
+            ? (enquiry as any).executionInquiries
+            : [];
+        const segments = tasks
+            .filter((task: any) => String(task?.type || "").toUpperCase() === "TRANSPORTATION")
+            .map((task: any, index: number) => ({
+                label: String(task?.details?.segmentLabel || task?.title || "").replace(/^Inland Transportation:\s*/i, "").trim(),
+                from: String(task?.details?.from || ""),
+                to: String(task?.details?.to || ""),
+            }))
+            .filter((segment: any) => segment.label || segment.from || segment.to);
+        if (segments.length > 0) setInlandTransportSegments(segments);
+    }, [enquiry, inlandTransportSegments.length]);
     useEffect(() => {
         setResponsibilityPlan((prev) => {
             const next = { ...prev };
@@ -453,22 +560,23 @@ export default function EnquiryDetailsPage() {
     const isFromIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.originCountry));
     const isToIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.destinationCountry));
 
+    const isImportPortPickup = isImportEnquiry && String(importDeliveryMode || "").toUpperCase() === "PORT_PICKUP";
     const responsibilityFieldConfig = React.useMemo(() => {
         return [
             { key: "procurementBy", label: "Procurement / Sourcing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuSearch size={16} /> },
             { key: "qualityTestingBy", label: "Quality Testing", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuClipboardCheck size={16} /> },
             { key: "packagingBy", label: "Packaging & Labelling", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuPackage size={16} /> },
-            { key: "transportBy", label: "Inland Transportation", allowed: ["buyer", "seller", "obaol"], show: true, icon: <LuTruck size={16} /> },
+            { key: "transportBy", label: "Inland Transportation", allowed: ["buyer", "seller", "obaol"], show: !isImportPortPickup, icon: <LuTruck size={16} /> },
             { key: "shippingBy", label: "Freight Forwarding & Shipping", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL", icon: <LuAnchor size={16} /> },
             { key: "exportCustomsBy", label: "Export Customs", allowed: ["buyer", "seller", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isFromIndia, icon: <LuFileCheck size={16} /> },
             { key: "importCustomsBy", label: "Import Customs", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuFileCheck size={16} /> },
             { key: "dutiesTaxesBy", label: "Duties & Taxes", allowed: ["buyer"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTag size={16} /> },
             { key: "portHandlingBy", label: "Port Handling", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuAnchor size={16} /> },
-            { key: "destinationInlandTransportBy", label: "Port → Warehouse Transport", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuTruck size={16} /> },
-            { key: "destinationInspectionBy", label: "Destination Inspection", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuEye size={16} /> },
-            { key: "finalDeliveryConfirmationBy", label: "Final Delivery Check", allowed: ["obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia, icon: <LuCheck size={16} /> },
+            { key: "destinationInlandTransportBy", label: "Port → Warehouse Transport", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia && !isImportPortPickup, icon: <LuTruck size={16} /> },
+            { key: "destinationInspectionBy", label: "Destination Inspection", allowed: ["buyer", "obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia && !isImportPortPickup, icon: <LuEye size={16} /> },
+            { key: "finalDeliveryConfirmationBy", label: "Final Delivery Check", allowed: ["obaol"], show: executionContext.tradeType === "INTERNATIONAL" && isToIndia && !isImportPortPickup, icon: <LuCheck size={16} /> },
         ].filter((f) => f.show);
-    }, [executionContext.tradeType, isFromIndia, isToIndia]);
+    }, [executionContext.tradeType, isFromIndia, isToIndia, isImportPortPickup]);
 
     const allowedResponsibilityValues: Record<string, Set<string>> = {
         procurementBy: new Set(["buyer", "seller", "obaol"]),
@@ -489,7 +597,7 @@ export default function EnquiryDetailsPage() {
         "procurementBy",
         "qualityTestingBy",
         "packagingBy",
-        "transportBy",
+        ...(isImportPortPickup ? [] : ["transportBy"]),
     ];
     const internationalRequiredResponsibilities = [
         "shippingBy",
@@ -499,9 +607,7 @@ export default function EnquiryDetailsPage() {
                 "importCustomsBy",
                 "dutiesTaxesBy",
                 "portHandlingBy",
-                "destinationInlandTransportBy",
-                "destinationInspectionBy",
-                "finalDeliveryConfirmationBy",
+                ...(isImportPortPickup ? [] : ["destinationInlandTransportBy", "destinationInspectionBy", "finalDeliveryConfirmationBy"]),
             ]
             : []),
     ];
@@ -522,10 +628,28 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: () => {
             toast.success("Operator assigned successfully");
+            setAssignmentSavedAt(new Date().toISOString());
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
         },
-        onError: () => {
-            toast.error("Failed to assign operator.");
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message || "Failed to assign operator.";
+            toast.error(msg);
+        },
+    });
+    const updateOperatorRolesMutation = useMutation({
+        mutationFn: async () =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+                supplierOperatorId: selectedSupplierOperatorId || null,
+                dealCloserOperatorId: selectedDealCloserOperatorId || null,
+            }),
+        onSuccess: () => {
+            toast.success("Operator roles updated.");
+            setAssignmentSavedAt(new Date().toISOString());
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message || "Failed to update operator roles.";
+            toast.error(msg);
         },
     });
 
@@ -615,18 +739,58 @@ export default function EnquiryDetailsPage() {
         },
     });
 
+    const openDocViewer = (doc: any) => {
+        if (!doc) return;
+        setDocViewerDoc(doc);
+        setDocViewerOpen(true);
+    };
+
     const createQuotationMutation = useMutation({
         mutationFn: async () => {
-            return postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
+            const res = await postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
+            await patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, { actionKey: "QUOTATION_CREATED" });
+            return res;
         },
         onSuccess: (res: any) => {
             toast.success("Quotation created.");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
-            const createdId = res?.data?.data?._id;
-            if (createdId) router.push(`/dashboard/documents/${createdId}`);
+            const createdDoc = res?.data?.data || null;
+            if (createdDoc) {
+                openDocViewer(createdDoc);
+                return;
+            }
+            toast.info("Quotation drafted.");
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error?.message || "Failed to create quotation.");
+        },
+    });
+    const submitQuotationMutation = useMutation({
+        mutationFn: async () => {
+            if (!quotationId) throw new Error("Quotation not found.");
+            return patchData(apiRoutes.tradeDocuments.update(quotationId), { status: "SENT" });
+        },
+        onSuccess: () => {
+            toast.success("Quotation submitted.");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to submit quotation.");
+        },
+    });
+    const reopenQuotationMutation = useMutation({
+        mutationFn: async () => {
+            if (!quotationId) throw new Error("Quotation not found.");
+            return patchData(apiRoutes.tradeDocuments.update(quotationId), { status: "DRAFT" });
+        },
+        onSuccess: () => {
+            toast.success("Quotation reopened for revision.");
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to reopen quotation.");
         },
     });
 
@@ -641,11 +805,98 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to confirm enquiry.");
         },
     });
+    const applyActionMutation = useMutation({
+        mutationFn: async (payload: Record<string, any>) =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, payload),
+        onSuccess: () => {
+            toast.success("Action applied.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to apply action.");
+        },
+    });
+    const revisionRequestMutation = useMutation({
+        mutationFn: async () => {
+            const reasons: string[] = [];
+            if (clarificationReasonRate) reasons.push("RATE");
+            if (clarificationReasonPayment) reasons.push("PAYMENT_TERMS");
+            if (clarificationReasonTimeline) reasons.push("DELIVERY_TIMELINE");
+            return patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, {
+                actionKey: "REVISION_REQUESTED",
+                reasons,
+                revisionRate: clarificationReasonRate ? Number(clarificationRate) : undefined,
+                communicatedConfirmed: clarificationCommunicated,
+            });
+        },
+        onSuccess: () => {
+            toast.success("Revision requested.");
+            setClarificationOpen(false);
+            setClarificationRate("");
+            setClarificationReasonRate(false);
+            setClarificationReasonPayment(false);
+            setClarificationReasonTimeline(false);
+            setClarificationCommunicated(false);
+            setClarificationDeliveryMode("");
+            setClarificationDeliveryDate("");
+            setRevisionError("");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || "Failed to request revision.";
+            setRevisionError(message);
+            toast.error(message);
+        },
+    });
+    const revisionReplyMutation = useMutation({
+        mutationFn: async () => {
+            if (!revisionReplies.length) {
+                throw new Error("No replies to save.");
+            }
+            return patchData(`${apiRoutes.enquiry.getAll}/${id}/revision-reply`, {
+            replies: revisionReplies.map((item) => ({
+                key: String(item.key || "").toUpperCase(),
+                acknowledged: item.acknowledged,
+                counterRate: item.key === "RATE" && item.acknowledged
+                    ? (() => {
+                            const raw = String(item.counterRate ?? "").trim();
+                            if (!raw) return undefined;
+                            const parsed = Number(raw);
+                            return Number.isNaN(parsed) ? undefined : parsed;
+                        })()
+                        : undefined,
+                })),
+            });
+        },
+        onSuccess: (res: any) => {
+            toast.success("Revision reply saved.");
+            setRevisionReplyError("");
+            setRevisionReplySuccess("Reply saved.");
+            const savedItems = Array.isArray(res?.data?.data?.revisionThread?.items)
+                ? res.data.data.revisionThread.items
+                : [];
+            if (savedItems.length) {
+                setRevisionReplies(savedItems.map((item: any) => ({
+                    key: String(item?.key || "").toUpperCase(),
+                    acknowledged: Boolean(item?.supplierAcknowledged),
+                    counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
+                })));
+            }
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || error?.message || "Failed to save revision reply.";
+            setRevisionReplyError(message);
+            setRevisionReplySuccess("");
+            toast.error(message);
+        },
+    });
     const finalizeResponsibilitiesMutation = useMutation({
         mutationFn: async () =>
             patchData(`${apiRoutes.enquiry.getAll}/${id}/finalize-responsibilities`, {
                 executionContext,
                 packagingSpecifications,
+                inlandTransportSegments,
             }),
         onSuccess: () => {
             toast.success("Responsibilities finalized and execution inquiries generated.");
@@ -703,6 +954,17 @@ export default function EnquiryDetailsPage() {
         },
         onError: () => { toast.error("Failed to update specification."); },
     });
+    const updateImportDeliveryModeMutation = useMutation({
+        mutationFn: (mode: string) =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}`, { importDeliveryMode: mode }),
+        onSuccess: () => {
+            toast.success("Import delivery mode updated.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to update import delivery mode.");
+        },
+    });
     const updateResponsibilityPlanMutation = useMutation({
         mutationFn: () => {
             const actor = (user as any)?.name || (user as any)?.email || "User";
@@ -748,6 +1010,43 @@ export default function EnquiryDetailsPage() {
             toast.error("Failed to save responsibility plan.");
         },
     });
+
+    const responsibilitySummary = React.useMemo(() => {
+        const plan = (responsibilityPlan || (enquiry as any)?.responsibilityPlan || {}) as any;
+        const execution = (executionContext || {}) as any;
+        const incotermLabel = incotermOptions.find((item: any) => item._id === selectedIncotermId)?.code
+            || enquiry?.preferredIncoterm?.code
+            || "Not specified";
+        const paymentLabel = paymentTermOptions.find((item: any) => item._id === selectedPaymentTermId)?.label
+            || enquiry?.paymentTermId?.label
+            || "Not specified";
+
+        const listItems: any[] = [
+            { label: "Procurement / Sourcing", value: plan.procurementBy || "Not set" },
+            { label: "Quality Testing", value: plan.qualityTestingBy || "Not set" },
+            { label: "Packaging & Labelling", value: plan.packagingBy || "Not set" },
+            { label: "Inland Transportation", value: plan.transportBy || "Not set" },
+            { label: "Freight Forwarding & Shipping", value: plan.shippingBy || "Not set" },
+            { label: "Export Customs Clearance", value: plan.exportCustomsBy || plan.certificateBy || "Not set" },
+        ];
+        if (execution.tradeType === "INTERNATIONAL") {
+            listItems.push(
+                { label: "Import Customs Clearance", value: plan.importCustomsBy || "Not set" },
+                { label: "Duties & Taxes", value: plan.dutiesTaxesBy || "Not set" },
+                { label: "Port Handling", value: plan.portHandlingBy || "Not set" },
+                { label: "Inland Transport (Port → Warehouse)", value: plan.destinationInlandTransportBy || "Not set" },
+                { label: "Destination Inspection", value: plan.destinationInspectionBy || "Not set" },
+                { label: "Final Delivery Confirmation", value: plan.finalDeliveryConfirmationBy || "Not set" }
+            );
+        }
+        return {
+            incotermLabel,
+            paymentLabel,
+            tradeType: execution.tradeType || "Not set",
+            listItems,
+            packagingSpecs: packagingSpecifications || "No specifications added",
+        };
+    }, [responsibilityPlan, enquiry, executionContext, incotermOptions, paymentTermOptions, selectedIncotermId, selectedPaymentTermId, packagingSpecifications]);
     const updateTradeTermsMutation = useMutation({
         mutationFn: () =>
             patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
@@ -775,12 +1074,16 @@ export default function EnquiryDetailsPage() {
             }
             return postData(apiRoutes.tradeDocuments.create, payload);
         },
-        onSuccess: () => {
+        onSuccess: (res: any) => {
             toast.success("Document created.");
             setDocActionOpen(false);
             setDocActionRule(null);
             setDocActionFileUrl("");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
+            const createdDoc = res?.data?.data || null;
+            if (createdDoc) {
+                openDocViewer(createdDoc);
+            }
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to create document.");
@@ -856,7 +1159,7 @@ export default function EnquiryDetailsPage() {
     };
 
     const normalizedStatus = String(enquiry.status || "").toUpperCase();
-    const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt);
+    const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt) || isImportEnquiry;
     const hasBuyerConfirmed = Boolean(enquiry.buyerConfirmedAt);
     const hasResponsibilitiesFinalized = Boolean((enquiry as any).responsibilitiesFinalizedAt);
     const hasExecutionContextForStage = executionContext.tradeType === "DOMESTIC"
@@ -872,9 +1175,16 @@ export default function EnquiryDetailsPage() {
     const isCancelled = normalizedStatus === "CANCELLED";
     const isCompletedFlow = normalizedStatus === "COMPLETED" || normalizedStatus === "CLOSED";
     const isConvertedFlow = normalizedStatus === "CONVERTED";
+    const isReadOnlyAfterConversion = normalizedStatus === "CONVERTED" || normalizedStatus === "CLOSED";
     const initialPlan = (enquiry as any)?.responsibilityPlan || {};
     // assignedOperatorId may be an object or just an ID string; handle both safely
     const assignedOperatorObj = (enquiry.assignedOperatorId && typeof enquiry.assignedOperatorId === 'object') ? enquiry.assignedOperatorId : null;
+    const supplierOperatorObj = ((enquiry as any)?.supplierOperatorId && typeof (enquiry as any).supplierOperatorId === "object")
+        ? (enquiry as any).supplierOperatorId
+        : null;
+    const dealCloserOperatorObj = ((enquiry as any)?.dealCloserOperatorId && typeof (enquiry as any).dealCloserOperatorId === "object")
+        ? (enquiry as any).dealCloserOperatorId
+        : null;
     const assignedOperatorName =
         assignedOperatorObj?.name ||
         (enquiry as any)?.assignedOperatorName ||
@@ -887,7 +1197,15 @@ export default function EnquiryDetailsPage() {
     const canManageDocs = isSystemAdmin || isOperatorUser;
     const canManageWorkflow = isSystemAdmin || isOperatorUser;
     const assignedOperatorId = (assignedOperatorObj?._id || enquiry.assignedOperatorId || "").toString();
-    const isAssignedOperator = Boolean(isOperatorUser && user?.id && assignedOperatorId === String(user.id));
+    const supplierOperatorId = (supplierOperatorObj?._id || (enquiry as any)?.supplierOperatorId || "").toString();
+    const dealCloserOperatorId = (dealCloserOperatorObj?._id || (enquiry as any)?.dealCloserOperatorId || "").toString();
+    const isAssignedOperator = Boolean(
+        isOperatorUser &&
+        user?.id &&
+        (assignedOperatorId === String(user.id) ||
+            supplierOperatorId === String(user.id) ||
+            dealCloserOperatorId === String(user.id))
+    );
     const isAdmin = isSystemAdmin || isAssignedOperator;
     const isOperatorBlocked = Boolean(isOperatorUser && !isAssignedOperator);
     if (isOperatorBlocked) {
@@ -906,6 +1224,25 @@ export default function EnquiryDetailsPage() {
     const sellerId = (enquiry as any)?.sellerAssociateId?._id || enquiry?.sellerAssociateId;
     const buyerAssociateObj = typeof (enquiry as any)?.buyerAssociateId === "object" ? (enquiry as any).buyerAssociateId : null;
     const sellerAssociateObj = typeof (enquiry as any)?.sellerAssociateId === "object" ? (enquiry as any).sellerAssociateId : null;
+    const importListing = (enquiry as any)?.importListingId;
+    const importSellerCompanyObj =
+        isImportEnquiry && typeof importListing?.importerCompanyId === "object"
+            ? importListing.importerCompanyId
+            : null;
+    const importSellerSupervisorObj =
+        importSellerCompanyObj && typeof importSellerCompanyObj?.supervisor === "object"
+            ? importSellerCompanyObj.supervisor
+            : null;
+    const importSellerAssociateObj =
+        isImportEnquiry && typeof importListing?.importerAssociateId === "object"
+            ? importListing.importerAssociateId
+            : importSellerSupervisorObj;
+    const importSellerCompanyName =
+        isImportEnquiry
+            ? importSellerCompanyObj?.name ||
+              importListing?.importerCompanyName ||
+              ""
+            : "";
     const extractAssociateCompanyName = (associate: any, fallbackField: string) =>
         associate?.associateCompany?.name ||
         associate?.associateCompanyId?.name ||
@@ -918,23 +1255,33 @@ export default function EnquiryDetailsPage() {
         (enquiry as any)?.buyerName ||
         (typeof buyerId === "string" ? `Associate (${buyerId.slice(-6)})` : "N/A");
     const sellerAssociateName =
+        (isImportEnquiry ? importSellerAssociateObj?.name : null) ||
         sellerAssociateObj?.name ||
         (enquiry as any)?.sellerAssociateName ||
         (enquiry as any)?.sellerName ||
+        (isImportEnquiry && importSellerCompanyName ? `${importSellerCompanyName} (Importer)` : null) ||
         (typeof sellerId === "string" ? `Associate (${sellerId.slice(-6)})` : "N/A");
     const buyerCompanyName = extractAssociateCompanyName(buyerAssociateObj, "buyerAssociateCompanyName");
-    const sellerCompanyName = extractAssociateCompanyName(sellerAssociateObj, "sellerAssociateCompanyName");
+    const sellerCompanyName =
+        (isImportEnquiry && importSellerCompanyName) ||
+        extractAssociateCompanyName(sellerAssociateObj, "sellerAssociateCompanyName");
     const buyerPhone = buyerAssociateObj?.phone || (enquiry as any)?.buyerPhone || null;
-    const sellerPhone = sellerAssociateObj?.phone || (enquiry as any)?.sellerPhone || null;
+    const sellerPhone =
+        (isImportEnquiry ? importSellerAssociateObj?.phone : null) ||
+        (isImportEnquiry ? importSellerCompanyObj?.phone : null) ||
+        sellerAssociateObj?.phone ||
+        (enquiry as any)?.sellerPhone ||
+        null;
     const buyerPresence = {
         online: isOnline(buyerAssociateObj?.lastSeenAt),
         status: getPresenceStatus(buyerAssociateObj?.lastSeenAt),
         lastSeenLabel: formatLastSeen(buyerAssociateObj?.lastSeenAt),
     };
+    const sellerPresenceSource = isImportEnquiry && importSellerAssociateObj ? importSellerAssociateObj : sellerAssociateObj;
     const sellerPresence = {
-        online: isOnline(sellerAssociateObj?.lastSeenAt),
-        status: getPresenceStatus(sellerAssociateObj?.lastSeenAt),
-        lastSeenLabel: formatLastSeen(sellerAssociateObj?.lastSeenAt),
+        online: isOnline(sellerPresenceSource?.lastSeenAt),
+        status: getPresenceStatus(sellerPresenceSource?.lastSeenAt),
+        lastSeenLabel: formatLastSeen(sellerPresenceSource?.lastSeenAt),
     };
     const assignedPresence = {
         online: isOnline(assignedOperatorObj?.lastSeenAt),
@@ -946,14 +1293,21 @@ export default function EnquiryDetailsPage() {
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
 
     const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
-    const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data) ? enquiryRulesResponse.data.data : [];
+    const normalizedStageKey = String(workflowStage || "").toUpperCase();
+    const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data?.data)
+        ? enquiryRulesResponse.data.data.data
+        : Array.isArray(enquiryRulesResponse?.data?.data)
+            ? enquiryRulesResponse.data.data
+            : Array.isArray(enquiryRulesResponse?.data)
+                ? enquiryRulesResponse.data
+                : [];
     const docsForEnquiry = Array.isArray(enquiryDocsResponse?.data?.data?.data)
         ? enquiryDocsResponse?.data?.data?.data
         : (enquiryDocsResponse?.data?.data || []);
     const rulesForStage = docRules
         .filter((r: any) =>
             String(r.stageType) === "INQUIRY" &&
-            String(r.stageKey) === workflowStage &&
+            String(r.stageKey || "").toUpperCase() === normalizedStageKey &&
             r.isActive !== false &&
             (r.tradeType === "BOTH" || r.tradeType === executionContext.tradeType)
         )
@@ -974,43 +1328,228 @@ export default function EnquiryDetailsPage() {
         if (roleKey === "SELLER") return Boolean(isSeller);
         return false;
     };
-    const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === workflowStage);
-    const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
+    const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === normalizedStageKey);
+    const fallbackActions: Record<string, string[]> = {
+        QUOTATION_REVISION: ["REVISION_REQUESTED", "REVISION_CONFIRMED"],
+        LOI_ACCEPTED_QTY_CONFIRMED: ["SUPPLIER_QTY_CONFIRMED"],
+        QUOTATION_CREATED: ["QUOTATION_CREATED"],
+        QUOTATION_DECISION: ["QUOTATION_ACCEPTED", "RETURN_TO_REVISION"],
+        RESPONSIBILITIES_FINALIZED: ["RESPONSIBILITIES_FINALIZED"],
+        PROFORMA_ISSUED: ["PROFORMA_CREATED"],
+        OTHER_DOCUMENTS: ["OTHER_DOCS_UPLOADED", "OTHER_DOCS_SKIPPED"],
+        PURCHASE_ORDER_CREATED: ["PO_UPLOADED", "PO_SKIPPED"],
+    };
+    const fallbackActionBy: Record<string, string> = {
+        QUOTATION_REVISION: "BUYER",
+        LOI_ACCEPTED_QTY_CONFIRMED: "SUPPLIER",
+        QUOTATION_CREATED: "SUPPLIER",
+        QUOTATION_DECISION: "BUYER",
+        RESPONSIBILITIES_FINALIZED: "BOTH",
+        PROFORMA_ISSUED: "SUPPLIER",
+        OTHER_DOCUMENTS: "BOTH",
+        PURCHASE_ORDER_CREATED: "BUYER",
+    };
+    const requiredActions = Array.isArray(currentRule?.requiredActions) && currentRule?.requiredActions?.length
+        ? currentRule.requiredActions
+        : (fallbackActions[normalizedStageKey] || []);
+    const displayActions = (() => {
+        const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED"].includes(String(key || "").toUpperCase()));
+        return filtered.filter((key: string) => String(key || "").toUpperCase() !== "SUPPLIER_QTY_CONFIRMED");
+    })();
+    const actionBy = String((currentRule as any)?.actionBy || fallbackActionBy[normalizedStageKey] || "").toUpperCase();
+    const formatActionByLabel = (value: string) => {
+        const normalized = String(value || "").toUpperCase();
+        if (normalized === "BUYER") return "Buyer";
+        if (normalized === "SELLER" || normalized === "SUPPLIER") return "Supplier";
+        if (normalized === "BOTH") return "Buyer & Supplier";
+        if (normalized === "EITHER") return "Buyer or Supplier";
+        if (normalized === "OBAOL" || normalized === "INTERNAL") return "OBAOL";
+        return "";
+    };
+    const actionByLabelText = formatActionByLabel(actionBy);
+    const canActByRole = (() => {
+        if (actionBy === "BUYER") return Boolean(isBuyer);
+        if (actionBy === "SUPPLIER") return Boolean(isSeller);
+        if (actionBy === "BOTH") return Boolean(isBuyer || isSeller);
+        if (actionBy === "EITHER") return Boolean(isBuyer || isSeller);
+        return true;
+    })();
+    const canPerformAction = isSystemAdmin || isAssignedOperator || canActByRole;
+    const actionLabels: Record<string, string> = {
+        LOI_SUBMITTED: "Submit LOI",
+        SUPPLIER_QTY_CONFIRMED: "Confirm Quantity",
+        REVISION_REQUESTED: "Request Revision",
+        REVISION_CONFIRMED: "Confirm Revision",
+        QUOTATION_CREATED: "Create Quotation",
+        QUOTATION_ACCEPTED: "Accept Quotation",
+        RETURN_TO_REVISION: "Return to Revision",
+        RESPONSIBILITIES_FINALIZED: "Finalize Responsibilities",
+        PROFORMA_CREATED: "Create Proforma",
+        OTHER_DOCS_UPLOADED: "Upload Other Docs",
+        OTHER_DOCS_SKIPPED: "Skip Other Docs",
+        PO_UPLOADED: "Upload Purchase Order",
+        PO_SKIPPED: "Skip Purchase Order",
+    };
+    const handleActionPress = (actionKey: string) => {
+        if (!actionKey) return;
+        if (actionKey === "REVISION_REQUESTED") {
+            setClarificationOpen(true);
+            return;
+        }
+        if (actionKey === "RESPONSIBILITIES_FINALIZED") {
+            onFinalizeOpen();
+            return;
+        }
+        if (actionKey === "QUOTATION_CREATED") {
+            if (quotationId && quotationDoc) {
+                openDocViewer(quotationDoc);
+                return;
+            }
+            createQuotationMutation.mutate();
+            return;
+        }
+        applyActionMutation.mutate({ actionKey });
+    };
     const actionStatus = {
-        SUPPLIER_ACCEPTED: Boolean(enquiry?.sellerAcceptedAt),
-        BUYER_CONFIRMED: Boolean(enquiry?.buyerConfirmedAt),
+        LOI_SUBMITTED: Boolean((enquiry as any)?.loiSubmittedAt),
+        SUPPLIER_QTY_CONFIRMED: Boolean((enquiry as any)?.supplierQtyConfirmedAt),
+        REVISION_REQUESTED: Boolean((enquiry as any)?.revisionRequestedAt),
+        REVISION_CONFIRMED: Boolean((enquiry as any)?.revisionThread?.buyerConfirmedAt),
+        QUOTATION_CREATED: Boolean((enquiry as any)?.quotationCreatedAt),
+        QUOTATION_ACCEPTED: Boolean(enquiry?.buyerConfirmedAt),
+        RETURN_TO_REVISION: Boolean((enquiry as any)?.revisionRequestedAt),
         RESPONSIBILITIES_FINALIZED: Boolean((enquiry as any)?.responsibilitiesFinalizedAt),
+        PROFORMA_CREATED: Boolean((enquiry as any)?.proformaCreatedAt),
+        OTHER_DOCS_UPLOADED: Boolean((enquiry as any)?.otherDocsCompletedAt),
+        OTHER_DOCS_SKIPPED: Boolean((enquiry as any)?.otherDocsCompletedAt),
+        PO_UPLOADED: Boolean((enquiry as any)?.poSubmittedAt),
+        PO_SKIPPED: Boolean((enquiry as any)?.poSubmittedAt),
+    };
+    const scrollToRevisionPanel = () => {
+        if (typeof document === "undefined") return;
+        document.getElementById("revision-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+    const enquiryDocs = Array.isArray(enquiryDocsResponse?.data?.data?.data)
+        ? enquiryDocsResponse?.data?.data?.data
+        : Array.isArray(enquiryDocsResponse?.data?.data)
+            ? enquiryDocsResponse?.data?.data
+            : Array.isArray(enquiryDocsResponse?.data)
+                ? enquiryDocsResponse?.data
+                : [];
+    const hasLoiDoc = (enquiryDocs || []).some((doc: any) => String(doc?.type || "").toUpperCase() === "LOI");
+    const showDraftQuotation = Boolean((enquiry as any)?.quotationCreatedAt);
+    const filteredEnquiryDocs = (enquiryDocs || []).filter((doc: any) => {
+        const type = String(doc?.type || "").toUpperCase();
+        const status = String(doc?.status || "").toUpperCase();
+        if (type === "QUOTATION" && status === "DRAFT" && !showDraftQuotation) return false;
+        return true;
+    });
+    const syntheticLoiDoc = !hasLoiDoc && (enquiry as any)?.loiSubmittedAt ? [{
+        _id: "synthetic-loi",
+        type: "LOI",
+        status: "SENT",
+        createdAt: (enquiry as any)?.loiSubmittedAt,
+        fileUrl: null,
+        documentNumber: "LOI-AUTO",
+    }] : [];
+    const sortedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs].sort((a: any, b: any) => {
+        const aTime = new Date(a?.createdAt || 0).getTime();
+        const bTime = new Date(b?.createdAt || 0).getTime();
+        return bTime - aTime;
+    });
+    const DOC_TYPE_LABELS: Record<string, string> = {
+        LOI: "Letter of Intent",
+        QUOTATION: "Quotation",
+        PROFORMA_INVOICE: "Proforma Invoice",
+        INVOICE: "Invoice",
+        PURCHASE_ORDER: "Purchase Order",
+        SALES_CONTRACT: "Sales Contract",
+        PACKING_LIST: "Packing List",
+        QUALITY_CERTIFICATE: "Quality Certificate",
+        INSPECTION_CERTIFICATE: "Inspection Certificate",
+        PHYTOSANITARY_CERTIFICATE: "Phytosanitary Certificate",
+        FUMIGATION_CERTIFICATE: "Fumigation Certificate",
+        BILL_OF_LADING: "Bill of Lading",
+        AIR_WAYBILL: "Air Waybill",
+        LORRY_RECEIPT: "Lorry Receipt",
+        LCL_DRAFT: "LCL Draft",
+        INSURANCE_CERTIFICATE: "Insurance Certificate",
+        PAYMENT_ADVICE: "Payment Advice",
     };
     const sortedEnquiryStages = enquiryRules
         .filter((r: any) => r?.isActive !== false)
         .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
         .map((r: any) => String(r.stageKey || "").toUpperCase())
         .filter(Boolean);
+    let workflowStageOptions = sortedEnquiryStages.length > 0
+        ? [...sortedEnquiryStages]
+        : [
+            "ENQUIRY_CREATED",
+            "LOI_ACCEPTED_QTY_CONFIRMED",
+            "QUOTATION_REVISION",
+            "QUOTATION_CREATED",
+            "QUOTATION_DECISION",
+            "RESPONSIBILITIES_FINALIZED",
+            "PROFORMA_ISSUED",
+            "OTHER_DOCUMENTS",
+            "PURCHASE_ORDER_CREATED",
+        ];
+    if (isImportEnquiry) {
+        workflowStageOptions = workflowStageOptions.filter(
+            (key) => !["ENQUIRY_CREATED", "LOI_ACCEPTED_QTY_CONFIRMED"].includes(String(key || "").toUpperCase())
+        );
+    }
+    const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
+    const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
+    const hasDocType = (type: string) => safeDocs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
+    const hasSubmittedDoc = (type: string) =>
+        safeDocs.some(
+            (doc: any) => String(doc?.type || "").toUpperCase() === type && String(doc?.status || "").toUpperCase() !== "DRAFT"
+        );
     const stageLabelMap = new Map(
         enquiryRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
     );
-    const workflowStageOptions = sortedEnquiryStages.length > 0
-        ? sortedEnquiryStages
-        : ["INQUIRY_CREATED", "QUOTATION_SUBMITTED", "QUOTATION_REVISED", "PROFORMA_ISSUED", "PURCHASE_ORDER_RECEIVED", "ORDER_CONFIRMED"];
-    const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
-    const hasDocType = (type: string) => (docsForEnquiry || []).some((doc: any) => String(doc?.type || "") === type);
+    const hasSubmittedQuotation = hasSubmittedDoc("QUOTATION");
+    const isPreClarification = normalizedStageKey === "QUOTATION_REVISION" && !hasSubmittedQuotation && !showDraftQuotation;
+    if (isPreClarification) {
+        stageLabelMap.set("QUOTATION_REVISION", "Pre Clarification");
+    }
+    const canBuyerActions = isBuyer || isSystemAdmin;
+    const revisionItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
+    const revisionBuyerRequestedAt = (enquiry as any)?.revisionThread?.buyerRequestedAt || null;
+    const revisionBuyerConfirmedAt = (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
+    const allRevisionAcknowledged = revisionItems.length > 0 && revisionItems.every((item: any) => {
+        const itemKey = String(item?.key || "").toUpperCase();
+        const reply = revisionReplies.find((r) => r.key === itemKey);
+        const acknowledged = Boolean(reply?.acknowledged ?? item?.supplierAcknowledged);
+        const hasCounter = reply?.counterRate !== undefined && reply?.counterRate !== null && String(reply?.counterRate).trim() !== "";
+        const counterSaved = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
+        return acknowledged || hasCounter || counterSaved;
+    });
+    const canBuyerRevision = isBuyer || isSystemAdmin || isAssignedOperator;
+    const canSupplierRevision = isSeller || isSystemAdmin || isAssignedOperator;
+    const requiredActionMode = String((currentRule as any)?.requiredActionMode || "ALL").toUpperCase();
+    const isRequiredSatisfied = (() => {
+        if (!requiredActions.length) return true;
+        if (requiredActionMode === "ANY") return requiredActions.some((action: string) => actionStatus[action]);
+        return requiredActions.every((action: string) => actionStatus[action]);
+    })();
     const waitingMessage = (() => {
         if (isCancelled) return "This enquiry was cancelled.";
         if (isCompletedFlow) return "This enquiry is completed.";
-        if (!hasSellerAccepted) {
-            if (isSeller) return "Action pending from supplier: accept this enquiry to move forward.";
-            return "Waiting for supplier to accept this enquiry.";
+        if (requiredActions.length && !isRequiredSatisfied) {
+            const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
+            if (actionBy === "BUYER") return "Action pending from buyer.";
+            if (actionBy === "SUPPLIER") return "Action pending from supplier.";
+            if (actionBy === "BOTH") return "Action pending from buyer and supplier.";
+            if (actionBy === "EITHER") return "Action pending from buyer or supplier.";
+            return "Action pending for this stage.";
         }
-        if (!hasBuyerConfirmed) {
-            if (isBuyer) return "Action pending from buyer: click 'Mark All Good to Go'.";
-            return "Waiting for buyer confirmation.";
-        }
-        if (!hasExecutionPlanReady) return "Waiting for execution plan finalization to generate execution inquiries.";
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
         return "Enquiry is converted. Order execution is now in progress.";
     })();
     const isAssociateResponsibilityLocked = hasResponsibilitiesFinalized && !isAdmin;
-    const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked;
+    const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked && !isReadOnlyAfterConversion;
     const transportOwner = sanitizeOwner(responsibilityPlan.transportBy || initialPlan.transportBy || "obaol");
     const buyerHandlesTransport = transportOwner === "buyer";
     const sellerHandlesTransport = transportOwner === "seller";
@@ -1071,7 +1610,9 @@ export default function EnquiryDetailsPage() {
         JSON.stringify(normalizeExecutionContext(initialExecutionContext));
     const isPackagingSpecificationsChanged =
         String(packagingSpecifications || "").trim() !== String((enquiry as any)?.packagingSpecifications || "").trim();
-    const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged || isPackagingSpecificationsChanged;
+    const isTransportSegmentsChanged =
+        JSON.stringify(inlandTransportSegments) !== JSON.stringify((enquiry as any)?.inlandTransportSegments || []);
+    const isResponsibilityEventChanged = isResponsibilityPlanChanged || isExecutionContextChanged || isPackagingSpecificationsChanged || isTransportSegmentsChanged;
     const isTradeTermsChanged =
         String(selectedIncotermId || "") !== String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || "") ||
         String(selectedPaymentTermId || "") !== String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || "");
@@ -1103,35 +1644,6 @@ export default function EnquiryDetailsPage() {
     const isLive: boolean = liveRate?.isLive === true;
     const lastRateUpdate = liveRate?.updatedAt ? dayjs(liveRate.updatedAt).format("DD MMM, hh:mm A") : null;
     const enquiryOrderId = (enquiry as any)?.order?._id || (enquiry as any)?.order || null;
-    const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
-        ? incotermResponse.data.data.data
-        : Array.isArray(incotermResponse?.data?.data)
-            ? incotermResponse.data.data
-            : Array.isArray(incotermResponse?.data)
-                ? incotermResponse.data
-                : [];
-    const paymentTermOptions = Array.isArray(paymentTermResponse?.data?.data?.data)
-        ? paymentTermResponse.data.data.data
-        : Array.isArray(paymentTermResponse?.data?.data)
-            ? paymentTermResponse.data.data
-            : Array.isArray(paymentTermResponse?.data)
-                ? paymentTermResponse.data
-                : [];
-    const parseMasterRows = (raw: any): any[] => {
-        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
-        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
-        if (Array.isArray(raw?.data?.data)) return raw.data.data;
-        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
-        if (Array.isArray(raw?.data)) return raw.data;
-        if (Array.isArray(raw)) return raw;
-        return [];
-    };
-    const getEntityId = (value: any): string => String(value?._id || value?.id || value || "");
-    const states = parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted);
-    const districts = parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted);
-    const countries = parseMasterRows(countriesResponse).filter((item: any) => !item?.isDeleted);
-    const originSeaPorts = parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted);
-    const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
     const originDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.originState);
     const destinationDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === executionContext.destinationState);
     const inlineDistrictOptions = districts.filter((item: any) => getEntityId(item?.state) === inlineStateId);
@@ -1181,6 +1693,11 @@ export default function EnquiryDetailsPage() {
                     <BreadcrumbItem isCurrent>#{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
+            {isReadOnlyAfterConversion && (
+                <div className="w-full rounded-3xl border border-success-500/20 bg-success-500/5 px-6 py-4 text-success-600 text-xs font-black uppercase tracking-widest">
+                    Enquiry is converted and locked. All responsibility and execution details are read-only.
+                </div>
+            )}
 
             {isCancelled && (
                 <Card className="border border-danger-400/30 bg-danger-500/10">
@@ -1213,6 +1730,11 @@ export default function EnquiryDetailsPage() {
                                 >
                                     {enquiry.status}
                                 </Chip>
+                                {(String(enquiry?.sourceType || "").toUpperCase() === "IMPORT" || enquiry?.importListingId) && (
+                                    <Chip size="sm" variant="flat" className="font-bold border-none bg-warning-500/15 text-warning-600">
+                                        Import Enquiry
+                                    </Chip>
+                                )}
                             </div>
                             <div className="flex flex-col gap-1.5 mt-0.5">
                                 <span className="text-default-500 text-sm font-bold flex items-center gap-2">
@@ -1224,11 +1746,75 @@ export default function EnquiryDetailsPage() {
                                         {workflowStage.replaceAll("_", " ")}
                                     </Chip>
                                 )}
+                                {isImportEnquiry && (
+                                    <div className="mt-4 flex items-center gap-4 p-5 rounded-[2rem] border border-warning-500/20 bg-warning-500/5 backdrop-blur-3xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[40px] rounded-full -mr-16 -mt-16 animate-pulse" />
+                                        <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-600 shrink-0 border border-warning-500/10 shadow-inner">
+                                            <LuAnchor size={20} className="group-hover:rotate-12 transition-transform duration-500" />
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600/70">Import Protocol Active</span>
+                                            <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation is bypassed. Secure your logistics framework by choosing <span className="text-warning-600">Port Pickup</span> or <span className="text-warning-600">OBAOL Service</span> to proceed.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Right Side: Contact & Actions */}
                         <div className="flex flex-col gap-5 w-full md:w-auto items-end">
+                            {isImportEnquiry && (
+                                <div className="w-full md:w-[280px] group">
+                                    <Select
+                                        label={<span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-warning-500 transition-colors">Logistics Strategy</span>}
+                                        labelPlacement="outside"
+                                        placeholder="Select Framework..."
+                                        selectedKeys={importDeliveryMode ? [importDeliveryMode] : []}
+                                        onSelectionChange={(keys) => {
+                                            const key = Array.from(keys)[0] as string | undefined;
+                                            const next = String(key || "").toUpperCase();
+                                            setImportDeliveryMode(next);
+                                            if (next) updateImportDeliveryModeMutation.mutate(next);
+                                        }}
+                                        isDisabled={updateImportDeliveryModeMutation.isPending || isReadOnlyAfterConversion}
+                                        classNames={{
+                                            trigger: "h-14 bg-background border border-divider/50 hover:border-warning-500/50 shadow-none rounded-2xl transition-all group-data-[selected=true]:bg-warning-500/5",
+                                            value: "font-black text-sm uppercase tracking-wider text-foreground",
+                                            label: "mb-2"
+                                        }}
+                                        startContent={<LuNavigation size={18} className="text-warning-500 mr-1" />}
+                                    >
+                                        <SelectItem 
+                                            key="PORT_PICKUP" 
+                                            value="PORT_PICKUP"
+                                            textValue="Port Pickup"
+                                            className="py-3"
+                                        >
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-bold text-sm tracking-tight text-foreground">Port Pickup</span>
+                                                <span className="text-[10px] text-default-400 font-medium">Self-managed arrival logistics</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem 
+                                            key="OBAOL_SERVICE" 
+                                            value="OBAOL_SERVICE"
+                                            textValue="OBAOL Service"
+                                            className="py-3"
+                                        >
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-bold text-sm tracking-tight text-foreground">OBAOL Service</span>
+                                                <span className="text-[10px] text-default-400 font-medium">Managed end-to-end framework</span>
+                                            </div>
+                                        </SelectItem>
+                                    </Select>
+                                    {!importDeliveryMode && (
+                                        <div className="flex items-center gap-1.5 text-[9px] text-warning-600 font-black uppercase tracking-widest mt-3 ml-1 animate-pulse">
+                                            <FiAlertCircle size={10} />
+                                            Deployment required
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {/* Support Contact Point (Client/Supplier View) */}
                             {!isSystemAdmin && !isOperatorUser && (
                                 <div className="flex flex-col gap-2.5 p-3.5 bg-default-50/50 rounded-2xl border border-default-200/50 items-end text-right min-w-[220px]">
@@ -1319,6 +1905,271 @@ export default function EnquiryDetailsPage() {
                             </div>
                             <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
                         </div>
+
+                        <div className="mt-4 rounded-2xl border border-default-200/50 bg-foreground/[0.02] px-4 py-3">
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                                <span className="text-[10px] uppercase font-black tracking-widest text-default-500">Stage Actions</span>
+                                <span className="text-[10px] font-bold text-default-400">{String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}</span>
+                            </div>
+                            {normalizedStageKey === "QUOTATION_REVISION" ? (
+                                <div className="text-xs text-default-500">Revision actions are available in the panel below.</div>
+                            ) : displayActions.length === 0 ? (
+                                <div className="text-xs text-default-500">No actions configured for this stage.</div>
+                            ) : (
+                                <div className="flex flex-wrap gap-3">
+                                    {displayActions.map((actionKey: string) => (
+                                        <div key={actionKey} className="flex flex-col items-start gap-1">
+                                            <Button
+                                                size="sm"
+                                                color="primary"
+                                                variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
+                                                className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest uppercase"
+                                                isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
+                                                onPress={() => handleActionPress(actionKey)}
+                                                isLoading={applyActionMutation.isPending}
+                                            >
+                                                {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
+                                            </Button>
+                                            {isSystemAdmin && actionByLabelText && (
+                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                    Action by: {actionByLabelText}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {normalizedStageKey === "QUOTATION_REVISION" && (
+                            <div id="revision-panel" className="mt-4 rounded-2xl border border-default-200/50 bg-background/60 px-4 py-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Revision Panel</span>
+                                        <span className="text-sm font-bold">Buyer requests, supplier replies</span>
+                                    </div>
+                                    {revisionBuyerConfirmedAt && (
+                                        <Chip size="sm" color="success" variant="flat">Confirmed</Chip>
+                                    )}
+                                </div>
+
+                                {revisionItems.length === 0 && canBuyerRevision && (
+                                    <div className="space-y-3">
+                                        <Checkbox isSelected={clarificationReasonRate} onValueChange={setClarificationReasonRate}>
+                                            Rate
+                                        </Checkbox>
+                                        {clarificationReasonRate && (
+                                            <Input
+                                                type="number"
+                                                label="Requested Rate"
+                                                placeholder="Enter rate"
+                                                value={clarificationRate}
+                                                onValueChange={setClarificationRate}
+                                            />
+                                        )}
+                                        <Checkbox isSelected={clarificationReasonPayment} onValueChange={setClarificationReasonPayment}>
+                                            Payment Terms
+                                        </Checkbox>
+                                        <Checkbox isSelected={clarificationReasonTimeline} onValueChange={setClarificationReasonTimeline}>
+                                            Delivery Timeline
+                                        </Checkbox>
+                                        <div className="flex flex-col gap-1">
+                                            <Checkbox isSelected={clarificationCommunicated} onValueChange={setClarificationCommunicated}>
+                                                I have informed the supplier about this revision.
+                                            </Checkbox>
+                                            {!clarificationCommunicated && (
+                                                <span className="text-[11px] font-semibold text-warning-500">Check this box to enable Submit.</span>
+                                            )}
+                                        </div>
+                                        {revisionError && (
+                                            <div className="text-xs font-bold text-danger-500">{revisionError}</div>
+                                        )}
+                                        <div className="flex flex-col items-end gap-1">
+                                            <Button
+                                                color="primary"
+                                                className="font-bold"
+                                                isLoading={revisionRequestMutation.isPending}
+                                                isDisabled={
+                                                    !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
+                                                    (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                                    !clarificationCommunicated
+                                                }
+                                                onPress={async () => {
+                                                    const reasonsSelected = clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline;
+                                                    if (!reasonsSelected) {
+                                                        setRevisionError("Select at least one reason.");
+                                                        return;
+                                                    }
+                                                    if (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) {
+                                                        setRevisionError("Enter a valid rate.");
+                                                        return;
+                                                    }
+                                                    if (!clarificationCommunicated) {
+                                                        setRevisionError("Please confirm communication to supplier.");
+                                                        return;
+                                                    }
+                                                    setRevisionError("");
+                                                    const timeoutId = setTimeout(() => {
+                                                        setRevisionError("Request is taking too long. Please retry.");
+                                                    }, 15000);
+                                                    try {
+                                                        await revisionRequestMutation.mutateAsync();
+                                                    } finally {
+                                                        clearTimeout(timeoutId);
+                                                    }
+                                                }}
+                                            >
+                                                Submit Revision
+                                            </Button>
+                                            {isSystemAdmin && (
+                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                    Action by: Buyer
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {revisionItems.length > 0 && (
+                                    <div className="space-y-3">
+                                        {revisionItems.map((item: any) => {
+                                            const itemKey = String(item.key || "").toUpperCase();
+                                            const reply = revisionReplies.find((r) => r.key === itemKey) || { acknowledged: false, counterRate: "" };
+                                            return (
+                                                <div key={itemKey} className="rounded-xl border border-divider/50 px-3 py-2 bg-background/40">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div className="text-xs font-bold uppercase tracking-widest text-default-500">{itemKey.replaceAll("_", " ")}</div>
+                                                        {item.supplierAcknowledged && <Chip size="sm" color="success" variant="flat">Acknowledged</Chip>}
+                                                    </div>
+                                                    {itemKey === "RATE" && (
+                                                        <div className="text-xs text-default-500 mt-1">Buyer requested: {item.buyerRate ?? "-"}</div>
+                                                    )}
+                                                    {canSupplierRevision && (
+                                                        <div className="mt-2 flex flex-col gap-2">
+                                                            <Checkbox
+                                                                isSelected={reply.acknowledged}
+                                                                onValueChange={(val) => {
+                                                                    setRevisionReplies((prev) => {
+                                                                        const existing = prev.find((r) => r.key === itemKey);
+                                                                        if (!existing) {
+                                                                            return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
+                                                                        }
+                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
+                                                                    });
+                                                                }}
+                                                            >
+                                                                Acknowledge
+                                                            </Checkbox>
+                                                            {itemKey === "RATE" && reply.acknowledged && (
+                                                                <Input
+                                                                    type="number"
+                                                                    label="Counter Rate (optional)"
+                                                                    placeholder="Enter counter rate"
+                                                                    value={reply.counterRate || ""}
+                                                                    onValueChange={(val) => {
+                                                                        setRevisionReplies((prev) => {
+                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                            if (!existing) {
+                                                                                return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
+                                                                            }
+                                                                            return prev.map((r) => r.key === itemKey ? { ...r, counterRate: val } : r);
+                                                                        });
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        <div className="flex flex-wrap items-center gap-4 justify-end">
+                                            {canSupplierRevision && (
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <Button
+                                                        variant="flat"
+                                                        color="primary"
+                                                        className="font-bold"
+                                                        isLoading={revisionReplyMutation.isPending}
+                                                        isDisabled={!revisionReplies.some((item) => item.acknowledged)}
+                                                        onPress={async () => {
+                                                            const hasAcknowledged = revisionReplies.some((item) => item.acknowledged);
+                                                            if (!hasAcknowledged) {
+                                                                setRevisionReplyError("Select at least one item to acknowledge before saving.");
+                                                                return;
+                                                            }
+                                                            setRevisionReplyError("");
+                                                            setRevisionReplySuccess("");
+                                                            const timeoutId = setTimeout(() => {
+                                                                setRevisionReplyError("Save is taking too long. Please retry.");
+                                                            }, 15000);
+                                                            try {
+                                                                await revisionReplyMutation.mutateAsync();
+                                                            } finally {
+                                                                clearTimeout(timeoutId);
+                                                            }
+                                                        }}
+                                                    >
+                                                        Save Reply
+                                                    </Button>
+                                                    {isSystemAdmin && (
+                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                            Action by: Supplier
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {canBuyerRevision && (
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <Button
+                                                        color="primary"
+                                                        className="font-bold"
+                                                        isDisabled={!allRevisionAcknowledged}
+                                                        isLoading={applyActionMutation.isPending}
+                                                        onPress={async () => {
+                                                            if (!allRevisionAcknowledged) {
+                                                                setRevisionConfirmError("Supplier reply is required for all revision items before confirming.");
+                                                                return;
+                                                            }
+                                                            setRevisionConfirmError("");
+                                                            const timeoutId = setTimeout(() => {
+                                                                setRevisionConfirmError("Confirmation is taking too long. Please retry.");
+                                                            }, 15000);
+                                                            try {
+                                                                await applyActionMutation.mutateAsync({ actionKey: "REVISION_CONFIRMED" });
+                                                            } catch (error: any) {
+                                                                const message = error?.response?.data?.message || error?.message || "Failed to confirm revision.";
+                                                                setRevisionConfirmError(message);
+                                                            } finally {
+                                                                clearTimeout(timeoutId);
+                                                            }
+                                                        }}
+                                                    >
+                                                        Confirm Revision
+                                                    </Button>
+                                                    {isSystemAdmin && (
+                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                            Action by: Buyer
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {revisionReplyError && (
+                                            <div className="text-xs font-bold text-danger-500">{revisionReplyError}</div>
+                                        )}
+                                        {revisionReplySuccess && (
+                                            <div className="text-xs font-bold text-success-600">{revisionReplySuccess}</div>
+                                        )}
+                                        {revisionConfirmError && (
+                                            <div className="text-xs font-bold text-danger-500">{revisionConfirmError}</div>
+                                        )}
+                                        {!allRevisionAcknowledged && (
+                                            <div className="text-xs text-warning-500 font-semibold">Supplier must acknowledge all items before confirmation.</div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </CardBody>
                 </Card>
 
@@ -1337,27 +2188,105 @@ export default function EnquiryDetailsPage() {
                                 {rulesForStage.filter(canSeeRule).map((rule: any) => {
                                     const hasDoc = hasDocType(String(rule.docType || ""));
                                     return (
-                                        <div key={rule._id} className="flex items-center justify-between gap-3 border border-default-200/60 rounded-lg px-3 py-2">
-                                            <div className="text-sm">
-                                                <span className="font-medium">{rule.docType}</span>
-                                                <span className="text-default-500"> • {rule.responsibleRole} • {rule.actionType}</span>
+                                        <div key={rule._id} className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-divider/50 bg-background/50 hover:bg-default-50 transition-colors group">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="font-black text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">{rule.docType}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400">{rule.responsibleRole}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-default-300" />
+                                                    <span className="text-[10px] font-bold text-primary/70 uppercase tracking-tight">{rule.actionType} MODE</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Chip size="sm" variant="flat" color={hasDoc ? "success" : "warning"}>
-                                                    {hasDoc ? "Uploaded" : "Pending"}
+                                            <div className="flex items-center gap-3">
+                                                <Chip 
+                                                    size="sm" 
+                                                    variant="flat" 
+                                                    color={hasDoc ? "success" : "warning"}
+                                                    className="font-black uppercase text-[9px] tracking-widest px-2"
+                                                >
+                                                    {hasDoc ? "ARCHIVED" : "AWAITING"}
                                                 </Chip>
                                                 {!hasDoc && canActOnRule(rule) && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="flat"
-                                                        onPress={() => {
-                                                            setDocActionRule(rule);
-                                                            setDocActionOpen(true);
-                                                        }}
-                                                    >
-                                                        {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
-                                                    </Button>
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat"
+                                                            color="primary"
+                                                            className="font-black text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl"
+                                                            onPress={() => {
+                                                                setDocActionRule(rule);
+                                                                setDocActionOpen(true);
+                                                            }}
+                                                        >
+                                                            {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Initialize"}
+                                                        </Button>
+                                                        {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
+                                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                                Action by: {formatActionByLabel(rule?.responsibleRole)}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
+
+                <Card className="w-full border border-default-200/50">
+                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-4 md:px-6 pt-4 md:pt-5 pb-0">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-bold text-lg">All Documents</span>
+                            <span className="text-[10px] uppercase font-black tracking-wider text-default-400">LOI, quotation, proforma, PO, and more</span>
+                        </div>
+                        <Chip size="sm" variant="flat" color="primary" className="font-black uppercase text-[9px] tracking-widest px-2">
+                            {sortedEnquiryDocs.length} Files
+                        </Chip>
+                    </CardHeader>
+                    <CardBody className="px-4 md:px-6 pb-4 md:pb-6">
+                        {sortedEnquiryDocs.length === 0 ? (
+                            <div className="text-sm text-default-500 text-left">No documents created yet for this enquiry.</div>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                {sortedEnquiryDocs.map((doc: any) => {
+                                    const typeKey = String(doc?.type || "").toUpperCase();
+                                    const label = DOC_TYPE_LABELS[typeKey] || String(typeKey || "").replaceAll("_", " ");
+                                    const status = String(doc?.status || "DRAFT").toUpperCase();
+                                    const createdAt = doc?.createdAt ? dayjs(doc.createdAt).format("DD MMM YYYY") : "";
+                                    const hasFile = Boolean(doc?.fileUrl);
+                                    return (
+                                        <div key={String(doc?._id || doc?.id || `${typeKey}-${createdAt}`)} className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-divider/50 bg-background/50 hover:bg-default-50 transition-colors group">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="font-black text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">{label}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400">{status}</span>
+                                                    {createdAt && (
+                                                        <>
+                                                            <span className="w-1 h-1 rounded-full bg-default-300" />
+                                                            <span className="text-[10px] font-bold text-default-500">{createdAt}</span>
+                                                        </>
+                                                    )}
+                                                    {hasFile && (
+                                                        <>
+                                                            <span className="w-1 h-1 rounded-full bg-default-300" />
+                                                            <span className="text-[10px] font-bold text-success-600 uppercase tracking-widest">FILE</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <Button
+                                                    size="sm"
+                                                    variant="flat"
+                                                    color="primary"
+                                                    className="font-black text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl"
+                                                    onPress={() => openDocViewer(doc)}
+                                                >
+                                                    View
+                                                </Button>
                                             </div>
                                         </div>
                                     );
@@ -1544,6 +2473,7 @@ export default function EnquiryDetailsPage() {
                                             minRows={3}
                                             value={buyerSpecification}
                                             onChange={(e) => setBuyerSpecification(e.target.value)}
+                                            isDisabled={isReadOnlyAfterConversion}
                                             placeholder="Add specific requirements..."
                                             className="flex-1"
                                         />
@@ -1552,7 +2482,7 @@ export default function EnquiryDetailsPage() {
                                             color="primary"
                                             variant="flat"
                                             isLoading={updateSpecificationMutation.isPending}
-                                            isDisabled={buyerSpecification.trim() === String(specificationTextRaw || "").trim()}
+                                            isDisabled={isReadOnlyAfterConversion || buyerSpecification.trim() === String(specificationTextRaw || "").trim()}
                                             onPress={() => updateSpecificationMutation.mutate()}
                                         >
                                             Save
@@ -1596,6 +2526,9 @@ export default function EnquiryDetailsPage() {
                         <CardBody className="px-6 pb-6 pt-4">
                             <div className="flex justify-end">
                                 <CurrencySelector />
+                            </div>
+                            <div className="mt-3 text-[11px] text-default-500 font-medium">
+                                Base price only. Execution services (procurement/logistics/packaging/etc.) have separate charges.
                             </div>
                             {(isAdmin || isMediator) ? (
                                 <div className="flex flex-col gap-3">
@@ -1653,527 +2586,100 @@ export default function EnquiryDetailsPage() {
                     </Card>
 
                     {/* Responsibility Arena */}
-                    <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
-                        <CardHeader className="px-6 pt-6 pb-0 flex flex-col items-start gap-1">
-                            <span className="font-bold text-lg tracking-tight">Responsibility Event</span>
-                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
-                        </CardHeader>
-                        <Divider className="mt-4" />
-                        <CardBody className="flex flex-col gap-10 px-6 py-6 transition-all duration-300">
-                            <div className="flex flex-col gap-4 p-5 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/60 to-white dark:from-default-100/5 dark:to-transparent shadow-sm">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    {isImportPortPickup ? (
+                        <Card className="lg:col-span-3 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-warning-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
+                            <CardBody className="flex flex-col md:flex-row items-center gap-8 px-8 py-10 relative z-10">
+                                <div className="w-24 h-24 rounded-[2rem] bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
+                                    <LuAnchor size={40} />
+                                </div>
+                                <div className="flex flex-col gap-4 flex-1 text-center md:text-left">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Trade Terms</span>
-                                        <span className="text-base font-black text-foreground">Incoterms & Payment</span>
+                                         <div className="flex items-center gap-2 justify-center md:justify-start">
+                                            <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-600 opacity-80">Logistics Profile</span>
+                                         </div>
+                                        <h3 className="text-2xl font-bold tracking-tight text-foreground">Port Pickup Protocol</h3>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <Button
-                                            size="sm"
-                                            color="primary"
-                                            variant="flat"
-                                            isDisabled={!canEditResponsibilityPlan || !isTradeTermsChanged}
-                                            isLoading={updateTradeTermsMutation.isPending}
-                                            onPress={() => updateTradeTermsMutation.mutate()}
-                                            className="font-bold"
+                                    <p className="text-sm font-medium text-default-500 max-w-2xl leading-relaxed">
+                                        Responsibility events and inland transport segments are <span className="text-foreground font-bold">automatically decoupled</span> for port-delivery frameworks. The mission transition point is established at the port of arrival.
+                                    </p>
+                                    <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                            Arrival Handling Only
+                                        </div>
+                                        <div className="px-4 py-2 rounded-xl bg-foreground/5 border border-foreground/5 text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                            No Inland Reservation
+                                        </div>
+                                        <div className="px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-[10px] font-bold uppercase tracking-wider text-primary-600 cursor-pointer hover:bg-primary/10 transition-colors"
+                                             onClick={() => {
+                                                 setImportDeliveryMode("OBAOL_SERVICE");
+                                                 updateImportDeliveryModeMutation.mutate("OBAOL_SERVICE");
+                                             }}
                                         >
-                                            Save Terms
-                                        </Button>
-                                        {tradeTermsSavedAt && (
-                                            <span className="text-xs text-default-400">
-                                                Saved {dayjs(tradeTermsSavedAt).format("DD MMM, HH:mm")}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Select
-                                        size="sm"
-                                        label="Incoterm"
-                                        variant="bordered"
-                                        selectedKeys={selectedIncotermId ? [selectedIncotermId] : []}
-                                        onSelectionChange={(keys) => {
-                                            const arr = Array.from(keys as Set<string>);
-                                            setSelectedIncotermId((arr[0] as string) || "");
-                                        }}
-                                        isDisabled={!canEditResponsibilityPlan}
-                                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                    >
-                                        {incotermOptions.map((item: any) => (
-                                            <SelectItem key={item._id} value={item._id}>
-                                                {[item.code, item.name].filter(Boolean).join(" — ")}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-
-                                    <Select
-                                        size="sm"
-                                        label="Payment Term"
-                                        variant="bordered"
-                                        selectedKeys={selectedPaymentTermId ? [selectedPaymentTermId] : []}
-                                        onSelectionChange={(keys) => {
-                                            const arr = Array.from(keys as Set<string>);
-                                            setSelectedPaymentTermId((arr[0] as string) || "");
-                                        }}
-                                        isDisabled={!canEditResponsibilityPlan}
-                                        classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                    >
-                                        {paymentTermOptions.map((item: any) => (
-                                            <SelectItem key={item._id} value={item._id}>
-                                                {item.label || "Payment Term"}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                </div>
-                            </div>
-                            {/* Section 1: Execution Context & Location Strategy */}
-                            <div className="flex flex-col gap-8 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
-                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none rotate-12 group-hover:rotate-0 duration-700">
-                                    <LuNavigation size={140} />
-                                </div>
-
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-divider/50 pb-6">
-                                    <div className="flex flex-col gap-1">
-                                        <h3 className="text-lg font-black text-foreground inline-flex items-center gap-2 tracking-tighter">
-                                            <LuNavigation className="text-primary" size={20} />
-                                            Execution Context
-                                        </h3>
-                                        <p className="text-xs text-default-500 font-bold tracking-tight uppercase opacity-70">Logistics Parameters & Trade Type</p>
-                                    </div>
-                                    <div className="bg-default-200/50 dark:bg-black/40 p-1.5 rounded-2xl gap-1.5 border border-default-300/40 flex self-start md:self-center shadow-inner md:mr-4">
-                                        {["DOMESTIC", "INTERNATIONAL"].map((type) => {
-                                            const isSelected = executionContext.tradeType === type;
-                                            const canToggle = (isBuyer || isAdmin) && canEditResponsibilityPlan;
-                                            return (
-                                                <button
-                                                    key={type}
-                                                    onClick={() => {
-                                                        if (canToggle) {
-                                                            const value = type as "DOMESTIC" | "INTERNATIONAL";
-                                                            setExecutionContext((prev) => ({
-                                                                ...prev,
-                                                                tradeType: value,
-                                                                ...(value === "DOMESTIC"
-                                                                    ? { originCountry: "", destinationCountry: "", originPort: "", destinationPort: "" }
-                                                                    : { originState: "", destinationState: "", originDistrict: "", destinationDistrict: "" }),
-                                                            }));
-                                                        }
-                                                    }}
-                                                    disabled={!canToggle}
-                                                    className={`px-6 h-9 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${isSelected
-                                                        ? "bg-white dark:bg-default-200 text-primary shadow-xl scale-[1.05] z-10 ring-1 ring-black/5"
-                                                        : "text-default-500 hover:text-default-700 hover:bg-white/40 dark:hover:bg-default-200/20"
-                                                        } ${!canToggle ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}`}
-                                                >
-                                                    {type}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                                    {executionContext.tradeType === "DOMESTIC" ? (
-                                        <>
-                                            {showOriginLogisticsFields && (
-                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                                            <LuMapPin size={20} />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Origin</span>
-                                                            <span className="text-base font-black text-foreground tracking-tighter">Ship From</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        <Select
-                                                            size="sm"
-                                                            label="State"
-                                                            variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                                            selectedKeys={executionContext.originState ? [executionContext.originState] : []}
-                                                            onSelectionChange={(keys) => {
-                                                                const arr = Array.from(keys as Set<string>);
-                                                                const value = (arr[0] as string) || "";
-                                                                setExecutionContext((prev) => ({
-                                                                    ...prev,
-                                                                    originState: value,
-                                                                    originDistrict: "",
-                                                                }));
-                                                            }}
-                                                            isDisabled={!canEditOriginLogistics}
-                                                        >
-                                                            {states.map((item: any) => (
-                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                            ))}
-                                                        </Select>
-                                                        <Select
-                                                            size="sm"
-                                                            label="District"
-                                                            variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                                            selectedKeys={executionContext.originDistrict ? [executionContext.originDistrict] : []}
-                                                            onSelectionChange={(keys) => {
-                                                                const arr = Array.from(keys as Set<string>);
-                                                                setExecutionContext((prev) => ({ ...prev, originDistrict: (arr[0] as string) || "" }));
-                                                            }}
-                                                            isDisabled={!canEditOriginLogistics || !executionContext.originState}
-                                                        >
-                                                            {originDistrictOptions.map((item: any) => (
-                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                            ))}
-                                                        </Select>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {showDestinationLogisticsFields && (
-                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary shadow-inner">
-                                                            <LuNavigation size={20} />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Domestic Destination</span>
-                                                            <span className="text-base font-black text-foreground tracking-tighter">Ship To</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        <Select
-                                                            size="sm"
-                                                            label="State"
-                                                            variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                                            selectedKeys={executionContext.destinationState ? [executionContext.destinationState] : []}
-                                                            onSelectionChange={(keys) => {
-                                                                const arr = Array.from(keys as Set<string>);
-                                                                const value = (arr[0] as string) || "";
-                                                                setExecutionContext((prev) => ({
-                                                                    ...prev,
-                                                                    destinationState: value,
-                                                                    destinationDistrict: "",
-                                                                }));
-                                                            }}
-                                                            isDisabled={!canEditDestinationLogistics}
-                                                        >
-                                                            {states.map((item: any) => (
-                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                            ))}
-                                                        </Select>
-                                                        <Select
-                                                            size="sm"
-                                                            label="District"
-                                                            variant="bordered"
-                                                            classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
-                                                            selectedKeys={executionContext.destinationDistrict ? [executionContext.destinationDistrict] : []}
-                                                            onSelectionChange={(keys) => {
-                                                                const arr = Array.from(keys as Set<string>);
-                                                                setExecutionContext((prev) => ({ ...prev, destinationDistrict: (arr[0] as string) || "" }));
-                                                            }}
-                                                            isDisabled={!canEditDestinationLogistics || !executionContext.destinationState}
-                                                        >
-                                                            {destinationDistrictOptions.map((item: any) => (
-                                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
-                                                            ))}
-                                                        </Select>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <>
-                                            {showOriginLogisticsFields && (
-                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                                            <LuGlobe size={20} />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Origin</span>
-                                                            <span className="text-base font-black text-foreground tracking-tighter">Origin Country & Port</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        {/* @ts-ignore */}
-                                                        <Autocomplete
-                                                            size="sm"
-                                                            label="Origin Country"
-                                                            variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
-                                                            selectedKey={executionContext.originCountry || null}
-                                                            items={countries}
-                                                            onSelectionChange={(key) => {
-                                                                const value = String(key || "");
-                                                                setExecutionContext((prev) => ({
-                                                                    ...prev,
-                                                                    originCountry: value,
-                                                                    originPort: "",
-                                                                }));
-                                                            }}
-                                                        >
-                                                            {(item: any) => (
-                                                                <AutocompleteItem key={item._id} textValue={item.name}>
-                                                                    {item.name}
-                                                                </AutocompleteItem>
-                                                            )}
-                                                        </Autocomplete>
-                                                        {/* @ts-ignore */}
-                                                        <Autocomplete
-                                                            size="sm"
-                                                            label="Port of Load"
-                                                            variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
-                                                            selectedKey={executionContext.originPort || null}
-                                                            items={originPortOptions}
-                                                            onSelectionChange={(key) => {
-                                                                setExecutionContext((prev) => ({ ...prev, originPort: String(key || "") }));
-                                                            }}
-                                                        >
-                                                            {(item: any) => (
-                                                                <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
-                                                                    {item.loCode} - {item.name}
-                                                                </AutocompleteItem>
-                                                            )}
-                                                        </Autocomplete>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {showDestinationLogisticsFields && (
-                                                <div className="flex flex-col gap-5 p-5 rounded-2xl border border-white/60 dark:border-default-200/20 bg-white/40 dark:bg-black/10 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <div className="w-10 h-10 rounded-2xl bg-danger/10 flex items-center justify-center text-danger shadow-inner">
-                                                            <LuAnchor size={20} />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Global Trade Destination</span>
-                                                            <span className="text-base font-black text-foreground tracking-tighter">Dest. Country & Port</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        {/* @ts-ignore */}
-                                                        <Autocomplete
-                                                            size="sm"
-                                                            label="Dest. Country"
-                                                            variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
-                                                            selectedKey={executionContext.destinationCountry || null}
-                                                            items={countries}
-                                                            onSelectionChange={(key) => {
-                                                                const value = String(key || "");
-                                                                setExecutionContext((prev) => ({
-                                                                    ...prev,
-                                                                    destinationCountry: value,
-                                                                    destinationPort: "",
-                                                                }));
-                                                            }}
-                                                        >
-                                                            {(item: any) => (
-                                                                <AutocompleteItem key={item._id} textValue={item.name}>
-                                                                    {item.name}
-                                                                </AutocompleteItem>
-                                                            )}
-                                                        </Autocomplete>
-                                                        {/* @ts-ignore */}
-                                                        <Autocomplete
-                                                            size="sm"
-                                                            label="Port of Discharge"
-                                                            variant="bordered"
-                                                            classNames={{ base: "rounded-2xl", listbox: "rounded-2xl", inputWrapper: "h-10 border-default-200 shadow-sm" }}
-                                                            selectedKey={executionContext.destinationPort || null}
-                                                            items={destinationPortOptions}
-                                                            onSelectionChange={(key) => {
-                                                                setExecutionContext((prev) => ({ ...prev, destinationPort: String(key || "") }));
-                                                            }}
-                                                        >
-                                                            {(item: any) => (
-                                                                <AutocompleteItem key={item._id} textValue={`${item.loCode} - ${item.name}`}>
-                                                                    {item.loCode} - {item.name}
-                                                                </AutocompleteItem>
-                                                            )}
-                                                        </Autocomplete>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Section 2: Responsibility Map */}
-                            <div className="flex flex-col gap-6 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-white to-default-50/30 dark:from-transparent dark:to-default-100/5 shadow-inner">
-                                <div className="flex flex-col gap-1 border-b border-divider/50 pb-4">
-                                    <h3 className="text-lg font-black text-foreground inline-flex items-center gap-2 tracking-tighter">
-                                        <LuClipboardCheck className="text-primary" size={20} />
-                                        Responsibility Map
-                                    </h3>
-                                    <p className="text-xs text-default-500 font-bold tracking-tight uppercase opacity-70">Ownership Allocation & Control Points</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-                                    {responsibilityFieldConfig.map((field) => {
-                                        const currentValue = (responsibilityPlan as any)[field.key] || "";
-                                        const allowed = field.allowed;
-                                        const getOwnerStyles = (owner: string) => {
-                                            switch (owner) {
-                                                case "buyer": return "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none translate-y-[-2px]";
-                                                case "seller": return "bg-amber-500 text-white shadow-lg shadow-amber-200 dark:shadow-none translate-y-[-2px]";
-                                                case "obaol": return "bg-cyan-600 text-white shadow-lg shadow-cyan-200 dark:shadow-none translate-y-[-2px]";
-                                                default: return "bg-white text-primary";
-                                            }
-                                        };
-                                        return (
-                                            <div key={field.key} className="flex flex-col gap-4 p-4 rounded-2xl border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl transition-all duration-500 group">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-primary/5 dark:bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500 border border-primary-100/30 shadow-inner">
-                                                        {/* @ts-ignore */}
-                                                        {React.cloneElement(field.icon, { size: 18 })}
-                                                    </div>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-[10px] font-black text-foreground/90 uppercase tracking-widest leading-none mb-1">{field.label}</span>
-                                                        <span className="text-[8px] text-default-400 font-bold uppercase tracking-tighter opacity-70">Step Owner Selection</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-3 bg-default-100/80 dark:bg-black/40 p-1.5 rounded-2xl gap-2 border border-default-200/50 relative overflow-hidden">
-                                                    {allowed.map((option: string) => {
-                                                        const isSelected = currentValue === option;
-                                                        const canSelect = canEditResponsibilityPlan && (allowed.length > 1 || !isSelected);
-                                                        return (
-                                                            <button
-                                                                key={option}
-                                                                onClick={() => {
-                                                                    if (canSelect) {
-                                                                        setResponsibilityPlan((prev) => ({ ...prev, [field.key]: option as any }));
-                                                                    }
-                                                                }}
-                                                                disabled={!canSelect}
-                                                                className={`relative flex items-center justify-center py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-500
-                                                                    ${isSelected
-                                                                        ? `${getOwnerStyles(option)} z-10`
-                                                                        : "text-default-400 hover:text-default-700 hover:bg-white dark:hover:bg-default-200/20"
-                                                                    }
-                                                                    ${!canSelect && !isSelected ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
-                                                                `}
-                                                            >
-                                                                {ownerLabelByKey[option] || option}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {executionContext.tradeType === "INTERNATIONAL" && (
-                                    <div className="rounded-[1.5rem] border border-primary-100/40 bg-primary-50/40 dark:bg-primary-900/10 px-8 py-5 text-xs text-primary-700 dark:text-primary-300 font-bold leading-relaxed flex items-center gap-5 shadow-sm">
-                                        <div className="w-3 h-3 rounded-full bg-primary animate-ping shrink-0" />
-                                        <p className="tracking-tight">Cargo Insurance is automatically synchronized with the owner handling Freight Forwarding & Logistics Operations.</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Section 3: Product Specs & Intelligence */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 rounded-3xl border border-white/80 dark:border-default-200/10 bg-white/40 dark:bg-default-100/5 relative overflow-hidden shadow-sm">
-                                <div className="lg:col-span-2 flex flex-col gap-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-2xl bg-warning/10 flex items-center justify-center text-warning shadow-inner">
-                                            <LuPackage size={20} />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Product Specs</span>
-                                            <span className="text-base font-black text-foreground tracking-tighter">Packaging Detail</span>
+                                            Switch to OBAOL Service
                                         </div>
                                     </div>
-                                    <Textarea
-                                        size="lg"
-                                        variant="flat"
-                                        value={packagingSpecifications}
-                                        onValueChange={setPackagingSpecifications}
-                                        isDisabled={!canEditResponsibilityPlan}
-                                        minRows={4}
-                                        placeholder="Specify packaging requirements (dimensions, weight, material, handling instructions...)"
-                                        classNames={{
-                                            input: "text-base font-medium",
-                                            inputWrapper: "bg-white/80 dark:bg-black/40 border border-default-200/50 hover:bg-white focus-within:bg-white shadow-sm transition-all rounded-2xl p-4 h-auto"
-                                        }}
-                                    />
                                 </div>
-
-                                <div className="flex flex-col gap-8">
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                                <LuActivity size={20} />
-                                            </div>
-                                            <span className="text-sm font-black uppercase tracking-widest text-foreground">Route Notes</span>
-                                        </div>
-                                        <Input
-                                            size="lg"
-                                            variant="bordered"
-                                            classNames={{
-                                                inputWrapper: "rounded-2xl border-default-200 h-14 bg-white/50 dark:bg-white/5 shadow-sm",
-                                                input: "font-semibold"
-                                            }}
-                                            placeholder="Add logistics constraints..."
-                                            value={executionContext.routeNotes}
-                                            onValueChange={(v) => setExecutionContext((prev) => ({ ...prev, routeNotes: v }))}
-                                            isDisabled={!canEditRouteNotes}
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col gap-4 mt-auto">
-                                        {!hasPackagingSpecifications && (
-                                            <div className="flex items-center gap-4 p-5 rounded-2xl bg-danger-50 dark:bg-danger-500/10 border border-danger-200 dark:border-danger-500/20 text-danger-700 dark:text-danger-400 transition-all">
-                                                <FiAlertCircle size={22} className="shrink-0 animate-bounce" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-black uppercase tracking-widest">Mandatory</span>
-                                                    <p className="text-[10px] font-bold opacity-80 leading-tight">Packaging specs required for order generation.</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {executionContext.tradeType === "INTERNATIONAL" && (
-                                            <div className="flex items-start gap-4 p-5 rounded-2xl bg-warning-50 dark:bg-warning-500/10 border border-warning-200 dark:border-warning-500/20 text-warning-700 dark:text-warning-400 transition-all">
-                                                <FiInfo size={22} className="mt-0.5 shrink-0" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-black uppercase tracking-widest">Alert</span>
-                                                    <p className="text-[10px] font-bold opacity-80 leading-tight">Special customs and port handling costs will apply based on this context.</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {canEditResponsibilityPlan && (
-                                            <div className="flex flex-col gap-3 mt-4">
-                                                <Button
-                                                    size="lg"
-                                                    color="primary"
-                                                    variant="shadow"
-                                                    onPress={() => updateResponsibilityPlanMutation.mutate()}
-                                                    isLoading={updateResponsibilityPlanMutation.isPending}
-                                                    isDisabled={!isResponsibilityEventChanged}
-                                                    className="w-full h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                                    startContent={!updateResponsibilityPlanMutation.isPending && <FiCheckCircle size={20} />}
-                                                >
-                                                    Finalize Framework
-                                                </Button>
-                                                <div className="flex items-center justify-center gap-2 opacity-50">
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-500">
-                                                        {updateResponsibilityPlanMutation.isPending
-                                                            ? "Synchronizing..."
-                                                            : responsibilitySavedAt
-                                                                ? `Last Sync: ${dayjs(responsibilitySavedAt).format("DD MMM, HH:mm")}`
-                                                                : "Awaiting sync"}
-                                                    </span>
-                                                    {responsibilitySavedAt && <div className="w-1 h-1 rounded-full bg-success" />}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardBody>
-                    </Card>
+                            </CardBody>
+                        </Card>
+                    ) : (
+                        <ResponsibilityEventForm
+                            incotermOptions={incotermOptions}
+                            paymentTermOptions={paymentTermOptions}
+                            selectedIncotermId={selectedIncotermId}
+                            setSelectedIncotermId={setSelectedIncotermId}
+                            selectedPaymentTermId={selectedPaymentTermId}
+                            setSelectedPaymentTermId={setSelectedPaymentTermId}
+                            isTradeTermsChanged={isTradeTermsChanged}
+                            onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
+                            savingTradeTerms={updateTradeTermsMutation.isPending}
+                            tradeTermsSavedAt={tradeTermsSavedAt}
+                            executionContext={executionContext}
+                            setExecutionContext={setExecutionContext}
+                            canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
+                            states={states}
+                            originDistrictOptions={originDistrictOptions}
+                            destinationDistrictOptions={destinationDistrictOptions}
+                            originCountryOptions={countries}
+                            destinationCountryOptions={countries}
+                            originPortOptions={originPortOptions}
+                            destinationPortOptions={destinationPortOptions}
+                            showOriginLogisticsFields={showOriginLogisticsFields}
+                            showDestinationLogisticsFields={showDestinationLogisticsFields}
+                            canEditOriginLogistics={canEditOriginLogistics}
+                            canEditDestinationLogistics={canEditDestinationLogistics}
+                            canEditRouteNotes={canEditRouteNotes}
+                            responsibilityPlan={responsibilityPlan}
+                            setResponsibilityPlan={setResponsibilityPlan}
+                            responsibilityFieldConfig={responsibilityFieldConfig}
+                            canEditResponsibilityPlan={canEditResponsibilityPlan}
+                            isReadOnlyAfterConversion={isReadOnlyAfterConversion}
+                            inlandTransportSegments={inlandTransportSegments}
+                            setInlandTransportSegments={setInlandTransportSegments}
+                            packagingSpecifications={packagingSpecifications}
+                            setPackagingSpecifications={setPackagingSpecifications}
+                            hasPackagingSpecifications={hasPackagingSpecifications}
+                            isInternational={executionContext.tradeType === "INTERNATIONAL"}
+                            showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
+                            isResponsibilityEventChanged={isResponsibilityEventChanged}
+                            onSaveFramework={() => updateResponsibilityPlanMutation.mutate()}
+                            savingFramework={updateResponsibilityPlanMutation.isPending}
+                            onFinalize={() => {
+                                if (isResponsibilityEventChanged) {
+                                    updateResponsibilityPlanMutation.mutate(undefined, {
+                                        onSuccess: () => onFinalizeOpen()
+                                    });
+                                } else {
+                                    onFinalizeOpen();
+                                }
+                            }}
+                            finalizeLoading={finalizeResponsibilitiesMutation.isPending}
+                            responsibilitySavedAt={responsibilitySavedAt}
+                            showFinalizeButton={canEditResponsibilityPlan && workflowStage === "PROFORMA_ISSUED"}
+                            showSaveTermsButton={true}
+                        />
+                    )}
 
                     {/* Execution Inquiries */}
                     {
@@ -2230,6 +2736,7 @@ export default function EnquiryDetailsPage() {
                                             }}
                                             className="flex-1"
                                             placeholder="Select operator"
+                                            isDisabled={isReadOnlyAfterConversion}
                                         >
                                             {operatorOptions.map((emp: any) => (
                                                 <SelectItem key={emp._id} value={emp._id}>
@@ -2242,12 +2749,74 @@ export default function EnquiryDetailsPage() {
                                             color="primary"
                                             isLoading={assignOperatorMutation.isPending}
                                             onPress={() => assignOperatorMutation.mutate()}
-                                            isDisabled={!selectedOperatorId}
+                                            isDisabled={!selectedOperatorId || isReadOnlyAfterConversion}
                                         >
                                             Save
                                         </Button>
                                     </div>
+                                    <span className="text-[10px] text-default-500 font-bold uppercase tracking-wider mt-1 px-1">
+                                        {assignOperatorMutation.isPending
+                                            ? "Saving assignment..."
+                                            : assignmentSavedAt
+                                                ? `Updated at ${dayjs(assignmentSavedAt).format("DD MMM, HH:mm A")}`
+                                                : "Ready to assign"}
+                                    </span>
                                 </div>
+                            )}
+                            {isAdmin && (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-default-400">Supplier Ownership Operator</span>
+                                    <Select
+                                        size="sm"
+                                        selectedKeys={selectedSupplierOperatorId ? [selectedSupplierOperatorId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedSupplierOperatorId(arr[0] || "");
+                                        }}
+                                        className="flex-1"
+                                        placeholder="Select supplier operator"
+                                        isDisabled={isReadOnlyAfterConversion}
+                                    >
+                                        {operatorOptions.map((emp: any) => (
+                                            <SelectItem key={emp._id} value={emp._id}>
+                                                {emp.name || emp.firstName || emp.email}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            )}
+                            {isAdmin && (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-default-400">Deal Closer Operator</span>
+                                    <Select
+                                        size="sm"
+                                        selectedKeys={selectedDealCloserOperatorId ? [selectedDealCloserOperatorId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedDealCloserOperatorId(arr[0] || "");
+                                        }}
+                                        className="flex-1"
+                                        placeholder="Select deal closer operator"
+                                        isDisabled={isReadOnlyAfterConversion}
+                                    >
+                                        {operatorOptions.map((emp: any) => (
+                                            <SelectItem key={emp._id} value={emp._id}>
+                                                {emp.name || emp.firstName || emp.email}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            )}
+                            {isAdmin && (
+                                <Button
+                                    size="sm"
+                                    color="secondary"
+                                    isLoading={updateOperatorRolesMutation.isPending}
+                                    onPress={() => updateOperatorRolesMutation.mutate()}
+                                    isDisabled={isReadOnlyAfterConversion}
+                                >
+                                    Save Operator Roles
+                                </Button>
                             )}
                             {enquiry.supplierCommitUntil && (
                                 <div className="flex flex-col gap-1">
@@ -2266,6 +2835,7 @@ export default function EnquiryDetailsPage() {
                                             size="sm"
                                             value={commitUntil}
                                             onChange={(e) => setCommitUntil(e.target.value)}
+                                            isDisabled={isReadOnlyAfterConversion}
                                             className="flex-1"
                                         />
                                         <Button
@@ -2274,7 +2844,7 @@ export default function EnquiryDetailsPage() {
                                             variant="flat"
                                             isLoading={commitUntilMutation.isPending}
                                             onPress={() => commitUntilMutation.mutate()}
-                                            isDisabled={!commitUntil}
+                                            isDisabled={!commitUntil || isReadOnlyAfterConversion}
                                         >
                                             Commit
                                         </Button>
@@ -2293,74 +2863,145 @@ export default function EnquiryDetailsPage() {
                 <Divider className="my-6" />
 
                 {/* Bottom Action Hub */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8 bg-default-50/50 p-6 md:p-8 rounded-[40px] border border-divider">
-                    <div className="flex flex-col gap-1.5 text-center md:text-left">
-                        <h2 className="text-2xl font-black tracking-tight">Finalize & Execute</h2>
-                        <p className="text-default-500 text-sm font-medium">Review all details above before finalizing the execution plan.</p>
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col md:flex-row justify-between items-center gap-10 bg-foreground/[0.02] backdrop-blur-3xl p-10 md:p-12 rounded-[3.5rem] border border-foreground/5 shadow-2xl relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -ml-32 -mt-32" />
+                    
+                    <div className="flex flex-col gap-2 text-center md:text-left relative z-10">
+                        <div className="flex items-center gap-3 justify-center md:justify-start">
+                             <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(var(--heroui-primary-rgb),0.5)]" />
+                             <span className="text-[10px] font-bold tracking-widest uppercase text-primary">Readiness Protocol</span>
+                        </div>
+                        <h2 className="text-3xl font-bold tracking-tight leading-none text-foreground">Finalize & Execute</h2>
+                        <p className="text-default-500 text-[11px] font-medium max-w-md opacity-80 decoration-transparent">Review performance parameters and logistics framework before authorizing mission-critical execution.</p>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 justify-center md:justify-end items-center">
-                        {quotationId && (
-                            <Button
-                                color="primary"
-                                variant="bordered"
-                                className="w-full sm:w-auto font-black px-6 rounded-2xl h-12 text-xs tracking-wide border-divider"
-                                onPress={() => router.push(`/dashboard/documents/${quotationId}`)}
-                                startContent={<LuEye size={18} />}
-                            >
-                                View Quotation
-                            </Button>
+                    <div className="flex flex-wrap gap-6 justify-center md:justify-end items-center relative z-10">
+                        {requiredActions.length > 0 && (
+                            <div className="flex flex-wrap gap-3 justify-center md:justify-end">
+                                {displayActions.map((actionKey: string) => (
+                                    <div key={actionKey} className="flex flex-col items-start gap-1">
+                                        <Button
+                                            size="sm"
+                                            color="primary"
+                                            variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
+                                            className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase"
+                                            isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
+                                            onPress={() => handleActionPress(actionKey)}
+                                            isLoading={applyActionMutation.isPending}
+                                        >
+                                            {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
+                                        </Button>
+                                        {isSystemAdmin && actionByLabelText && (
+                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                Action by: {actionByLabelText}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         )}
-                        {!quotationId && canManageDocs && enquiry.sellerAcceptedAt && (
-                            <Button
-                                color="primary"
-                                variant="flat"
-                                className="w-full sm:w-auto font-black px-6 rounded-2xl h-12 text-xs tracking-wide"
-                                isLoading={createQuotationMutation.isPending}
-                                onPress={() => createQuotationMutation.mutate()}
-                                startContent={<FiPlus size={18} />}
-                            >
-                                Create Quotation
-                            </Button>
+                        {normalizedStatus === "CONVERTED" && (
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold uppercase tracking-widest">
+                                <LuCheck size={14} />
+                                Mission Finalized • Order Active
+                            </div>
+                        )}
+                        {normalizedStatus === "CLOSED" && (
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-default-500/10 bg-default-500/5 text-default-600 text-[10px] font-bold uppercase tracking-widest">
+                                Enquiry Closed • Termination Successful
+                            </div>
+                        )}
+                        {quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && quotationStatus === "DRAFT" && (
+                            <div className="flex flex-col items-start gap-1">
+                                <Button
+                                    color="primary"
+                                    className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-primary text-primary-foreground shadow-xl shadow-primary/20"
+                                    isLoading={submitQuotationMutation.isPending}
+                                    onPress={() => submitQuotationMutation.mutate()}
+                                    startContent={<LuFileCheck size={18} />}
+                                >
+                                    Authorize Proposal
+                                </Button>
+                                {isSystemAdmin && (
+                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                        Action by: Supplier
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && quotationStatus !== "DRAFT" && (enquiry as any)?.revisionRequestedAt && (
+                            <div className="flex flex-col items-start gap-1">
+                                <Button
+                                    color="warning"
+                                    className="w-full sm:w-auto font-black px-10 rounded-2xl h-14 text-[11px] tracking-[0.2em] uppercase italic"
+                                    isLoading={reopenQuotationMutation.isPending}
+                                    onPress={() => reopenQuotationMutation.mutate()}
+                                    startContent={<FiEdit3 size={18} />}
+                                >
+                                    Revise Proposal
+                                </Button>
+                                {isSystemAdmin && (
+                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                        Action by: Supplier
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {!quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && (
+                            <div className="flex flex-col items-start gap-1">
+                                <Button
+                                    color="primary"
+                                    className="w-full sm:w-auto font-black px-10 rounded-2xl h-14 text-[11px] tracking-[0.2em] uppercase italic"
+                                    isLoading={createQuotationMutation.isPending}
+                                    onPress={() => createQuotationMutation.mutate()}
+                                    startContent={<FiPlus size={18} />}
+                                >
+                                    Draft Proposal
+                                </Button>
+                                {isSystemAdmin && (
+                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                        Action by: Supplier
+                                    </span>
+                                )}
+                            </div>
                         )}
 
-                        {isSeller && !enquiry.sellerAcceptedAt && (
-                            <Button
-                                color="success"
-                                variant="solid"
-                                className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
-                                isLoading={sellerAcceptMutation.isPending}
-                                onPress={() => setInventoryAcceptOpen(true)}
-                            >
-                                Accept Enquiry
-                            </Button>
+                        {(isSeller || isAdmin) && !hasSellerAccepted && !isImportEnquiry && (
+                            <div className="flex flex-col items-start gap-1">
+                                <Button
+                                    color="success"
+                                    className="w-full sm:w-auto font-bold px-12 rounded-[1.25rem] h-16 text-[11px] tracking-widest uppercase bg-success text-success-foreground shadow-2xl transition-all hover:scale-105 active:scale-95 shadow-success-500/20"
+                                    isLoading={sellerAcceptMutation.isPending}
+                                    onPress={() => setInventoryAcceptOpen(true)}
+                                >
+                                    Confirm Shipment Load
+                                </Button>
+                                {isSystemAdmin && (
+                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                        Action by: Supplier
+                                    </span>
+                                )}
+                            </div>
                         )}
 
-                        {isBuyer && enquiry.sellerAcceptedAt && !enquiry.buyerConfirmedAt && (
-                            <Button
-                                color="primary"
-                                variant="solid"
-                                className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
-                                isLoading={buyerConfirmMutation.isPending}
-                                onPress={() => buyerConfirmMutation.mutate()}
-                            >
-                                Mark All Good to Go
-                            </Button>
-                        )}
 
                         {isAdmin && (
                             <div className="flex flex-wrap gap-4 justify-center md:justify-end">
-                                {!isConvertedFlow && !isCompletedFlow && !isCancelled && enquiry.sellerAcceptedAt && enquiry.buyerConfirmedAt && (
+                                {!isConvertedFlow && !isCompletedFlow && !isCancelled && workflowStage === "PROFORMA_ISSUED" && hasSellerAccepted && enquiry.buyerConfirmedAt && (
                                     <>
                                         {!hasResponsibilitiesFinalized && (
                                             <Tooltip
                                                 content={
-                                                    <div className="px-1 py-2">
-                                                        <div className="text-tiny font-bold uppercase tracking-wider mb-2 opacity-60">Missing Requirements</div>
-                                                        <ul className="flex flex-col gap-1.5">
-                                                            {!hasFullResponsibilityPlan && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Ownership Allocation</li>}
-                                                            {!hasExecutionContext && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Logistics Context</li>}
-                                                            {!hasPackagingSpecifications && <li className="flex items-center gap-2 text-warning-600"><FiAlertCircle size={14} /> Packaging Specs</li>}
+                                                    <div className="px-5 py-4 rounded-3xl bg-content1 shadow-2xl border border-divider">
+                                                        <div className="text-[10px] font-bold uppercase tracking-widest mb-4 text-default-400">Readiness Gap Analysis</div>
+                                                        <ul className="flex flex-col gap-3">
+                                                            {!hasFullResponsibilityPlan && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Ownership Allocation</li>}
+                                                            {!hasExecutionContext && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Logistics Context</li>}
+                                                            {!hasPackagingSpecifications && <li className="flex items-center gap-3 text-danger-500 text-[10px] font-bold uppercase tracking-widest"><div className="w-1.5 h-1.5 rounded-full bg-danger-500" /> Packaging Specs</li>}
                                                         </ul>
                                                     </div>
                                                 }
@@ -2372,80 +3013,224 @@ export default function EnquiryDetailsPage() {
                                                 <div className="w-full sm:w-auto">
                                                     <Button
                                                         color="warning"
-                                                        variant="solid"
-                                                        className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                                        className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-warning text-black shadow-xl"
                                                         isLoading={finalizeResponsibilitiesMutation.isPending}
-                                                        isDisabled={!hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
-                                                        onPress={() => finalizeResponsibilitiesMutation.mutate()}
-                                                        startContent={<FiCheckCircle size={18} />}
+                                                        isDisabled={isReadOnlyAfterConversion || !hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
+                                                        onPress={() => onFinalizeOpen()}
+                                                        startContent={<LuFileCheck size={20} />}
                                                     >
-                                                        Finalize Responsibilities
+                                                        Finalize Framework
                                                     </Button>
                                                 </div>
                                             </Tooltip>
                                         )}
                                         <Button
                                             color="danger"
-                                            variant="light"
-                                            className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
+                                            variant="flat"
+                                            className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-widest uppercase"
                                             onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                             isLoading={updateStatusMutation.isPending}
                                         >
-                                            Cancel Enquiry
+                                            Terminate Thread
                                         </Button>
                                         <Button
                                             color="primary"
-                                            variant="solid"
-                                            className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
+                                            className="w-full sm:w-auto font-bold px-12 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
                                             onPress={onOpen}
                                             isDisabled={!hasResponsibilitiesFinalized}
-                                            startContent={<FiArrowRight size={18} />}
+                                            startContent={<FiArrowRight size={20} />}
                                         >
-                                            Convert to Order
+                                            Initialize Order
                                         </Button>
                                     </>
-                                )}
-
-                                {normalizedStatus === "CONVERTED" && (
-                                    <div className="flex flex-wrap gap-4">
-                                        <Button
-                                            color="success"
-                                            variant="flat"
-                                            className="w-full sm:w-auto font-bold rounded-2xl h-12 px-8"
-                                            onPress={() => updateStatusMutation.mutate("CLOSED")}
-                                            isLoading={updateStatusMutation.isPending}
-                                        >
-                                            Complete Enquiry
-                                        </Button>
-                                        <Button
-                                            color="success"
-                                            variant="solid"
-                                            className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
-                                            isDisabled={!enquiryOrderId}
-                                            onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
-                                            startContent={<LuTruck size={18} />}
-                                        >
-                                            View Order
-                                        </Button>
-                                    </div>
                                 )}
                             </div>
                         )}
 
-                        {/* Order Context View for non-admins */}
-                        {!isAdmin && (enquiry as any)?.order && (
+                        {!isAdmin && (enquiry as any)?.order && normalizedStatus !== "CONVERTED" && normalizedStatus !== "CLOSED" && (
                             <Button
-                                color="success"
-                                variant="solid"
-                                className="w-full sm:w-auto font-black px-8 rounded-2xl h-12"
+                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider uppercase bg-success text-success-foreground shadow-lg shadow-success-500/20"
                                 onPress={() => router.push(`/dashboard/orders/${(enquiry as any).order}`)}
                                 startContent={<LuTruck size={18} />}
                             >
-                                View Order
+                                View Active Order
+                            </Button>
+                        )}
+                        {(normalizedStatus === "CONVERTED" || normalizedStatus === "CLOSED") && (
+                            <Button
+                                className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider uppercase bg-success text-success-foreground shadow-lg shadow-success-500/20"
+                                isDisabled={!enquiryOrderId}
+                                onPress={() => enquiryOrderId && router.push(`/dashboard/orders/${enquiryOrderId}`)}
+                                startContent={<LuTruck size={18} />}
+                            >
+                                View Mission Order
                             </Button>
                         )}
                     </div>
-                </div>
+                </motion.div>
+
+                <Modal
+                    isOpen={isFinalizeOpen}
+                    onOpenChange={onFinalizeOpenChange}
+                    size="lg"
+                    placement="center"
+                    scrollBehavior="inside"
+                >
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">
+                                    <span className="text-sm font-black uppercase tracking-widest text-default-400">Confirm Responsibility Finalization</span>
+                                    <span className="text-lg font-black">Review responsibilities before locking</span>
+                                </ModalHeader>
+                                <ModalBody className="flex flex-col gap-4">
+                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
+                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Trade Terms</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm font-semibold">
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Incoterm: <b>{responsibilitySummary.incotermLabel}</b></div>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Payment: <b>{responsibilitySummary.paymentLabel}</b></div>
+                                            <div className="rounded-lg bg-default-100 px-3 py-2">Trade Type: <b>{responsibilitySummary.tradeType}</b></div>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
+                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Packaging Specs</div>
+                                        <div className="text-sm font-medium text-default-600 whitespace-pre-line">
+                                            {responsibilitySummary.packagingSpecs}
+                                        </div>
+                                    </div>
+                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
+                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Responsibility Allocation</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                            {responsibilitySummary.listItems.map((item) => (
+                                                <div key={item.label} className="rounded-lg bg-default-100 px-3 py-2">
+                                                    {item.label}: <b>{item.value}</b>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="rounded-2xl border border-warning-400/30 bg-warning-500/5 px-4 py-3 text-xs text-warning-700 font-bold">
+                                        Finalizing will lock responsibilities and generate execution inquiries. Changes will not be allowed after conversion.
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter className="flex items-center justify-between">
+                                    <Button variant="light" onPress={onClose}>Cancel</Button>
+                                    <Button
+                                        color="warning"
+                                        className="font-bold"
+                                        isLoading={finalizeResponsibilitiesMutation.isPending}
+                                        isDisabled={isReadOnlyAfterConversion || !hasExecutionContext || !hasFullResponsibilityPlan || !hasPackagingSpecifications}
+                                        onPress={() => {
+                                            finalizeResponsibilitiesMutation.mutate();
+                                            onClose();
+                                        }}
+                                    >
+                                        Confirm & Finalize
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
+
+                <Modal
+                    isOpen={clarificationOpen}
+                    onOpenChange={setClarificationOpen}
+                    size="lg"
+                    placement="center"
+                    scrollBehavior="inside"
+                >
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">
+                                    <span className="text-sm font-black uppercase tracking-widest text-default-400">Revision Checklist</span>
+                                    <span className="text-lg font-black">Request quotation revision</span>
+                                </ModalHeader>
+                                <ModalBody className="flex flex-col gap-4">
+                                    <Checkbox isSelected={clarificationReasonRate} onValueChange={setClarificationReasonRate}>
+                                        Rate
+                                    </Checkbox>
+                                    {clarificationReasonRate && (
+                                        <Input
+                                            type="number"
+                                            label="Requested Rate"
+                                            placeholder="Enter rate"
+                                            value={clarificationRate}
+                                            onValueChange={setClarificationRate}
+                                        />
+                                    )}
+                                    <Checkbox isSelected={clarificationReasonPayment} onValueChange={setClarificationReasonPayment}>
+                                        Payment Terms
+                                    </Checkbox>
+                                    <Checkbox isSelected={clarificationReasonTimeline} onValueChange={setClarificationReasonTimeline}>
+                                        Delivery Timeline
+                                    </Checkbox>
+                                    <div className="flex flex-col gap-1">
+                                        <Checkbox isSelected={clarificationCommunicated} onValueChange={setClarificationCommunicated}>
+                                            I have informed the supplier about this revision.
+                                        </Checkbox>
+                                        {!clarificationCommunicated && (
+                                            <span className="text-[11px] font-semibold text-warning-500">Check this box to enable Submit.</span>
+                                        )}
+                                    </div>
+                                    {revisionError && (
+                                        <div className="text-xs font-bold text-danger-500">{revisionError}</div>
+                                    )}
+                                </ModalBody>
+                                <ModalFooter className="flex items-center justify-between">
+                                    <Button variant="light" onPress={onClose}>Cancel</Button>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="text-[10px] text-default-400">
+                                            {!clarificationReasonRate && !clarificationReasonPayment && !clarificationReasonTimeline
+                                                ? "Select at least one reason."
+                                                : clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))
+                                                    ? "Enter a valid rate."
+                                                    : !clarificationCommunicated
+                                                        ? "Confirm communication to supplier."
+                                                        : ""}
+                                        </span>
+                                    <Button
+                                        color="primary"
+                                        className="font-bold"
+                                        isLoading={revisionRequestMutation.isPending}
+                                        isDisabled={
+                                            !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
+                                            (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                            !clarificationCommunicated
+                                        }
+                                        onPress={async () => {
+                                            const reasonsSelected = clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline;
+                                            if (!reasonsSelected) {
+                                                setRevisionError("Select at least one reason.");
+                                                return;
+                                            }
+                                            if (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) {
+                                                setRevisionError("Enter a valid rate.");
+                                                return;
+                                            }
+                                            if (!clarificationCommunicated) {
+                                                setRevisionError("Please confirm communication to supplier.");
+                                                return;
+                                            }
+                                            setRevisionError("");
+                                            const timeoutId = setTimeout(() => {
+                                                setRevisionError("Request is taking too long. Please retry.");
+                                            }, 15000);
+                                            try {
+                                                await revisionRequestMutation.mutateAsync();
+                                            } finally {
+                                                clearTimeout(timeoutId);
+                                            }
+                                        }}
+                                    >
+                                        Submit Revision
+                                    </Button>
+                                    </div>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
 
                 <Modal
                     isOpen={inventoryAcceptOpen}
@@ -2517,12 +3302,9 @@ export default function EnquiryDetailsPage() {
                                             label="Select Warehouse"
                                             placeholder="Choose inventory"
                                             selectedKeys={selectedInventoryId ? new Set([selectedInventoryId]) : new Set()}
-                                            renderValue={(items) => {
-                                                const item = items?.[0];
-                                                const data = (item as any)?.data as any;
-                                                if (!data) return "Choose inventory";
-                                                const name = data.warehouseName || "Warehouse";
-                                                return `${name} • ${data.availableQty} MT available`;
+                                            renderValue={() => {
+                                                if (!selectedInventory) return "Choose inventory";
+                                                return `${selectedInventory.warehouseName || "Warehouse"} • ${selectedInventory.availableQty} MT available`;
                                             }}
                                             onSelectionChange={(keys) => {
                                                 const arr = Array.from(keys as Set<string>);
@@ -2594,16 +3376,28 @@ export default function EnquiryDetailsPage() {
                                     </>
                                 )}
 
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Input
-                                        label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
-                                        type="number"
-                                        placeholder="0"
-                                        value={inlineQuantity}
-                                        onValueChange={setInlineQuantity}
-                                        variant="bordered"
-                                    />
-                                </div>
+                                {(isAddingNewInventory || (selectedInventory && selectedInventory.availableQty < requiredQty)) && (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Input
+                                                label={isAddingNewInventory ? "Total Stock (MT)" : "Add Stock (MT)"}
+                                                type="number"
+                                                placeholder="0"
+                                                value={inlineQuantity}
+                                                onValueChange={setInlineQuantity}
+                                                variant="bordered"
+                                            />
+                                        </div>
+                                        {!isAddingNewInventory && selectedInventory && selectedInventory.availableQty < requiredQty && (
+                                            <div className="text-[10px] text-warning-600 font-bold px-1 italic">
+                                                * This inventory has insufficient stock. Please add the missing {(requiredQty - selectedInventory.availableQty).toFixed(2)} MT to enable selection.
+                                            </div>
+                                        )}
+                                        <div className="text-[10px] text-default-400 font-medium px-1 leading-tight">
+                                            The quantity field is required to ensure sufficient stock is available to fulfill this {requiredQty} MT requirement.
+                                        </div>
+                                    </div>
+                                )}
 
                                 {selectedInventory && !isAddingNewInventory && (
                                     <div className="text-[10px] text-default-400 uppercase font-black px-1">
@@ -2731,6 +3525,49 @@ export default function EnquiryDetailsPage() {
                                 isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
                             >
                                 {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                            </Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+
+                <Modal
+                    isOpen={docViewerOpen}
+                    onOpenChange={(open) => setDocViewerOpen(Boolean(open))}
+                    size="4xl"
+                    scrollBehavior="inside"
+                >
+                    <ModalContent>
+                        <ModalHeader className="flex flex-col gap-1">
+                            {DOC_TYPE_LABELS[String(docViewerDoc?.type || "").toUpperCase()] || String(docViewerDoc?.type || "Document").replaceAll("_", " ")}
+                            <span className="text-[10px] uppercase font-black tracking-widest text-default-400">
+                                {docViewerDoc?.documentNumber || "Draft Preview"}
+                            </span>
+                        </ModalHeader>
+                        <ModalBody>
+                            {docViewerDoc?.fileUrl ? (
+                                <div className="space-y-3">
+                                    <a
+                                        href={docViewerDoc.fileUrl}
+                                        target="_blank"
+                                        className="text-xs font-bold text-primary-600 underline"
+                                    >
+                                        Open file in new tab
+                                    </a>
+                                    <div className="rounded-2xl border border-divider overflow-hidden">
+                                        <iframe
+                                            title="Document Preview"
+                                            src={docViewerDoc.fileUrl}
+                                            className="w-full h-[70vh]"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <DocumentTemplatePreview docType={String(docViewerDoc?.type || "")} actionType="CREATE" />
+                            )}
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button variant="light" onPress={() => setDocViewerOpen(false)}>
+                                Close
                             </Button>
                         </ModalFooter>
                     </ModalContent>

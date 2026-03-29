@@ -26,6 +26,17 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   AUD: "$",
   // Add more if needed
 };
+const DEFAULT_CURRENCIES: CurrencyMap = {
+  INR: "Indian Rupee",
+  USD: "US Dollar",
+  EUR: "Euro",
+  GBP: "British Pound",
+  AED: "UAE Dirham",
+  CAD: "Canadian Dollar",
+  AUD: "Australian Dollar",
+  CHF: "Swiss Franc",
+  SEK: "Swedish Krona",
+};
 
 interface CurrencySelectorProps {
   isMobile?: boolean;
@@ -41,14 +52,26 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({ isMobile }) => {
       try {
         const res = await fetch("https://api.frankfurter.app/currencies");
         const data = await res.json();
-        setCurrencies(data);
+        if (data && Object.keys(data).length > 0) {
+          setCurrencies(data);
+        } else {
+          setCurrencies(DEFAULT_CURRENCIES);
+        }
       } catch (error) {
         console.error("Failed to fetch currencies:", error);
+        setCurrencies(DEFAULT_CURRENCIES);
       }
     };
 
     fetchCurrencies();
   }, []);
+  useEffect(() => {
+    if (Object.keys(currencies).length === 0) return;
+    const normalized = selectedCurrency.toUpperCase();
+    if (!currencies[normalized]) {
+      setSelectedCurrency("inr");
+    }
+  }, [currencies, selectedCurrency, setSelectedCurrency]);
 
   const currentCurrencyCode = selectedCurrency.toUpperCase();
   const currentSymbol = CURRENCY_SYMBOLS[currentCurrencyCode] || "";

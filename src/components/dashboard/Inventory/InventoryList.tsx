@@ -28,7 +28,7 @@ import DeleteModal from "@/components/CurdTable/delete";
 import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
 import TableFrame from "@/components/CurdTable/table-frame";
 import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler";
-import { apiRoutes, associateCompanyRoutes, associateRoutes, inventoryRoutes, variantRateRoutes, inventoryReservationRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, associateCompanyRoutes, associateRoutes, inventoryRoutes, variantRateRoutes, inventoryReservationRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
@@ -51,6 +51,9 @@ const InventoryList: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>("inventory");
     const [demoLoading, setDemoLoading] = useState(false);
     const [demoClearing, setDemoClearing] = useState(false);
+    const [costModalOpen, setCostModalOpen] = useState(false);
+    const [costInventory, setCostInventory] = useState<any>(null);
+    const [customDays, setCustomDays] = useState("");
 
     const roleLower = String(user?.role || "").toLowerCase();
     const isAdmin = roleLower === "admin";
@@ -116,6 +119,17 @@ const InventoryList: React.FC = () => {
         enabled: shouldFetchInventory && (Boolean(effectiveCompanyId) || isAssociate),
     });
 
+    const { data: warehouseData } = useQuery({
+        queryKey: ["inventory-my-warehouses", effectiveCompanyId, user?.id],
+        queryFn: () =>
+            getData(warehouseRoutes.getAll, {
+                limit: 500,
+                scope: "my",
+                ...(effectiveCompanyId && { associateCompany: effectiveCompanyId }),
+            }),
+        enabled: shouldFetchInventory && Boolean(effectiveCompanyId),
+    });
+
     const { data: reservationData } = useQuery({
         queryKey: ["inventory-reservations", effectiveCompanyId, user?.id],
         queryFn: () =>
@@ -143,6 +157,27 @@ const InventoryList: React.FC = () => {
         setRateValue("");
         setRateLive(true);
         setSubmittingRate(false);
+    };
+
+    const openCostModal = (item: any) => {
+        setCostInventory(item);
+        setCustomDays("");
+        setCostModalOpen(true);
+    };
+
+    const closeCostModal = () => {
+        setCostModalOpen(false);
+        setCostInventory(null);
+        setCustomDays("");
+    };
+
+    const computeDaysStored = (storedAt?: string | Date | null) => {
+        if (!storedAt) return null;
+        const storedTime = new Date(storedAt).getTime();
+        if (Number.isNaN(storedTime)) return null;
+        const now = Date.now();
+        const diffDays = Math.floor((now - storedTime) / (24 * 60 * 60 * 1000));
+        return Math.max(1, diffDays);
     };
 
     return (
@@ -236,6 +271,15 @@ const InventoryList: React.FC = () => {
                                 availableQty,
                             });
                         });
+
+                        const warehouseRows = Array.isArray(warehouseData?.data?.data?.data)
+                            ? warehouseData?.data?.data?.data
+                            : (warehouseData?.data?.data || []);
+                        const warehouseMap = new Map<string, any>();
+                        for (const wh of warehouseRows || []) {
+                            const whId = wh?._id || wh?.id;
+                            if (whId) warehouseMap.set(String(whId), wh);
+                        }
 
                         const summaryMap = new Map<string, { key: string; name: string; company: string; totalQty: number; warehouses: Set<string>; reservedQty: number }>();
                         for (const row of tableData) {
@@ -704,6 +748,18 @@ const InventoryList: React.FC = () => {
                                                                     </Tooltip>
                                                                 </div>
                                                             )}
+
+                                                            <Tooltip content="Storage cost" placement="top" size="sm">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="flat"
+                                                                    color="default"
+                                                                    className="h-7 px-2.5 text-xs font-semibold"
+                                                                    onPress={() => openCostModal(item)}
+                                                                >
+                                                                    Storage Cost
+                                                                </Button>
+                                                            </Tooltip>
                                                         </div>
                                                     );
                                                 }}
@@ -837,6 +893,127 @@ const InventoryList: React.FC = () => {
                                         </ModalFooter>
                                     </ModalContent>
 
+                                </Modal>
+
+                                <Modal
+                                    isOpen={costModalOpen}
+                                    onOpenChange={(open) => {
+                                        if (!open) closeCostModal();
+                                    }}
+                                    size="lg"
+                                >
+                                    <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
+                                        <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
+                                            <div className="text-lg font-black tracking-tight text-foreground">Storage Cost</div>
+                                            <div className="text-xs text-default-500">
+                                                Daily and projected storage costs based on warehouse rate.
+                                            </div>
+                                        </ModalHeader>
+                                        <ModalBody className="py-5 px-6">
+                                            {(() => {
+                                                if (!costInventory) {
+                                                    return (
+                                                        <div className="text-sm text-default-500">Select an inventory item.</div>
+                                                    );
+                                                }
+                                                const storedAt = costInventory?.storedAt;
+                                                const warehouseId = costInventory?.warehouseId?._id || costInventory?.warehouseId;
+                                                const warehouseName = costInventory?.warehouseName;
+                                                const warehouse = warehouseId ? warehouseMap.get(String(warehouseId)) : null;
+                                                const ratePerUnit = warehouse?.storageRatePerUnit;
+                                                const rateUnit = warehouse?.unit || "KG";
+                                                const daysStored = computeDaysStored(storedAt);
+                                                const quantity = Number(costInventory?.quantity || 0);
+                                                const dailyCost =
+                                                    ratePerUnit && quantity ? Number(ratePerUnit) * quantity : null;
+                                                const currentCost =
+                                                    dailyCost && daysStored ? dailyCost * daysStored : null;
+
+                                                if (!warehouseId || warehouseName === "Private Location" || !warehouseName) {
+                                                    return (
+                                                        <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3 text-sm text-default-500">
+                                                            No storage cost (not in warehouse).
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (!ratePerUnit) {
+                                                    return (
+                                                        <div className="rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-3 text-sm text-warning-700 dark:text-warning-300">
+                                                            Rate not configured for this warehouse.
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <div className="flex flex-col gap-4">
+                                                        <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3">
+                                                            <div className="text-sm font-semibold text-foreground">
+                                                                {warehouseName}
+                                                            </div>
+                                                            <div className="text-xs text-default-500">
+                                                                Rate: {ratePerUnit} / {rateUnit}
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                            <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3">
+                                                                <div className="text-xs text-default-500">Daily Cost</div>
+                                                                <div className="text-lg font-semibold text-foreground">
+                                                                    {dailyCost?.toFixed(2)}
+                                                                </div>
+                                                            </div>
+                                                            <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3">
+                                                                <div className="text-xs text-default-500">Days Stored</div>
+                                                                <div className="text-lg font-semibold text-foreground">
+                                                                    {daysStored ?? "—"}
+                                                                </div>
+                                                            </div>
+                                                            <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3">
+                                                                <div className="text-xs text-default-500">Current Total</div>
+                                                                <div className="text-lg font-semibold text-foreground">
+                                                                    {currentCost?.toFixed(2)}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-3">
+                                                            <div className="text-sm font-semibold text-foreground">Projections</div>
+                                                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                                {[7, 30, 90].map((days) => (
+                                                                    <div key={days} className="rounded-lg border border-default-200/30 bg-background/60 px-3 py-2">
+                                                                        <div className="text-xs text-default-500">{days} Days</div>
+                                                                        <div className="text-sm font-semibold text-foreground">
+                                                                            {(dailyCost * days).toFixed(2)}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <div className="mt-3 flex items-center gap-3">
+                                                                <Input
+                                                                    label="Custom days"
+                                                                    type="number"
+                                                                    value={customDays}
+                                                                    onChange={(e) => setCustomDays(e.target.value)}
+                                                                    placeholder="e.g. 45"
+                                                                    labelPlacement="outside"
+                                                                    className="max-w-[180px]"
+                                                                />
+                                                                <div className="text-sm text-default-500">
+                                                                    {Number(customDays) > 0
+                                                                        ? `Projected total: ${(dailyCost * Number(customDays)).toFixed(2)}`
+                                                                        : "Enter days to project."}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </ModalBody>
+                                        <ModalFooter className="px-6 py-4">
+                                            <Button variant="flat" color="default" onPress={closeCostModal}>
+                                                Close
+                                            </Button>
+                                        </ModalFooter>
+                                    </ModalContent>
                                 </Modal>
 
                                 <Modal

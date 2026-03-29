@@ -32,6 +32,21 @@ import { useSoundEffect } from "@/context/SoundContext";
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+const decodeJwt = (token: string): any => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -41,6 +56,13 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [googleSignUp, setGoogleSignUp] = useState(false);
+  const [googleIdToken, setGoogleIdToken] = useState("");
+  const [googleReady, setGoogleReady] = useState(false);
+  const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "available" | "exists" | "error">("idle");
+  const [emailCheckMessage, setEmailCheckMessage] = useState("");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const [optionsDebug, setOptionsDebug] = useState<{
     resolvedEndpoint: string;
     counts: { designations: number; existingCompanies: number; companyTypes: number; countries: number };
@@ -216,6 +238,53 @@ export default function RegisterPage() {
     },
     retry: 1,
   });
+
+  React.useEffect(() => {
+    if (!googleClientId || typeof window === "undefined") return;
+    if (document.getElementById("google-gsi-script")) {
+      setGoogleReady(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "google-gsi-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setGoogleReady(true);
+    document.body.appendChild(script);
+    return () => {
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+  }, [googleClientId]);
+
+  React.useEffect(() => {
+    if (!googleReady) return;
+    if (!window?.google?.accounts?.id) return;
+    const container = document.getElementById("google-register-associate");
+    if (!container) return;
+    const buttonWidth = Math.min(360, Math.max(240, container.clientWidth || 320));
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: (resp: { credential?: string }) => {
+        if (!resp?.credential) return;
+        const payload = decodeJwt(resp.credential);
+        setGoogleIdToken(resp.credential);
+        setGoogleSignUp(true);
+        setFormData((prev) => ({
+          ...prev,
+          name: prev.name || payload?.name || "",
+          email: prev.email || payload?.email || "",
+        }));
+      },
+    });
+    window.google.accounts.id.renderButton(container, {
+      theme: "outline",
+      size: "large",
+      width: buttonWidth,
+      text: "continue_with",
+      shape: "pill",
+    });
+  }, [googleReady, googleClientId]);
 
   const companyTypes = Array.isArray(registerOptions?.companyTypes) ? registerOptions.companyTypes : EMPTY_LIST;
   const existingCompanies = Array.isArray(registerOptions?.existingCompanies) ? registerOptions.existingCompanies : EMPTY_LIST;
@@ -424,9 +493,11 @@ export default function RegisterPage() {
       ) {
         stepErrors.phoneSecondary = "Enter a valid secondary phone number";
       }
-      if (passwordStrength.length > 0) stepErrors.password = `Requirements: ${passwordStrength.join(", ")}`;
-      if (!formData.confirmPassword.trim()) stepErrors.confirmPassword = "Please confirm password";
-      if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = "Passwords do not match";
+      if (!googleSignUp) {
+        if (passwordStrength.length > 0) stepErrors.password = `Requirements: ${passwordStrength.join(", ")}`;
+        if (!formData.confirmPassword.trim()) stepErrors.confirmPassword = "Please confirm password";
+        if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     if (step === 2) {
@@ -494,8 +565,29 @@ export default function RegisterPage() {
     return Object.keys(stepErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) return;
+
+    if (currentStep === 1 && !googleSignUp) {
+      setIsLoading(true);
+      try {
+        const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+        const res = await axios.get(`${apiRoot}/auth/email-status`, {
+          params: { email: formData.email.trim() },
+        });
+        if (res.data?.exists) {
+          setErrors((prev) => ({ ...prev, email: "Email already registered. Sign in instead." }));
+          showToastMessage({ type: "warning", message: "Email already exists.", position: "top-right" });
+          setIsLoading(false);
+          return;
+        }
+      } catch (error: any) {
+        // Silently continue or show non-blocking error
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     setCurrentStep((prev) => Math.min(4, prev + 1) as StepKey);
   };
 
@@ -505,10 +597,48 @@ export default function RegisterPage() {
 
   const [isSubmittingSuccess, setIsSubmittingSuccess] = useState(false);
 
+  const handleEmailVerify = async () => {
+    if (!formData.email.trim()) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage("Please enter an email first.");
+      return;
+    }
+    if (!emailRegex.test(formData.email)) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage("Invalid email format.");
+      return;
+    }
+    setIsCheckingEmail(true);
+    setEmailCheckStatus("idle");
+    setEmailCheckMessage("");
+    try {
+      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+      const res = await axios.get(`${apiRoot}/auth/email-status`, {
+        params: { email: formData.email.trim() },
+      });
+      if (res.data?.exists) {
+        setEmailCheckStatus("exists");
+        setEmailCheckMessage("This email is already registered — please sign in.");
+      } else {
+        setEmailCheckStatus("available");
+        setEmailCheckMessage("Email available.");
+      }
+    } catch (error: any) {
+      setEmailCheckStatus("error");
+      setEmailCheckMessage(error?.response?.data?.message || "Unable to verify email.");
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (isLoading || isSubmittingSuccess) return;
     if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
       showToastMessage({ type: "error", message: "Please complete required fields.", position: "top-right" });
+      return;
+    }
+    if (googleSignUp && !googleIdToken) {
+      showToastMessage({ type: "error", message: "Google sign-up token missing. Please retry Google sign-up.", position: "top-right" });
       return;
     }
 
@@ -595,10 +725,15 @@ export default function RegisterPage() {
         };
       }
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web"}/auth/register`,
-        payload
-      );
+      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+      const response = googleSignUp
+        ? await axios.post(`${apiRoot}/auth/google`, {
+          idToken: googleIdToken,
+          role: "Associate",
+          intent: "register",
+          registerPayload: payload,
+        })
+        : await axios.post(`${apiRoot}/auth/register`, payload);
 
       if (response.data?.success) {
         setIsSubmittingSuccess(true);
@@ -662,6 +797,18 @@ export default function RegisterPage() {
             e.preventDefault();
           }}
         >
+          <div className="flex flex-col items-center gap-3">
+            {googleClientId ? (
+            <div id="google-register-associate" className="w-full" />
+            ) : (
+              <p className="text-xs text-warning-500">Google sign-up is not configured.</p>
+            )}
+            {googleSignUp && (
+              <p className="text-xs text-success-500 font-semibold">
+                Google sign-up active. Complete the form to finish registration.
+              </p>
+            )}
+          </div>
           <div className="mb-10">
             <div className="flex items-center justify-between relative px-2 mb-6">
               <div className="absolute top-1/2 left-0 w-full h-[2.5px] bg-default-100/50 -translate-y-1/2 z-0 rounded-full" />
@@ -717,24 +864,37 @@ export default function RegisterPage() {
                     variant="bordered"
                     value={formData.name}
                     onValueChange={(v) => setField("name", v)}
+                    isReadOnly={googleSignUp}
                     isInvalid={!!errors.name}
                     errorMessage={errors.name}
                     startContent={<IoPerson className="text-default-400" />}
                     classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
                   />
-                  <Input
-                    type="email"
-                    label="Email Address"
-                    labelPlacement="outside"
-                    placeholder="name@company.com"
-                    variant="bordered"
-                    value={formData.email}
-                    onValueChange={(v) => setField("email", v)}
-                    isInvalid={!!errors.email}
-                    errorMessage={errors.email}
-                    startContent={<IoMail className="text-default-400" />}
-                    classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      type="email"
+                      label="Email Address"
+                      labelPlacement="outside"
+                      placeholder="name@company.com"
+                      variant="bordered"
+                      value={formData.email}
+                      onValueChange={(v) => {
+                        setField("email", v);
+                        setEmailCheckStatus("idle");
+                        setEmailCheckMessage("");
+                      }}
+                      isReadOnly={googleSignUp}
+                      isInvalid={!!errors.email}
+                      errorMessage={errors.email}
+                      startContent={<IoMail className="text-default-400" />}
+                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                    />
+                    {errors.email && (
+                      <span className="text-xs font-semibold text-danger-500 pl-1">
+                        {errors.email}
+                      </span>
+                    )}
+                  </div>
                   <div className="md:col-span-2">
                     <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
                       <PhoneField
@@ -770,44 +930,46 @@ export default function RegisterPage() {
                     {errors.phoneSecondary ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phoneSecondary}</p> : null}
                   </div>
 
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      label="Password"
-                      labelPlacement="outside"
-                      placeholder="Create a secure password"
-                      variant="bordered"
-                      value={formData.password}
-                      onValueChange={(v) => setField("password", v)}
-                      isInvalid={!!errors.password}
-                      errorMessage={errors.password}
-                      startContent={<IoLockClosed className="text-default-400" />}
-                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
-                      endContent={
-                        <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
-                          {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
-                        </button>
-                      }
-                    />
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      label="Confirm Password"
-                      labelPlacement="outside"
-                      placeholder="Repeat your password"
-                      variant="bordered"
-                      value={formData.confirmPassword}
-                      onValueChange={(v) => setField("confirmPassword", v)}
-                      isInvalid={!!errors.confirmPassword}
-                      errorMessage={errors.confirmPassword}
-                      startContent={<IoLockClosed className="text-default-400" />}
-                      classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
-                      endContent={
-                        <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
-                          {showConfirmPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
-                        </button>
-                      }
-                    />
-                  </div>
+                  {!googleSignUp && (
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        label="Password"
+                        labelPlacement="outside"
+                        placeholder="Create a secure password"
+                        variant="bordered"
+                        value={formData.password}
+                        onValueChange={(v) => setField("password", v)}
+                        isInvalid={!!errors.password}
+                        errorMessage={errors.password}
+                        startContent={<IoLockClosed className="text-default-400" />}
+                        classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                        endContent={
+                          <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="focus:outline-none p-2">
+                            {showPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
+                          </button>
+                        }
+                      />
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        label="Confirm Password"
+                        labelPlacement="outside"
+                        placeholder="Repeat your password"
+                        variant="bordered"
+                        value={formData.confirmPassword}
+                        onValueChange={(v) => setField("confirmPassword", v)}
+                        isInvalid={!!errors.confirmPassword}
+                        errorMessage={errors.confirmPassword}
+                        startContent={<IoLockClosed className="text-default-400" />}
+                        classNames={{ inputWrapper: "rounded-xl border-default-200 h-12" }}
+                        endContent={
+                          <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)} className="focus:outline-none p-2">
+                            {showConfirmPassword ? <IoEyeOff className="text-default-400" /> : <IoEye className="text-default-400" />}
+                          </button>
+                        }
+                      />
+                    </div>
+                  )}
                 </motion.div>
               )}
 

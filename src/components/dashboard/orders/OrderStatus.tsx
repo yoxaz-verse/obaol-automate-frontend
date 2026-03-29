@@ -21,26 +21,26 @@ const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
     const config = getStatusConfig(status);
 
     return (
-        <div className="flex flex-col gap-2.5 w-full">
+        <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-black uppercase tracking-[0.25em] ${config.textColor}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${config.textColor}`}>
                     {config.label}
                 </span>
                 {config.step > 0 && config.step < 6 && (
-                    <span className="text-[9px] font-black text-default-400 uppercase tracking-widest bg-default-100 px-2 py-0.5 rounded-full">
-                        {config.step} / 6
+                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-wider bg-foreground/5 px-3 py-1 rounded-lg border border-foreground/5">
+                        Stage {config.step} / 6
                     </span>
                 )}
             </div>
-
+ 
             {config.step > 0 && (
-                <div className="flex gap-1.5 h-1.5 w-full relative">
+                <div className="flex gap-1.5 h-1 w-full relative">
                     {[1, 2, 3, 4, 5, 6].map((step) => (
                         <div
                             key={step}
                             className={`flex-1 rounded-full transition-all duration-700 ${step <= config.step
-                                ? `${config.colorClass} ${config.shadowClass}`
-                                : "bg-default-200 dark:bg-default-100/10"
+                                ? `${config.colorClass} shadow-sm opacity-100`
+                                : "bg-foreground/[0.05] dark:bg-foreground/[0.02]"
                                 }`}
                         />
                     ))}

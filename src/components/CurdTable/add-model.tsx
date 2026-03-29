@@ -13,7 +13,7 @@ import { LuPlus } from "react-icons/lu";
 import { AddModalProps } from "@/data/interface-data";
 import AddForm from "./add-form";
 
-const AddModal: React.FC<AddModalProps> = ({
+const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void }> = ({
   name,
   buttonLabel,
   currentTable,
@@ -21,6 +21,7 @@ const AddModal: React.FC<AddModalProps> = ({
   apiEndpoint,
   refetchData,
   additionalVariable,
+  onSuccess,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -76,7 +77,10 @@ const AddModal: React.FC<AddModalProps> = ({
                 apiEndpoint={apiEndpoint}
                 refetchData={refetchData}
                 additionalVariable={additionalVariable}
-                onSuccess={closeModal}
+                onSuccess={(data: any) => {
+                  if (onSuccess) onSuccess(data);
+                  closeModal();
+                }}
               />
             </div>
           </ModalBody>

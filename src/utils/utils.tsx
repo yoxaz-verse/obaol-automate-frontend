@@ -13,13 +13,14 @@ import { LiaMapMarkedAltSolid } from "react-icons/lia";
 import { GoOrganization } from "react-icons/go";
 import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
-import { LuWarehouse } from "react-icons/lu";
+import { LuWarehouse, LuShip } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
 import { TbContainer, TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3 } from "react-icons/fi";
+import { LuBox, LuTruck } from "react-icons/lu";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -64,6 +65,11 @@ export const sidebarOptions = [
     link: "/dashboard/enquiries",
   },
   {
+    name: "Sample Requests",
+    icon: <LuBox />,
+    link: "/dashboard/sample-requests",
+  },
+  {
     name: "My Product", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
@@ -75,7 +81,7 @@ export const sidebarOptions = [
   },
   {
     name: "Imports",
-    icon: <TbContainer />,
+    icon: <LuShip />,
     link: "/dashboard/imports",
   },
   {
@@ -124,9 +130,14 @@ export const sidebarOptions = [
     link: "/dashboard/operator/earnings",
   },
   {
-    name: "Orders",
+    name: "Internal Orders",
     icon: <FiShoppingBag />,
     link: "/dashboard/orders",
+  },
+  {
+    name: "External Orders",
+    icon: <LuTruck />,
+    link: "/dashboard/external-orders",
   },
   {
     name: "Documents",

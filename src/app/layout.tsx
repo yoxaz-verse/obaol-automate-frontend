@@ -8,6 +8,8 @@ import TranslationEngine from "@/components/dashboard/TranslationEngine";
 import TopLoader from "@/components/ui/TopLoader";
 import SoundInitializer from "@/components/ui/SoundInitializer";
 import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
+import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
+import { Suspense } from "react";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -129,25 +131,9 @@ export default function RootLayout({
     >
 
       <head>
-        {/* Google Tag Manager */}
-        {GTM_ID && (
-          <Script
-            id="gtm-script"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(w,d,s,l,i){w[l]=w[l]||[];
-                w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-                var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-                j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;
-                f.parentNode.insertBefore(j,f);
-                })(window,document,'script','dataLayer','${GTM_ID}');
-              `,
-            }}
-          />
-        )}
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         <style dangerouslySetInnerHTML={{
           __html: `
           /* Aggressive Google Translate UI Hiding */
@@ -193,19 +179,6 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
-        {GTM_ID && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{
-                display: "none",
-                visibility: "hidden",
-              }}
-            />
-          </noscript>
-        )}
         <AuthProvider>
           {/* <VerificationProvider> */}
           <Providers>

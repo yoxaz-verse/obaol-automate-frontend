@@ -69,12 +69,12 @@ export default function MarketplacePage() {
                                     selectedKey={currentTable}
                                     onSelectionChange={(key) => setCurrentTable(key as MarketplaceTabKey)}
                                     variant="underlined"
-                                    color="warning"
+                                    color="primary"
                                     classNames={{
-                                        tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                                        cursor: "w-full bg-warning-500",
-                                        tab: "max-w-fit px-0 h-12",
-                                        tabContent: "text-default-600 dark:text-default-300 group-data-[selected=true]:text-warning-500 font-semibold"
+                                        tabList: "gap-10 relative rounded-none p-0 border-b border-divider/40",
+                                        cursor: "bg-primary w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.2)]",
+                                        tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
+                                        tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
                                     <Tab key={"marketplace-live"} title="Marketplace (Live)">

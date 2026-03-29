@@ -56,25 +56,57 @@ import DocRulesEditor from "@/components/rules/DocRulesEditor";
 
 const SUBFLOW_ICONS: Record<string, any> = {
   PROCUREMENT: FiShoppingCart,
-  LOGISTICS: FiTruck,
-  INLAND_LOGISTICS: FiTruck, // Using truck for inland as well
+  INLAND_TRANSPORTATION: FiTruck,
   PACKAGING: FiPackage,
   FREIGHT_FORWARDING: FiGlobe,
   INVENTORY: FiBox,
+  CERTIFICATION: FiShield,
+  QUALITY_QA: FiCheckCircle,
+  WAREHOUSE: FiLayers,
   SHIPPING: FiAnchor,
   CUSTOMS: FiShield,
 };
 
 const SUBFLOW_DESCRIPTIONS: Record<string, string> = {
   PROCUREMENT: "Sourcing and purchasing raw materials or products.",
-  LOGISTICS: "Standard shipping and delivery operations.",
-  INLAND_LOGISTICS: "Movement of goods through inland hubs and routes.",
+  INLAND_TRANSPORTATION: "Movement of goods through inland routes and road transport.",
   PACKAGING: "Product labeling, boxing, and preparation for shipment.",
   FREIGHT_FORWARDING: "International cargo orchestration and documentation.",
   INVENTORY: "Stock management and storage allocation.",
+  CERTIFICATION: "Certification and compliance clearance steps.",
+  QUALITY_QA: "Quality assurance and lab validation checkpoints.",
+  WAREHOUSE: "Inbound storage, holding, and release operations.",
 };
 
-const ACTIONS = ["SUPPLIER_ACCEPTED", "BUYER_CONFIRMED", "RESPONSIBILITIES_FINALIZED"] as const;
+const ACTIONS = [
+  "LOI_SUBMITTED",
+  "SUPPLIER_QTY_CONFIRMED",
+  "REVISION_REQUESTED",
+  "QUOTATION_CREATED",
+  "QUOTATION_ACCEPTED",
+  "RETURN_TO_REVISION",
+  "RESPONSIBILITIES_FINALIZED",
+  "PROFORMA_CREATED",
+  "OTHER_DOCS_UPLOADED",
+  "OTHER_DOCS_SKIPPED",
+  "PO_UPLOADED",
+  "PO_SKIPPED",
+] as const;
+
+const ACTION_LABELS: Record<string, string> = {
+  LOI_SUBMITTED: "LOI Submitted",
+  SUPPLIER_QTY_CONFIRMED: "Supplier Qty Confirmed",
+  REVISION_REQUESTED: "Revision Requested",
+  QUOTATION_CREATED: "Quotation Created",
+  QUOTATION_ACCEPTED: "Quotation Accepted",
+  RETURN_TO_REVISION: "Return To Revision",
+  RESPONSIBILITIES_FINALIZED: "Responsibilities Finalized",
+  PROFORMA_CREATED: "Proforma Created",
+  OTHER_DOCS_UPLOADED: "Other Docs Uploaded",
+  OTHER_DOCS_SKIPPED: "Other Docs Skipped",
+  PO_UPLOADED: "PO Uploaded",
+  PO_SKIPPED: "PO Skipped",
+};
 const DOC_TYPES = [
   "QUOTATION",
   "PROFORMA_INVOICE",
@@ -88,6 +120,8 @@ const DOC_TYPES = [
   "FUMIGATION_CERTIFICATE",
   "BILL_OF_LADING",
   "AIR_WAYBILL",
+  "LORRY_RECEIPT",
+  "LCL_DRAFT",
   "INSURANCE_CERTIFICATE",
   "PAYMENT_ADVICE",
 ];
@@ -95,6 +129,7 @@ const RESPONSIBLE_ROLES = ["BUYER", "SELLER", "OBAOL", "PACKAGING", "QUALITY", "
 const ACTION_TYPES = ["CREATE", "UPLOAD"];
 const VISIBILITY = ["BUYER", "SELLER", "BOTH", "INTERNAL"];
 const TRADE_TYPES = ["DOMESTIC", "INTERNATIONAL", "BOTH"];
+const ACTION_BY = ["BUYER", "SUPPLIER", "BOTH", "EITHER"];
 
 const FLOW_TYPES = [
   { key: "TRADE_ENQUIRY", label: "Enquiry Flow" },
@@ -102,20 +137,23 @@ const FLOW_TYPES = [
   { key: "SAMPLING", label: "Sampling Flow" },
   { key: "WAREHOUSE", label: "Warehouse Flow" },
   { key: "PROCUREMENT", label: "Procurement Flow" },
-  { key: "LOGISTICS", label: "Logistics Flow" },
-  { key: "INLAND_LOGISTICS", label: "Inland Logistics Flow" },
+  { key: "INLAND_TRANSPORTATION", label: "Inland Transportation Flow" },
   { key: "PACKAGING", label: "Packaging Flow" },
   { key: "FREIGHT_FORWARDING", label: "Freight Forwarding Flow" },
   { key: "INVENTORY", label: "Inventory Flow" },
+  { key: "CERTIFICATION", label: "Certification Flow" },
+  { key: "QUALITY_QA", label: "Quality & QA Flow" },
 ];
 
 const ORDER_SUBFLOWS = [
   { key: "PROCUREMENT", label: "Procurement" },
-  { key: "LOGISTICS", label: "Logistics" },
-  { key: "INLAND_LOGISTICS", label: "Inland Logistics" },
+  { key: "INLAND_TRANSPORTATION", label: "Inland Transportation" },
   { key: "PACKAGING", label: "Packaging" },
   { key: "FREIGHT_FORWARDING", label: "Freight Forwarding" },
   { key: "INVENTORY", label: "Inventory" },
+  { key: "CERTIFICATION", label: "Certification" },
+  { key: "QUALITY_QA", label: "Quality & QA" },
+  { key: "WAREHOUSE", label: "Warehouse" },
 ];
 
 type SubflowConfig = {
@@ -130,16 +168,17 @@ type SubflowConfig = {
 };
 
 const STAGE_DEFAULTS: Record<string, { stageKey: string; label: string }> = {
-  TRADE_ENQUIRY: { stageKey: "INQUIRY_CREATED", label: "Inquiry Created" },
+  TRADE_ENQUIRY: { stageKey: "ENQUIRY_CREATED", label: "Enquiry Created" },
   TRADE_ORDER: { stageKey: "ORDER_CREATED", label: "Order Created" },
   SAMPLING: { stageKey: "REQUESTED", label: "Requested" },
   WAREHOUSE: { stageKey: "INBOUND_REQUESTED", label: "Inbound Requested" },
-  PROCUREMENT: { stageKey: "REQUESTED", label: "Requested" },
-  LOGISTICS: { stageKey: "PICKUP_SCHEDULED", label: "Pickup Scheduled" },
-  INLAND_LOGISTICS: { stageKey: "VEHICLE_ASSIGNED", label: "Vehicle Assigned" },
-  PACKAGING: { stageKey: "SPEC_RECEIVED", label: "Spec Received" },
+  PROCUREMENT: { stageKey: "PROCUREMENT_SPECIALIST_ASSIGNED", label: "Procurement Specialist Assigned" },
+  INLAND_TRANSPORTATION: { stageKey: "PICKUP_SCHEDULED", label: "Pickup Scheduled" },
+  PACKAGING: { stageKey: "PACKAGING_REQUEST_RECEIVED", label: "Packaging Request Received" },
   FREIGHT_FORWARDING: { stageKey: "BOOKING_REQUESTED", label: "Booking Requested" },
   INVENTORY: { stageKey: "STOCK_IN", label: "Stock In" },
+  CERTIFICATION: { stageKey: "DOCS_COLLECTED", label: "Docs Collected" },
+  QUALITY_QA: { stageKey: "SAMPLE_SENT", label: "Sample Sent" },
 };
 
 type RuleForm = {
@@ -150,6 +189,7 @@ type RuleForm = {
   sortOrder: number;
   isActive: boolean;
   requiredActions: string[];
+  actionBy: string;
   triggersOrderCreation: boolean;
   triggersClose: boolean;
   tradeType: string;
@@ -163,11 +203,13 @@ const flowStageType = (flowType: string) => {
   if (
     [
       "PROCUREMENT",
-      "LOGISTICS",
-      "INLAND_LOGISTICS",
+      "INLAND_TRANSPORTATION",
       "PACKAGING",
       "FREIGHT_FORWARDING",
       "INVENTORY",
+      "CERTIFICATION",
+      "QUALITY_QA",
+      "WAREHOUSE",
     ].includes(flowType)
   ) {
     return flowType;
@@ -194,12 +236,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
 
   const [form, setForm] = useState<RuleForm>({
     flowType: defaultFlowType,
-    stageKey: STAGE_DEFAULTS[defaultFlowType]?.stageKey || "INQUIRY_CREATED",
-    label: STAGE_DEFAULTS[defaultFlowType]?.label || "Inquiry Created",
+    stageKey: STAGE_DEFAULTS[defaultFlowType]?.stageKey || "ENQUIRY_CREATED",
+    label: STAGE_DEFAULTS[defaultFlowType]?.label || "Enquiry Created",
     description: "",
     sortOrder: 0,
     isActive: true,
     requiredActions: [],
+    actionBy: "",
     triggersOrderCreation: false,
     triggersClose: false,
     tradeType: "BOTH",
@@ -251,8 +294,13 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
   }, [rules, flowType]);
 
   const seedMutation = useMutation({
-    mutationFn: () => postData(`${apiRoutes.flowRules.seed}?force=true&flowType=${flowType}`, {}),
-    onSuccess: () => {
+    mutationFn: () => patchData(`${apiRoutes.flowRules.seed}?force=true&flowType=${flowType}`, {}),
+    onSuccess: (res: any) => {
+      const restored = Array.isArray(res?.data?.data) ? res.data.data : [];
+      if (restored.length === 0) {
+        showToastMessage({ type: "error", message: "No defaults found for this flow type.", position: "top-right" });
+        return;
+      }
       showToastMessage({ type: "success", message: "Default flow rules restored.", position: "top-right" });
       queryClient.invalidateQueries({ queryKey: ["flow-rules", flowType] });
     },
@@ -396,7 +444,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
     if (!previewStage) return [];
     const missing: string[] = [];
     (previewStage.requiredActions || []).forEach((action: string) => {
-      if (!previewActionState[action]) missing.push(action.replaceAll("_", " "));
+      if (!previewActionState[action]) missing.push(ACTION_LABELS[action] || action.replaceAll("_", " "));
     });
     stageDocRules.forEach((doc: any) => {
       if (doc.isRequired && !previewDocState[String(doc.docType)]) {
@@ -550,6 +598,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
       sortOrder: 0,
       isActive: true,
       requiredActions: [],
+      actionBy: "",
       triggersOrderCreation: false,
       triggersClose: false,
       tradeType: "BOTH",
@@ -568,6 +617,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
       sortOrder: Number(rule.sortOrder || 0),
       isActive: rule.isActive !== false,
       requiredActions: Array.isArray(rule.requiredActions) ? rule.requiredActions : [],
+      actionBy: String(rule.actionBy || ""),
       triggersOrderCreation: Boolean(rule.triggersOrderCreation),
       triggersClose: Boolean(rule.triggersClose),
       tradeType: String(rule.tradeType || "BOTH"),
@@ -633,7 +683,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             <RulesActionStrip
               title="Enquiry Actions"
               items={actionUsage.map(({ action, used }) => ({
-                label: action.replaceAll("_", " "),
+                label: ACTION_LABELS[action] || action.replaceAll("_", " "),
                 used,
               }))}
             />
@@ -1100,7 +1150,9 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                     setPreviewActionState((prev) => ({ ...prev, [action]: !prev[action] }))
                                   }
                                 />
-                                <span className="text-xs font-black uppercase tracking-tight">{action.replaceAll("_", " ")}</span>
+                                <span className="text-xs font-black uppercase tracking-tight">
+                                  {ACTION_LABELS[action] || action.replaceAll("_", " ")}
+                                </span>
                               </motion.label>
                             );
                           })
@@ -1197,7 +1249,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
               <ModalBody className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
                 <Input
                   label="Stage Key"
-                  placeholder="E.g. INQUIRY_CREATED"
+                  placeholder="E.g. ENQUIRY_CREATED"
                   variant="bordered"
                   value={form.stageKey}
                   onValueChange={(value) => setForm({ ...form, stageKey: value.toUpperCase() })}
@@ -1228,7 +1280,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                         onSelectionChange={(keys) =>
                           setForm({ ...form, requiredActions: Array.from(keys as Set<string>) })
                         }
-                        items={ACTIONS.map(a => ({ key: a, label: a.replaceAll("_", " ") }))}
+                        items={ACTIONS.map(a => ({ key: a, label: ACTION_LABELS[a] || a.replaceAll("_", " ") }))}
                       >
                         {(action) => (
                           <SelectItem key={action.key} textValue={action.label}>
@@ -1249,6 +1301,23 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                       />
                     )}
                   </>
+                )}
+                {flowType === "TRADE_ENQUIRY" && (
+                  <Select
+                    label="Action By"
+                    variant="bordered"
+                    selectedKeys={new Set([form.actionBy || ""])}
+                    onSelectionChange={(keys) =>
+                      setForm({ ...form, actionBy: Array.from(keys as Set<string>)[0] || "" })
+                    }
+                    items={ACTION_BY.map((item) => ({ key: item, label: item.replaceAll("_", " ") }))}
+                  >
+                    {(item) => (
+                      <SelectItem key={item.key} textValue={item.label}>
+                        {item.label}
+                      </SelectItem>
+                    )}
+                  </Select>
                 )}
 
                 {flowType === "TRADE_ORDER" && (

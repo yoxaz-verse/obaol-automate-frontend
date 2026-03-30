@@ -116,6 +116,7 @@ export default function RegisterPage() {
     associateDistrict: "",
     associateDivision: "",
     associatePincodeEntry: "",
+    referralCode: "",
   });
 
   const { data: registerOptions, isLoading: optionsLoading, isError: optionsError, refetch: refetchOptions } = useQuery({
@@ -679,6 +680,7 @@ export default function RegisterPage() {
         associateDistrict: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? formData.associateDistrict : undefined,
         associateDivision: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? formData.associateDivision : undefined,
         associatePincodeEntry: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? (formData.associatePincodeEntry || undefined) : undefined,
+        referralCode: formData.referralCode.trim() || undefined,
       };
 
       if (isNewCompany) {
@@ -929,7 +931,6 @@ export default function RegisterPage() {
                     </div>
                     {errors.phoneSecondary ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phoneSecondary}</p> : null}
                   </div>
-
                   {!googleSignUp && (
                     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       <Input
@@ -970,6 +971,30 @@ export default function RegisterPage() {
                       />
                     </div>
                   )}
+
+                  <div className="md:col-span-2 pt-4">
+                    <div className="p-4 rounded-2xl bg-warning-500/5 border border-dashed border-warning-500/30 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-warning-600">Operator Referral (Optional)</span>
+                      </div>
+                      <Input
+                        type="text"
+                        placeholder="Enter 6-digit Referral Code"
+                        variant="flat"
+                        value={formData.referralCode}
+                        onValueChange={(v) => setField("referralCode", v.toUpperCase())}
+                        maxLength={6}
+                        classNames={{
+                          input: "font-black tracking-[0.2em] text-center",
+                          inputWrapper: "bg-background/80 h-12 border-none shadow-inner"
+                        }}
+                      />
+                      <p className="text-[9px] font-bold text-default-400 uppercase tracking-tighter italic opacity-70">
+                        Enter a valid operator code to automatically link your profile for faster verification.
+                      </p>
+                    </div>
+                  </div>
                 </motion.div>
               )}
 

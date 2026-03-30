@@ -880,165 +880,289 @@ export default function ImportsPage() {
       <Modal
         isOpen={createOpen}
         onOpenChange={setCreateOpen}
-        size="2xl"
+        size="3xl"
         isDismissable={false}
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
+        classNames={{
+          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          header: "border-b border-white/5 p-8",
+          footer: "border-t border-white/5 p-8",
+          body: "p-8",
+          closeButton: "hover:bg-white/5 active:bg-white/10 transition-colors top-6 right-6",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Create Import Listing</ModalHeader>
-              <ModalBody className="gap-4">
-                {needsCompanySelect && (
-                  <Select
-                    label="Importer Company"
-                    selectedKeys={createForm.importerCompanyId ? [createForm.importerCompanyId] : []}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setCreateForm((prev) => ({ ...prev, importerCompanyId: key || "" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    {companies.map((company: any) => (
-                      <SelectItem key={company._id} value={company._id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                )}
-                <Select
-                  label="Product"
-                  selectedKeys={createForm.productId ? [createForm.productId] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setCreateForm((prev) => ({ ...prev, productId: key || "", productVariant: "" }));
-                  }}
-                  popoverProps={{ shouldCloseOnBlur: false }}
-                >
-                  {products.map((product: any) => (
-                    <SelectItem key={product._id} value={product._id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Product Variant"
-                  isDisabled={!createForm.productId}
-                  selectedKeys={createForm.productVariant ? [createForm.productVariant] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setCreateForm((prev) => ({ ...prev, productVariant: key || "" }));
-                  }}
-                  popoverProps={{ shouldCloseOnBlur: false }}
-                >
-                  {variants.map((variant: any) => (
-                    <SelectItem key={variant._id} value={variant._id}>
-                      {variant.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Total Quantity"
-                    type="number"
-                    value={createForm.totalQuantity}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, totalQuantity: value }))}
-                  />
-                  <Select
-                    label="Quantity Unit"
-                    selectedKeys={[createForm.quantityUnit]}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setCreateForm((prev) => ({ ...prev, quantityUnit: key || "MT" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    <SelectItem key="MT" value="MT">
-                      MT
-                    </SelectItem>
-                    <SelectItem key="KG" value="KG">
-                      KG
-                    </SelectItem>
-                  </Select>
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Inception Phase</span>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Create Import Listing</h3>
+              </ModalHeader>
+              <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
+                <div className="space-y-8">
+                  {/* Entity & Product Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Parameters</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      {needsCompanySelect && (
+                        <Select
+                          label="Importer Authority"
+                          variant="flat"
+                          selectedKeys={createForm.importerCompanyId ? [createForm.importerCompanyId] : []}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setCreateForm((prev) => ({ ...prev, importerCompanyId: key || "" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs",
+                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          }}
+                          popoverProps={{ shouldCloseOnBlur: false }}
+                        >
+                          {companies.map((company: any) => (
+                            <SelectItem key={company._id} value={company._id} className="text-white hover:bg-white/5 rounded-xl">
+                              {company.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Select
+                          label="Commodity Type"
+                          variant="flat"
+                          selectedKeys={createForm.productId ? [createForm.productId] : []}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setCreateForm((prev) => ({ ...prev, productId: key || "", productVariant: "" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs",
+                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          }}
+                          popoverProps={{ shouldCloseOnBlur: false }}
+                        >
+                          {products.map((product: any) => (
+                            <SelectItem key={product._id} value={product._id} className="text-white hover:bg-white/5 rounded-xl">
+                              {product.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                        <Select
+                          label="Variant Specification"
+                          variant="flat"
+                          isDisabled={!createForm.productId}
+                          selectedKeys={createForm.productVariant ? [createForm.productVariant] : []}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setCreateForm((prev) => ({ ...prev, productVariant: key || "" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors disabled:opacity-30",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs",
+                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          }}
+                          popoverProps={{ shouldCloseOnBlur: false }}
+                        >
+                          {variants.map((variant: any) => (
+                            <SelectItem key={variant._id} value={variant._id} className="text-white hover:bg-white/5 rounded-xl">
+                              {variant.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operational Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Capacity</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex gap-2">
+                        <Input
+                          label="Target Volume"
+                          type="number"
+                          variant="flat"
+                          placeholder="00.00"
+                          value={createForm.totalQuantity}
+                          onValueChange={(value) => setCreateForm((prev) => ({ ...prev, totalQuantity: value }))}
+                          classNames={{
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
+                            label: "text-default-400 font-medium",
+                            input: "text-white font-bold uppercase text-sm"
+                          }}
+                        />
+                        <Select
+                          label="Unit"
+                          variant="flat"
+                          selectedKeys={[createForm.quantityUnit]}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setCreateForm((prev) => ({ ...prev, quantityUnit: key || "MT" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-24 hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs"
+                          }}
+                        >
+                          <SelectItem key="MT" value="MT" className="text-white">MT</SelectItem>
+                          <SelectItem key="KG" value="KG" className="text-white">KG</SelectItem>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Input
+                          label="Price Point"
+                          type="number"
+                          variant="flat"
+                          placeholder="0.00"
+                          value={createForm.price}
+                          onValueChange={(value) => setCreateForm((prev) => ({ ...prev, price: value }))}
+                          classNames={{
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
+                            label: "text-default-400 font-medium",
+                            input: "text-white font-bold uppercase text-sm"
+                          }}
+                        />
+                        <Select
+                          label="Rate"
+                          variant="flat"
+                          selectedKeys={[createForm.priceUnit]}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setCreateForm((prev) => ({ ...prev, priceUnit: key || "KG" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-28 hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs"
+                          }}
+                        >
+                          <SelectItem key="KG" value="KG" className="text-white">/ KG</SelectItem>
+                          <SelectItem key="MT" value="MT" className="text-white">/ MT</SelectItem>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {canSetCommission && (
+                      <Input
+                        label="OBAOL Governance Fee (%)"
+                        type="number"
+                        variant="flat"
+                        placeholder="0"
+                        value={createForm.adminCommission}
+                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, adminCommission: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm"
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Supply Chain Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Logistics Initialization</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Input
+                        label="Projected ETA"
+                        type="date"
+                        variant="flat"
+                        value={createForm.expectedArrivalDate}
+                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, expectedArrivalDate: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm [color-scheme:dark]"
+                        }}
+                      />
+                      <Input
+                        label="Buffer Window (Days)"
+                        type="number"
+                        variant="flat"
+                        placeholder="0"
+                        value={createForm.arrivalWindowDays}
+                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, arrivalWindowDays: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm"
+                        }}
+                      />
+                    </div>
+
+                    {ports.length > 0 ? (
+                      <Select
+                        label="Inbound Nodal Point"
+                        variant="flat"
+                        selectedKeys={createForm.portId ? [createForm.portId] : []}
+                        onSelectionChange={(keys) => {
+                          const key = Array.from(keys)[0] as string | undefined;
+                          setCreateForm((prev) => ({ ...prev, portId: key || "", portName: "" }));
+                        }}
+                        classNames={{
+                          trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          value: "text-white font-bold uppercase text-xs",
+                          popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                        }}
+                        popoverProps={{ shouldCloseOnBlur: false }}
+                      >
+                        {ports.map((port: any) => (
+                          <SelectItem key={port._id} value={port._id} className="text-white hover:bg-white/5 rounded-xl">
+                            {port.name} ({port.loCode})
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Input
+                        label="Manual Nodal Point Override"
+                        variant="flat"
+                        placeholder="Enter port location"
+                        value={createForm.portName}
+                        onValueChange={(value) => setCreateForm((prev) => ({ ...prev, portName: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm placeholder:text-white/20"
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Price"
-                    type="number"
-                    value={createForm.price}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, price: value }))}
-                  />
-                  <Select
-                    label="Price Unit"
-                    selectedKeys={[createForm.priceUnit]}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setCreateForm((prev) => ({ ...prev, priceUnit: key || "KG" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    <SelectItem key="KG" value="KG">
-                      Per KG
-                    </SelectItem>
-                    <SelectItem key="MT" value="MT">
-                      Per MT
-                    </SelectItem>
-                  </Select>
-                </div>
-                {canSetCommission && (
-                  <Input
-                    label="OBAOL Commission"
-                    type="number"
-                    value={createForm.adminCommission}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, adminCommission: value }))}
-                  />
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Expected Arrival Date"
-                    type="date"
-                    value={createForm.expectedArrivalDate}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, expectedArrivalDate: value }))}
-                  />
-                  <Input
-                    label="Arrival Window (days)"
-                    type="number"
-                    value={createForm.arrivalWindowDays}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, arrivalWindowDays: value }))}
-                  />
-                </div>
-                {ports.length > 0 ? (
-                  <Select
-                    label="Arrival Port"
-                    selectedKeys={createForm.portId ? [createForm.portId] : []}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setCreateForm((prev) => ({ ...prev, portId: key || "", portName: "" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    {ports.map((port: any) => (
-                      <SelectItem key={port._id} value={port._id}>
-                        {port.name} ({port.loCode})
-                      </SelectItem>
-                    ))}
-                  </Select>
-                ) : (
-                  <Input
-                    label="Arrival Port (manual)"
-                    value={createForm.portName}
-                    onValueChange={(value) => setCreateForm((prev) => ({ ...prev, portName: value }))}
-                  />
-                )}
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" className="h-10 rounded-xl" onClick={onClose}>
+              <ModalFooter className="gap-3">
+                <Button 
+                  variant="flat" 
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  onClick={onClose}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="warning"
-                  className="h-10 rounded-xl font-bold uppercase text-[11px]"
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={createMutation.isPending}
                   isDisabled={!createForm.productId || !createForm.productVariant}
                   onClick={() =>
@@ -1058,7 +1182,7 @@ export default function ImportsPage() {
                     })
                   }
                 >
-                  Create Listing
+                  Initialize Listing
                 </Button>
               </ModalFooter>
             </>
@@ -1077,108 +1201,164 @@ export default function ImportsPage() {
             setReserveStatus("idle");
           }
         }}
-        isDismissable={false}
-        isKeyboardDismissDisabled
-        shouldCloseOnInteractOutside={() => false}
+        size="lg"
+        classNames={{
+          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          header: "border-b border-white/5 p-8",
+          footer: "border-t border-white/5 p-8",
+          body: "p-8",
+          closeButton: "hover:bg-white/5 active:bg-white/10 transition-colors top-6 right-6",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Reserve Quantity</ModalHeader>
-              <ModalBody>
-                {reserveStatus !== "success" && (
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Inventory Control</span>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Reserve Quantity</h3>
+              </ModalHeader>
+              <ModalBody className="gap-6">
+                {reserveStatus !== "success" ? (
                   <>
-                    {reserveNeedsCompany && (
-                      <Select
-                        label="Buyer Company"
-                        selectedKeys={reserveCompanyId ? [reserveCompanyId] : []}
-                        onSelectionChange={(keys) => {
-                          const key = Array.from(keys)[0] as string | undefined;
-                          setReserveCompanyId(key || "");
-                          setReserveFeedback("");
-                          setReserveStatus("idle");
-                        }}
-                        popoverProps={{ shouldCloseOnBlur: false }}
-                      >
-                        {companies.map((company: any) => (
-                          <SelectItem key={company._id} value={company._id}>
-                            {company.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                    )}
-                    <Input
-                      label="Quantity (MT)"
-                      type="number"
-                      placeholder="Enter quantity in MT"
-                      value={reserveQty}
-                      onValueChange={(value) => {
-                        setReserveQty(value);
-                        setReserveFeedback("");
-                        setReserveStatus("idle");
-                      }}
-                    />
+                    <div className="flex flex-col gap-6">
+                      {reserveNeedsCompany && (
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Target Entity</label>
+                          <Select
+                            label="Select Buyer Company"
+                            variant="flat"
+                            selectedKeys={reserveCompanyId ? [reserveCompanyId] : []}
+                            onSelectionChange={(keys) => {
+                              const key = Array.from(keys)[0] as string | undefined;
+                              setReserveCompanyId(key || "");
+                              setReserveFeedback("");
+                              setReserveStatus("idle");
+                            }}
+                            classNames={{
+                              trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                              label: "text-default-400 font-medium",
+                              value: "text-white font-bold uppercase text-xs",
+                              popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            }}
+                            popoverProps={{ shouldCloseOnBlur: false }}
+                          >
+                            {companies.map((company: any) => (
+                              <SelectItem key={company._id} value={company._id} className="text-white hover:bg-white/5 rounded-xl">
+                                {company.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Mission Volume</label>
+                        <Input
+                          label="Allocation (MT)"
+                          type="number"
+                          placeholder="00.00"
+                          variant="flat"
+                          value={reserveQty}
+                          onValueChange={(value) => {
+                            setReserveQty(value);
+                            setReserveFeedback("");
+                            setReserveStatus("idle");
+                          }}
+                          classNames={{
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors data-[focus=true]:border-warning-500/50",
+                            label: "text-default-400 font-medium",
+                            input: "text-white font-bold uppercase text-sm placeholder:text-white/20",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-[2rem] bg-warning-500/5 border border-warning-500/10 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <FiPackage size={14} className="text-warning-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-warning-500">Available Infrastructure</span>
+                      </div>
+                      <p className="text-xs text-default-300 font-medium leading-relaxed">
+                        Secure up to <span className="text-white font-bold">{maxReservableQty} MT</span> for this shipment. 
+                        Once submitted, the mission authority will review your request.
+                      </p>
+                    </div>
                   </>
-                )}
-                {reserveFeedback && (
-                  <div
-                    className={`text-xs ${
-                      reserveStatus === "success"
-                        ? "text-success-500"
-                        : reserveStatus === "error"
-                        ? "text-danger-500"
-                        : "text-warning-600"
-                    }`}
+                ) : (
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }} 
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-8 gap-4 text-center"
                   >
-                    {reserveFeedback}
-                  </div>
+                    <div className="w-16 h-16 rounded-full bg-success-500/10 border border-success-500/20 flex items-center justify-center text-success-500 mb-2">
+                      <LuCheck size={32} />
+                    </div>
+                    <h4 className="text-lg font-bold text-white uppercase tracking-tight">Reserve Request Initialized</h4>
+                    <p className="text-xs text-default-400 max-w-[280px]">
+                      Your allocation request has been broadcasted. Tracking will be available in "My Reservations" once approved.
+                    </p>
+                  </motion.div>
                 )}
-                {!reserveFeedback && reserveSameCompany && (
-                  <div className="text-xs text-danger-500">
-                    Buyer company cannot be the same as the importer company.
-                  </div>
+
+                {reserveFeedback && reserveStatus !== "success" && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl bg-danger-500/5 border border-danger-500/10"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-danger-500 animate-pulse" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-danger-500">
+                      {reserveFeedback}
+                    </span>
+                  </motion.div>
                 )}
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" className="h-10 rounded-xl" onClick={onClose}>
-                  {reserveStatus === "success" ? "Close" : "Cancel"}
-                </Button>
-                <Button
-                  color="warning"
-                  className="h-10 rounded-xl font-bold uppercase text-[11px]"
-                  isLoading={reserveMutation.isPending}
-                  isDisabled={
-                    !reserveQty ||
-                    Number(reserveQty) <= 0 ||
-                    (reserveNeedsCompany && !reserveCompanyId) ||
-                    (maxReservableQty > 0 && Number(reserveQty) > maxReservableQty) ||
-                    reserveSameCompany ||
-                    reserveStatus === "success"
-                  }
-                  onPress={() => {
-                    if (!selectedListing) return;
-                    const requestedQty = Number(reserveQty || 0);
-                    if (reserveSameCompany) {
-                      setReserveFeedback("Buyer company cannot be the same as the importer company.");
-                      setReserveStatus("error");
-                      return;
-                    }
-                    if (maxReservableQty > 0 && requestedQty > maxReservableQty) {
-                      setReserveFeedback(`Only ${maxReservableQty} MT is available. Please enter a lower quantity.`);
-                      setReserveStatus("error");
-                      return;
-                    }
-                    reserveMutation.mutate({
-                      id: selectedListing._id,
-                      data: {
-                        quantityRequested: requestedQty,
-                        buyerCompanyId: reserveNeedsCompany ? reserveCompanyId : undefined,
-                      },
-                    });
-                  }}
+              <ModalFooter className="gap-3">
+                <Button 
+                  variant="flat" 
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  onClick={onClose}
                 >
-                  {reserveStatus === "success" ? "Reserved" : "Submit"}
+                  {reserveStatus === "success" ? "Back to Imports" : "Cancel"}
                 </Button>
+                {reserveStatus !== "success" && (
+                  <Button
+                    color="warning"
+                    className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
+                    isLoading={reserveMutation.isPending}
+                    isDisabled={
+                      !reserveQty ||
+                      Number(reserveQty) <= 0 ||
+                      (reserveNeedsCompany && !reserveCompanyId) ||
+                      (maxReservableQty > 0 && Number(reserveQty) > maxReservableQty) ||
+                      reserveSameCompany
+                    }
+                    onPress={() => {
+                      if (!selectedListing) return;
+                      const requestedQty = Number(reserveQty || 0);
+                      if (reserveSameCompany) {
+                        setReserveFeedback("Inter-nodal conflict: Target entity matches origin nodal entity.");
+                        setReserveStatus("error");
+                        return;
+                      }
+                      if (maxReservableQty > 0 && requestedQty > maxReservableQty) {
+                        setReserveFeedback(`Capacity overflow: Limit is ${maxReservableQty} MT.`);
+                        setReserveStatus("error");
+                        return;
+                      }
+                      reserveMutation.mutate({
+                        id: selectedListing._id,
+                        data: {
+                          quantityRequested: requestedQty,
+                          buyerCompanyId: reserveNeedsCompany ? reserveCompanyId : undefined,
+                        },
+                      });
+                    }}
+                  >
+                    Authorize Reserve
+                  </Button>
+                )}
               </ModalFooter>
             </>
           )}
@@ -1345,149 +1525,246 @@ export default function ImportsPage() {
       <Modal
         isOpen={editOpen}
         onOpenChange={setEditOpen}
-        size="2xl"
+        size="3xl"
         isDismissable={false}
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
+        classNames={{
+          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          header: "border-b border-white/5 p-8",
+          footer: "border-t border-white/5 p-8",
+          body: "p-8",
+          closeButton: "hover:bg-white/5 active:bg-white/10 transition-colors top-6 right-6",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Edit Import Listing</ModalHeader>
-              <ModalBody className="gap-4">
-                <Select
-                  label="Product"
-                  isDisabled
-                  selectedKeys={editForm.productId ? [editForm.productId] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setEditForm((prev) => ({ ...prev, productId: key || "", productVariant: "" }));
-                  }}
-                  popoverProps={{ shouldCloseOnBlur: false }}
-                >
-                  {products.map((product: any) => (
-                    <SelectItem key={product._id} value={product._id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Product Variant"
-                  isDisabled
-                  selectedKeys={editForm.productVariant ? [editForm.productVariant] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setEditForm((prev) => ({ ...prev, productVariant: key || "" }));
-                  }}
-                  popoverProps={{ shouldCloseOnBlur: false }}
-                >
-                  {variants.map((variant: any) => (
-                    <SelectItem key={variant._id} value={variant._id}>
-                      {variant.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Total Quantity"
-                    type="number"
-                    value={editForm.totalQuantity}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, totalQuantity: value }))}
-                  />
-                  <Select
-                    label="Quantity Unit"
-                    selectedKeys={[editForm.quantityUnit]}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setEditForm((prev) => ({ ...prev, quantityUnit: key || "MT" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    <SelectItem key="MT" value="MT">
-                      MT
-                    </SelectItem>
-                    <SelectItem key="KG" value="KG">
-                      KG
-                    </SelectItem>
-                  </Select>
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Node Configuration</span>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Edit Import Listing</h3>
+              </ModalHeader>
+              <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
+                <div className="space-y-8">
+                  {/* Base Identity Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Identity</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        label="Product"
+                        isDisabled
+                        variant="flat"
+                        selectedKeys={editForm.productId ? [editForm.productId] : []}
+                        classNames={{
+                          trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl opacity-50",
+                          label: "text-default-400 font-medium",
+                          value: "text-white font-bold uppercase text-xs"
+                        }}
+                      >
+                        {products.map((product: any) => (
+                          <SelectItem key={product._id} value={product._id} className="text-white">
+                            {product.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      <Select
+                        label="Product Variant"
+                        isDisabled
+                        variant="flat"
+                        selectedKeys={editForm.productVariant ? [editForm.productVariant] : []}
+                        classNames={{
+                          trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl opacity-50",
+                          label: "text-default-400 font-medium",
+                          value: "text-white font-bold uppercase text-xs"
+                        }}
+                      >
+                        {variants.map((variant: any) => (
+                          <SelectItem key={variant._id} value={variant._id} className="text-white">
+                            {variant.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Operational Parameters Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Parameters</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex gap-2">
+                        <Input
+                          label="Total Quantity"
+                          type="number"
+                          variant="flat"
+                          value={editForm.totalQuantity}
+                          onValueChange={(value) => setEditForm((prev) => ({ ...prev, totalQuantity: value }))}
+                          classNames={{
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
+                            label: "text-default-400 font-medium",
+                            input: "text-white font-bold uppercase text-sm"
+                          }}
+                        />
+                        <Select
+                          label="Unit"
+                          variant="flat"
+                          selectedKeys={[editForm.quantityUnit]}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setEditForm((prev) => ({ ...prev, quantityUnit: key || "MT" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-24 hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs"
+                          }}
+                        >
+                          <SelectItem key="MT" value="MT" className="text-white">MT</SelectItem>
+                          <SelectItem key="KG" value="KG" className="text-white">KG</SelectItem>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Input
+                          label="Price Point"
+                          type="number"
+                          variant="flat"
+                          value={editForm.price}
+                          onValueChange={(value) => setEditForm((prev) => ({ ...prev, price: value }))}
+                          classNames={{
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors flex-1",
+                            label: "text-default-400 font-medium",
+                            input: "text-white font-bold uppercase text-sm"
+                          }}
+                        />
+                        <Select
+                          label="Unit"
+                          variant="flat"
+                          selectedKeys={[editForm.priceUnit]}
+                          onSelectionChange={(keys) => {
+                            const key = Array.from(keys)[0] as string | undefined;
+                            setEditForm((prev) => ({ ...prev, priceUnit: key || "KG" }));
+                          }}
+                          classNames={{
+                            trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl w-28 hover:bg-white/10 transition-colors",
+                            label: "text-default-400 font-medium",
+                            value: "text-white font-bold uppercase text-xs"
+                          }}
+                        >
+                          <SelectItem key="KG" value="KG" className="text-white">/ KG</SelectItem>
+                          <SelectItem key="MT" value="MT" className="text-white">/ MT</SelectItem>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {canSetCommission && (
+                      <Input
+                        label="OBAOL Governance Fee (%)"
+                        type="number"
+                        variant="flat"
+                        value={editForm.adminCommission}
+                        onValueChange={(value) => setEditForm((prev) => ({ ...prev, adminCommission: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm"
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Logistics Section */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Supply Chain Control</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Input
+                        label="Projected Arrival (ETA)"
+                        type="date"
+                        variant="flat"
+                        value={editForm.expectedArrivalDate}
+                        onValueChange={(value) => setEditForm((prev) => ({ ...prev, expectedArrivalDate: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm [color-scheme:dark]"
+                        }}
+                      />
+                      <Input
+                        label="Delivery Buffer (Days)"
+                        type="number"
+                        variant="flat"
+                        value={editForm.arrivalWindowDays}
+                        onValueChange={(value) => setEditForm((prev) => ({ ...prev, arrivalWindowDays: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm"
+                        }}
+                      />
+                    </div>
+
+                    {ports.length > 0 ? (
+                      <Select
+                        label="Deployment Port"
+                        variant="flat"
+                        selectedKeys={editForm.portId ? [editForm.portId] : []}
+                        onSelectionChange={(keys) => {
+                          const key = Array.from(keys)[0] as string | undefined;
+                          setEditForm((prev) => ({ ...prev, portId: key || "", portName: "" }));
+                        }}
+                        classNames={{
+                          trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          value: "text-white font-bold uppercase text-xs",
+                          popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                        }}
+                        popoverProps={{ shouldCloseOnBlur: false }}
+                      >
+                        {ports.map((port: any) => (
+                          <SelectItem key={port._id} value={port._id} className="text-white hover:bg-white/5 rounded-xl">
+                            {port.name} ({port.loCode})
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Input
+                        label="Nodal Point (Manual Override)"
+                        variant="flat"
+                        value={editForm.portName}
+                        onValueChange={(value) => setEditForm((prev) => ({ ...prev, portName: value }))}
+                        classNames={{
+                          inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                          label: "text-default-400 font-medium",
+                          input: "text-white font-bold uppercase text-sm placeholder:text-white/20"
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Price"
-                    type="number"
-                    value={editForm.price}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, price: value }))}
-                  />
-                  <Select
-                    label="Price Unit"
-                    selectedKeys={[editForm.priceUnit]}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setEditForm((prev) => ({ ...prev, priceUnit: key || "KG" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    <SelectItem key="KG" value="KG">
-                      Per KG
-                    </SelectItem>
-                    <SelectItem key="MT" value="MT">
-                      Per MT
-                    </SelectItem>
-                  </Select>
-                </div>
-                {canSetCommission && (
-                  <Input
-                    label="OBAOL Commission"
-                    type="number"
-                    value={editForm.adminCommission}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, adminCommission: value }))}
-                  />
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Expected Arrival Date"
-                    type="date"
-                    value={editForm.expectedArrivalDate}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, expectedArrivalDate: value }))}
-                  />
-                  <Input
-                    label="Arrival Window (days)"
-                    type="number"
-                    value={editForm.arrivalWindowDays}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, arrivalWindowDays: value }))}
-                  />
-                </div>
-                {ports.length > 0 ? (
-                  <Select
-                    label="Arrival Port"
-                    selectedKeys={editForm.portId ? [editForm.portId] : []}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as string | undefined;
-                      setEditForm((prev) => ({ ...prev, portId: key || "", portName: "" }));
-                    }}
-                    popoverProps={{ shouldCloseOnBlur: false }}
-                  >
-                    {ports.map((port: any) => (
-                      <SelectItem key={port._id} value={port._id}>
-                        {port.name} ({port.loCode})
-                      </SelectItem>
-                    ))}
-                  </Select>
-                ) : (
-                  <Input
-                    label="Arrival Port (manual)"
-                    value={editForm.portName}
-                    onValueChange={(value) => setEditForm((prev) => ({ ...prev, portName: value }))}
-                  />
-                )}
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" className="h-10 rounded-xl" onClick={onClose}>
+              <ModalFooter className="gap-3">
+                <Button 
+                  variant="flat" 
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  onClick={onClose}
+                >
                   Cancel
                 </Button>
                 <Button
                   color="warning"
-                  className="h-10 rounded-xl font-bold uppercase text-[11px]"
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={editMutation.isPending}
                   onClick={() => {
                     if (!selectedListing?._id) return;
@@ -1507,7 +1784,7 @@ export default function ImportsPage() {
                     });
                   }}
                 >
-                  Save Changes
+                  Synchronize Data
                 </Button>
               </ModalFooter>
             </>

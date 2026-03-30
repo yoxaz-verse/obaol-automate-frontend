@@ -63,11 +63,6 @@ export default function OrdersPage() {
                     const scopedOrders = ordersData.filter((item: any) => {
                         if (!isOperatorUser) return true;
                         if (item?.isExternal) return true;
-                        const assignedOperatorId = (
-                            item?.enquiry?.assignedOperatorId?._id ||
-                            item?.enquiry?.assignedOperatorId ||
-                            ""
-                        ).toString();
                         const supplierOperatorId = (
                             item?.enquiry?.supplierOperatorId?._id ||
                             item?.enquiry?.supplierOperatorId ||
@@ -80,8 +75,7 @@ export default function OrdersPage() {
                         ).toString();
                         return Boolean(
                             user?.id &&
-                            (assignedOperatorId === String(user.id) ||
-                                supplierOperatorId === String(user.id) ||
+                            (supplierOperatorId === String(user.id) ||
                                 dealCloserOperatorId === String(user.id))
                         );
                     });
@@ -90,11 +84,6 @@ export default function OrdersPage() {
                         if (item?.isExternal) return false;
                         if (!isOperatorUser) return true;
                         if (item?.isExternal) return true;
-                        const assignedOperatorId = (
-                            item?.enquiry?.assignedOperatorId?._id ||
-                            item?.enquiry?.assignedOperatorId ||
-                            ""
-                        ).toString();
                         const supplierOperatorId = (
                             item?.enquiry?.supplierOperatorId?._id ||
                             item?.enquiry?.supplierOperatorId ||
@@ -107,8 +96,7 @@ export default function OrdersPage() {
                         ).toString();
                         return Boolean(
                             user?.id &&
-                            (assignedOperatorId === String(user.id) ||
-                                supplierOperatorId === String(user.id) ||
+                            (supplierOperatorId === String(user.id) ||
                                 dealCloserOperatorId === String(user.id))
                         );
                     });

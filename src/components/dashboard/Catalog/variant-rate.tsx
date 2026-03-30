@@ -718,7 +718,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         </div>
                         <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Products Live</h3>
                         <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                          You haven't activated any products for the live market yet. Switch to your general product list and toggle them live to start trading.
+                          You haven&apos;t activated any products for the live market yet. Switch to your general product list and toggle them live to start trading.
                         </p>
                       </div>
                     ) : null
@@ -1931,6 +1931,12 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
                   variantRate={variantRate}
                   onClose={onClose}
                 />
+                <div className="mt-4 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-xs text-primary-700 dark:text-primary-300 flex items-start gap-2">
+                  <FiInfo size={14} className="mt-0.5" />
+                  <span>
+                    LOI will be created automatically from your company to our company when you submit this enquiry.
+                  </span>
+                </div>
               </ModalBody>
               <ModalFooter className="flex flex-col gap-2 border-t border-divider py-3 px-6">
                 <div className="flex items-center gap-2 text-primary-500 bg-primary-500/10 px-3 py-2 rounded-xl w-full">
@@ -1995,6 +2001,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   });
 
   const parseAssociateRows = (raw: any): any[] => {
+    if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
     if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
     if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
     if (Array.isArray(raw?.data?.data)) return raw.data.data;
@@ -2211,7 +2218,20 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                   <label className="text-xs font-semibold text-default-600">Buyer Associate</label>
                   <select
                     value={buyerAssociateId}
-                    onChange={(e) => setBuyerAssociateId(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBuyerAssociateId(val);
+                      if (val) {
+                        const selectedItem = associateOptions.find((a: any) => String(a._id) === val);
+                        if (selectedItem) {
+                          setName(selectedItem.name || selectedItem.fullName || selectedItem.user?.name || "");
+                          setPhoneNumber(selectedItem.phone || selectedItem.phoneNumber || selectedItem.user?.phone || "");
+                        }
+                      } else {
+                        setName("");
+                        setPhoneNumber("");
+                      }
+                    }}
                     className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                     required
                   >

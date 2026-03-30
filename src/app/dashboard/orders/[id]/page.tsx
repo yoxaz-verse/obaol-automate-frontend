@@ -45,6 +45,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 
 dayjs.extend(relativeTime);
 
@@ -94,6 +95,8 @@ export default function OrderDetailsPage() {
     const [docActionOpen, setDocActionOpen] = useState(false);
     const [docActionRule, setDocActionRule] = useState<any>(null);
     const [docActionFileUrl, setDocActionFileUrl] = useState("");
+    const [docViewerOpen, setDocViewerOpen] = useState(false);
+    const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState("");
     const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState("");
     const [responsibilities, setResponsibilities] = useState<any>({
@@ -124,6 +127,7 @@ export default function OrderDetailsPage() {
         transportDispatchDate: "",
         shippingBookedDate: "",
         customsClearanceDate: "",
+        deliveryTargetDate: "",
     });
 
     // Fetch Order Data
@@ -304,7 +308,7 @@ export default function OrderDetailsPage() {
             setWorkflowStage(String(order?.workflowStage || fallbackStage));
             setResponsibilities({
                 procurementBy: order?.responsibilities?.procurementBy || "obaol",
-                certificateBy: order?.responsibilities?.certificateBy || "obaol",
+                certificateBy: order?.responsibilities?.certificateBy || "",
                 transportBy: order?.responsibilities?.transportBy || "obaol",
                 shippingBy: order?.responsibilities?.shippingBy || "obaol",
                 packagingBy: order?.responsibilities?.packagingBy || "obaol",
@@ -332,6 +336,7 @@ export default function OrderDetailsPage() {
                 transportDispatchDate: toDateInput(m.transportDispatchDate),
                 shippingBookedDate: toDateInput(m.shippingBookedDate),
                 customsClearanceDate: toDateInput(m.customsClearanceDate),
+                deliveryTargetDate: toDateInput(m.deliveryTargetDate),
             });
         }
     }, [order]);
@@ -374,6 +379,7 @@ export default function OrderDetailsPage() {
                 transportDispatchDate: dateOrNull(milestones.transportDispatchDate),
                 shippingBookedDate: dateOrNull(milestones.shippingBookedDate),
                 customsClearanceDate: dateOrNull(milestones.customsClearanceDate),
+                deliveryTargetDate: dateOrNull(milestones.deliveryTargetDate),
             }
         });
     }
@@ -449,7 +455,13 @@ export default function OrderDetailsPage() {
         setLogisticsList(logisticsList.filter((_, i) => i !== index));
     };
 
-    const subflowConfigs = Array.isArray(subflowConfigResponse?.data?.data) ? subflowConfigResponse.data.data : [];
+    const subflowConfigs = Array.isArray(subflowConfigResponse?.data?.data?.data)
+        ? subflowConfigResponse.data.data.data
+        : Array.isArray(subflowConfigResponse?.data?.data)
+            ? subflowConfigResponse.data.data
+            : Array.isArray(subflowConfigResponse?.data)
+                ? subflowConfigResponse.data
+                : [];
     const tradeType = String(
         (order as any)?.externalTradeType ||
         (linkedEnquiry as any)?.executionContext?.tradeType ||
@@ -458,7 +470,16 @@ export default function OrderDetailsPage() {
     const executionTasks = Array.isArray((linkedEnquiry as any)?.executionInquiries)
         ? (linkedEnquiry as any).executionInquiries
         : null;
-    const hasLinkedExecutionTasks = Array.isArray(executionTasks);
+    const hasLinkedExecutionTasks = Array.isArray(executionTasks) && executionTasks.length > 0;
+    const executionTasksByType = new Map<string, any[]>();
+    if (Array.isArray(executionTasks)) {
+        executionTasks.forEach((task: any) => {
+            const type = String(task?.type || "").toUpperCase();
+            if (!type) return;
+            if (!executionTasksByType.has(type)) executionTasksByType.set(type, []);
+            executionTasksByType.get(type)?.push(task);
+        });
+    }
     const inlandTransportInstances = (() => {
         const rawInstances = Array.isArray((order as any)?.subflowInstances) ? (order as any).subflowInstances : [];
         const fromOrder = rawInstances
@@ -497,7 +518,7 @@ export default function OrderDetailsPage() {
     const scopedSubflowConfigs = hasLinkedExecutionTasks
         ? (requiredSubflowTypes.length > 0
             ? activeSubflowConfigs.filter((config: any) => requiredSubflowTypeSet.has(String(config.subflowType || "").toUpperCase()))
-            : [])
+            : activeSubflowConfigs)
         : activeSubflowConfigs;
     const subflowTypes = Array.from(
         new Set(
@@ -516,7 +537,13 @@ export default function OrderDetailsPage() {
             const map = new Map<string, any[]>();
             results.forEach((res, index) => {
                 const flowType = String(subflowTypes[index]);
-                const rules = Array.isArray(res?.data?.data) ? res.data.data : [];
+                const rules = Array.isArray(res?.data?.data?.data)
+                    ? res.data.data.data
+                    : Array.isArray(res?.data?.data)
+                        ? res.data.data
+                        : Array.isArray(res?.data)
+                            ? res.data
+                            : [];
                 map.set(flowType, rules);
             });
             return map;
@@ -527,13 +554,6 @@ export default function OrderDetailsPage() {
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
-    const assignedOperatorId = (
-        (linkedEnquiry as any)?.assignedOperatorId?._id ||
-        (linkedEnquiry as any)?.assignedOperatorId ||
-        (order as any)?.enquiry?.assignedOperatorId?._id ||
-        (order as any)?.enquiry?.assignedOperatorId ||
-        ""
-    ).toString();
     const supplierOperatorId = (
         (linkedEnquiry as any)?.supplierOperatorId?._id ||
         (linkedEnquiry as any)?.supplierOperatorId ||
@@ -551,8 +571,7 @@ export default function OrderDetailsPage() {
     if (
         isOperatorUser &&
         (!user?.id ||
-            (assignedOperatorId !== String(user.id) &&
-                supplierOperatorId !== String(user.id) &&
+            (supplierOperatorId !== String(user.id) &&
                 dealCloserOperatorId !== String(user.id)))
     ) {
         return (
@@ -563,7 +582,16 @@ export default function OrderDetailsPage() {
         );
     }
 
-    const orderRules = Array.isArray(orderRulesResponse?.data?.data) ? orderRulesResponse.data.data : [];
+    const parseOrderRules = (raw: any): any[] => {
+        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
+        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
+        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
+        if (Array.isArray(raw?.data?.data)) return raw.data.data;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw)) return raw;
+        return [];
+    };
+    const orderRules = parseOrderRules(orderRulesResponse).filter((r: any) => !r?.isDeleted);
     const isExternal = Boolean((order as any)?.isExternal);
     const sortedOrderStages = orderRules
         .filter((r: any) => r?.isActive !== false)
@@ -581,9 +609,7 @@ export default function OrderDetailsPage() {
         if (r?.tradeType && r.tradeType !== "BOTH" && String(r.tradeType) !== tradeType) return;
         orderStageRank.set(String(r.stageKey).toUpperCase(), Number(r.sortOrder || 0));
     });
-    const workflowStageOptions = sortedOrderStages.length > 0
-        ? sortedOrderStages
-        : ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", "QUALITY_VERIFIED", "COMPLIANCE_APPROVED", "PACKING_COMPLETED", "READY_FOR_SHIPMENT", "SHIPPED", "DELIVERED", "PAYMENT_PENDING", "PAYMENT_COMPLETED", "TRADE_CLOSED"];
+    const workflowStageOptions = sortedOrderStages.length > 0 ? sortedOrderStages : [];
     const docsForOrder = Array.isArray(orderDocsResponse?.data?.data?.data)
         ? orderDocsResponse?.data?.data?.data
         : (orderDocsResponse?.data?.data || []);
@@ -656,6 +682,15 @@ export default function OrderDetailsPage() {
             const gateRank = orderStageRank.get(gateStage) ?? 0;
             const dependsOn = Array.isArray(config.dependsOnSubflows) ? config.dependsOnSubflows : [];
 
+            const getBiddingLabel = (task?: any) => {
+                if (!task) return "Awaiting bids";
+                if (task?.committedProvider) return "Provider committed";
+                const bids = Array.isArray(task?.bids) ? task.bids : [];
+                if (bids.length > 0) return "Under bidding";
+                if (String(task?.status || "").toUpperCase() === "IN_PROGRESS") return "In progress";
+                if (String(task?.status || "").toUpperCase() === "COMPLETED") return "Completed";
+                return "Awaiting bids";
+            };
             const buildStatus = (instanceKey?: string, instanceLabel?: string) => {
                 const stageKey = instanceKey
                     ? String((order as any)?.subflowStages?.[`INLAND_TRANSPORTATION::${instanceKey}`] || "").toUpperCase()
@@ -665,6 +700,10 @@ export default function OrderDetailsPage() {
                         (order as any)?.subflowStages?.LOGISTICS ||
                         ""
                     ).toUpperCase();
+                const taskList = executionTasksByType.get(type === "QUALITY_QA" ? "QUALITY_TESTING" : type) || [];
+                const matchedTask = instanceKey
+                    ? taskList.find((task: any) => String(task?.details?.segmentKey || task?._id || "") === String(instanceKey))
+                    : taskList[0];
                 const isComplete = Boolean(lastStage && stageKey && String(lastStage.stageKey) === stageKey);
                 const currentIndex = sortedFlowRules.findIndex((rule: any) => String(rule.stageKey || "").toUpperCase() === stageKey);
                 const completedCount = currentIndex >= 0 ? currentIndex + 1 : 0;
@@ -684,6 +723,7 @@ export default function OrderDetailsPage() {
                     isBlocking: !isComplete && currentRank >= gateRank,
                     gateLabel,
                     dependsOn,
+                    biddingLabel: getBiddingLabel(matchedTask),
                     stages: sortedFlowRules.map((rule: any) => ({
                         stageKey: String(rule.stageKey || "").toUpperCase(),
                         label: rule.label || rule.stageKey,
@@ -773,6 +813,15 @@ export default function OrderDetailsPage() {
         return "";
     };
     const hasDocType = (type: string) => (docsForOrder || []).some((doc: any) => String(doc?.type || "") === type);
+    const getLatestDocByType = (type: string) => {
+        const matches = (docsForOrder || []).filter((doc: any) => String(doc?.type || "").toUpperCase() === String(type || "").toUpperCase());
+        if (!matches.length) return null;
+        return [...matches].sort((a: any, b: any) => {
+            const aTime = new Date(a?.updatedAt || a?.createdAt || 0).getTime();
+            const bTime = new Date(b?.updatedAt || b?.createdAt || 0).getTime();
+            return bTime - aTime;
+        })[0];
+    };
 
     return (
         <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-warning-500/30">
@@ -898,31 +947,36 @@ export default function OrderDetailsPage() {
                 </div>
             )}
 
-            {/* Status Pipeline: Modern Connected Flow */}
-            <div className="w-full relative py-6">
-                <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
-                <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
-                    {workflowStageOptions.map((step, index) => {
-                        const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
-                        const isCompleted = index < currentStepIndex;
-                        const isCurrent = index === currentStepIndex;
-                        return (
-                            <div key={step} className="flex flex-col items-center gap-4 min-w-[120px] shrink-0 group">
-                                <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-warning-500 border-warning-400 scale-125 shadow-[0_0_15px_rgba(245,165,36,0.6)]' :
-                                    isCompleted ? 'bg-success-500 border-success-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]' :
-                                        'bg-default-200 border-divider'
-                                    }`} />
-                                <div className={`text-xs font-black uppercase tracking-tight transition-colors text-center ${isCurrent ? 'text-warning-500' :
-                                    isCompleted ? 'text-success-500/80' :
-                                        'text-default-500 group-hover:text-default-700 dark:group-hover:text-default-300'
-                                    }`}>
-                                    {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
-                                </div>
-                            </div>
-                        );
-                    })}
+            {workflowStageOptions.length === 0 ? (
+                <div className="w-full rounded-2xl border border-warning-500/20 bg-warning-500/5 px-5 py-4 text-xs font-bold text-warning-600 uppercase tracking-widest">
+                    No flow rules configured for orders. Configure Flow Rules to unlock order stages.
                 </div>
-            </div>
+            ) : (
+                <div className="w-full relative py-6">
+                    <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
+                    <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
+                        {workflowStageOptions.map((step, index) => {
+                            const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
+                            const isCompleted = index < currentStepIndex;
+                            const isCurrent = index === currentStepIndex;
+                            return (
+                                <div key={step} className="flex flex-col items-center gap-4 min-w-[120px] shrink-0 group">
+                                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-warning-500 border-warning-400 scale-125 shadow-[0_0_15px_rgba(245,165,36,0.6)]' :
+                                        isCompleted ? 'bg-success-500 border-success-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]' :
+                                            'bg-default-200 border-divider'
+                                        }`} />
+                                    <div className={`text-xs font-black uppercase tracking-tight transition-colors text-center ${isCurrent ? 'text-warning-500' :
+                                        isCompleted ? 'text-success-500/80' :
+                                            'text-default-500 group-hover:text-default-700 dark:group-hover:text-default-300'
+                                        }`}>
+                                        {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Strategic Command: Global Summary */}
@@ -1037,6 +1091,20 @@ export default function OrderDetailsPage() {
 
                 {/* Next Step Protocol: Action Roadmap */}
                 <div className="lg:col-span-1 flex flex-col gap-8">
+                    {!hasLinkedExecutionTasks && (
+                        <div className="rounded-3xl border border-warning-500/30 bg-warning-500/10 p-6 backdrop-blur-xl flex flex-col gap-3">
+                            <div className="text-xs font-black uppercase tracking-widest text-warning-600">Execution Requests Needed</div>
+                            <div className="text-sm font-semibold text-default-600">
+                                Create execution requests to start subflow bidding and coordination.
+                            </div>
+                            <Link
+                                href={`/dashboard/execution-enquiries${enquiryRefId ? `?enquiryId=${enquiryRefId}` : ""}`}
+                                className="inline-flex items-center justify-center rounded-2xl bg-warning-500 text-black text-xs font-black uppercase tracking-widest h-10 px-4 shadow-[0_10px_30px_rgba(245,165,36,0.25)]"
+                            >
+                                Create Execution Request
+                            </Link>
+                        </div>
+                    )}
                     <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group flex flex-col h-full">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-warning-500/20 transition-all duration-700" />
 
@@ -1063,6 +1131,11 @@ export default function OrderDetailsPage() {
                                             <div className="text-sm font-black text-foreground uppercase tracking-tight">
                                                 {subflowStatus.find(f => !f.isComplete)?.label}
                                             </div>
+                                            {subflowStatus.find(f => !f.isComplete)?.biddingLabel ? (
+                                                <div className="text-[10px] font-bold text-default-400 uppercase tracking-wider italic mt-0.5">
+                                                    {subflowStatus.find(f => !f.isComplete)?.biddingLabel}
+                                                </div>
+                                            ) : null}
                                             <div className="text-[10px] font-bold text-default-400 uppercase tracking-wider italic mt-0.5">
                                                 Locked by: {subflowStatus.find(f => !f.isComplete)?.gateLabel}
                                             </div>
@@ -1152,15 +1225,21 @@ export default function OrderDetailsPage() {
                                                         <div className="flex flex-col gap-1.5 text-left">
                                                             <div className="text-sm font-black text-foreground uppercase tracking-tight group-hover/item:text-warning-500 transition-colors">{flow.label}</div>
                                                             <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
+                                                            <div className="text-[9px] font-black uppercase tracking-widest bg-default-200/50 dark:bg-default-50/10 px-2 py-0.5 rounded-md border border-divider">
+                                                                <span className="text-default-400 mr-1.5">STATUS:</span>
+                                                                <span className="text-warning-500">{flow.currentLabel}</span>
+                                                            </div>
+                                                            {flow.biddingLabel ? (
                                                                 <div className="text-[9px] font-black uppercase tracking-widest bg-default-200/50 dark:bg-default-50/10 px-2 py-0.5 rounded-md border border-divider">
-                                                                    <span className="text-default-400 mr-1.5">STATUS:</span>
-                                                                    <span className="text-warning-500">{flow.currentLabel}</span>
+                                                                    <span className="text-default-400 mr-1.5">BIDDING:</span>
+                                                                    <span className="text-default-500">{flow.biddingLabel}</span>
                                                                 </div>
-                                                                {flow.isBlocking && (
-                                                                    <div className="text-[9px] font-black uppercase tracking-widest bg-danger-500/10 dark:bg-danger-500/5 px-2 py-0.5 rounded-md border border-danger-500/20 text-danger-500">
-                                                                        <span className="text-danger-400/50 mr-1.5 ">GATE:</span> {flow.gateLabel}
-                                                                    </div>
-                                                                )}
+                                                            ) : null}
+                                                            {flow.isBlocking && (
+                                                                <div className="text-[9px] font-black uppercase tracking-widest bg-danger-500/10 dark:bg-danger-500/5 px-2 py-0.5 rounded-md border border-danger-500/20 text-danger-500">
+                                                                    <span className="text-danger-400/50 mr-1.5 ">GATE:</span> {flow.gateLabel}
+                                                                </div>
+                                                            )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1420,7 +1499,9 @@ export default function OrderDetailsPage() {
                     <div className="flex-grow space-y-4">
                         {[
                             { key: "procurementBy", label: "Procurement", date: milestones.procurementCompletedDate },
-                            { key: "certificateBy", label: "Certificates", date: milestones.certificateIssuedDate },
+                            ...(Boolean(responsibilities.certificateBy) || Boolean(milestones.certificateRequestedDate) || Boolean(milestones.certificateIssuedDate)
+                                ? [{ key: "certificateBy", label: "Certificates", date: milestones.certificateIssuedDate }]
+                                : []),
                             { key: "transportBy", label: "Transportation", date: milestones.transportDispatchDate },
                             { key: "packagingBy", label: "Packaging", date: milestones.packagingCompletedDate },
                             { key: "qualityTestingBy", label: "Quality/QA", date: milestones.qualityApprovedDate },
@@ -1505,6 +1586,25 @@ export default function OrderDetailsPage() {
                     </div>
 
                     <div className="mt-8 pt-8 border-t border-divider">
+                        <h3 className="text-[10px] font-black text-default-400 uppercase tracking-widest px-1 mb-4">Delivery Commitment</h3>
+                        <Input
+                            label="TARGET DELIVERY DATE"
+                            placeholder="Not specified"
+                            value={milestones.deliveryTargetDate || ""}
+                            isReadOnly
+                            variant="bordered"
+                            classNames={{
+                                label: "text-[10px] font-black text-default-400 tracking-widest",
+                                input: "text-foreground font-black uppercase text-xs",
+                                inputWrapper: "border-divider h-14 bg-default-100/50"
+                            }}
+                        />
+                        <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mt-3">
+                            Synced from enquiry delivery timeline.
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-divider">
                         <h3 className="text-[10px] font-black text-default-400 uppercase tracking-widest px-1 mb-4">Execution Metadata</h3>
                         <Input
                             label="TRACKING ID"
@@ -1537,22 +1637,41 @@ export default function OrderDetailsPage() {
                                 const rule = getDocRule(String(docType || ""));
                                 return (
                                     <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-warning-500/30 transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
-                                            <div className="text-xs font-black text-foreground uppercase tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div>
-                                        </div>
-                                        {!hasDoc && rule && canActOnRule(rule) && (
-                                            <div className="flex flex-col items-end gap-1">
-                                                <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black uppercase px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
-                                                    {String(rule.actionType || "") === "UPLOAD" ? "UPLOAD" : "GENERATE"}
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
+                                        <div className="text-xs font-black text-foreground uppercase tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div>
+                                    </div>
+                                        <div className="flex items-end gap-2">
+                                            {hasDoc && (
+                                                <Button
+                                                    size="sm"
+                                                    color="primary"
+                                                    variant="flat"
+                                                    className="h-7 text-xs font-black uppercase px-4 rounded-lg"
+                                                    onPress={() => {
+                                                        const doc = getLatestDocByType(String(docType || ""));
+                                                        if (doc) {
+                                                            setDocViewerDoc(doc);
+                                                            setDocViewerOpen(true);
+                                                        }
+                                                    }}
+                                                >
+                                                    View
                                                 </Button>
-                                                {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
-                                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                                        Action by: {formatActionByLabel(rule?.responsibleRole)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
+                                            )}
+                                            {!hasDoc && rule && canActOnRule(rule) && (
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <Button size="sm" color="warning" variant="flat" className="h-7 text-xs font-black uppercase px-4 rounded-lg" onPress={() => { setDocActionRule(rule); setDocActionOpen(true); }}>
+                                                        {String(rule.actionType || "") === "UPLOAD" ? "UPLOAD" : "GENERATE"}
+                                                    </Button>
+                                                    {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
+                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                            Action by: {formatActionByLabel(rule?.responsibleRole)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })
@@ -1573,6 +1692,42 @@ export default function OrderDetailsPage() {
                     <ModalFooter>
                         <Button variant="light" className="text-default-400 font-black text-xs uppercase" onPress={() => setDocActionOpen(false)}> CANCEL </Button>
                         <Button color="warning" className="font-black text-xs uppercase shadow-lg shadow-warning-500/20" onPress={() => createDocMutation.mutate()}> COMMIT TO REGISTRY </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Modal isOpen={docViewerOpen} onOpenChange={setDocViewerOpen} size="4xl" scrollBehavior="inside">
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        {DOC_TYPE_LABELS[String(docViewerDoc?.type || "").toUpperCase()] || String(docViewerDoc?.type || "Document").replaceAll("_", " ")}
+                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">
+                            {docViewerDoc?.documentNumber || "Draft Preview"}
+                        </span>
+                    </ModalHeader>
+                    <ModalBody>
+                        {docViewerDoc?.fileUrl ? (
+                            <div className="space-y-3">
+                                <a
+                                    href={docViewerDoc.fileUrl}
+                                    target="_blank"
+                                    className="text-xs font-bold text-primary-600 underline"
+                                >
+                                    Open file in new tab
+                                </a>
+                                <div className="rounded-2xl border border-divider overflow-hidden">
+                                    <iframe
+                                        title="Document Preview"
+                                        src={docViewerDoc.fileUrl}
+                                        className="w-full h-[70vh]"
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <DocumentTemplatePreview docType={String(docViewerDoc?.type || "")} actionType="CREATE" />
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setDocViewerOpen(false)}>Close</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

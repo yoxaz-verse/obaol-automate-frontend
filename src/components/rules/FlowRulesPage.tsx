@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Button,
   Input,
@@ -248,28 +248,37 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
     tradeType: "BOTH",
   });
   const [selectedDocs, setSelectedDocs] = useState<DocRuleDraft[]>([]);
+  const [autoSeeding, setAutoSeeding] = useState(false);
+  const autoSeededFlowsRef = useRef(new Set<string>());
 
   const stageType = flowStageType(flowType);
   const showDocRules = Boolean(stageType);
 
-  const { data: rulesResponse } = useQuery({
+  const parseMasterRows = (raw: any): any[] => {
+    const payload = raw?.data?.data ?? raw?.data ?? raw;
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    return [];
+  };
+
+  const { data: rulesResponse, isLoading: rulesLoading, isFetching: rulesFetching } = useQuery({
     queryKey: ["flow-rules", flowType],
     queryFn: () => getData(apiRoutes.flowRules.list, { flowType }),
   });
-  const rules = Array.isArray(rulesResponse?.data?.data) ? rulesResponse.data.data : [];
+  const rules = parseMasterRows(rulesResponse);
 
   const { data: docRulesResponse } = useQuery({
     queryKey: ["document-rules"],
     queryFn: () => getData(apiRoutes.documentRules.list),
   });
-  const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+  const docRules = parseMasterRows(docRulesResponse);
 
   const { data: subflowResponse } = useQuery({
     queryKey: ["order-subflows"],
     queryFn: () => getData(apiRoutes.orderSubflowConfigs.list),
     enabled: flowType === "TRADE_ORDER",
   });
-  const subflowConfigs = Array.isArray(subflowResponse?.data?.data) ? subflowResponse.data.data : [];
+  const subflowConfigs = parseMasterRows(subflowResponse);
 
   const subflowConfigMap = useMemo(() => {
     const map = new Map<string, SubflowConfig>();
@@ -296,7 +305,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
   const seedMutation = useMutation({
     mutationFn: () => patchData(`${apiRoutes.flowRules.seed}?force=true&flowType=${flowType}`, {}),
     onSuccess: (res: any) => {
-      const restored = Array.isArray(res?.data?.data) ? res.data.data : [];
+      const restored = parseMasterRows(res);
       if (restored.length === 0) {
         showToastMessage({ type: "error", message: "No defaults found for this flow type.", position: "top-right" });
         return;
@@ -308,6 +317,19 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
       showToastMessage({ type: "error", message: error?.response?.data?.message || "Failed to restore defaults.", position: "top-right" });
     },
   });
+
+  useEffect(() => {
+    if (!flowType) return;
+    if (rulesLoading || rulesFetching) return;
+    if (seedMutation.isPending || autoSeeding) return;
+    if (rules.length > 0) return;
+    if (autoSeededFlowsRef.current.has(flowType)) return;
+    autoSeededFlowsRef.current.add(flowType);
+    setAutoSeeding(true);
+    seedMutation.mutate(undefined, {
+      onSettled: () => setAutoSeeding(false),
+    });
+  }, [flowType, rulesLoading, rulesFetching, rules.length, seedMutation, autoSeeding]);
 
   const subflowMutation = useMutation({
     mutationFn: async (payload: {
@@ -997,6 +1019,12 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             onAdd={openCreate}
             restoreLoading={seedMutation.isPending}
           />
+          {rules.length === 0 && (autoSeeding || seedMutation.isPending) && (
+            <div className="mt-3 px-4 py-3 rounded-xl border border-warning-500/20 bg-warning-500/10 text-[10px] font-black uppercase tracking-widest text-warning-700/80 flex items-center gap-2">
+              <FiAlertCircle className="text-warning-600" />
+              Restoring default flow rules…
+            </div>
+          )}
           <RulesSortableList
             rules={sortedRules}
             filteredRules={filteredRules}

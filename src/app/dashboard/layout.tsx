@@ -95,7 +95,7 @@ export default function DashboardLayout({
   if (!isMounted) {
     return (
       <section className="bg-content1 min-h-screen">
-        <BrandedLoader fullScreen message="Preparing dashboard" variant="compact" />
+        <BrandedLoader fullScreen message="ESTABLISHING_COMMAND_LINK" variant="compact" />
       </section>
     );
   }

@@ -109,8 +109,13 @@ export default function EnquiryPage() {
               ...rest
             } = item;
 
-            const assignedOperatorId = (item.assignedOperatorId?._id || item.assignedOperatorId || "").toString();
-            const isAssignedOperator = Boolean(isOperatorUser && user?.id && assignedOperatorId === String(user.id));
+            const supplierOperatorId = (item.supplierOperatorId?._id || item.supplierOperatorId || "").toString();
+            const dealCloserOperatorId = (item.dealCloserOperatorId?._id || item.dealCloserOperatorId || "").toString();
+            const isAssignedOperator = Boolean(
+              isOperatorUser &&
+                user?.id &&
+                (supplierOperatorId === String(user.id) || dealCloserOperatorId === String(user.id))
+            );
             const createdById = (item.createdBy?._id || item.createdBy || "").toString();
             const isCreatedByOperator = Boolean(isOperatorUser && user?.id && createdById === String(user.id));
             const isAdmin = isSystemAdmin || isAssignedOperator;
@@ -237,7 +242,7 @@ export default function EnquiryPage() {
               counterparty: counterpartyStr,
               counterpartyLabel: counterpartyLabelStr,
               associateCompany: companyStr,
-              assignedOperator: getOperatorName(item.assignedOperatorId),
+              assignedOperator: getOperatorName(item.supplierOperatorId),
               mediatorAssociate: item.mediatorAssociateId?.name || "Direct",
               dateColor: dateInfo.color,
               status: getStatusKey(item.status),
@@ -245,7 +250,7 @@ export default function EnquiryPage() {
               isAdmin,
               supplierPhone: item.sellerAssociateId?.phone || "N/A",
               buyerPhone: item.buyerAssociateId?.phone || "N/A",
-              operatorPhone: item.assignedOperatorId?.phone || "+917306096941",
+              operatorPhone: item.supplierOperatorId?.phone || "+917306096941",
               isAssignedOperator,
               isCreatedByOperator,
             };

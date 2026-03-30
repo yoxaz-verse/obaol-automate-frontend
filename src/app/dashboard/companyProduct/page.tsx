@@ -336,7 +336,7 @@ export default function CompanyProductPage() {
 
   const { data: companyData, isLoading: loadingCompanies } = useQuery({
     queryKey: ["associateCompany", associateCompanyRoutes.getAll],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
+    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 3000 }),
   });
 
   const { data: associatesData, refetch: refetchAssociates } = useQuery({
@@ -347,7 +347,7 @@ export default function CompanyProductPage() {
 
   const { data: operatorData, isLoading: loadingOperators } = useQuery({
     queryKey: ["operators"],
-    queryFn: () => getData(operatorRoutes.getAll, { limit: 300 }),
+    queryFn: () => getData(operatorRoutes.getAll, { limit: 3000 }),
     enabled: roleLower === "admin",
   });
 
@@ -355,6 +355,7 @@ export default function CompanyProductPage() {
     mutationFn: (operatorId: string | null) =>
       patchData(`${associateCompanyRoutes.getAll}/${selectedCompanyId}`, { assignedOperator: operatorId }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["associateCompany"] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       setIsAssigning(false);
     },
@@ -542,7 +543,7 @@ export default function CompanyProductPage() {
 
   if (loadingCompanies) {
     return (
-      <BrandedLoader message="Loading company catalog" />
+      <BrandedLoader message="NARRATING_CATALOG_SYNC" />
     );
   }
 
@@ -623,7 +624,7 @@ export default function CompanyProductPage() {
               <div className="px-8 pt-10 pb-6 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[11px] font-black text-default-400 uppercase tracking-[0.4em] italic mb-1">Entity Clusters</h3>
-                  <span className="text-[10px] font-bold text-default-300 px-2 py-0.5 rounded-full border border-default-100">{allCompanies.length} Total</span>
+                  <span className="text-[10px] font-bold text-default-300 px-2 py-0.5 rounded-full border border-default-100">{allCompanies.length} TOTAL</span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 bg-foreground/[0.04] p-1.5 rounded-[1.5rem] border border-foreground/5 shadow-inner">
@@ -792,8 +793,17 @@ export default function CompanyProductPage() {
                                   </SelectItem>
                                 ))}
                               </Select>
-                              <Button size="sm" color="warning" variant="shadow" className="font-black" isLoading={assignMutation.isPending} onClick={handleAssign}>CONFIRM</Button>
-                              <Button isIconOnly size="sm" variant="light" onClick={() => setIsAssigning(false)}>×</Button>
+                              <Button 
+                                size="sm" 
+                                color="warning" 
+                                variant="shadow" 
+                                className="font-black h-9 rounded-xl px-4" 
+                                isLoading={assignMutation.isPending} 
+                                onClick={handleAssign}
+                              >
+                                {assignMutation.isPending ? "ASSIGNING" : "CONFIRM"}
+                              </Button>
+                              <Button isIconOnly size="sm" variant="light" className="rounded-xl" onClick={() => setIsAssigning(false)}>×</Button>
                             </div>
                           )}
                         </div>
@@ -816,10 +826,10 @@ export default function CompanyProductPage() {
                         tabContent: "text-[11px] font-black uppercase tracking-[0.2em] group-data-[selected=true]:text-warning-500 transition-all",
                       }}
                     >
-                      <Tab key="products" title="ALLOCATION_MAP" />
-                      <Tab key="details" title="ENTITY_PROFILE" />
-                      <Tab key="associates" title="HUMAN_RESOURCES" />
-                      <Tab key="web" title="DIGITAL_CONTENT" />
+                      <Tab key="products" title="Allocation Map" />
+                      <Tab key="details" title="Entity Profile" />
+                      <Tab key="associates" title="Human Resources" />
+                      <Tab key="web" title="Digital Content" />
                     </Tabs>
                   </div>
 
@@ -848,7 +858,7 @@ export default function CompanyProductPage() {
                             </div>
                           </div>
                           
-                          <h4 className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none mb-4">ALLOCATION_MISSING</h4>
+                          <h4 className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none mb-4">Allocation Missing</h4>
                           <div className="w-12 h-1 bg-warning-500/30 rounded-full mx-auto mb-6" />
                           
                           <p className="text-default-400 text-[10px] font-bold uppercase tracking-[0.2em] max-w-[320px] leading-relaxed opacity-60">
@@ -872,7 +882,7 @@ export default function CompanyProductPage() {
                       <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem]">
                         <div className="flex items-center gap-3 mb-8">
                           <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
-                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Communication_Gateways</h3>
+                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Communication Gateways</h3>
                         </div>
                         <div className="space-y-6">
                           {[
@@ -911,7 +921,7 @@ export default function CompanyProductPage() {
                       <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem]">
                         <div className="flex items-center gap-3 mb-8">
                           <div className="w-1.5 h-6 bg-warning-500 rounded-full" />
-                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Geospatial_Meta</h3>
+                          <h3 className="text-[11px] font-black text-foreground uppercase tracking-[0.3em]">Geospatial Meta</h3>
                         </div>
                         <div className="space-y-6">
                           {[
@@ -1190,92 +1200,161 @@ export default function CompanyProductPage() {
                           </Card>
                         </div>
                       ) : (
-                        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-                          <Card className="p-10 border-none bg-foreground/[0.02] shadow-none rounded-[3.5rem] flex flex-col gap-10">
-                            <div className="flex justify-between items-center border-b border-foreground/5 pb-8">
-                              <div className="flex flex-col">
-                                <h3 className="text-xl font-black text-foreground uppercase tracking-tight italic leading-none">ASSET_OVERRIDE_CONSOLE</h3>
-                                <p className="text-[9px] font-bold text-default-400 uppercase mt-2 tracking-widest">Global entity parameter modification</p>
-                              </div>
-                              <div className="flex gap-3">
-                                <Button size="sm" variant="flat" onClick={() => setIsEditingWeb(false)} className="h-12 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest">ABORT</Button>
-                                <Button
-                                  size="sm"
-                                  color="warning"
-                                  variant="shadow"
-                                  isLoading={updateCompanyMutation.isPending}
-                                  onClick={() => {
-                                    const nextError = validateAboutUs(webFields.aboutUs || "");
-                                    setAboutUsError(nextError);
-                                    if (nextError) return;
-                                    updateCompanyMutation.mutate(webFields);
-                                  }}
-                                  className="h-12 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest"
-                                >
-                                  EXECUTE_CHANGES
-                                </Button>
-                              </div>
+                        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                          {/* CONTROL CONSOLE */}
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-foreground/[0.03] p-6 rounded-[2rem] border border-foreground/5 mb-6">
+                            <div className="flex flex-col">
+                              <h3 className="text-xl font-black text-foreground uppercase tracking-tight italic leading-none">Content Optimizer</h3>
+                              <p className="text-[9px] font-bold text-default-400 uppercase mt-2 tracking-widest">Fine-tune entity assets and digital metadata</p>
                             </div>
+                            <div className="flex gap-3">
+                              <Button size="sm" variant="flat" onClick={() => setIsEditingWeb(false)} className="h-10 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest">Abort</Button>
+                              <Button
+                                size="sm"
+                                color="warning"
+                                variant="shadow"
+                                isLoading={updateCompanyMutation.isPending}
+                                onClick={() => {
+                                  const nextError = validateAboutUs(webFields.aboutUs || "");
+                                  setAboutUsError(nextError);
+                                  if (nextError) return;
+                                  updateCompanyMutation.mutate(webFields);
+                                }}
+                                className="h-10 px-8 rounded-xl font-black uppercase text-[10px] tracking-widest"
+                              >
+                                {updateCompanyMutation.isPending ? "Syncing..." : "Execute Sync"}
+                              </Button>
+                            </div>
+                          </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                              <div className="space-y-8">
-                                {[
-                                  { label: "LOGO_ASSET_URI", key: "logo", placeholder: "HTTPS://NODE.CDN/LOGO.PNG", icon: LuImage },
-                                  { label: "BANNER_ASSET_URI", key: "banner", placeholder: "HTTPS://NODE.CDN/BANNER.JPG", icon: LuImage },
-                                  { label: "EXTERNAL_WEBSITE_LINK", key: "website", placeholder: "HTTPS://DOMAIN.COM", icon: LuGlobe },
-                                  { label: "CORE_TAGLINE", key: "description", placeholder: "GLOBAL RECOGNITION TAGLINE", icon: LuBriefcase },
-                                ].map((field) => (
-                                  <Input
-                                    key={field.key}
-                                    label={field.label}
-                                    placeholder={field.placeholder}
-                                    value={webFields[field.key]}
-                                    onValueChange={(val) => handleWebFieldChange(field.key, val)}
-                                    size="lg"
-                                    labelPlacement="outside"
-                                    variant="flat"
-                                    classNames={{
-                                      input: "font-bold text-xs uppercase tracking-widest",
-                                      inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
-                                      label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
-                                    }}
-                                    startContent={<field.icon className="text-warning-500/50 mr-2" size={18} />}
-                                  />
-                                ))}
-                              </div>
+                          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            {/* VISUAL ASSETS SECTION */}
+                            <div className="lg:col-span-4 space-y-6">
+                              <Card className="p-6 border-none bg-foreground/[0.02] shadow-none rounded-[2rem] space-y-6">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-1 h-4 bg-warning-500 rounded-full" />
+                                  <span className="text-[10px] font-black uppercase tracking-widest">Visual Assets</span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                  {[
+                                    { label: "Logo URL", key: "logo", icon: LuImage },
+                                    { label: "Banner URL", key: "banner", icon: LuImage },
+                                  ].map((field) => (
+                                    <Input
+                                      key={field.key}
+                                      label={field.label}
+                                      value={webFields[field.key]}
+                                      onValueChange={(val) => handleWebFieldChange(field.key, val)}
+                                      size="sm"
+                                      labelPlacement="outside"
+                                      variant="flat"
+                                      classNames={{
+                                        input: "font-bold text-[10px] tracking-wider",
+                                        inputWrapper: "h-10 bg-foreground/5 hover:bg-foreground/10 border-none rounded-xl transition-all",
+                                        label: "text-[9px] font-black uppercase tracking-widest opacity-60 mb-2 ml-1"
+                                      }}
+                                      startContent={<field.icon className="text-warning-500/40" size={14} />}
+                                    />
+                                  ))}
+                                </div>
 
-                              <div className="space-y-8">
-                                <Textarea
-                                  label="ENTITY_EPILOGUE (ABOUT_US)"
-                                  placeholder="SYSTEM DESCRIPTION OF OPERATIONS AND CAPABILITIES..."
-                                  value={webFields.aboutUs}
-                                  onValueChange={(val) => handleWebFieldChange('aboutUs', val)}
-                                  size="lg"
+                                {/* PREVIEW MINI-WIDGET */}
+                                <div className="space-y-3 pt-2">
+                                  <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Live Preview Check</span>
+                                  <div className="relative h-20 bg-foreground/[0.03] rounded-xl overflow-hidden border border-foreground/5 group">
+                                     {webFields.banner ? (
+                                       <img src={webFields.banner} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" alt="Preview"/>
+                                     ) : (
+                                       <div className="absolute inset-0 flex items-center justify-center opacity-10"><LuImage size={24}/></div>
+                                     )}
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                        <Avatar 
+                                          src={webFields.logo} 
+                                          size="sm" 
+                                          className="w-10 h-10 border-2 border-background shadow-xl rounded-lg"
+                                        />
+                                     </div>
+                                  </div>
+                                </div>
+                              </Card>
+
+                              <Card className="p-6 border-none bg-foreground/[0.02] shadow-none rounded-[2rem] space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-1 h-4 bg-warning-500 rounded-full" />
+                                  <span className="text-[10px] font-black uppercase tracking-widest">Connectivity</span>
+                                </div>
+                                <Input
+                                  label="Official Website"
+                                  placeholder="https://..."
+                                  value={webFields.website}
+                                  onValueChange={(val) => handleWebFieldChange("website", val)}
+                                  size="sm"
                                   labelPlacement="outside"
-                                  minRows={8}
                                   variant="flat"
                                   classNames={{
-                                    input: "font-bold text-xs uppercase tracking-widest leading-relaxed",
-                                    inputWrapper: "bg-foreground/5 hover:bg-foreground/10 border-none rounded-[2rem] p-6 transition-all",
-                                    label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
+                                    input: "font-bold text-[10px]",
+                                    inputWrapper: "h-10 bg-foreground/5 border-none rounded-xl",
+                                    label: "text-[9px] font-black uppercase tracking-widest opacity-60 mb-2 ml-1"
+                                  }}
+                                  startContent={<LuGlobe className="text-warning-500/40" size={14} />}
+                                />
+                              </Card>
+                            </div>
+
+                            {/* CORE METADATA SECTION */}
+                            <div className="lg:col-span-8 space-y-6">
+                              <Card className="p-8 border-none bg-foreground/[0.02] shadow-none rounded-[2.5rem] space-y-6">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-1 h-4 bg-warning-500 rounded-full" />
+                                  <span className="text-[10px] font-black uppercase tracking-widest">Corporate Narrative</span>
+                                </div>
+                                
+                                <Input
+                                  label="Strategic Tagline"
+                                  placeholder="Global market recognition tagline..."
+                                  value={webFields.description}
+                                  onValueChange={(val) => handleWebFieldChange("description", val)}
+                                  size="md"
+                                  labelPlacement="outside"
+                                  variant="flat"
+                                  classNames={{
+                                    input: "font-black text-xs uppercase italic tracking-tight",
+                                    inputWrapper: "h-12 bg-foreground/5 border-none rounded-xl",
+                                    label: "text-[9px] font-black uppercase tracking-widest opacity-60 mb-2 ml-1"
+                                  }}
+                                />
+
+                                <Textarea
+                                  label="Primary Bio"
+                                  placeholder="Operations synopsis..."
+                                  value={webFields.aboutUs}
+                                  onValueChange={(val) => handleWebFieldChange('aboutUs', val)}
+                                  size="md"
+                                  labelPlacement="outside"
+                                  minRows={4}
+                                  variant="flat"
+                                  classNames={{
+                                    input: "font-bold text-xs leading-relaxed uppercase tracking-wider",
+                                    inputWrapper: "bg-foreground/5 border-none rounded-2xl p-4",
+                                    label: "text-[9px] font-black uppercase tracking-widest opacity-60 mb-2 ml-1"
                                   }}
                                   isInvalid={Boolean(aboutUsError)}
                                   errorMessage={aboutUsError}
                                 />
                                 
-                                <div className="space-y-4">
-                                  <span className="text-[9px] font-black text-default-400 uppercase tracking-[0.3em] ml-2 block">SOCIAL_SIGNAL_MAPS</span>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="pt-4 space-y-4">
+                                  <span className="text-[9px] font-black uppercase tracking-widest opacity-60 ml-1">Social Signal Integrations</span>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                      { label: "LINKED_IN", key: "socialLinks.linkedin", icon: LuLinkedin },
-                                      { label: "FACEBOOK", key: "socialLinks.facebook", icon: LuFacebook },
-                                      { label: "TWITTER_X", key: "socialLinks.twitter", icon: LuTwitter },
-                                      { label: "INSTAGRAM", key: "socialLinks.instagram", icon: LuInstagram },
+                                      { label: "LinkedIn", key: "socialLinks.linkedin", icon: LuLinkedin },
+                                      { label: "Facebook", key: "socialLinks.facebook", icon: LuFacebook },
+                                      { label: "Twitter", key: "socialLinks.twitter", icon: LuTwitter },
+                                      { label: "Instagram", key: "socialLinks.instagram", icon: LuInstagram },
                                     ].map((s) => (
                                       <Input
                                         key={s.key}
                                         label={s.label}
-                                        placeholder="HANDLE_ID"
                                         value={s.key.includes('.') ? webFields.socialLinks?.[s.key.split('.')[1]] : webFields[s.key]}
                                         onValueChange={(val) => handleWebFieldChange(s.key, val)}
                                         size="sm"
@@ -1283,17 +1362,17 @@ export default function CompanyProductPage() {
                                         variant="flat"
                                         classNames={{
                                           input: "font-bold text-[10px] uppercase",
-                                          inputWrapper: "h-12 bg-foreground/5 border-none rounded-xl",
-                                          label: "text-[8px] font-black uppercase tracking-widest opacity-50 mb-1 ml-1"
+                                          inputWrapper: "h-10 bg-foreground/5 border-none rounded-xl",
+                                          label: "text-[8px] font-black uppercase tracking-widest opacity-40 mb-1 ml-1"
                                         }}
-                                        startContent={<s.icon className="text-default-400" size={14} />}
+                                        startContent={<s.icon className="text-default-400" size={12} />}
                                       />
                                     ))}
                                   </div>
                                 </div>
-                              </div>
+                              </Card>
                             </div>
-                          </Card>
+                          </div>
                         </div>
                       )}
                     </div>

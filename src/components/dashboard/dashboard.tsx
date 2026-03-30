@@ -184,7 +184,8 @@ const Dashboard: NextPage = () => {
     }
     if (isOperatorUser) {
       return (
-        (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId ||
+        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
+        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
         (item?.createdBy?._id || item?.createdBy)?.toString() === userId
       );
     }
@@ -195,7 +196,8 @@ const Dashboard: NextPage = () => {
     if (isAdmin) return true;
     if (isOperatorUser) {
       return (
-        (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId ||
+        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
+        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
         (item?.createdBy?._id || item?.createdBy)?.toString() === userId
       );
     }
@@ -356,8 +358,10 @@ const Dashboard: NextPage = () => {
       }
 
       if (isOperatorUser) {
-        const assigned = (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId
-          || (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
+        const assigned =
+          (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
+          (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
+          (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
         if (!assigned) return false;
         const status = String(item?.status || "").toUpperCase();
         return !["COMPLETED", "CLOSED", "CANCELLED", "CONVERTED"].includes(status);
@@ -930,8 +934,10 @@ const Dashboard: NextPage = () => {
         )
       : [];
     const ongoingEnquiries = enquiries.filter((item: any) => {
-      const assigned = (item?.assignedOperatorId?._id || item?.assignedOperatorId)?.toString() === userId
-        || (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
+      const assigned =
+        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
+        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
+        (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
       if (!assigned) return false;
       const status = String(item?.status || "").toUpperCase();
       return !["COMPLETED", "CLOSED", "CANCELLED"].includes(status);

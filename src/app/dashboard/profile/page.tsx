@@ -130,7 +130,7 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
 function OperatorDashboardPanel({ userId }: { userId: string }) {
   const { data: enquiryResponse } = useQuery({
     queryKey: ["operatorEnquiries", userId],
-    queryFn: () => getData(apiRoutes.enquiry.getAll, { assignedOperatorId: userId, limit: 200 }),
+    queryFn: () => getData(apiRoutes.enquiry.getAll, { limit: 200 }),
     enabled: !!userId,
   });
 
@@ -147,7 +147,11 @@ function OperatorDashboardPanel({ userId }: { userId: string }) {
     return [];
   };
 
-  const enquiries = extractList(enquiryResponse);
+  const enquiries = extractList(enquiryResponse).filter((item: any) => {
+    const supplierOperatorId = (item?.supplierOperatorId?._id || item?.supplierOperatorId || "").toString();
+    const dealCloserOperatorId = (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId || "").toString();
+    return supplierOperatorId === userId || dealCloserOperatorId === userId;
+  });
   const companies = extractList(companiesResponse);
 
   const totalAssignedCompanies = companies.length;

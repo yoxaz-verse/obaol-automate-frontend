@@ -51,7 +51,7 @@ const getOptions = async (
   };
 
   const query = async () => {
-    let params: any = { limit: "1000" };
+    let params: any = { limit: "2000" };
     if (parentKey && parentValue) {
       // If parentValue is an array (multi-select), usually the backend generic CRUD 
       // handles it if passed as multiple params or special format. 

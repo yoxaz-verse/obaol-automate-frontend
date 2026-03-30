@@ -5,7 +5,7 @@ import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateRoutes } from "@/core/api/apiRoutes";
 import InlineLoader from "@/components/ui/InlineLoader";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 
 // 🔎 search icon
 const SearchIcon = ({
@@ -82,7 +82,7 @@ export default function AssociateSearch({
         ? associateData?.data
         : [];
   
-  const associates: Associate[] = rawAssociates || [];
+  const associates: Associate[] = useMemo(() => rawAssociates || [], [rawAssociates]);
 
   useEffect(() => {
     if (defaultSelected === undefined) return;

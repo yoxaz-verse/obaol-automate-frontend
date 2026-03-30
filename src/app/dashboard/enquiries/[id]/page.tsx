@@ -43,6 +43,7 @@ import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 // Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
 const LuTrendingDown = FiTrendingDown;
@@ -134,7 +135,6 @@ export default function EnquiryDetailsPage() {
     const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onOpenChange: onFinalizeOpenChange } = useDisclosure();
     const [conversionNote, setConversionNote] = useState("");
     const { user } = useContext(AuthContext);
-    const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState<string>("");
     const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState<string>("");
     const [commitUntil, setCommitUntil] = useState<string>("");
@@ -601,8 +601,8 @@ export default function EnquiryDetailsPage() {
                         : Array.isArray(countriesResponse)
                             ? countriesResponse
                             : [];
-    const getCountryNameById = (countryId: string) =>
-        countryRowsForCheck.find((c: any) => String(c?._id || c?.id || "") === String(countryId || ""))?.name || "";
+    const getCountryNameById = React.useCallback((countryId: string) =>
+        countryRowsForCheck.find((c: any) => String(c?._id || c?.id || "") === String(countryId || ""))?.name || "", [countryRowsForCheck]);
     const isIndiaName = (name: string) => String(name || "").trim().toLowerCase() === "india";
     const isFromIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.originCountry));
     const isToIndia = executionContext.tradeType === "INTERNATIONAL" && isIndiaName(getCountryNameById(executionContext.destinationCountry));
@@ -665,24 +665,6 @@ export default function EnquiryDetailsPage() {
         allowedResponsibilityValues[key]?.has(String((responsibilityPlan as any)[key] || ""))
     );
 
-    // Update Status Mutation
-    const assignOperatorMutation = useMutation({
-        mutationFn: async () => {
-            if (!selectedOperatorId) return;
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}/assign`, {
-                operatorId: selectedOperatorId,
-            });
-        },
-        onSuccess: () => {
-            toast.success("Operator assigned successfully");
-            setAssignmentSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
-        },
-        onError: (error: any) => {
-            const msg = error?.response?.data?.message || "Failed to assign operator.";
-            toast.error(msg);
-        },
-    });
     const updateOperatorRolesMutation = useMutation({
         mutationFn: async () =>
             patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
@@ -1077,17 +1059,46 @@ export default function EnquiryDetailsPage() {
         const paymentLabel = paymentTermOptions.find((item: any) => item._id === selectedPaymentTermId)?.label
             || enquiry?.paymentTermId?.label
             || "Not specified";
+            
+        const getStateNameById = (id: string) => states.find((s: any) => String(s?._id || s?.id) === String(id))?.name || "";
+        const getDistrictNameById = (id: string) => districts.find((d: any) => String(d?._id || d?.id) === String(id))?.name || "";
+        const getPortNameById = (id: string) => {
+            const allPorts = [...originSeaPorts, ...destinationSeaPorts];
+            return allPorts.find((p: any) => String(p?._id || p?.id) === String(id))?.name || "";
+        };
+
+        const buildDomesticLabel = (stateId?: string, districtId?: string) => {
+            const parts = [getStateNameById(String(stateId || "")), getDistrictNameById(String(districtId || ""))].filter(Boolean);
+            return parts.length ? parts.join(" • ") : "Not specified";
+        };
+        const buildInternationalLabel = (countryId?: string, stateId?: string, districtId?: string, portId?: string) => {
+            const parts = [
+                getCountryNameById(countryId) || String(countryId || ""),
+                getStateNameById(String(stateId || "")),
+                getDistrictNameById(String(districtId || "")),
+                getPortNameById(String(portId || "")),
+            ].filter(Boolean);
+            return parts.length ? parts.join(" • ") : "Not specified";
+        };
+
+        const isInternational = execution.tradeType === "INTERNATIONAL";
+        const originLabel = isInternational
+            ? buildInternationalLabel(execution.originCountry, execution.originState, execution.originDistrict, execution.originPort)
+            : buildDomesticLabel(execution.originState, execution.originDistrict);
+        const destinationLabel = isInternational
+            ? buildInternationalLabel(execution.destinationCountry, execution.destinationState, execution.destinationDistrict, execution.destinationPort)
+            : buildDomesticLabel(execution.destinationState, execution.destinationDistrict);
 
         const listItems: any[] = [
             { label: "Procurement / Sourcing", value: plan.procurementBy || "Not set" },
             { label: "Quality Testing", value: plan.qualityTestingBy || "Not set" },
             { label: "Packaging & Labelling", value: plan.packagingBy || "Not set" },
             { label: "Inland Transportation", value: plan.transportBy || "Not set" },
-            { label: "Freight Forwarding & Shipping", value: plan.shippingBy || "Not set" },
-            { label: "Export Customs Clearance", value: plan.exportCustomsBy || plan.certificateBy || "Not set" },
         ];
-        if (execution.tradeType === "INTERNATIONAL") {
+        if (isInternational) {
             listItems.push(
+                { label: "Freight Forwarding & Shipping", value: plan.shippingBy || "Not set" },
+                { label: "Export Customs Clearance", value: plan.exportCustomsBy || plan.certificateBy || "Not set" },
                 { label: "Import Customs Clearance", value: plan.importCustomsBy || "Not set" },
                 { label: "Duties & Taxes", value: plan.dutiesTaxesBy || "Not set" },
                 { label: "Port Handling", value: plan.portHandlingBy || "Not set" },
@@ -1100,10 +1111,12 @@ export default function EnquiryDetailsPage() {
             incotermLabel,
             paymentLabel,
             tradeType: execution.tradeType || "Not set",
+            originLabel,
+            destinationLabel,
             listItems,
             packagingSpecs: packagingSpecifications || "No specifications added",
         };
-    }, [responsibilityPlan, enquiry, executionContext, incotermOptions, paymentTermOptions, selectedIncotermId, selectedPaymentTermId, packagingSpecifications]);
+    }, [responsibilityPlan, enquiry, executionContext, incotermOptions, paymentTermOptions, selectedIncotermId, selectedPaymentTermId, packagingSpecifications, getCountryNameById]);
     const updateTradeTermsMutation = useMutation({
         mutationFn: () =>
             patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
@@ -1170,7 +1183,26 @@ export default function EnquiryDetailsPage() {
         },
     });
 
-    if (isLoading) return <div className="flex items-center justify-center h-screen"><Progress isIndeterminate className="max-w-md" /></div>;
+    useEffect(() => {
+        if (!inventoryAcceptOpen) return;
+        if (inventoryOptions.length === 0) {
+            setIsAddingNewInventory(true);
+            if (!inlineQuantity) {
+                setInlineQuantity(String(requiredQty || ""));
+            }
+        }
+    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity]);
+
+    useEffect(() => {
+        if (!inventoryAcceptOpen) return;
+        if (isAddingNewInventory) return;
+        if (!selectedInventory) return;
+        if (missingQty <= 0) return;
+        if (inlineQuantity) return;
+        setInlineQuantity(String(missingQty));
+    }, [inventoryAcceptOpen, isAddingNewInventory, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
+
+    if (isLoading) return <BrandedLoader fullScreen message="SYNCING_TRADE_PROTOCOL" />;
     if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
 
     const sellerInventoryRows = Array.isArray(sellerInventoryResponse?.data?.data?.data)
@@ -1203,11 +1235,19 @@ export default function EnquiryDetailsPage() {
     const selectedInventory = inventoryOptions.find((row: any) => String(row.invId) === String(selectedInventoryId));
     const requiredQty = Number(enquiry?.quantity || 0);
     const addedQty = Number(inlineQuantity || 0);
+    const missingQty = selectedInventory ? Math.max(0, requiredQty - Number(selectedInventory.availableQty || 0)) : 0;
     const projectedAvailable = !isAddingNewInventory && selectedInventory
         ? (selectedInventory.availableQty || 0) + (Number.isFinite(addedQty) ? addedQty : 0)
         : (selectedInventory?.availableQty || 0);
     const hasInsufficientStock = Boolean(!isAddingNewInventory && selectedInventory && requiredQty > projectedAvailable);
     const shouldShowInsufficient = Boolean(acceptAttempted && hasInsufficientStock);
+    const shouldShowMissingQtyError = Boolean(
+        acceptAttempted &&
+        !isAddingNewInventory &&
+        selectedInventory &&
+        Number(selectedInventory.availableQty || 0) < requiredQty &&
+        !inlineQuantity
+    );
 
     const handleInventoryAccept = () => {
         setAcceptAttempted(true);
@@ -1249,18 +1289,12 @@ export default function EnquiryDetailsPage() {
     const isConvertedFlow = normalizedStatus === "CONVERTED";
     const isReadOnlyAfterConversion = normalizedStatus === "CONVERTED" || normalizedStatus === "CLOSED";
     const initialPlan = (enquiry as any)?.responsibilityPlan || {};
-    // assignedOperatorId may be an object or just an ID string; handle both safely
-    const assignedOperatorObj = (enquiry.assignedOperatorId && typeof enquiry.assignedOperatorId === 'object') ? enquiry.assignedOperatorId : null;
     const supplierOperatorObj = ((enquiry as any)?.supplierOperatorId && typeof (enquiry as any).supplierOperatorId === "object")
         ? (enquiry as any).supplierOperatorId
         : null;
     const dealCloserOperatorObj = ((enquiry as any)?.dealCloserOperatorId && typeof (enquiry as any).dealCloserOperatorId === "object")
         ? (enquiry as any).dealCloserOperatorId
         : null;
-    const assignedOperatorName =
-        assignedOperatorObj?.name ||
-        (enquiry as any)?.assignedOperatorName ||
-        (typeof enquiry.assignedOperatorId === "string" ? "Assigned operator" : "OBAOL Desk");
 
     // ─── Role Detection ───────────────────────────────────────────────────────
     const roleLower = String(user?.role || "").toLowerCase();
@@ -1268,14 +1302,12 @@ export default function EnquiryDetailsPage() {
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const canManageDocs = isSystemAdmin || isOperatorUser;
     const canManageWorkflow = isSystemAdmin || isOperatorUser;
-    const assignedOperatorId = (assignedOperatorObj?._id || enquiry.assignedOperatorId || "").toString();
     const supplierOperatorId = (supplierOperatorObj?._id || (enquiry as any)?.supplierOperatorId || "").toString();
     const dealCloserOperatorId = (dealCloserOperatorObj?._id || (enquiry as any)?.dealCloserOperatorId || "").toString();
     const isAssignedOperator = Boolean(
         isOperatorUser &&
         user?.id &&
-        (assignedOperatorId === String(user.id) ||
-            supplierOperatorId === String(user.id) ||
+        (supplierOperatorId === String(user.id) ||
             dealCloserOperatorId === String(user.id))
     );
     const isAdmin = isSystemAdmin || isAssignedOperator;
@@ -1355,11 +1387,8 @@ export default function EnquiryDetailsPage() {
         status: getPresenceStatus(sellerPresenceSource?.lastSeenAt),
         lastSeenLabel: formatLastSeen(sellerPresenceSource?.lastSeenAt),
     };
-    const assignedPresence = {
-        online: isOnline(assignedOperatorObj?.lastSeenAt),
-        status: getPresenceStatus(assignedOperatorObj?.lastSeenAt),
-        lastSeenLabel: formatLastSeen(assignedOperatorObj?.lastSeenAt),
-    };
+    const supplierOperatorName = supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Not assigned";
+    const dealCloserOperatorName = dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Not assigned";
     const userIdStr = user?.id?.toString();
     const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
@@ -1405,31 +1434,7 @@ export default function EnquiryDetailsPage() {
         return false;
     };
     const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === normalizedStageKey);
-    const fallbackActions: Record<string, string[]> = {
-        QUOTATION_REVISION: ["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"],
-        LOI_ACCEPTED_QTY_CONFIRMED: ["SUPPLIER_QTY_CONFIRMED"],
-        QUOTATION_CREATED: ["QUOTATION_CREATED"],
-        QUOTATION_DECISION: ["QUOTATION_ACCEPTED", "RETURN_TO_REVISION"],
-        RESPONSIBILITIES_FINALIZED: ["RESPONSIBILITIES_FINALIZED"],
-        PROFORMA_ISSUED: ["PROFORMA_CREATED"],
-        OTHER_DOCUMENTS: ["OTHER_DOCS_UPLOADED", "OTHER_DOCS_SKIPPED"],
-        PURCHASE_ORDER_CREATED: ["PO_UPLOADED", "PO_SKIPPED"],
-        CONVERT_TO_ORDER: ["CONVERT_TO_ORDER"],
-    };
-    const fallbackActionBy: Record<string, string> = {
-        QUOTATION_REVISION: "BUYER",
-        LOI_ACCEPTED_QTY_CONFIRMED: "SUPPLIER",
-        QUOTATION_CREATED: "SUPPLIER",
-        QUOTATION_DECISION: "BUYER",
-        RESPONSIBILITIES_FINALIZED: "BOTH",
-        PROFORMA_ISSUED: "SUPPLIER",
-        OTHER_DOCUMENTS: "BOTH",
-        PURCHASE_ORDER_CREATED: "BUYER",
-        CONVERT_TO_ORDER: "EITHER",
-    };
-    const requiredActions = Array.isArray(currentRule?.requiredActions) && currentRule?.requiredActions?.length
-        ? currentRule.requiredActions
-        : (fallbackActions[normalizedStageKey] || []);
+    const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
     const displayActions = (() => {
         const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"].includes(String(key || "").toUpperCase()));
         if (isConvertedFlow) {
@@ -1437,7 +1442,7 @@ export default function EnquiryDetailsPage() {
         }
         return filtered;
     })();
-    const actionBy = String((currentRule as any)?.actionBy || fallbackActionBy[normalizedStageKey] || "").toUpperCase();
+    const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
     const formatActionByLabel = (value: string) => {
         const normalized = String(value || "").toUpperCase();
         if (normalized === "BUYER") return "Buyer";
@@ -1469,7 +1474,7 @@ export default function EnquiryDetailsPage() {
         PROFORMA_CREATED: "Create Proforma",
         OTHER_DOCS_UPLOADED: "Upload Other Docs",
         OTHER_DOCS_SKIPPED: "Skip Other Docs",
-        PO_UPLOADED: "Upload Purchase Order",
+        PO_UPLOADED: "Upload or Create Purchase Order",
         PO_SKIPPED: "Skip Purchase Order",
         CONVERT_TO_ORDER: "Convert to Order",
     };
@@ -1613,25 +1618,11 @@ export default function EnquiryDetailsPage() {
         .filter(Boolean);
     let workflowStageOptions = sortedEnquiryStages.length > 0
         ? [...sortedEnquiryStages]
-        : [
-            "ENQUIRY_CREATED",
-            "LOI_ACCEPTED_QTY_CONFIRMED",
-            "QUOTATION_REVISION",
-            "QUOTATION_CREATED",
-            "QUOTATION_DECISION",
-            "RESPONSIBILITIES_FINALIZED",
-            "PROFORMA_ISSUED",
-            "OTHER_DOCUMENTS",
-            "PURCHASE_ORDER_CREATED",
-            "CONVERT_TO_ORDER",
-        ];
+        : [];
     if (isImportEnquiry) {
         workflowStageOptions = workflowStageOptions.filter(
             (key) => !["ENQUIRY_CREATED", "LOI_ACCEPTED_QTY_CONFIRMED"].includes(String(key || "").toUpperCase())
         );
-    }
-    if (isConvertedFlow && !workflowStageOptions.includes("CONVERT_TO_ORDER")) {
-        workflowStageOptions = [...workflowStageOptions, "CONVERT_TO_ORDER"];
     }
     const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
     const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
@@ -1643,9 +1634,6 @@ export default function EnquiryDetailsPage() {
     const stageLabelMap = new Map(
         enquiryRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
     );
-    if (!stageLabelMap.has("CONVERT_TO_ORDER")) {
-        stageLabelMap.set("CONVERT_TO_ORDER", "Convert to Order");
-    }
     const hasSubmittedQuotation = hasSubmittedDoc("QUOTATION");
     const isPreClarification = normalizedStageKey === "QUOTATION_REVISION" && !hasSubmittedQuotation && !showDraftQuotation;
     if (isPreClarification) {
@@ -1958,7 +1946,11 @@ export default function EnquiryDetailsPage() {
                                     </div>
 
                                     {(() => {
-                                        const opId = enquiry?.assignedOperator?._id || enquiry?.assignedOperatorId || enquiry?.assignedOperator;
+                                        const opId =
+                                            enquiry?.dealCloserOperatorId?._id ||
+                                            enquiry?.dealCloserOperatorId ||
+                                            enquiry?.supplierOperatorId?._id ||
+                                            enquiry?.supplierOperatorId;
                                         const op = operators?.find((o: any) => String(o._id) === String(opId));
 
                                         return (
@@ -2000,38 +1992,46 @@ export default function EnquiryDetailsPage() {
                     <Divider />
                     <CardBody className="px-4 md:px-6 py-6 md:py-10">
                         {/* Status Stepper */}
-                        <Progress
-                            size="sm"
-                            radius="full"
-                            value={workflowStageOptions.length > 1
-                                ? (currentStepIndex / (workflowStageOptions.length - 1)) * 100
-                                : 0}
-                            color={isCompletedFlow ? "success" : "primary"}
-                            className="mb-4"
-                        />
-                        <div className="flex flex-wrap items-center gap-2 mb-5">
-                            {workflowStageOptions.map((step, index) => {
-                                const isCompleted = index < currentStepIndex;
-                                const isCurrent = index === currentStepIndex;
-                                return (
-                                    <React.Fragment key={step}>
-                                        <div
-                                            className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
-                                                ? "bg-primary text-white border-primary"
-                                                : isCompleted
-                                                    ? "bg-success/10 text-success-700 border-success/30"
-                                                    : "bg-default-100 text-default-500 border-default-200"
-                                                }`}
-                                        >
-                                            {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
-                                        </div>
-                                        {index < workflowStageOptions.length - 1 && (
-                                            <span className="text-default-300 text-xs">→</span>
-                                        )}
-                                    </React.Fragment>
-                                );
-                            })}
-                        </div>
+                        {workflowStageOptions.length === 0 ? (
+                            <div className="rounded-xl border border-warning-500/20 bg-warning-500/5 px-4 py-3 text-xs font-bold text-warning-600 uppercase tracking-widest">
+                                No flow rules configured for enquiries. Configure Flow Rules to unlock stages and actions.
+                            </div>
+                        ) : (
+                            <Progress
+                                size="sm"
+                                radius="full"
+                                value={workflowStageOptions.length > 1
+                                    ? (currentStepIndex / (workflowStageOptions.length - 1)) * 100
+                                    : 0}
+                                color={isCompletedFlow ? "success" : "primary"}
+                                className="mb-4"
+                            />
+                        )}
+                        {workflowStageOptions.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 mb-5">
+                                {workflowStageOptions.map((step, index) => {
+                                    const isCompleted = index < currentStepIndex;
+                                    const isCurrent = index === currentStepIndex;
+                                    return (
+                                        <React.Fragment key={step}>
+                                            <div
+                                                className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
+                                                    ? "bg-primary text-white border-primary"
+                                                    : isCompleted
+                                                        ? "bg-success/10 text-success-700 border-success/30"
+                                                        : "bg-default-100 text-default-500 border-default-200"
+                                                    }`}
+                                            >
+                                                {String(stageLabelMap.get(step) || step).replaceAll("_", " ")}
+                                            </div>
+                                            {index < workflowStageOptions.length - 1 && (
+                                                <span className="text-default-300 text-xs">→</span>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                        )}
                         <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-left">
                             <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Current Progress</span>
@@ -2300,42 +2300,80 @@ export default function EnquiryDetailsPage() {
 
                                                             {canSupplierRevision && (
                                                                 <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-white dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
-                                                                    <Checkbox
-                                                                        isSelected={reply.acknowledged}
-                                                                        onValueChange={(val) => {
-                                                                            setRevisionReplies((prev) => {
-                                                                                const existing = prev.find((r) => r.key === itemKey);
-                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
-                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
-                                                                            });
-                                                                            setRevisionConfirmError("");
-                                                                        }}
-                                                                        classNames={{ label: "text-xs font-black uppercase tracking-tight text-foreground" }}
-                                                                    >
-                                                                        Acknowledge Parameter
-                                                                    </Checkbox>
-                                                                    {itemKey === "RATE" && reply.acknowledged && (
-                                                                        <Input
-                                                                            type="number"
-                                                                            size="sm"
-                                                                            label="Counter Proposal (Rate)"
-                                                                            variant="bordered"
-                                                                            placeholder="Enter counter rate"
-                                                                            value={reply.counterRate || ""}
+                                                                    {itemKey === "RATE" ? (
+                                                                        <div className="flex flex-col gap-3">
+                                                                            <div className="text-[10px] font-black uppercase tracking-widest text-default-500">Rate Response</div>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant={reply.acknowledged && !reply.counterRate ? "solid" : "flat"}
+                                                                                    color="success"
+                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    onPress={() => {
+                                                                                        setRevisionReplies((prev) => {
+                                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: "" } : r);
+                                                                                        });
+                                                                                        setRevisionConfirmError("");
+                                                                                    }}
+                                                                                >
+                                                                                    Accept Requested Rate
+                                                                                </Button>
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant={reply.counterRate ? "solid" : "flat"}
+                                                                                    color="warning"
+                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    onPress={() => {
+                                                                                        setRevisionReplies((prev) => {
+                                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
+                                                                                        });
+                                                                                        setRevisionConfirmError("");
+                                                                                    }}
+                                                                                >
+                                                                                    Propose Max Rate
+                                                                                </Button>
+                                                                            </div>
+                                                                            <Input
+                                                                                type="number"
+                                                                                size="sm"
+                                                                                label="Maximum Rate (if proposing)"
+                                                                                variant="bordered"
+                                                                                placeholder="Enter max rate"
+                                                                                value={reply.counterRate || ""}
+                                                                                onValueChange={(val) => {
+                                                                                    setRevisionReplies((prev) => {
+                                                                                        const existing = prev.find((r) => r.key === itemKey);
+                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: val } : r);
+                                                                                    });
+                                                                                    setRevisionConfirmError("");
+                                                                                }}
+                                                                                classNames={{
+                                                                                    label: "font-black uppercase text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
+                                                                                    inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-10 shadow-inner group-focus-within/input:border-primary",
+                                                                                    input: "font-black text-sm"
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <Checkbox
+                                                                            isSelected={reply.acknowledged}
                                                                             onValueChange={(val) => {
                                                                                 setRevisionReplies((prev) => {
                                                                                     const existing = prev.find((r) => r.key === itemKey);
-                                                                                    if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
-                                                                                    return prev.map((r) => r.key === itemKey ? { ...r, counterRate: val } : r);
+                                                                                    if (!existing) return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
+                                                                                    return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
                                                                                 });
                                                                                 setRevisionConfirmError("");
                                                                             }}
-                                                                            classNames={{
-                                                                                label: "font-black uppercase text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
-                                                                                inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-10 shadow-inner group-focus-within/input:border-primary",
-                                                                                input: "font-black text-sm"
-                                                                            }}
-                                                                        />
+                                                                            classNames={{ label: "text-xs font-black uppercase tracking-tight text-foreground" }}
+                                                                        >
+                                                                            Acknowledge Parameter
+                                                                        </Checkbox>
                                                                     )}
                                                                 </div>
                                                             )}
@@ -2378,19 +2416,34 @@ export default function EnquiryDetailsPage() {
                                                             {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Supplier</span>}
                                                         </div>
                                                     )}
- 
+
                                                     {canBuyerRevision && (
                                                         <div className="flex flex-col items-end gap-1">
                                                             <Button
                                                                 size="sm"
                                                                 color="success"
                                                                 className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-success/20 text-white hover:scale-[1.02] active:scale-95 transition-all outline-none"
-                                                                isDisabled={!allRevisionAcknowledged}
+                                                                isDisabled={revisionItems.length > 0 && !allRevisionAcknowledged}
                                                                 isLoading={applyActionMutation.isPending}
                                                                 onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_CONFIRMED" })}
                                                                 startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
                                                             >
                                                                 Authorize Revision
+                                                            </Button>
+                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Buyer</span>}
+                                                        </div>
+                                                    )}
+                                                    {canBuyerRevision && (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                color="default"
+                                                                variant="flat"
+                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px]"
+                                                                isDisabled={applyActionMutation.isPending}
+                                                                onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_SKIPPED" })}
+                                                            >
+                                                                Proceed Without Revision
                                                             </Button>
                                                             {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Buyer</span>}
                                                         </div>
@@ -2966,58 +3019,20 @@ export default function EnquiryDetailsPage() {
                         <CardHeader className="font-bold text-lg px-4 md:px-6 pt-4 md:pt-6">Handling & Assignment</CardHeader>
                         <Divider className="my-2" />
                         <CardBody className="flex flex-col gap-4 md:gap-5 px-4 md:px-6 pb-4 md:pb-6">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[10px] uppercase font-bold text-default-400">Assigned Operator</span>
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${assignedOperatorName === "OBAOL Desk" ? "bg-default-400" : assignedPresence.online ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
-                                    <span className={`font-bold ${assignedOperatorName === "OBAOL Desk" ? "text-default-500" : "text-primary"}`}>{assignedOperatorName}</span>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Supply Ownership Operator</span>
+                                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                    <div className={`w-2 h-2 rounded-full ${supplierOperatorName === "Not assigned" ? "bg-default-400" : "bg-success-500 animate-pulse"}`} />
+                                    <span className={supplierOperatorName === "Not assigned" ? "text-default-500" : "text-primary"}>{supplierOperatorName}</span>
                                 </div>
-                                {assignedOperatorName !== "OBAOL Desk" && (
-                                    <span className={`text-xs ${assignedPresence.online ? "text-success-600" : "text-default-500"}`}>
-                                        {assignedPresence.online ? "Online" : `Last seen ${assignedPresence.lastSeenLabel}`}
-                                    </span>
-                                )}
                             </div>
-                            {isAdmin && (
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-default-400">Assign / Reassign Operator</span>
-                                    <div className="flex gap-2">
-                                        <Select
-                                            size="sm"
-                                            selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
-                                            onSelectionChange={(keys) => {
-                                                const arr = Array.from(keys as Set<string>);
-                                                setSelectedOperatorId(arr[0] || "");
-                                            }}
-                                            className="flex-1"
-                                            placeholder="Select operator"
-                                            isDisabled={isReadOnlyAfterConversion}
-                                        >
-                                            {operatorOptions.map((emp: any) => (
-                                                <SelectItem key={emp._id} value={emp._id}>
-                                                    {emp.name || emp.firstName || emp.email}
-                                                </SelectItem>
-                                            ))}
-                                        </Select>
-                                        <Button
-                                            size="sm"
-                                            color="primary"
-                                            isLoading={assignOperatorMutation.isPending}
-                                            onPress={() => assignOperatorMutation.mutate()}
-                                            isDisabled={!selectedOperatorId || isReadOnlyAfterConversion}
-                                        >
-                                            Save
-                                        </Button>
-                                    </div>
-                                    <span className="text-[10px] text-default-500 font-bold uppercase tracking-wider mt-1 px-1">
-                                        {assignOperatorMutation.isPending
-                                            ? "Saving assignment..."
-                                            : assignmentSavedAt
-                                                ? `Updated at ${dayjs(assignmentSavedAt).format("DD MMM, HH:mm A")}`
-                                                : "Ready to assign"}
-                                    </span>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Legal Closer Operator</span>
+                                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                    <div className={`w-2 h-2 rounded-full ${dealCloserOperatorName === "Not assigned" ? "bg-default-400" : "bg-warning-500 animate-pulse"}`} />
+                                    <span className={dealCloserOperatorName === "Not assigned" ? "text-default-500" : "text-warning-500"}>{dealCloserOperatorName}</span>
                                 </div>
-                            )}
+                            </div>
                             {isAdmin && (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Supplier Ownership Operator</span>
@@ -3307,19 +3322,26 @@ export default function EnquiryDetailsPage() {
                                             <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
                                         </div>
                                         <div className="grid grid-cols-1 gap-2">
-                                            {[
+                                            { [
+                                                { label: "From", value: responsibilitySummary.originLabel, icon: <LuMapPin size={14} className="text-blue-500" /> },
+                                                { label: "To", value: responsibilitySummary.destinationLabel, icon: <LuMapPin size={14} className="text-danger-500" /> },
                                                 { label: "Incoterm", value: responsibilitySummary.incotermLabel, icon: <LuGlobe size={14} className="text-primary" /> },
                                                 { label: "Payment", value: responsibilitySummary.paymentLabel, icon: <FiPercent size={14} className="text-warning-500" /> },
                                                 { label: "Trade Type", value: responsibilitySummary.tradeType, icon: <LuActivity size={14} className="text-success-500" /> },
-                                            ].map((term) => (
-                                                <div key={term.label} className="flex justify-between items-center rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 px-4 py-2.5 shadow-sm">
-                                                    <div className="flex items-center gap-2.5">
-                                                        {term.icon}
-                                                        <span className="text-default-500 dark:text-default-400 font-bold uppercase text-[9px] tracking-widest">{term.label}</span>
+                                            ].map((term) => {
+                                                const isMissing = String(term.value || "").toLowerCase().includes("not spec") || String(term.value || "").toLowerCase().includes("not set");
+                                                return (
+                                                    <div key={term.label} className="flex justify-between items-center rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 px-4 py-2.5 shadow-sm">
+                                                        <div className="flex items-center gap-2.5">
+                                                            {term.icon}
+                                                            <span className="text-default-500 dark:text-default-400 font-bold uppercase text-[9px] tracking-widest">{term.label}</span>
+                                                        </div>
+                                                        <span className={`font-black text-sm tracking-tight ${isMissing ? "text-danger-500 animate-pulse" : "text-foreground"}`}>
+                                                            {term.value}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-foreground font-black text-sm tracking-tight">{term.value}</span>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
  
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
@@ -3327,7 +3349,9 @@ export default function EnquiryDetailsPage() {
                                             <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
                                             <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
                                         </div>
-                                        <div className="p-4 rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 text-xs font-bold text-default-600 dark:text-default-400 italic whitespace-pre-line leading-relaxed shadow-sm">
+                                        <div className={`p-4 rounded-xl border text-xs font-bold italic whitespace-pre-line leading-relaxed shadow-sm ${!responsibilitySummary.packagingSpecs || responsibilitySummary.packagingSpecs.includes("No specifications") 
+                                            ? "bg-danger-500/5 border-danger-500/20 text-danger-500" 
+                                            : "bg-white/40 dark:bg-black/40 border-default-200/50 text-default-600 dark:text-default-400"}`}>
                                             {responsibilitySummary.packagingSpecs || "No additional specifications provided."}
                                         </div>
                                     </div>
@@ -3363,7 +3387,7 @@ export default function EnquiryDetailsPage() {
                                                         <span className="text-[9px] font-black uppercase tracking-widest text-default-500 dark:text-default-400 leading-none">{item.label}</span>
                                                         <div className={`flex items-center gap-2 px-2.5 py-1 rounded-lg w-fit ${badgeStyles}`}>
                                                             {icon}
-                                                            <span className="text-[10px] font-black tracking-wider">{label}</span>
+                                                            <span className={`text-[10px] font-black tracking-wider ${ownerKey === "not set" ? "text-danger-500" : ""}`}>{label}</span>
                                                         </div>
                                                     </div>
                                                 );
@@ -3388,7 +3412,7 @@ export default function EnquiryDetailsPage() {
                                             onClose();
                                         }}
                                     >
-                                        Confirm & Finalize
+                                        Finalize
                                     </Button>
                                 </ModalFooter>
                             </>
@@ -3500,6 +3524,14 @@ export default function EnquiryDetailsPage() {
                     isOpen={inventoryAcceptOpen}
                     onOpenChange={(open) => {
                         setInventoryAcceptOpen(open);
+                        if (open) {
+                            if (inventoryOptions.length === 0) {
+                                setIsAddingNewInventory(true);
+                                if (!inlineQuantity) {
+                                    setInlineQuantity(String(requiredQty || ""));
+                                }
+                            }
+                        }
                         if (!open) setSelectedInventoryId("");
                         if (!open) {
                             setAcceptAttempted(false);
@@ -3573,8 +3605,11 @@ export default function EnquiryDetailsPage() {
                                             onSelectionChange={(keys) => {
                                                 const arr = Array.from(keys as Set<string>);
                                                 const id = arr[0] || "";
+                                                const picked = inventoryOptions.find((row: any) => String(row.invId) === String(id));
+                                                const available = Number(picked?.availableQty || 0);
+                                                const missing = Math.max(0, requiredQty - available);
                                                 setSelectedInventoryId(id);
-                                                setInlineQuantity("");
+                                                setInlineQuantity(missing > 0 ? String(missing) : "");
                                                 setAcceptAttempted(false);
                                             }}
                                         >
@@ -3582,7 +3617,6 @@ export default function EnquiryDetailsPage() {
                                                 <SelectItem
                                                     key={row.invId}
                                                     value={row.invId}
-                                                    isDisabled={row.availableQty <= 0}
                                                     textValue={row.warehouseName || "Warehouse"}
                                                 >
                                                     {row.warehouseName || "Warehouse"} • {row.availableQty} MT available
@@ -3640,7 +3674,7 @@ export default function EnquiryDetailsPage() {
                                     </>
                                 )}
 
-                                {(isAddingNewInventory || (selectedInventory && selectedInventory.availableQty < requiredQty)) && (
+                                {(isAddingNewInventory || inventoryOptions.length === 0 || (selectedInventory && selectedInventory.availableQty < requiredQty)) && (
                                     <div className="flex flex-col gap-2">
                                         <div className="grid grid-cols-2 gap-3">
                                             <Input
@@ -3673,6 +3707,11 @@ export default function EnquiryDetailsPage() {
                                         Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.
                                     </div>
                                 )}
+                                {shouldShowMissingQtyError && (
+                                    <div className="text-xs text-danger-600 font-semibold px-1">
+                                        Please add the missing quantity to proceed.
+                                    </div>
+                                )}
                             </div>
                         </ModalBody>
                         <ModalFooter className="border-t border-divider">
@@ -3687,7 +3726,7 @@ export default function EnquiryDetailsPage() {
                                 isDisabled={
                                     (isAddingNewInventory || inventoryOptions.length === 0)
                                         ? (!inlineWarehouseName || !inlineQuantity || (inventoryOptions.length === 0 && (!inlineStateId || !inlineDistrictId)))
-                                        : (!selectedInventoryId)
+                                        : (!selectedInventoryId || (selectedInventory && Number(selectedInventory.availableQty || 0) < requiredQty && !inlineQuantity))
                                 }
                             >
                                 Save & Accept Enquiry
@@ -3697,57 +3736,139 @@ export default function EnquiryDetailsPage() {
                 </Modal>
 
                 {/* Conversion Modal */}
-                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <Modal 
+                    isOpen={isOpen} 
+                    onOpenChange={onOpenChange}
+                    size="2xl"
+                    backdrop="blur"
+                    classNames={{
+                        base: "bg-[#04070f] dark:bg-[#04070f] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem]",
+                        wrapper: "z-[10000]",
+                        backdrop: "bg-black/60 backdrop-blur-xl",
+                        closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
+                    }}
+                >
                     <ModalContent>
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1">Convert to Order</ModalHeader>
-                                <ModalBody>
-                                    <p>Confirm conversion after supplier acceptance, buyer confirmation, and finalized responsibility event.</p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Procurement / Sourcing: <b>{responsibilityPlan.procurementBy || "Not set"}</b></div>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Quality Testing: <b>{responsibilityPlan.qualityTestingBy || "Not set"}</b></div>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Packaging & Labelling: <b>{responsibilityPlan.packagingBy || "Not set"}</b></div>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transportation: <b>{responsibilityPlan.transportBy || "Not set"}</b></div>
-                                        <div className="rounded-lg bg-default-100 px-3 py-2 sm:col-span-2">
-                                            Packaging Specs: <b>{String(packagingSpecifications || "").trim() || "Not provided"}</b>
+                                <ModalHeader className="flex flex-col gap-1 pt-12 px-10">
+                                    <div className="flex items-center gap-5">
+                                        <div className="relative group">
+                                            <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:bg-primary/30 transition-all rounded-full" />
+                                            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-2xl border border-primary/20">
+                                                <FiArrowRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
+                                            </div>
                                         </div>
-                                        {executionContext.tradeType === "INTERNATIONAL" && (
-                                            <>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Freight Forwarding & Shipping: <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                                <div className="rounded-lg bg-default-100 px-3 py-2">Cargo Insurance (Auto from Freight/Shipping): <b>{responsibilityPlan.shippingBy || "Not set"}</b></div>
-                                                {isFromIndia && (
-                                                    <div className="rounded-lg bg-default-100 px-3 py-2">Export Customs Clearance: <b>{responsibilityPlan.exportCustomsBy || "Not set"}</b></div>
-                                                )}
-                                                {isToIndia && (
-                                                    <>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Import Customs Clearance: <b>{responsibilityPlan.importCustomsBy || "Not set"}</b></div>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Duties & Taxes: <b>{responsibilityPlan.dutiesTaxesBy || "Not set"}</b></div>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Port Handling: <b>{responsibilityPlan.portHandlingBy || "Not set"}</b></div>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Inland Transport (Port → Warehouse): <b>{responsibilityPlan.destinationInlandTransportBy || "Not set"}</b></div>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Destination Inspection: <b>{responsibilityPlan.destinationInspectionBy || "Not set"}</b></div>
-                                                        <div className="rounded-lg bg-default-100 px-3 py-2">Final Delivery Confirmation: <b>{responsibilityPlan.finalDeliveryConfirmationBy || "Not set"}</b></div>
-                                                    </>
-                                                )}
-                                            </>
-                                        )}
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80 leading-none">COMMAND_SEQUENCE_INITIATED</span>
+                                            <span className="text-3xl font-black tracking-tight text-white italic leading-none mt-1">Convert to Order</span>
+                                        </div>
                                     </div>
-                                    <Input
-                                        label="Initial Notes"
-                                        placeholder="Any specific instructions..."
-                                        value={conversionNote}
-                                        onValueChange={setConversionNote}
-                                    />
+                                </ModalHeader>
+                                <ModalBody className="px-10 py-8">
+                                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 mb-8 flex items-start gap-4 relative overflow-hidden group">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/40 group-hover:bg-primary transition-all shadow-[0_0_15px_rgba(0,112,243,0.3)]" />
+                                        <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
+                                            <FiInfo className="text-primary" size={20} />
+                                        </div>
+                                        <p className="text-[11px] font-bold text-default-300 dark:text-default-400 leading-relaxed uppercase tracking-wide">
+                                            WARNING: PROCEEDING WITH CONVERSION WILL LOCK ALL TRADE PARAMETERS. 
+                                            THIS ACTION SYNCHRONIZES RESPONSIBILITIES AND FINALIZES THE EXECUTION PROTOCOL.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(0,112,243,0.5)]" />
+                                        <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">FINAL_RESPONSIBILITY_MATRIX</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                                        {[
+                                            { label: "Procurement / Sourcing", value: responsibilityPlan.procurementBy, icon: <LuSearch size={14} /> },
+                                            { label: "Quality Testing", value: responsibilityPlan.qualityTestingBy, icon: <LuClipboardCheck size={14} /> },
+                                            { label: "Packaging & Labelling", value: responsibilityPlan.packagingBy, icon: <LuPackage size={14} /> },
+                                            { label: "Inland Transportation", value: responsibilityPlan.transportBy, icon: <LuTruck size={14} />, show: !isImportPortPickup },
+                                            ...(executionContext.tradeType === "INTERNATIONAL" ? [
+                                                { label: "Freight & Shipping", value: responsibilityPlan.shippingBy, icon: <LuAnchor size={14} /> },
+                                                { label: "Cargo Insurance", value: responsibilityPlan.shippingBy, icon: <LuShieldCheck size={14} /> },
+                                                { label: "Export Customs", value: responsibilityPlan.exportCustomsBy, icon: <LuFileCheck size={14} />, show: isFromIndia },
+                                                { label: "Import Customs", value: responsibilityPlan.importCustomsBy, icon: <LuFileCheck size={14} />, show: isToIndia },
+                                                { label: "Duties & Taxes", value: responsibilityPlan.dutiesTaxesBy, icon: <LuTag size={14} />, show: isToIndia },
+                                                { label: "Port Handling", value: responsibilityPlan.portHandlingBy, icon: <LuAnchor size={14} />, show: isToIndia },
+                                                { label: "Onward Transport", value: responsibilityPlan.destinationInlandTransportBy, icon: <LuTruck size={14} />, show: isToIndia && !isImportPortPickup },
+                                            ] : [])
+                                        ].filter(item => item.show !== false).map((item) => (
+                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-primary/50 group-hover:text-primary transition-colors bg-black/40 p-2 rounded-xl border border-white/5 shadow-inner">
+                                                        {item.icon}
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">{item.label}</span>
+                                                </div>
+                                                <Chip 
+                                                    size="sm" 
+                                                    variant="flat" 
+                                                    color={item.value === "obaol" ? "primary" : item.value === "buyer" ? "success" : "warning"}
+                                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-6 px-3 bg-opacity-20 border border-current/20 shadow-lg"
+                                                >
+                                                    {item.value || "PENDING"}
+                                                </Chip>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {packagingSpecifications && (
+                                        <div className="mb-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-1.5 h-6 bg-success-500 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
+                                                <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">PACKAGING_SPECIFICATIONS</span>
+                                            </div>
+                                            <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 text-[11px] font-bold text-default-300 italic whitespace-pre-line leading-relaxed shadow-inner">
+                                                {packagingSpecifications}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-6 bg-warning-500 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+                                            <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">ORDER_CONTEXT_METADATA</span>
+                                        </div>
+                                        <Textarea
+                                            label="Initial Notes"
+                                            variant="flat"
+                                            labelPlacement="outside"
+                                            placeholder="Inject tactical instructions for mission execution..."
+                                            value={conversionNote}
+                                            onValueChange={setConversionNote}
+                                            classNames={{
+                                                inputWrapper: "bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all rounded-3xl p-6 min-h-[120px] shadow-inner focus-within:ring-1 focus-within:ring-primary/40",
+                                                label: "hidden",
+                                                input: "text-[12px] font-bold text-white placeholder:text-white/20"
+                                            }}
+                                        />
+                                    </div>
                                 </ModalBody>
-                                <ModalFooter>
-                                    <Button color="danger" variant="light" onPress={onClose}>Cancel</Button>
-                                    <Button
-                                        color="primary"
-                                        onPress={() => convertMutation.mutate()}
-                                        isLoading={convertMutation.isPending}
-                                        isDisabled={!canConvert}
+                                <ModalFooter className="px-10 pb-12 pt-4 flex gap-4">
+                                    <Button 
+                                        variant="light" 
+                                        onPress={onClose}
+                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all"
                                     >
-                                        Confirm Conversion
+                                        CANCEL_OPERATION
+                                    </Button>
+                                    <Button 
+                                        color="primary"
+                                        variant="shadow"
+                                        onPress={() => applyActionMutation.mutate({ 
+                                            actionKey: "CONVERT_TO_ORDER", 
+                                            notes: conversionNote 
+                                        })}
+                                        isLoading={applyActionMutation.isPending}
+                                        className="px-10 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                        startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
+                                    >
+                                        ESTABLISH_ORDER_PROTOCOL
                                     </Button>
                                 </ModalFooter>
                             </>

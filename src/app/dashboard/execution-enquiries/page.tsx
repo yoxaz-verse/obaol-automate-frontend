@@ -266,7 +266,8 @@ export default function ExecutionEnquiriesPage() {
             || "Unknown Origin",
           buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
           sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
-          assignedOperatorId: String(inquiry.assignedOperatorId?._id || inquiry.assignedOperatorId || ""),
+          supplierOperatorId: String(inquiry.supplierOperatorId?._id || inquiry.supplierOperatorId || ""),
+          dealCloserOperatorId: String(inquiry.dealCloserOperatorId?._id || inquiry.dealCloserOperatorId || ""),
           tasks,
         };
       })
@@ -315,7 +316,8 @@ export default function ExecutionEnquiriesPage() {
             "Unknown Origin",
           buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
           sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
-          assignedOperatorId: String(inquiry.assignedOperatorId?._id || inquiry.assignedOperatorId || ""),
+          supplierOperatorId: String(inquiry.supplierOperatorId?._id || inquiry.supplierOperatorId || ""),
+          dealCloserOperatorId: String(inquiry.dealCloserOperatorId?._id || inquiry.dealCloserOperatorId || ""),
           tasks,
         };
       })
@@ -603,7 +605,10 @@ export default function ExecutionEnquiriesPage() {
                         const isSellerOwner = ownerBy === "seller" && enq.sellerCompanyId && enq.sellerCompanyId === myCompanyId;
                         const canBid = isAdmin || (roleLower === "associate" && (isCandidate || isBuyerOwner || isSellerOwner));
                         const isOperatorUser = user?.role === "Operator" || user?.role === "team";
-                        const isAssignedOperator = isOperatorUser && enq.assignedOperatorId && enq.assignedOperatorId === String(user?.id || "");
+                        const isAssignedOperator =
+                          isOperatorUser &&
+                          ((enq.supplierOperatorId && enq.supplierOperatorId === String(user?.id || "")) ||
+                            (enq.dealCloserOperatorId && enq.dealCloserOperatorId === String(user?.id || "")));
                         const canCommit = isAdmin || isAssignedOperator;
                         const canViewBidDetails = isAdmin || isCandidate || isBuyerOwner || isSellerOwner;
 

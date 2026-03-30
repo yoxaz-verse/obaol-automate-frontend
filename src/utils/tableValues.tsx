@@ -2458,17 +2458,6 @@ export const initialTableConfig: Record<
       required: false,
     },
     {
-      label: "Assign Operator (Optional)",
-      type: "select",
-      key: "assignedOperatorId",
-      values: [],
-      dynamicValuesFn: () => fetchDependentOptions("operator"),
-      inForm: true,
-      inTable: false,
-      inEdit: true,
-      required: false,
-    },
-    {
       label: "Product",
       type: "select",
       key: "productId",

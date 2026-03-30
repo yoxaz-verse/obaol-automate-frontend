@@ -1994,13 +1994,15 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     enabled: isAdminUser,
   });
 
-  const associateOptions = (() => {
-    const raw = associatesResponse?.data;
-    if (Array.isArray(raw)) return raw;
-    if (Array.isArray(raw?.data)) return raw.data;
+  const parseAssociateRows = (raw: any): any[] => {
+    if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
+    if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
     if (Array.isArray(raw?.data?.data)) return raw.data.data;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw)) return raw;
     return [];
-  })();
+  };
+  const associateOptions = parseAssociateRows(associatesResponse).filter((item: any) => !item?.isDeleted);
 
   useEffect(() => {
     if (!name) {
@@ -2216,9 +2218,17 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                     <option value="">Select buyer</option>
                     {associateOptions.map((item: any) => {
                       const id = String(item?._id || "");
+                      const label =
+                        item?.name ||
+                        item?.fullName ||
+                        item?.user?.name ||
+                        item?.email ||
+                        item?.user?.email ||
+                        item?.associateCompany?.name ||
+                        "Associate";
                       return (
                         <option key={id} value={id}>
-                          {item?.name || item?.email || "Associate"}
+                          {label}
                         </option>
                       );
                     })}

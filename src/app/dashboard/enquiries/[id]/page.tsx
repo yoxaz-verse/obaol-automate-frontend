@@ -403,6 +403,8 @@ export default function EnquiryDetailsPage() {
         const hasDocType = (type: string) =>
             docs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
         const fallbackStage = (() => {
+            const status = String((enquiry as any)?.status || "").toUpperCase();
+            if (status === "CONVERTED" || (enquiry as any)?.order) return "CONVERT_TO_ORDER";
             if (isImportEnquiry) return "QUOTATION_REVISION";
             if ((enquiry as any)?.poSubmittedAt) return "CONVERT_TO_ORDER";
             if ((enquiry as any)?.otherDocsCompletedAt) return "PURCHASE_ORDER_CREATED";
@@ -1362,7 +1364,7 @@ export default function EnquiryDetailsPage() {
     const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
 
-    const docRules = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
+    const docRules = parseMasterRows(docRulesResponse).filter((item: any) => !item?.isDeleted);
     const normalizedStageKey = String(workflowStage || "").toUpperCase();
     const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data?.data)
         ? enquiryRulesResponse.data.data.data
@@ -1375,12 +1377,16 @@ export default function EnquiryDetailsPage() {
         ? enquiryDocsResponse?.data?.data?.data
         : (enquiryDocsResponse?.data?.data || []);
     const rulesForStage = docRules
-        .filter((r: any) =>
-            String(r.stageType) === "INQUIRY" &&
-            String(r.stageKey || "").toUpperCase() === normalizedStageKey &&
-            r.isActive !== false &&
-            (r.tradeType === "BOTH" || r.tradeType === executionContext.tradeType)
-        )
+        .filter((r: any) => {
+            const stageType = String(r.stageType || r.stage || "").toUpperCase();
+            const isInquiryStage = stageType === "INQUIRY" || stageType === "ENQUIRY";
+            return (
+                isInquiryStage &&
+                String(r.stageKey || "").toUpperCase() === normalizedStageKey &&
+                r.isActive !== false &&
+                (r.tradeType === "BOTH" || r.tradeType === executionContext.tradeType)
+            );
+        })
         .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
     const canSeeRule = (rule: any) => {
         const visibility = String(rule.visibility || "BOTH");
@@ -1426,6 +1432,9 @@ export default function EnquiryDetailsPage() {
         : (fallbackActions[normalizedStageKey] || []);
     const displayActions = (() => {
         const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"].includes(String(key || "").toUpperCase()));
+        if (isConvertedFlow) {
+            return filtered.filter((key: string) => String(key || "").toUpperCase() !== "CONVERT_TO_ORDER");
+        }
         return filtered;
     })();
     const actionBy = String((currentRule as any)?.actionBy || fallbackActionBy[normalizedStageKey] || "").toUpperCase();
@@ -1542,7 +1551,38 @@ export default function EnquiryDetailsPage() {
         fileUrl: null,
         documentNumber: "LOI-AUTO",
     }] : [];
-    const sortedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs].sort((a: any, b: any) => {
+    const combinedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs];
+    const uniqueDocsByType = Object.values(
+        combinedEnquiryDocs.reduce((acc: Record<string, any>, doc: any) => {
+            const typeKey = String(doc?.type || "").toUpperCase();
+            if (!typeKey) return acc;
+            const existing = acc[typeKey];
+            if (!existing) {
+                acc[typeKey] = doc;
+                return acc;
+            }
+            const existingStatus = String(existing?.status || "").toUpperCase();
+            const nextStatus = String(doc?.status || "").toUpperCase();
+            const existingTime = new Date(existing?.createdAt || 0).getTime();
+            const nextTime = new Date(doc?.createdAt || 0).getTime();
+            if (existingStatus === "DRAFT" && nextStatus !== "DRAFT") {
+                acc[typeKey] = doc;
+                return acc;
+            }
+            if (existingStatus === nextStatus && nextTime > existingTime) {
+                acc[typeKey] = doc;
+                return acc;
+            }
+            if (existingStatus !== "DRAFT" && nextStatus === "DRAFT") {
+                return acc;
+            }
+            if (nextTime > existingTime) {
+                acc[typeKey] = doc;
+            }
+            return acc;
+        }, {})
+    );
+    const sortedEnquiryDocs = uniqueDocsByType.sort((a: any, b: any) => {
         const aTime = new Date(a?.createdAt || 0).getTime();
         const bTime = new Date(b?.createdAt || 0).getTime();
         return bTime - aTime;
@@ -1583,11 +1623,15 @@ export default function EnquiryDetailsPage() {
             "PROFORMA_ISSUED",
             "OTHER_DOCUMENTS",
             "PURCHASE_ORDER_CREATED",
+            "CONVERT_TO_ORDER",
         ];
     if (isImportEnquiry) {
         workflowStageOptions = workflowStageOptions.filter(
             (key) => !["ENQUIRY_CREATED", "LOI_ACCEPTED_QTY_CONFIRMED"].includes(String(key || "").toUpperCase())
         );
+    }
+    if (isConvertedFlow && !workflowStageOptions.includes("CONVERT_TO_ORDER")) {
+        workflowStageOptions = [...workflowStageOptions, "CONVERT_TO_ORDER"];
     }
     const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
     const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
@@ -1599,6 +1643,9 @@ export default function EnquiryDetailsPage() {
     const stageLabelMap = new Map(
         enquiryRules.map((r: any) => [String(r.stageKey || "").toUpperCase(), r.label || r.stageKey])
     );
+    if (!stageLabelMap.has("CONVERT_TO_ORDER")) {
+        stageLabelMap.set("CONVERT_TO_ORDER", "Convert to Order");
+    }
     const hasSubmittedQuotation = hasSubmittedDoc("QUOTATION");
     const isPreClarification = normalizedStageKey === "QUOTATION_REVISION" && !hasSubmittedQuotation && !showDraftQuotation;
     if (isPreClarification) {
@@ -2408,7 +2455,9 @@ export default function EnquiryDetailsPage() {
                                                             setDocActionOpen(true);
                                                         }}
                                                     >
-                                                        {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Initialize"}
+                                                        {String(rule.actionType || "").toUpperCase() === "UPLOAD"
+                                                            ? "Upload"
+                                                            : "Create"}
                                                     </Button>
                                                 )}
                                             </div>

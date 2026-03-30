@@ -24,7 +24,11 @@ import {
   LuCheck,
   LuPackage,
   LuActivity,
+  LuUser,
+  LuStore,
+  LuShieldCheck,
 } from "react-icons/lu";
+import { motion, AnimatePresence } from "framer-motion";
 import { FiAlertCircle, FiInfo, FiCheckCircle } from "react-icons/fi";
 
 export type ResponsibilityField = {
@@ -100,14 +104,23 @@ const ownerLabelByKey: Record<string, string> = {
 const getOwnerStyles = (owner: string) => {
   switch (owner) {
     case "buyer":
-      return "bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none translate-y-[-2px]";
+      return "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]";
     case "seller":
-      return "bg-amber-500 text-white shadow-lg shadow-amber-200 dark:shadow-none translate-y-[-2px]";
+      return "bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]";
     case "obaol":
-      return "bg-cyan-600 text-white shadow-lg shadow-cyan-200 dark:shadow-none translate-y-[-2px]";
+      return "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]";
     default:
       return "bg-white text-primary";
   }
+};
+
+const getOwnerIcons = (owner: string) => {
+    switch (owner) {
+        case "buyer": return <LuUser size={10} />;
+        case "seller": return <LuStore size={10} />;
+        case "obaol": return <LuShieldCheck size={10} />;
+        default: return null;
+    }
 };
 
 const ResponsibilityEventForm: React.FC<Props> = ({
@@ -158,6 +171,18 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   showSaveTermsButton = true,
 }) => {
   const canToggle = typeof canToggleTradeType === "boolean" ? canToggleTradeType : canEditResponsibilityPlan;
+  const selectedIncoterm = incotermOptions?.find((it: any) => String(it?._id || it?.id) === String(selectedIncotermId));
+  const selectedIncotermCode = String(selectedIncoterm?.code || "").toUpperCase();
+  const filteredPaymentTerms = Array.isArray(paymentTermOptions)
+    ? paymentTermOptions.filter((term: any) => {
+        const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
+        if (!selectedIncotermCode) return true;
+        if (!allowed.length) return true;
+        return allowed.map((v: any) => String(v).toUpperCase()).includes(selectedIncotermCode);
+      })
+    : [];
+  const selectedPaymentTerm = filteredPaymentTerms.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId))
+    || paymentTermOptions?.find((term: any) => String(term?._id || term?.id) === String(selectedPaymentTermId));
 
   return (
     <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
@@ -229,13 +254,36 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               classNames={{ trigger: "rounded-2xl border-default-200 h-10 shadow-sm", label: "font-black uppercase text-[10px] tracking-widest text-default-400" }}
               startContent={<LuFileCheck size={16} className="text-success/70" />}
             >
-              {paymentTermOptions.map((item: any) => (
+              {(filteredPaymentTerms.length > 0 ? filteredPaymentTerms : paymentTermOptions).map((item: any) => (
                 <SelectItem key={item._id} value={item._id}>
                   {item.label || "Payment Term"}
                 </SelectItem>
               ))}
             </Select>
           </div>
+          {selectedPaymentTerm && Array.isArray(selectedPaymentTerm?.milestones) && selectedPaymentTerm.milestones.length > 0 && (
+            <div className="mt-3 rounded-2xl border border-default-200/60 bg-background/60 p-3">
+              <div className="text-[10px] uppercase font-black tracking-widest text-default-400 mb-2">Payment Framework Milestones</div>
+              <div className="flex flex-col gap-2">
+                {selectedPaymentTerm.milestones.map((milestone: any, idx: number) => (
+                  <div
+                    key={`${milestone.label}-${idx}`}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-divider px-3 py-2 bg-background/40"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-xs font-black text-foreground uppercase tracking-tight">{milestone.label}</span>
+                      <span className="text-[11px] text-default-500">
+                        {String(milestone.triggerType || "").toUpperCase() === "STAGE"
+                          ? `Stage: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`
+                          : `Doc: ${String(milestone.triggerValue || "").replaceAll("_", " ")}`}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-default-600">{Number(milestone.percent || 0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-8 p-6 rounded-3xl border border-default-200/60 bg-gradient-to-br from-default-50/50 to-white dark:from-default-100/5 dark:to-transparent relative overflow-hidden group shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
@@ -520,7 +568,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 bg-default-100/80 dark:bg-black/40 p-1.5 rounded-2xl gap-2 border border-default-200/50 relative overflow-hidden">
+                    <div className="bg-default-100/80 dark:bg-black/40 p-1 rounded-2xl border border-default-200/50 flex gap-1 relative overflow-hidden h-10 w-full">
                       {allowed.map((option: string) => {
                         const isSelected = currentValue === option;
                         const canSelect = canEditResponsibilityPlan && (allowed.length > 1 || !isSelected);
@@ -533,15 +581,25 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                               }
                             }}
                             disabled={!canSelect}
-                            className={`relative flex items-center justify-center py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-500
-                              ${isSelected
-                                ? `${getOwnerStyles(option)} z-10`
-                                : "text-default-400 hover:text-default-700 hover:bg-white dark:hover:bg-default-200/20"
-                              }
+                            className={`relative flex-1 flex items-center justify-center gap-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 z-10
+                              ${isSelected ? "text-white" : "text-default-400 hover:text-default-700"}
                               ${!canSelect && !isSelected ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
                             `}
                           >
-                            {ownerLabelByKey[option] || option}
+                            <AnimatePresence>
+                                {isSelected && (
+                                    <motion.div
+                                        layoutId={`active-bg-${field.key}`}
+                                        className={`absolute inset-0 rounded-xl ${getOwnerStyles(option)} z-0`}
+                                        initial={false}
+                                        transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
+                                    />
+                                )}
+                            </AnimatePresence>
+                            <span className="relative z-10 flex items-center gap-1.5 px-2">
+                                {getOwnerIcons(option)}
+                                {ownerLabelByKey[option] || option}
+                            </span>
                           </button>
                         );
                       })}
@@ -716,32 +774,34 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                         <Button
                           fullWidth
                           size="lg"
-                          className="h-16 rounded-[1.5rem] font-bold uppercase tracking-widest text-[11px] bg-foreground text-background shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                          className={`h-16 rounded-[1.5rem] font-bold uppercase tracking-widest text-[11px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${!isResponsibilityEventChanged && responsibilitySavedAt ? "bg-success text-white" : "bg-foreground text-background"}`}
                           isLoading={Boolean(savingFramework)}
-                          isDisabled={!isResponsibilityEventChanged || isReadOnlyAfterConversion}
+                          isDisabled={(!isResponsibilityEventChanged && !!responsibilitySavedAt) || isReadOnlyAfterConversion}
                           onPress={() => onSaveFramework()}
-                          startContent={!savingFramework && <LuFileCheck size={18} />}
+                          startContent={!savingFramework && (isResponsibilityEventChanged ? <LuFileCheck size={18} /> : <LuCheck size={18} />)}
                         >
-                          Synchronize Workspace
+                          {!isResponsibilityEventChanged && responsibilitySavedAt ? "Workspace Synced" : "Synchronize Workspace"}
                         </Button>
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-foreground/5">
-                           <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
-                           <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest italic leading-none">Awaiting Synchronization</span>
+                           <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged ? "bg-warning-500 animate-pulse" : "bg-success"}`} />
+                           <span className={`text-[9px] font-bold uppercase tracking-widest italic leading-none ${isResponsibilityEventChanged ? "text-default-400" : "text-success"}`}>
+                             {isResponsibilityEventChanged ? "Awaiting Synchronization" : "Workspace Synchronized"}
+                           </span>
                         </div>
                       </div>
                     )}
                     {showFinalizeButton && onFinalize && (
                       <Button
                         size="lg"
-                        color="primary"
-                        variant="shadow"
+                        color={isReadOnlyAfterConversion ? "success" : "primary"}
+                        variant={isReadOnlyAfterConversion ? "flat" : "shadow"}
                         onPress={() => onFinalize()}
                         isLoading={Boolean(finalizeLoading)}
                         isDisabled={isReadOnlyAfterConversion}
                         className="flex-[2] h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
-                        startContent={!finalizeLoading && <FiCheckCircle size={20} />}
+                        startContent={!finalizeLoading && (isReadOnlyAfterConversion ? <LuCheck size={20} /> : <FiCheckCircle size={20} />)}
                       >
-                        Finalize Framework
+                        {isReadOnlyAfterConversion ? "Framework Finalized" : "Finalize Framework"}
                       </Button>
                     )}
                   </div>

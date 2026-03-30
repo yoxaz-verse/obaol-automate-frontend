@@ -131,7 +131,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
     );
   }
 
-  const { convertRate } = useCurrency();
+  const { convertRate, formatRate } = useCurrency();
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAdminUser = roleLower === "admin" || isOperatorUser;
@@ -470,17 +470,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                 // Column Mapping
                 rate: isAdminUser && isMarketplace
-                  ? convertRate(totalRate)
+                  ? formatRate(totalRate)
                   : user?.role?.toLowerCase() === "admin"
-                    ? convertRate(supplierRate)
-                    : convertRate(displayedPrice),
+                    ? formatRate(supplierRate)
+                    : formatRate(displayedPrice),
                 commission: isAdminUser && isMarketplace
-                  ? (isCommissionAdded ? convertRate(adminCommission) : "-")
+                  ? (isCommissionAdded ? formatRate(adminCommission) : "-")
                   : adminCommission
-                    ? convertRate(adminCommission)
+                    ? formatRate(adminCommission)
                     : 0,
                 commissionStatus: isCommissionAdded ? "+" : "-",
-                finalRate: convertRate(totalRate),
+                finalRate: formatRate(totalRate),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",
@@ -515,8 +515,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 actualIsLive: item.isLive,
                 supplierIsLive: baseRate?.isLive !== false,
                 associate: item.associateCompanyId?.name || "My Company",
-                rate: convertRate(finalPrice),
-                commission: mediatorMarkup ? convertRate(mediatorMarkup) : convertRate(0),
+                rate: formatRate(finalPrice),
+                commission: mediatorMarkup ? formatRate(mediatorMarkup) : formatRate(0),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",
@@ -550,7 +550,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...rest,
                 isLive: item.isLive,
                 associate: item.associateCompany?.name || "My Company",
-                rate: convertRate(totalRate),
+                rate: formatRate(totalRate),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",

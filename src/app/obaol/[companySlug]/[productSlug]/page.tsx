@@ -22,7 +22,7 @@ const PublicProductPage = () => {
     const params = useParams();
     const companySlug = params.companySlug as string;
     const productSlug = params.productSlug as string;
-    const { convertRate } = useCurrency();
+    const { convertRate, formatRate } = useCurrency();
 
     // Fetch product details
     const { data, isLoading, error } = useQuery({
@@ -93,7 +93,7 @@ const PublicProductPage = () => {
 
                     <div className="flex items-end gap-3 mb-6">
                         <span className="text-4xl font-bold text-success">
-                            {convertRate(catalogItem.finalPrice)}
+                            {formatRate(catalogItem.finalPrice)}
                         </span>
                         <span className="text-default-400 mb-1">
                             / {variant?.unit || "unit"}

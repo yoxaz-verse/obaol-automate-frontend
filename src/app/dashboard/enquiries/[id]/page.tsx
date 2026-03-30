@@ -36,13 +36,20 @@ import {
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo, FiArrowRight, FiEdit3 } from "react-icons/fi";
-import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity } from "react-icons/lu";
+import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity, LuFileText, LuHistory, LuClock, LuStore } from "react-icons/lu";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
+
+// Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
+const LuTrendingDown = FiTrendingDown;
+const LuCreditCard = FiPercent;
+const LuFileSignature = FiFileText;
+const LuEdit3 = FiEdit3;
+const LuCheckCircle = FiCheckCircle;
 
 type ResponsibilityPlan = {
     procurementBy: "buyer" | "seller" | "obaol" | "";
@@ -122,7 +129,7 @@ export default function EnquiryDetailsPage() {
     const { id } = useParams();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { convertRate } = useCurrency();
+    const { convertRate, formatRate } = useCurrency();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isFinalizeOpen, onOpen: onFinalizeOpen, onOpenChange: onFinalizeOpenChange } = useDisclosure();
     const [conversionNote, setConversionNote] = useState("");
@@ -135,6 +142,7 @@ export default function EnquiryDetailsPage() {
     const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
     const [specSavedAt, setSpecSavedAt] = useState<string>("");
     const [responsibilitySavedAt, setResponsibilitySavedAt] = useState<string>("");
+    const [responsibilitiesLockedOverride, setResponsibilitiesLockedOverride] = useState<boolean>(false);
     const [inlandTransportSegments, setInlandTransportSegments] = useState<Array<{ label: string; from: string; to: string }>>([]);
     const [workflowStage, setWorkflowStage] = useState<string>("ENQUIRY_CREATED");
     const [importDeliveryMode, setImportDeliveryMode] = useState<string>("");
@@ -359,6 +367,23 @@ export default function EnquiryDetailsPage() {
     const enquiryPackagingSpecificationsValue = (enquiry as any)?.packagingSpecifications || "";
     const isImportEnquiry = String((enquiry as any)?.sourceType || "").toUpperCase() === "IMPORT" || Boolean((enquiry as any)?.importListingId);
     useEffect(() => {
+        if (selectedPaymentTermId || paymentTermOptions.length === 0) return;
+        const selectedIncoterm = incotermOptions.find((it: any) => String(it?._id || it?.id) === String(selectedIncotermId));
+        const incotermCode = String(selectedIncoterm?.code || "").toUpperCase();
+        const filteredTerms = paymentTermOptions.filter((term: any) => {
+            const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
+            if (!incotermCode) return true;
+            if (!allowed.length) return true;
+            return allowed.map((v: any) => String(v).toUpperCase()).includes(incotermCode);
+        });
+        const defaultTerm =
+            filteredTerms.find((term: any) => Boolean(term?.isDefault)) ||
+            paymentTermOptions.find((term: any) => Boolean(term?.isDefault)) ||
+            filteredTerms[0] ||
+            paymentTermOptions[0];
+        if (defaultTerm?._id) setSelectedPaymentTermId(String(defaultTerm._id));
+    }, [paymentTermOptions, selectedPaymentTermId, selectedIncotermId, incotermOptions]);
+    useEffect(() => {
         setBuyerSpecification(enquirySpecificationValue);
     }, [enquirySpecificationValue]);
     useEffect(() => {
@@ -379,7 +404,7 @@ export default function EnquiryDetailsPage() {
             docs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
         const fallbackStage = (() => {
             if (isImportEnquiry) return "QUOTATION_REVISION";
-            if ((enquiry as any)?.poSubmittedAt) return "PURCHASE_ORDER_CREATED";
+            if ((enquiry as any)?.poSubmittedAt) return "CONVERT_TO_ORDER";
             if ((enquiry as any)?.otherDocsCompletedAt) return "PURCHASE_ORDER_CREATED";
             if ((enquiry as any)?.proformaCreatedAt) return "OTHER_DOCUMENTS";
             if ((enquiry as any)?.responsibilitiesFinalizedAt) return "PROFORMA_ISSUED";
@@ -388,7 +413,7 @@ export default function EnquiryDetailsPage() {
             if ((enquiry as any)?.revisionRequestedAt) return "QUOTATION_REVISION";
             if ((enquiry as any)?.supplierQtyConfirmedAt) return "QUOTATION_REVISION";
             if ((enquiry as any)?.loiSubmittedAt) return "LOI_ACCEPTED_QTY_CONFIRMED";
-            if (hasSubmittedDoc("PURCHASE_ORDER")) return "PURCHASE_ORDER_CREATED";
+            if (hasSubmittedDoc("PURCHASE_ORDER")) return "CONVERT_TO_ORDER";
             if (hasSubmittedDoc("PROFORMA_INVOICE")) return "OTHER_DOCUMENTS";
             if (hasSubmittedDoc("QUOTATION")) return "QUOTATION_DECISION";
             return "ENQUIRY_CREATED";
@@ -429,9 +454,25 @@ export default function EnquiryDetailsPage() {
         });
         setSelectedIncotermId(String((enquiry as any)?.preferredIncoterm?._id || (enquiry as any)?.preferredIncoterm || ""));
         setSelectedPaymentTermId(String((enquiry as any)?.paymentTermId?._id || (enquiry as any)?.paymentTermId || ""));
-        const threadItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
-        if (threadItems.length) {
-            setRevisionReplies(threadItems.map((item: any) => ({
+        const rounds = Array.isArray((enquiry as any)?.revisionRounds) ? (enquiry as any).revisionRounds : [];
+        const legacyItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
+        const derivedRounds = rounds.length
+            ? rounds
+            : legacyItems.length
+                ? [{
+                    roundId: "legacy",
+                    status: (enquiry as any)?.revisionThread?.buyerConfirmedAt ? "CONFIRMED" : "OPEN",
+                    items: legacyItems,
+                    buyerRequestedAt: (enquiry as any)?.revisionThread?.buyerRequestedAt || null,
+                    buyerConfirmedAt: (enquiry as any)?.revisionThread?.buyerConfirmedAt || null,
+                    closedAt: (enquiry as any)?.revisionThread?.buyerConfirmedAt || null,
+                }]
+                : [];
+        const openRound = [...derivedRounds].reverse().find((round: any) => String(round?.status || "").toUpperCase() === "OPEN");
+        const currentRound = openRound || derivedRounds[derivedRounds.length - 1];
+        const currentItems = Array.isArray(currentRound?.items) ? currentRound.items : [];
+        if (currentItems.length) {
+            setRevisionReplies(currentItems.map((item: any) => ({
                 key: String(item?.key || "").toUpperCase(),
                 acknowledged: Boolean(item?.supplierAcknowledged),
                 counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
@@ -440,6 +481,10 @@ export default function EnquiryDetailsPage() {
             setRevisionReplies([]);
         }
     }, [enquiry, enquiryDocsResponse, isImportEnquiry]);
+    useEffect(() => {
+        if (!enquiry) return;
+        setResponsibilitiesLockedOverride(Boolean((enquiry as any)?.responsibilitiesFinalizedAt));
+    }, [enquiry, (enquiry as any)?.responsibilitiesFinalizedAt]);
     useEffect(() => {
         if (!enquiry) return;
         if (inlandTransportSegments.length > 0) return;
@@ -748,7 +793,6 @@ export default function EnquiryDetailsPage() {
     const createQuotationMutation = useMutation({
         mutationFn: async () => {
             const res = await postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
-            await patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, { actionKey: "QUOTATION_CREATED" });
             return res;
         },
         onSuccess: (res: any) => {
@@ -768,7 +812,9 @@ export default function EnquiryDetailsPage() {
     const submitQuotationMutation = useMutation({
         mutationFn: async () => {
             if (!quotationId) throw new Error("Quotation not found.");
-            return patchData(apiRoutes.tradeDocuments.update(quotationId), { status: "SENT" });
+            await patchData(apiRoutes.tradeDocuments.update(quotationId), { status: "SENT" });
+            await patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, { actionKey: "QUOTATION_CREATED" });
+            return true;
         },
         onSuccess: () => {
             toast.success("Quotation submitted.");
@@ -826,6 +872,8 @@ export default function EnquiryDetailsPage() {
                 actionKey: "REVISION_REQUESTED",
                 reasons,
                 revisionRate: clarificationReasonRate ? Number(clarificationRate) : undefined,
+                deliveryMode: clarificationReasonTimeline ? clarificationDeliveryMode : undefined,
+                deliveryDate: clarificationReasonTimeline ? clarificationDeliveryDate : undefined,
                 communicatedConfirmed: clarificationCommunicated,
             });
         },
@@ -872,8 +920,10 @@ export default function EnquiryDetailsPage() {
             toast.success("Revision reply saved.");
             setRevisionReplyError("");
             setRevisionReplySuccess("Reply saved.");
-            const savedItems = Array.isArray(res?.data?.data?.revisionThread?.items)
-                ? res.data.data.revisionThread.items
+            setRevisionConfirmError("");
+            const savedInquiry = res?.data?.data || null;
+            const savedItems = Array.isArray(savedInquiry?.revisionThread?.items)
+                ? savedInquiry.revisionThread.items
                 : [];
             if (savedItems.length) {
                 setRevisionReplies(savedItems.map((item: any) => ({
@@ -881,6 +931,10 @@ export default function EnquiryDetailsPage() {
                     acknowledged: Boolean(item?.supplierAcknowledged),
                     counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
                 })));
+            }
+            if (savedInquiry) {
+                // Ensure cached data structure matches what's expected by useQuery's select function
+                queryClient.setQueryData(["enquiry", id], { data: { data: savedInquiry } });
             }
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
         },
@@ -898,8 +952,9 @@ export default function EnquiryDetailsPage() {
                 packagingSpecifications,
                 inlandTransportSegments,
             }),
-        onSuccess: () => {
+        onSuccess: (res: any) => {
             toast.success("Responsibilities finalized and execution inquiries generated.");
+            setResponsibilitiesLockedOverride(true);
             queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
         },
         onError: () => {
@@ -1069,6 +1124,9 @@ export default function EnquiryDetailsPage() {
                 type: docActionRule.docType,
                 enquiryId: id,
             };
+            if (String(docActionRule.docType || "").toUpperCase() === "PURCHASE_ORDER" && String(docActionRule.actionType || "").toUpperCase() === "CREATE") {
+                payload.status = "SENT";
+            }
             if (String(docActionRule.actionType) === "UPLOAD") {
                 payload.fileUrl = docActionFileUrl;
             }
@@ -1161,7 +1219,19 @@ export default function EnquiryDetailsPage() {
     const normalizedStatus = String(enquiry.status || "").toUpperCase();
     const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt) || isImportEnquiry;
     const hasBuyerConfirmed = Boolean(enquiry.buyerConfirmedAt);
-    const hasResponsibilitiesFinalized = Boolean((enquiry as any).responsibilitiesFinalizedAt);
+    const stageLockKeys = new Set([
+        "RESPONSIBILITIES_FINALIZED",
+        "PROFORMA_ISSUED",
+        "OTHER_DOCUMENTS",
+        "PURCHASE_ORDER_CREATED",
+        "PURCHASE_ORDER_RECEIVED",
+        "ORDER_CONFIRMED",
+    ]);
+    const hasResponsibilitiesFinalized = Boolean(
+        (enquiry as any).responsibilitiesFinalizedAt ||
+        responsibilitiesLockedOverride ||
+        stageLockKeys.has(String(workflowStage || "").toUpperCase())
+    );
     const hasExecutionContextForStage = executionContext.tradeType === "DOMESTIC"
         ? Boolean(executionContext.originState.trim()) &&
         Boolean(executionContext.originDistrict.trim()) &&
@@ -1330,7 +1400,7 @@ export default function EnquiryDetailsPage() {
     };
     const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === normalizedStageKey);
     const fallbackActions: Record<string, string[]> = {
-        QUOTATION_REVISION: ["REVISION_REQUESTED", "REVISION_CONFIRMED"],
+        QUOTATION_REVISION: ["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"],
         LOI_ACCEPTED_QTY_CONFIRMED: ["SUPPLIER_QTY_CONFIRMED"],
         QUOTATION_CREATED: ["QUOTATION_CREATED"],
         QUOTATION_DECISION: ["QUOTATION_ACCEPTED", "RETURN_TO_REVISION"],
@@ -1338,6 +1408,7 @@ export default function EnquiryDetailsPage() {
         PROFORMA_ISSUED: ["PROFORMA_CREATED"],
         OTHER_DOCUMENTS: ["OTHER_DOCS_UPLOADED", "OTHER_DOCS_SKIPPED"],
         PURCHASE_ORDER_CREATED: ["PO_UPLOADED", "PO_SKIPPED"],
+        CONVERT_TO_ORDER: ["CONVERT_TO_ORDER"],
     };
     const fallbackActionBy: Record<string, string> = {
         QUOTATION_REVISION: "BUYER",
@@ -1348,13 +1419,14 @@ export default function EnquiryDetailsPage() {
         PROFORMA_ISSUED: "SUPPLIER",
         OTHER_DOCUMENTS: "BOTH",
         PURCHASE_ORDER_CREATED: "BUYER",
+        CONVERT_TO_ORDER: "EITHER",
     };
     const requiredActions = Array.isArray(currentRule?.requiredActions) && currentRule?.requiredActions?.length
         ? currentRule.requiredActions
         : (fallbackActions[normalizedStageKey] || []);
     const displayActions = (() => {
-        const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED"].includes(String(key || "").toUpperCase()));
-        return filtered.filter((key: string) => String(key || "").toUpperCase() !== "SUPPLIER_QTY_CONFIRMED");
+        const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"].includes(String(key || "").toUpperCase()));
+        return filtered;
     })();
     const actionBy = String((currentRule as any)?.actionBy || fallbackActionBy[normalizedStageKey] || "").toUpperCase();
     const formatActionByLabel = (value: string) => {
@@ -1380,6 +1452,7 @@ export default function EnquiryDetailsPage() {
         SUPPLIER_QTY_CONFIRMED: "Confirm Quantity",
         REVISION_REQUESTED: "Request Revision",
         REVISION_CONFIRMED: "Confirm Revision",
+        REVISION_SKIPPED: "Skip Revision",
         QUOTATION_CREATED: "Create Quotation",
         QUOTATION_ACCEPTED: "Accept Quotation",
         RETURN_TO_REVISION: "Return to Revision",
@@ -1389,6 +1462,7 @@ export default function EnquiryDetailsPage() {
         OTHER_DOCS_SKIPPED: "Skip Other Docs",
         PO_UPLOADED: "Upload Purchase Order",
         PO_SKIPPED: "Skip Purchase Order",
+        CONVERT_TO_ORDER: "Convert to Order",
     };
     const handleActionPress = (actionKey: string) => {
         if (!actionKey) return;
@@ -1400,8 +1474,20 @@ export default function EnquiryDetailsPage() {
             onFinalizeOpen();
             return;
         }
+        if (actionKey === "CONVERT_TO_ORDER") {
+            onOpen();
+            return;
+        }
+        if (actionKey === "SUPPLIER_QTY_CONFIRMED") {
+            setInventoryAcceptOpen(true);
+            return;
+        }
         if (actionKey === "QUOTATION_CREATED") {
             if (quotationId && quotationDoc) {
+                if (quotationStatus !== "DRAFT") {
+                    applyActionMutation.mutate({ actionKey: "QUOTATION_CREATED" });
+                    return;
+                }
                 openDocViewer(quotationDoc);
                 return;
             }
@@ -1415,7 +1501,10 @@ export default function EnquiryDetailsPage() {
         SUPPLIER_QTY_CONFIRMED: Boolean((enquiry as any)?.supplierQtyConfirmedAt),
         REVISION_REQUESTED: Boolean((enquiry as any)?.revisionRequestedAt),
         REVISION_CONFIRMED: Boolean((enquiry as any)?.revisionThread?.buyerConfirmedAt),
-        QUOTATION_CREATED: Boolean((enquiry as any)?.quotationCreatedAt),
+        // Keep QUOTATION_CREATED actionable while we're on that stage,
+        // otherwise the user gets stuck after a revision loop.
+        QUOTATION_CREATED:
+            Boolean((enquiry as any)?.quotationCreatedAt) && normalizedStageKey !== "QUOTATION_CREATED",
         QUOTATION_ACCEPTED: Boolean(enquiry?.buyerConfirmedAt),
         RETURN_TO_REVISION: Boolean((enquiry as any)?.revisionRequestedAt),
         RESPONSIBILITIES_FINALIZED: Boolean((enquiry as any)?.responsibilitiesFinalizedAt),
@@ -1424,6 +1513,7 @@ export default function EnquiryDetailsPage() {
         OTHER_DOCS_SKIPPED: Boolean((enquiry as any)?.otherDocsCompletedAt),
         PO_UPLOADED: Boolean((enquiry as any)?.poSubmittedAt),
         PO_SKIPPED: Boolean((enquiry as any)?.poSubmittedAt),
+        CONVERT_TO_ORDER: Boolean(isConvertedFlow),
     };
     const scrollToRevisionPanel = () => {
         if (typeof document === "undefined") return;
@@ -1519,12 +1609,9 @@ export default function EnquiryDetailsPage() {
     const revisionBuyerRequestedAt = (enquiry as any)?.revisionThread?.buyerRequestedAt || null;
     const revisionBuyerConfirmedAt = (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
     const allRevisionAcknowledged = revisionItems.length > 0 && revisionItems.every((item: any) => {
-        const itemKey = String(item?.key || "").toUpperCase();
-        const reply = revisionReplies.find((r) => r.key === itemKey);
-        const acknowledged = Boolean(reply?.acknowledged ?? item?.supplierAcknowledged);
-        const hasCounter = reply?.counterRate !== undefined && reply?.counterRate !== null && String(reply?.counterRate).trim() !== "";
+        const acknowledged = Boolean(item?.supplierAcknowledged);
         const counterSaved = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
-        return acknowledged || hasCounter || counterSaved;
+        return acknowledged || counterSaved;
     });
     const canBuyerRevision = isBuyer || isSystemAdmin || isAssignedOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isAssignedOperator;
@@ -1912,7 +1999,15 @@ export default function EnquiryDetailsPage() {
                                 <span className="text-[10px] font-bold text-default-400">{String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}</span>
                             </div>
                             {normalizedStageKey === "QUOTATION_REVISION" ? (
-                                <div className="text-xs text-default-500">Revision actions are available in the panel below.</div>
+                                <div className="text-xs text-default-500">
+                                    <div className="font-semibold text-default-600">Stage actions for this step:</div>
+                                    <div className="mt-1 flex flex-wrap gap-2">
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Submit Revision (Buyer)</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Save Reply (Supplier)</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-default-100 text-[10px] font-bold uppercase tracking-widest">Confirm Revision (Buyer)</span>
+                                    </div>
+                                    <div className="mt-1">Use the revision panel below to perform these actions.</div>
+                                </div>
                             ) : displayActions.length === 0 ? (
                                 <div className="text-xs text-default-500">No actions configured for this stage.</div>
                             ) : (
@@ -1942,290 +2037,379 @@ export default function EnquiryDetailsPage() {
                         </div>
 
                         {normalizedStageKey === "QUOTATION_REVISION" && (
-                            <div id="revision-panel" className="mt-4 rounded-2xl border border-default-200/50 bg-background/60 px-4 py-4">
-                                <div className="flex items-center justify-between mb-3">
+                            <div id="revision-panel" className="mt-8 rounded-[1.75rem] border border-default-200/50 bg-content1/50 backdrop-blur-3xl overflow-hidden shadow-xl relative group/rev">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover/rev:opacity-[0.04] transition-opacity pointer-events-none rotate-12 duration-700">
+                                    <FiTrendingDown size={140} />
+                                </div>
+                                <div className="px-6 pt-6 pb-3 flex items-center justify-between border-b border-divider/50 bg-white/10 dark:bg-black/10">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Revision Panel</span>
-                                        <span className="text-sm font-bold">Buyer requests, supplier replies</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                                            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-default-500 dark:text-default-400">Negotiation Loop</span>
+                                        </div>
+                                        <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
+                                            <FiEdit3 className="text-warning-500" size={20} />
+                                            Revision Hub
+                                        </h3>
                                     </div>
                                     {revisionBuyerConfirmedAt && (
-                                        <Chip size="sm" color="success" variant="flat">Confirmed</Chip>
+                                        <div className="px-4 py-2 rounded-2xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                            <FiCheckCircle size={14} />
+                                            Negotiation Finalized
+                                        </div>
                                     )}
                                 </div>
 
-                                {revisionItems.length === 0 && canBuyerRevision && (
-                                    <div className="space-y-3">
-                                        <Checkbox isSelected={clarificationReasonRate} onValueChange={setClarificationReasonRate}>
-                                            Rate
-                                        </Checkbox>
-                                        {clarificationReasonRate && (
-                                            <Input
-                                                type="number"
-                                                label="Requested Rate"
-                                                placeholder="Enter rate"
-                                                value={clarificationRate}
-                                                onValueChange={setClarificationRate}
-                                            />
-                                        )}
-                                        <Checkbox isSelected={clarificationReasonPayment} onValueChange={setClarificationReasonPayment}>
-                                            Payment Terms
-                                        </Checkbox>
-                                        <Checkbox isSelected={clarificationReasonTimeline} onValueChange={setClarificationReasonTimeline}>
-                                            Delivery Timeline
-                                        </Checkbox>
-                                        <div className="flex flex-col gap-1">
-                                            <Checkbox isSelected={clarificationCommunicated} onValueChange={setClarificationCommunicated}>
-                                                I have informed the supplier about this revision.
-                                            </Checkbox>
-                                            {!clarificationCommunicated && (
-                                                <span className="text-[11px] font-semibold text-warning-500">Check this box to enable Submit.</span>
-                                            )}
-                                        </div>
-                                        {revisionError && (
-                                            <div className="text-xs font-bold text-danger-500">{revisionError}</div>
-                                        )}
-                                        <div className="flex flex-col items-end gap-1">
-                                            <Button
-                                                color="primary"
-                                                className="font-bold"
-                                                isLoading={revisionRequestMutation.isPending}
-                                                isDisabled={
-                                                    !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
-                                                    (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
-                                                    !clarificationCommunicated
-                                                }
-                                                onPress={async () => {
-                                                    const reasonsSelected = clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline;
-                                                    if (!reasonsSelected) {
-                                                        setRevisionError("Select at least one reason.");
-                                                        return;
-                                                    }
-                                                    if (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) {
-                                                        setRevisionError("Enter a valid rate.");
-                                                        return;
-                                                    }
-                                                    if (!clarificationCommunicated) {
-                                                        setRevisionError("Please confirm communication to supplier.");
-                                                        return;
-                                                    }
-                                                    setRevisionError("");
-                                                    const timeoutId = setTimeout(() => {
-                                                        setRevisionError("Request is taking too long. Please retry.");
-                                                    }, 15000);
-                                                    try {
-                                                        await revisionRequestMutation.mutateAsync();
-                                                    } finally {
-                                                        clearTimeout(timeoutId);
-                                                    }
-                                                }}
-                                            >
-                                                Submit Revision
-                                            </Button>
-                                            {isSystemAdmin && (
-                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                                    Action by: Buyer
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {revisionItems.length > 0 && (
-                                    <div className="space-y-3">
-                                        {revisionItems.map((item: any) => {
-                                            const itemKey = String(item.key || "").toUpperCase();
-                                            const reply = revisionReplies.find((r) => r.key === itemKey) || { acknowledged: false, counterRate: "" };
-                                            return (
-                                                <div key={itemKey} className="rounded-xl border border-divider/50 px-3 py-2 bg-background/40">
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <div className="text-xs font-bold uppercase tracking-widest text-default-500">{itemKey.replaceAll("_", " ")}</div>
-                                                        {item.supplierAcknowledged && <Chip size="sm" color="success" variant="flat">Acknowledged</Chip>}
+                                <div className="p-6">
+                                    {revisionItems.length === 0 && canBuyerRevision && (
+                                        <div className="space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <button
+                                                    onClick={() => setClarificationReasonRate(!clarificationReasonRate)}
+                                                    className={`flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-300 ${clarificationReasonRate ? "bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.01]" : "bg-white/40 dark:bg-black/20 border-default-200 hover:border-primary/50"}`}
+                                                >
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${clarificationReasonRate ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
+                                                        <FiTrendingDown size={20} />
                                                     </div>
-                                                    {itemKey === "RATE" && (
-                                                        <div className="text-xs text-default-500 mt-1">Buyer requested: {item.buyerRate ?? "-"}</div>
-                                                    )}
-                                                    {canSupplierRevision && (
-                                                        <div className="mt-2 flex flex-col gap-2">
-                                                            <Checkbox
-                                                                isSelected={reply.acknowledged}
-                                                                onValueChange={(val) => {
-                                                                    setRevisionReplies((prev) => {
-                                                                        const existing = prev.find((r) => r.key === itemKey);
-                                                                        if (!existing) {
-                                                                            return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
-                                                                        }
-                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
-                                                                    });
-                                                                }}
-                                                            >
-                                                                Acknowledge
-                                                            </Checkbox>
-                                                            {itemKey === "RATE" && reply.acknowledged && (
-                                                                <Input
-                                                                    type="number"
-                                                                    label="Counter Rate (optional)"
-                                                                    placeholder="Enter counter rate"
-                                                                    value={reply.counterRate || ""}
-                                                                    onValueChange={(val) => {
-                                                                        setRevisionReplies((prev) => {
-                                                                            const existing = prev.find((r) => r.key === itemKey);
-                                                                            if (!existing) {
-                                                                                return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
-                                                                            }
-                                                                            return prev.map((r) => r.key === itemKey ? { ...r, counterRate: val } : r);
-                                                                        });
-                                                                    }}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                        <div className="flex flex-wrap items-center gap-4 justify-end">
-                                            {canSupplierRevision && (
-                                                <div className="flex flex-col items-end gap-1">
-                                                    <Button
-                                                        variant="flat"
-                                                        color="primary"
-                                                        className="font-bold"
-                                                        isLoading={revisionReplyMutation.isPending}
-                                                        isDisabled={!revisionReplies.some((item) => item.acknowledged)}
-                                                        onPress={async () => {
-                                                            const hasAcknowledged = revisionReplies.some((item) => item.acknowledged);
-                                                            if (!hasAcknowledged) {
-                                                                setRevisionReplyError("Select at least one item to acknowledge before saving.");
-                                                                return;
-                                                            }
-                                                            setRevisionReplyError("");
-                                                            setRevisionReplySuccess("");
-                                                            const timeoutId = setTimeout(() => {
-                                                                setRevisionReplyError("Save is taking too long. Please retry.");
-                                                            }, 15000);
-                                                            try {
-                                                                await revisionReplyMutation.mutateAsync();
-                                                            } finally {
-                                                                clearTimeout(timeoutId);
-                                                            }
+                                                    <div className="flex flex-col items-start gap-1">
+                                                        <span className="text-sm font-black text-foreground tracking-tight">Rate Revision</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Buyer Target Pricing</span>
+                                                    </div>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setClarificationReasonPayment(!clarificationReasonPayment)}
+                                                    className={`flex flex-col gap-4 p-5 rounded-3xl border transition-all duration-300 ${clarificationReasonPayment ? "bg-success/10 border-success shadow-lg shadow-success/10 scale-[1.02]" : "bg-white/40 dark:bg-black/20 border-default-200 hover:border-success/50"}`}
+                                                >
+                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${clarificationReasonPayment ? "bg-success text-white" : "bg-success/10 text-success"}`}>
+                                                        <FiPercent size={24} />
+                                                    </div>
+                                                    <div className="flex flex-col items-start gap-1">
+                                                        <span className="text-sm font-black text-foreground tracking-tight">Payment Terms</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Framework Adjustments</span>
+                                                    </div>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setClarificationReasonTimeline(!clarificationReasonTimeline)}
+                                                    className={`flex flex-col gap-4 p-5 rounded-3xl border transition-all duration-300 ${clarificationReasonTimeline ? "bg-warning/10 border-warning shadow-lg shadow-warning/10 scale-[1.02]" : "bg-white/40 dark:bg-black/20 border-default-200 hover:border-warning/50"}`}
+                                                >
+                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${clarificationReasonTimeline ? "bg-warning text-white" : "bg-warning/10 text-warning"}`}>
+                                                        <LuClock size={24} />
+                                                    </div>
+                                                    <div className="flex flex-col items-start gap-1">
+                                                        <span className="text-sm font-black text-foreground tracking-tight">Timeline Shift</span>
+                                                        <span className="text-[10px] text-default-500 dark:text-default-400 font-bold uppercase tracking-widest text-left leading-none">Logistics Milestone</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+
+                                            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                                {clarificationReasonRate && (
+                                                    <Input
+                                                        type="number"
+                                                        label="Requested Rate"
+                                                        variant="bordered"
+                                                        placeholder="Enter preferred unit rate"
+                                                        value={clarificationRate}
+                                                        onValueChange={setClarificationRate}
+                                                        className="max-w-md"
+                                                        classNames={{
+                                                            label: "font-black uppercase text-[10px] tracking-widest text-primary mb-1 pl-1",
+                                                            inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-primary transition-all h-14 shadow-inner",
+                                                            input: "font-black text-sm",
                                                         }}
-                                                    >
-                                                        Save Reply
-                                                    </Button>
-                                                    {isSystemAdmin && (
-                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                                            Action by: Supplier
+                                                    />
+                                                )}
+
+                                                {clarificationReasonTimeline && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <Select
+                                                            label="Delivery Protocol"
+                                                            variant="bordered"
+                                                            placeholder="Select milestone"
+                                                            selectedKeys={clarificationDeliveryMode ? [clarificationDeliveryMode] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const value = Array.from(keys)[0] as string | undefined;
+                                                                setClarificationDeliveryMode((value as any) || "");
+                                                            }}
+                                                            classNames={{
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-warning-600 mb-1 pl-1",
+                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
+                                                                value: "font-black text-xs uppercase"
+                                                            }}
+                                                        >
+                                                            <SelectItem key="DELIVER_TO_LOCATION">DELIVER TO LOCATION</SelectItem>
+                                                            <SelectItem key="PRODUCT_READY">PRODUCT READY</SelectItem>
+                                                        </Select>
+                                                        <Input
+                                                            type="date"
+                                                            label="Precision Date"
+                                                            variant="bordered"
+                                                            value={clarificationDeliveryDate}
+                                                            onValueChange={setClarificationDeliveryDate}
+                                                            classNames={{
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-warning-600 mb-1 pl-1",
+                                                                inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
+                                                                input: "font-black text-xs uppercase"
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-[2rem] bg-default-100/30 border border-default-200/50">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-3">
+                                                        <Checkbox
+                                                            isSelected={clarificationCommunicated}
+                                                            onValueChange={setClarificationCommunicated}
+                                                            classNames={{ wrapper: "rounded-lg" }}
+                                                        />
+                                                        <span className="text-xs font-black text-foreground uppercase tracking-tight italic">External Synchronization Confirmed</span>
+                                                    </div>
+                                                    <p className="text-[10px] text-default-400 font-bold ml-8">I have informed the supplier about this revision through secure channels.</p>
+                                                    {!clarificationCommunicated && (
+                                                        <span className="text-[9px] font-black text-warning-600 uppercase tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
+                                                            <FiAlertCircle size={10} />
+                                                            Protocol confirmation required
                                                         </span>
                                                     )}
                                                 </div>
-                                            )}
-                                            {canBuyerRevision && (
+
                                                 <div className="flex flex-col items-end gap-1">
                                                     <Button
+                                                        size="lg"
                                                         color="primary"
-                                                        className="font-bold"
-                                                        isDisabled={!allRevisionAcknowledged}
-                                                        isLoading={applyActionMutation.isPending}
-                                                        onPress={async () => {
-                                                            if (!allRevisionAcknowledged) {
-                                                                setRevisionConfirmError("Supplier reply is required for all revision items before confirming.");
-                                                                return;
-                                                            }
-                                                            setRevisionConfirmError("");
-                                                            const timeoutId = setTimeout(() => {
-                                                                setRevisionConfirmError("Confirmation is taking too long. Please retry.");
-                                                            }, 15000);
-                                                            try {
-                                                                await applyActionMutation.mutateAsync({ actionKey: "REVISION_CONFIRMED" });
-                                                            } catch (error: any) {
-                                                                const message = error?.response?.data?.message || error?.message || "Failed to confirm revision.";
-                                                                setRevisionConfirmError(message);
-                                                            } finally {
-                                                                clearTimeout(timeoutId);
-                                                            }
-                                                        }}
+                                                        className="px-10 h-12 rounded-xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                        isLoading={revisionRequestMutation.isPending}
+                                                        isDisabled={
+                                                            !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
+                                                            (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                                            (clarificationReasonTimeline && (!clarificationDeliveryMode || !clarificationDeliveryDate)) ||
+                                                            !clarificationCommunicated
+                                                        }
+                                                        onPress={() => revisionRequestMutation.mutate()}
                                                     >
-                                                        Confirm Revision
+                                                        Submit Revision
                                                     </Button>
                                                     {isSystemAdmin && (
-                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest mr-2">
                                                             Action by: Buyer
                                                         </span>
                                                     )}
                                                 </div>
+                                            </div>
+                                            {revisionError && (
+                                                <div className="text-xs font-bold text-danger-500 px-6 animate-bounce">{revisionError}</div>
                                             )}
                                         </div>
-                                        {revisionReplyError && (
-                                            <div className="text-xs font-bold text-danger-500">{revisionReplyError}</div>
-                                        )}
-                                        {revisionReplySuccess && (
-                                            <div className="text-xs font-bold text-success-600">{revisionReplySuccess}</div>
-                                        )}
-                                        {revisionConfirmError && (
-                                            <div className="text-xs font-bold text-danger-500">{revisionConfirmError}</div>
-                                        )}
-                                        {!allRevisionAcknowledged && (
-                                            <div className="text-xs text-warning-500 font-semibold">Supplier must acknowledge all items before confirmation.</div>
-                                        )}
-                                    </div>
-                                )}
+                                    )}
+
+                                    {revisionItems.length > 0 && (
+                                        <div className="space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {revisionItems.map((item: any) => {
+                                                    const itemKey = String(item.key || "").toUpperCase();
+                                                    const reply = revisionReplies.find((r) => r.key === itemKey) || { acknowledged: false, counterRate: "" };
+                                                    const itemLabel = itemKey.replaceAll("_", " ");
+
+                                                    return (
+                                                        <div key={itemKey} className="group relative flex flex-col gap-4 p-6 rounded-[2rem] border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl transition-all duration-500">
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner ${itemKey === "RATE" ? "bg-primary/10 text-primary" : itemKey === "DELIVERY_TIMELINE" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"}`}>
+                                                                        {itemKey === "RATE" ? <FiTrendingDown size={20} /> : itemKey === "DELIVERY_TIMELINE" ? <LuClock size={20} /> : <FiPercent size={20} />}
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-1">{itemLabel}</span>
+                                                                        <span className="text-base font-black text-foreground tracking-tighter">Buyer Request</span>
+                                                                    </div>
+                                                                </div>
+                                                                {item.supplierAcknowledged && (
+                                                                    <div className="px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-600 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1.5">
+                                                                        <LuCheck size={12} />
+                                                                        Synced
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="p-4 rounded-2xl bg-default-100/50 border border-divider/50 flex flex-col gap-2">
+                                                                <span className="text-[10px] font-bold text-default-500 dark:text-default-400 uppercase tracking-widest leading-none">Specifications</span>
+                                                                {itemKey === "RATE" && (
+                                                                    <div className="text-sm font-black text-foreground">Requested Rate: <span className="text-primary italic">{formatRate(item.buyerRate)}</span></div>
+                                                                )}
+                                                                {itemKey === "DELIVERY_TIMELINE" && (
+                                                                    <div className="text-sm font-black text-foreground">
+                                                                        Target: <span className="text-warning-600 underline decoration-2 underline-offset-4">{item.buyerDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span> 
+                                                                        <span className="text-default-400 font-bold mx-2">•</span> 
+                                                                        {item.buyerDeliveryDate ? dayjs(item.buyerDeliveryDate).format("DD MMM YYYY") : "-"}
+                                                                    </div>
+                                                                )}
+                                                                {itemKey === "PAYMENT_TERMS" && (
+                                                                    <div className="text-sm font-black text-foreground">Framework Revision Requested</div>
+                                                                )}
+                                                            </div>
+
+                                                            {canSupplierRevision && (
+                                                                <div className="mt-2 flex flex-col gap-4 p-4 rounded-2xl bg-white dark:bg-black/40 border border-primary/20 shadow-lg shadow-primary/5">
+                                                                    <Checkbox
+                                                                        isSelected={reply.acknowledged}
+                                                                        onValueChange={(val) => {
+                                                                            setRevisionReplies((prev) => {
+                                                                                const existing = prev.find((r) => r.key === itemKey);
+                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
+                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
+                                                                            });
+                                                                            setRevisionConfirmError("");
+                                                                        }}
+                                                                        classNames={{ label: "text-xs font-black uppercase tracking-tight text-foreground" }}
+                                                                    >
+                                                                        Acknowledge Parameter
+                                                                    </Checkbox>
+                                                                    {itemKey === "RATE" && reply.acknowledged && (
+                                                                        <Input
+                                                                            type="number"
+                                                                            size="sm"
+                                                                            label="Counter Proposal (Rate)"
+                                                                            variant="bordered"
+                                                                            placeholder="Enter counter rate"
+                                                                            value={reply.counterRate || ""}
+                                                                            onValueChange={(val) => {
+                                                                                setRevisionReplies((prev) => {
+                                                                                    const existing = prev.find((r) => r.key === itemKey);
+                                                                                    if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: val }];
+                                                                                    return prev.map((r) => r.key === itemKey ? { ...r, counterRate: val } : r);
+                                                                                });
+                                                                                setRevisionConfirmError("");
+                                                                            }}
+                                                                            classNames={{
+                                                                                label: "font-black uppercase text-[10px] tracking-widest text-default-400 group-focus-within/input:text-primary transition-colors",
+                                                                                inputWrapper: "rounded-xl border-divider bg-default-100/5 dark:bg-black/10 hover:bg-default-100/10 h-10 shadow-inner group-focus-within/input:border-primary",
+                                                                                input: "font-black text-sm"
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-default-100/30 border border-default-200/50 mt-4">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400">Negotiation Status</span>
+                                                    {!allRevisionAcknowledged ? (
+                                                        <div className="flex items-center gap-1.5 text-warning-600 font-bold text-[10px] italic uppercase tracking-tight">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                                                            Waiting for supplier acknowledgment
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1.5 text-success-600 font-bold text-[10px] italic uppercase tracking-tight">
+                                                            <FiCheckCircle size={14} />
+                                                            All parameters synchronized
+                                                        </div>
+                                                    )}
+                                                </div>
+ 
+                                                <div className="flex items-center gap-3">
+                                                    {canSupplierRevision && (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                color="primary"
+                                                                variant="shadow"
+                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                                                                isLoading={revisionReplyMutation.isPending}
+                                                                isDisabled={!revisionReplies.some((item: any) => item.acknowledged)}
+                                                                onPress={() => revisionReplyMutation.mutate()}
+                                                                startContent={!revisionReplyMutation.isPending && <LuFileCheck size={14} />}
+                                                            >
+                                                                Propagate Sync
+                                                            </Button>
+                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Supplier</span>}
+                                                        </div>
+                                                    )}
+ 
+                                                    {canBuyerRevision && (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                color="success"
+                                                                className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-success/20 text-white hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                                                                isDisabled={!allRevisionAcknowledged}
+                                                                isLoading={applyActionMutation.isPending}
+                                                                onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_CONFIRMED" })}
+                                                                startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
+                                                            >
+                                                                Authorize Revision
+                                                            </Button>
+                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Buyer</span>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="px-6 space-y-2">
+                                                {revisionReplyError && <div className="text-xs font-bold text-danger-500 animate-bounce">{revisionReplyError}</div>}
+                                                {revisionReplySuccess && <div className="text-xs font-bold text-success-600 animate-pulse">{revisionReplySuccess}</div>}
+                                                {revisionConfirmError && <div className="text-xs font-bold text-danger-500 animate-bounce">{revisionConfirmError}</div>}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </CardBody>
                 </Card>
 
-                <Card className="w-full border border-default-200/50">
-                    <CardHeader className="flex flex-col items-start gap-1 px-4 md:px-6 pt-4 md:pt-5">
-                        <span className="font-bold text-lg">Documentation Checklist</span>
-                        <span className="text-[10px] uppercase font-black tracking-wider text-default-400">
+                <Card className="w-full border border-default-200/50 shadow-md rounded-2xl">
+                    <CardHeader className="flex flex-col items-start gap-1 px-5 pt-5">
+                        <span className="font-bold text-base tracking-tight">Documentation Checklist</span>
+                        <span className="text-[9px] uppercase font-black tracking-widest text-default-400">
                             Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
                         </span>
                     </CardHeader>
-                    <CardBody className="px-4 md:px-6 pb-4 md:pb-6">
+                    <CardBody className="px-5 pb-5 pt-3">
                         {rulesForStage.filter(canSeeRule).length === 0 ? (
-                            <div className="text-sm text-default-500 text-left">No documentation rules configured for this stage.</div>
+                            <div className="text-xs text-default-400 py-4 italic">No configuration for this stage.</div>
                         ) : (
-                            <div className="flex flex-col gap-2">
+                            <div className="space-y-2">
                                 {rulesForStage.filter(canSeeRule).map((rule: any) => {
                                     const hasDoc = hasDocType(String(rule.docType || ""));
                                     return (
-                                        <div key={rule._id} className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-divider/50 bg-background/50 hover:bg-default-50 transition-colors group">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="font-black text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">{rule.docType}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400">{rule.responsibleRole}</span>
-                                                    <span className="w-1 h-1 rounded-full bg-default-300" />
-                                                    <span className="text-[10px] font-bold text-primary/70 uppercase tracking-tight">{rule.actionType} MODE</span>
+                                        <div key={rule._id} className="flex items-center justify-between gap-4 p-3.5 rounded-xl border border-divider/50 bg-default-50/30 hover:bg-default-50 transition-colors group">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-bold text-xs tracking-tight text-foreground group-hover:text-primary transition-colors">{rule.docType}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-400">{rule.responsibleRole}</span>
+                                                    <div className="w-1 h-1 rounded-full bg-default-300" />
+                                                    <span className="text-[9px] font-bold text-default-500 uppercase tracking-tight">{rule.actionType}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-2">
                                                 <Chip 
                                                     size="sm" 
-                                                    variant="flat" 
+                                                    variant="dot" 
                                                     color={hasDoc ? "success" : "warning"}
-                                                    className="font-black uppercase text-[9px] tracking-widest px-2"
+                                                    className="font-black uppercase text-[8px] tracking-[0.1em] h-5 border-none bg-transparent"
                                                 >
                                                     {hasDoc ? "ARCHIVED" : "AWAITING"}
                                                 </Chip>
                                                 {!hasDoc && canActOnRule(rule) && (
-                                                    <div className="flex flex-col items-end gap-1">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="flat"
-                                                            color="primary"
-                                                            className="font-black text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl"
-                                                            onPress={() => {
-                                                                setDocActionRule(rule);
-                                                                setDocActionOpen(true);
-                                                            }}
-                                                        >
-                                                            {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Initialize"}
-                                                        </Button>
-                                                        {isSystemAdmin && formatActionByLabel(rule?.responsibleRole) && (
-                                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                                                Action by: {formatActionByLabel(rule?.responsibleRole)}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="flat"
+                                                        color="primary"
+                                                        className="font-black text-[9px] uppercase tracking-widest h-8 px-4 rounded-lg"
+                                                        onPress={() => {
+                                                            setDocActionRule(rule);
+                                                            setDocActionOpen(true);
+                                                        }}
+                                                    >
+                                                        {String(rule.actionType || "") === "UPLOAD" ? "Upload" : "Initialize"}
+                                                    </Button>
                                                 )}
                                             </div>
                                         </div>
@@ -2236,56 +2420,78 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
 
-                <Card className="w-full border border-default-200/50">
-                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-4 md:px-6 pt-4 md:pt-5 pb-0">
+                <Card className="w-full border border-default-200/50 bg-content1/50 backdrop-blur-xl overflow-hidden rounded-[1.75rem] shadow-xl group/vault">
+                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 pt-6 pb-0">
                         <div className="flex flex-col gap-1">
-                            <span className="font-bold text-lg">All Documents</span>
-                            <span className="text-[10px] uppercase font-black tracking-wider text-default-400">LOI, quotation, proforma, PO, and more</span>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,0,0,0.1)]" />
+                                <span className="text-[10px] uppercase font-black tracking-[0.2em] text-default-500 dark:text-default-400">Document Vault</span>
+                            </div>
+                            <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
+                                <LuFileText className="text-primary" size={20} />
+                                Trade Repository
+                            </h3>
                         </div>
-                        <Chip size="sm" variant="flat" color="primary" className="font-black uppercase text-[9px] tracking-widest px-2">
-                            {sortedEnquiryDocs.length} Files
-                        </Chip>
+                        <div className="flex items-center gap-3">
+                            <div className="px-3 py-1.5 rounded-xl bg-white/10 dark:bg-black/20 border border-divider/50 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <LuHistory size={12} className="text-default-400" />
+                                {sortedEnquiryDocs.length} Active Records
+                            </div>
+                        </div>
                     </CardHeader>
-                    <CardBody className="px-4 md:px-6 pb-4 md:pb-6">
+                    <CardBody className="px-6 pb-6 pt-4">
                         {sortedEnquiryDocs.length === 0 ? (
-                            <div className="text-sm text-default-500 text-left">No documents created yet for this enquiry.</div>
+                            <div className="flex flex-col items-center justify-center py-12 px-6 rounded-[2rem] border-2 border-dashed border-divider bg-default-50/50">
+                                <div className="w-16 h-16 rounded-[1.5rem] bg-default-100 flex items-center justify-center text-default-400 mb-4 opacity-50">
+                                    <LuFileText size={32} />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-default-400">No records found</p>
+                                <p className="text-xs text-default-300 font-bold mt-1 italic">Initiate trade actions to generate documents.</p>
+                            </div>
                         ) : (
-                            <div className="flex flex-col gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {sortedEnquiryDocs.map((doc: any) => {
                                     const typeKey = String(doc?.type || "").toUpperCase();
                                     const label = DOC_TYPE_LABELS[typeKey] || String(typeKey || "").replaceAll("_", " ");
                                     const status = String(doc?.status || "DRAFT").toUpperCase();
                                     const createdAt = doc?.createdAt ? dayjs(doc.createdAt).format("DD MMM YYYY") : "";
                                     const hasFile = Boolean(doc?.fileUrl);
+
+                                    const isSent = status === "SENT";
+                                    const isDraft = status === "DRAFT";
+
                                     return (
-                                        <div key={String(doc?._id || doc?.id || `${typeKey}-${createdAt}`)} className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-divider/50 bg-background/50 hover:bg-default-50 transition-colors group">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="font-black text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">{label}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-400">{status}</span>
-                                                    {createdAt && (
-                                                        <>
-                                                            <span className="w-1 h-1 rounded-full bg-default-300" />
-                                                            <span className="text-[10px] font-bold text-default-500">{createdAt}</span>
-                                                        </>
-                                                    )}
-                                                    {hasFile && (
-                                                        <>
-                                                            <span className="w-1 h-1 rounded-full bg-default-300" />
-                                                            <span className="text-[10px] font-bold text-success-600 uppercase tracking-widest">FILE</span>
-                                                        </>
-                                                    )}
+                                        <div key={String(doc?._id || doc?.id || `${typeKey}-${createdAt}`)} className="group relative flex items-center justify-between gap-4 p-4 rounded-[1.5rem] border border-white dark:border-default-200/10 bg-white/60 dark:bg-black/20 shadow-sm hover:shadow-xl hover:scale-[1.01] hover:border-primary/30 transition-all duration-500">
+                                            <div className="flex items-center gap-3 flex-1">
+                                                <div className={`w-11 h-11 rounded-[1rem] flex items-center justify-center shadow-inner transition-colors duration-500 ${isDraft ? "bg-default-100 dark:bg-default-50 text-default-400 dark:text-default-500" : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white"}`}>
+                                                    {typeKey === "LETTER_OF_INTENT" ? <FiFileText size={20} /> : typeKey === "QUOTATION" ? <LuFileCheck size={20} /> : <LuFileText size={20} />}
+                                                </div>
+                                                <div className="flex flex-col gap-0.5 truncate">
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-500 dark:text-default-400 leading-none mb-0.5">{isDraft ? "Draft Version" : "Finalized Record"}</span>
+                                                    <span className="text-sm font-black text-foreground tracking-tighter truncate group-hover:text-primary transition-colors">{label}</span>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border transition-colors ${isSent ? "bg-success-500/10 border-success-500/20 text-success-600" : "bg-default-400/10 border-default-400/20 text-default-400"}`}>
+                                                            {status}
+                                                        </div>
+                                                        {createdAt && (
+                                                            <div className="flex items-center gap-1 text-[8px] font-bold text-default-400 uppercase tracking-widest">
+                                                                <LuClock size={9} />
+                                                                {createdAt}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex flex-col items-center gap-1">
                                                 <Button
-                                                    size="sm"
-                                                    variant="flat"
+                                                    isIconOnly
+                                                    variant="shadow"
                                                     color="primary"
-                                                    className="font-black text-[10px] uppercase tracking-widest h-8 px-4 rounded-xl"
+                                                    size="md"
+                                                    className="w-10 h-10 min-w-unit-10 rounded-xl shadow-lg shadow-primary/20"
                                                     onPress={() => openDocViewer(doc)}
                                                 >
-                                                    View
+                                                    <LuEye size={18} />
                                                 </Button>
                                             </div>
                                         </div>
@@ -2326,7 +2532,7 @@ export default function EnquiryDetailsPage() {
                                 {/* Enquiry Rate */}
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Enquiry Rate</span>
-                                    <span className="font-black text-xl text-primary">{convertRate(netRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
+                                    <span className="font-black text-xl text-primary">{formatRate(netRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
                                     <span className="text-xs text-default-400">At time of enquiry</span>
                                 </div>
 
@@ -2334,7 +2540,7 @@ export default function EnquiryDetailsPage() {
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Current Rate</span>
                                     {liveRate ? (
-                                        <span className="font-black text-xl text-foreground">{convertRate(liveNetRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
+                                        <span className="font-black text-xl text-foreground">{formatRate(liveNetRate)} <span className="text-xs font-bold text-default-400">/KG</span></span>
                                     ) : (
                                         <span className="font-bold text-default-400 text-lg">—</span>
                                     )}
@@ -2347,7 +2553,7 @@ export default function EnquiryDetailsPage() {
                                     {liveRate ? (
                                         <span className={`flex items-center gap-1.5 font-black text-xl ${priceDelta > 0 ? "text-danger" : priceDelta < 0 ? "text-success" : "text-default-500"}`}>
                                             {priceDelta > 0 ? <FiTrendingUp size={18} /> : priceDelta < 0 ? <FiTrendingDown size={18} /> : null}
-                                            {priceDelta > 0 ? "+" : ""}{convertRate(Math.abs(priceDelta))} <span className="text-xs font-bold text-default-400">({priceDeltaPct}%)</span>
+                                            {priceDelta > 0 ? "+" : ""}{formatRate(Math.abs(priceDelta))} <span className="text-xs font-bold text-default-400">({priceDeltaPct}%)</span>
                                         </span>
                                     ) : (
                                         <span className="font-bold text-default-400 text-lg">—</span>
@@ -2385,7 +2591,7 @@ export default function EnquiryDetailsPage() {
                                     : "bg-success/5 border-success/20 text-success-700"}`}>
                                     {priceDelta > 0 ? <FiTrendingUp size={16} className="mt-0.5 flex-shrink-0" /> : <FiTrendingDown size={16} className="mt-0.5 flex-shrink-0" />}
                                     <span>
-                                        Market price has {priceDelta > 0 ? "increased" : "decreased"} by {convertRate(Math.abs(priceDelta))}/KG ({Math.abs(Number(priceDeltaPct))}%) since this enquiry was created.
+                                        Market price has {priceDelta > 0 ? "increased" : "decreased"} by {formatRate(Math.abs(priceDelta))}/KG ({Math.abs(Number(priceDeltaPct))}%) since this enquiry was created.
                                         {priceDelta > 0 ? " Costs may be higher than quoted." : " You may be able to negotiate a better price."}
                                     </span>
                                 </div>
@@ -2451,7 +2657,7 @@ export default function EnquiryDetailsPage() {
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Rate / KG</span>
-                                <span className="font-bold text-success text-xl">{convertRate(netRate)}</span>
+                                <span className="font-bold text-success text-xl">{formatRate(netRate)}</span>
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Quantity</span>
@@ -2527,31 +2733,31 @@ export default function EnquiryDetailsPage() {
                             <div className="flex justify-end">
                                 <CurrencySelector />
                             </div>
-                            <div className="mt-3 text-[11px] text-default-500 font-medium">
-                                Base price only. Execution services (procurement/logistics/packaging/etc.) have separate charges.
+                            <div className="mt-3 text-[11px] text-default-500 font-medium leading-relaxed">
+                                Base price only (Ex-Mill / EXW / Ex-Factory). Execution services (procurement/logistics/packaging/etc.) have separate charges.
                             </div>
                             {(isAdmin || isMediator) ? (
                                 <div className="flex flex-col gap-3">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-default-500 font-medium">Base Rate (Supplier)</span>
-                                        <span className="font-semibold text-foreground">{convertRate(baseRate)}</span>
+                                    <div className="flex justify-between items-center text-sm mt-1">
+                                        <span className="text-default-500 font-medium">Ex-Mill Rate (Supplier)</span>
+                                        <span className="font-bold text-foreground">{formatRate(baseRate)}</span>
                                     </div>
                                     {isAdmin && adminCommission > 0 && (
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-default-500 font-medium">+ OBAOL Margin</span>
-                                            <span className="font-semibold text-success">{convertRate(adminCommission)}</span>
+                                            <span className="font-bold text-success">{formatRate(adminCommission)}</span>
                                         </div>
                                     )}
                                     {mediatorCommission > 0 && (
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-default-500 font-medium">+ Mediator Margin</span>
-                                            <span className="font-semibold text-warning-600">{convertRate(mediatorCommission)}</span>
+                                            <span className="font-bold text-warning-600">{formatRate(mediatorCommission)}</span>
                                         </div>
                                     )}
-                                    <div className="w-full h-[1px] bg-default-200 my-1" />
+                                    <div className="w-full h-[1px] bg-default-200 mt-1 mb-0.5" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-xs uppercase font-black tracking-widest text-default-400">Net Rate / KG</span>
-                                        <span className="font-black text-lg text-primary">{convertRate(netRate)}</span>
+                                        <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Net EXW Rate / KG</span>
+                                        <span className="font-black text-lg text-primary">{formatRate(netRate)}</span>
                                     </div>
                                     <div className="mt-4 p-4 bg-white/60 dark:bg-slate-900/40 rounded-xl border border-success/20 flex flex-col gap-1">
                                         <span className="text-[10px] uppercase font-black text-success-600 tracking-widest">Calculated Trade Volume</span>
@@ -2559,7 +2765,7 @@ export default function EnquiryDetailsPage() {
                                             {convertRate(tradeVolume)}
                                         </span>
                                         <span className="text-xs text-default-500 font-medium mt-1">
-                                            {quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {convertRate(netRate)}/KG
+                                            {quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {formatRate(netRate)}/KG
                                         </span>
                                     </div>
                                     {isAdmin && (
@@ -2573,12 +2779,12 @@ export default function EnquiryDetailsPage() {
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-col gap-1">
                                         <span className="text-[10px] uppercase font-bold text-default-400">Net Rate / KG</span>
-                                        <span className="font-black text-xl text-primary">{convertRate(netRate)}</span>
+                                        <span className="font-black text-xl text-primary">{formatRate(netRate)}</span>
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <span className="text-[10px] uppercase font-bold text-default-400">Total Trade Volume</span>
                                         <span className="font-black text-2xl text-success-600 tracking-tight">{convertRate(tradeVolume)}</span>
-                                        <span className="text-xs text-default-400">{quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {convertRate(netRate)}/KG</span>
+                                        <span className="text-xs text-default-400">{quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {formatRate(netRate)}/KG</span>
                                     </div>
                                 </div>
                             )}
@@ -2933,24 +3139,6 @@ export default function EnquiryDetailsPage() {
                                 )}
                             </div>
                         )}
-                        {quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && quotationStatus !== "DRAFT" && (enquiry as any)?.revisionRequestedAt && (
-                            <div className="flex flex-col items-start gap-1">
-                                <Button
-                                    color="warning"
-                                    className="w-full sm:w-auto font-black px-10 rounded-2xl h-14 text-[11px] tracking-[0.2em] uppercase italic"
-                                    isLoading={reopenQuotationMutation.isPending}
-                                    onPress={() => reopenQuotationMutation.mutate()}
-                                    startContent={<FiEdit3 size={18} />}
-                                >
-                                    Revise Proposal
-                                </Button>
-                                {isSystemAdmin && (
-                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                        Action by: Supplier
-                                    </span>
-                                )}
-                            </div>
-                        )}
                         {!quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && (
                             <div className="flex flex-col items-start gap-1">
                                 <Button
@@ -2969,25 +3157,6 @@ export default function EnquiryDetailsPage() {
                                 )}
                             </div>
                         )}
-
-                        {(isSeller || isAdmin) && !hasSellerAccepted && !isImportEnquiry && (
-                            <div className="flex flex-col items-start gap-1">
-                                <Button
-                                    color="success"
-                                    className="w-full sm:w-auto font-bold px-12 rounded-[1.25rem] h-16 text-[11px] tracking-widest uppercase bg-success text-success-foreground shadow-2xl transition-all hover:scale-105 active:scale-95 shadow-success-500/20"
-                                    isLoading={sellerAcceptMutation.isPending}
-                                    onPress={() => setInventoryAcceptOpen(true)}
-                                >
-                                    Confirm Shipment Load
-                                </Button>
-                                {isSystemAdmin && (
-                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                        Action by: Supplier
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
 
                         {isAdmin && (
                             <div className="flex flex-wrap gap-4 justify-center md:justify-end">
@@ -3083,33 +3252,79 @@ export default function EnquiryDetailsPage() {
                                     <span className="text-sm font-black uppercase tracking-widest text-default-400">Confirm Responsibility Finalization</span>
                                     <span className="text-lg font-black">Review responsibilities before locking</span>
                                 </ModalHeader>
-                                <ModalBody className="flex flex-col gap-4">
-                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
-                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Trade Terms</div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm font-semibold">
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Incoterm: <b>{responsibilitySummary.incotermLabel}</b></div>
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Payment: <b>{responsibilitySummary.paymentLabel}</b></div>
-                                            <div className="rounded-lg bg-default-100 px-3 py-2">Trade Type: <b>{responsibilitySummary.tradeType}</b></div>
+                                <ModalBody className="flex flex-col gap-4 py-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.2)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
                                         </div>
-                                    </div>
-                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
-                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Packaging Specs</div>
-                                        <div className="text-sm font-medium text-default-600 whitespace-pre-line">
-                                            {responsibilitySummary.packagingSpecs}
-                                        </div>
-                                    </div>
-                                    <div className="rounded-2xl border border-default-200/60 bg-default-50/60 dark:bg-default-100/5 p-4">
-                                        <div className="text-xs uppercase font-black tracking-widest text-default-400 mb-2">Responsibility Allocation</div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                            {responsibilitySummary.listItems.map((item) => (
-                                                <div key={item.label} className="rounded-lg bg-default-100 px-3 py-2">
-                                                    {item.label}: <b>{item.value}</b>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {[
+                                                { label: "Incoterm", value: responsibilitySummary.incotermLabel, icon: <LuGlobe size={14} className="text-primary" /> },
+                                                { label: "Payment", value: responsibilitySummary.paymentLabel, icon: <FiPercent size={14} className="text-warning-500" /> },
+                                                { label: "Trade Type", value: responsibilitySummary.tradeType, icon: <LuActivity size={14} className="text-success-500" /> },
+                                            ].map((term) => (
+                                                <div key={term.label} className="flex justify-between items-center rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 px-4 py-2.5 shadow-sm">
+                                                    <div className="flex items-center gap-2.5">
+                                                        {term.icon}
+                                                        <span className="text-default-500 dark:text-default-400 font-bold uppercase text-[9px] tracking-widest">{term.label}</span>
+                                                    </div>
+                                                    <span className="text-foreground font-black text-sm tracking-tight">{term.value}</span>
                                                 </div>
                                             ))}
                                         </div>
+ 
+                                    <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="w-1 h-3 rounded-full bg-success-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
+                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Packaging Specifications</span>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-white/40 dark:bg-black/40 border border-default-200/50 text-xs font-bold text-default-600 dark:text-default-400 italic whitespace-pre-line leading-relaxed shadow-sm">
+                                            {responsibilitySummary.packagingSpecs || "No additional specifications provided."}
+                                        </div>
                                     </div>
-                                    <div className="rounded-2xl border border-warning-400/30 bg-warning-500/5 px-4 py-3 text-xs text-warning-700 font-bold">
-                                        Finalizing will lock responsibilities and generate execution inquiries. Changes will not be allowed after conversion.
+ 
+                                    <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="w-1 h-3 rounded-full bg-warning-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
+                                            <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            {responsibilitySummary.listItems.map((item) => {
+                                                const ownerKey = String(item.value || "").toLowerCase();
+                                                let badgeStyles = "bg-default-100 text-default-400";
+                                                let icon = <LuShieldCheck size={14} />;
+                                                let label = "EXECUTION";
+ 
+                                                if (ownerKey === "buyer") {
+                                                    badgeStyles = "bg-primary/10 text-primary dark:text-primary-400 border border-primary/20";
+                                                    icon = <LuUser size={14} />;
+                                                    label = "BUYER";
+                                                } else if (ownerKey === "seller" || ownerKey.includes("supp")) {
+                                                    badgeStyles = "bg-success-500/10 text-success-600 dark:text-success-400 border border-success-500/20";
+                                                    icon = <LuStore size={14} />;
+                                                    label = "SUPPLIER";
+                                                } else if (ownerKey === "obaol") {
+                                                    badgeStyles = "bg-warning-500/10 text-warning-600 dark:text-warning-400 border border-warning-500/20";
+                                                    icon = <LuShieldCheck size={14} />;
+                                                    label = "OBAOL";
+                                                }
+ 
+                                                return (
+                                                    <div key={item.label} className="flex flex-col gap-1.5 p-3 rounded-xl border border-default-200 bg-white/60 dark:bg-black/40 shadow-sm">
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-default-500 dark:text-default-400 leading-none">{item.label}</span>
+                                                        <div className={`flex items-center gap-2 px-2.5 py-1 rounded-lg w-fit ${badgeStyles}`}>
+                                                            {icon}
+                                                            <span className="text-[10px] font-black tracking-wider">{label}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+ 
+                                    <div className="rounded-xl border border-warning-400/20 bg-warning-500/5 p-4 text-[10px] text-warning-600 dark:text-warning-500 font-bold flex items-start gap-3">
+                                        <FiAlertCircle size={16} className="mt-0.5 shrink-0" />
+                                        <span>Finalizing will lock responsibilities and generate execution inquiries. Changes will not be allowed after conversion.</span>
                                     </div>
                                 </ModalBody>
                                 <ModalFooter className="flex items-center justify-between">
@@ -3566,6 +3781,74 @@ export default function EnquiryDetailsPage() {
                             )}
                         </ModalBody>
                         <ModalFooter>
+                            {(() => {
+                                const docType = String(docViewerDoc?.type || "").toUpperCase();
+                                const docStatus = String(docViewerDoc?.status || "").toUpperCase();
+                                const canAdvance = canManageDocs || isSystemAdmin;
+                                const actionButtons: React.ReactNode[] = [];
+
+                                if (docType === "QUOTATION" && canAdvance) {
+                                    if (!(enquiry as any)?.quotationCreatedAt) {
+                                        actionButtons.push(
+                                            <Button
+                                                key="mark-quotation-created"
+                                                color="secondary"
+                                                variant="flat"
+                                                onPress={() => applyActionMutation.mutate({ actionKey: "QUOTATION_CREATED" })}
+                                                isLoading={applyActionMutation.isPending}
+                                            >
+                                                Mark Quotation Created
+                                            </Button>
+                                        );
+                                    }
+                                }
+
+                                if (docType === "LOI" && canAdvance && !(enquiry as any)?.loiSubmittedAt) {
+                                    actionButtons.push(
+                                        <Button
+                                            key="mark-loi-submitted"
+                                            color="secondary"
+                                            variant="flat"
+                                            onPress={() => applyActionMutation.mutate({ actionKey: "LOI_SUBMITTED" })}
+                                            isLoading={applyActionMutation.isPending}
+                                        >
+                                            Submit LOI
+                                        </Button>
+                                    );
+                                }
+
+                                if (docType === "PROFORMA_INVOICE" && canAdvance && !(enquiry as any)?.proformaCreatedAt) {
+                                    actionButtons.push(
+                                        <Button
+                                            key="mark-proforma-created"
+                                            color="secondary"
+                                            variant="flat"
+                                            onPress={() => applyActionMutation.mutate({ actionKey: "PROFORMA_CREATED" })}
+                                            isLoading={applyActionMutation.isPending}
+                                        >
+                                            Mark Proforma Issued
+                                        </Button>
+                                    );
+                                }
+
+                                if (docType === "PURCHASE_ORDER" && canAdvance && !(enquiry as any)?.poSubmittedAt) {
+                                    actionButtons.push(
+                                        <Button
+                                            key="mark-po-uploaded"
+                                            color="secondary"
+                                            variant="flat"
+                                            onPress={() => applyActionMutation.mutate({ actionKey: "PO_UPLOADED" })}
+                                            isLoading={applyActionMutation.isPending}
+                                        >
+                                            Mark PO Uploaded
+                                        </Button>
+                                    );
+                                }
+
+                                return actionButtons.length ? (
+                                    <div className="flex flex-wrap gap-2">{actionButtons}</div>
+                                ) : null;
+                            })()}
                             <Button variant="light" onPress={() => setDocViewerOpen(false)}>
                                 Close
                             </Button>

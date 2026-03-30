@@ -1477,7 +1477,9 @@ export default function OrderDetailsPage() {
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-black text-foreground uppercase tracking-tight">{milestone.label}</span>
                                                 <span className="text-[11px] text-default-500">
-                                                    {DOC_TYPE_LABELS[String(milestone.dueAtDocType || "").toUpperCase()] || "Document"} required
+                                                    {milestone.dueAtStageKey
+                                                        ? `Stage: ${String(milestone.dueAtStageKey || "").replaceAll("_", " ")}`
+                                                        : `${DOC_TYPE_LABELS[String(milestone.dueAtDocType || "").toUpperCase()] || "Document"} required`}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-3">

@@ -42,19 +42,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 "/dashboard/product",
                 "/dashboard/catalog",
                 "/dashboard/marketplace",
-                "/dashboard/imports",
             ],
         },
         {
             label: "Execution",
             links: [
                 "/dashboard/enquiries",
-                "/dashboard/orders",
-                "/dashboard/external-orders",
                 "/dashboard/sample-requests",
-                "/dashboard/execution-enquiries",
+                "/dashboard/orders",
                 "/dashboard/documents",
-                "/dashboard/warehouse-rent",
+            ],
+        },
+        {
+            label: "Services",
+            links: [
+               "/dashboard/imports",
+               "/dashboard/external-orders",
+               "/dashboard/execution-enquiries",
+               "/dashboard/warehouse-rent",
             ],
         },
         {

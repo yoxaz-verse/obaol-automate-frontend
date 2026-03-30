@@ -8,6 +8,7 @@ interface CurrencyContextProps {
   setSelectedCurrency: (currency: string) => void;
   exchangeRates: ExchangeRates;
   convertRate: (rateInINR: number) => string;
+  formatRate: (rateInINR: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextProps | undefined>(
@@ -77,6 +78,11 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
     const converted = rateInINR * exchangeRate;
     return `${selectedCurrency.toUpperCase()} ${converted.toFixed(2)}`;
   };
+  const formatRate = (rateInINR: number): string => {
+    const base = convertRate(rateInINR);
+    if (base === "—") return base;
+    return `${base} (Ex Factory Rate)`;
+  };
 
   return (
     <CurrencyContext.Provider
@@ -85,6 +91,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedCurrency,
         exchangeRates,
         convertRate,
+        formatRate,
       }}
     >
       {children}

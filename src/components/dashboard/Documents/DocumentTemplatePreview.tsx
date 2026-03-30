@@ -127,8 +127,8 @@ const FALLBACK_FIELDS = [
 ];
 
 const sampleLineItems = [
-  { product: "Turmeric", variant: "A‑Grade", qty: "18.00 MT", rate: "₹ 112.50", amount: "₹ 2,025,000" },
-  { product: "Black Pepper", variant: "Premium", qty: "8.00 MT", rate: "₹ 420.00", amount: "₹ 3,360,000" },
+  { product: "Turmeric", variant: "A‑Grade", qty: "18.00 MT", rate: "₹ 112.50 X mil", amount: "₹ 2,025,000" },
+  { product: "Black Pepper", variant: "Premium", qty: "8.00 MT", rate: "₹ 420.00 X mil", amount: "₹ 3,360,000" },
 ];
 
 const templateByType = (docType: string) => {

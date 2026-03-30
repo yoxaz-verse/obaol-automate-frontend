@@ -13,7 +13,7 @@ import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 const PublicCatalogPage = () => {
     const params = useParams();
     const companySlug = params.companySlug as string;
-    const { convertRate } = useCurrency();
+    const { convertRate, formatRate } = useCurrency();
 
     // Fetch catalog items for this company
     const { data, isLoading, error } = useQuery({
@@ -95,7 +95,7 @@ const PublicCatalogPage = () => {
                                         <div className="absolute bottom-2 right-2">
                                             {/* @ts-ignore */}
                                             <Chip color="success" variant="solid" className="shadow-sm font-bold">
-                                                {convertRate(item.finalPrice)}
+                                                {formatRate(item.finalPrice)}
                                             </Chip>
                                         </div>
                                     </CardBody>

@@ -63,15 +63,19 @@ export default function EnquiryPage() {
 
 
 
-      <div className="mx-2 md:mx-6 mb-4 rounded-xl border border-primary-200/60 bg-primary-50/50 dark:bg-primary-900/20 px-3 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <p className="text-sm font-medium text-primary-700 dark:text-primary-300">
-          Create enquiry from Marketplace by selecting product and variant.
-        </p>
+      <div className="mx-2 md:mx-6 mb-8 rounded-[2rem] border border-default-300 dark:border-white/20 bg-white dark:bg-[#04070f] px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center">
+                <FiArrowRight size={20} className="text-warning-600 rotate-180" />
+            </div>
+            <p className="text-[11px] font-black uppercase tracking-widest text-default-500">
+                Execute new enquiries from the <span className="text-warning-500">Marketplace Terminal</span>
+            </p>
+        </div>
         <Button
-          color="primary"
           variant="flat"
           onPress={() => router.push("/dashboard/marketplace")}
-          className="w-full md:w-auto font-bold tracking-tight rounded-xl"
+          className="w-full md:w-auto font-black uppercase text-[10px] tracking-widest rounded-xl bg-warning-500 text-black h-11 shadow-lg shadow-warning-500/10"
         >
           Go to Marketplace
         </Button>
@@ -84,7 +88,6 @@ export default function EnquiryPage() {
         limit={20}
       >
         {(enquiryResponse: any) => {
-          // Helper to extract array from paginated response
           const extractArray = (raw: any): any[] => {
             if (raw?.data && Array.isArray(raw.data)) return raw.data;
             if (Array.isArray(raw)) return raw;
@@ -260,11 +263,11 @@ export default function EnquiryPage() {
           });
 
           return (
-            <div className="flex flex-col items-center w-full">
-              <div className="w-full px-2 sm:px-4 md:px-0 md:w-[95%]">
+            <div className="flex flex-col w-full px-4 md:px-6">
+              <div className="w-full">
                 <StatsHeader data={enquiriesData} />
 
-                <div className="flex justify-between items-center mb-4 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
+                <div className="flex justify-between items-center mb-6 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
                   <Tabs
                     selectedKey={selectedType}
                     onSelectionChange={(key) => {
@@ -274,20 +277,21 @@ export default function EnquiryPage() {
                     }}
                     variant="underlined"
                     color="primary"
+                    className="w-fit"
                     classNames={{
-                      tabList: "gap-4 relative rounded-none p-0 border-b border-divider/40",
-                      cursor: "bg-primary w-full h-[2.5px] rounded-t-full",
-                      tab: "max-w-fit px-4 h-12 transition-all duration-300",
-                      tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-400 group-data-[selected=true]:text-primary"
+                      tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                      cursor: "bg-warning-500 w-full h-[3px] rounded-t-full",
+                      tab: "max-w-fit px-2 h-12 transition-all duration-300",
+                      tabContent: "font-black uppercase tracking-[0.15em] text-[10px] text-default-400 group-data-[selected=true]:text-warning-500"
                     }}
                   >
-                    <Tab key="All" title="All" />
-                    <Tab key="Buying" title="My Purchases" />
-                    <Tab key="Selling" title="Received" />
+                    <Tab key="All" title="Global Pipeline" />
+                    <Tab key="Buying" title="My Acquisitions" />
+                    <Tab key="Selling" title="Supply Streams" />
                   </Tabs>
                 </div>
 
-                <div className="flex justify-between items-center mb-4 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
+                <div className="flex justify-between items-center mb-8 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
                   <Tabs
                     aria-label="Enquiry Stages"
                     color="primary"
@@ -298,18 +302,19 @@ export default function EnquiryPage() {
                       setSelectedStage(key as string);
                       setTimeout(() => setIsTransitioning(false), 400);
                     }}
+                    className="w-fit"
                     classNames={{
-                      tabList: "gap-4 relative rounded-none p-0 border-b border-divider/40",
-                      cursor: "bg-primary w-full h-[2px] rounded-t-full",
-                      tab: "max-w-fit px-4 h-10 transition-all duration-300",
-                      tabContent: "font-semibold uppercase tracking-wider text-[9px] text-default-500 group-data-[selected=true]:text-primary"
+                      tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                      cursor: "bg-warning-500/60 w-full h-[2px] rounded-t-full",
+                      tab: "max-w-fit px-2 h-10 transition-all duration-300",
+                      tabContent: "font-black uppercase tracking-[0.12em] text-[9px] text-default-500 group-data-[selected=true]:text-warning-500"
                     }}
                   >
-                    <Tab key="All" title="All Stages" />
+                    <Tab key="All" title="Full Stack" />
                     <Tab key="Pending" title="New" />
                     <Tab key="Converted" title="Converted" />
-                    <Tab key="Completed" title="Completed" />
-                    <Tab key="Cancelled" title="Cancelled" />
+                    <Tab key="Completed" title="Closed" />
+                    <Tab key="Cancelled" title="Dormant" />
                   </Tabs>
                 </div>
 
@@ -324,9 +329,9 @@ export default function EnquiryPage() {
                         className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/20 backdrop-blur-[2px] rounded-2xl"
                       >
                         <div className="flex flex-col items-center gap-4">
-                          <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary animate-pulse">
-                            Updating Feed
+                          <div className="w-10 h-10 border-2 border-warning-500/20 border-t-warning-500 rounded-full animate-spin" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-warning-500 animate-pulse">
+                            Syncing Pipeline
                           </p>
                         </div>
                       </motion.div>
@@ -338,7 +343,7 @@ export default function EnquiryPage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
                         transition={{ duration: 0.3 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
                       >
                         {filteredData.map((item: any, index: number) => (
                           <motion.div

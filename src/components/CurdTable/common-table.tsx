@@ -29,6 +29,10 @@ export default function CommonTable({
   otherModal,
   isLoading = false,
   emptyContent,
+  page: serverPage,
+  totalPages: serverTotalPages,
+  rowsPerPage: serverRowsPerPage,
+  onPageChange,
 }: TableProps & { emptyContent?: React.ReactNode }) {
   type UserData = (typeof TableData)[0];
   const effectiveColumns = Math.max(1, columns?.length || 0);
@@ -46,6 +50,7 @@ export default function CommonTable({
   );
 
   const renderTruncatedText = React.useCallback((value: any, maxWidthClass?: string, allowWrap?: boolean) => {
+    if (React.isValidElement(value)) return value;
     const str = String(value ?? "N/A");
     if (allowWrap) {
       return <span className={`block ${maxWidthClass || "max-w-[220px]"} whitespace-normal break-words`}>{str}</span>;
@@ -65,6 +70,7 @@ export default function CommonTable({
       }
 
       const cellValue = item[columnKey as keyof UserData];
+      if (React.isValidElement(cellValue)) return cellValue;
       const columnType = column?.type;
 
       switch (columnType) {
@@ -173,15 +179,20 @@ export default function CommonTable({
   );
 
   // Pagination logic
+  const isServerPagination = typeof onPageChange === "function" && typeof serverTotalPages === "number";
   const [page, setPage] = React.useState(1);
-  const rowsPerPage = 10;
-  const pages = Math.ceil((TableData?.length || 0) / rowsPerPage);
+  const rowsPerPage = serverRowsPerPage || 10;
+  const pages = isServerPagination ? Math.max(1, serverTotalPages || 1) : Math.ceil((TableData?.length || 0) / rowsPerPage);
+  const activePage = isServerPagination ? (serverPage || 1) : page;
 
   const items = React.useMemo(() => {
+    if (isServerPagination) {
+      return TableData || [];
+    }
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return TableData ? TableData.slice(start, end) : [];
-  }, [page, TableData]);
+  }, [page, TableData, isServerPagination, rowsPerPage]);
 
   const dataSignature = React.useMemo(() => {
     if (!Array.isArray(TableData) || TableData.length === 0) return "empty";
@@ -241,44 +252,44 @@ export default function CommonTable({
               color: "warning",
               className: "w-max",
               classNames: {
-                base: "w-full min-w-0 max-w-full",
+                base: "w-full min-w-0 max-w-full overflow-visible",
                 wrapper: "p-0 bg-transparent shadow-none overflow-visible",
                 table: "w-max table-auto",
                 th: [
-                  "bg-default-100/80",
-                  "dark:bg-default-100/20",
+                  "bg-foreground/[0.04]",
+                  "dark:bg-white/[0.02]",
                   "text-default-700",
-                  "dark:text-default-500", // Slightly dimmed uppercase headers
-                  "font-bold",
-                  "text-[11px]",
+                  "dark:text-white/60",
+                  "font-black",
+                  "text-[10px]",
                   "uppercase",
-                  "tracking-wider",
+                  "tracking-[0.2em]",
                   "border-b",
-                  "border-divider",
+                  "border-white/10",
                   "whitespace-nowrap",
                   "min-w-[140px]",
-                  "backdrop-blur-md", // Keep headers sharp
+                  "h-14",
+                  "backdrop-blur-xl",
                 ],
                 td: [
-                  "py-4", // Slightly more breathing room
+                  "py-5",
                   "align-middle",
-                  "text-sm",
+                  "text-[13px]",
                   "text-default-800",
-                  "dark:text-foreground", // High contrast text for body
+                  "dark:text-white",
                   "whitespace-nowrap",
-                  "overflow-hidden",
                   "min-w-[140px]",
                   "border-b",
-                  "border-divider/50",
+                  "border-white/5",
+                  "group-hover/row:border-warning-500/20",
+                  "transition-all",
                 ],
                 tr: [
                   "group/row",
                   "hover:bg-default-50/50",
-                  "dark:hover:bg-default-100/10",
-                  "transition-colors",
+                  "dark:hover:bg-warning-500/[0.03]",
+                  "transition-all",
                   "cursor-default",
-                  "even:bg-default-50/30",
-                  "dark:even:bg-default-50/5",
                 ],
               }
             } as any)}
@@ -356,9 +367,15 @@ export default function CommonTable({
               showControls: true,
               showShadow: true,
               color: "warning",
-              page: page,
+              page: activePage,
               total: pages,
-              onChange: (page: number) => setPage(page),
+              onChange: (nextPage: number) => {
+                if (isServerPagination) {
+                  onPageChange?.(nextPage);
+                } else {
+                  setPage(nextPage);
+                }
+              },
             } as any)}
           />
         </div>

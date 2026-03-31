@@ -10,22 +10,21 @@ import {
     Card as HeroCard,
     Chip as HeroChip,
     Skeleton,
+    Divider as HeroDivider,
 } from "@heroui/react";
 
 const Button = HeroButton as any;
 const Card = HeroCard as any;
 const Chip = HeroChip as any;
-import {
-    LuGlobe,
-    LuLinkedin,
-    LuFacebook,
-    LuTwitter,
-    LuInstagram,
-    LuArrowRight,
-    LuShoppingBag,
-    LuInfo,
-    LuExternalLink
-} from "react-icons/lu";
+const Divider = HeroDivider as any;
+
+const strokeStyle = `
+  .stroke-text {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4);
+  }
+`;
+
+import { LuGlobe, LuLinkedin, LuFacebook, LuTwitter, LuInstagram, LuArrowRight, LuShoppingBag, LuInfo, LuExternalLink, LuChevronLeft } from "react-icons/lu";
 import { useParams } from "next/navigation";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
@@ -56,10 +55,39 @@ export default function BrandPage() {
 
     if (isCompanyLoading) {
         return (
-            <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,165,0,0.1)_0%,_transparent_50%)]">
-                <Skeleton className="w-48 h-48 rounded-full bg-default-200 mb-8" />
-                <Skeleton className="w-64 h-8 rounded-lg bg-default-200 mb-4" />
-                <Skeleton className="w-96 h-20 rounded-lg bg-default-200" />
+            <div className="min-h-screen bg-black text-white flex flex-col overflow-hidden">
+                {/* Skeleton Nav */}
+                <div className="h-24 px-8 border-b border-white/5 flex items-center justify-between animate-pulse">
+                    <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 rounded-xl bg-white/5" />
+                        <div className="flex flex-col gap-2">
+                           <div className="w-32 h-3 bg-white/10 rounded" />
+                           <div className="w-20 h-2 bg-white/5 rounded" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex-1 flex items-center px-8 max-w-7xl mx-auto w-full">
+                    <div className="max-w-4xl w-full space-y-12 animate-pulse">
+                        <div className="flex items-center gap-4">
+                            <div className="w-4 h-4 rounded-full bg-white/5" />
+                            <div className="w-32 h-2 bg-white/5 rounded" />
+                        </div>
+                        <div className="space-y-6">
+                            <div className="w-full max-w-2xl h-20 bg-white/10 rounded-2xl" />
+                            <div className="w-3/4 max-w-xl h-20 bg-white/5 rounded-2xl opacity-40" />
+                        </div>
+                        <div className="flex gap-6">
+                            <div className="w-48 h-20 bg-white/10 rounded-[2rem]" />
+                            <div className="w-32 h-20 bg-white/5 rounded-[2rem]" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Ambient Glow */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                     <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-warning-500/[0.02] rounded-full blur-[120px]" />
+                </div>
             </div>
         );
     }
@@ -81,110 +109,193 @@ export default function BrandPage() {
                     Preview Mode: This brand page isn&apos;t live yet, but you&apos;re viewing the draft preview.
                 </div>
             )}
-            <div className="mx-auto max-w-6xl px-4 pt-8">
-                <IndiaFirstNote className="border-white/10 bg-white/5 text-white/70" />
-            </div>
-            {/* Cinematic Hero Section */}
-            <section className="relative h-[80vh] flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
-                {/* Animated Background Overlay */}
-                <div className="absolute inset-0 z-0">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-warning-500/10 rounded-full blur-[120px] -mr-40 -mt-40 animate-pulse" />
-                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary-500/10 rounded-full blur-[100px] -ml-20 -mb-20" />
-                    {company.banner && (
-                        <img
-                            src={company.banner}
-                            alt="Banner"
-                            className="w-full h-full object-cover opacity-30 mix-blend-overlay scale-110 transform transition-transform duration-10000 hover:scale-100"
+            {/* --- STANDALONE WEBSITE NAVIGATION --- */}
+            <nav className="sticky top-0 z-[60] backdrop-blur-xl border-b border-white/5 bg-black/40">
+                <div className="max-w-7xl mx-auto px-8 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                        <Avatar
+                            src={company.logo}
+                            className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform"
                         />
+                        <div className="flex flex-col">
+                           <span className="text-sm font-black uppercase tracking-tight text-white leading-none">{company.name}</span>
+                           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-warning-500 mt-1 italic">Verified Industry Partner</span>
+                        </div>
+                    </div>
+                    <div className="hidden md:flex items-center gap-10">
+                        <button onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Strategic Ops</button>
+                        <button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Inventory Hub</button>
+                        <div className="w-px h-10 bg-white/5" />
+                        <Button
+                            as="a"
+                            href="/"
+                            variant="flat"
+                            className="bg-warning-500 text-black text-[10px] font-black uppercase tracking-widest h-11 px-8 rounded-full shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
+                        >
+                            Procure Now
+                        </Button>
+                    </div>
+                </div>
+            </nav>
+
+            <div className="mx-auto max-w-7xl px-8 pt-8">
+                <IndiaFirstNote className="border-white/5 bg-white/[0.01] text-white/20" />
+            </div>
+            {/* --- LUXURY HERO SECTION --- */}
+            <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+                {/* Refined Background Elements */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] bg-warning-500/[0.03] rounded-full blur-[150px]" />
+                    <div className="absolute bottom-[20%] left-[5%] w-[400px] h-[400px] bg-white/[0.01] rounded-full blur-[120px]" />
+                    {company.banner && (
+                        <div className="absolute inset-0 opacity-20 grayscale hover:grayscale-0 transition-all duration-1000">
+                             <img src={company.banner} alt="" className="w-full h-full object-cover" />
+                        </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent lg:to-black/20" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black" />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl animate-in fade-in zoom-in duration-1000">
-                    <Avatar
-                        src={company.logo}
-                        className="w-32 h-32 md:w-40 md:h-40 border-4 border-warning-500/20 shadow-[0_0_50px_rgba(255,165,0,0.2)] mb-8 bg-default-900"
-                    />
-                    <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 leading-none">
-                        {company.name}
-                    </h1>
-                    <p className="text-lg md:text-2xl text-warning-500 font-medium max-w-2xl mb-8 drop-shadow-md">
-                        {company.description || "The future of quality sourcing."}
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-3">
-                        {company.tags?.map((tag: string) => (
-                            <Chip key={tag} variant="dot" color="warning" className="bg-white/5 border-white/10 text-xs font-bold uppercase tracking-widest">{tag}</Chip>
-                        ))}
+                <div className="relative z-10 w-full max-w-7xl mx-auto px-8 py-20 lg:py-40">
+                    <div className="max-w-4xl space-y-12 animate-in slide-in-from-left-10 duration-1000">
+                        {/* Global Identity Marker */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-2">
+                                <div className="w-4 h-4 rounded-full bg-warning-500 shadow-[0_0_10px_rgba(245,158,11,0.5)] border border-black" />
+                                <div className="w-4 h-4 rounded-full bg-white/20 border border-black" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.6em] text-white/30 italic">Direct Protocol Access</span>
+                        </div>
+
+                        {/* Standalone Website Hero Content */}
+                        <div className="space-y-4">
+                            <h1 className="text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-[0.8] text-white italic">
+                                {company.name.split(' ').map((word: string, i: number) => (
+                                    <span key={i} className={i % 2 === 1 ? "text-transparent stroke-text" : "text-white"}>
+                                        {word}{" "}
+                                    </span>
+                                ))}
+                            </h1>
+                            <div className="flex items-center gap-6 pt-4">
+                               <div className="h-0.5 w-20 bg-warning-500" />
+                               <p className="text-2xl md:text-3xl font-light text-warning-500 italic lowercase tracking-tight">
+                                {company.description || "The future of quality sourcing."}
+                               </p>
+                            </div>
+                        </div>
+
+                        <p className="text-lg md:text-xl text-white/40 max-w-2xl font-bold uppercase tracking-widest leading-relaxed">
+                            A verified trade entity operating within the OBAOL core ecosystem. Specializing in high-density product allocation and global market reach.
+                        </p>
+
+                        {/* Action Portal */}
+                        <div className="pt-10 flex flex-wrap items-center gap-6">
+                            <Button
+                                className="h-24 px-16 rounded-[2rem] bg-white text-black font-black text-xs uppercase tracking-[0.3em] shadow-[0_40px_70px_rgba(255,255,255,0.1)] hover:scale-105 transition-all group"
+                                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                            >
+                                Enter Logistics Hub
+                                <LuArrowRight className="ml-4 group-hover:translate-x-2 transition-transform" size={20} />
+                            </Button>
+                            <Button
+                                variant="bordered"
+                                className="h-24 px-12 rounded-[2rem] border border-white/10 text-white/50 font-black text-xs uppercase tracking-[0.3em] hover:bg-white/5 transition-all"
+                                onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+                            >
+                                Structure
+                            </Button>
+                        </div>
                     </div>
-                    <Button
-                        className="mt-12 h-16 px-10 rounded-full bg-gradient-to-r from-warning-500 to-orange-600 font-bold text-lg uppercase tracking-widest shadow-[0_0_40px_rgba(255,165,0,0.4)] hover:shadow-[0_0_60px_rgba(255,165,0,0.6)] transition-all group"
-                        onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        View Products
-                        <LuArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
-                    </Button>
+                </div>
+
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-20">
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em]">Scroll to reveal</span>
+                    <div className="w-px h-12 bg-gradient-to-b from-white to-transparent" />
                 </div>
             </section>
 
-            {/* About Section - Glassmorphic Concept */}
-            <section className="py-32 px-4 container mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                    <div className="space-y-8">
-                        <div className="flex items-center gap-4 text-warning-500">
-                            <div className="w-12 h-[2px] bg-warning-500" />
-                            <span className="text-xs font-black uppercase tracking-[0.3em]">The Legacy</span>
+            {/* --- REFINED ABOUT SECTION --- */}
+            <section id="about" className="py-40 px-8 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-32 items-start">
+                    <div className="lg:col-span-6 space-y-16">
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-6">
+                                <div className="h-10 w-[2px] bg-warning-500" />
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-500">The Manifesto & Legacy</h3>
+                            </div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight leading-[0.9] text-white italic">
+                                Redefining the <br /> <span className="text-white/40">Sourcing Standard.</span>
+                            </h2>
+                            <p className="text-white/50 text-xl font-light leading-relaxed">
+                                {company.aboutUs || "Welcome to our space. We are dedicated to providing the highest quality products directly from the source. Our commitment to excellence and innovation drives everything we do."}
+                            </p>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold leading-tight">Beyond Conventional <br /> Sourcing Patterns</h2>
-                        <p className="text-default-400 text-lg leading-relaxed text-justify">
-                            {company.aboutUs || "Welcome to our space. We are dedicated to providing the highest quality products directly from the source. Our commitment to excellence and innovation drives everything we do."}
-                        </p>
-                        <div className="grid grid-cols-2 gap-6 pt-8">
-                            <Card className="bg-white/5 border-white/10 p-6 shadow-none">
-                                <div className="text-3xl font-bold mb-1 text-warning-500">01.</div>
-                                <div className="text-sm font-bold uppercase text-white/60">Direct Trade Focus</div>
-                            </Card>
-                            <Card className="bg-white/5 border-white/10 p-6 shadow-none">
-                                <div className="text-3xl font-bold mb-1 text-primary-500">02.</div>
-                                <div className="text-sm font-bold uppercase text-white/60">Execution Visibility</div>
-                            </Card>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                            <div className="space-y-4">
+                                <div className="text-4xl font-black text-warning-500/20 italic">01.</div>
+                                <h4 className="text-xs font-black uppercase tracking-widest text-white/80">Direct Trade Focus</h4>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 leading-relaxed">Eliminating inefficiencies in the global supply chain through direct partnership.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="text-4xl font-black text-warning-500/20 italic">02.</div>
+                                <h4 className="text-xs font-black uppercase tracking-widest text-white/80">Execution Visibility</h4>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 leading-relaxed">Providing end-to-end transparency in every transaction within our ecosystem.</p>
+                            </div>
                         </div>
                     </div>
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-warning-500/20 blur-[100px] rounded-full" />
-                        <div className="relative bg-white/5 border border-white/10 backdrop-blur-3xl rounded-[40px] p-12 overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-100 transition-opacity">
-                                <LuInfo className="w-24 h-24 text-warning-500" />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                                <LuGlobe className="text-warning-500" />
-                                Company Presence
-                            </h3>
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                                    <span className="text-white/40 uppercase text-xs font-black">Headquarters</span>
-                                    <span className="text-sm font-medium">{company.address || "Location not listed"}</span>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Capabilities</div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {capabilityLabels.length > 0 ? capabilityLabels.map((cap: string) => (
-                                            <Chip key={cap} size="sm" variant="flat" color="warning" className="bg-white/5 border-white/10 text-[10px] font-black uppercase tracking-widest">{cap}</Chip>
-                                        )) : (
-                                            <span className="text-xs text-white/40">No capabilities listed yet.</span>
+
+                    <div className="lg:col-span-6 sticky top-32">
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-warning-500/5 blur-[120px] rounded-full" />
+                            <div className="relative bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-12 overflow-hidden">
+                                <div className="absolute -top-10 -right-10 w-48 h-48 bg-warning-500/[0.05] rounded-full blur-[80px]" />
+                                
+                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-12 flex items-center gap-4">
+                                    <LuGlobe size={18} className="text-warning-500" />
+                                    Global Corporate Record
+                                </h3>
+
+                                <div className="space-y-10">
+                                    <div className="space-y-2">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Operational Hub</span>
+                                        <div className="text-lg font-black uppercase tracking-tight text-white/80 leading-snug">
+                                            {company.address || "Location not listed"}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Core Capabilities</span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {capabilityLabels.length > 0 ? capabilityLabels.map((cap: string) => (
+                                                <div key={cap} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-warning-500/80">
+                                                    {cap}
+                                                </div>
+                                            )) : (
+                                                <span className="text-[10px] font-black italic text-white/20">Awaiting parameter finalization...</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-10 border-t border-white/5 flex flex-wrap items-center justify-between gap-8">
+                                        {company.website && (
+                                            <a href={company.website} target="_blank" className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-warning-500 transition-colors flex items-center gap-2">
+                                                <LuExternalLink size={14} /> Official Portal
+                                            </a>
                                         )}
+                                        <div className="flex gap-4">
+                                            {[
+                                                { icon: LuLinkedin, link: company.socialLinks?.linkedin },
+                                                { icon: LuFacebook, link: company.socialLinks?.facebook },
+                                                { icon: LuTwitter, link: company.socialLinks?.twitter },
+                                                { icon: LuInstagram, link: company.socialLinks?.instagram },
+                                            ].filter(s => s.link).map((s, i) => (
+                                                <a key={i} href={s.link} target="_blank" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:bg-warning-500 hover:text-black transition-all">
+                                                    <s.icon size={16} />
+                                                </a>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                                {company.website && (
-                                    <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                                        <span className="text-white/40 uppercase text-xs font-black">Website</span>
-                                        <a href={company.website} className="text-sm font-medium text-warning-500 hover:underline">{company.website}</a>
-                                    </div>
-                                )}
-                                <div className="pt-4 flex gap-6">
-                                    {company.socialLinks?.linkedin && <a href={company.socialLinks.linkedin} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-warning-500 hover:text-black transition-all"><LuLinkedin /></a>}
-                                    {company.socialLinks?.facebook && <a href={company.socialLinks.facebook} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-warning-500 hover:text-black transition-all"><LuFacebook /></a>}
-                                    {company.socialLinks?.twitter && <a href={company.socialLinks.twitter} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-warning-500 hover:text-black transition-all"><LuTwitter /></a>}
-                                    {company.socialLinks?.instagram && <a href={company.socialLinks.instagram} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-warning-500 hover:text-black transition-all"><LuInstagram /></a>}
                                 </div>
                             </div>
                         </div>
@@ -276,6 +387,7 @@ export default function BrandPage() {
                     </div>
                 </div>
             </footer>
+            <style dangerouslySetInnerHTML={{ __html: strokeStyle }} />
         </div>
     );
 }

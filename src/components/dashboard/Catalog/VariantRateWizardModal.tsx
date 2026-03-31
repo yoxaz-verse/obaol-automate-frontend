@@ -133,8 +133,40 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const stepLabel = useMemo(() => stepMeta.find((item) => item.key === step), [step]);
 
+  const getOptionKey = (item: any) =>
+    String(item?.key ?? item?._id ?? item?.id ?? item?.value ?? "");
+  const getOptionLabel = (item: any) =>
+    String(item?.value ?? item?.name ?? item?.label ?? item?.code ?? item?.title ?? "");
+
   const setValue = (key: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => {
+      const next: Record<string, any> = { ...prev, [key]: value };
+      if (key === "category") {
+        next.subCategory = "";
+        next.product = "";
+        next.productVariant = "";
+      }
+      if (key === "subCategory") {
+        next.product = "";
+        next.productVariant = "";
+      }
+      if (key === "product") {
+        next.productVariant = "";
+      }
+      if (key === "state") {
+        next.district = "";
+        next.division = "";
+        next.pincodeEntry = "";
+      }
+      if (key === "district") {
+        next.division = "";
+        next.pincodeEntry = "";
+      }
+      if (key === "division") {
+        next.pincodeEntry = "";
+      }
+      return next;
+    });
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
@@ -218,11 +250,24 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   };
 
   const darkField = {
-    label: "font-black uppercase text-[10px] tracking-widest text-white/40 mb-1",
-    trigger: "rounded-xl border-white/10 bg-white/[0.04] hover:bg-white/[0.07] data-[hover=true]:border-white/20 transition-all",
-    inputWrapper: "rounded-xl border-white/10 bg-white/[0.04] hover:bg-white/[0.07] data-[hover=true]:border-white/20 transition-all",
-    value: "text-white font-semibold text-sm",
-    input: "text-white placeholder:text-white/30 font-semibold text-sm",
+    base: "text-white",
+    label: "font-black uppercase text-[10px] tracking-[0.2em] text-white/30 mb-2 ml-1",
+    trigger: "rounded-2xl border-white/10 bg-[#1A1F26] hover:bg-[#232932] data-[open=true]:border-warning-500/40 data-[hover=true]:border-white/20 transition-all border shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)] h-14",
+    inputWrapper: "rounded-2xl border-white/10 bg-[#1A1F26] hover:bg-[#232932] data-[focus=true]:border-warning-500/40 data-[hover=true]:border-white/20 transition-all border shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)] h-14",
+    innerWrapper: "text-white",
+    value: "text-white font-black uppercase text-[11px] tracking-widest !text-white",
+    input: "text-white placeholder:text-white/20 font-bold text-sm !text-white",
+    selectorIcon: "text-white/60",
+    popoverContent: "bg-[#0B0F14] border border-white/10 shadow-2xl rounded-3xl p-2 backdrop-blur-3xl !text-white",
+    listbox: "bg-transparent !text-white",
+    errorMessage: "text-danger-400 text-xs",
+    description: "text-white/40 text-xs",
+    helperWrapper: "ml-1",
+  };
+
+  const itemClasses = {
+    base: "rounded-xl text-white data-[hover=true]:bg-white/10 data-[selectable=true]:focus:bg-white/10 data-[selected=true]:text-warning-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-white/10",
+    title: "font-black uppercase tracking-widest text-[11px] text-white",
   };
 
   return (
@@ -231,8 +276,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       onClose={onClose}
       size="5xl"
       scrollBehavior="inside"
+      isDismissable={false}
+      isKeyboardDismissDisabled={true}
+      backdrop="blur"
       classNames={{
-        base: "bg-gradient-to-br from-[#0B0F14] via-[#0B1016] to-[#151A22] border border-white/10 max-h-[92vh]",
+        base: "bg-gradient-to-br from-[#0B0F14] via-[#0B1016] to-[#151A22] border border-white/10 max-h-[92vh] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)]",
         header: "border-b border-white/10",
         footer: "border-t border-white/10",
         body: "overflow-y-auto",
@@ -288,24 +336,32 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {!fixedVariantId && (
                       <>
-                        <Select variant="bordered" label="Category" classNames={darkField} selectedKeys={formData.category ? [formData.category] : []} onChange={(e) => setValue("category", e.target.value)} isInvalid={!!errors.category} errorMessage={errors.category}>
+                        <Select variant="bordered" label="Category" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
                           {categories.map((item) => (
-                            <SelectItem key={item._id}>{item.name}</SelectItem>
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                              {getOptionLabel(item)}
+                            </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Sub Category" classNames={darkField} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onChange={(e) => setValue("subCategory", e.target.value)} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
+                        <Select variant="bordered" label="Sub Category" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onSelectionChange={(keys) => setValue("subCategory", Array.from(keys)[0])} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
                           {subCategories.map((item) => (
-                            <SelectItem key={item._id}>{item.name}</SelectItem>
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                              {getOptionLabel(item)}
+                            </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Product" classNames={darkField} selectedKeys={formData.product ? [formData.product] : []} onChange={(e) => setValue("product", e.target.value)} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
+                        <Select variant="bordered" label="Product" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.product ? [formData.product] : []} onSelectionChange={(keys) => setValue("product", Array.from(keys)[0])} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
                           {products.map((item) => (
-                            <SelectItem key={item._id}>{item.name}</SelectItem>
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                              {getOptionLabel(item)}
+                            </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Product Variant" classNames={darkField} selectedKeys={formData.productVariant ? [formData.productVariant] : []} onChange={(e) => setValue("productVariant", e.target.value)} isDisabled={!formData.product} isInvalid={!!errors.productVariant} errorMessage={errors.productVariant}>
+                        <Select variant="bordered" label="Product Variant" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.productVariant ? [formData.productVariant] : []} onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])} isDisabled={!formData.product} isInvalid={!!errors.productVariant} errorMessage={errors.productVariant}>
                           {variants.map((item) => (
-                            <SelectItem key={item._id}>{item.name}</SelectItem>
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                              {getOptionLabel(item)}
+                            </SelectItem>
                           ))}
                         </Select>
                       </>
@@ -320,16 +376,18 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 {step === 2 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input variant="bordered" label="Price (per KG)" type="number" classNames={darkField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
-                    <Select variant="bordered" label="Unit" classNames={darkField} selectedKeys={formData.unit ? [formData.unit] : []} onChange={(e) => setValue("unit", e.target.value)} isInvalid={!!errors.unit} errorMessage={errors.unit}>
-                      <SelectItem key="KG">KG</SelectItem>
-                      <SelectItem key="MT">Metric Ton (MT)</SelectItem>
-                      <SelectItem key="Quintal">Quintal</SelectItem>
+                    <Select variant="bordered" label="Unit" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.unit ? [formData.unit] : []} onSelectionChange={(keys) => setValue("unit", Array.from(keys)[0])} isInvalid={!!errors.unit} errorMessage={errors.unit}>
+                      <SelectItem key="KG" className="text-white font-black">KG</SelectItem>
+                      <SelectItem key="MT" className="text-white font-black">Metric Ton (MT)</SelectItem>
+                      <SelectItem key="Quintal" className="text-white font-black">Quintal</SelectItem>
                     </Select>
                     <Input variant="bordered" label="Quantity (MT)" type="number" classNames={darkField} value={formData.quantity || ""} onChange={(e) => setValue("quantity", e.target.value)} />
                     {!isAssociateUser && (
-                      <Select variant="bordered" label="Associate" classNames={darkField} selectedKeys={formData.associate ? [formData.associate] : []} onChange={(e) => setValue("associate", e.target.value)} isInvalid={!!errors.associate} errorMessage={errors.associate}>
+                      <Select variant="bordered" label="Associate" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
                         {associates.map((item) => (
-                          <SelectItem key={item._id}>{item.name || item.fullName || item.email}</SelectItem>
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className="uppercase text-white font-black">
+                            {getOptionLabel(item) || item.email}
+                          </SelectItem>
                         ))}
                       </Select>
                     )}
@@ -347,24 +405,32 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 )}
                 {step === 3 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select variant="bordered" label="State" classNames={darkField} selectedKeys={formData.state ? [formData.state] : []} onChange={(e) => setValue("state", e.target.value)} isInvalid={!!errors.state} errorMessage={errors.state}>
+                    <Select variant="bordered" label="State" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.state ? [formData.state] : []} onSelectionChange={(keys) => setValue("state", Array.from(keys)[0])} isInvalid={!!errors.state} errorMessage={errors.state}>
                       {states.map((item) => (
-                        <SelectItem key={item._id}>{item.name}</SelectItem>
+                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                          {getOptionLabel(item)}
+                        </SelectItem>
                       ))}
                     </Select>
-                    <Select variant="bordered" label="District" classNames={darkField} selectedKeys={formData.district ? [formData.district] : []} onChange={(e) => setValue("district", e.target.value)} isDisabled={!formData.state} isInvalid={!!errors.district} errorMessage={errors.district}>
+                    <Select variant="bordered" label="District" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.district ? [formData.district] : []} onSelectionChange={(keys) => setValue("district", Array.from(keys)[0])} isDisabled={!formData.state} isInvalid={!!errors.district} errorMessage={errors.district}>
                       {districts.map((item) => (
-                        <SelectItem key={item._id}>{item.name}</SelectItem>
+                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                          {getOptionLabel(item)}
+                        </SelectItem>
                       ))}
                     </Select>
-                    <Select variant="bordered" label="Division" classNames={darkField} selectedKeys={formData.division ? [formData.division] : []} onChange={(e) => setValue("division", e.target.value)} isDisabled={!formData.district}>
+                    <Select variant="bordered" label="Division" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.division ? [formData.division] : []} onSelectionChange={(keys) => setValue("division", Array.from(keys)[0])} isDisabled={!formData.district}>
                       {divisions.map((item) => (
-                        <SelectItem key={item._id}>{item.name}</SelectItem>
+                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                          {getOptionLabel(item)}
+                        </SelectItem>
                       ))}
                     </Select>
-                    <Select variant="bordered" label="Pin Code" classNames={darkField} selectedKeys={formData.pincodeEntry ? [formData.pincodeEntry] : []} onChange={(e) => setValue("pincodeEntry", e.target.value)} isDisabled={!formData.division}>
+                    <Select variant="bordered" label="Pin Code" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.pincodeEntry ? [formData.pincodeEntry] : []} onSelectionChange={(keys) => setValue("pincodeEntry", Array.from(keys)[0])} isDisabled={!formData.division}>
                       {pincodes.map((item) => (
-                        <SelectItem key={item._id}>{item.name || item.code}</SelectItem>
+                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                          {getOptionLabel(item)}
+                        </SelectItem>
                       ))}
                     </Select>
                     <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">

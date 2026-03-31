@@ -27,6 +27,8 @@ import {
     Progress,
     Tooltip,
     Textarea,
+    Tabs,
+    Tab,
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import {
@@ -271,6 +273,31 @@ export default function OrderDetailsPage() {
             toast.error(error?.response?.data?.message || error?.message || "Failed to update workflow stage.");
         },
     });
+    const updateSubflowStageMutation = useMutation({
+        mutationFn: async (payload: { type: string; stage: string; instanceKey?: string }) => {
+            const currentStages = (order as any)?.subflowStages || {};
+            const nextStages = { ...currentStages };
+            const typeKey = String(payload.type || "").toUpperCase();
+            const stageKey = String(payload.stage || "").toUpperCase();
+            const instanceKey = payload.instanceKey ? String(payload.instanceKey) : "";
+            const storageKey = instanceKey ? `${typeKey}::${instanceKey}` : typeKey;
+
+            if (!stageKey || stageKey === "NOT_STARTED") {
+                delete nextStages[storageKey];
+            } else {
+                nextStages[storageKey] = stageKey;
+            }
+
+            return patchData(`${apiRoutes.orders.getAll}/${orderId}`, { subflowStages: nextStages });
+        },
+        onSuccess: () => {
+            toast.success("Subflow stage updated.");
+            queryClient.invalidateQueries({ queryKey: ["order", id] });
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || error?.message || "Failed to update subflow stage.");
+        },
+    });
     const createDocMutation = useMutation({
         mutationFn: async () => {
             if (!docActionRule) throw new Error("No document rule selected.");
@@ -471,6 +498,7 @@ export default function OrderDetailsPage() {
         ? (linkedEnquiry as any).executionInquiries
         : null;
     const hasLinkedExecutionTasks = Array.isArray(executionTasks) && executionTasks.length > 0;
+    const executionBidTasks = Array.isArray(executionTasks) ? executionTasks : [];
     const executionTasksByType = new Map<string, any[]>();
     if (Array.isArray(executionTasks)) {
         executionTasks.forEach((task: any) => {
@@ -554,6 +582,32 @@ export default function OrderDetailsPage() {
     if (!order) return <div>Order not found</div>;
     const roleLower = String(user?.role || "").toLowerCase();
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const getExecutionTaskLabel = (type: string) => {
+        const key = String(type || "").toUpperCase();
+        if (key === "PROCUREMENT") return "Procurement";
+        if (key === "PACKAGING") return "Packaging";
+        if (key === "QUALITY_TESTING") return "Quality Testing";
+        if (key === "QUALITY_QA") return "Quality Testing";
+        if (key === "CERTIFICATION") return "Certification";
+        if (key === "WAREHOUSE") return "Warehouse";
+        if (key === "TRANSPORTATION") return "Inland Transportation";
+        if (key === "SHIPPING") return "Freight Forwarding";
+        return key.replaceAll("_", " ");
+    };
+    const getCompanyName = (company: any) => {
+        if (!company) return "Unknown";
+        if (typeof company === "string") return company;
+        return String(company?.name || company?.companyName || company?._id || "Unknown");
+    };
+    const getExecutionBidLabel = (task?: any) => {
+        if (!task) return "Awaiting bids";
+        if (task?.committedProvider || task?.committedCompany || task?.committedVendor) return "Provider committed";
+        const bids = Array.isArray(task?.bids) ? task.bids : [];
+        if (bids.length > 0) return "Under bidding";
+        if (String(task?.status || "").toUpperCase() === "IN_PROGRESS") return "In progress";
+        if (String(task?.status || "").toUpperCase() === "COMPLETED") return "Completed";
+        return "Awaiting bids";
+    };
     const supplierOperatorId = (
         (linkedEnquiry as any)?.supplierOperatorId?._id ||
         (linkedEnquiry as any)?.supplierOperatorId ||
@@ -610,6 +664,7 @@ export default function OrderDetailsPage() {
         orderStageRank.set(String(r.stageKey).toUpperCase(), Number(r.sortOrder || 0));
     });
     const workflowStageOptions = sortedOrderStages.length > 0 ? sortedOrderStages : [];
+    const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
     const docsForOrder = Array.isArray(orderDocsResponse?.data?.data?.data)
         ? orderDocsResponse?.data?.data?.data
         : (orderDocsResponse?.data?.data || []);
@@ -803,6 +858,7 @@ export default function OrderDetailsPage() {
         return false;
     };
     const isSystemAdmin = roleLower === "admin";
+    const canManageMainFlow = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
     const formatActionByLabel = (value: string) => {
         const normalized = String(value || "").toUpperCase();
         if (normalized === "BUYER") return "Buyer";
@@ -851,7 +907,36 @@ export default function OrderDetailsPage() {
                     <div className="h-12 w-px bg-divider hidden md:block" />
                     <div className="text-right">
                         <div className="text-xs font-black text-warning-500 uppercase tracking-widest mb-1">Workflow Stage</div>
-                        <div className="text-xl font-black text-foreground uppercase tracking-tight">{String(order.workflowStage || order.status || "").replaceAll("_", " ")}</div>
+                        <div className="text-xl font-black text-foreground uppercase tracking-tight">{String(workflowStage || order.workflowStage || order.status || "").replaceAll("_", " ")}</div>
+                        {canManageMainFlow && workflowStageOptions.length > 0 && (
+                            <div className="mt-3 flex justify-end">
+                                <Select
+                                    aria-label="Change workflow stage"
+                                    placeholder="Switch stage"
+                                    selectedKeys={workflowStageOptions.includes(workflowStage) ? [workflowStage] : []}
+                                    onSelectionChange={(keys) => {
+                                        const nextStage = Array.from(keys as Set<string>)[0];
+                                        if (nextStage && nextStage !== workflowStage) {
+                                            handleWorkflowStageChange(String(nextStage));
+                                        }
+                                    }}
+                                    size="sm"
+                                    variant="bordered"
+                                    className="max-w-[220px]"
+                                    classNames={{
+                                        trigger: "h-9 bg-default-100/60 border-divider",
+                                        value: "text-[10px] font-black uppercase tracking-widest",
+                                    }}
+                                    isDisabled={updateWorkflowStageMutation.isPending}
+                                >
+                                    {workflowStageOptions.map((stageKey) => (
+                                        <SelectItem key={stageKey} value={stageKey} className="text-[10px] font-black uppercase tracking-widest">
+                                            {String(stageLabelMap.get(stageKey) || stageKey).replaceAll("_", " ")}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                            </div>
+                        )}
                     </div>
                     <div className="text-right hidden sm:block">
                         <div className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">Terminal Synced</div>
@@ -956,7 +1041,6 @@ export default function OrderDetailsPage() {
                     <div className="absolute top-[38px] left-0 right-0 h-0.5 bg-divider" />
                     <div className="relative flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
                         {workflowStageOptions.map((step, index) => {
-                            const currentStepIndex = workflowStageOptions.indexOf(workflowStage);
                             const isCompleted = index < currentStepIndex;
                             const isCurrent = index === currentStepIndex;
                             return (
@@ -1264,6 +1348,46 @@ export default function OrderDetailsPage() {
                                             }}
                                         >
                                                 <div className="flex flex-col gap-8">
+                                                    {flow.stages.length > 0 && (
+                                                        <div className="rounded-[1.5rem] border border-divider bg-default-100/30 p-5 flex flex-col gap-3">
+                                                            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500 px-1">
+                                                                Subflow Stage Control
+                                                            </div>
+                                                            <Select
+                                                                aria-label={`${flow.label} stage`}
+                                                                placeholder="Select stage"
+                                                                selectedKeys={flow.currentStage && flow.currentStage !== "NOT_STARTED" ? [flow.currentStage] : []}
+                                                                onSelectionChange={(keys) => {
+                                                                    const nextStage = Array.from(keys as Set<string>)[0] || "";
+                                                                    if (nextStage && nextStage !== flow.currentStage) {
+                                                                        updateSubflowStageMutation.mutate({
+                                                                            type: flow.type,
+                                                                            stage: nextStage,
+                                                                            instanceKey: flow.instanceKey,
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                size="sm"
+                                                                variant="bordered"
+                                                                classNames={{
+                                                                    trigger: "h-10 bg-background/60 border-divider",
+                                                                    value: "text-[10px] font-black uppercase tracking-widest",
+                                                                }}
+                                                                isDisabled={!canEditSubflow(flow.type) || updateSubflowStageMutation.isPending}
+                                                            >
+                                                                {flow.stages.map((stage) => (
+                                                                    <SelectItem key={stage.stageKey} value={stage.stageKey} className="text-[10px] font-black uppercase tracking-widest">
+                                                                        {String(stage.label || stage.stageKey).replaceAll("_", " ")}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </Select>
+                                                            {!canEditSubflow(flow.type) && (
+                                                                <div className="text-[10px] font-bold text-default-400 uppercase tracking-widest px-1">
+                                                                    Editing restricted to assigned owner.
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                     {/* Parallel Dates Section */}
                                                     {dateFields.length > 0 && (
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 rounded-[1.5rem] bg-default-100/20 border border-divider shadow-inner group/dates relative overflow-hidden">
@@ -1621,6 +1745,119 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            {hasLinkedExecutionTasks && (
+                <div className="mt-10 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
+                    <div className="flex items-start justify-between gap-4 mb-6">
+                        <div>
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-warning-500 flex items-center gap-3 mb-2">
+                                <span className="w-2 h-2 rounded-full bg-warning-500 block shadow-[0_0_8px_rgba(245,165,36,0.6)]" />
+                                Execution Bidding
+                            </h2>
+                            <p className="text-[11px] font-black text-default-400 uppercase tracking-widest">
+                                Track who is bidding, current rates, and provider status for each service.
+                            </p>
+                        </div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-default-500 bg-default-100/50 px-3 py-1.5 rounded-full border border-divider">
+                            {executionBidTasks.length} Active Tasks
+                        </div>
+                    </div>
+
+                    {executionBidTasks.length === 0 ? (
+                        <div className="py-10 text-center text-[11px] font-black uppercase tracking-widest text-default-400 border border-dashed border-divider rounded-2xl">
+                            No execution bids yet.
+                        </div>
+                    ) : (
+                        <Tabs
+                            aria-label="Execution bidding tabs"
+                            variant="underlined"
+                            classNames={{
+                                tabList: "gap-6",
+                                tab: "text-xs font-black uppercase tracking-widest",
+                                cursor: "bg-warning-500"
+                            }}
+                        >
+                            {executionBidTasks.map((task: any) => {
+                                const taskKey = String(task?._id || task?.id || task?.type || "task");
+                                const bids = Array.isArray(task?.bids) ? task.bids : [];
+                                const committedProvider =
+                                    task?.committedProvider ||
+                                    task?.committedCompany ||
+                                    task?.committedVendor ||
+                                    task?.provider;
+                                return (
+                                    <Tab key={taskKey} title={getExecutionTaskLabel(task?.type || "Task")}>
+                                        <div className="rounded-2xl border border-divider bg-default-50/30 p-6 space-y-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-4">
+                                                <div className="text-[11px] font-black uppercase tracking-widest text-default-500">
+                                                    Bidding Status
+                                                </div>
+                                                <div className="text-[11px] font-black uppercase tracking-widest text-warning-600">
+                                                    {getExecutionBidLabel(task)}
+                                                </div>
+                                            </div>
+                                            <div className="text-[11px] font-black uppercase tracking-widest text-default-500">
+                                                Handling:{" "}
+                                                <span className="text-foreground">
+                                                    {committedProvider ? getCompanyName(committedProvider) : "Not assigned"}
+                                                </span>
+                                            </div>
+
+                                            <div className="rounded-xl border border-default-200/50 bg-default-100/40 p-3">
+                                                {bids.length === 0 ? (
+                                                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400 px-2 py-2">
+                                                        No bids yet.
+                                                    </div>
+                                                ) : (
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full min-w-[420px] text-[10px]">
+                                                            <thead>
+                                                                <tr className="text-default-400 font-black uppercase tracking-tight">
+                                                                    <th className="text-left py-1">Company</th>
+                                                                    <th className="text-left py-1">Rate</th>
+                                                                    <th className="text-left py-1">Note</th>
+                                                                    <th className="text-left py-1">Status</th>
+                                                                    <th className="text-left py-1">Updated</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {bids.map((bid: any, bidIdx: number) => {
+                                                                    const amount = typeof bid?.amount === "number"
+                                                                        ? bid.amount
+                                                                        : typeof bid?.rate === "number"
+                                                                            ? bid.rate
+                                                                            : typeof bid?.price === "number"
+                                                                                ? bid.price
+                                                                                : null;
+                                                                    return (
+                                                                        <tr key={`${taskKey}-bid-${bidIdx}`} className="border-t border-default-200/40 font-bold">
+                                                                            <td className="py-1 truncate max-w-[140px] text-foreground">
+                                                                                {getCompanyName(bid?.company || bid?.companyId || bid?.provider)}
+                                                                            </td>
+                                                                            <td className="py-1 text-warning-600">
+                                                                                {amount !== null ? `₹${Number(amount).toLocaleString()}` : "-"}
+                                                                            </td>
+                                                                            <td className="py-1 text-default-500 truncate max-w-[160px]">{bid?.note || "-"}</td>
+                                                                            <td className="py-1 text-default-500 opacity-80">{String(bid?.status || "SUBMITTED")}</td>
+                                                                            <td className="py-1 text-default-400 opacity-60">
+                                                                                {bid?.updatedAt ? dayjs(bid.updatedAt).format("DD MMM") : "-"}
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Tab>
+                                );
+                            })}
+                        </Tabs>
+                    )}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Order Core Documents */}

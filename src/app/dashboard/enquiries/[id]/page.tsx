@@ -159,6 +159,7 @@ export default function EnquiryDetailsPage() {
     const [docActionFileUrl, setDocActionFileUrl] = useState("");
     const [docViewerOpen, setDocViewerOpen] = useState(false);
     const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
+    const [conversionError, setConversionError] = useState("");
     const [reopenRequestOpen, setReopenRequestOpen] = useState(false);
     const [reopenReason, setReopenReason] = useState("");
     const [clarificationOpen, setClarificationOpen] = useState(false);
@@ -517,6 +518,11 @@ export default function EnquiryDetailsPage() {
             return next;
         });
     }, [executionContext.tradeType]);
+    useEffect(() => {
+        if (isOpen) {
+            setConversionError("");
+        }
+    }, [isOpen]);
 
     // Convert to Order Mutation
     const convertMutation = useMutation({
@@ -1165,6 +1171,35 @@ export default function EnquiryDetailsPage() {
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
+                queryClient.setQueryData(["trade-documents", "enquiry", id], (prev: any) => {
+                    const getRows = (raw: any): any[] => {
+                        if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
+                        if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
+                        if (Array.isArray(raw?.data?.data)) return raw.data.data;
+                        if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
+                        if (Array.isArray(raw?.data)) return raw.data;
+                        if (Array.isArray(raw)) return raw;
+                        return [];
+                    };
+                    const prevRows = getRows(prev);
+                    const createdId = String(createdDoc?._id || createdDoc?.id || "");
+                    const merged = [
+                        createdDoc,
+                        ...prevRows.filter((doc: any) => String(doc?._id || doc?.id || "") !== createdId),
+                    ];
+                    return {
+                        ...(prev || {}),
+                        data: {
+                            ...(prev?.data || {}),
+                            data: {
+                                ...(prev?.data?.data || {}),
+                                data: merged,
+                            },
+                        },
+                    };
+                });
+            }
+            if (createdDoc) {
                 openDocViewer(createdDoc);
             }
             const createdType = String(createdDoc?.type || docActionRule?.docType || "").toUpperCase();
@@ -1174,6 +1209,20 @@ export default function EnquiryDetailsPage() {
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to create document.");
+        },
+    });
+    const emailDocMutation = useMutation({
+        mutationFn: async () => {
+            if (!docViewerDoc?._id) throw new Error("No document selected.");
+            return postData(apiRoutes.tradeDocuments.email(String(docViewerDoc._id)), {
+                enquiryId: id,
+            });
+        },
+        onSuccess: () => {
+            toast.success("Document emailed successfully.");
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to email document.");
         },
     });
 
@@ -1683,6 +1732,11 @@ export default function EnquiryDetailsPage() {
     });
     const canBuyerRevision = isBuyer || isSystemAdmin || isAssignedOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isAssignedOperator;
+    const canCreateProformaDoc = (isSystemAdmin || isOperatorUser) && normalizedStageKey === "PROFORMA_ISSUED" && !hasDocType("PROFORMA_INVOICE");
+    const fallbackProformaRule = {
+        docType: "PROFORMA_INVOICE",
+        actionType: "CREATE",
+    };
     const requiredActionMode = String((currentRule as any)?.requiredActionMode || "ALL").toUpperCase();
     const isRequiredSatisfied = (() => {
         if (!requiredActions.length) return true;
@@ -2558,11 +2612,27 @@ export default function EnquiryDetailsPage() {
                 </Card>
 
                 <Card className="w-full border border-default-200/50 shadow-md rounded-2xl">
-                    <CardHeader className="flex flex-col items-start gap-1 px-5 pt-5">
-                        <span className="font-bold text-base tracking-tight">Documentation Checklist</span>
-                        <span className="text-[9px] uppercase font-black tracking-widest text-default-400">
-                            Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
-                        </span>
+                    <CardHeader className="flex flex-col items-start gap-2 px-5 pt-5">
+                        <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                            <div className="flex flex-col gap-1">
+                                <span className="font-bold text-base tracking-tight">Documentation Checklist</span>
+                                <span className="text-[9px] uppercase font-black tracking-widest text-default-400">
+                                    Stage: {String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ")}
+                                </span>
+                            </div>
+                            {canCreateProformaDoc && (
+                                <Button
+                                    size="sm"
+                                    color="primary"
+                                    variant="flat"
+                                    className="font-black text-[9px] uppercase tracking-widest h-8 px-4 rounded-lg"
+                                    isLoading={createDocMutation.isPending}
+                                    onPress={() => createDocMutation.mutate(fallbackProformaRule)}
+                                >
+                                    Create Proforma Invoice
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardBody className="px-5 pb-5 pt-3">
                         {rulesForStage.filter(canSeeRule).length === 0 ? (
@@ -2993,7 +3063,7 @@ export default function EnquiryDetailsPage() {
 
                     {/* Responsibility Arena */}
                     {isImportPortPickup ? (
-                        <Card className="md:col-span-1 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group">
+                        <Card className="md:col-span-2 lg:col-span-3 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group w-full">
                             <div className="absolute top-0 right-0 w-80 h-80 bg-warning-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
                             <CardBody className="flex flex-col md:flex-row items-center gap-8 px-8 py-10 relative z-10">
                                 <div className="w-24 h-24 rounded-[2rem] bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
@@ -3030,7 +3100,7 @@ export default function EnquiryDetailsPage() {
                             </CardBody>
                         </Card>
                     ) : (
-                        <div className={`md:col-span-1 relative transition-all duration-500 ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
+                        <div className={`md:col-span-2 lg:col-span-3 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
                             {workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
                                     <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
@@ -3260,7 +3330,7 @@ export default function EnquiryDetailsPage() {
 
                     <div className="flex flex-wrap gap-6 justify-center md:justify-end items-center relative z-10">
                         {requiredActions.length > 0 && (
-                            <div className="flex flex-wrap gap-3 justify-center md:justify-end">
+                            <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto ml-auto">
                                 {displayActions.map((actionKey: string) => (
                                     <div key={actionKey} className="flex flex-col items-start gap-1">
                                         <Button
@@ -3369,7 +3439,7 @@ export default function EnquiryDetailsPage() {
                                         <Button
                                             color="default"
                                             variant="light"
-                                            className="w-full sm:w-auto font-black px-6 rounded-xl h-11 text-[9px] tracking-[0.2em] uppercase text-default-400 hover:text-danger-500 hover:bg-danger-500/5 transition-all opacity-40 hover:opacity-100 italic"
+                                            className="w-full sm:w-auto font-black px-0 py-0 h-auto text-[9px] tracking-[0.25em] uppercase text-default-400 hover:text-danger-500 hover:underline transition-all opacity-40 hover:opacity-100 italic bg-transparent shadow-none"
                                             onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                             isLoading={updateStatusMutation.isPending}
                                         >
@@ -3871,7 +3941,7 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 </ModalHeader>
                                 <ModalBody className="px-10 py-8 overflow-y-auto">
-                                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 mb-8 flex items-start gap-4 relative overflow-hidden group">
+                                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 mb-6 flex items-start gap-4 relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-primary/40 group-hover:bg-primary transition-all shadow-[0_0_15px_rgba(0,112,243,0.3)]" />
                                         <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
                                             <FiInfo className="text-primary" size={20} />
@@ -3881,6 +3951,11 @@ export default function EnquiryDetailsPage() {
                                             THIS ACTION SYNCHRONIZES RESPONSIBILITIES AND FINALIZES THE EXECUTION PROTOCOL.
                                         </p>
                                     </div>
+                                    {conversionError && (
+                                        <div className="mb-6 rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200 uppercase tracking-wide">
+                                            {conversionError}
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(0,112,243,0.5)]" />
@@ -3903,12 +3978,12 @@ export default function EnquiryDetailsPage() {
                                                 { label: "Onward Transport", value: responsibilityPlan.destinationInlandTransportBy, icon: <LuTruck size={14} />, show: isToIndia && !isImportPortPickup },
                                             ] : [])
                                         ].filter(item => item.show !== false).map((item) => (
-                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300">
+                                            <div key={item.label} className="group flex items-center justify-between p-4 rounded-2xl bg-content2/60 border border-white/10 hover:border-primary/40 hover:bg-content2/80 transition-all duration-300">
                                                 <div className="flex items-center gap-3">
                                                     <div className="text-primary/50 group-hover:text-primary transition-colors bg-black/40 p-2 rounded-xl border border-white/5 shadow-inner">
                                                         {item.icon}
                                                     </div>
-                                                    <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">{item.label}</span>
+                                                    <span className="text-[10px] font-black text-default-200 uppercase tracking-widest">{item.label}</span>
                                                 </div>
                                                 <Chip 
                                                     size="sm" 
@@ -3954,34 +4029,66 @@ export default function EnquiryDetailsPage() {
                                         />
                                     </div>
                                 </ModalBody>
-                                <ModalFooter className="px-10 pb-12 pt-4 flex gap-4">
-                                    <Button
-                                        variant="flat"
-                                        onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${Array.isArray(id) ? id[0] : id}`, "_blank")}
-                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20"
-                                    >
-                                        Open Execution Panel
-                                    </Button>
+                                <ModalFooter className="px-10 pb-12 pt-4 flex flex-wrap items-center justify-between gap-4">
                                     <Button 
                                         variant="light" 
                                         onPress={onClose}
-                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all"
                                     >
-                                        CANCEL_OPERATION
+                                        Close
                                     </Button>
-                                    <Button 
-                                        color="primary"
-                                        variant="shadow"
-                                        onPress={() => applyActionMutation.mutate({ 
-                                            actionKey: "CONVERT_TO_ORDER", 
-                                            notes: conversionNote 
-                                        })}
-                                        isLoading={applyActionMutation.isPending}
-                                        className="px-10 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
-                                        startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
-                                    >
-                                        ESTABLISH_ORDER_PROTOCOL
-                                    </Button>
+                                    <div className="flex flex-wrap items-center gap-4">
+                                        <Button
+                                            variant="flat"
+                                            onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${Array.isArray(id) ? id[0] : id}`, "_blank")}
+                                            className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20"
+                                        >
+                                            Open Execution Panel
+                                        </Button>
+                                        <Button 
+                                            color="primary"
+                                            variant="shadow"
+                                            onPress={async () => {
+                                                setConversionError("");
+                                                if (!hasSellerAccepted || !enquiry?.buyerConfirmedAt) {
+                                                    setConversionError("Supplier acceptance and buyer confirmation are required before order conversion.");
+                                                    return;
+                                                }
+                                                if (!hasResponsibilitiesFinalized) {
+                                                    setConversionError("Finalize responsibilities before order conversion.");
+                                                    return;
+                                                }
+                                                if (!hasFullResponsibilityPlan || !hasExecutionContext || !hasPackagingSpecifications) {
+                                                    const missing: string[] = [];
+                                                    if (!hasFullResponsibilityPlan) missing.push("responsibility plan");
+                                                    if (!hasExecutionContext) missing.push("logistics context");
+                                                    if (!hasPackagingSpecifications) missing.push("packaging specifications");
+                                                    setConversionError(`Missing ${missing.join(", ")}. Please complete these before converting.`);
+                                                    return;
+                                                }
+                                                try {
+                                                    const res = await applyActionMutation.mutateAsync({
+                                                        actionKey: "CONVERT_TO_ORDER",
+                                                        notes: conversionNote,
+                                                    });
+                                                    const updatedInquiry = res?.data?.data || null;
+                                                    const orderId = updatedInquiry?.order?._id || updatedInquiry?.order;
+                                                    if (orderId) {
+                                                        onClose();
+                                                        router.push(`/dashboard/orders/${orderId}`);
+                                                    }
+                                                } catch (error: any) {
+                                                    const msg = error?.response?.data?.message || error?.message || "Failed to convert to order.";
+                                                    setConversionError(msg);
+                                                }
+                                            }}
+                                            isLoading={applyActionMutation.isPending}
+                                            className="px-10 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                            startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
+                                        >
+                                            ESTABLISH_ORDER_PROTOCOL
+                                        </Button>
+                                    </div>
                                 </ModalFooter>
                             </>
                         )}
@@ -4063,6 +4170,17 @@ export default function EnquiryDetailsPage() {
                             )}
                         </ModalBody>
                         <ModalFooter>
+                            {(canManageDocs || isSystemAdmin) && (
+                                <Button
+                                    color="primary"
+                                    variant="flat"
+                                    onPress={() => emailDocMutation.mutate()}
+                                    isLoading={emailDocMutation.isPending}
+                                    isDisabled={!docViewerDoc?._id}
+                                >
+                                    Email Document
+                                </Button>
+                            )}
                             {(() => {
                                 const docType = String(docViewerDoc?.type || "").toUpperCase();
                                 const docStatus = String(docViewerDoc?.status || "").toUpperCase();

@@ -33,6 +33,8 @@ const EssentialTabContent = ({
   const [filters, setFilters] = React.useState<Record<string, any>>({});
   const [search, setSearch] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [page, setPage] = React.useState(1);
+  const limit = 25;
 
   // ✅ Apply filter only when prop changes
   React.useEffect(() => {
@@ -47,6 +49,10 @@ const EssentialTabContent = ({
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, JSON.stringify(filters || {}), essentialName]);
 
   const columns = generateColumns(essentialName, tableConfig);
 
@@ -94,14 +100,14 @@ const EssentialTabContent = ({
           </div>{" "}
           <QueryComponent
             api={apiRoutesByRole[essentialName]}
-            queryKey={[essentialName, apiRoutesByRole[essentialName], filters, debouncedSearch]}
-            page={1}
-            limit={1000}
+            queryKey={[essentialName, apiRoutesByRole[essentialName], filters, debouncedSearch, page]}
+            page={page}
+            limit={limit}
             search={debouncedSearch}
             additionalParams={filters}
           >
-            {(data: any) => {
-              const fetchedData = data?.data || [];
+            {(data: any, _refetch, meta) => {
+              const fetchedData = Array.isArray(data) ? data : (data?.data || []);
               // const tableData = fetchedData.map((item: any) => ({
               //   ...item,
               // }));
@@ -169,6 +175,10 @@ const EssentialTabContent = ({
                         TableData={tableData}
                         columns={columns}
                         isLoading={false}
+                        page={meta?.currentPage || page}
+                        totalPages={meta?.totalPages || 1}
+                        rowsPerPage={limit}
+                        onPageChange={(nextPage) => setPage(nextPage)}
                         viewModal={(item: any) => (
                           // Implement view modal if needed
                           <>

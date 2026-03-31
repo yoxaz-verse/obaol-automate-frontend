@@ -40,9 +40,14 @@ const TopBar = ({ username, role }: TopbarProps) => {
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const { soundEnabled, setSoundEnabled, play } = useSoundEffect();
+  const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
     setMounted(true);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("en-GB", { hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
   const normalizedRole = String(role || "").toLowerCase();
   const displayRole = (normalizedRole === "operator" || normalizedRole === "team")
@@ -135,7 +140,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
     { label: "Product", links: ["/dashboard/product", "/dashboard/catalog", "/dashboard/marketplace", "/dashboard/imports"] },
     { label: "Execution", links: ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/external-orders", "/dashboard/sample-requests", "/dashboard/execution-enquiries", "/dashboard/documents"] },
     { label: "News", links: ["/dashboard/news"] },
-    { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/companyProduct", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
+    { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
     { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/essentials", "/dashboard/geosphere"] },
   ];
@@ -143,8 +148,10 @@ const TopBar = ({ username, role }: TopbarProps) => {
   return (
     <div
       data-topbar
-      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-2.5 md:my-3 md:mx-4 rounded-2xl border border-default-300/20 dark:border-default-800/15 bg-gradient-to-r from-content1/98 via-content1/90 to-content1/98 backdrop-blur-xl shadow-sm dark:shadow-lg transition-all duration-300"
+      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-7 md:py-3 md:my-3 md:mx-4 rounded-[1.5rem] border border-white/10 dark:border-white/5 bg-gradient-to-br from-[#0B0F14]/95 via-[#1A1F26]/90 to-[#0B0F14]/95 backdrop-blur-[40px] shadow-[0_10px_40px_rgba(0,0,0,0.4)] transition-all duration-500 overflow-hidden"
     >
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       {/* Left Section: Navigation & Identity */}
       <div className="flex gap-1 md:gap-4 items-center min-w-0">
         {/* Side Drawer - Mobile only */}
@@ -308,18 +315,30 @@ const TopBar = ({ username, role }: TopbarProps) => {
           <span className="font-black text-[10px] tracking-[0.28em] text-foreground/70 uppercase select-none">SUPREME</span>
         </div>
 
-        {/* Identity - Desktop only */}
-        <div className="hidden md:flex flex-col min-w-0 pr-4">
-          <h1 className="text-[15px] font-bold text-foreground tracking-tight truncate">
-            {displayRole} Panel
-          </h1>
-          <p className="text-[10px] text-default-500 font-medium truncate uppercase tracking-widest leading-none mt-0.5">
+        <div className="hidden md:flex flex-col min-w-0 pr-6 border-r border-white/5 h-10 justify-center">
+          <div className="flex items-center gap-2">
+             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+             <h1 className="text-[12px] font-black text-foreground tracking-[0.2em] uppercase select-none leading-none">
+              {displayRole} PROTOCOL
+            </h1>
+          </div>
+          <p className="text-[9px] text-default-500 font-bold uppercase tracking-[0.3em] leading-none mt-2 opacity-40 italic">
             {new Date().getHours() < 12
-              ? "Good Morning"
+              ? "MORNING SYNC ACTIVE"
               : new Date().getHours() < 18
-                ? "Good Afternoon"
-                : "Good Evening"}
+                ? "AFTERNOON OPS ACTIVE"
+                : "EVENING SURVEILLANCE ACTIVE"}
           </p>
+        </div>
+        
+        {/* Mission Clock (Desktop only) */}
+        <div className="hidden lg:flex items-center gap-4 px-4 h-10 border-r border-white/5">
+           <div className="flex flex-col items-center">
+              <span className="text-[11px] font-black text-foreground tracking-[0.15em] tabular-nums">
+                {mounted ? (currentTime || new Date().toLocaleTimeString("en-GB", { hour12: false })) : "--:--:--"}
+              </span>
+              <span className="text-[8px] font-black text-warning-500/50 uppercase tracking-[0.3em] mt-1 italic">MISSION TIME</span>
+           </div>
         </div>
       </div>
 
@@ -370,12 +389,12 @@ const TopBar = ({ username, role }: TopbarProps) => {
                 size: "sm",
                 src: ""
               }}
-              className="transition-transform"
+              className="transition-all hover:scale-105 active:scale-95"
               name={username}
-              description={<span className="text-default-500 font-medium capitalize hidden md:block">{role}</span>}
+              description={<span className="text-warning-500 font-bold uppercase tracking-[0.2em] hidden md:block opacity-70">{role}</span>}
               classNames={{
-                name: "text-foreground font-bold hidden md:block leading-tight",
-                description: "text-default-500"
+                name: "text-[12px] font-black text-foreground uppercase tracking-tight hidden md:block leading-none",
+                description: "text-[9px] mt-1"
               }}
             />
           </DropdownTrigger>

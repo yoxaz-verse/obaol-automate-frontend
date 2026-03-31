@@ -19,7 +19,6 @@ export const routeRoles: { [key: string]: string[] } = {
     "Worker",
     "Operator",
   ],
-  "/dashboard/companyProduct": ["Admin", "Operator"],
   "/dashboard/company": ["Associate"],
   "/dashboard/operator/hierarchy": ["Admin", "Operator", "team"],
   "/dashboard/operator/team": ["Admin", "Operator", "team"],

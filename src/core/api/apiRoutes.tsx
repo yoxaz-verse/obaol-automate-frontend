@@ -60,7 +60,6 @@ const BASE_PATHS = {
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
   ORGANIZATION_REPORT: "/organization-reports",
   INVENTORY: "/inventories",
-  SERVICE_REQUEST: "/service-requests",
   INVENTORY_RESERVATION: "/inventory-reservations",
   SAMPLE_REQUEST: "/sample-requests",
   TRADE_DOCUMENT: "/trade-documents",
@@ -342,15 +341,6 @@ export const organizationReportRoutes = {
   action: (id: string) => `${BASE_PATHS.ORGANIZATION_REPORT}/${id}/action`,
 };
 
-export const serviceRequestRoutes = {
-  list: BASE_PATHS.SERVICE_REQUEST,
-  create: BASE_PATHS.SERVICE_REQUEST,
-  getOne: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}`,
-  bid: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/bid`,
-  commit: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/commit`,
-  status: (id: string) => `${BASE_PATHS.SERVICE_REQUEST}/${id}/status`,
-};
-
 // Optionally, group all routes into a single object for easier imports
 export const apiRoutes = {
   analytics: dashboardRoutes,
@@ -422,6 +412,7 @@ export const apiRoutes = {
     create: `${BASE_PATHS.TRADE_DOCUMENT}`,
     getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
+    email: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email`,
   },
   documentRules: {
     list: `${BASE_PATHS.DOCUMENT_RULE}`,
@@ -499,7 +490,6 @@ export const apiRoutes = {
   operatorHierarchy: operatorHierarchyRoutes,
   commissions: commissionRoutes,
   organizationReports: organizationReportRoutes,
-  serviceRequests: serviceRequestRoutes,
   inventory: inventoryRoutes,
   warehouses: {
     list: "/warehouses",

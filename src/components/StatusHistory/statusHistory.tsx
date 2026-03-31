@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import QueryComponent from "@/components/queryComponent";
 import { Spacer } from "@nextui-org/react";
-import { getData } from "@/core/api/apiHandler";
-import { useQuery } from "@tanstack/react-query";
 import { statusHistoryRoutes } from "@/core/api/apiRoutes";
 import CommonTable from "../CurdTable/common-table";
 import TableFrame from "../CurdTable/table-frame";
@@ -35,79 +33,77 @@ const StatusHistoryTabContent: React.FC<StatusHistoryTabContentProps> = ({
   entityType,
   additionalParams = {},
 }) => {
-  // Fetch status history data
-  const { data: historyData } = useQuery({
-    queryKey: ["statusHistory", entityId, entityType],
-    queryFn: () =>
-      getData(
-        `${statusHistoryRoutes.getAll}?entityId=${entityId}&entityType=${entityType}`,
-        additionalParams
-      ),
-  });
+  const [page, setPage] = useState(1);
+  const limit = 25;
 
-  const tableData = useMemo(() => {
-    const formatChangedFields = (changedFields: any[]) => {
-      return changedFields
-        .filter(
-          (field) =>
-            JSON.stringify(field.oldValue) !== JSON.stringify(field.newValue) &&
-            field.field !== "updatedAt" &&
-            field.field !== "createdAt"
-        )
-        .map(
-          (field: any) =>
-            `${toTitleCase(field.field)} changed from '${field.oldValue}' to '${
-              field.newValue
-            }'`
-        )
-        .join(", ");
-    };
-
-    // Helper function to convert string to Title Case
-    const toTitleCase = (str: string) => {
-      return str.replace(/\w\S*/g, (txt) => {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      });
-    };
-    const raw = historyData?.data?.data;
-    const rows = Array.isArray(raw)
-      ? raw
-      : Array.isArray(raw?.data)
-        ? raw.data
-        : Array.isArray(historyData?.data?.data?.data)
-          ? historyData?.data?.data?.data
-          : [];
-
-    if (rows.length > 0) {
-      return rows.map((history: any, index: number) => ({
-        id: history._id || `history-${index}`, // Ensure unique key
-        changeType: history.changeType,
-        previousStatus: history.previousStatus || "N/A",
-        newStatus: history.newStatus || "N/A",
-        changedBy: history.changedBy,
-        changedFields: formatChangedFields(history.changedFields), // Format changed fields into a readable string
-        changedRole: history.changedRole || "N/A",
-        changedAt: formatDateTime(history.changedAt), // Format date
-      }));
-    }
-
-    return [];
-  }, [historyData]);
+  useEffect(() => {
+    setPage(1);
+  }, [entityId, entityType, JSON.stringify(additionalParams || {})]);
 
   return (
     <>
       <Spacer y={5} />
-      {tableData.length > 0 ? (
-        <TableFrame>
-          <CommonTable
-            TableData={tableData}
-            columns={columns}
-            isLoading={!historyData}
-          />
-        </TableFrame>
-      ) : (
-        <div>{""}</div>
-      )}
+      <QueryComponent
+        api={statusHistoryRoutes.getAll}
+        queryKey={["statusHistory", entityId, entityType, additionalParams, page]}
+        page={page}
+        limit={limit}
+        additionalParams={{ entityId, entityType, ...(additionalParams || {}) }}
+      >
+        {(historyData: any, _refetch, meta) => {
+          const formatChangedFields = (changedFields: any[]) => {
+            return changedFields
+              .filter(
+                (field) =>
+                  JSON.stringify(field.oldValue) !== JSON.stringify(field.newValue) &&
+                  field.field !== "updatedAt" &&
+                  field.field !== "createdAt"
+              )
+              .map(
+                (field: any) =>
+                  `${toTitleCase(field.field)} changed from '${field.oldValue}' to '${
+                    field.newValue
+                  }'`
+              )
+              .join(", ");
+          };
+
+          // Helper function to convert string to Title Case
+          const toTitleCase = (str: string) => {
+            return str.replace(/\w\S*/g, (txt) => {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+          };
+
+          const rows = Array.isArray(historyData) ? historyData : (historyData?.data || []);
+          const tableData = rows.map((history: any, index: number) => ({
+            id: history._id || `history-${index}`, // Ensure unique key
+            changeType: history.changeType,
+            previousStatus: history.previousStatus || "N/A",
+            newStatus: history.newStatus || "N/A",
+            changedBy: history.changedBy,
+            changedFields: formatChangedFields(history.changedFields), // Format changed fields into a readable string
+            changedRole: history.changedRole || "N/A",
+            changedAt: formatDateTime(history.changedAt), // Format date
+          }));
+
+          return tableData.length > 0 ? (
+            <TableFrame>
+              <CommonTable
+                TableData={tableData}
+                columns={columns}
+                isLoading={false}
+                page={meta?.currentPage || page}
+                totalPages={meta?.totalPages || 1}
+                rowsPerPage={limit}
+                onPageChange={(nextPage) => setPage(nextPage)}
+              />
+            </TableFrame>
+          ) : (
+            <div>{""}</div>
+          );
+        }}
+      </QueryComponent>
     </>
   );
 };

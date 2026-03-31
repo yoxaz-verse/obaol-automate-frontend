@@ -153,7 +153,7 @@ export default function DocumentTemplatePreview({
   const fieldMap = useMemo(() => FIELD_MAPS[String(docType || "").toUpperCase()] || FALLBACK_FIELDS, [docType]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-xs uppercase tracking-[0.3em] text-default-400 font-black">Preview</div>
@@ -166,40 +166,41 @@ export default function DocumentTemplatePreview({
         )}
       </div>
 
-      <Card className="invoice-card border border-default-200/70 bg-content1/95 shadow-sm">
-        <CardBody className="space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-warning-500/10 flex items-center justify-center font-black text-warning-600">
-                O
+      <div className="w-full flex justify-center">
+        <Card className="invoice-card border border-default-200/70 bg-content1/95 shadow-xl w-full max-w-4xl">
+          <CardBody className="space-y-7 px-8 py-8">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-warning-500/10 flex items-center justify-center font-black text-warning-600">
+                  O
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-default-400">OBAOL Supreme</div>
+                  <div className="text-base font-semibold tracking-tight text-foreground">{docLabel}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-xs text-default-500">OBAOL Supreme</div>
-                <div className="text-sm font-semibold">{docLabel}</div>
+              <div className="text-right text-xs text-default-500">
+                <div className="font-semibold text-default-700 tracking-tight">DOC‑2026‑001</div>
+                <div>15 Mar 2026</div>
+                <div>Status: Draft</div>
               </div>
             </div>
-            <div className="text-right text-xs text-default-500">
-              <div className="font-semibold text-default-700">DOC‑2026‑001</div>
-              <div>15 Mar 2026</div>
-              <div>Status: Draft</div>
-            </div>
-          </div>
 
           <Divider />
 
           {templateType === "commercial" && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Buyer</div>
-                  <div className="font-semibold">Evergreen Imports LLC</div>
+                  <div className="font-semibold text-foreground">Evergreen Imports LLC</div>
                   <div>buyer@evergreen.com</div>
                   <div>+1 415 555 0199</div>
                   <div>San Francisco, CA, USA</div>
                 </div>
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Seller</div>
-                  <div className="font-semibold">OBAOL Producer Co.</div>
+                  <div className="font-semibold text-foreground">OBAOL Producer Co.</div>
                   <div>seller@obaol.com</div>
                   <div>+91 98765 43210</div>
                   <div>Kochi, India</div>
@@ -211,24 +212,24 @@ export default function DocumentTemplatePreview({
               <div className="text-xs">
                 <div className="text-[10px] uppercase tracking-widest text-default-400 mb-2">Line Items</div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead className="text-default-400 border-b border-default-200">
+                  <table className="w-full text-[11px]">
+                    <thead className="text-default-400 border-b border-default-200/80">
                       <tr>
-                        <th className="text-left py-1.5">Product</th>
-                        <th className="text-left py-1.5">Variant</th>
-                        <th className="text-right py-1.5">Qty</th>
-                        <th className="text-right py-1.5">Rate/KG</th>
-                        <th className="text-right py-1.5">Amount</th>
+                        <th className="text-left py-2">Product</th>
+                        <th className="text-left py-2">Variant</th>
+                        <th className="text-right py-2">Qty</th>
+                        <th className="text-right py-2">Rate/KG</th>
+                        <th className="text-right py-2">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sampleLineItems.map((item, idx) => (
                         <tr key={idx} className="border-b border-default-200/60">
-                          <td className="py-1.5">{item.product}</td>
-                          <td className="py-1.5">{item.variant}</td>
-                          <td className="py-1.5 text-right">{item.qty}</td>
-                          <td className="py-1.5 text-right">{item.rate}</td>
-                          <td className="py-1.5 text-right">{item.amount}</td>
+                          <td className="py-2">{item.product}</td>
+                          <td className="py-2">{item.variant}</td>
+                          <td className="py-2 text-right">{item.qty}</td>
+                          <td className="py-2 text-right">{item.rate}</td>
+                          <td className="py-2 text-right">{item.amount}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -238,7 +239,7 @@ export default function DocumentTemplatePreview({
 
               <Divider />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Terms</div>
                   <div>Payment: 30% advance, 70% before shipment</div>
@@ -246,10 +247,10 @@ export default function DocumentTemplatePreview({
                   <div>Notes: Quality inspection before dispatch</div>
                 </div>
                 <div className="space-y-1 text-right">
-                  <div className="flex justify-between"><span>Subtotal</span><span>₹ 5,385,000</span></div>
-                  <div className="flex justify-between"><span>Commission</span><span>₹ 120,000</span></div>
-                  <div className="flex justify-between"><span>Tax</span><span>₹ 0</span></div>
-                  <div className="flex justify-between font-semibold"><span>Total</span><span>₹ 5,505,000</span></div>
+                  <div className="flex justify-between gap-6"><span>Subtotal</span><span>₹ 5,385,000</span></div>
+                  <div className="flex justify-between gap-6"><span>Commission</span><span>₹ 120,000</span></div>
+                  <div className="flex justify-between gap-6"><span>Tax</span><span>₹ 0</span></div>
+                  <div className="flex justify-between gap-6 font-semibold"><span>Total</span><span>₹ 5,505,000</span></div>
                 </div>
               </div>
             </>
@@ -391,8 +392,9 @@ export default function DocumentTemplatePreview({
               </div>
             </div>
           )}
-        </CardBody>
-      </Card>
+          </CardBody>
+        </Card>
+      </div>
 
       <div className="rounded-xl border border-default-200/60 bg-content1/95 p-3">
         <div className="text-[10px] uppercase tracking-widest text-default-400 font-bold mb-2">Field Map</div>

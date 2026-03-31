@@ -55,7 +55,8 @@ import {
   LuClock,
   LuCheck,
   LuLoader,
-  LuMapPin
+  LuMapPin,
+  LuShieldCheck
 } from "react-icons/lu";
 
 type ImportTab = "all" | "mine" | "reservations";
@@ -471,9 +472,22 @@ export default function ImportsPage() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-start min-h-screen p-6 md:p-12 bg-background"
+      className="relative flex flex-col items-center justify-start min-h-screen p-6 md:p-12 bg-background overflow-hidden"
     >
-      <div className="w-full max-w-[1500px]">
+      {/* --- CINEMATIC LOGISTICS BACKGROUND --- */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+         <img 
+            src="/high_tech_logistics_bg_png_1774979381331.png" 
+            alt="" 
+            className="w-full h-full object-cover opacity-[0.03] dark:opacity-[0.05] grayscale mix-blend-luminosity scale-110"
+         />
+         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+      </div>
+
+      {/* --- AMBIENT DECO --- */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-warning-500/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-warning-500/[0.01] rounded-full blur-[120px] pointer-events-none" />
+      <div className="relative z-10 w-full max-w-[1500px]">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
@@ -492,11 +506,15 @@ export default function ImportsPage() {
               </div>
             </div>
             <div className="flex flex-col">
-              <Title title="Import Listings" />
+              <div className="flex items-center gap-3">
+                 <Title title="Import Listings" />
+              </div>
               <p className="text-default-500 text-xs font-semibold tracking-tight max-w-lg opacity-90 leading-relaxed mt-1">
                 Unified logistics portal for incoming shipments, inventory reserves, and network-wide trade synchronization for the Indian market.
               </p>
             </div>
+            
+            {/* Decal: Global Stream */}
           </div>
 
           {canCreate && (
@@ -531,6 +549,7 @@ export default function ImportsPage() {
               <Tab key="reservations" title="My Reservations" />
             </Tabs>
           </div>
+
 
           <AnimatePresence mode="wait">
             {activeTab !== "reservations" && importsLoading && (

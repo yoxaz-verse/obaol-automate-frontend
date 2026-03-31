@@ -187,7 +187,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
   return (
     <Card className="lg:col-span-3 order-12 border border-divider bg-content1/50">
       <CardHeader className="px-6 pt-6 pb-0 flex flex-col items-start gap-1">
-        <span className="font-bold text-lg tracking-tight">Responsibility Event</span>
+        <span className="font-bold text-lg tracking-tight whitespace-nowrap">Responsibility Event</span>
         <span className="text-[10px] uppercase font-black tracking-widest text-default-400">Execution Ownership Allocation</span>
       </CardHeader>
       <Divider className="mt-4" />
@@ -791,29 +791,47 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                       </div>
                     )}
                     {showFinalizeButton && onFinalize && (
-                      <Button
-                        size="lg"
-                        color={isReadOnlyAfterConversion ? "success" : "primary"}
-                        variant={isReadOnlyAfterConversion ? "flat" : "shadow"}
-                        onPress={() => onFinalize()}
-                        isLoading={Boolean(finalizeLoading)}
-                        isDisabled={isReadOnlyAfterConversion}
-                        className="flex-[2] h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
-                        startContent={!finalizeLoading && (isReadOnlyAfterConversion ? <LuCheck size={20} /> : <FiCheckCircle size={20} />)}
-                      >
-                        {isReadOnlyAfterConversion ? "Framework Finalized" : "Finalize Framework"}
-                      </Button>
+                      <div className="flex flex-col gap-4">
+                        <Button
+                          size="lg"
+                          fullWidth
+                          color={isReadOnlyAfterConversion ? "success" : "primary"}
+                          variant={isReadOnlyAfterConversion ? "flat" : "shadow"}
+                          onPress={() => onFinalize()}
+                          isLoading={Boolean(finalizeLoading)}
+                          isDisabled={isReadOnlyAfterConversion}
+                          className={`h-16 rounded-[1.75rem] font-black uppercase tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
+                            ${isReadOnlyAfterConversion 
+                              ? "bg-success/10 text-success border border-success/30 shadow-[0_0_25px_rgba(34,197,94,0.15)]" 
+                              : "bg-primary text-white shadow-[0_15px_45px_rgba(37,99,235,0.3)] hover:shadow-primary/60 hover:-translate-y-1 hover:scale-[1.02]"
+                            }`}
+                          startContent={!finalizeLoading && (isReadOnlyAfterConversion 
+                            ? <LuShieldCheck size={18} className="mr-1" /> 
+                            : <LuActivity size={18} className="mr-1 group-hover/btn:animate-pulse" />
+                          )}
+                        >
+                          {!isReadOnlyAfterConversion && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />}
+                          {isReadOnlyAfterConversion ? "PROTOCOL LOCKED" : "FINALIZE FRAMEWORK"}
+                        </Button>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-center gap-2 opacity-50">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-default-500">
-                      {finalizeLoading || savingFramework
-                        ? "Synchronizing..."
-                        : responsibilitySavedAt
-                          ? `Last Sync: ${dayjs(responsibilitySavedAt).format("DD MMM, HH:mm")}`
-                          : "Awaiting sync"}
-                    </span>
-                    {responsibilitySavedAt && <div className="w-1 h-1 rounded-full bg-success" />}
+                  <div className="flex flex-col items-center gap-2 mt-4">
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-foreground/[0.04] border border-white/5 shadow-inner">
+                       <div className={`w-1.5 h-1.5 rounded-full ${isReadOnlyAfterConversion ? "bg-success animate-pulse" : "bg-warning-500 animate-pulse"} shadow-[0_0_8px_rgba(234,179,8,0.5)]`} />
+                       <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/40 italic">
+                          {finalizeLoading || savingFramework
+                            ? "PARSING PROTOCOL..."
+                            : isReadOnlyAfterConversion
+                              ? "EXECUTION READY"
+                              : "AWAITING LOCAL SYNC"}
+                       </span>
+                    </div>
+                    {responsibilitySavedAt && (
+                       <span className="text-[8px] font-bold uppercase tracking-widest text-default-400 opacity-50">
+                          LOGGED AT // {dayjs(responsibilitySavedAt).format("HH:mm:ss")}
+                       </span>
+                    )}
                   </div>
                 </div>
               )}

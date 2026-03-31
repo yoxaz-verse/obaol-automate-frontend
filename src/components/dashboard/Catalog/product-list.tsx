@@ -93,7 +93,9 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
       >
         {(productVariantData: any) => {
           const productVariantFormFields = tableConfig["productVariant"];
-          const productVariantValue = productVariantData?.data || [];
+          const productVariantValue = Array.isArray(productVariantData)
+            ? productVariantData
+            : (productVariantData?.data || []);
 
           return (
             <div className="space-y-10">

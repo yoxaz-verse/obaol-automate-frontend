@@ -107,7 +107,43 @@ export default function SampleRequestsPage() {
                <LuDatabase size={36} />
              </div>
              <h4 className="text-2xl font-black text-foreground uppercase tracking-tight">System Empty</h4>
-             <p className="text-xs font-bold text-default-400 uppercase tracking-widest mt-3 opacity-60 max-w-sm mx-auto leading-relaxed">Active sourcing sequences not found. Initialize marketplace protocols to track sampling.</p>
+             <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-4 opacity-70 max-w-lg mx-auto leading-relaxed mb-10">
+               No active sample tracking protocols detected. Follow the sampling protocol below to initialize your first dispatch.
+             </p>
+
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16 text-left">
+                {[
+                  { step: "01", title: "EXPLORE MARKET", desc: "Navigate to the Marketplace or Global Catalog to browse live cargo rates.", icon: LuSearch, color: "text-blue-500" },
+                  { step: "02", title: "INITIATE PROTOCOL", desc: "Select the 'Request Sample' icon on any live product to start the dispatch sequence.", icon: LuBox, color: "text-warning-500" },
+                  { step: "03", title: "TRACK DISPATCH", desc: "Monitor your sample's logistics lifecycle right here in the Sample Hub.", icon: LuActivity, color: "text-emerald-500" }
+                ].map((item, i) => (
+                  <div key={i} className="p-6 rounded-[2rem] bg-foreground/[0.03] border border-white/5 relative group hover:bg-foreground/[0.05] transition-all">
+                    <span className="absolute top-6 right-6 text-[10px] font-black text-foreground/20 italic tracking-widest">{item.step}</span>
+                    <item.icon className={`${item.color} mb-4 opacity-50 group-hover:opacity-100 transition-opacity`} size={24} />
+                    <h5 className="text-[11px] font-black uppercase tracking-widest mb-2">{item.title}</h5>
+                    <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest leading-loose opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
+                  </div>
+                ))}
+             </div>
+
+             <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button 
+                   color="warning" 
+                   className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest uppercase shadow-warning-500/20 shadow-2xl bg-warning-500 text-black border-none hover:scale-105 transition-all"
+                   onPress={() => router.push("/dashboard/product")}
+                   startContent={<LuBox size={20} />}
+                >
+                   INITIALIZE IN MARKETPLACE
+                </Button>
+                <Button 
+                   variant="flat" 
+                   className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest uppercase bg-foreground/5 border border-foreground/5 transition-all hover:bg-foreground/10 hover:border-foreground/10"
+                   onPress={() => router.push("/dashboard/catalog")}
+                   startContent={<LuDatabase size={20} />}
+                >
+                   BROWSE_CATALOG
+                </Button>
+             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">

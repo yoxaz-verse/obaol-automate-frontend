@@ -85,7 +85,12 @@ const getOptions = async (
     }
 
     if (lowerKey === "subcategory") {
-      const res = await getData(subCategoryRoutes.getAll, params);
+      const parentVal = typeof parentValue === "string" ? parentValue : undefined;
+      const subParams = { 
+        ...params, 
+        ...(parentVal && { category: parentVal }) 
+      };
+      const res = await getData(subCategoryRoutes.getAll, subParams);
       return extractArray(res).map((d: any) => ({ key: d._id, value: d.name }));
     }
 
@@ -230,7 +235,14 @@ const getOptions = async (
   // fetch or return cached data
   return queryClient.fetchQuery({
     queryKey,
-    queryFn: query,
+    queryFn: async () => {
+      try {
+        return await query();
+      } catch (err) {
+        console.error(`Failed to fetch options for ${fieldKey}:`, err);
+        return [];
+      }
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

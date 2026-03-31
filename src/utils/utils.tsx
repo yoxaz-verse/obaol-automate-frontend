@@ -110,11 +110,6 @@ export const sidebarOptions = [
     link: "/dashboard/company",
   },
   {
-    name: "Companies", //Translate
-    icon: <GoOrganization />,
-    link: "/dashboard/companyProduct",
-  },
-  {
     name: "Hierarchy",
     icon: <MdOutlineAccountTree />,
     link: "/dashboard/operator/hierarchy",

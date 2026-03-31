@@ -79,9 +79,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
     return `${selectedCurrency.toUpperCase()} ${converted.toFixed(2)}`;
   };
   const formatRate = (rateInINR: number): string => {
-    const base = convertRate(rateInINR);
-    if (base === "—") return base;
-    return `${base} (Ex Factory Rate)`;
+    return convertRate(rateInINR);
   };
 
   return (

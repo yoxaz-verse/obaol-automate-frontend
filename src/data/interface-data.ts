@@ -117,10 +117,16 @@ export interface EditModalProps {
   onClose?: () => void;
 }
 
+export interface QueryComponentMeta {
+  totalCount?: number;
+  currentPage?: number;
+  totalPages?: number;
+}
+
 export interface QueryComponentProps<T> {
   api: string;
   queryKey: any[];
-  children: (data: T, refetch?: () => void) => React.ReactNode; // Added refetch as a parameter
+  children: (data: T, refetch?: () => void, meta?: QueryComponentMeta) => React.ReactNode; // Added refetch + meta
   page?: number; // Optional for paginated data
   limit?: number; // Optional for paginated data
   search?: string | null;
@@ -172,6 +178,10 @@ export interface TableProps {
   editModal?: (item: any) => React.ReactNode;
   otherModal?: (item: any) => React.ReactNode;
   isLoading?: boolean;
+  page?: number;
+  totalPages?: number;
+  rowsPerPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export interface BulkAddProps {

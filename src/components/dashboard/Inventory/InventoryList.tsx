@@ -37,6 +37,8 @@ const InventoryList: React.FC = () => {
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [page, setPage] = useState(1);
+    const limit = 25;
     const [rateModalOpen, setRateModalOpen] = useState(false);
     const [selectedInventory, setSelectedInventory] = useState<any>(null);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
@@ -85,6 +87,10 @@ const InventoryList: React.FC = () => {
         }, 300);
         return () => clearTimeout(timer);
     }, [search]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, JSON.stringify(filters || {}), effectiveCompanyId, activeTab]);
 
     const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
         setFilters(updatedFilters);
@@ -211,9 +217,10 @@ const InventoryList: React.FC = () => {
                         debouncedSearch,
                         additionalParams,
                         effectiveCompanyId,
+                        page,
                     ]}
-                    page={1}
-                    limit={100}
+                    page={page}
+                    limit={limit}
                     search={debouncedSearch}
                     additionalParams={{
                         ...(filters || {}),
@@ -221,7 +228,7 @@ const InventoryList: React.FC = () => {
                         ...(effectiveCompanyId && { associateCompany: effectiveCompanyId }),
                     }}
                 >
-                    {(inventoryData: any, refetch) => {
+                    {(inventoryData: any, refetch, meta) => {
                         const rawData = inventoryData?.data ?? inventoryData ?? [];
                         const items = Array.isArray(rawData) ? rawData : (rawData?.data || []);
 
@@ -655,6 +662,10 @@ const InventoryList: React.FC = () => {
                                                 TableData={tableData}
                                                 columns={columns}
                                                 isLoading={false}
+                                                page={meta?.currentPage || page}
+                                                totalPages={meta?.totalPages || 1}
+                                                rowsPerPage={limit}
+                                                onPageChange={(nextPage) => setPage(nextPage)}
                                                 editModal={(item: any) => (
                                                     <EditModal
                                                         _id={item._id}

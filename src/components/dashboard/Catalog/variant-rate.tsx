@@ -26,6 +26,7 @@ import {
   AutocompleteItem,
 } from "@nextui-org/react";
 import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiShoppingBag, FiPlus } from "react-icons/fi";
+import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AssociateSearch from "../Users/AssociateSearch";
@@ -50,6 +51,38 @@ import TableFrame from "@/components/CurdTable/table-frame";
 import { useCurrency } from "@/context/CurrencyContext";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
+
+const COMMISSION_RATE = 0.025;
+const round2 = (value: number) => Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
+const resolveAdminCommission = (rateValue: any, commissionValue: any) => {
+  const numericCommission = Number(commissionValue);
+  if (Number.isFinite(numericCommission) && numericCommission > 0) return numericCommission;
+  return round2(Number(rateValue || 0) * COMMISSION_RATE);
+};
+const formatLastLiveDate = (value: any) => {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "--";
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  if (sameDay(date, today)) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
+        <span className="text-[10px] font-black text-warning-500 uppercase tracking-[0.1em] italic">Today</span>
+      </div>
+    );
+  }
+
+  if (sameDay(date, yesterday)) return "Yesterday";
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 /**
  * Props for your existing VariantRate component
@@ -93,6 +126,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const productVariantValue = productVariant || null;
   const tableConfig = { ...initialTableConfig }; // avoid mutations
   const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   // Step 1: Combine all fields
   const combinedFields = [
     ...(tableConfig["category"] || []),
@@ -157,6 +191,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 25;
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
   const [inventoryQty, setInventoryQty] = useState("");
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
@@ -176,6 +212,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [
+    serverSearch,
+    productVariantValue?._id,
+    JSON.stringify(effectiveFilters || {}),
+    JSON.stringify(additionalParams || {}),
+  ]);
 
   const { data: variantResponse } = useQuery({
     queryKey: ["displayedRate", user?.id],
@@ -276,6 +321,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
     }
   }
 
+  // Rename pricing columns for "Ex Factory" specification in the header
+  columns = columns.map(col => {
+    if (col.uid === "rate") return { ...col, name: "PRICE (EX FACTORY)" };
+    if (col.uid === "finalRate") return { ...col, name: "FINAL PRICE (EX FACTORY)" };
+    if (col.uid === "commission") return { ...col, name: "COMMISSION" };
+    return col;
+  });
+
   // Return the entire QueryComponent for data fetching
   return (
     <QueryComponent
@@ -290,8 +343,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
         serverSearch,
         addedRateIds.size, // Refresh when catalog items change
       ]}
-      page={1}
-      limit={1000}
+      page={page}
+      limit={limit}
       search={serverSearch}
       additionalParams={{
         ...(effectiveFilters || {}),
@@ -301,7 +354,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         ...(productVariantValue && { productVariant: productVariantValue._id }),
       }}
     >
-      {(variantRateData: any, refetch) => {
+      {(variantRateData: any, refetch, meta) => {
         // If we have associates, populate the "associate" field values for AddModal
         const refetchData = () => {
           refetch?.(); // Safely call refetch if it's available
@@ -442,7 +495,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
               const supplierRate = item.rate || 0;
               const quantityValue = item.quantity;
-              const adminCommission = item.commission || 0;
+              const adminCommission = resolveAdminCommission(supplierRate, item.commission);
               const totalRate = supplierRate + adminCommission;
               const isCommissionAdded = Number(adminCommission) > 0;
 
@@ -451,43 +504,83 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ? supplierRate
                 : totalRate;
 
+              const productVariantLabel = String(
+                (
+                  (item.productVariant?.product?.name || "") +
+                  " " +
+                  (item.productVariant?.name || item.productVariantName || "")
+                ).trim() || "N/A"
+              );
+
               return {
                 ...rest,
-                isLive: item.isLive,
-                associate:
-                  item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL"),
+                isLive: Boolean(item.isLive),
+                liveStatus: (
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-1.5 h-1.5 rounded-full ${item.isLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${item.isLive ? "text-success-400" : "text-white/20"}`}>
+                      {item.isLive ? "LIVE_NODE" : "OFFLINE"}
+                    </span>
+                  </div>
+                ),
+                associate: (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-bold text-white uppercase tracking-tight line-clamp-1">{item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL")}</span>
+                    <span className="text-[9px] text-white/30 uppercase tracking-widest">ID: {String(item.associate?._id || item.associate || "---").slice(-6)}</span>
+                  </div>
+                ),
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
-                productVariant: String(
-                  (
-                    (item.productVariant?.product?.name || "") +
-                    " " +
-                    (item.productVariant?.name || item.productVariantName || "")
-                  ).trim() || "N/A"
-                ),
+                productVariant: productVariantLabel,
                 product: item.productVariant?.product?.name,
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
 
                 // Column Mapping
-                rate: isAdminUser && isMarketplace
-                  ? formatRate(totalRate)
-                  : user?.role?.toLowerCase() === "admin"
-                    ? formatRate(supplierRate)
-                    : formatRate(displayedPrice),
-                commission: isAdminUser && isMarketplace
-                  ? (isCommissionAdded ? formatRate(adminCommission) : "-")
-                  : adminCommission
-                    ? formatRate(adminCommission)
-                    : 0,
+                rate: (
+                  <span className="text-warning-500 font-bold tracking-tight text-sm">
+                     {isAdminUser && isMarketplace
+                      ? formatRate(totalRate)
+                      : user?.role?.toLowerCase() === "admin"
+                        ? formatRate(supplierRate)
+                        : formatRate(displayedPrice)}
+                  </span>
+                ),
+                commission: (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-black ${isCommissionAdded ? "text-primary-400" : "text-white/20"}`}>
+                      {isAdminUser && isMarketplace
+                        ? (isCommissionAdded ? formatRate(adminCommission) : "-")
+                        : adminCommission
+                          ? formatRate(adminCommission)
+                          : "0.00"}
+                    </span>
+                    {isCommissionAdded && <div className="w-1 h-3 bg-primary-500/20 rounded-full" />}
+                  </div>
+                ),
                 commissionStatus: isCommissionAdded ? "+" : "-",
-                finalRate: formatRate(totalRate),
+                finalRate: (
+                  <span className="text-white font-black text-sm tracking-tight border-b border-white/10 pb-0.5">
+                    {formatRate(totalRate)}
+                  </span>
+                ),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
-                  ? `${quantityValue} MT`
+                  ? (
+                    <div className="flex items-center gap-1.5">
+                      <FiPackage size={12} className="text-white/30" />
+                      <span className="font-bold">{quantityValue}</span>
+                      <span className="text-[9px] text-white/40 uppercase">{item.quantityUnit || "MT"}</span>
+                    </div>
+                  )
                   : "-",
                 quantityRaw: quantityValue,
                 inventoryQty: inventorySummary
-                  ? `${inventorySummary.totalQty} MT`
+                  ? (
+                    <div className="flex items-center gap-2">
+                       <div className="w-1 h-3 bg-success-500/40 rounded-full" />
+                       <span className="font-bold text-success-400">{inventorySummary.totalQty} MT</span>
+                    </div>
+                  )
                   : "-",
                 inventoryStatus,
                 hasInventory,
@@ -497,14 +590,18 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isMarketplaceView: isMarketplace,
                 isOwnerView: isOwner && !isMarketplace,
                 isAdded: addedRateIds.has(item._id),
-                lastLiveDate: item.lastLiveDate || item.updatedAt || item.createdAt
+                lastLiveDate: (
+                  <div className="flex items-center justify-start min-w-[80px]">
+                    {formatLastLiveDate(item.lastLiveDate || item.updatedAt || item.createdAt)}
+                  </div>
+                )
               };
             } else if (rate === "catalogItem") {
               // Row is a CatalogItem (Added to Catalog)
               const baseRate = item.baseRateId;
               const supplierRate = baseRate?.rate || 0;
               const quantityValue = baseRate?.quantity;
-              const adminCommission = baseRate?.commission || 0;
+              const adminCommission = resolveAdminCommission(baseRate?.rate, baseRate?.commission);
               const mediatorMarkup = item.margin || 0;
 
               // Rule: Mediator sees final display rate (Base + Admin + Mediator Markup)
@@ -536,13 +633,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isCatalogView: true,
                 isAdded: true,
                 isOwnerView: true,
-                lastLiveDate: item.lastLiveDate || item.updatedAt || item.createdAt
+                lastLiveDate: (
+                  <div className="flex items-center justify-start min-w-[80px]">
+                    {formatLastLiveDate(item.lastLiveDate || item.updatedAt || item.createdAt)}
+                  </div>
+                )
               };
             } else {
               // Row is a DisplayedRate (Personalized - fallback/old)
               const supplierRate = item.variantRate?.rate || 0;
               const quantityValue = item.variantRate?.quantity;
-              const adminCommission = item.variantRate?.commission || 0;
+              const adminCommission = resolveAdminCommission(item.variantRate?.rate, item.variantRate?.commission);
               const basePriceForUser = supplierRate + adminCommission;
 
               const associateMargin = item.commission || 0;
@@ -565,6 +666,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 rawBasePrice: basePriceForUser,
                 rawCommission: associateMargin,
                 variantRateId: item.variantRate?._id,
+                lastLiveDate: (
+                  <div className="flex items-center justify-start min-w-[80px]">
+                    {formatLastLiveDate(item.lastLiveDate || item.updatedAt || item.createdAt)}
+                  </div>
+                ),
               };
             }
           });
@@ -666,6 +772,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   TableData={finalTableData}
                   columns={columns}
                   isLoading={false}
+                  page={meta?.currentPage || page}
+                  totalPages={meta?.totalPages || 1}
+                  rowsPerPage={limit}
+                  onPageChange={(nextPage) => setPage(nextPage)}
                   emptyContent={
                     rate === "catalogItem" && isAssociateUser && finalTableData.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
@@ -1360,6 +1470,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   const [requestState, setRequestState] = useState("");
   const [requestDistrict, setRequestDistrict] = useState("");
   const [requestDivision, setRequestDivision] = useState("");
@@ -1551,19 +1662,23 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Tooltip content={cooldownLabel} closeDelay={0}>
+      <Tooltip 
+        content={<span className="text-[10px] font-black uppercase tracking-widest px-1">Request Sample Protocol</span>} 
+        closeDelay={0}
+        className="bg-[#0B0F14] border border-white/10 rounded-lg shadow-2xl"
+      >
         <span
           onClick={() => {
             if (isCooldownActive) return;
             onOpen();
           }}
-          className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${
             isCooldownActive
-              ? "bg-success-500/10 text-success-500 cursor-not-allowed"
-              : "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 cursor-pointer active:opacity-50"
+              ? "bg-success-500/10 text-success-500 cursor-not-allowed opacity-50"
+              : "bg-warning-500/10 hover:bg-warning-500/20 text-warning-500 cursor-pointer active:scale-90"
           }`}
         >
-          <FiPackage size={20} className={isCooldownActive ? "text-success-600/80" : "text-orange-600/80"} />
+          <LuBox size={22} className={isCooldownActive ? "text-success-600/80" : "text-warning-600/80"} />
           <div className="h-[2px]" />
         </span>
       </Tooltip>
@@ -1896,12 +2011,16 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2 ">
-      <Tooltip content="Create Enquiry" closeDelay={0}>
+      <Tooltip 
+        content={<span className="text-[10px] font-black uppercase tracking-widest px-1">Initialize Enquiry Protocol</span>} 
+        closeDelay={0}
+        className="bg-[#0B0F14] border border-white/10 rounded-lg shadow-2xl"
+      >
         <span
           onClick={onOpen}
-          className="flex flex-col items-center justify-center p-2 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 cursor-pointer active:opacity-50 transition-all duration-200"
+          className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 cursor-pointer active:scale-90 transition-all duration-300"
         >
-          <FiMessageSquare size={20} className="text-primary-600/80" />
+          <LuMessageSquare size={22} className="text-primary-600/80" />
           <div className="h-[2px]" />
         </span>
       </Tooltip>

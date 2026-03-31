@@ -417,12 +417,12 @@ export default function ExternalOrderCreatePage() {
             startContent={<LuChevronLeft size={16} />}
             onPress={() => router.push("/dashboard/external-orders")}
           >
-            RETURN_TO_LIST
+            RETURN TO LIST
           </Button>
           <div className="flex items-center gap-3 px-4 py-2 bg-foreground/[0.03] rounded-full border border-foreground/5">
              <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse" />
              <span className="text-[9px] font-black text-default-400 uppercase tracking-widest italic">
-                OPERATIONAL_MODE // {user?.role || "OPERATOR"}
+                OPERATIONAL MODE // {user?.role || "OPERATOR"}
              </span>
           </div>
         </motion.div>
@@ -434,15 +434,15 @@ export default function ExternalOrderCreatePage() {
         >
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-              <h3 className="text-[11px] font-black text-warning-500 uppercase tracking-[0.4em] italic mb-1">Trade_Role_Selection</h3>
-              <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">HOW_DO_YOU_PARTICIPATE?</p>
+              <h3 className="text-[11px] font-black text-warning-500 uppercase tracking-[0.4em] italic mb-1">Trade Role Selection</h3>
+              <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">HOW DO YOU PARTICIPATE?</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { id: "BUYER", icon: LuUser, sub: "BUYER_SIDE_REP" },
-                  { id: "SELLER", icon: LuPackage, sub: "SELLER_SIDE_REP" },
-                  { id: "MEDIATOR", icon: LuSearch, sub: "GLOBAL_COORDINATOR" },
+                  { id: "BUYER", icon: LuUser, sub: "BUYER SIDE REP" },
+                  { id: "SELLER", icon: LuPackage, sub: "SELLER SIDE REP" },
+                  { id: "MEDIATOR", icon: LuSearch, sub: "GLOBAL COORDINATOR" },
                 ].map((role) => {
                   const selected = externalRole === role.id;
                   return (
@@ -480,8 +480,8 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity_Module</h3>
-                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">BUYER_DETAILS</p>
+                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">BUYER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
                 <Switch
@@ -489,13 +489,13 @@ export default function ExternalOrderCreatePage() {
                   onValueChange={setBuyerUndisclosed}
                   classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-400" }}
                 >
-                  UNDISCLOSED_ENTITY
+                  UNDISCLOSED ENTITY
                 </Switch>
                 <div className="space-y-6">
                   {[
-                    { label: "ENTITY_NAME", key: "name", placeholder: "ENTER_LEGAL_ENTITY", icon: LuUser },
-                    { label: "COMM_CHANNEL_EMAIL", key: "email", placeholder: "CONTACT@ENTITY.COM", icon: LuFileCheck },
-                    { label: "VOICE_ENCRYPTION_ID", key: "phone", placeholder: "+X XXX XXX XXXX", icon: LuSearch },
+                    { label: "ENTITY NAME", key: "name", placeholder: "ENTER LEGAL ENTITY", icon: LuUser },
+                    { label: "COMM CHANNEL EMAIL", key: "email", placeholder: "CONTACT@ENTITY.COM", icon: LuFileCheck },
+                    { label: "VOICE ENCRYPTION ID", key: "phone", placeholder: "+X XXX XXX XXXX", icon: LuSearch },
                   ].map((field) => (
                     <Input
                       key={field.key}
@@ -523,8 +523,8 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity_Module</h3>
-                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">SELLER_DETAILS</p>
+                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <p className="text-xl font-black text-foreground uppercase tracking-tight italic">SELLER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
                 <Switch
@@ -532,13 +532,13 @@ export default function ExternalOrderCreatePage() {
                   onValueChange={setSellerUndisclosed}
                   classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-400" }}
                 >
-                  UNDISCLOSED_ENTITY
+                  UNDISCLOSED ENTITY
                 </Switch>
                 <div className="space-y-6">
                   {[
-                    { label: "ENTITY_NAME", key: "name", placeholder: "ENTER_LEGAL_ENTITY", icon: LuUser },
-                    { label: "COMM_CHANNEL_EMAIL", key: "email", placeholder: "CONTACT@ENTITY.COM", icon: LuFileCheck },
-                    { label: "VOICE_ENCRYPTION_ID", key: "phone", placeholder: "+X XXX XXX XXXX", icon: LuSearch },
+                    { label: "ENTITY NAME", key: "name", placeholder: "ENTER LEGAL ENTITY", icon: LuUser },
+                    { label: "COMM CHANNEL EMAIL", key: "email", placeholder: "CONTACT@ENTITY.COM", icon: LuFileCheck },
+                    { label: "VOICE ENCRYPTION ID", key: "phone", placeholder: "+X XXX XXX XXXX", icon: LuSearch },
                   ].map((field) => (
                     <Input
                       key={field.key}
@@ -567,14 +567,14 @@ export default function ExternalOrderCreatePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-               <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Cargo_Manifest</h3>
-               <p className="text-xl font-black text-foreground uppercase tracking-tight italic">PRODUCT_PARAMETERS</p>
+               <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Cargo Manifest</h3>
+               <p className="text-xl font-black text-foreground uppercase tracking-tight italic">PRODUCT PARAMETERS</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <Input
-                  label="PRIMARY_COMMODITY"
-                  placeholder="IDENTIFY_PRODUCT"
+                  label="PRIMARY COMMODITY"
+                  placeholder="IDENTIFY PRODUCT"
                   value={externalProduct.name}
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, name: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
@@ -582,8 +582,8 @@ export default function ExternalOrderCreatePage() {
                   startContent={<LuPackage className="text-warning-500/50 mr-2" size={16} />}
                 />
                 <Input
-                  label="CARGO_VARIANT"
-                  placeholder="SPEC_ID"
+                  label="CARGO VARIANT"
+                  placeholder="SPEC ID"
                   value={externalProduct.variant}
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, variant: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
@@ -591,7 +591,7 @@ export default function ExternalOrderCreatePage() {
                   startContent={<LuTag className="text-warning-500/50 mr-2" size={16} />}
                 />
                 <Input
-                  label="PAYLOAD_QUANTITY"
+                  label="PAYLOAD QUANTITY"
                   placeholder="VALUE"
                   type="number"
                   value={externalProduct.quantity}
@@ -600,7 +600,7 @@ export default function ExternalOrderCreatePage() {
                   classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
                 />
                 <Select
-                  label="METRIC_UNIT"
+                  label="METRIC UNIT"
                   variant="flat"
                   size="lg"
                   labelPlacement="outside"
@@ -673,19 +673,19 @@ export default function ExternalOrderCreatePage() {
                    <div className="absolute inset-0 bg-warning-500 blur-2xl opacity-30 animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-3">
-                  <div className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none">INITIALIZE_EXTERNAL_ORDER</div>
+                  <div className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none">INITIALIZE EXTERNAL ORDER</div>
                   <p className="text-[10px] font-bold text-default-500 uppercase tracking-widest leading-relaxed opacity-80">
                     Routing this transaction through the global execution matrix. All responsibility mappings will be encoded into the core ledger upon initialization.
                   </p>
                   
-                  <div className="flex flex-wrap gap-3 mt-2">
+                  <div className="flex flex-wrap gap-2.5 mt-3">
                     {missingItems.map((item) => (
                       <Chip 
                         key={item.key} 
                         size="sm" 
                         variant="flat" 
-                        className={`font-black uppercase text-[8px] tracking-widest h-6 border none ${item.ok ? "bg-success-500/10 text-success-500" : "bg-danger-500/10 text-danger-500 animate-pulse"}`}
-                        startContent={item.ok ? <LuCheck size={10} /> : <div className="w-1.5 h-1.5 rounded-full bg-danger-500 mr-1" />}
+                        className={`font-black uppercase text-[8px] tracking-[0.2em] h-7 px-3 border border-current transition-all duration-500 rounded-lg ${item.ok ? "bg-success-500/5 text-success-500/60" : "bg-danger-500/10 text-danger-500 animate-pulse"}`}
+                        startContent={item.ok ? <LuCheck size={10} className="mr-1" /> : <div className="w-1.5 h-1.5 rounded-full bg-danger-500 mr-2" />}
                       >
                         {item.label}
                       </Chip>
@@ -703,13 +703,22 @@ export default function ExternalOrderCreatePage() {
                 <Button
                   color="warning"
                   variant="shadow"
-                  className="font-black px-16 h-16 rounded-3xl text-sm tracking-[0.3em] uppercase italic transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(234,179,8,0.3)]"
+                  className="font-black px-16 h-16 rounded-[2.5rem] text-[13px] tracking-[0.4em] uppercase italic transition-all duration-500 
+                    bg-warning-500 text-black hover:scale-[1.03] active:scale-95
+                    shadow-[0_20px_60px_rgba(234,179,8,0.4)] hover:shadow-warning-500/60
+                    disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
                   isLoading={submitting}
                   isDisabled={!canSubmit || submitting}
                   onPress={handleSubmit}
+                  startContent={!submitting && <LuShoppingBag size={20} className="mr-2" />}
                 >
-                  EXECUTE_ORDER_CREATION
+                  {submitting ? "REDIRECTING..." : "DEPLOY MISSION ORCHESTRATION"}
                 </Button>
+                {submitting && (
+                  <div className="text-[9px] font-black uppercase tracking-[0.35em] text-default-400 text-center italic">
+                    Redirecting to order view
+                  </div>
+                )}
               </div>
             </CardBody>
           </Card>

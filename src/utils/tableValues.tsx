@@ -99,7 +99,7 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
     if (roleLower === "admin") {
       nonActionColumns.push({ name: "Associate", uid: "associate" });
     }
-    nonActionColumns.push({ name: "Product", uid: "productVariant" });
+    nonActionColumns.push({ name: "Product", uid: "productVariant", maxWidth: "max-w-[260px]" });
   } else if (currentTable === "displayedRate" || currentTable === "catalogItem") {
     if (userRole !== "Associate") {
       nonActionColumns.push({ name: "Associate", uid: "associate" });
@@ -111,8 +111,8 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
   ) {
     nonActionColumns.push({ name: "ADMIN", uid: "admin" });
   } else if (currentTable === "inventories") {
-    nonActionColumns.push({ name: "Product", uid: "product" });
-    nonActionColumns.push({ name: "Product Variant", uid: "productVariant" });
+    nonActionColumns.push({ name: "Product", uid: "product", maxWidth: "max-w-[240px]" });
+    nonActionColumns.push({ name: "Product Variant", uid: "productVariant", maxWidth: "max-w-[240px]" });
     if (roleLower === "admin") {
       nonActionColumns.push({ name: "Associate", uid: "associate" });
     }
@@ -2154,7 +2154,7 @@ export const initialTableConfig: Record<
       type: "boolean",
       key: "isLive",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: false,
     },
     {
@@ -2267,7 +2267,7 @@ export const initialTableConfig: Record<
       type: "boolean",
       key: "isLive",
       inForm: true,
-      inTable: true,
+      inTable: false,
       inEdit: true,
     },
     {

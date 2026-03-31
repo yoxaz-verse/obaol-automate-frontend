@@ -32,11 +32,7 @@ import { useSoundEffect } from "@/context/SoundContext";
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
+// Global window extension handled by explicit casting to avoid declaration conflicts
 const decodeJwt = (token: string): any => {
   try {
     const payload = token.split(".")[1];
@@ -260,11 +256,11 @@ export default function RegisterPage() {
 
   React.useEffect(() => {
     if (!googleReady) return;
-    if (!window?.google?.accounts?.id) return;
+    if (!(window as any)?.google?.accounts?.id) return;
     const container = document.getElementById("google-register-associate");
     if (!container) return;
     const buttonWidth = Math.min(360, Math.max(240, container.clientWidth || 320));
-    window.google.accounts.id.initialize({
+    (window as any).google.accounts.id.initialize({
       client_id: googleClientId,
       callback: (resp: { credential?: string }) => {
         if (!resp?.credential) return;
@@ -278,7 +274,7 @@ export default function RegisterPage() {
         }));
       },
     });
-    window.google.accounts.id.renderButton(container, {
+    (window as any).google.accounts.id.renderButton(container, {
       theme: "outline",
       size: "large",
       width: buttonWidth,

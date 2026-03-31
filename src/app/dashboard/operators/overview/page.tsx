@@ -2,11 +2,10 @@
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardBody, CardHeader, Select, SelectItem, Spinner, Button } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Select, SelectItem, Spinner } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
-import Link from "next/link";
 
 const toId = (value: unknown) => String(value || "").trim();
 
@@ -144,7 +143,6 @@ export default function OperatorOverviewPage() {
                       <th className="px-4 py-3 text-left">Company</th>
                       <th className="px-4 py-3 text-left">Products</th>
                       <th className="px-4 py-3 text-left">Live Products</th>
-                      <th className="px-4 py-3 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -153,22 +151,11 @@ export default function OperatorOverviewPage() {
                         <td className="px-4 py-3 text-foreground font-medium">{company.name}</td>
                         <td className="px-4 py-3 text-default-600">{company.productCount || 0}</td>
                         <td className="px-4 py-3 text-default-600">{company.liveProductCount || 0}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            as={Link}
-                            size="sm"
-                            color="warning"
-                            variant="flat"
-                            href={`/dashboard/companyProduct?companyId=${company._id}`}
-                          >
-                            View Company
-                          </Button>
-                        </td>
                       </tr>
                     ))}
                     {companies.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="px-4 py-6 text-center text-default-500">
+                        <td colSpan={3} className="px-4 py-6 text-center text-default-500">
                           No companies assigned to this operator.
                         </td>
                       </tr>

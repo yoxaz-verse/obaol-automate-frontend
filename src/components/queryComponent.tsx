@@ -42,7 +42,22 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     retry: 1,
   });
 
-  const responseData = page ? data?.data?.data : data?.data;
+  const rawResult = page !== undefined ? data?.data?.data : data?.data;
+  const responseData =
+    page !== undefined
+      ? Array.isArray(rawResult?.data)
+        ? rawResult.data
+        : Array.isArray(rawResult)
+          ? rawResult
+          : []
+      : rawResult;
+  const responseMeta = page !== undefined && rawResult && !Array.isArray(rawResult)
+    ? {
+      totalCount: rawResult?.totalCount,
+      currentPage: rawResult?.currentPage,
+      totalPages: rawResult?.totalPages,
+    }
+    : undefined;
 
   const renderLoading = () => {
     if (loadingVariant === "inline") {
@@ -81,7 +96,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     );
   }
 
-  return <div className="w-full min-w-0 max-w-full">{children(responseData as T, refetch)}</div>;
+  return <div className="w-full min-w-0 max-w-full">{children(responseData as T, refetch, responseMeta)}</div>;
 }
 
 export default QueryComponent;

@@ -26,6 +26,8 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 25;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,6 +35,10 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, JSON.stringify(filters || {}), currentTable]);
 
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
@@ -51,16 +57,17 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
           apiRoutesByRole[currentTable],
           filters,
           debouncedSearch,
+          page,
         ]}
-        page={1}
-        limit={1000}
+        page={page}
+        limit={limit}
         search={debouncedSearch}
         additionalParams={{
           ...filters,
         }}
       >
-        {(data: any) => {
-          const fetchedData = data?.data || [];
+        {(data: any, _refetch, meta) => {
+          const fetchedData = Array.isArray(data) ? data : (data?.data || []);
           // Generate formFields with updated values
           let formFields = tableConfig[currentTable];
 
@@ -131,6 +138,10 @@ const UserTabContent: React.FC<UserTabContentProps> = ({ currentTable }) => {
                     TableData={tableData}
                     columns={columns}
                     isLoading={false}
+                    page={meta?.currentPage || page}
+                    totalPages={meta?.totalPages || 1}
+                    rowsPerPage={limit}
+                    onPageChange={(nextPage) => setPage(nextPage)}
                     viewModal={(item: any) => (
                       <DetailsModal
                         currentTable={currentTable}

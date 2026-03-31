@@ -161,11 +161,11 @@ const Dashboard: NextPage = () => {
 
   const prioritizedLinks = useMemo(() => {
     const priorityMap = isAdmin
-      ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/companyProduct", "/dashboard/operator/team"]
+      ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/operator/team"]
       : isAssociate
         ? ["/dashboard/marketplace", "/dashboard/catalog", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"]
         : isOperatorUser
-          ? ["/dashboard/companyProduct", "/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/operator/hierarchy"]
+          ? ["/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/operator/hierarchy"]
           : ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"];
 
     return priorityMap
@@ -307,13 +307,6 @@ const Dashboard: NextPage = () => {
           route: "/dashboard/product",
           color: "primary" as const,
         },
-        {
-          label: "Assigned companies",
-          value: Number(operatorMetrics.assignedCompanies || 0),
-          detail: "Companies currently mapped to you",
-          route: "/dashboard/companyProduct",
-          color: "success" as const,
-        },
       ];
     }
 
@@ -324,7 +317,6 @@ const Dashboard: NextPage = () => {
     associateActionRequired,
     associateMetrics.liveProducts,
     associateMetrics.obaolCatalogCount,
-    operatorMetrics.assignedCompanies,
     operatorMetrics.liveAssignedProducts,
     operatorMetrics.pendingAssignedEnquiries,
     operatorMetrics.totalAssignedProducts,
@@ -430,27 +422,6 @@ const Dashboard: NextPage = () => {
            </div>
          ))}
 
-         {isAssociate && (
-            <div className="flex flex-col gap-1.5 p-5 bg-primary/5 border border-primary/10 rounded-2xl group transition-all hover:bg-primary/10">
-               <div className="flex items-center gap-2 mb-1">
-                  <LuZap className="text-primary" size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary">Modular Service Request</span>
-               </div>
-               <div className="flex items-center justify-between gap-4">
-                  <p className="text-[11px] font-semibold text-default-600 leading-tight">Create specialized procurement, packaging, or custom transit protocols.</p>
-                  <Button 
-                    size="sm" 
-                    color="primary" 
-                    variant="flat" 
-                    className="h-8 rounded-lg font-bold text-[10px] uppercase tracking-widest"
-                    onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
-                  >
-                     Initiate
-                  </Button>
-               </div>
-            </div>
-         )}
-
          {isAssociate && associateActionRequired > 0 && (
             <div className="p-5 bg-danger/5 border border-danger/10 rounded-2xl animate-in slide-in-from-right duration-500">
                <div className="flex items-center gap-2 mb-3">
@@ -546,34 +517,6 @@ const Dashboard: NextPage = () => {
     </Card>
   );
 
-
-  const renderPartialService = () => (
-    (isAdmin || isAssociate || isOperatorUser) ? (
-      <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 p-10">
-          <div className="flex-1">
-             <div className="flex items-center gap-3 mb-3">
-               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-               <span className="text-[10px] font-bold tracking-widest uppercase text-primary">Service Modularization</span>
-             </div>
-            <h4 className="font-bold text-2xl tracking-tight text-foreground mb-2">Need a Specific Logistics Core?</h4>
-            <p className="text-sm text-default-500 max-w-lg leading-relaxed font-medium">
-              Create a partial service request for localized procurement, high-spec packaging, testing, transit, or customs clearance.
-            </p>
-          </div>
-          <Button
-            color="primary"
-            size="lg"
-            className="h-14 px-10 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
-            endContent={<LuArrowRight size={18} />}
-            onPress={() => router.push("/dashboard/execution-enquiries?tab=service-requests")}
-          >
-            Create Modular Service
-          </Button>
-        </CardHeader>
-      </Card>
-    ) : null
-  );
 
   const associateInterestChips = useMemo(() => {
     const rawInterests = Array.isArray(user?.companyInterests)
@@ -755,7 +698,6 @@ const Dashboard: NextPage = () => {
         </Card>
       </div>
 
-      {renderPartialService()}
     </>
   );
 
@@ -1107,7 +1049,6 @@ const Dashboard: NextPage = () => {
           </CardBody>
         </Card>
 
-        {renderPartialService()}
       </>
     );
   };

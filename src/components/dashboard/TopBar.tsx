@@ -143,7 +143,7 @@ const TopBar = ({ username, role }: TopbarProps) => {
   return (
     <div
       data-topbar
-      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-2.5 md:my-3 md:mx-4 rounded-2xl border border-default-300/70 dark:border-default-800/70 bg-gradient-to-r from-content1/98 via-content1/90 to-content1/98 backdrop-blur-xl shadow-sm dark:shadow-lg transition-all duration-300"
+      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-6 md:py-2.5 md:my-3 md:mx-4 rounded-2xl border border-default-300/20 dark:border-default-800/15 bg-gradient-to-r from-content1/98 via-content1/90 to-content1/98 backdrop-blur-xl shadow-sm dark:shadow-lg transition-all duration-300"
     >
       {/* Left Section: Navigation & Identity */}
       <div className="flex gap-1 md:gap-4 items-center min-w-0">

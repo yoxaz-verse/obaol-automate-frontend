@@ -237,6 +237,48 @@ export default function ExecutionEnquiriesPage() {
     onError: (err: any) => toast.error(err?.response?.data?.message || "Failed to create request"),
   });
 
+  const resolveLocationPart = (value: any) => {
+    if (!value) return "";
+    if (typeof value === "string") {
+      if (/^[0-9a-fA-F]{24}$/.test(value)) return "";
+      return value;
+    }
+    if (typeof value === "object") {
+      return (
+        value.name ||
+        value.label ||
+        value.title ||
+        value.stateName ||
+        value.districtName ||
+        value.cityName ||
+        value.code ||
+        ""
+      );
+    }
+    return String(value);
+  };
+  const resolveAddressLocation = (address: any) => {
+    if (!address) return "";
+    if (typeof address === "string") return address;
+    const parts = [
+      resolveLocationPart(address.district || address.districtId || address.districtName),
+      resolveLocationPart(address.city || address.cityId || address.cityName),
+      resolveLocationPart(address.state || address.stateId || address.stateName),
+      resolveLocationPart(address.country || address.countryId || address.countryName),
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
+  const resolveExecutionLocation = (ctx: any, prefix: "origin" | "destination") => {
+    if (!ctx) return "";
+    const parts = [
+      resolveLocationPart(ctx[`${prefix}District`]),
+      resolveLocationPart(ctx[`${prefix}City`]),
+      resolveLocationPart(ctx[`${prefix}State`]),
+      resolveLocationPart(ctx[`${prefix}Country`]),
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
+
   // Build the enquiry-grouped task list from embedded executionInquiries
   const enquiriesWithTasks = useMemo(() => {
     const results = rawInquiries
@@ -252,18 +294,16 @@ export default function ExecutionEnquiriesPage() {
           enquiryCode: inquiry.enquiryCode || (inquiry._id ? inquiry._id.slice(-6).toUpperCase() : "N/A"),
           product: inquiry.productId?.name || inquiry.productVariant?.product?.name || "Global Commodity",
           variant: inquiry.productVariant?.name || "Standard Variant",
+          workflowStage: inquiry.workflowStage || "",
+          status: inquiry.status || "",
           buyer:
-            [inquiry.executionContext?.destinationDistrict, inquiry.executionContext?.destinationState]
-              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
-              .join(", ")
-            || inquiry.buyerAssociateId?.address
-            || "Unknown Destination",
+            resolveExecutionLocation(inquiry.executionContext, "destination") ||
+            resolveAddressLocation(inquiry.buyerAssociateId?.address) ||
+            "Unknown Destination",
           seller:
-            [inquiry.executionContext?.originDistrict, inquiry.executionContext?.originState]
-              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
-              .join(", ")
-            || inquiry.sellerAssociateId?.address
-            || "Unknown Origin",
+            resolveExecutionLocation(inquiry.executionContext, "origin") ||
+            resolveAddressLocation(inquiry.sellerAssociateId?.address) ||
+            "Unknown Origin",
           buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
           sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
           supplierOperatorId: String(inquiry.supplierOperatorId?._id || inquiry.supplierOperatorId || ""),
@@ -302,17 +342,15 @@ export default function ExecutionEnquiriesPage() {
           enquiryCode: inquiry.enquiryCode || (inquiry._id ? inquiry._id.slice(-6).toUpperCase() : "N/A"),
           product: inquiry.productId?.name || inquiry.productVariant?.product?.name || "Global Commodity",
           variant: inquiry.productVariant?.name || "Standard Variant",
+          workflowStage: inquiry.workflowStage || "",
+          status: inquiry.status || "",
           buyer:
-            [inquiry.executionContext?.destinationDistrict, inquiry.executionContext?.destinationState]
-              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
-              .join(", ") ||
-            inquiry.buyerAssociateId?.address ||
+            resolveExecutionLocation(inquiry.executionContext, "destination") ||
+            resolveAddressLocation(inquiry.buyerAssociateId?.address) ||
             "Unknown Destination",
           seller:
-            [inquiry.executionContext?.originDistrict, inquiry.executionContext?.originState]
-              .filter((p: any) => p && (typeof p !== "string" || !/^[0-9a-fA-F]{24}$/.test(p)))
-              .join(", ") ||
-            inquiry.sellerAssociateId?.address ||
+            resolveExecutionLocation(inquiry.executionContext, "origin") ||
+            resolveAddressLocation(inquiry.sellerAssociateId?.address) ||
             "Unknown Origin",
           buyerCompanyId: String(inquiry.buyerAssociateId?._id || inquiry.buyerAssociateId || ""),
           sellerCompanyId: String(inquiry.sellerAssociateId?._id || inquiry.sellerAssociateId || ""),
@@ -445,6 +483,20 @@ export default function ExecutionEnquiriesPage() {
                             Anchor
                           </span>
                           <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                          {(enq.workflowStage || enq.status) && (
+                            <div className="flex flex-wrap gap-2 ml-2">
+                              {enq.workflowStage && (
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                  {String(enq.workflowStage).replaceAll("_", " ")}
+                                </span>
+                              )}
+                              {enq.status && (
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                  {String(enq.status)}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
                         <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
@@ -566,12 +618,26 @@ export default function ExecutionEnquiriesPage() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                       <div className="flex items-center gap-5">
                         <div>
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
-                              Anchor
-                            </span>
-                            <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
-                          </div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
+                            Anchor
+                          </span>
+                          <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
+                          {(enq.workflowStage || enq.status) && (
+                            <div className="flex flex-wrap gap-2 ml-2">
+                              {enq.workflowStage && (
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                  {String(enq.workflowStage).replaceAll("_", " ")}
+                                </span>
+                              )}
+                              {enq.status && (
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-default-100 text-default-600 border border-divider">
+                                  {String(enq.status)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                           <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none">{enq.product}</h2>
                           <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
                             <span className="opacity-60">{enq.variant}</span>

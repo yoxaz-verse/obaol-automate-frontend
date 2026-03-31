@@ -543,7 +543,7 @@ export default function CompanyProductPage() {
 
   if (loadingCompanies) {
     return (
-      <BrandedLoader message="NARRATING_CATALOG_SYNC" />
+      <BrandedLoader message="NARRATING CATALOG SYNC" />
     );
   }
 

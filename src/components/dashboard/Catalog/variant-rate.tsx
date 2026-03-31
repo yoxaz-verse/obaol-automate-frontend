@@ -30,7 +30,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AssociateSearch from "../Users/AssociateSearch";
 
-import AddModal from "@/components/CurdTable/add-model";
+import VariantRateWizardModal from "@/components/dashboard/Catalog/VariantRateWizardModal";
 import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
 import SelectModal from "./select-modal"; // Commission logic
@@ -161,6 +161,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [inventoryQty, setInventoryQty] = useState("");
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const shouldUseServerSearch = !(isMarketplaceView && typeof externalSearch === "string");
@@ -605,15 +606,28 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 )}
                 {!displayOnly && rate === "variantRate" && canAddOwnRate && (
                   <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
-                    <AddModal
-                      buttonLabel="Post New Rate"
-                      currentTable={rate}
-                      formFields={variantRateFormFields}
+                    <Button
+                      size="sm"
+                      onPress={() => setWizardOpen(true)}
+                      variant="shadow"
+                      color="warning"
+                      className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
+                      startContent={<FiPlus size={16} />}
+                    >
+                      Post New Rate
+                    </Button>
+                    <VariantRateWizardModal
+                      isOpen={wizardOpen}
+                      onClose={() => setWizardOpen(false)}
                       apiEndpoint={apiRoutesByRole[rate]}
-                      refetchData={refetchData}
+                      productVariantValue={productVariantValue}
+                      user={user}
                       additionalVariable={{
                         ...(productVariantValue && { productVariant: productVariantValue._id }),
                         ...(user?.role === "Associate" && { associate: user?.id }),
+                      }}
+                      onSuccess={() => {
+                        refetchData();
                       }}
                     />
                   </div>

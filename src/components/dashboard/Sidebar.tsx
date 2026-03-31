@@ -172,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 {!isCollapsed && (
                     <span className="font-bold text-[14px] tracking-widest text-foreground/90 whitespace-nowrap uppercase select-none flex flex-col leading-none">
                         OBAOL
-                        <span className="text-[7px] font-semibold text-default-400 tracking-[0.3em] mt-1">CORE TELEMETRY</span>
+                        <span className="text-[7px] font-semibold text-default-400 tracking-[0.3em] mt-1">TRADE ECO SYSTEM</span>
                     </span>
                 )}
             </div>

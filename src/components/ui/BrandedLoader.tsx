@@ -20,9 +20,9 @@ type MissionStage = {
 };
 
 const MISSION_STAGES: MissionStage[] = [
-    { title: "INITIALIZING_PROTOCOL",   icon: LuScan,        status: "AGRO_SOURCE_VALIDATED" },
-    { title: "LOGISTICS_SYNC",          icon: LuTruck,       status: "FLEET_ORCHESTRATION_ACTIVE" },
-    { title: "FINALIZING_ECOSYSTEM",    icon: LuShieldCheck, status: "MISSION_PARAMETERS_LOCKED" },
+    { title: "INITIALIZING PROTOCOL",   icon: LuScan,        status: "AGRO SOURCE VALIDATED" },
+    { title: "LOGISTICS SYNC",          icon: LuTruck,       status: "FLEET ORCHESTRATION ACTIVE" },
+    { title: "FINALIZING ECOSYSTEM",    icon: LuShieldCheck, status: "MISSION PARAMETERS LOCKED" },
 ];
 
 const INTERVAL_MS = 2400;
@@ -32,7 +32,7 @@ export default function BrandedLoader({
   className = "",
   variant = "default",
   size = "md",
-  message = "INITIALIZING_SYSTEM",
+  message = "INITIALIZING SYSTEM",
 }: BrandedLoaderProps) {
   const sizeMap = {
     sm: { frame: "w-[120px] h-[120px]", logo: 32, iconSize: 18 },
@@ -176,7 +176,7 @@ export default function BrandedLoader({
         </div>
 
         <span className="mt-6 text-[8px] font-black text-white/20 uppercase tracking-[0.4em] italic">
-          OBAOL_MISSION_CONTROL // STATUS_NORMAL
+          OBAOL MISSION CONTROL // STATUS NORMAL
         </span>
       </div>
     </div>

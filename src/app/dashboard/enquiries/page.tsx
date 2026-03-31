@@ -395,20 +395,50 @@ export default function EnquiryPage() {
                     )}
                   </AnimatePresence>
 
-                  {filteredData.length === 0 && (
+                  {filteredData.length === 0 && !isTransitioning && (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-center py-32 text-default-400"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="absolute inset-0 flex items-center justify-center"
                     >
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 rounded-full bg-default-100 flex items-center justify-center">
-                          <FiArrowRight className="rotate-90 text-default-300" size={24} />
+                      <div className="flex flex-col items-center gap-6 text-center max-w-sm px-6">
+                        {/* Icon */}
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-warning-500/10 blur-2xl rounded-full" />
+                          <div className="relative w-20 h-20 rounded-[1.75rem] bg-warning-500/[0.06] border border-warning-500/20 flex items-center justify-center">
+                            <FiArrowRight className="-rotate-45 text-warning-500/60" size={28} />
+                          </div>
                         </div>
-                        <p className="font-bold uppercase tracking-widest text-xs">No {selectedType !== "All" ? selectedType.toLowerCase() : ""} enquiries found in this stage</p>
+
+                        {/* Text */}
+                        <div className="flex flex-col gap-2">
+                          <p className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-500/80">
+                            NO_ENQUIRIES_FOUND
+                          </p>
+                          <h3 className="text-base font-black text-foreground uppercase tracking-tight leading-snug">
+                            {selectedType !== "All"
+                              ? `No ${selectedType.toLowerCase()} enquiries in this stage`
+                              : "No enquiries in this stage"}
+                          </h3>
+                          <p className="text-[11px] text-default-400 font-medium leading-relaxed mt-1">
+                            Browse the marketplace to discover available commodities and initiate a new trade enquiry.
+                          </p>
+                        </div>
+
+                        {/* CTA */}
+                        <Button
+                          variant="flat"
+                          onPress={() => router.push("/dashboard/marketplace")}
+                          className="font-black uppercase text-[10px] tracking-widest rounded-2xl bg-warning-500 text-black h-11 px-8 shadow-lg shadow-warning-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                          endContent={<FiArrowRight size={14} />}
+                        >
+                          Go to Marketplace
+                        </Button>
                       </div>
                     </motion.div>
                   )}
+
                 </section>
               </div>
             </div>

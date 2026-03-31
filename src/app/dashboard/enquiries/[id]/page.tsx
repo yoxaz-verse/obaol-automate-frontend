@@ -174,6 +174,7 @@ export default function EnquiryDetailsPage() {
     const [revisionReplySuccess, setRevisionReplySuccess] = useState("");
     const [revisionConfirmError, setRevisionConfirmError] = useState("");
     const [revisionReplies, setRevisionReplies] = useState<Array<{ key: string; acknowledged: boolean; counterRate?: string }>>([]);
+    const [pendingActionKey, setPendingActionKey] = useState<string>("");
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
         tradeType: "DOMESTIC",
         originCountry: "",
@@ -845,6 +846,9 @@ export default function EnquiryDetailsPage() {
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to apply action.");
         },
+        onSettled: () => {
+            setPendingActionKey("");
+        },
     });
     const revisionRequestMutation = useMutation({
         mutationFn: async () => {
@@ -1139,7 +1143,12 @@ export default function EnquiryDetailsPage() {
                 type: docActionRule.docType,
                 enquiryId: id,
             };
-            if (String(docActionRule.docType || "").toUpperCase() === "PURCHASE_ORDER" && String(docActionRule.actionType || "").toUpperCase() === "CREATE") {
+            const docTypeKey = String(docActionRule.docType || "").toUpperCase();
+            const actionTypeKey = String(docActionRule.actionType || "").toUpperCase();
+            if (docTypeKey === "PURCHASE_ORDER" && actionTypeKey === "CREATE") {
+                payload.status = "SENT";
+            }
+            if (docTypeKey === "PROFORMA_INVOICE" && actionTypeKey === "CREATE") {
                 payload.status = "SENT";
             }
             if (String(docActionRule.actionType) === "UPLOAD") {
@@ -1156,6 +1165,10 @@ export default function EnquiryDetailsPage() {
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
                 openDocViewer(createdDoc);
+            }
+            const createdType = String(createdDoc?.type || docActionRule?.docType || "").toUpperCase();
+            if (createdType === "PROFORMA_INVOICE" && !(enquiry as any)?.proformaCreatedAt) {
+                applyActionMutation.mutate({ actionKey: "PROFORMA_CREATED" });
             }
         },
         onError: (error: any) => {
@@ -1182,28 +1195,6 @@ export default function EnquiryDetailsPage() {
             toast.error(error?.response?.data?.message || "Failed to submit reopen request.");
         },
     });
-
-    useEffect(() => {
-        if (!inventoryAcceptOpen) return;
-        if (inventoryOptions.length === 0) {
-            setIsAddingNewInventory(true);
-            if (!inlineQuantity) {
-                setInlineQuantity(String(requiredQty || ""));
-            }
-        }
-    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity]);
-
-    useEffect(() => {
-        if (!inventoryAcceptOpen) return;
-        if (isAddingNewInventory) return;
-        if (!selectedInventory) return;
-        if (missingQty <= 0) return;
-        if (inlineQuantity) return;
-        setInlineQuantity(String(missingQty));
-    }, [inventoryAcceptOpen, isAddingNewInventory, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
-
-    if (isLoading) return <BrandedLoader fullScreen message="SYNCING_TRADE_PROTOCOL" />;
-    if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
 
     const sellerInventoryRows = Array.isArray(sellerInventoryResponse?.data?.data?.data)
         ? sellerInventoryResponse?.data?.data?.data
@@ -1248,6 +1239,28 @@ export default function EnquiryDetailsPage() {
         Number(selectedInventory.availableQty || 0) < requiredQty &&
         !inlineQuantity
     );
+
+    useEffect(() => {
+        if (!inventoryAcceptOpen) return;
+        if (inventoryOptions.length === 0) {
+            setIsAddingNewInventory(true);
+            if (!inlineQuantity) {
+                setInlineQuantity(String(requiredQty || ""));
+            }
+        }
+    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity]);
+
+    useEffect(() => {
+        if (!inventoryAcceptOpen) return;
+        if (isAddingNewInventory) return;
+        if (!selectedInventory) return;
+        if (missingQty <= 0) return;
+        if (inlineQuantity) return;
+        setInlineQuantity(String(missingQty));
+    }, [inventoryAcceptOpen, isAddingNewInventory, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
+
+    if (isLoading) return <BrandedLoader fullScreen message="SYNCING TRADE PROTOCOL" />;
+    if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
 
     const handleInventoryAccept = () => {
         setAcceptAttempted(true);
@@ -1499,6 +1512,7 @@ export default function EnquiryDetailsPage() {
         if (actionKey === "QUOTATION_CREATED") {
             if (quotationId && quotationDoc) {
                 if (quotationStatus !== "DRAFT") {
+                    setPendingActionKey("QUOTATION_CREATED");
                     applyActionMutation.mutate({ actionKey: "QUOTATION_CREATED" });
                     return;
                 }
@@ -1508,6 +1522,7 @@ export default function EnquiryDetailsPage() {
             createQuotationMutation.mutate();
             return;
         }
+        setPendingActionKey(actionKey);
         applyActionMutation.mutate({ actionKey });
     };
     const actionStatus = {
@@ -2068,7 +2083,7 @@ export default function EnquiryDetailsPage() {
                                                 className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest uppercase"
                                                 isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
                                                 onPress={() => handleActionPress(actionKey)}
-                                                isLoading={applyActionMutation.isPending}
+                                                isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
                                             >
                                                 {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                             </Button>
@@ -2153,21 +2168,59 @@ export default function EnquiryDetailsPage() {
 
                                             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                                 {clarificationReasonRate && (
-                                                    <Input
-                                                        type="number"
-                                                        label="Requested Rate"
-                                                        variant="bordered"
-                                                        placeholder="Enter preferred unit rate"
-                                                        value={clarificationRate}
-                                                        onValueChange={setClarificationRate}
-                                                        className="max-w-md"
-                                                        classNames={{
-                                                            label: "font-black uppercase text-[10px] tracking-widest text-primary mb-1 pl-1",
-                                                            inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-primary transition-all h-14 shadow-inner",
-                                                            input: "font-black text-sm",
-                                                        }}
-                                                    />
+                                                    <div className="flex flex-col gap-3 max-w-md">
+                                                        <Input
+                                                            type="number"
+                                                            label="Requested Rate"
+                                                            variant="bordered"
+                                                            placeholder="Enter preferred unit rate"
+                                                            value={clarificationRate}
+                                                            onValueChange={setClarificationRate}
+                                                            classNames={{
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-primary mb-1 pl-1",
+                                                                inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-primary transition-all h-14 shadow-inner",
+                                                                input: "font-black text-sm",
+                                                            }}
+                                                        />
+
+                                                        {/* Supplier Rate Context Hint */}
+                                                        {baseRate > 0 && (
+                                                            <div className="flex items-start gap-3 p-4 rounded-2xl bg-warning-500/[0.05] border border-warning-500/20 relative overflow-hidden">
+                                                                <div className="absolute top-0 left-0 w-1 h-full bg-warning-500/50 rounded-l-2xl" />
+                                                                <div className="flex flex-col gap-1 min-w-0">
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-warning-600 dark:text-warning-400">
+                                                                            SUPPLIER ASKING RATE
+                                                                        </span>
+                                                                        <span className="text-sm font-black text-warning-600 dark:text-warning-300">
+                                                                            {formatRate(baseRate)}<span className="text-[10px] font-bold text-default-400 ml-1">/KG</span>
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className="text-[11px] text-default-500 dark:text-default-400 leading-relaxed font-medium">
+                                                                        This is the rate the supplier is currently offering. The further your bid goes below this rate, the lower the likelihood of securing the product.
+                                                                    </p>
+                                                                    {clarificationRate && Number(clarificationRate) < baseRate && (
+                                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-danger-500 shrink-0" />
+                                                                            <span className="text-[10px] font-black text-danger-500">
+                                                                                Your bid is {formatRate(baseRate - Number(clarificationRate))}/KG below the supplier rate — acceptance is less likely.
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                    {clarificationRate && Number(clarificationRate) >= baseRate && (
+                                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-success-500 shrink-0" />
+                                                                            <span className="text-[10px] font-black text-success-600">
+                                                                                Your bid meets or exceeds the supplier rate — high acceptance probability.
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 )}
+
 
                                                 {clarificationReasonTimeline && (
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2213,9 +2266,19 @@ export default function EnquiryDetailsPage() {
                                                             onValueChange={setClarificationCommunicated}
                                                             classNames={{ wrapper: "rounded-lg" }}
                                                         />
-                                                        <span className="text-xs font-black text-foreground uppercase tracking-tight italic">External Synchronization Confirmed</span>
+                                                        <span
+                                                            className="text-xs font-black text-foreground uppercase tracking-tight italic cursor-pointer select-none"
+                                                            onClick={() => setClarificationCommunicated(!clarificationCommunicated)}
+                                                        >
+                                                            External Synchronization Confirmed
+                                                        </span>
                                                     </div>
-                                                    <p className="text-[10px] text-default-400 font-bold ml-8">I have informed the supplier about this revision through secure channels.</p>
+                                                    <p
+                                                        className="text-[10px] text-default-400 font-bold ml-8 cursor-pointer select-none"
+                                                        onClick={() => setClarificationCommunicated(!clarificationCommunicated)}
+                                                    >
+                                                        I have informed the supplier about this revision through secure channels.
+                                                    </p>
                                                     {!clarificationCommunicated && (
                                                         <span className="text-[9px] font-black text-warning-600 uppercase tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
                                                             <FiAlertCircle size={10} />
@@ -2224,22 +2287,34 @@ export default function EnquiryDetailsPage() {
                                                     )}
                                                 </div>
 
-                                                <div className="flex flex-col items-end gap-1">
-                                                    <Button
-                                                        size="lg"
-                                                        color="primary"
-                                                        className="px-10 h-12 rounded-xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                                        isLoading={revisionRequestMutation.isPending}
-                                                        isDisabled={
-                                                            !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
-                                                            (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
-                                                            (clarificationReasonTimeline && (!clarificationDeliveryMode || !clarificationDeliveryDate)) ||
-                                                            !clarificationCommunicated
-                                                        }
-                                                        onPress={() => revisionRequestMutation.mutate()}
-                                                    >
-                                                        Submit Revision
-                                                    </Button>
+                                                <div className="flex flex-col items-end gap-3">
+                                                    <div className="flex flex-col md:flex-row md:items-center gap-3">
+                                                        <Button
+                                                            size="lg"
+                                                            color="primary"
+                                                            className="px-10 h-12 rounded-xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                            isLoading={revisionRequestMutation.isPending}
+                                                            isDisabled={
+                                                                !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
+                                                                (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                                                (clarificationReasonTimeline && (!clarificationDeliveryMode || !clarificationDeliveryDate)) ||
+                                                                !clarificationCommunicated
+                                                            }
+                                                            onPress={() => revisionRequestMutation.mutate()}
+                                                        >
+                                                            Submit Revision
+                                                        </Button>
+                                                        <Button
+                                                            size="lg"
+                                                            color="warning"
+                                                            variant="shadow"
+                                                            className="px-8 h-12 rounded-xl font-black uppercase tracking-[0.22em] text-xs shadow-xl shadow-warning/30 text-black hover:scale-[1.03] active:scale-95 transition-all"
+                                                            isDisabled={applyActionMutation.isPending}
+                                                            onPress={() => applyActionMutation.mutate({ actionKey: "REVISION_SKIPPED" })}
+                                                        >
+                                                            Skip Revision
+                                                        </Button>
+                                                    </div>
                                                     {isSystemAdmin && (
                                                         <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest mr-2">
                                                             Action by: Buyer
@@ -2492,10 +2567,15 @@ export default function EnquiryDetailsPage() {
                                                 <Chip 
                                                     size="sm" 
                                                     variant="dot" 
-                                                    color={hasDoc ? "success" : "warning"}
+                                                    color={hasDoc ? "success" : String(rule.actionType || "").toUpperCase() === "UPLOAD" ? "primary" : "secondary"}
                                                     className="font-black uppercase text-[8px] tracking-[0.1em] h-5 border-none bg-transparent"
                                                 >
-                                                    {hasDoc ? "ARCHIVED" : "AWAITING"}
+                                                    {hasDoc
+                                                        ? "ARCHIVED"
+                                                        : String(rule.actionType || "").toUpperCase() === "UPLOAD"
+                                                            ? "UPLOAD"
+                                                            : "CREATE"
+                                                    }
                                                 </Chip>
                                                 {!hasDoc && canActOnRule(rule) && (
                                                     <Button
@@ -2932,61 +3012,72 @@ export default function EnquiryDetailsPage() {
                             </CardBody>
                         </Card>
                     ) : (
-                        <ResponsibilityEventForm
-                            incotermOptions={incotermOptions}
-                            paymentTermOptions={paymentTermOptions}
-                            selectedIncotermId={selectedIncotermId}
-                            setSelectedIncotermId={setSelectedIncotermId}
-                            selectedPaymentTermId={selectedPaymentTermId}
-                            setSelectedPaymentTermId={setSelectedPaymentTermId}
-                            isTradeTermsChanged={isTradeTermsChanged}
-                            onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
-                            savingTradeTerms={updateTradeTermsMutation.isPending}
-                            tradeTermsSavedAt={tradeTermsSavedAt}
-                            executionContext={executionContext}
-                            setExecutionContext={setExecutionContext}
-                            canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
-                            states={states}
-                            originDistrictOptions={originDistrictOptions}
-                            destinationDistrictOptions={destinationDistrictOptions}
-                            originCountryOptions={countries}
-                            destinationCountryOptions={countries}
-                            originPortOptions={originPortOptions}
-                            destinationPortOptions={destinationPortOptions}
-                            showOriginLogisticsFields={showOriginLogisticsFields}
-                            showDestinationLogisticsFields={showDestinationLogisticsFields}
-                            canEditOriginLogistics={canEditOriginLogistics}
-                            canEditDestinationLogistics={canEditDestinationLogistics}
-                            canEditRouteNotes={canEditRouteNotes}
-                            responsibilityPlan={responsibilityPlan}
-                            setResponsibilityPlan={setResponsibilityPlan}
-                            responsibilityFieldConfig={responsibilityFieldConfig}
-                            canEditResponsibilityPlan={canEditResponsibilityPlan}
-                            isReadOnlyAfterConversion={isReadOnlyAfterConversion}
-                            inlandTransportSegments={inlandTransportSegments}
-                            setInlandTransportSegments={setInlandTransportSegments}
-                            packagingSpecifications={packagingSpecifications}
-                            setPackagingSpecifications={setPackagingSpecifications}
-                            hasPackagingSpecifications={hasPackagingSpecifications}
-                            isInternational={executionContext.tradeType === "INTERNATIONAL"}
-                            showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
-                            isResponsibilityEventChanged={isResponsibilityEventChanged}
-                            onSaveFramework={() => updateResponsibilityPlanMutation.mutate()}
-                            savingFramework={updateResponsibilityPlanMutation.isPending}
-                            onFinalize={() => {
-                                if (isResponsibilityEventChanged) {
-                                    updateResponsibilityPlanMutation.mutate(undefined, {
-                                        onSuccess: () => onFinalizeOpen()
-                                    });
-                                } else {
-                                    onFinalizeOpen();
-                                }
-                            }}
-                            finalizeLoading={finalizeResponsibilitiesMutation.isPending}
-                            responsibilitySavedAt={responsibilitySavedAt}
-                            showFinalizeButton={canEditResponsibilityPlan && workflowStage === "PROFORMA_ISSUED"}
-                            showSaveTermsButton={true}
-                        />
+                        <div className={`relative transition-all duration-500 ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
+                            {workflowStage === "PROFORMA_ISSUED" && (
+                                <div className="flex items-center gap-3 px-6 pt-5 pb-0">
+                                    <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.35em] text-warning-600 dark:text-warning-400">
+                                        ACTION REQUIRED — Finalize Responsibilities
+                                    </span>
+                                    <div className="flex-1 h-px bg-gradient-to-r from-warning-500/30 to-transparent" />
+                                </div>
+                            )}
+                            <ResponsibilityEventForm
+                                incotermOptions={incotermOptions}
+                                paymentTermOptions={paymentTermOptions}
+                                selectedIncotermId={selectedIncotermId}
+                                setSelectedIncotermId={setSelectedIncotermId}
+                                selectedPaymentTermId={selectedPaymentTermId}
+                                setSelectedPaymentTermId={setSelectedPaymentTermId}
+                                isTradeTermsChanged={isTradeTermsChanged}
+                                onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
+                                savingTradeTerms={updateTradeTermsMutation.isPending}
+                                tradeTermsSavedAt={tradeTermsSavedAt}
+                                executionContext={executionContext}
+                                setExecutionContext={setExecutionContext}
+                                canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
+                                states={states}
+                                originDistrictOptions={originDistrictOptions}
+                                destinationDistrictOptions={destinationDistrictOptions}
+                                originCountryOptions={countries}
+                                destinationCountryOptions={countries}
+                                originPortOptions={originPortOptions}
+                                destinationPortOptions={destinationPortOptions}
+                                showOriginLogisticsFields={showOriginLogisticsFields}
+                                showDestinationLogisticsFields={showDestinationLogisticsFields}
+                                canEditOriginLogistics={canEditOriginLogistics}
+                                canEditDestinationLogistics={canEditDestinationLogistics}
+                                canEditRouteNotes={canEditRouteNotes}
+                                responsibilityPlan={responsibilityPlan}
+                                setResponsibilityPlan={setResponsibilityPlan}
+                                responsibilityFieldConfig={responsibilityFieldConfig}
+                                canEditResponsibilityPlan={canEditResponsibilityPlan}
+                                isReadOnlyAfterConversion={isReadOnlyAfterConversion}
+                                inlandTransportSegments={inlandTransportSegments}
+                                setInlandTransportSegments={setInlandTransportSegments}
+                                packagingSpecifications={packagingSpecifications}
+                                setPackagingSpecifications={setPackagingSpecifications}
+                                hasPackagingSpecifications={hasPackagingSpecifications}
+                                isInternational={executionContext.tradeType === "INTERNATIONAL"}
+                                showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
+                                isResponsibilityEventChanged={isResponsibilityEventChanged}
+                                onSaveFramework={() => updateResponsibilityPlanMutation.mutate()}
+                                savingFramework={updateResponsibilityPlanMutation.isPending}
+                                onFinalize={() => {
+                                    if (isResponsibilityEventChanged) {
+                                        updateResponsibilityPlanMutation.mutate(undefined, {
+                                            onSuccess: () => onFinalizeOpen()
+                                        });
+                                    } else {
+                                        onFinalizeOpen();
+                                    }
+                                }}
+                                finalizeLoading={finalizeResponsibilitiesMutation.isPending}
+                                responsibilitySavedAt={responsibilitySavedAt}
+                                showFinalizeButton={canEditResponsibilityPlan && workflowStage === "PROFORMA_ISSUED"}
+                                showSaveTermsButton={true}
+                            />
+                        </div>
                     )}
 
                     {/* Execution Inquiries */}
@@ -3161,7 +3252,7 @@ export default function EnquiryDetailsPage() {
                                             className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase"
                                             isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
                                             onPress={() => handleActionPress(actionKey)}
-                                            isLoading={applyActionMutation.isPending}
+                                            isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
                                         >
                                             {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                         </Button>
@@ -3259,21 +3350,12 @@ export default function EnquiryDetailsPage() {
                                         )}
                                         <Button
                                             color="danger"
-                                            variant="flat"
-                                            className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-widest uppercase"
+                                            variant="light"
+                                            className="w-full sm:w-auto font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase bg-danger/5 hover:bg-danger/10 opacity-70 hover:opacity-100 transition-all border border-danger/20"
                                             onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                             isLoading={updateStatusMutation.isPending}
                                         >
                                             Terminate Thread
-                                        </Button>
-                                        <Button
-                                            color="primary"
-                                            className="w-full sm:w-auto font-bold px-12 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
-                                            onPress={onOpen}
-                                            isDisabled={!hasResponsibilitiesFinalized}
-                                            startContent={<FiArrowRight size={20} />}
-                                        >
-                                            Initialize Order
                                         </Button>
                                     </>
                                 )}
@@ -3317,6 +3399,9 @@ export default function EnquiryDetailsPage() {
                                     <span className="text-lg font-black">Review responsibilities before locking</span>
                                 </ModalHeader>
                                 <ModalBody className="flex flex-col gap-4 py-6">
+                                        <div className="rounded-2xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-bold text-warning-600 uppercase tracking-widest">
+                                            Finalizing will create execution tasks and move this enquiry into the Execution Panel.
+                                        </div>
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(0,0,0,0.2)] dark:shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
                                             <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Global Trade Terms</span>
@@ -3741,17 +3826,19 @@ export default function EnquiryDetailsPage() {
                     onOpenChange={onOpenChange}
                     size="2xl"
                     backdrop="blur"
+                    scrollBehavior="inside"
                     classNames={{
-                        base: "bg-[#04070f] dark:bg-[#04070f] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem]",
+                        base: "bg-[#04070f] dark:bg-[#04070f] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
+                        body: "overflow-y-auto",
                     }}
                 >
                     <ModalContent>
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1 pt-12 px-10">
+                                <ModalHeader className="flex flex-col gap-1 pt-12 px-10 shrink-0">
                                     <div className="flex items-center gap-5">
                                         <div className="relative group">
                                             <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:bg-primary/30 transition-all rounded-full" />
@@ -3760,12 +3847,12 @@ export default function EnquiryDetailsPage() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col gap-0.5">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80 leading-none">COMMAND_SEQUENCE_INITIATED</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80 leading-none">COMMAND SEQUENCE INITIATED</span>
                                             <span className="text-3xl font-black tracking-tight text-white italic leading-none mt-1">Convert to Order</span>
                                         </div>
                                     </div>
                                 </ModalHeader>
-                                <ModalBody className="px-10 py-8">
+                                <ModalBody className="px-10 py-8 overflow-y-auto">
                                     <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 mb-8 flex items-start gap-4 relative overflow-hidden group">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-primary/40 group-hover:bg-primary transition-all shadow-[0_0_15px_rgba(0,112,243,0.3)]" />
                                         <div className="mt-1 bg-primary/10 p-1.5 rounded-lg border border-primary/20">
@@ -3850,6 +3937,13 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 </ModalBody>
                                 <ModalFooter className="px-10 pb-12 pt-4 flex gap-4">
+                                    <Button
+                                        variant="flat"
+                                        onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${Array.isArray(id) ? id[0] : id}`, "_blank")}
+                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20"
+                                    >
+                                        Open Execution Panel
+                                    </Button>
                                     <Button 
                                         variant="light" 
                                         onPress={onClose}

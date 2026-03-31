@@ -127,6 +127,8 @@ export default function ExternalOrderCreatePage() {
   const [selectedPaymentTermId, setSelectedPaymentTermId] = useState<string>("");
   const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
   const [inlandTransportSegments, setInlandTransportSegments] = useState<Array<{ label: string; from: string; to: string }>>([]);
+  const [responsibilitiesFinalized, setResponsibilitiesFinalized] = useState(false);
+  const [finalizeLoading, setFinalizeLoading] = useState(false);
 
   useEffect(() => {
     if (buyerUndisclosed) {
@@ -282,6 +284,25 @@ export default function ExternalOrderCreatePage() {
     );
   })();
 
+  const handleFinalizeResponsibilities = async () => {
+    if (!hasPackagingSpecifications || !hasFullResponsibilityPlan || !isExecutionContextValid) {
+      showToastMessage({
+        type: "error",
+        message: "Complete responsibilities, packaging specs, and execution context before finalizing.",
+        position: "top-right",
+      });
+      return;
+    }
+    setFinalizeLoading(true);
+    setResponsibilitiesFinalized(true);
+    setFinalizeLoading(false);
+    showToastMessage({
+      type: "success",
+      message: "Responsibilities finalized. External order can now be initialized.",
+      position: "top-right",
+    });
+  };
+
   const canSubmit =
     Boolean(externalRole) &&
     (buyerUndisclosed || externalBuyer.name.trim()) &&
@@ -290,7 +311,8 @@ export default function ExternalOrderCreatePage() {
     Number(externalProduct.quantity || 0) > 0 &&
     hasPackagingSpecifications &&
     hasFullResponsibilityPlan &&
-    isExecutionContextValid;
+    isExecutionContextValid &&
+    responsibilitiesFinalized;
 
   const missingItems = [
     { key: "role", label: "Role in trade", ok: Boolean(externalRole) },
@@ -300,6 +322,7 @@ export default function ExternalOrderCreatePage() {
     { key: "context", label: "Execution context", ok: isExecutionContextValid },
     { key: "responsibilities", label: "Responsibilities", ok: hasFullResponsibilityPlan },
     { key: "packaging", label: "Packaging specs", ok: hasPackagingSpecifications },
+    { key: "finalized", label: "Finalize responsibilities", ok: responsibilitiesFinalized },
   ];
   const incompleteItems = missingItems.filter((item) => !item.ok);
 
@@ -633,7 +656,10 @@ export default function ExternalOrderCreatePage() {
             isInternational={executionContext.tradeType === "INTERNATIONAL"}
             showCargoInsuranceNote
             isResponsibilityEventChanged={true}
-            showFinalizeButton={false}
+            onFinalize={handleFinalizeResponsibilities}
+            finalizeLoading={finalizeLoading}
+            isReadOnlyAfterConversion={responsibilitiesFinalized}
+            showFinalizeButton
             showSaveTermsButton={false}
           />
         </motion.div>

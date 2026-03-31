@@ -475,15 +475,28 @@ export default function ImportsPage() {
     >
       <div className="w-full max-w-[1500px]">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 bg-warning-500 rounded-full" />
-              <span className="text-[10px] font-bold tracking-wider uppercase text-warning-500">Imports to India</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-warning-500/5 border border-warning-500/20 backdrop-blur-md shadow-sm">
+                <div className="relative">
+                  <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.6)]" />
+                  <div className="absolute -inset-1 bg-warning-500/20 rounded-full blur-sm" />
+                </div>
+                <span className="text-[11px] font-black tracking-[0.25em] uppercase text-warning-600 dark:text-warning-500">Imports to India</span>
+                <div className="h-4 w-px bg-warning-500/30 mx-1" />
+                <div className="flex items-center gap-2 text-[9px] font-black text-warning-600 bg-warning-500/10 px-2.5 py-0.5 rounded-lg border border-warning-500/10">
+                  <span className="tracking-tighter italic">INBOUND</span>
+                  <div className="w-1 h-1 rounded-full bg-warning-500" />
+                  <span>IND</span>
+                </div>
+              </div>
             </div>
-            <Title title="Import Listings" />
-            <p className="text-default-500 text-xs font-medium opacity-80">
-              Manage incoming shipments and secure inventory reserves across the network.
-            </p>
+            <div className="flex flex-col">
+              <Title title="Import Listings" />
+              <p className="text-default-500 text-xs font-semibold tracking-tight max-w-lg opacity-90 leading-relaxed mt-1">
+                Unified logistics portal for incoming shipments, inventory reserves, and network-wide trade synchronization for the Indian market.
+              </p>
+            </div>
           </div>
 
           {canCreate && (
@@ -557,17 +570,21 @@ export default function ImportsPage() {
                             </h4>
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20">
+                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20 shadow-sm">
                                 <div className="w-1.5 h-1.5 rounded-full bg-warning-500" />
                                 <span className="text-[9px] font-bold text-warning-500 uppercase tracking-widest">{listing.status}</span>
+                                <div className="h-2.5 w-px bg-warning-500/30 mx-0.5" />
+                                <span className="text-[8px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-tighter italic">IND</span>
                              </div>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-start gap-6 text-default-400">
-                           <div className="flex items-center gap-2">
-                             <LuMapPin size={14} className="text-warning-500/50" />
-                             <span className="text-[10px] font-bold uppercase tracking-widest">{listing.portName || "Port TBD"}</span>
+                           <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-foreground/[0.03] border border-foreground/5 shadow-sm">
+                             <LuMapPin size={12} className="text-warning-500/50" />
+                             <span className="text-[9px] font-black uppercase tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
+                             <div className="w-1 h-1 rounded-full bg-warning-500/30" />
+                             <span className="text-[8px] font-black text-warning-600/60 uppercase tracking-tighter">IND</span>
                            </div>
                            <div className="flex items-center gap-2">
                              <LuClock size={14} className="text-warning-500/50" />

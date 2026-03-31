@@ -1137,21 +1137,22 @@ export default function EnquiryDetailsPage() {
         },
     });
     const createDocMutation = useMutation({
-        mutationFn: async () => {
-            if (!docActionRule) throw new Error("No document rule selected.");
+        mutationFn: async (ruleOverride?: any) => {
+            const activeRule = ruleOverride || docActionRule;
+            if (!activeRule) throw new Error("No document rule selected.");
             const payload: any = {
-                type: docActionRule.docType,
+                type: activeRule.docType,
                 enquiryId: id,
             };
-            const docTypeKey = String(docActionRule.docType || "").toUpperCase();
-            const actionTypeKey = String(docActionRule.actionType || "").toUpperCase();
+            const docTypeKey = String(activeRule.docType || "").toUpperCase();
+            const actionTypeKey = String(activeRule.actionType || "").toUpperCase();
             if (docTypeKey === "PURCHASE_ORDER" && actionTypeKey === "CREATE") {
                 payload.status = "SENT";
             }
             if (docTypeKey === "PROFORMA_INVOICE" && actionTypeKey === "CREATE") {
                 payload.status = "SENT";
             }
-            if (String(docActionRule.actionType) === "UPLOAD") {
+            if (String(activeRule.actionType) === "UPLOAD") {
                 payload.fileUrl = docActionFileUrl;
             }
             return postData(apiRoutes.tradeDocuments.create, payload);
@@ -1521,6 +1522,23 @@ export default function EnquiryDetailsPage() {
             }
             createQuotationMutation.mutate();
             return;
+        }
+        if (actionKey === "PROFORMA_CREATED") {
+            const proformaRule = docRules.find((rule: any) => {
+                const stageType = String(rule.stageType || rule.stage || "").toUpperCase();
+                const isInquiryStage = stageType === "INQUIRY" || stageType === "ENQUIRY";
+                return (
+                    isInquiryStage &&
+                    String(rule.stageKey || "").toUpperCase() === "PROFORMA_ISSUED" &&
+                    String(rule.docType || "").toUpperCase() === "PROFORMA_INVOICE" &&
+                    String(rule.actionType || "").toUpperCase() === "CREATE"
+                );
+            });
+            if (proformaRule) {
+                setDocActionRule(proformaRule);
+                createDocMutation.mutate(proformaRule);
+                return;
+            }
         }
         setPendingActionKey(actionKey);
         applyActionMutation.mutate({ actionKey });
@@ -2975,7 +2993,7 @@ export default function EnquiryDetailsPage() {
 
                     {/* Responsibility Arena */}
                     {isImportPortPickup ? (
-                        <Card className="lg:col-span-3 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group">
+                        <Card className="md:col-span-1 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-80 h-80 bg-warning-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
                             <CardBody className="flex flex-col md:flex-row items-center gap-8 px-8 py-10 relative z-10">
                                 <div className="w-24 h-24 rounded-[2rem] bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
@@ -3012,7 +3030,7 @@ export default function EnquiryDetailsPage() {
                             </CardBody>
                         </Card>
                     ) : (
-                        <div className={`relative transition-all duration-500 ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
+                        <div className={`md:col-span-1 relative transition-all duration-500 ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
                             {workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
                                     <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
@@ -3349,9 +3367,9 @@ export default function EnquiryDetailsPage() {
                                             </Tooltip>
                                         )}
                                         <Button
-                                            color="danger"
+                                            color="default"
                                             variant="light"
-                                            className="w-full sm:w-auto font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase bg-danger/5 hover:bg-danger/10 opacity-70 hover:opacity-100 transition-all border border-danger/20"
+                                            className="w-full sm:w-auto font-black px-6 rounded-xl h-11 text-[9px] tracking-[0.2em] uppercase text-default-400 hover:text-danger-500 hover:bg-danger-500/5 transition-all opacity-40 hover:opacity-100 italic"
                                             onPress={() => updateStatusMutation.mutate("CANCELLED")}
                                             isLoading={updateStatusMutation.isPending}
                                         >

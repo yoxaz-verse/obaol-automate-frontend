@@ -22,6 +22,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
+import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 import AuthContext from "@/context/AuthContext";
 import {
   LuChevronLeft,
@@ -36,6 +37,7 @@ import {
   LuEye,
   LuCheck,
   LuShoppingBag,
+  LuBookOpen,
 } from "react-icons/lu";
 
 type ResponsibilityPlan = {
@@ -68,6 +70,17 @@ type ExecutionContext = {
   routeNotes: string;
 };
 
+type AssociateCompany = {
+  _id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  slug?: string;
+  subdomain?: string;
+  customDomain?: string;
+};
+
 const parseMasterRows = (raw: any): any[] => {
   if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
   if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
@@ -79,6 +92,26 @@ const parseMasterRows = (raw: any): any[] => {
 };
 
 const getEntityId = (value: any): string => String(value?._id || value?.id || value || "");
+
+const normalizeUrl = (value: any) => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+  return `https://${raw}`;
+};
+
+const getCompanyPreviewUrl = (company: AssociateCompany | null) => {
+  if (!company) return "";
+  const customDomain = String(company?.customDomain || "").trim();
+  if (customDomain) return `https://${customDomain}`;
+  const subdomain = String(company?.subdomain || "").trim();
+  if (subdomain) return `https://${subdomain}.company.obaol.com`;
+  const slug = String(company?.slug || "").trim();
+  if (slug) return `https://obaol.com/obaol/${slug}`;
+  const website = normalizeUrl(company?.website);
+  if (website) return website;
+  return "";
+};
 
 export default function ExternalOrderCreatePage() {
   const router = useRouter();
@@ -92,6 +125,9 @@ export default function ExternalOrderCreatePage() {
   const [sellerUndisclosed, setSellerUndisclosed] = useState(false);
   const [externalBuyer, setExternalBuyer] = useState({ name: "", email: "", phone: "" });
   const [externalSeller, setExternalSeller] = useState({ name: "", email: "", phone: "" });
+  const [buyerCompany, setBuyerCompany] = useState<AssociateCompany | null>(null);
+  const [sellerCompany, setSellerCompany] = useState<AssociateCompany | null>(null);
+  const [initiationMode, setInitiationMode] = useState<"DIRECT" | "DOCS">("DIRECT");
   const [externalProduct, setExternalProduct] = useState({ name: "", variant: "", quantity: "", unit: "MT" });
   const [externalTradeType, setExternalTradeType] = useState<"DOMESTIC" | "INTERNATIONAL">("DOMESTIC");
 
@@ -133,6 +169,7 @@ export default function ExternalOrderCreatePage() {
   useEffect(() => {
     if (buyerUndisclosed) {
       setExternalBuyer({ name: "Undisclosed", email: "", phone: "" });
+      if (buyerCompany) setBuyerCompany(null);
     } else if (externalBuyer.name === "Undisclosed") {
       setExternalBuyer((prev) => ({ ...prev, name: "" }));
     }
@@ -141,17 +178,14 @@ export default function ExternalOrderCreatePage() {
   useEffect(() => {
     if (sellerUndisclosed) {
       setExternalSeller({ name: "Undisclosed", email: "", phone: "" });
+      if (sellerCompany) setSellerCompany(null);
     } else if (externalSeller.name === "Undisclosed") {
       setExternalSeller((prev) => ({ ...prev, name: "" }));
     }
   }, [sellerUndisclosed]);
 
   useEffect(() => {
-    if (externalRole === "BUYER") {
-      setSellerUndisclosed(true);
-    } else if (externalRole === "SELLER") {
-      setBuyerUndisclosed(true);
-    } else if (externalRole === "MEDIATOR") {
+    if (externalRole === "MEDIATOR") {
       setBuyerUndisclosed(false);
       setSellerUndisclosed(false);
     }
@@ -162,6 +196,31 @@ export default function ExternalOrderCreatePage() {
       setExternalTradeType(executionContext.tradeType);
     }
   }, [executionContext.tradeType]);
+
+  const applyCompanyToEntity = (
+    company: AssociateCompany | null,
+    setEntity: React.Dispatch<React.SetStateAction<{ name: string; email: string; phone: string }>>,
+    setUndisclosed: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    if (!company) return;
+    const associateCompanyId = String((user as any)?.associateCompanyId || "");
+    const selectedCompanyId = String(company?._id || "");
+    const canAutofillContacts = Boolean(associateCompanyId && selectedCompanyId && associateCompanyId === selectedCompanyId);
+    setUndisclosed(false);
+    setEntity({
+      name: String(company?.name || "").trim(),
+      email: canAutofillContacts ? String(company?.email || "").trim() : "",
+      phone: canAutofillContacts ? String(company?.phone || "").trim() : "",
+    });
+  };
+
+  const buyerPreviewUrl = useMemo(() => getCompanyPreviewUrl(buyerCompany), [buyerCompany]);
+  const sellerPreviewUrl = useMemo(() => getCompanyPreviewUrl(sellerCompany), [sellerCompany]);
+  const canStartDocumentationFlow =
+    !buyerUndisclosed &&
+    !sellerUndisclosed &&
+    Boolean(externalBuyer.name.trim()) &&
+    Boolean(externalSeller.name.trim());
 
   const { data: incotermResponse } = useQuery({
     queryKey: ["incoterms"],
@@ -305,8 +364,10 @@ export default function ExternalOrderCreatePage() {
 
   const canSubmit =
     Boolean(externalRole) &&
-    (buyerUndisclosed || externalBuyer.name.trim()) &&
-    (sellerUndisclosed || externalSeller.name.trim()) &&
+    !buyerUndisclosed &&
+    !sellerUndisclosed &&
+    externalBuyer.name.trim() &&
+    externalSeller.name.trim() &&
     externalProduct.name.trim() &&
     Number(externalProduct.quantity || 0) > 0 &&
     hasPackagingSpecifications &&
@@ -316,8 +377,8 @@ export default function ExternalOrderCreatePage() {
 
   const missingItems = [
     { key: "role", label: "Role in trade", ok: Boolean(externalRole) },
-    { key: "buyer", label: "Buyer name", ok: buyerUndisclosed || Boolean(externalBuyer.name.trim()) },
-    { key: "seller", label: "Seller name", ok: sellerUndisclosed || Boolean(externalSeller.name.trim()) },
+    { key: "buyer", label: "Buyer name", ok: !buyerUndisclosed && Boolean(externalBuyer.name.trim()) },
+    { key: "seller", label: "Seller name", ok: !sellerUndisclosed && Boolean(externalSeller.name.trim()) },
     { key: "product", label: "Product + quantity", ok: Boolean(externalProduct.name.trim()) && Number(externalProduct.quantity || 0) > 0 },
     { key: "context", label: "Execution context", ok: isExecutionContextValid },
     { key: "responsibilities", label: "Responsibilities", ok: hasFullResponsibilityPlan },
@@ -330,7 +391,9 @@ export default function ExternalOrderCreatePage() {
     if (!canSubmit) {
       showToastMessage({
         type: "error",
-        message: "Please complete all required fields before submitting.",
+        message: buyerUndisclosed || sellerUndisclosed
+          ? "Buyer and seller must be disclosed to create an external order."
+          : "Please complete all required fields before submitting.",
         position: "top-right",
       });
       return;
@@ -427,6 +490,95 @@ export default function ExternalOrderCreatePage() {
           </div>
         </motion.div>
 
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
+            <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
+              <h3 className="text-[11px] font-black text-warning-500 uppercase tracking-[0.4em] italic mb-1">Initiation Mode</h3>
+              <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">CHOOSE EXECUTION PATH</p>
+            </CardHeader>
+            <CardBody className="px-10 pb-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    key: "DIRECT",
+                    title: "DIRECT ORDER",
+                    desc: "Jump straight into external order creation with responsibility events.",
+                  },
+                  {
+                    key: "DOCS",
+                    title: "DOCUMENTATION FLOW",
+                    desc: "Use the inquiry & documentation pipeline before order execution.",
+                  },
+                ].map((mode) => {
+                  const selected = initiationMode === mode.key;
+                  return (
+                    <button
+                      key={mode.key}
+                      className={`group relative rounded-[2rem] border p-8 text-left transition-all duration-500 overflow-hidden ${
+                        selected
+                          ? "border-warning-500/30 bg-warning-500/10 shadow-[0_0_40px_rgba(234,179,8,0.1)]"
+                          : "border-foreground/5 bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/10"
+                      }`}
+                      onClick={() => setInitiationMode(mode.key as "DIRECT" | "DOCS")}
+                    >
+                      {selected && (
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-warning-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
+                      )}
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[9px] font-black text-default-400 uppercase tracking-widest">MODE</span>
+                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-warning-500" : "text-foreground"}`}>
+                          {mode.title}
+                        </div>
+                        <p className="text-[10px] font-bold text-default-500 uppercase mt-2 leading-relaxed opacity-60">
+                          {mode.desc}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </CardBody>
+          </Card>
+        </motion.div>
+
+        {initiationMode === "DOCS" ? (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
+              <CardBody className="px-12 py-12 flex flex-col items-center text-center gap-6">
+                <div className="w-16 h-16 rounded-[2rem] bg-warning-500 text-black flex items-center justify-center">
+                  <LuFileCheck size={28} />
+                </div>
+                <div className="max-w-2xl flex flex-col gap-3">
+                  <div className="text-2xl font-black text-foreground uppercase tracking-tight italic">
+                    DOCUMENTATION WORKFLOW
+                  </div>
+                  <p className="text-[11px] font-bold text-default-500 uppercase tracking-widest leading-relaxed opacity-80">
+                    Start from the inquiry pipeline to generate documentation and approvals before creating the final order.
+                  </p>
+                </div>
+                <Button
+                  color="warning"
+                  variant="shadow"
+                  className="font-black px-16 h-14 rounded-[2.5rem] text-[12px] tracking-[0.4em] uppercase italic transition-all duration-500 
+                    bg-warning-500 text-black hover:scale-[1.03] active:scale-95
+                    shadow-[0_20px_60px_rgba(234,179,8,0.4)] hover:shadow-warning-500/60
+                    disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
+                  isDisabled={!canStartDocumentationFlow}
+                  onPress={() => router.push("/dashboard/marketplace")}
+                  startContent={<LuBookOpen size={18} className="mr-2" />}
+                >
+                  GO TO MARKETPLACE
+                </Button>
+                {!canStartDocumentationFlow && (
+                  <div className="text-[9px] font-black uppercase tracking-[0.35em] text-danger-500/80 text-center italic">
+                    Reveal buyer & seller to proceed
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          </motion.div>
+        ) : (
+          <>
         <motion.div
            initial={{ opacity: 0, x: -20 }}
            animate={{ opacity: 1, x: 0 }}
@@ -484,6 +636,27 @@ export default function ExternalOrderCreatePage() {
                  <p className="text-xl font-black text-foreground uppercase tracking-tight italic">BUYER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
+                <div className="flex flex-col gap-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
+                  <CompanySearch
+                    defaultSelected={buyerCompany?._id || null}
+                    isDisabled={buyerUndisclosed}
+                    onSelectCompany={(company) => {
+                      setBuyerCompany(company);
+                      if (company) applyCompanyToEntity(company, setExternalBuyer, setBuyerUndisclosed);
+                    }}
+                  />
+                  {buyerCompany && buyerPreviewUrl && (
+                    <a
+                      href={buyerPreviewUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[9px] font-black uppercase tracking-[0.35em] text-warning-500/80 hover:text-warning-400 transition-colors ml-1"
+                    >
+                      OPEN_ASSOCIATE_SITE
+                    </a>
+                  )}
+                </div>
                 <Switch
                   isSelected={buyerUndisclosed}
                   onValueChange={setBuyerUndisclosed}
@@ -527,6 +700,27 @@ export default function ExternalOrderCreatePage() {
                  <p className="text-xl font-black text-foreground uppercase tracking-tight italic">SELLER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
+                <div className="flex flex-col gap-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-default-400 ml-1">LINK ASSOCIATE COMPANY</span>
+                  <CompanySearch
+                    defaultSelected={sellerCompany?._id || null}
+                    isDisabled={sellerUndisclosed}
+                    onSelectCompany={(company) => {
+                      setSellerCompany(company);
+                      if (company) applyCompanyToEntity(company, setExternalSeller, setSellerUndisclosed);
+                    }}
+                  />
+                  {sellerCompany && sellerPreviewUrl && (
+                    <a
+                      href={sellerPreviewUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[9px] font-black uppercase tracking-[0.35em] text-warning-500/80 hover:text-warning-400 transition-colors ml-1"
+                    >
+                      OPEN_ASSOCIATE_SITE
+                    </a>
+                  )}
+                </div>
                 <Switch
                   isSelected={sellerUndisclosed}
                   onValueChange={setSellerUndisclosed}
@@ -723,6 +917,8 @@ export default function ExternalOrderCreatePage() {
             </CardBody>
           </Card>
         </motion.div>
+          </>
+        )}
       </div>
     </section>
   );

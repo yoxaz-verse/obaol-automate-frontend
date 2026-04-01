@@ -60,9 +60,9 @@ const resolveAdminCommission = (rateValue: any, commissionValue: any) => {
   return round2(Number(rateValue || 0) * COMMISSION_RATE);
 };
 const formatLastLiveDate = (value: any) => {
-  if (!value) return "--";
+  if (!value) return "";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "--";
+  if (Number.isNaN(date.getTime())) return "";
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
@@ -74,7 +74,7 @@ const formatLastLiveDate = (value: any) => {
   if (sameDay(date, today)) {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
+        <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(234,179,8,0.8)]" />
         <span className="text-[10px] font-black text-warning-500 uppercase tracking-[0.1em] italic">Today</span>
       </div>
     );
@@ -581,7 +581,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                        <span className="font-bold text-success-400">{inventorySummary.totalQty} MT</span>
                     </div>
                   )
-                  : "-",
+                  : "",
                 inventoryStatus,
                 hasInventory,
 
@@ -1110,7 +1110,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-foreground/[0.06]">
                       <div>
                         <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest">Rate</p>
-                        <p className="text-xl font-black text-foreground">{item.rate || "—"}</p>
+                        <p className="text-xl font-black text-foreground">{item.rate || ""}</p>
                       </div>
 
                       <div className="flex items-center gap-2">

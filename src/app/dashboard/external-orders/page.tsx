@@ -145,15 +145,15 @@ export default function ExternalOrdersPage() {
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <Tabs
                                                 aria-label="Order Stages"
-                                                color="primary"
+                                                color="warning"
                                                 variant="underlined"
                                                 selectedKey={selectedTab}
                                                 onSelectionChange={(key) => setSelectedTab(key as string)}
                                                 classNames={{
                                                     tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
-                                                    cursor: "bg-primary w-full h-[2.5px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.3)]",
+                                                    cursor: "bg-warning w-full h-[2.5px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-warning-rgb),0.3)]",
                                                     tab: "max-w-fit px-4 h-11 transition-all duration-300",
-                                                    tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary"
+                                                    tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning"
                                                 }}
                                             >
                                                 <Tab key="All" title="All Orders" />
@@ -166,8 +166,8 @@ export default function ExternalOrdersPage() {
                                             {canCreateExternal && (
                                                 <Button
                                                     size="sm"
-                                                    color="primary"
-                                                    className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] px-6 shadow-xl shadow-primary/20"
+                                                    color="warning"
+                                                    className="h-11 rounded-xl font-bold uppercase tracking-wider text-[11px] px-6 shadow-xl shadow-warning/20"
                                                     isLoading={isRedirecting}
                                                     onPress={handleCreateNew}
                                                 >
@@ -217,7 +217,7 @@ export default function ExternalOrdersPage() {
 
                                     {externalOrders.filter((item: any) => selectedTab === "All" || item.status === selectedTab).length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-20 px-8 bg-foreground/[0.02] backdrop-blur-3xl rounded-[3rem] border border-foreground/5 shadow-sm max-w-5xl mx-auto w-full group transition-all hover:bg-foreground/[0.04]">
-                                            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center text-primary mb-8 group-hover:scale-105 transition-transform duration-500 shadow-inner">
+                                            <div className="w-20 h-20 bg-warning/10 rounded-[2rem] flex items-center justify-center text-warning mb-8 group-hover:scale-105 transition-transform duration-500 shadow-inner">
                                                 <LuShoppingBag size={40} />
                                             </div>
                                             <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3 text-center tracking-tight">Generate External Mission</h3>
@@ -233,7 +233,7 @@ export default function ExternalOrdersPage() {
                                                     { icon: <LuCheck size={22} />, label: "Closure", sub: "Final Manifest" }
                                                 ].map((step, idx) => (
                                                     <div key={idx} className="flex flex-col items-center gap-4 relative z-10">
-                                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-foreground/[0.05] flex items-center justify-center text-default-400 border border-foreground/5 transition-all duration-300 group-hover:border-primary/40 group-hover:text-primary shadow-sm">
+                                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-foreground/[0.05] flex items-center justify-center text-default-400 border border-foreground/5 transition-all duration-300 group-hover:border-warning/40 group-hover:text-warning shadow-sm">
                                                             {step.icon}
                                                         </div>
                                                         <div className="flex flex-col items-center text-center">
@@ -249,8 +249,8 @@ export default function ExternalOrdersPage() {
  
                                             {canCreateExternal && (
                                                 <Button
-                                                    color="primary"
-                                                    className="font-bold px-12 h-14 rounded-2xl shadow-2xl shadow-primary/20 text-sm tracking-widest uppercase hover:scale-105 active:scale-95 transition-all"
+                                                    color="warning"
+                                                    className="font-bold px-12 h-14 rounded-2xl shadow-2xl shadow-warning/20 text-sm tracking-widest uppercase hover:scale-105 active:scale-95 transition-all text-black"
                                                     isLoading={isRedirecting}
                                                     onPress={handleCreateNew}
                                                     endContent={!isRedirecting && <LuArrowRight className="ml-2" />}

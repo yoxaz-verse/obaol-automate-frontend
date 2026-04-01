@@ -6,7 +6,7 @@ import { Chip, Input, Card, CardBody, Divider } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LuUser, LuPackage, LuMapPin, LuDatabase, LuArrowRight, LuSearch, LuActivity, LuBox } from "react-icons/lu";
+import { LuUser, LuPackage, LuMapPin, LuArrowRight, LuSearch, LuActivity, LuBox, LuLayoutGrid } from "react-icons/lu";
 
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
@@ -104,7 +104,7 @@ export default function SampleRequestsPage() {
         {(filteredRows || []).length === 0 ? (
           <div className="rounded-[3rem] border border-dashed border-divider bg-content1/30 px-10 py-40 flex flex-col items-center justify-center text-center backdrop-blur-xl">
              <div className="w-20 h-20 bg-warning-500/10 rounded-3xl flex items-center justify-center mb-8 text-warning-500 shadow-inner">
-               <LuDatabase size={36} />
+               <LuPackage size={36} />
              </div>
              <h4 className="text-2xl font-black text-foreground uppercase tracking-tight">System Empty</h4>
              <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-4 opacity-70 max-w-lg mx-auto leading-relaxed mb-10">
@@ -139,7 +139,7 @@ export default function SampleRequestsPage() {
                    variant="flat" 
                    className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest uppercase bg-foreground/5 border border-foreground/5 transition-all hover:bg-foreground/10 hover:border-foreground/10"
                    onPress={() => router.push("/dashboard/catalog")}
-                   startContent={<LuDatabase size={20} />}
+                   startContent={<LuLayoutGrid size={20} />}
                 >
                    BROWSE_CATALOG
                 </Button>

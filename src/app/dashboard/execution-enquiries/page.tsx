@@ -150,6 +150,21 @@ export default function ExecutionEnquiriesPage() {
     ].filter(Boolean);
     return parts.join(", ");
   };
+  const buildRouteSummary = (tasks: any[]) => {
+    if (!Array.isArray(tasks) || tasks.length === 0) return "";
+    let routeNote = "";
+    let fromDistrict = "";
+    for (const task of tasks) {
+      if (!routeNote && task?.details?.routeNotes) routeNote = String(task.details.routeNotes);
+      if (!fromDistrict && task?.details?.fromDistrict) fromDistrict = String(task.details.fromDistrict);
+      if (routeNote && fromDistrict) break;
+    }
+    if (!routeNote && !fromDistrict) return "";
+    const parts = [];
+    if (routeNote) parts.push(`Route: ${routeNote}`);
+    if (fromDistrict) parts.push(`From: ${fromDistrict}`);
+    return parts.join(" • ");
+  };
 
   // Build the enquiry-grouped task list from embedded executionInquiries
   const enquiriesWithTasks = useMemo(() => {
@@ -250,6 +265,20 @@ export default function ExecutionEnquiriesPage() {
   const getCompanyId = (obj: any) => String(obj?._id || obj || "");
   const getCompanyLabel = (obj: any) => getName(obj);
   const buildBidCompanyOptions = (bids: any[], candidates: any[]) => {
+    const bidCompanies = bids.map((bid: any) => bid?.company).filter(Boolean);
+    const base = bidCompanies.length > 0 ? bidCompanies : candidates;
+    const obaolCandidate = candidates.find((company: any) => getCompanyLabel(company).toLowerCase().includes("obaol"));
+    const merged = [...base];
+    if (obaolCandidate) merged.push(obaolCandidate);
+    const seen = new Set<string>();
+    return merged.filter((company: any) => {
+      const id = getCompanyId(company);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  };
+  const buildCommitCompanyOptions = (bids: any[], candidates: any[]) => {
     const bidCompanies = bids.map((bid: any) => bid?.company).filter(Boolean);
     const obaolCandidate = candidates.find((company: any) => getCompanyLabel(company).toLowerCase().includes("obaol"));
     const merged = [...bidCompanies];
@@ -514,18 +543,24 @@ export default function ExecutionEnquiriesPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-10">
-                        <div className="hidden lg:flex flex-col text-right">
-                          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
-                          <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
-                        </div>
-                        <div className="w-px h-10 bg-divider hidden lg:block" />
-                        <div className="flex flex-col text-right">
-                          <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
-                          <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
-                        </div>
+                    <div className="flex items-center gap-10">
+                      <div className="hidden lg:flex flex-col text-right">
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Origin</span>
+                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.seller}</span>
+                      </div>
+                      <div className="w-px h-10 bg-divider hidden lg:block" />
+                      <div className="flex flex-col text-right">
+                        <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-1">Destination</span>
+                        <span className="text-sm font-black text-foreground uppercase tracking-tight">{enq.buyer}</span>
                       </div>
                     </div>
+                  </div>
+
+                  {buildRouteSummary(enq.tasks) && (
+                    <div className="mb-6 text-[10px] font-black uppercase tracking-widest text-default-500/80">
+                      {buildRouteSummary(enq.tasks)}
+                    </div>
+                  )}
 
                     <div className="relative flex flex-col gap-6 border-l-2 border-divider ml-8 pl-8">
                       {enq.tasks.map((task: any) => {
@@ -533,7 +568,7 @@ export default function ExecutionEnquiriesPage() {
                         const candidates = Array.isArray(task.candidateProviders) ? task.candidateProviders : [];
                         const bids = Array.isArray(task.bids) ? task.bids : [];
                         const bidCompanyOptions = buildBidCompanyOptions(bids, candidates);
-                        const commitOptions = bidCompanyOptions;
+                        const commitOptions = buildCommitCompanyOptions(bids, candidates);
                         const isCandidate = !!myCompanyId && candidates.some((provider: any) => String(provider?._id || provider) === myCompanyId);
                         const ownerBy = String(task.ownerBy || "").toLowerCase();
                         const isBuyerOwner = ownerBy === "buyer" && enq.buyerCompanyId && enq.buyerCompanyId === myCompanyId;
@@ -580,9 +615,7 @@ export default function ExecutionEnquiriesPage() {
                                     </div>
                                     {task.details && Object.keys(task.details).some((k: any) => task.details[k]) && (
                                       <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-default-500 uppercase tracking-tight">
-                                        {task.details.routeNotes && <span>Route: {task.details.routeNotes}</span>}
                                         {task.details.packagingSpecifications && <span>Pkg: {task.details.packagingSpecifications}</span>}
-                                        {task.details.fromDistrict && <span>From: {task.details.fromDistrict}</span>}
                                       </div>
                                     )}
                                   </div>

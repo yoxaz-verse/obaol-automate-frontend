@@ -550,9 +550,10 @@ export default function OrderDetailsPage() {
         : activeSubflowConfigs;
     const subflowTypes = Array.from(
         new Set(
-            scopedSubflowConfigs
-                .map((config: any) => String(config.subflowType || "").toUpperCase())
-                .filter(Boolean)
+            (scopedSubflowConfigs.length > 0
+                ? scopedSubflowConfigs.map((config: any) => String(config.subflowType || "").toUpperCase())
+                : (hasLinkedExecutionTasks ? requiredSubflowTypes : [])
+            ).filter(Boolean)
         )
     );
     const { data: subflowRulesResponse } = useQuery({
@@ -647,6 +648,7 @@ export default function OrderDetailsPage() {
     };
     const orderRules = parseOrderRules(orderRulesResponse).filter((r: any) => !r?.isDeleted);
     const isExternal = Boolean((order as any)?.isExternal);
+    const ordersBackHref = isExternal ? "/dashboard/external-orders" : "/dashboard/orders";
     const sortedOrderStages = orderRules
         .filter((r: any) => r?.isActive !== false)
         .filter((r: any) => !r?.tradeType || r.tradeType === "BOTH" || String(r.tradeType) === tradeType)
@@ -702,7 +704,7 @@ export default function OrderDetailsPage() {
         INLAND_TRANSPORTATION: ["LORRY_RECEIPT", "LCL_DRAFT"],
         FREIGHT_FORWARDING: ["BILL_OF_LADING", "AIR_WAYBILL", "INSURANCE_CERTIFICATE"],
     };
-    const ORDER_CORE_DOC_TYPES = ["SALES_CONTRACT", "INVOICE", "PAYMENT_ADVICE"];
+    const ORDER_CORE_DOC_TYPES = ["SALES_CONTRACT", "PURCHASE_ORDER", "INVOICE", "PAYMENT_ADVICE"];
     const docRulesAll = Array.isArray(docRulesResponse?.data?.data) ? docRulesResponse.data.data : [];
     const operatorOptions = Array.isArray(operators) ? operators : [];
     const docRuleByType = new Map<string, any>();
@@ -725,16 +727,29 @@ export default function OrderDetailsPage() {
     const orderCoreDocTypes = [...ORDER_CORE_DOC_TYPES, ...extraDocTypes];
     const getDocRule = (docType: string) => docRuleByType.get(String(docType || "").toUpperCase());
 
-    const subflowStatus = scopedSubflowConfigs
+    const fallbackGateStage = sortedOrderStages[0] || "ORDER_CREATED";
+    const effectiveSubflowConfigs = scopedSubflowConfigs.length > 0
+        ? scopedSubflowConfigs
+        : (hasLinkedExecutionTasks
+            ? subflowTypes.map((type) => ({
+                subflowType: type,
+                mustCompleteBeforeOrderStage: fallbackGateStage,
+                dependsOnSubflows: [],
+                isActive: true,
+            }))
+            : []);
+
+    const subflowStatus = effectiveSubflowConfigs
         .flatMap((config: any) => {
             const type = String(config.subflowType || "").toUpperCase();
             const flowRules = subflowRulesResponse?.get?.(type) || [];
             const sortedFlowRules = [...flowRules].sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
             const lastStage = sortedFlowRules.length ? sortedFlowRules[sortedFlowRules.length - 1] : null;
-            const gateStage = String(config.mustCompleteBeforeOrderStage || "").toUpperCase();
+            const gateStage = String(config.mustCompleteBeforeOrderStage || fallbackGateStage || "").toUpperCase();
+            const hasGate = Boolean(gateStage);
             const gateLabel = stageLabelMap.get(gateStage) || gateStage;
             const currentRank = orderStageRank.get(String(workflowStage).toUpperCase()) ?? 0;
-            const gateRank = orderStageRank.get(gateStage) ?? 0;
+            const gateRank = hasGate ? (orderStageRank.get(gateStage) ?? 0) : 0;
             const dependsOn = Array.isArray(config.dependsOnSubflows) ? config.dependsOnSubflows : [];
 
             const getBiddingLabel = (task?: any) => {
@@ -775,7 +790,7 @@ export default function OrderDetailsPage() {
                     currentStage: stageKey || "NOT_STARTED",
                     currentLabel,
                     isComplete,
-                    isBlocking: !isComplete && currentRank >= gateRank,
+                    isBlocking: hasGate ? (!isComplete && currentRank >= gateRank) : false,
                     gateLabel,
                     dependsOn,
                     biddingLabel: getBiddingLabel(matchedTask),
@@ -830,6 +845,26 @@ export default function OrderDetailsPage() {
         if (owner === "buyer") return buyerId === userId;
         if (owner === "seller") return sellerId === userId;
         return false;
+    };
+
+    const isBiddingConfirmed = (subflowType: string, instanceKey?: string) => {
+        if (!hasLinkedExecutionTasks) return true;
+        const type = String(subflowType || "").toUpperCase();
+        const taskType = type === "QUALITY_QA" ? "QUALITY_TESTING" : type;
+        const taskList = executionTasksByType.get(taskType) || [];
+        if (taskList.length === 0) return false;
+
+        const matchTask = instanceKey
+            ? taskList.find((task: any) => String(task?.details?.segmentKey || task?._id || "") === String(instanceKey))
+            : taskList[0];
+
+        if (!matchTask) return false;
+        return Boolean(
+            matchTask?.committedProvider ||
+            matchTask?.committedCompany ||
+            matchTask?.committedVendor ||
+            matchTask?.provider
+        );
     };
 
     const canSeeFleet = () => {
@@ -951,6 +986,40 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
 
+            <div className="sticky top-20 z-30 w-full rounded-2xl border border-divider bg-background/80 backdrop-blur-xl px-4 py-3 flex flex-wrap items-center gap-3">
+                <Link
+                    href={ordersBackHref}
+                    className="inline-flex items-center justify-center rounded-xl border border-divider bg-default-100/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-foreground hover:border-warning-500/40 hover:text-warning-500 transition-all"
+                >
+                    Back To Orders
+                </Link>
+                <div className="text-[9px] font-black uppercase tracking-widest text-default-400">Quick Jump</div>
+                <a
+                    href="#order-plan"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                >
+                    Plan
+                </a>
+                <a
+                    href="#subflows"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                >
+                    Subflows
+                </a>
+                <a
+                    href="#execution-bidding"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                >
+                    Bidding
+                </a>
+                <a
+                    href="#order-docs"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                >
+                    Documents
+                </a>
+            </div>
+
             {(roleLower === "admin" || roleLower === "operator" || roleLower === "team") && (
                 <Card className="border border-divider bg-content1/60">
                     <CardBody className="flex flex-col gap-4 md:flex-row md:items-end">
@@ -1062,7 +1131,7 @@ export default function OrderDetailsPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div id="order-plan" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Strategic Command: Global Summary */}
                 <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
@@ -1277,7 +1346,7 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div id="subflows" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Status Pipeline / Subflow Manifest */}
                 {subflowStatus.length > 0 ? (
                     <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl backdrop-blur-xl overflow-hidden h-full">
@@ -1353,6 +1422,10 @@ export default function OrderDetailsPage() {
                                                             <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500 px-1">
                                                                 Subflow Stage Control
                                                             </div>
+                                                            {(() => {
+                                                                const biddingConfirmed = isBiddingConfirmed(flow.type, flow.instanceKey);
+                                                                const canEdit = canEditSubflow(flow.type);
+                                                                return (
                                                             <Select
                                                                 aria-label={`${flow.label} stage`}
                                                                 placeholder="Select stage"
@@ -1373,7 +1446,7 @@ export default function OrderDetailsPage() {
                                                                     trigger: "h-10 bg-background/60 border-divider",
                                                                     value: "text-[10px] font-black uppercase tracking-widest",
                                                                 }}
-                                                                isDisabled={!canEditSubflow(flow.type) || updateSubflowStageMutation.isPending}
+                                                                isDisabled={!canEdit || !biddingConfirmed || updateSubflowStageMutation.isPending}
                                                             >
                                                                 {flow.stages.map((stage) => (
                                                                     <SelectItem key={stage.stageKey} value={stage.stageKey} className="text-[10px] font-black uppercase tracking-widest">
@@ -1381,6 +1454,13 @@ export default function OrderDetailsPage() {
                                                                     </SelectItem>
                                                                 ))}
                                                             </Select>
+                                                                );
+                                                            })()}
+                                                            {!isBiddingConfirmed(flow.type, flow.instanceKey) && (
+                                                                <div className="text-[10px] font-bold text-warning-500 uppercase tracking-widest px-1">
+                                                                    Confirm bidding before selecting a stage.
+                                                                </div>
+                                                            )}
                                                             {!canEditSubflow(flow.type) && (
                                                                 <div className="text-[10px] font-bold text-default-400 uppercase tracking-widest px-1">
                                                                     Editing restricted to assigned owner.
@@ -1747,7 +1827,7 @@ export default function OrderDetailsPage() {
             </div>
 
             {hasLinkedExecutionTasks && (
-                <div className="mt-10 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
+                <div id="execution-bidding" className="mt-10 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
                     <div className="flex items-start justify-between gap-4 mb-6">
                         <div>
                             <h2 className="text-xs font-black uppercase tracking-[0.2em] text-warning-500 flex items-center gap-3 mb-2">
@@ -1859,7 +1939,7 @@ export default function OrderDetailsPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div id="order-docs" className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Order Core Documents */}
                 <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
                     <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">

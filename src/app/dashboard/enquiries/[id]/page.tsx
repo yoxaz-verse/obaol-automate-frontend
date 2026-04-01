@@ -363,6 +363,11 @@ export default function EnquiryDetailsPage() {
     const states = parseMasterRows(statesResponse).filter((item: any) => !item?.isDeleted);
     const districts = parseMasterRows(districtsResponse).filter((item: any) => !item?.isDeleted);
     const countries = parseMasterRows(countriesResponse).filter((item: any) => !item?.isDeleted);
+    const getCountryLabel = (country: any): string =>
+        String(country?.name || country?.label || country?.countryName || country?.country || "");
+    const sortedCountries = [...countries].sort((a: any, b: any) =>
+        getCountryLabel(a).localeCompare(getCountryLabel(b), "en", { sensitivity: "base" })
+    );
     const originSeaPorts = parseMasterRows(originPortsResponse).filter((item: any) => !item?.isDeleted);
     const destinationSeaPorts = parseMasterRows(destinationPortsResponse).filter((item: any) => !item?.isDeleted);
     const enquirySpecificationValue = (enquiry as any)?.specifications || (enquiry as any)?.specification || "";
@@ -1500,10 +1505,15 @@ export default function EnquiryDetailsPage() {
     const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
     const displayActions = (() => {
         const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"].includes(String(key || "").toUpperCase()));
+        const noProformaAction = filtered.filter((key: string) => {
+            const normalized = String(key || "").toUpperCase();
+            if (normalizedStageKey === "PROFORMA_ISSUED" && normalized === "PROFORMA_CREATED") return false;
+            return true;
+        });
         if (isConvertedFlow) {
-            return filtered.filter((key: string) => String(key || "").toUpperCase() !== "CONVERT_TO_ORDER");
+            return noProformaAction.filter((key: string) => String(key || "").toUpperCase() !== "CONVERT_TO_ORDER");
         }
-        return filtered;
+        return noProformaAction;
     })();
     const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
     const formatActionByLabel = (value: string) => {
@@ -1530,7 +1540,7 @@ export default function EnquiryDetailsPage() {
         REVISION_REQUESTED: "Request Revision",
         REVISION_CONFIRMED: "Confirm Revision",
         REVISION_SKIPPED: "Skip Revision",
-        QUOTATION_CREATED: "Create Quotation",
+        QUOTATION_CREATED: "Draft Proposal",
         QUOTATION_ACCEPTED: "Accept Quotation",
         RETURN_TO_REVISION: "Return to Revision",
         RESPONSIBILITIES_FINALIZED: "Finalize Responsibilities",
@@ -1637,15 +1647,18 @@ export default function EnquiryDetailsPage() {
         createdAt: (enquiry as any)?.loiSubmittedAt,
         fileUrl: null,
         documentNumber: "LOI-AUTO",
+        audienceScope: "SELLER_OBAOL",
     }] : [];
     const combinedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs];
     const uniqueDocsByType = Object.values(
         combinedEnquiryDocs.reduce((acc: Record<string, any>, doc: any) => {
             const typeKey = String(doc?.type || "").toUpperCase();
+            const scopeKey = String(doc?.audienceScope || "SELLER_OBAOL").toUpperCase();
             if (!typeKey) return acc;
-            const existing = acc[typeKey];
+            const docKey = `${typeKey}::${scopeKey}`;
+            const existing = acc[docKey];
             if (!existing) {
-                acc[typeKey] = doc;
+                acc[docKey] = doc;
                 return acc;
             }
             const existingStatus = String(existing?.status || "").toUpperCase();
@@ -1653,18 +1666,18 @@ export default function EnquiryDetailsPage() {
             const existingTime = new Date(existing?.createdAt || 0).getTime();
             const nextTime = new Date(doc?.createdAt || 0).getTime();
             if (existingStatus === "DRAFT" && nextStatus !== "DRAFT") {
-                acc[typeKey] = doc;
+                acc[docKey] = doc;
                 return acc;
             }
             if (existingStatus === nextStatus && nextTime > existingTime) {
-                acc[typeKey] = doc;
+                acc[docKey] = doc;
                 return acc;
             }
             if (existingStatus !== "DRAFT" && nextStatus === "DRAFT") {
                 return acc;
             }
             if (nextTime > existingTime) {
-                acc[typeKey] = doc;
+                acc[docKey] = doc;
             }
             return acc;
         }, {})
@@ -1692,6 +1705,12 @@ export default function EnquiryDetailsPage() {
         LCL_DRAFT: "LCL Draft",
         INSURANCE_CERTIFICATE: "Insurance Certificate",
         PAYMENT_ADVICE: "Payment Advice",
+    };
+    const getAudienceLabel = (scope: any) => {
+        const normalized = String(scope || "").toUpperCase();
+        if (normalized === "SELLER_OBAOL") return "Seller ↔ OBAOL";
+        if (normalized === "OBAOL_BUYER") return "OBAOL ↔ Buyer";
+        return "";
     };
     const sortedEnquiryStages = enquiryRules
         .filter((r: any) => r?.isActive !== false)
@@ -2640,7 +2659,11 @@ export default function EnquiryDetailsPage() {
                         ) : (
                             <div className="space-y-2">
                                 {rulesForStage.filter(canSeeRule).map((rule: any) => {
+                                    const docTypeKey = String(rule.docType || "").toUpperCase();
+                                    const actionTypeKey = String(rule.actionType || "").toUpperCase();
+                                    const isPurchaseOrder = docTypeKey === "PURCHASE_ORDER";
                                     const hasDoc = hasDocType(String(rule.docType || ""));
+                                    const actionTypeLabel = isPurchaseOrder ? "UPLOAD OR CREATE" : actionTypeKey;
                                     return (
                                         <div key={rule._id} className="flex items-center justify-between gap-4 p-3.5 rounded-xl border border-divider/50 bg-default-50/30 hover:bg-default-50 transition-colors group">
                                             <div className="flex flex-col gap-0.5">
@@ -2648,21 +2671,26 @@ export default function EnquiryDetailsPage() {
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-[9px] font-black uppercase tracking-widest text-default-400">{rule.responsibleRole}</span>
                                                     <div className="w-1 h-1 rounded-full bg-default-300" />
-                                                    <span className="text-[9px] font-bold text-default-500 uppercase tracking-tight">{rule.actionType}</span>
+                                                    <span className="text-[9px] font-bold text-default-500 uppercase tracking-tight">{actionTypeLabel}</span>
                                                 </div>
+                                                <span className="text-[8px] font-bold uppercase tracking-widest text-default-400">
+                                                    Seller ↔ OBAOL / OBAOL ↔ Buyer
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Chip 
                                                     size="sm" 
                                                     variant="dot" 
-                                                    color={hasDoc ? "success" : String(rule.actionType || "").toUpperCase() === "UPLOAD" ? "primary" : "secondary"}
+                                                    color={hasDoc ? "success" : actionTypeKey === "UPLOAD" ? "primary" : "secondary"}
                                                     className="font-black uppercase text-[8px] tracking-[0.1em] h-5 border-none bg-transparent"
                                                 >
                                                     {hasDoc
                                                         ? "ARCHIVED"
-                                                        : String(rule.actionType || "").toUpperCase() === "UPLOAD"
-                                                            ? "UPLOAD"
-                                                            : "CREATE"
+                                                        : isPurchaseOrder
+                                                            ? "UPLOAD / CREATE"
+                                                            : actionTypeKey === "UPLOAD"
+                                                                ? "UPLOAD"
+                                                                : "CREATE"
                                                     }
                                                 </Chip>
                                                 {!hasDoc && canActOnRule(rule) && (
@@ -2676,7 +2704,7 @@ export default function EnquiryDetailsPage() {
                                                             setDocActionOpen(true);
                                                         }}
                                                     >
-                                                        {String(rule.actionType || "").toUpperCase() === "UPLOAD"
+                                                        {actionTypeKey === "UPLOAD"
                                                             ? "Upload"
                                                             : "Create"}
                                                     </Button>
@@ -2720,12 +2748,13 @@ export default function EnquiryDetailsPage() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {sortedEnquiryDocs.map((doc: any) => {
-                                    const typeKey = String(doc?.type || "").toUpperCase();
-                                    const label = DOC_TYPE_LABELS[typeKey] || String(typeKey || "").replaceAll("_", " ");
-                                    const status = String(doc?.status || "DRAFT").toUpperCase();
-                                    const createdAt = doc?.createdAt ? dayjs(doc.createdAt).format("DD MMM YYYY") : "";
-                                    const hasFile = Boolean(doc?.fileUrl);
+                                    {sortedEnquiryDocs.map((doc: any) => {
+                                        const typeKey = String(doc?.type || "").toUpperCase();
+                                        const label = DOC_TYPE_LABELS[typeKey] || String(typeKey || "").replaceAll("_", " ");
+                                        const status = String(doc?.status || "DRAFT").toUpperCase();
+                                        const createdAt = doc?.createdAt ? dayjs(doc.createdAt).format("DD MMM YYYY") : "";
+                                        const hasFile = Boolean(doc?.fileUrl);
+                                        const audienceLabel = getAudienceLabel(doc?.audienceScope);
 
                                     const isSent = status === "SENT";
                                     const isDraft = status === "DRAFT";
@@ -2743,6 +2772,11 @@ export default function EnquiryDetailsPage() {
                                                         <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border transition-colors ${isSent ? "bg-success-500/10 border-success-500/20 text-success-600" : "bg-default-400/10 border-default-400/20 text-default-400"}`}>
                                                             {status}
                                                         </div>
+                                                        {audienceLabel && (
+                                                            <div className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border border-primary/20 text-primary/80 bg-primary/10">
+                                                                {audienceLabel}
+                                                            </div>
+                                                        )}
                                                         {createdAt && (
                                                             <div className="flex items-center gap-1 text-[8px] font-bold text-default-400 uppercase tracking-widest">
                                                                 <LuClock size={9} />
@@ -3127,8 +3161,8 @@ export default function EnquiryDetailsPage() {
                                 states={states}
                                 originDistrictOptions={originDistrictOptions}
                                 destinationDistrictOptions={destinationDistrictOptions}
-                                originCountryOptions={countries}
-                                destinationCountryOptions={countries}
+                                originCountryOptions={sortedCountries}
+                                destinationCountryOptions={sortedCountries}
                                 originPortOptions={originPortOptions}
                                 destinationPortOptions={destinationPortOptions}
                                 showOriginLogisticsFields={showOriginLogisticsFields}
@@ -3328,81 +3362,9 @@ export default function EnquiryDetailsPage() {
                         <p className="text-default-500 text-[11px] font-medium max-w-md opacity-80 decoration-transparent">Review performance parameters and logistics framework before authorizing mission-critical execution.</p>
                     </div>
 
-                    <div className="flex flex-wrap gap-6 justify-center md:justify-end items-center relative z-10">
-                        {requiredActions.length > 0 && (
-                            <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto ml-auto">
-                                {displayActions.map((actionKey: string) => (
-                                    <div key={actionKey} className="flex flex-col items-start gap-1">
-                                        <Button
-                                            size="sm"
-                                            color="primary"
-                                            variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
-                                            className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase"
-                                            isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
-                                            onPress={() => handleActionPress(actionKey)}
-                                            isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
-                                        >
-                                            {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
-                                        </Button>
-                                        {isSystemAdmin && actionByLabelText && (
-                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                                Action by: {actionByLabelText}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {normalizedStatus === "CONVERTED" && (
-                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold uppercase tracking-widest">
-                                <LuCheck size={14} />
-                                Mission Finalized • Order Active
-                            </div>
-                        )}
-                        {normalizedStatus === "CLOSED" && (
-                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-default-500/10 bg-default-500/5 text-default-600 text-[10px] font-bold uppercase tracking-widest">
-                                Enquiry Closed • Termination Successful
-                            </div>
-                        )}
-                        {quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && quotationStatus === "DRAFT" && (
-                            <div className="flex flex-col items-start gap-1">
-                                <Button
-                                    color="primary"
-                                    className="w-full sm:w-auto font-bold px-10 rounded-2xl h-14 text-[11px] tracking-widest uppercase bg-primary text-primary-foreground shadow-xl shadow-primary/20"
-                                    isLoading={submitQuotationMutation.isPending}
-                                    onPress={() => submitQuotationMutation.mutate()}
-                                    startContent={<LuFileCheck size={18} />}
-                                >
-                                    Authorize Proposal
-                                </Button>
-                                {isSystemAdmin && (
-                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                        Action by: Supplier
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {!quotationId && canManageDocs && workflowStage === "QUOTATION_CREATED" && (
-                            <div className="flex flex-col items-start gap-1">
-                                <Button
-                                    color="primary"
-                                    className="w-full sm:w-auto font-black px-10 rounded-2xl h-14 text-[11px] tracking-[0.2em] uppercase italic"
-                                    isLoading={createQuotationMutation.isPending}
-                                    onPress={() => createQuotationMutation.mutate()}
-                                    startContent={<FiPlus size={18} />}
-                                >
-                                    Draft Proposal
-                                </Button>
-                                {isSystemAdmin && (
-                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
-                                        Action by: Supplier
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
+                    <div className="flex flex-wrap gap-6 justify-center md:justify-end items-center relative z-10 w-full">
                         {isAdmin && (
-                            <div className="flex flex-wrap gap-4 justify-center md:justify-end">
+                            <div className="flex flex-wrap gap-4 justify-center md:justify-start mr-auto">
                                 {!isConvertedFlow && !isCompletedFlow && !isCancelled && workflowStage === "PROFORMA_ISSUED" && hasSellerAccepted && enquiry.buyerConfirmedAt && (
                                     <>
                                         {!hasResponsibilitiesFinalized && (
@@ -3449,7 +3411,42 @@ export default function EnquiryDetailsPage() {
                                 )}
                             </div>
                         )}
-
+                        {requiredActions.length > 0 && (
+                            <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto ml-auto">
+                                {displayActions.map((actionKey: string) => (
+                                    <div key={actionKey} className="flex flex-col items-start gap-1">
+                                        <Button
+                                            size="sm"
+                                            color="primary"
+                                            variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
+                                            className="font-bold px-6 rounded-xl h-11 text-[10px] tracking-widest uppercase"
+                                            isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
+                                            onPress={() => handleActionPress(actionKey)}
+                                            isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
+                                        >
+                                            {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
+                                        </Button>
+                                        {isSystemAdmin && actionByLabelText && (
+                                            <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
+                                                Action by: {actionByLabelText}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {normalizedStatus === "CONVERTED" && (
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-success-500/10 bg-success-500/5 text-success-600 text-[10px] font-bold uppercase tracking-widest">
+                                <LuCheck size={14} />
+                                Mission Finalized • Order Active
+                            </div>
+                        )}
+                        {normalizedStatus === "CLOSED" && (
+                            <div className="w-full md:w-auto flex items-center gap-3 px-6 py-4 rounded-2xl border border-default-500/10 bg-default-500/5 text-default-600 text-[10px] font-bold uppercase tracking-widest">
+                                Enquiry Closed • Termination Successful
+                            </div>
+                        )}
+                        
                         {!isAdmin && (enquiry as any)?.order && normalizedStatus !== "CONVERTED" && normalizedStatus !== "CLOSED" && (
                             <Button
                                 className="w-full sm:w-auto font-bold px-8 rounded-2xl h-14 text-[11px] tracking-wider uppercase bg-success text-success-foreground shadow-lg shadow-success-500/20"
@@ -4029,19 +4026,19 @@ export default function EnquiryDetailsPage() {
                                         />
                                     </div>
                                 </ModalBody>
-                                <ModalFooter className="px-10 pb-12 pt-4 flex flex-wrap items-center justify-between gap-4">
+                                <ModalFooter className="px-10 pb-12 pt-4 flex flex-col items-center gap-8">
                                     <Button 
                                         variant="light" 
                                         onPress={onClose}
-                                        className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                                        className="px-8 h-8 rounded-full font-black uppercase text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
                                     >
                                         Close
                                     </Button>
-                                    <div className="flex flex-wrap items-center gap-4">
+                                    <div className="flex items-center justify-between w-full gap-4">
                                         <Button
                                             variant="flat"
                                             onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${Array.isArray(id) ? id[0] : id}`, "_blank")}
-                                            className="px-8 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20"
+                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20 shadow-xl shadow-warning-500/5"
                                         >
                                             Open Execution Panel
                                         </Button>
@@ -4083,7 +4080,7 @@ export default function EnquiryDetailsPage() {
                                                 }
                                             }}
                                             isLoading={applyActionMutation.isPending}
-                                            className="px-10 h-12 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                            className="flex-1 max-w-[320px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
                                             startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
                                         >
                                             ESTABLISH_ORDER_PROTOCOL
@@ -4146,6 +4143,11 @@ export default function EnquiryDetailsPage() {
                             <span className="text-[10px] uppercase font-black tracking-widest text-default-400">
                                 {docViewerDoc?.documentNumber || "Draft Preview"}
                             </span>
+                            {getAudienceLabel(docViewerDoc?.audienceScope) && (
+                                <span className="text-[9px] uppercase font-black tracking-widest text-primary/80">
+                                    {getAudienceLabel(docViewerDoc?.audienceScope)}
+                                </span>
+                            )}
                         </ModalHeader>
                         <ModalBody>
                             {docViewerDoc?.fileUrl ? (
@@ -4293,7 +4295,7 @@ export default function EnquiryDetailsPage() {
                         </ModalFooter>
                     </ModalContent>
                 </Modal>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

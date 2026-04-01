@@ -236,7 +236,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
             >
               {incotermOptions.map((item: any) => (
                 <SelectItem key={item._id} value={item._id}>
-                  {[item.code, item.name].filter(Boolean).join(" — ")}
+                  {[item.code, item.name].filter(Boolean).join(" // ")}
                 </SelectItem>
               ))}
             </Select>
@@ -803,14 +803,14 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           className={`h-16 rounded-[1.75rem] font-black uppercase tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
                             ${isReadOnlyAfterConversion 
                               ? "bg-success/10 text-success border border-success/30 shadow-[0_0_25px_rgba(34,197,94,0.15)]" 
-                              : "bg-primary text-white shadow-[0_15px_45px_rgba(37,99,235,0.3)] hover:shadow-primary/60 hover:-translate-y-1 hover:scale-[1.02]"
+                              : "bg-warning-500 text-black shadow-[0_15px_45px_rgba(234,179,8,0.3)] hover:shadow-warning-500/60 hover:-translate-y-1 hover:scale-[1.02]"
                             }`}
                           startContent={!finalizeLoading && (isReadOnlyAfterConversion 
                             ? <LuShieldCheck size={18} className="mr-1" /> 
                             : <LuActivity size={18} className="mr-1 group-hover/btn:animate-pulse" />
                           )}
                         >
-                          {!isReadOnlyAfterConversion && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />}
+                          {!isReadOnlyAfterConversion && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />}
                           {isReadOnlyAfterConversion ? "PROTOCOL LOCKED" : "FINALIZE FRAMEWORK"}
                         </Button>
                       </div>

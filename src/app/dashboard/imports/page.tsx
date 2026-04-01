@@ -1238,6 +1238,9 @@ export default function ImportsPage() {
           }
         }}
         size="lg"
+        isDismissable={false}
+        isKeyboardDismissDisabled
+        shouldCloseOnInteractOutside={() => false}
         classNames={{
           backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
           base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",

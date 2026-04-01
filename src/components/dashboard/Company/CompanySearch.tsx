@@ -47,18 +47,28 @@ const SearchIcon = ({
 interface Company {
   _id: string;
   name: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  slug?: string;
+  subdomain?: string;
+  customDomain?: string;
 }
 
 export default function CompanySearch({
   onSelect,
+  onSelectCompany,
   defaultSelected,
   itemsFilter,
   onSearchChange,
+  isDisabled,
 }: {
   onSelect?: (id: string | null) => void;
+  onSelectCompany?: (company: Company | null) => void;
   defaultSelected?: string | null;
   itemsFilter?: (companies: Company[]) => Company[]; // allow filtering (e.g. onlyWithProducts)
   onSearchChange?: (value: string) => void;
+  isDisabled?: boolean;
 }) {
   const [inputValue, setInputValue] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(
@@ -92,10 +102,14 @@ export default function CompanySearch({
     userSelectedKeyRef.current = nextKey;
     if (!nextKey) {
       setInputValue("");
+      if (onSelectCompany) onSelectCompany(null);
       return;
     }
     const match = companies.find((c) => String(c._id) === String(nextKey));
-    if (match) setInputValue(match.name || "");
+    if (match) {
+      setInputValue(match.name || "");
+      if (onSelectCompany) onSelectCompany(match);
+    }
   }, [defaultSelected]);
 
   if (isLoading) {
@@ -119,6 +133,7 @@ export default function CompanySearch({
       radius="full"
       selectedKey={selectedKey || undefined}
       isClearable
+      isDisabled={isDisabled}
       className="text-warning-400 w-full max-w-md mb-6"
       classNames={{
         base: "max-w-full",
@@ -146,6 +161,7 @@ export default function CompanySearch({
           setSelectedKey(null);
           userSelectedKeyRef.current = null;
           if (onSelect) onSelect(null);
+          if (onSelectCompany) onSelectCompany(null);
           return;
         }
 
@@ -157,6 +173,7 @@ export default function CompanySearch({
             setSelectedKey(null);
             userSelectedKeyRef.current = null;
             if (onSelect) onSelect(null);
+            if (onSelectCompany) onSelectCompany(null);
           }
         }
       }}
@@ -166,12 +183,14 @@ export default function CompanySearch({
         userSelectedKeyRef.current = null;
         if (onSearchChange) onSearchChange("");
         if (onSelect) onSelect(null);
+        if (onSelectCompany) onSelectCompany(null);
       }}
       onSelectionChange={(key: any) => {
         if (!key) {
            setSelectedKey(null);
            userSelectedKeyRef.current = null;
            if (onSelect) onSelect(null);
+           if (onSelectCompany) onSelectCompany(null);
            return;
         }
 
@@ -183,6 +202,7 @@ export default function CompanySearch({
         if (match) {
           setInputValue(match.name || "");
           if (onSearchChange) onSearchChange(match.name || "");
+          if (onSelectCompany) onSelectCompany(match);
         }
         if (onSelect) onSelect(nextKey);
       }}

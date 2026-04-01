@@ -37,6 +37,47 @@ import { Key } from "@react-types/shared";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 
+const PAYMENT_DOC_TYPES = [
+  "PROFORMA_INVOICE",
+  "PURCHASE_ORDER",
+  "SALES_CONTRACT",
+  "PACKING_LIST",
+  "INSPECTION_CERTIFICATE",
+  "PHYTOSANITARY_CERTIFICATE",
+  "FUMIGATION_CERTIFICATE",
+  "BILL_OF_LADING",
+  "AIR_WAYBILL",
+  "LORRY_RECEIPT",
+  "LCL_DRAFT",
+  "INSURANCE_CERTIFICATE",
+  "INVOICE",
+  "PAYMENT_ADVICE",
+];
+
+const PAYMENT_STAGE_KEYS = [
+  "ENQUIRY_CREATED",
+  "LOI_ACCEPTED_QTY_CONFIRMED",
+  "QUOTATION_REVISION",
+  "QUOTATION_CREATED",
+  "QUOTATION_DECISION",
+  "RESPONSIBILITIES_FINALIZED",
+  "PROFORMA_ISSUED",
+  "OTHER_DOCUMENTS",
+  "PURCHASE_ORDER_CREATED",
+  "ORDER_CREATED",
+  "CONTRACT_SIGNED",
+  "PRODUCTION_STARTED",
+  "QUALITY_VERIFIED",
+  "COMPLIANCE_APPROVED",
+  "PACKING_COMPLETED",
+  "READY_FOR_SHIPMENT",
+  "SHIPPED",
+  "DELIVERED",
+  "PAYMENT_PENDING",
+  "PAYMENT_COMPLETED",
+  "TRADE_CLOSED",
+];
+
 export default function EditModal({
   _id,
   currentTable,
@@ -348,6 +389,31 @@ export default function EditModal({
     });
   };
 
+  const updatePaymentMilestone = (fieldKey: string, index: number, patch: Record<string, any>) => {
+    setFormData((prev) => {
+      const next = Array.isArray(prev[fieldKey]) ? [...prev[fieldKey]] : [];
+      next[index] = { ...(next[index] || {}), ...patch };
+      return { ...prev, [fieldKey]: next };
+    });
+  };
+
+  const addPaymentMilestone = (fieldKey: string) => {
+    setFormData((prev) => {
+      const next = Array.isArray(prev[fieldKey]) ? [...prev[fieldKey]] : [];
+      if (next.length >= 3) return prev;
+      next.push({ label: "", percent: 0, triggerType: "DOC", triggerValue: "" });
+      return { ...prev, [fieldKey]: next };
+    });
+  };
+
+  const removePaymentMilestone = (fieldKey: string, index: number) => {
+    setFormData((prev) => {
+      const next = Array.isArray(prev[fieldKey]) ? [...prev[fieldKey]] : [];
+      next.splice(index, 1);
+      return { ...prev, [fieldKey]: next };
+    });
+  };
+
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const isFieldVisible = (field: FormField, data: Record<string, any>) => {
@@ -397,6 +463,88 @@ export default function EditModal({
     }
 
     switch (f.type) {
+      case "paymentMilestones": {
+        const milestones: any[] = Array.isArray(formData[f.key]) ? formData[f.key] : [];
+        return (
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-center justify-between">
+              <label className="font-medium">{f.label}</label>
+              <Button
+                size="sm"
+                type="button"
+                onClick={() => addPaymentMilestone(f.key)}
+                className="px-3 py-1 bg-warning-500 text-white rounded"
+                isDisabled={milestones.length >= 3}
+              >
+                + Add Segment
+              </Button>
+            </div>
+            {milestones.length === 0 && (
+              <p className="text-[11px] text-default-500">Add 1–3 segments that sum to 100%.</p>
+            )}
+            {milestones.map((milestone, index) => {
+              const triggerType = String(milestone?.triggerType || "DOC");
+              const triggerOptions = triggerType === "STAGE" ? PAYMENT_STAGE_KEYS : PAYMENT_DOC_TYPES;
+              return (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                  <Input
+                    label="Label"
+                    value={milestone?.label || ""}
+                    onChange={(e) => updatePaymentMilestone(f.key, index, { label: e.target.value })}
+                    isDisabled={disabled}
+                  />
+                  <Input
+                    label="Percent"
+                    type="number"
+                    value={milestone?.percent ?? ""}
+                    onChange={(e) => updatePaymentMilestone(f.key, index, { percent: Number(e.target.value) })}
+                    isDisabled={disabled}
+                  />
+                  <Select
+                    label="Trigger Type"
+                    selectedKeys={new Set([triggerType])}
+                    onSelectionChange={(keys) => {
+                      const nextType = Array.from(keys as Set<Key>)[0] || "DOC";
+                      updatePaymentMilestone(f.key, index, {
+                        triggerType: String(nextType),
+                        triggerValue: "",
+                      });
+                    }}
+                    isDisabled={disabled}
+                  >
+                    <SelectItem key="DOC">DOC</SelectItem>
+                    <SelectItem key="STAGE">STAGE</SelectItem>
+                  </Select>
+                  <Select
+                    label="Trigger Value"
+                    selectedKeys={milestone?.triggerValue ? new Set([String(milestone.triggerValue)]) : new Set()}
+                    onSelectionChange={(keys) => {
+                      const nextValue = Array.from(keys as Set<Key>)[0] || "";
+                      updatePaymentMilestone(f.key, index, { triggerValue: String(nextValue) });
+                    }}
+                    isDisabled={disabled}
+                  >
+                    {triggerOptions.map((opt) => (
+                      <SelectItem key={opt}>{opt}</SelectItem>
+                    ))}
+                  </Select>
+                  <div className="md:col-span-4">
+                    <Button
+                      size="sm"
+                      type="button"
+                      onClick={() => removePaymentMilestone(f.key, index)}
+                      className="bg-red-500 text-white rounded"
+                      isDisabled={disabled}
+                    >
+                      Remove Segment
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
       case "date": {
         const val = formData[f.key]
           ? parseDate(new Date(formData[f.key]).toISOString().split("T")[0])
@@ -759,7 +907,7 @@ export default function EditModal({
             <ModalBody>
               <form onSubmit={handleSubmit}>
                 {formFields
-                  .filter((f) => f.inEdit && f.type !== "password" && isFieldVisible(f, formData))
+                  .filter((f) => (f.inEdit ?? f.inForm) && f.type !== "password" && isFieldVisible(f, formData))
                   .map((f, i) => (
                     <div key={i} className="mb-4">
                       {renderField(f)}

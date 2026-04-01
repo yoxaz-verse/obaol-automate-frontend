@@ -1736,8 +1736,8 @@ export const initialTableConfig: Record<
       inTable: true,
     },
     {
-      label: "Milestones (JSON)",
-      type: "textarea",
+      label: "Milestones",
+      type: "paymentMilestones",
       key: "milestones",
       inForm: true,
       inEdit: true,

@@ -88,14 +88,6 @@ const InventoryList: React.FC = () => {
         return () => clearTimeout(timer);
     }, [search]);
 
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedSearch, JSON.stringify(filters || {}), effectiveCompanyId, activeTab]);
-
-    const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
-        setFilters(updatedFilters);
-    };
-
     const columns = generateColumns("inventories", initialTableConfig, user?.role);
     const formFields = initialTableConfig["inventories"];
 
@@ -113,6 +105,14 @@ const InventoryList: React.FC = () => {
         ? ((user as any)?.associateCompanyId || null)
         : selectedCompanyId;
     const shouldFetchInventory = !isAdmin || Boolean(effectiveCompanyId);
+
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, JSON.stringify(filters || {}), effectiveCompanyId, activeTab]);
+
+    const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
+        setFilters(updatedFilters);
+    };
 
     const { data: suggestedRateData } = useQuery({
         queryKey: ["inventory-suggested-rates", effectiveCompanyId, user?.id],

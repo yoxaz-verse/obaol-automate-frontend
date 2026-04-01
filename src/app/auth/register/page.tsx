@@ -795,18 +795,31 @@ export default function RegisterPage() {
             e.preventDefault();
           }}
         >
-          <div className="flex flex-col items-center gap-3">
-            {googleClientId ? (
-            <div id="google-register-associate" className="w-full" />
+            {googleClientId && !googleSignUp ? (
+              <div id="google-register-associate" className="w-full" />
+            ) : googleClientId && googleSignUp ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full flex items-center justify-between px-6 py-4 rounded-2xl bg-success-500/10 border border-success-500/20 shadow-[0_0_20px_rgba(34,197,94,0.1)] transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-success-500 flex items-center justify-center text-white shadow-lg shadow-success-500/40">
+                    <FiCheck size={20} className="stroke-[3]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-success-600 dark:text-success-400 uppercase tracking-[0.2em] leading-none mb-1">Identity Verified</span>
+                    <p className="text-[12px] font-bold text-foreground opacity-70 leading-none">GOOGLE PROTOCOL ACTIVE</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success-500/20 border border-success-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                  <span className="text-[9px] font-black text-success-600 uppercase tracking-widest">Linked</span>
+                </div>
+              </motion.div>
             ) : (
               <p className="text-xs text-warning-500">Google sign-up is not configured.</p>
             )}
-            {googleSignUp && (
-              <p className="text-xs text-success-500 font-semibold">
-                Google sign-up active. Complete the form to finish registration.
-              </p>
-            )}
-          </div>
           <div className="mb-10">
             <div className="flex items-center justify-between relative px-2 mb-6">
               <div className="absolute top-1/2 left-0 w-full h-[2.5px] bg-default-100/50 -translate-y-1/2 z-0 rounded-full" />

@@ -16,6 +16,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
 import { 
   LuFileText, 
@@ -96,6 +98,7 @@ export default function SampleRequestDetailPage() {
   const [receiptModalOpen, setReceiptModalOpen] = useState(false);
   const [quoteMinQty, setQuoteMinQty] = useState("");
   const [quotePrice, setQuotePrice] = useState("");
+  const [samplePaymentTerm, setSamplePaymentTerm] = useState("ADVANCE");
   const [courierAgencyName, setCourierAgencyName] = useState("");
   const [courierTrackingNumber, setCourierTrackingNumber] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -127,6 +130,7 @@ export default function SampleRequestDetailPage() {
       return patchData(apiRoutes.sampleRequest.quote(id), {
         supplierMinQty: Number(quoteMinQty),
         supplierPrice: Number(quotePrice),
+        samplePaymentTerm,
       });
     },
     onSuccess: () => {
@@ -134,6 +138,7 @@ export default function SampleRequestDetailPage() {
       setQuoteModalOpen(false);
       setQuoteMinQty("");
       setQuotePrice("");
+      setSamplePaymentTerm("ADVANCE");
       queryClient.invalidateQueries({ queryKey: ["sample-request", id] });
       queryClient.invalidateQueries({ queryKey: ["sample-requests"] });
     },
@@ -294,6 +299,10 @@ export default function SampleRequestDetailPage() {
   const productName = request?.variantRateId?.productVariant?.product?.name || "Product";
   const buyerName = request?.buyerAssociateId?.name || "Buyer";
   const supplierName = request?.supplierCompanyId?.name || "Supplier";
+  const samplePaymentTermLabel =
+    String(request?.samplePaymentTerm || "ADVANCE") === "COURIER_CHARGES"
+      ? "Courier Charges"
+      : "Advance";
   const receiptFileUrl = request?.receiptFileId?.fileURL || request?.receiptFileId?.fileId || null;
 
   return (
@@ -377,6 +386,13 @@ export default function SampleRequestDetailPage() {
                     <span className="text-xl font-bold text-warning">{request.supplierPrice} <span className="text-[10px] text-default-400">/KG</span></span>
                   </div>
                 )}
+                {request?.supplierPrice && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Sample Payment Term</span>
+                    <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
+                    <span className="text-sm font-bold text-foreground">{samplePaymentTermLabel}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -458,7 +474,10 @@ export default function SampleRequestDetailPage() {
                   <Button 
                     color="warning" 
                     className="h-12 rounded-xl font-bold uppercase tracking-wider text-black"
-                    onPress={() => setQuoteModalOpen(true)}
+                    onPress={() => {
+                      setSamplePaymentTerm(String(request?.samplePaymentTerm || "ADVANCE"));
+                      setQuoteModalOpen(true);
+                    }}
                     startContent={<LuQuote size={18} />}
                   >
                     Quote Sample
@@ -593,6 +612,17 @@ export default function SampleRequestDetailPage() {
                   value={quotePrice}
                   onChange={(e) => setQuotePrice(e.target.value)}
                 />
+                <Select
+                  label="Sample Payment Term"
+                  selectedKeys={new Set([samplePaymentTerm])}
+                  onSelectionChange={(keys) => {
+                    const nextValue = Array.from(keys as Set<string>)[0] || "ADVANCE";
+                    setSamplePaymentTerm(String(nextValue));
+                  }}
+                >
+                  <SelectItem key="ADVANCE">Advance</SelectItem>
+                  <SelectItem key="COURIER_CHARGES">Courier Charges</SelectItem>
+                </Select>
               </ModalBody>
               <ModalFooter>
                 <Button variant="flat" onPress={onClose}>Cancel</Button>

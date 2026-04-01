@@ -1470,6 +1470,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { user } = useContext(AuthContext);
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [requestState, setRequestState] = useState("");
   const [requestDistrict, setRequestDistrict] = useState("");
@@ -1538,7 +1539,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   const role = String(user?.role || "").toLowerCase();
   const isAdminOrOperator = role === "admin" || role === "operator";
   const buyerIdForSample = isAdminOrOperator ? buyerAssociateId : String(user?.id || "");
-  const sampleCooldownDays = 7;
+  const sampleCooldownDays = 3;
 
   const { data: recentSampleResponse } = useQuery({
     queryKey: ["sample-requests", "cooldown", variantRate?._id, buyerIdForSample],
@@ -1573,6 +1574,13 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     : "Request Sample";
 
   const handleSubmit = () => {
+    if (isCooldownActive) {
+      showToastMessage({
+        type: "error",
+        message: cooldownLabel,
+      });
+      return;
+    }
     if (isAdminOrOperator && !buyerAssociateId) {
       showToastMessage({
         type: "error",
@@ -1668,10 +1676,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         className="bg-[#0B0F14] border border-white/10 rounded-lg shadow-2xl"
       >
         <span
-          onClick={() => {
-            if (isCooldownActive) return;
-            onOpen();
-          }}
+          onClick={onOpen}
           className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${
             isCooldownActive
               ? "bg-success-500/10 text-success-500 cursor-not-allowed opacity-50"
@@ -1707,6 +1712,14 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                 </div>
               </ModalHeader>
               <ModalBody className="py-8 px-8 flex flex-col gap-6 overflow-y-auto">
+                {!isSuccess && isCooldownActive && (
+                  <div className="flex items-start gap-3 rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3">
+                    <FiX className="text-danger-400 mt-0.5 shrink-0" size={18} />
+                    <div className="text-[11px] font-semibold text-danger-300 leading-relaxed">
+                      {cooldownLabel} Please wait before creating another sample request for the same buyer.
+                    </div>
+                  </div>
+                )}
                 {isSuccess ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -1721,15 +1734,31 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                       <p className="text-sm text-default-500 font-medium max-w-[240px] leading-relaxed">
                         Your sample request has been successfully submitted to the supplier.
                       </p>
+                      <p className="text-[11px] text-default-400 font-semibold uppercase tracking-widest">
+                        For the next {sampleCooldownDays} days, you cannot book another sample from this supplier.
+                      </p>
                     </div>
-                    <Button
-                      className="font-black uppercase tracking-widest mt-4 px-10 shadow-lg shadow-success/20"
-                      color="success"
-                      variant="shadow"
-                      onPress={onClose}
-                    >
-                      Acknowledge
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                      <Button
+                        className="font-black uppercase tracking-widest px-10 shadow-lg shadow-success/20"
+                        color="success"
+                        variant="shadow"
+                        onPress={onClose}
+                      >
+                        Acknowledge
+                      </Button>
+                      <Button
+                        className="font-black uppercase tracking-widest px-10"
+                        color="warning"
+                        variant="flat"
+                        onPress={() => {
+                          onClose();
+                          router.push("/dashboard/sample-requests");
+                        }}
+                      >
+                        Go To Sample Requests
+                      </Button>
+                    </div>
                   </motion.div>
                 ) : isConfirming ? (
                   <motion.div
@@ -1991,6 +2020,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                    color={isConfirming ? "success" : "warning"}
                    onPress={() => isConfirming ? handleFinalSubmit() : handleSubmit()} 
                    isLoading={submitting}
+                   isDisabled={submitting || isCooldownActive}
                    className="rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-orange-500/20 px-8"
                 >
                   {isConfirming ? "Authorize Sample Dispatch" : "Request Sample Dispatch"}

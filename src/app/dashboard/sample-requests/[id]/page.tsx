@@ -473,12 +473,12 @@ export default function SampleRequestDetailPage() {
                 {status === "REQUESTED" && canSupplier && (
                   <Button 
                     color="warning" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-black"
+                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-black bg-warning shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
                     onPress={() => {
                       setSamplePaymentTerm(String(request?.samplePaymentTerm || "ADVANCE"));
                       setQuoteModalOpen(true);
                     }}
-                    startContent={<LuQuote size={18} />}
+                    startContent={<LuActivity size={18} />}
                   >
                     Quote Sample
                   </Button>
@@ -594,40 +594,96 @@ export default function SampleRequestDetailPage() {
       </div>
     </motion.section>
 
-      <Modal isOpen={quoteModalOpen} onOpenChange={setQuoteModalOpen} size="md" placement="center">
+      <Modal 
+        isOpen={quoteModalOpen} 
+        onOpenChange={setQuoteModalOpen} 
+        size="md" 
+        placement="center"
+        isDismissable={false}
+        isKeyboardDismissDisabled
+        classNames={{
+          base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+          header: "border-b border-white/5",
+          footer: "border-t border-white/5",
+          closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Quote Sample</ModalHeader>
-              <ModalBody className="gap-4">
-                <Input
-                  label="Supplier Min Qty (kg)"
-                  type="number"
-                  value={quoteMinQty}
-                  onChange={(e) => setQuoteMinQty(e.target.value)}
-                />
-                <Input
-                  label="Supplier Price (per kg)"
-                  type="number"
-                  value={quotePrice}
-                  onChange={(e) => setQuotePrice(e.target.value)}
-                />
-                <Select
-                  label="Sample Payment Term"
-                  selectedKeys={new Set([samplePaymentTerm])}
-                  onSelectionChange={(keys) => {
-                    const nextValue = Array.from(keys as Set<string>)[0] || "ADVANCE";
-                    setSamplePaymentTerm(String(nextValue));
-                  }}
-                >
-                  <SelectItem key="ADVANCE">Advance</SelectItem>
-                  <SelectItem key="COURIER_CHARGES">Courier Charges</SelectItem>
-                </Select>
+              <ModalHeader className="flex flex-col gap-1 py-6 px-8">
+                 <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-warning rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Project Quote Initiation</span>
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-warning-500/60 mt-1 italic">Tactical Parameter Selection</p>
+              </ModalHeader>
+              <ModalBody className="gap-6 px-8 py-8">
+                <div className="space-y-4">
+                  <Input
+                    label="Supplier Min Qty (kg)"
+                    type="number"
+                    variant="flat"
+                    labelPlacement="outside"
+                    placeholder="Enforce minimum operational volume..."
+                    value={quoteMinQty}
+                    onChange={(e) => setQuoteMinQty(e.target.value)}
+                    classNames={{
+                      inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      input: "text-sm font-bold text-white"
+                    }}
+                  />
+                  <Input
+                    label="Supplier Price (per kg)"
+                    type="number"
+                    variant="flat"
+                    labelPlacement="outside"
+                    placeholder="Declare unit rate for execution..."
+                    value={quotePrice}
+                    onChange={(e) => setQuotePrice(e.target.value)}
+                    classNames={{
+                      inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      input: "text-sm font-bold text-white text-warning"
+                    }}
+                  />
+                  <Select
+                    label="Sample Payment Term"
+                    variant="flat"
+                    labelPlacement="outside"
+                    selectedKeys={new Set([samplePaymentTerm])}
+                    onSelectionChange={(keys) => {
+                      const nextValue = Array.from(keys as Set<string>)[0] || "ADVANCE";
+                      setSamplePaymentTerm(String(nextValue));
+                    }}
+                    classNames={{
+                      trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      popoverContent: "bg-[#0B0F14] border border-white/10",
+                    }}
+                  >
+                    <SelectItem key="ADVANCE" className="text-white font-bold text-xs uppercase tracking-widest">Advance</SelectItem>
+                    <SelectItem key="COURIER_CHARGES" className="text-white font-bold text-xs uppercase tracking-widest">Courier Charges</SelectItem>
+                  </Select>
+                </div>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>Cancel</Button>
-                <Button color="warning" onPress={() => quoteMutation.mutate()} isDisabled={!quoteMinQty || !quotePrice}>
-                  Submit Quote
+              <ModalFooter className="px-8 py-6 flex items-center justify-between gap-4">
+                <Button 
+                   variant="light" 
+                   onPress={onClose}
+                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                >
+                   Abort
+                </Button>
+                <Button 
+                   color="warning" 
+                   variant="shadow"
+                   onPress={() => quoteMutation.mutate()} 
+                   isDisabled={!quoteMinQty || !quotePrice}
+                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(245,158,11,0.2)] bg-gradient-to-r from-warning to-warning-600"
+                >
+                   Execute Submission
                 </Button>
               </ModalFooter>
             </>
@@ -635,27 +691,72 @@ export default function SampleRequestDetailPage() {
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={courierModalOpen} onOpenChange={setCourierModalOpen} size="md" placement="center">
+      <Modal 
+         isOpen={courierModalOpen} 
+         onOpenChange={setCourierModalOpen} 
+         size="md" 
+         placement="center"
+         isDismissable={false}
+         isKeyboardDismissDisabled
+         classNames={{
+           base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+         }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Courier Details</ModalHeader>
-              <ModalBody className="gap-4">
+              <ModalHeader className="flex flex-col gap-1 py-8 px-10">
+                 <div className="flex items-center gap-3">
+                    <LuTruck className="text-primary" size={24} />
+                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Logistics Protocol</span>
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mt-1 italic">Submit Distribution Data</p>
+              </ModalHeader>
+              <ModalBody className="gap-6 px-10 pb-10">
                 <Input
-                  label="Courier Agency (optional)"
+                  label="Courier Agency"
+                  placeholder="Carrier service identity..."
+                  variant="flat"
+                  labelPlacement="outside"
                   value={courierAgencyName}
                   onChange={(e) => setCourierAgencyName(e.target.value)}
+                  classNames={{
+                    inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    input: "text-sm font-bold text-white text-primary"
+                  }}
                 />
                 <Input
                   label="Tracking Number"
+                  placeholder="Link operational sequence code..."
+                  variant="flat"
+                  labelPlacement="outside"
                   value={courierTrackingNumber}
                   onChange={(e) => setCourierTrackingNumber(e.target.value)}
+                  classNames={{
+                    inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    input: "text-sm font-bold text-white"
+                  }}
                 />
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>Cancel</Button>
-                <Button color="primary" onPress={() => courierSubmitMutation.mutate()} isDisabled={!courierTrackingNumber}>
-                  Submit
+              <ModalFooter className="px-10 pb-10 pt-2 flex items-center justify-between gap-4">
+                <Button 
+                   variant="light" 
+                   onPress={onClose}
+                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                >
+                   Abort
+                </Button>
+                <Button 
+                   color="primary" 
+                   variant="shadow"
+                   onPress={() => courierSubmitMutation.mutate()} 
+                   isDisabled={!courierTrackingNumber}
+                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                >
+                   Finalize Segment
                 </Button>
               </ModalFooter>
             </>
@@ -663,22 +764,49 @@ export default function SampleRequestDetailPage() {
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={receiptModalOpen} onOpenChange={setReceiptModalOpen} size="md" placement="center">
+      <Modal 
+         isOpen={receiptModalOpen} 
+         onOpenChange={setReceiptModalOpen} 
+         size="md" 
+         placement="center"
+         isDismissable={false}
+         isKeyboardDismissDisabled
+         classNames={{
+           base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+         }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Confirm Delivery</ModalHeader>
-              <ModalBody className="gap-4">
-                <Input
-                  type="file"
-                  label="Upload Receipt (optional)"
-                  onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                />
+              <ModalHeader className="flex flex-col gap-1 py-8 px-10">
+                 <div className="flex items-center gap-3">
+                    <LuCheck className="text-success" size={24} />
+                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Delivery Acceptance</span>
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-success-500/60 mt-1 italic">Confirmation Phase</p>
+              </ModalHeader>
+              <ModalBody className="gap-6 px-10 pb-10">
+                <div className="p-6 rounded-[1.5rem] bg-white/[0.02] border border-white/5 space-y-4">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Resource Verification</span>
+                  <p className="text-[10px] font-medium text-default-400 italic">No file required for this step.</p>
+                </div>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>Cancel</Button>
-                <Button color="success" onPress={() => receiptMutation.mutate()}>
-                  Buyer Accept Delivery
+              <ModalFooter className="px-10 pb-10 pt-2 flex items-center justify-between gap-4">
+                <Button 
+                   variant="light" 
+                   onPress={onClose}
+                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40"
+                >
+                   Close
+                </Button>
+                <Button 
+                   color="success" 
+                   variant="shadow"
+                   onPress={() => receiptMutation.mutate()}
+                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] text-white bg-gradient-to-r from-success to-success-600 shadow-[0_0_30px_rgba(34,197,94,0.2)]"
+                >
+                   Accept Sequence
                 </Button>
               </ModalFooter>
             </>

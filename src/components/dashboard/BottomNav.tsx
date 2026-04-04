@@ -56,23 +56,30 @@ const BottomNav = () => {
     return (
         <div
             data-bottomnav
-            className="fixed bottom-0 left-0 right-0 z-50 bg-content1 border-t border-default-200 px-4 pt-2 md:hidden"
-            style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+            className="fixed bottom-3 left-4 right-4 z-[100] h-16 bg-white/80 dark:bg-[#0B0F14]/80 backdrop-blur-2xl border border-default-200 dark:border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] md:hidden overflow-hidden"
+            style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
-            <div className="flex justify-between items-center max-w-md mx-auto">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent" />
+            <div className="flex justify-between items-center h-full px-4 max-w-lg mx-auto">
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
                     return (
                         <Link
                             key={item.name}
                             href={item.link}
-                            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${isActive ? "text-warning-500" : "text-default-500 hover:text-foreground"
-                                }`}
+                            className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 ${
+                                isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400 group-hover:text-foreground"
+                            }`}
                         >
-                            <div className={`transition-transform duration-200 ${isActive ? "scale-110" : ""}`}>
-                                {item.icon}
+                            {isActive && (
+                                <div className="absolute -top-[1px] w-8 h-[2px] bg-warning-500 rounded-full shadow-[0_2px_10px_rgba(245,165,36,0.5)]" />
+                            )}
+                            <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
+                                {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
                             </div>
-                            <span className="text-[10px] font-medium">{item.name}</span>
+                            <span className={`text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${isActive ? "opacity-100 -translate-y-0.5" : "opacity-0 translate-y-1 h-0"}`}>
+                                {item.name.slice(0, 8)}
+                            </span>
                         </Link>
                     );
                 })}

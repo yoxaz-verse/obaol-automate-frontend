@@ -464,17 +464,31 @@ const LoginComponent = ({ role }: ILoginProps) => {
         </motion.div>
 
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && (
-          <div className="mt-4 flex flex-col items-center gap-3">
-            <div className="relative flex items-center w-full">
-              <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
-              <span className="flex-shrink-0 mx-4 text-foreground/40 text-[10px] uppercase tracking-widest font-bold">Or</span>
-              <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+          <div className="mt-8 flex flex-col items-center gap-5">
+            <div className="relative flex items-center w-full px-4">
+              <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
+              <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Protocol Sync</span>
+              <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
             </div>
-            {googleClientId ? (
-              <div id={`google-login-${roleLower}`} className="w-full" />
-            ) : (
-              <p className="text-xs text-warning-500">Google login is not configured.</p>
-            )}
+
+            <div className="w-full flex flex-col gap-4">
+              <div className="p-1 px-1.5 rounded-[2rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-inner group/google">
+                <div className="flex items-center justify-center p-3 gap-3 border-b border-default-100/50 mb-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Secured Identity Link</span>
+                </div>
+                {googleClientId ? (
+                  <div className="p-1.5 overflow-hidden transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.1)]">
+                    <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[1.02]" />
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google Engine Offline</p>
+                )}
+              </div>
+              <p className="text-[9px] font-bold text-center text-foreground/30 uppercase tracking-[0.15em] px-4 leading-relaxed">
+                Connect via Google for instant biometric-grade authentication across the OBAOL trade network.
+              </p>
+            </div>
           </div>
         )}
 

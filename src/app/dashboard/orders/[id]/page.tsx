@@ -2040,7 +2040,13 @@ export default function OrderDetailsPage() {
                                 </div>
                             </div>
                         ) : (
-                            <DocumentTemplatePreview docType={String(docViewerDoc?.type || "")} actionType="CREATE" />
+                            <DocumentTemplatePreview
+                                docType={String(docViewerDoc?.type || "")}
+                                actionType="CREATE"
+                                doc={docViewerDoc}
+                                enquiry={linkedEnquiry}
+                                order={order}
+                            />
                         )}
                     </ModalBody>
                     <ModalFooter>

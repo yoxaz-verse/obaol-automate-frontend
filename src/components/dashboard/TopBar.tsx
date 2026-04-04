@@ -148,324 +148,202 @@ const TopBar = ({ username, role }: TopbarProps) => {
   return (
     <div
       data-topbar
-      className="relative z-50 flex text-foreground justify-between items-center px-4 py-2 my-2 mx-2 md:px-7 md:py-3 md:my-3 md:mx-4 rounded-[1.5rem] border border-white/10 dark:border-white/5 bg-gradient-to-br from-[#0B0F14]/95 via-[#1A1F26]/90 to-[#0B0F14]/95 backdrop-blur-[40px] shadow-[0_10px_40px_rgba(0,0,0,0.4)] transition-all duration-500 overflow-hidden"
+      className="relative z-50 flex text-foreground justify-between items-center px-6 py-3 my-2 mx-2 md:mx-4 rounded-2xl border border-default-200/50 bg-white/70 dark:bg-[#0B0F14]/80 backdrop-blur-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 overflow-visible"
     >
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      {/* Left Section: Navigation & Identity */}
-      <div className="flex gap-1 md:gap-4 items-center min-w-0">
-        {/* Side Drawer - Mobile only */}
-        <div className="md:hidden">
-          <button
-            aria-label="Open Menu"
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="flex items-center justify-center w-9 h-9 rounded-xl text-default-600 hover:bg-default-100 active:scale-95 transition-all"
-          >
-            <CiMenuBurger size={20} />
-          </button>
+      {/* Structural Accents */}
+      <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent opacity-40 dark:opacity-50" />
+      <div className="absolute -bottom-[1px] left-12 right-12 h-[1px] bg-gradient-to-r from-transparent via-default-200/50 dark:via-white/5 to-transparent" />
 
-          {mounted && createPortal(
-            <AnimatePresence>
-              {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-[999999]">
-                  {/* Frosted Backdrop */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="absolute inset-0 bg-black/55 backdrop-blur-[6px] z-[0]"
-                  />
+      {/* Left Section: Mission Telemetry & Identity */}
+      <div className="flex items-center gap-6 divide-x divide-default-200/60 dark:divide-white/5">
+        <div className="flex gap-1 md:gap-4 items-center">
+          {/* Side Drawer - Mobile only */}
+          <div className="md:hidden">
+            <button
+              aria-label="Open Menu"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-warning-500/10 hover:text-warning-500 transition-all active:scale-95"
+            >
+              <CiMenuBurger size={20} className="group-hover:rotate-180 transition-transform duration-500" />
+            </button>
 
-                  {/* Side Sheet */}
-                  <motion.div
-                    initial={{ x: "-100%" }}
-                    animate={{ x: 0 }}
-                    exit={{ x: "-100%" }}
-                    transition={{ type: "spring", damping: 32, stiffness: 320, mass: 0.7 }}
-                    className="absolute top-0 left-0 bottom-0 w-[290px] max-w-[88vw] flex flex-col z-[1] bg-white dark:bg-[#0d0d0d] shadow-[4px_0_48px_rgba(0,0,0,0.3)]"
-                  >
-                    {/* ── Drawer Header ── */}
-                    <div className="relative flex-shrink-0 px-5 pt-10 pb-4 overflow-hidden">
-                      {/* Warm ambient glow */}
-                      <div className="absolute -top-8 -left-8 w-48 h-48 bg-warning-500/10 rounded-full blur-3xl pointer-events-none" />
-                      <div className="absolute bottom-0 left-5 right-5 h-px bg-gradient-to-r from-transparent via-default-200 dark:via-white/8 to-transparent" />
-
-                      {/* Logo + Brand */}
-                      <div className="flex items-center justify-between">
+            {mounted && createPortal(
+              <AnimatePresence>
+                {isMobileMenuOpen && (
+                  <div className="fixed inset-0 z-[999999]">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md"
+                    />
+                    <motion.div
+                      initial={{ x: "-100%" }}
+                      animate={{ x: 0 }}
+                      exit={{ x: "-100%" }}
+                      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                      className="absolute top-0 left-0 bottom-0 w-[300px] bg-background border-r border-default-200 flex flex-col"
+                    >
+                      {/* Drawer content */}
+                      <div className="p-8 border-b border-default-100 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <div className="absolute inset-0 rounded-xl bg-warning-400/30 blur-md" />
-                            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-warning-400/20 to-warning-600/10 border border-warning-400/25 flex items-center justify-center">
-                              <Image src="/logo.png" width={22} height={22} alt="Obaol" className="object-contain" />
-                            </div>
-                          </div>
+                          <Image src="/logo.png" width={28} height={28} alt="Logo" />
                           <div>
-                            <p className="font-black text-[13px] tracking-[0.3em] text-foreground uppercase leading-none">OBAOL</p>
-                            <p className="text-[9px] font-black text-warning-500 uppercase tracking-[0.25em] leading-none mt-1.5">SUPREME</p>
+                            <p className="font-black text-xs tracking-widest uppercase">OBAOL</p>
+                            <p className="text-[9px] font-bold text-warning-500 uppercase tracking-widest">Supreme</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-default-400 hover:text-foreground hover:bg-default-100 dark:hover:bg-white/8 transition-all active:scale-90"
-                        >
-                          <FiX size={15} />
+                        <button onClick={() => setIsMobileMenuOpen(false)} className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center">
+                          <FiX size={14} />
                         </button>
                       </div>
-                    </div>
-
-                    {/* ── Nav Items ── */}
-                    <div className="flex-1 overflow-y-auto scrollbar-hide px-3 py-3">
-                      <div className="flex flex-col gap-5">
-                        {mobileSections.map((section, si) => {
-                          const sectionItems = section.links
-                            .map((link) => optionMap.get(link))
-                            .filter(Boolean) as typeof filteredOptions;
-                          if (sectionItems.length === 0) return null;
-                          return (
-                            <div key={section.label || si}>
-                              {section.label && (
-                                <div className="flex items-center gap-2 px-2 mb-2">
-                                  <span className="text-[8px] font-black uppercase tracking-[0.32em] text-default-400">{section.label}</span>
-                                  <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200/80 dark:from-white/8 to-transparent" />
-                                </div>
-                              )}
-                              <div className="space-y-0.5">
-                                {sectionItems.map((option) => {
-                                  const isDashboard = option.link === "/dashboard";
-                                  const isActive = isDashboard
-                                    ? pathname === "/dashboard"
-                                    : pathname === option.link || pathname.startsWith(`${option.link}/`);
-                                  return (
-                                    <button
-                                      key={option.name}
-                                      onClick={() => {
-                                        play("nav");
-                                        setIsMobileMenuOpen(false);
-                                        setTimeout(() => router.push(option.link), 50);
-                                      }}
-                                      className={`relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-150 text-left group ${isActive
-                                        ? "bg-warning-500/8 dark:bg-warning-500/6"
-                                        : "hover:bg-default-100/60 dark:hover:bg-white/4 active:bg-default-100 dark:active:bg-white/8"
-                                        }`}
-                                    >
-                                      {isActive && (
-                                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-warning-500 rounded-r-full" />
-                                      )}
-                                      <span className={`w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-[17px] transition-all duration-200 ${isActive
-                                        ? "bg-warning-500/12 text-warning-500"
-                                        : "text-default-400 group-hover:text-warning-500 group-hover:bg-warning-500/8"
-                                        }`}>
-                                        {option.icon}
-                                      </span>
-                                      <span className={`text-[13px] font-semibold tracking-[-0.01em] transition-colors flex-1 ${isActive
-                                        ? "text-warning-600 dark:text-warning-400"
-                                        : "text-foreground/75 dark:text-default-300 group-hover:text-foreground"
-                                        }`}>
-                                        {option.name}
-                                      </span>
-                                      {isActive && (
-                                        <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-warning-500" />
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
+                      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                        {mobileSections.map((sec) => (
+                           <div key={sec.label}>
+                             <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-3 px-3">{sec.label}</p>
+                             <div className="space-y-1">
+                               {sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
+                                 <button
+                                   key={opt.name}
+                                   onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
+                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:bg-default-50"}`}
+                                 >
+                                   <span className="text-lg">{opt.icon}</span>
+                                   <span className="text-sm">{opt.name}</span>
+                                 </button>
+                               ))}
+                             </div>
+                           </div>
+                        ))}
                       </div>
-                    </div>
-
-
-
-                    {/* ── Currency Selector (Mobile) ── */}
-                    <div className="flex-shrink-0 px-4 py-3 border-t border-default-100 dark:border-white/5 flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Currency</span>
-                      <CurrencySelector isMobile={true} />
-                    </div>
-
-                    {/* ── Drawer Footer — User Identity ── */}
-                    <div className="flex-shrink-0 px-4 py-4 border-t border-default-100 dark:border-white/5">
-                      <div className="flex items-center gap-3 px-1">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-400 to-warning-600 flex items-center justify-center text-white text-[10px] font-black shadow-md flex-shrink-0">
-                          {username?.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-bold text-foreground truncate leading-tight">{username}</p>
-                          <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-default-400 leading-none mt-0.5">{displayRole}</p>
-                        </div>
-                        <span className="flex-shrink-0 px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-wide border bg-warning-500/8 border-warning-400/20 text-warning-600 dark:text-warning-400">
-                          {role}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              )}
-            </AnimatePresence>,
-            document.body
-          )}
-        </div>
-
-        {/* Mobile Brand inline */}
-        <div className="md:hidden flex items-center gap-2">
-          <Image src="/logo.png" width={26} height={26} alt="Obaol" className="object-contain rounded-lg" />
-          <span className="font-black text-[10px] tracking-[0.28em] text-foreground/70 uppercase select-none">SUPREME</span>
-        </div>
-
-        <div className="hidden md:flex flex-col min-w-0 pr-6 border-r border-white/5 h-10 justify-center">
-          <div className="flex items-center gap-2">
-             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-             <h1 className="text-[12px] font-black text-foreground tracking-[0.2em] uppercase select-none leading-none">
-              {displayRole} PROTOCOL
-            </h1>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>,
+              document.body
+            )}
           </div>
-          <p className="text-[9px] text-default-500 font-bold uppercase tracking-[0.3em] leading-none mt-2 opacity-40 italic">
-            {new Date().getHours() < 12
-              ? "MORNING SYNC ACTIVE"
-              : new Date().getHours() < 18
-                ? "AFTERNOON OPS ACTIVE"
-                : "EVENING SURVEILLANCE ACTIVE"}
-          </p>
+
+          {/* Desktop Identity */}
+          <div className="hidden md:flex flex-col gap-1 pr-6 border-r border-default-200/60 dark:border-white/10">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+              <span className="text-[10px] font-black text-foreground tracking-[0.2em] uppercase">{username?.split('@')[0]}</span>
+            </div>
+            <div className="flex items-center gap-2">
+               <span className="text-[8px] font-black text-warning-500/80 dark:text-warning-500/60 uppercase tracking-[0.15em]">{displayRole} CORE ONLINE</span>
+            </div>
+          </div>
         </div>
-        
-        {/* Mission Clock (Desktop only) */}
-        <div className="hidden lg:flex items-center gap-4 px-4 h-10 border-r border-white/5">
-           <div className="flex flex-col items-center">
-              <span className="text-[11px] font-black text-foreground tracking-[0.15em] tabular-nums">
-                {mounted ? (currentTime || new Date().toLocaleTimeString("en-GB", { hour12: false })) : "--:--:--"}
+
+        {/* Telemetry Group: Global Synchronization */}
+        <div className="hidden lg:flex items-center gap-10 pl-6 h-12">
+           <div className="flex flex-col border-l-2 border-warning-500/10 pl-6 h-full justify-center">
+              <span className="text-[12px] font-black text-foreground tracking-[0.12em] tabular-nums flex items-center gap-2">
+                <span className="w-1 h-3 bg-warning-500/30 dark:bg-warning-500/40 rounded-full" />
+                {mounted ? (currentTime || "--:--:--") : "--:--:--"}
               </span>
-              <span className="text-[8px] font-black text-warning-500/50 uppercase tracking-[0.3em] mt-1 italic">MISSION TIME</span>
+              <span className="text-[8px] font-black text-warning-500/50 uppercase tracking-[0.3em] mt-1">Local Terminal</span>
+           </div>
+           
+           <div className="flex flex-col border-l border-default-200/60 dark:border-white/5 pl-8 h-full justify-center">
+              <span className="text-[11px] font-bold text-foreground/40 dark:text-white/30 tracking-[0.12em] tabular-nums flex items-center gap-2">
+                {mounted ? (new Date().toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })) : "--:--:--"}
+              </span>
+              <span className="text-[8px] font-black text-default-400/50 uppercase tracking-[0.3em] mt-1 italic">UTC Control</span>
            </div>
         </div>
       </div>
 
-      {/* Right Section: Utilities & User Profile */}
-      <div className="flex items-center gap-1.5 md:gap-3">
-        {/* Currency - hide on very small screens, show on sm+ */}
-        <div className="hidden sm:block">
+      {/* Right Section: Command Bar */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center bg-default-100/50 dark:bg-black/20 border border-default-200/50 dark:border-white/5 rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
           <CurrencySelector />
-        </div>
-
-        {/* Notification bell */}
-        <div className="relative" ref={notificationRef}>
-          <button
-            aria-label="Notifications"
-            onClick={() => setIsNotificationOpen((prev) => !prev)}
-            className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 ${unreadCount > 0
-              ? "bg-warning-500/15 text-warning-600 shadow-[0_0_12px_rgba(234,179,8,0.4)]"
-              : "text-default-500 hover:bg-default-100 dark:hover:bg-white/5"
+          <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
+          
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-500 ${
+                unreadCount > 0 ? "bg-warning-500/15 text-warning-600" : "text-default-500 hover:bg-white/5 hover:text-foreground"
               }`}
-          >
-            <FiBell size={18} className={unreadCount > 0 ? "scale-110" : ""} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-danger-500 rounded-full flex items-center justify-center text-white text-[8px] font-black border-2 border-white dark:border-black">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </button>
-          <AnimatePresence>
-            {isNotificationOpen && (
-              <div className="fixed right-3 md:right-8 top-[68px] md:top-[92px] z-[100000]">
-                <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
-              </div>
-            )}
-          </AnimatePresence>
+            >
+              <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-danger-500 rounded-full border-2 border-white dark:border-[#0B0F14]" />
+              )}
+            </button>
+            <AnimatePresence>
+              {isNotificationOpen && (
+                <div className="fixed right-6 top-[88px] z-[1000]">
+                  <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Avatar / User dropdown */}
-        <Dropdown
+        {/* Profile Command */}
+        <Dropdown 
           {...({ placement: "bottom-end" } as any)}
-          classNames={{ content: "border border-default-300 dark:border-default-700 bg-content1 shadow-2xl dark:shadow-black" }}
         >
           <DropdownTrigger>
-            <User
-              as="button"
-              avatarProps={{
-                isBordered: true,
-                color: "warning",
-                size: "sm",
-                src: ""
-              }}
-              className="transition-all hover:scale-105 active:scale-95"
-              name={username}
-              description={<span className="text-warning-500 font-bold uppercase tracking-[0.2em] hidden md:block opacity-70">{role}</span>}
-              classNames={{
-                name: "text-[12px] font-black text-foreground uppercase tracking-tight hidden md:block leading-none",
-                description: "text-[9px] mt-1"
-              }}
-            />
+            <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-warning-500/10 to-default-100 border border-warning-500/20 hover:border-warning-500/40 transition-all outline-none">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-warning-500/20 group-hover:scale-105 transition-transform">
+                {username?.slice(0, 1).toUpperCase()}
+              </div>
+              <div className="flex flex-col items-start sr-only sm:not-sr-only">
+                <span className="text-[10px] font-black text-foreground uppercase tracking-wider leading-none mb-1">{username?.split('@')[0]}</span>
+                <span className="text-[8px] font-bold text-warning-600 dark:text-warning-500 uppercase tracking-widest leading-none opacity-80 italic">{displayRole}</span>
+              </div>
+            </button>
           </DropdownTrigger>
-          <DropdownMenu
-            {...({
-              "aria-label": "User Actions",
-              variant: "flat",
-              className: "text-foreground min-w-[290px]",
-              itemClasses: { base: "rounded-lg data-[hover=true]:bg-default-100" },
+          <DropdownMenu 
+            {...({ 
+              "aria-label": "User Actions", 
+              className: "w-64 p-2", 
+              itemClasses: { 
+                base: "rounded-xl py-4 px-4 data-[hover=true]:bg-default-100/80 transition-all",
+                title: "text-sm font-bold text-default-700 dark:text-default-200",
+                description: "text-[10px] text-default-400 font-medium"
+              } 
             } as any)}
           >
-            <DropdownItem key="profile" className="h-14 gap-2 ">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold text-warning-500">{username}</p>
-            </DropdownItem>
-            <DropdownItem
-              key="dashboard"
+            <DropdownItem 
+              key="profile" 
+              startContent={<FiSettings size={16} className="text-warning-500" />} 
               onClick={() => router.push("/dashboard/profile")}
+              textValue="Account Profile"
             >
-              My Profile
+               <span className="text-default-700 dark:text-default-200 font-bold">Account Profile</span>
             </DropdownItem>
-            <DropdownItem key="prefs-header" isReadOnly textValue="Preferences">
-              <div className="flex items-center gap-2 text-default-500 text-xs font-semibold uppercase tracking-wide">
-                <FiSettings size={13} />
-                Preferences
-              </div>
+            <DropdownItem key="lang" isReadOnly closeOnSelect={false} textValue="Language">
+               <div className="flex items-center justify-between">
+                 <span className="text-sm font-bold text-default-700 dark:text-default-200">Translation</span>
+                 <LanguageSwitcher />
+               </div>
             </DropdownItem>
-            <DropdownItem key="prefs-divider" isReadOnly className="p-0 h-auto" textValue="Divider">
-              <Divider />
+            <DropdownItem key="appearance" isReadOnly closeOnSelect={false} textValue="Appearance">
+               <div className="flex items-center justify-between">
+                 <span className="text-sm font-bold text-default-700 dark:text-default-200">Visual Theme</span>
+                 <ThemeSwitcher />
+               </div>
             </DropdownItem>
-            <DropdownItem key="language-control" closeOnSelect={false} textValue="Language control">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-default-600">Language</span>
-                <LanguageSwitcher />
-              </div>
-            </DropdownItem>
-            <DropdownItem key="theme-control" closeOnSelect={false} textValue="Theme control">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-default-600">Theme</span>
-                <ThemeSwitcher />
-              </div>
-            </DropdownItem>
-            <DropdownItem key="sound-control" closeOnSelect={false} textValue="Sound control">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-default-600">Sounds</span>
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg transition-all ${soundEnabled
-                    ? "bg-warning-500/15 text-warning-600"
-                    : "bg-default-100 text-default-400"
-                    }`}
-                >
-                  {soundEnabled ? <FiVolume2 size={13} /> : <FiVolumeX size={13} />}
-                  {soundEnabled ? "On" : "Off"}
-                </button>
-              </div>
-            </DropdownItem>
-            <DropdownItem
-              key="logout"
-              color="danger"
-              onClick={async () => {
-                await logout();
-                router.push("/auth");
-              }}
+            <DropdownItem 
+               key="logout" 
+               color="danger" 
+               className="text-danger-500 mt-2 hover:bg-danger-50 dark:hover:bg-danger-500/10" 
+               onClick={async () => { await logout(); router.push("/auth"); }}
+               textValue="Close Session"
             >
-              Log Out
+               <span className="font-black uppercase tracking-widest text-[11px]">Close Session</span>
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </div>
     </div>
+
   );
 };
 

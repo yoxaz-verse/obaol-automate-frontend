@@ -87,80 +87,85 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       animate={panelMotion.animate}
       exit={panelMotion.exit}
       transition={panelMotion.transition}
-      className="w-[380px] max-w-[calc(100vw-24px)] rounded-2xl border border-default-300 dark:border-default-700 bg-content1 shadow-2xl dark:shadow-black overflow-hidden"
+      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/10 bg-white/95 dark:bg-[#0B0F14]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-default-200/60">
-        <div className="flex items-center gap-2">
-          <FiBell className="text-warning-500" size={16} />
-          <p className="text-sm font-black tracking-wide text-foreground">Notifications</p>
+      <div className="flex items-center justify-between px-6 py-5 border-b border-default-200/50 dark:border-white/5 bg-default-50/50 dark:bg-white/5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[14px] bg-warning-500/10 flex items-center justify-center text-warning-500">
+             <FiBell size={20} className={notifications.filter(n => !n.isRead).length > 0 ? "animate-wiggle" : ""} />
+          </div>
+          <div className="flex flex-col">
+             <p className="text-sm font-black tracking-tight text-[#1F2937] dark:text-white uppercase leading-none">Command Hub</p>
+             <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mt-1">Operational Alerts</p>
+          </div>
         </div>
-        <Button
-          size="sm"
-          variant="light"
-          className="text-xs font-semibold"
-          isDisabled={markAllMutation.isPending || notifications.every((x) => x.isRead)}
-          onPress={() => markAllMutation.mutate()}
+        <button
+          onClick={() => markAllMutation.mutate()}
+          disabled={markAllMutation.isPending || notifications.every((x) => x.isRead)}
+          className="text-[11px] font-black uppercase tracking-wider text-warning-600 dark:text-warning-500 hover:opacity-70 transition-opacity disabled:opacity-30"
         >
-          Mark all read
-        </Button>
+          Finalize All
+        </button>
       </div>
 
-      <div className="max-h-[460px] overflow-y-auto p-2">
+      <div className="max-h-[480px] overflow-y-auto custom-scrollbar p-3">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Spinner size="sm" color="warning" />
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Spinner size="md" color="warning" />
+            <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">Syncing Protocols...</span>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="py-10 text-center">
-            <p className="text-sm font-semibold text-default-500">No notifications yet</p>
+          <div className="py-20 text-center flex flex-col items-center opacity-40">
+             <div className="w-16 h-16 rounded-full border-2 border-dashed border-default-300 flex items-center justify-center mb-4">
+                <FiBell size={24} className="text-default-400" />
+             </div>
+             <p className="text-sm font-black text-default-500 uppercase tracking-widest">Sky clear</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-6 px-1">
             {order.map((bucket) => {
               const items = grouped[bucket] || [];
               if (!items.length) return null;
               return (
-                <div key={bucket} className="space-y-1.5">
-                  <p className="px-2 text-[11px] font-black uppercase tracking-widest text-default-500">{bucket}</p>
+                <div key={bucket} className="space-y-2">
+                  <div className="flex items-center gap-3 px-2 mb-3">
+                     <span className="text-[9px] font-black text-default-400 uppercase tracking-[0.25em] whitespace-nowrap">{bucket}</span>
+                     <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200 dark:from-white/5 to-transparent" />
+                  </div>
                   {items.map((item) => (
                     <button
                       key={item._id}
                       onClick={async () => {
-                        if (!item.isRead) {
-                          await markReadMutation.mutateAsync(item._id);
-                        }
-                        if (item.route) {
-                          router.push(item.route);
-                          onClose?.();
-                        }
+                        if (!item.isRead) await markReadMutation.mutateAsync(item._id);
+                        if (item.route) { router.push(item.route); onClose?.(); }
                       }}
-                      className={`w-full text-left rounded-xl border px-3 py-2.5 transition-all duration-300 ${item.isRead
-                        ? "border-default-200/50 bg-default-100/30 dark:bg-default-50/5 hover:bg-default-200/50 dark:hover:bg-default-100/10"
-                        : "border-warning-500/30 bg-warning-500/5 dark:bg-warning-500/10 hover:bg-warning-500/10 dark:hover:bg-warning-500/20 shadow-[0_0_15px_-5px_rgba(245,158,11,0.1)]"
+                      className={`w-full text-left p-4 rounded-[18px] transition-all duration-500 group relative border ${item.isRead
+                        ? "bg-transparent border-transparent hover:bg-default-100/50 dark:hover:bg-white/5 text-default-500"
+                        : "bg-warning-500/5 dark:bg-warning-500/10 border-warning-500/20 hover:border-warning-500/40 shadow-sm"
                         }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            {item.isRead ? (
-                              <FiCheckCircle size={12} className="text-default-400" />
-                            ) : (
-                              <FiCircle size={12} className="text-warning-500 fill-warning-500" />
-                            )}
-                            <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
-                          </div>
-                          <p className="mt-1 text-xs text-default-600 line-clamp-2">{item.message}</p>
-                          <div className="mt-2 flex items-center gap-2">
-                            <Chip size="sm" variant="flat" className="text-[10px] font-semibold">
-                              {item.type.replaceAll("_", " ")}
-                            </Chip>
-                            <span className="inline-flex items-center gap-1 text-[10px] text-default-500">
-                              <FiClock size={10} />
-                              {dayjs(item.createdAt).fromNow()}
-                            </span>
-                          </div>
+                      <div className="flex gap-4">
+                        <div className={`mt-1 h-2 w-2 rounded-full shrink-0 transition-all duration-500 ${item.isRead ? "bg-default-200" : "bg-warning-500 shadow-[0_0_10px_rgba(245,158,11,0.6)] animate-pulse"}`} />
+                        <div className="flex-1 min-w-0">
+                           <p className={`text-sm font-black leading-snug tracking-tight transition-colors ${item.isRead ? "text-default-600" : "text-[#1F2937] dark:text-white"}`}>
+                              {item.title}
+                           </p>
+                           <p className="mt-1.5 text-xs font-medium text-default-500 line-clamp-2 leading-relaxed italic">
+                              {item.message}
+                           </p>
+                           <div className="mt-4 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-full">
+                                   {item.type.split('_').join(' ')}
+                                </span>
+                                <span className="text-[9px] font-black text-default-400 uppercase tracking-widest tabular-nums flex items-center gap-1">
+                                   <FiClock size={10} className="stroke-[2.5px]" />
+                                   {dayjs(item.createdAt).fromNow()}
+                                </span>
+                              </div>
+                              <FiExternalLink size={14} className="text-default-300 group-hover:text-warning-500 group-hover:translate-x-0.5 transition-all" />
+                           </div>
                         </div>
-                        <FiExternalLink size={14} className="text-default-400 mt-0.5 shrink-0" />
                       </div>
                     </button>
                   ))}
@@ -171,21 +176,19 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
         )}
       </div>
 
-      <div className="flex items-center justify-between px-3 py-2 border-t border-default-200/60">
-        <Button
-          size="sm"
-          variant="light"
-          className="text-xs font-semibold"
-          onPress={() => {
-            router.push("/dashboard/notifications");
-            onClose?.();
-          }}
+      <div className="px-6 py-5 border-t border-default-200/50 dark:border-white/5 flex items-center justify-between bg-default-50/30 dark:bg-black/20">
+        <button
+          onClick={() => { router.push("/dashboard/notifications"); onClose?.(); }}
+          className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-warning-500 transition-colors"
         >
-          View all notifications
-        </Button>
-        <Button size="sm" variant="flat" className="text-xs" onPress={onClose}>
-          Close
-        </Button>
+          Access History Archive
+        </button>
+        <button 
+           onClick={onClose}
+           className="px-4 py-2 rounded-xl bg-default-100 dark:bg-white/10 text-[10px] font-black uppercase tracking-widest text-[#1F2937] dark:text-white hover:bg-default-200 dark:hover:bg-white/20 transition-all"
+        >
+           Close
+        </button>
       </div>
     </motion.div>
   );

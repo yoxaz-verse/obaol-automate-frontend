@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Card, CardBody, CardHeader, Chip, Divider } from "@nextui-org/react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const DOC_LABELS: Record<string, string> = {
   LOI: "Letter of Intent",
@@ -126,11 +127,6 @@ const FALLBACK_FIELDS = [
   { section: "Terms", fields: ["Payment Terms", "Delivery Terms", "Notes"] },
 ];
 
-const sampleLineItems = [
-  { product: "Turmeric", variant: "A‑Grade", qty: "18.00 MT", rate: "₹ 112.50 X mil", amount: "₹ 2,025,000" },
-  { product: "Black Pepper", variant: "Premium", qty: "8.00 MT", rate: "₹ 420.00 X mil", amount: "₹ 3,360,000" },
-];
-
 const templateByType = (docType: string) => {
   const type = String(docType || "").toUpperCase();
   if (["PACKING_LIST"].includes(type)) return "packing";
@@ -144,13 +140,91 @@ const templateByType = (docType: string) => {
 export default function DocumentTemplatePreview({
   docType,
   actionType,
+  enquiry,
+  order,
+  doc,
 }: {
   docType: string;
   actionType?: string;
+  enquiry?: any;
+  order?: any;
+  doc?: any;
 }) {
+  const { convertRate, formatRate } = useCurrency();
   const docLabel = DOC_LABELS[String(docType || "").toUpperCase()] || "Trade Document";
   const templateType = templateByType(docType);
   const fieldMap = useMemo(() => FIELD_MAPS[String(docType || "").toUpperCase()] || FALLBACK_FIELDS, [docType]);
+  const sourceEnquiry = enquiry || order?.enquiry || null;
+  const buyerSnapshot = doc?.buyer || null;
+  const sellerSnapshot = doc?.seller || null;
+  const buyerCompany =
+    buyerSnapshot?.name ||
+    sourceEnquiry?.buyerAssociateId?.associateCompany?.name ||
+    sourceEnquiry?.buyerAssociateCompanyName ||
+    sourceEnquiry?.buyerName ||
+    "—";
+  const sellerCompany =
+    sellerSnapshot?.name ||
+    sourceEnquiry?.sellerAssociateId?.associateCompany?.name ||
+    sourceEnquiry?.sellerAssociateCompanyName ||
+    sourceEnquiry?.sellerName ||
+    "—";
+  const buyerEmail = buyerSnapshot?.email || sourceEnquiry?.buyerAssociateId?.email || "—";
+  const sellerEmail = sellerSnapshot?.email || sourceEnquiry?.sellerAssociateId?.email || "—";
+  const buyerPhone = buyerSnapshot?.phone || sourceEnquiry?.buyerAssociateId?.phone || "—";
+  const sellerPhone = sellerSnapshot?.phone || sourceEnquiry?.sellerAssociateId?.phone || "—";
+  const buyerAddress =
+    buyerSnapshot?.address ||
+    sourceEnquiry?.buyerAssociateId?.associateCompany?.address ||
+    sourceEnquiry?.buyerAddress ||
+    "—";
+  const sellerAddress =
+    sellerSnapshot?.address ||
+    sourceEnquiry?.sellerAssociateId?.associateCompany?.address ||
+    sourceEnquiry?.sellerAddress ||
+    "—";
+  const primaryLineItem = Array.isArray(doc?.lineItems) && doc.lineItems.length > 0 ? doc.lineItems[0] : null;
+  const productName =
+    primaryLineItem?.productName ||
+    sourceEnquiry?.productVariant?.product?.name ||
+    sourceEnquiry?.productVariantName ||
+    sourceEnquiry?.productName ||
+    sourceEnquiry?.product?.name ||
+    "—";
+  const variantName =
+    primaryLineItem?.productVariantName ||
+    sourceEnquiry?.variantName ||
+    sourceEnquiry?.variant?.name ||
+    sourceEnquiry?.productVariant?.name ||
+    "—";
+  const quantityMt = Number(primaryLineItem?.quantityMT || sourceEnquiry?.quantity || 0);
+  const quantityKg = Number(primaryLineItem?.quantityKG || (quantityMt * 1000));
+  const baseRate = Number(primaryLineItem?.ratePerKg || sourceEnquiry?.rate || 0);
+  const adminCommission = Number(sourceEnquiry?.adminCommission || sourceEnquiry?.commission || 0);
+  const mediatorCommission = Number(sourceEnquiry?.mediatorCommission || 0);
+  const commissionRate = Number(primaryLineItem?.commissionPerKg || (adminCommission + mediatorCommission));
+  const lineAmount = Number(primaryLineItem?.amount || (quantityKg && baseRate ? quantityKg * baseRate : 0));
+  const commissionAmount = Number(doc?.totals?.commissionTotal || (quantityKg && commissionRate ? quantityKg * commissionRate : 0));
+  const grandTotal = Number(doc?.totals?.grandTotal || (lineAmount + commissionAmount));
+  const incotermLabel = (() => {
+    const raw = doc?.terms?.incotermCode || sourceEnquiry?.preferredIncoterm || sourceEnquiry?.preferredIncotermId;
+    if (!raw) return "—";
+    if (typeof raw === "object") {
+      const code = raw.code || "";
+      const name = raw.name || "";
+      return [code, name].filter(Boolean).join(" — ") || "—";
+    }
+    return String(raw || "—");
+  })();
+  const paymentLabel = (() => {
+    const raw = doc?.terms?.paymentTerms || sourceEnquiry?.paymentTermId;
+    if (!raw) return "—";
+    if (typeof raw === "object") return raw.label || raw.name || "—";
+    return String(raw || "—");
+  })();
+  const docNumber = doc?.documentNumber || "—";
+  const docDate = doc?.createdAt ? new Date(doc.createdAt).toLocaleDateString() : "—";
+  const docStatus = doc?.status ? String(doc.status).replaceAll("_", " ") : "Draft";
 
   return (
     <div className="space-y-6">
@@ -180,9 +254,9 @@ export default function DocumentTemplatePreview({
                 </div>
               </div>
               <div className="text-right text-xs text-default-500">
-                <div className="font-semibold text-default-700 tracking-tight">DOC‑2026‑001</div>
-                <div>15 Mar 2026</div>
-                <div>Status: Draft</div>
+                <div className="font-semibold text-default-700 tracking-tight">{docNumber}</div>
+                <div>{docDate}</div>
+                <div>Status: {docStatus || "Draft"}</div>
               </div>
             </div>
 
@@ -193,17 +267,17 @@ export default function DocumentTemplatePreview({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Buyer</div>
-                  <div className="font-semibold text-foreground">Evergreen Imports LLC</div>
-                  <div>buyer@evergreen.com</div>
-                  <div>+1 415 555 0199</div>
-                  <div>San Francisco, CA, USA</div>
+                  <div className="font-semibold text-foreground">{buyerCompany}</div>
+                  <div>{buyerEmail}</div>
+                  <div>{buyerPhone}</div>
+                  <div>{buyerAddress}</div>
                 </div>
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Seller</div>
-                  <div className="font-semibold text-foreground">OBAOL Producer Co.</div>
-                  <div>seller@obaol.com</div>
-                  <div>+91 98765 43210</div>
-                  <div>Kochi, India</div>
+                  <div className="font-semibold text-foreground">{sellerCompany}</div>
+                  <div>{sellerEmail}</div>
+                  <div>{sellerPhone}</div>
+                  <div>{sellerAddress}</div>
                 </div>
               </div>
 
@@ -223,15 +297,19 @@ export default function DocumentTemplatePreview({
                       </tr>
                     </thead>
                     <tbody>
-                      {sampleLineItems.map((item, idx) => (
-                        <tr key={idx} className="border-b border-default-200/60">
-                          <td className="py-2">{item.product}</td>
-                          <td className="py-2">{item.variant}</td>
-                          <td className="py-2 text-right">{item.qty}</td>
-                          <td className="py-2 text-right">{item.rate}</td>
-                          <td className="py-2 text-right">{item.amount}</td>
-                        </tr>
-                      ))}
+                      <tr className="border-b border-default-200/60">
+                        <td className="py-2">{productName}</td>
+                        <td className="py-2">{variantName}</td>
+                        <td className="py-2 text-right">
+                          {quantityMt ? `${quantityMt.toFixed(2)} MT` : "—"}
+                        </td>
+                        <td className="py-2 text-right">
+                          {baseRate ? formatRate(baseRate) : "—"}
+                        </td>
+                        <td className="py-2 text-right">
+                          {lineAmount ? convertRate(lineAmount) : "—"}
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -242,15 +320,17 @@ export default function DocumentTemplatePreview({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                 <div className="space-y-1">
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Terms</div>
-                  <div>Payment: 30% advance, 70% before shipment</div>
-                  <div>Delivery: FOB Cochin Port</div>
-                  <div>Notes: Quality inspection before dispatch</div>
+                  <div>Payment: {paymentLabel}</div>
+                  <div>Delivery: {incotermLabel}</div>
+                  <div>Notes: {String(sourceEnquiry?.specifications || sourceEnquiry?.specification || "—")}</div>
                 </div>
                 <div className="space-y-1 text-right">
-                  <div className="flex justify-between gap-6"><span>Subtotal</span><span>₹ 5,385,000</span></div>
-                  <div className="flex justify-between gap-6"><span>Commission</span><span>₹ 120,000</span></div>
-                  <div className="flex justify-between gap-6"><span>Tax</span><span>₹ 0</span></div>
-                  <div className="flex justify-between gap-6 font-semibold"><span>Total</span><span>₹ 5,505,000</span></div>
+                  <div className="flex justify-between gap-6"><span>Subtotal</span><span>{lineAmount ? convertRate(lineAmount) : "—"}</span></div>
+                  {commissionAmount > 0 && (
+                    <div className="flex justify-between gap-6"><span>Commission</span><span>{convertRate(commissionAmount)}</span></div>
+                  )}
+                  <div className="flex justify-between gap-6"><span>Tax</span><span>—</span></div>
+                  <div className="flex justify-between gap-6 font-semibold"><span>Total</span><span>{grandTotal ? convertRate(grandTotal) : "—"}</span></div>
                 </div>
               </div>
             </>

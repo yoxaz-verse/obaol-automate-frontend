@@ -20,7 +20,7 @@ import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3 } from "react-icons/fi";
-import { LuBox, LuTruck } from "react-icons/lu";
+import { LuBox, LuTruck, LuWallet, LuBuilding2 } from "react-icons/lu";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -110,6 +110,11 @@ export const sidebarOptions = [
     link: "/dashboard/company",
   },
   {
+    name: "Company",
+    icon: <LuBuilding2 />,
+    link: "/dashboard/companies",
+  },
+  {
     name: "Hierarchy",
     icon: <MdOutlineAccountTree />,
     link: "/dashboard/operator/hierarchy",
@@ -153,6 +158,11 @@ export const sidebarOptions = [
     name: "Documentation Preview",
     icon: <FiEye />,
     link: "/dashboard/documentation-preview",
+  },
+  {
+    name: "Payment Rules",
+    icon: <LuWallet />,
+    link: "/dashboard/payments",
   },
   {
     name: "Flow Rules",

@@ -28,6 +28,7 @@ import {
   jobRoleRoutes,
   jobTypeRoutes,
   languageRoutes,
+  commissionRuleRoutes,
   paymentTermRoutes,
   productRoutes,
   productVariantRoutes,
@@ -163,6 +164,7 @@ export const apiRoutesByRole: Record<string, string> = {
   enquiryProcessStatus: enquiryProcessStatusRoutes.getAll,
   incoterm: incotermRoutes.getAll,
   paymentTerm: paymentTermRoutes.getAll,
+  commissionRule: commissionRuleRoutes.getAll,
   designation: designationRoutes.getAll,
   companyType: companyTypeRoutes.getAll,
   certification: certificationRoutes.getAll,
@@ -203,7 +205,9 @@ export const initialTableConfig: Record<
     | "link"
     | "dateTime"
     | "password"
-    | "week"; // Define specific types
+    | "week"
+    | "switch"
+    | "paymentMilestones"; // Define specific types
 
     filterType?:
     | "text"
@@ -1774,6 +1778,118 @@ export const initialTableConfig: Record<
       inTable: true,
     },
   ],
+  commissionRule: [
+    {
+      label: "Name",
+      type: "text",
+      key: "name",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Pool %",
+      type: "number",
+      key: "poolPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Closer %",
+      type: "number",
+      key: "closerPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Portfolio %",
+      type: "number",
+      key: "portfolioPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Leadership L1 %",
+      type: "number",
+      key: "leadershipL1Percent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Leadership L2 %",
+      type: "number",
+      key: "leadershipL2Percent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Leadership L3 Pool %",
+      type: "number",
+      key: "leadershipL3PoolPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Leadership L3 Max Each %",
+      type: "number",
+      key: "leadershipL3MaxEachPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Default",
+      type: "switch",
+      key: "isDefault",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Active",
+      type: "switch",
+      key: "isActive",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+    },
+    {
+      label: "Notes",
+      type: "textarea",
+      key: "notes",
+      inForm: true,
+      inEdit: true,
+      inTable: false,
+    },
+    {
+      label: "Created At",
+      type: "dateTime",
+      key: "createdAt",
+      inForm: false,
+      inTable: true,
+    },
+    {
+      label: "Actions",
+      type: "action",
+      key: "actions2",
+      inForm: false,
+      inTable: true,
+    },
+  ],
 
   // Category
   category: [
@@ -2051,15 +2167,6 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
-      label: "Quantity (MT)",
-      type: "number",
-      key: "quantity",
-      inForm: true,
-      inTable: false,
-      inEdit: true,
-      required: false,
-    },
-    {
       label: "Inventory Status",
       type: "text",
       key: "inventoryStatus",
@@ -2080,6 +2187,13 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: true,
       inEdit: true,
+    },
+    {
+      label: "Location",
+      type: "text",
+      key: "location",
+      inForm: false,
+      inTable: true,
     },
     {
       label: "Final Rate",

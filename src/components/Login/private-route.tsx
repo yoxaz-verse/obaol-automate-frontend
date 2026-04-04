@@ -13,27 +13,25 @@ const PrivateRoute = ({
   const { isAuthenticated, loading, user } = useContext(AuthContext);
   const router = useRouter();
 
+  const normalizedAllowedRoles = allowedRoles.map((role) => String(role).toLowerCase());
+  const userRole = String(user?.role || "").toLowerCase();
+  const isAllowed = normalizedAllowedRoles.length === 0 || normalizedAllowedRoles.includes(userRole);
+
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
         router.replace("/auth"); // Redirect if not authenticated
-      } else if (
-        allowedRoles.length > 0 &&
-        !allowedRoles.includes(user?.role || "")
-      ) {
+      } else if (!isAllowed) {
         router.replace("/403"); // Redirect to a "Forbidden" page if the role is unauthorized
       }
     }
-  }, [isAuthenticated, loading, user, allowedRoles, router]);
+  }, [isAuthenticated, loading, isAllowed, router]);
 
   if (loading) {
     return <BrandedLoader fullScreen message="Loading your workspace" />;
   }
 
-  if (
-    !isAuthenticated ||
-    (allowedRoles.length > 0 && !allowedRoles.includes(user?.role || ""))
-  ) {
+  if (!isAuthenticated || !isAllowed) {
     return <BrandedLoader fullScreen message="Redirecting" variant="compact" />;
   }
 

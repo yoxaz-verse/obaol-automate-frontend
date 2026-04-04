@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getData, postData, patchData } from "@/core/api/apiHandler";
+import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { LuWarehouse, LuPencil, LuPlus } from "react-icons/lu";
@@ -16,6 +16,7 @@ import {
     Button, Input, Select, SelectItem, Switch, Textarea
 } from "@heroui/react";
 import AuthContext from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Warehouse {
@@ -25,10 +26,19 @@ interface Warehouse {
     category?: "GENERAL" | "COLD_STORAGE" | "BONDED" | "AGRO";
     allowedCategoryIds?: string[];
     storageRatePerUnit: number;
-    unit: "KG" | "MT";
+    totalCapacity?: number;
     isActive: boolean;
     listingType?: "PRIVATE" | "RENTAL";
     isRentalActive?: boolean;
+    location?: {
+        latitude?: number;
+        longitude?: number;
+        label?: string;
+        district?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+    } | null;
 }
 
 const EMPTY_WAREHOUSE = {
@@ -37,10 +47,11 @@ const EMPTY_WAREHOUSE = {
     category: "GENERAL" as const,
     allowedCategoryIds: [] as string[],
     storageRatePerUnit: 0,
-    unit: "MT" as const,
+    totalCapacity: 0,
     isActive: true,
     listingType: "PRIVATE" as const,
     isRentalActive: false,
+    location: null as Warehouse["location"],
 };
 const EMPTY_MOVEMENT = { warehouseId: "", quantity: 0, note: "" };
 
@@ -81,6 +92,7 @@ function LoadingState({ label }: { label: string }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function WarehousesPage() {
     const queryClient = useQueryClient();
+    const router = useRouter();
     const { user } = useContext(AuthContext);
     const roleLower = String(user?.role || "").toLowerCase();
     const initialTab = roleLower === "admin" ? "my" : "available";
@@ -91,7 +103,6 @@ export default function WarehousesPage() {
     }, [initialTab]);
 
     // Modal states
-    const [showAddWarehouse, setShowAddWarehouse] = useState(false);
     const [showEditWarehouse, setShowEditWarehouse] = useState(false);
     const [showMovementModal, setShowMovementModal] = useState<"inbound" | "outbound" | "adjust" | null>(null);
     const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
@@ -175,17 +186,6 @@ export default function WarehousesPage() {
     const charges = Array.isArray(chargesData) ? chargesData : [];
 
     // ── Mutations ──────────────────────────────────────────────────────────────
-    const createMutation = useMutation({
-        mutationFn: (data: typeof EMPTY_WAREHOUSE) => postData(apiRoutes.warehouses.create, data),
-        onSuccess: () => {
-            showToastMessage({ type: "success", message: "Warehouse created successfully!" });
-            queryClient.invalidateQueries({ queryKey: ["warehouses"] });
-            setShowAddWarehouse(false);
-            setWarehouseForm(EMPTY_WAREHOUSE);
-        },
-        onError: () => showToastMessage({ type: "error", message: "Failed to create warehouse." }),
-    });
-
     const updateMutation = useMutation({
         mutationFn: (data: Partial<Warehouse>) =>
             patchData(apiRoutes.warehouses.update(editingWarehouse!._id), data),
@@ -224,10 +224,11 @@ export default function WarehousesPage() {
             category: wh.category || "GENERAL",
             allowedCategoryIds: Array.isArray(wh.allowedCategoryIds) ? wh.allowedCategoryIds : [],
             storageRatePerUnit: wh.storageRatePerUnit,
-            unit: wh.unit,
+            totalCapacity: wh.totalCapacity || 0,
             isActive: wh.isActive,
             listingType: wh.listingType || "PRIVATE",
             isRentalActive: Boolean(wh.isRentalActive),
+            location: wh.location || null,
         });
         setShowEditWarehouse(true);
     };
@@ -270,7 +271,7 @@ export default function WarehousesPage() {
                         color="warning"
                         size="sm"
                         startContent={<LuPlus size={16} />}
-                        onPress={() => { setWarehouseForm(EMPTY_WAREHOUSE); setShowAddWarehouse(true); }}
+                        onPress={() => router.push("/dashboard/warehouses/location")}
                         className="font-bold shadow-md shadow-warning-500/20"
                     >
                         Add Warehouse
@@ -314,7 +315,7 @@ export default function WarehousesPage() {
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">{wh.unit} · ₹{wh.storageRatePerUnit}/{wh.unit}</p>
+                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -346,7 +347,7 @@ export default function WarehousesPage() {
                                                                     : wh.category === "AGRO" ? "Agro Warehouse"
                                                                         : "General Warehouse"}
                                                         </span>
-                                                        <span className="font-bold text-foreground">₹{wh.storageRatePerUnit} / {wh.unit}</span>
+                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0}</span>
                                                     </div>
                                                     {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 pt-1">
@@ -380,7 +381,7 @@ export default function WarehousesPage() {
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">{wh.unit} · ₹{wh.storageRatePerUnit}/{wh.unit}</p>
+                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0}</p>
                                                         </div>
                                                     </div>
                                                     <Chip size="sm" variant="flat" color="warning" className="text-[9px] font-bold uppercase tracking-wide">Rental</Chip>
@@ -397,7 +398,7 @@ export default function WarehousesPage() {
                                                                     : wh.category === "AGRO" ? "Agro Warehouse"
                                                                         : "General Warehouse"}
                                                         </span>
-                                                        <span className="font-bold text-foreground">₹{wh.storageRatePerUnit} / {wh.unit}</span>
+                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0}</span>
                                                     </div>
                                                     {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 pt-1">
@@ -473,146 +474,6 @@ export default function WarehousesPage() {
                 </Tab>
             </Tabs>
 
-            {/* ─── Add Warehouse Modal ─────────────────────────────────────── */}
-            <Modal isOpen={showAddWarehouse} onClose={() => setShowAddWarehouse(false)} size="md" placement="center">
-                <ModalContent>
-                    <ModalHeader className="font-black text-foreground">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500"><LuWarehouse size={16} /></div>
-                            Add New Warehouse
-                        </div>
-                    </ModalHeader>
-                    <Divider />
-                    <ModalBody className="py-5 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-foreground pl-0.5">Warehouse Name <span className="text-danger-500">*</span></label>
-                            <Input
-                                placeholder="e.g. Chennai Cold Storage"
-                                value={warehouseForm.name}
-                                onValueChange={(v) => setWarehouseForm(f => ({ ...f, name: v }))}
-                                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-foreground pl-0.5">Category <span className="text-danger-500">*</span></label>
-                            <Select
-                                selectedKeys={[warehouseForm.category]}
-                                onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, category: Array.from(keys)[0] as any }))}
-                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
-                            >
-                                <SelectItem key="GENERAL">General warehouse</SelectItem>
-                                <SelectItem key="COLD_STORAGE">Cold storage</SelectItem>
-                                <SelectItem key="BONDED">Bonded warehouse</SelectItem>
-                                <SelectItem key="AGRO">Agro warehouse</SelectItem>
-                            </Select>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
-                            <Select
-                                selectionMode="multiple"
-                                selectedKeys={warehouseForm.allowedCategoryIds}
-                                onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
-                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
-                                placeholder={categories.length ? "Select categories" : "No categories available"}
-                            >
-                                {categories.map((cat: any) => (
-                                    <SelectItem key={cat._id}>{cat.name}</SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
-                            <Select
-                                selectionMode="multiple"
-                                selectedKeys={warehouseForm.allowedCategoryIds}
-                                onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
-                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
-                                placeholder={categories.length ? "Select categories" : "No categories available"}
-                            >
-                                {categories.map((cat: any) => (
-                                    <SelectItem key={cat._id}>{cat.name}</SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-foreground pl-0.5">Address</label>
-                            <Textarea
-                                placeholder="Full warehouse address"
-                                value={warehouseForm.address}
-                                onValueChange={(v) => setWarehouseForm(f => ({ ...f, address: v }))}
-                                minRows={2}
-                                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
-                            />
-                        </div>
-                        <div className="flex gap-3">
-                            <div className="flex flex-col gap-1.5 w-full">
-                                <label className="text-xs font-bold text-foreground pl-0.5">Storage Rate per Unit <span className="text-danger-500">*</span></label>
-                                <Input
-                                    placeholder="0"
-                                    type="number"
-                                    value={String(warehouseForm.storageRatePerUnit)}
-                                    onValueChange={(v) => setWarehouseForm(f => ({ ...f, storageRatePerUnit: Number(v) }))}
-                                    startContent={<span className="text-default-400 text-sm font-semibold">₹</span>}
-                                    classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-1.5 w-full">
-                                <label className="text-xs font-bold text-foreground pl-0.5">Unit</label>
-                                <Select
-                                    selectedKeys={[warehouseForm.unit]}
-                                    onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, unit: Array.from(keys)[0] as "KG" | "MT" }))}
-                                    classNames={{ trigger: "bg-default-100/60 border-default-200" }}
-                                >
-                                    <SelectItem key="MT">MT (Metric Ton)</SelectItem>
-                                    <SelectItem key="KG">KG (Kilogram)</SelectItem>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between px-1">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">List for Rental</p>
-                                <p className="text-xs text-default-400">Allow other associates to use this warehouse</p>
-                            </div>
-                            <Switch
-                                isSelected={warehouseForm.listingType === "RENTAL" && warehouseForm.isRentalActive}
-                                onValueChange={(v) =>
-                                    setWarehouseForm((f) => ({
-                                        ...f,
-                                        listingType: v ? "RENTAL" : "PRIVATE",
-                                        isRentalActive: v,
-                                    }))
-                                }
-                                color="warning"
-                            />
-                        </div>
-                        <div className="flex items-center justify-between px-1">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">Active</p>
-                                <p className="text-xs text-default-400">Enable this warehouse for use</p>
-                            </div>
-                            <Switch
-                                isSelected={warehouseForm.isActive}
-                                onValueChange={(v) => setWarehouseForm(f => ({ ...f, isActive: v }))}
-                                color="warning"
-                            />
-                        </div>
-                    </ModalBody>
-                    <Divider />
-                    <ModalFooter>
-                        <Button variant="light" onPress={() => setShowAddWarehouse(false)}>Cancel</Button>
-                        <Button
-                            color="warning"
-                            isLoading={createMutation.isPending}
-                            isDisabled={!warehouseForm.name.trim()}
-                            onPress={() => createMutation.mutate(warehouseForm)}
-                            className="font-bold"
-                        >
-                            Create Warehouse
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
             {/* ─── Edit Warehouse Modal ────────────────────────────────────── */}
             <Modal isOpen={showEditWarehouse} onClose={() => setShowEditWarehouse(false)} size="md" placement="center">
                 <ModalContent>
@@ -654,28 +515,15 @@ export default function WarehousesPage() {
                                 classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
                             />
                         </div>
-                        <div className="flex gap-3">
-                            <div className="flex flex-col gap-1.5 w-full">
-                                <label className="text-xs font-bold text-foreground pl-0.5">Storage Rate <span className="text-danger-500">*</span></label>
-                                <Input
-                                    type="number"
-                                    value={String(warehouseForm.storageRatePerUnit)}
-                                    onValueChange={(v) => setWarehouseForm(f => ({ ...f, storageRatePerUnit: Number(v) }))}
-                                    startContent={<span className="text-default-400 text-sm font-semibold">₹</span>}
-                                    classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-1.5 w-full">
-                                <label className="text-xs font-bold text-foreground pl-0.5">Unit</label>
-                                <Select
-                                    selectedKeys={[warehouseForm.unit]}
-                                    onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, unit: Array.from(keys)[0] as "KG" | "MT" }))}
-                                    classNames={{ trigger: "bg-default-100/60 border-default-200" }}
-                                >
-                                    <SelectItem key="MT">MT (Metric Ton)</SelectItem>
-                                    <SelectItem key="KG">KG (Kilogram)</SelectItem>
-                                </Select>
-                            </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-foreground pl-0.5">Total Capacity</label>
+                            <Input
+                                placeholder="e.g. 2500"
+                                type="number"
+                                value={String(warehouseForm.totalCapacity ?? 0)}
+                                onValueChange={(v) => setWarehouseForm(f => ({ ...f, totalCapacity: Number(v) }))}
+                                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                            />
                         </div>
                         <div className="flex items-center justify-between px-1">
                             <div>

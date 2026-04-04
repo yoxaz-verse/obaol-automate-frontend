@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -19,6 +20,7 @@ import {
 import AuthContext from "@/context/AuthContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
 
 const INTEREST_OPTIONS = [
@@ -75,8 +77,11 @@ const getCompanyPreviewUrl = (company: any) => {
 
 export default function CompanyWorkspacePage() {
   const { user } = useContext(AuthContext);
+  const router = useRouter();
   const roleLower = String(user?.role || "").toLowerCase();
   const isAssociate = roleLower === "associate";
+  const isAdmin = roleLower === "admin";
+  const canViewObaolConfig = isAdmin;
   const associateCompanyId = String(user?.associateCompanyId || "");
   const queryClient = useQueryClient();
 
@@ -86,6 +91,7 @@ export default function CompanyWorkspacePage() {
   const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
   const [requestedInterests, setRequestedInterests] = useState<string[]>([]);
   const [interestNote, setInterestNote] = useState("");
+  const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [recentInterestSubmission, setRecentInterestSubmission] = useState<{
     requestedInterests: string[];
     createdAt: string;
@@ -138,6 +144,48 @@ export default function CompanyWorkspacePage() {
       return response?.data?.data || null;
     },
     enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
+  const obaolConfigQuery = useQuery({
+    queryKey: ["system-config-obaol-company"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.systemConfig.obaolCompany);
+      return response?.data?.data || null;
+    },
+    enabled: canViewObaolConfig,
+  });
+
+  const obaolCompanyDirectoryQuery = useQuery({
+    queryKey: ["system-config-obaol-company-directory"],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 500,
+        sort: "name:asc",
+      }),
+    enabled: canViewObaolConfig,
+  });
+
+  const obaolConfigMutation = useMutation({
+    mutationFn: async (companyId: string) => {
+      const response = await postData(apiRoutes.systemConfig.obaolCompany, { companyId });
+      return response?.data?.data || null;
+    },
+    onSuccess: (data: any) => {
+      showToastMessage({
+        type: "success",
+        message: data?.company?.name ? `OBAOL company set to ${data.company.name}.` : "OBAOL company updated.",
+        position: "top-right",
+      });
+      queryClient.invalidateQueries({ queryKey: ["system-config-obaol-company"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Failed to update OBAOL company configuration.",
+        position: "top-right",
+      });
+    },
   });
 
   const reportMutation = useMutation({
@@ -218,6 +266,13 @@ export default function CompanyWorkspacePage() {
   const isWebsiteLive = Boolean((company as any)?.isWebsiteLive);
   const members = useMemo(() => (Array.isArray(membersQuery.data) ? membersQuery.data : []), [membersQuery.data]);
   const reports = useMemo(() => (Array.isArray(reportsQuery.data) ? reportsQuery.data : []), [reportsQuery.data]);
+  const obaolConfig = obaolConfigQuery.data;
+  const obaolCompanyId = String(obaolConfig?.companyId || "");
+  const obaolCompany = obaolConfig?.company || null;
+  const obaolCompanies = useMemo(
+    () => extractList(obaolCompanyDirectoryQuery.data),
+    [obaolCompanyDirectoryQuery.data]
+  );
   const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
     ? interestsQuery.data.companyInterests.map((value: any) => String(value || "").toUpperCase())
     : [];
@@ -270,6 +325,17 @@ export default function CompanyWorkspacePage() {
     return () => clearTimeout(timer);
   }, [recentInterestSubmission]);
 
+  useEffect(() => {
+    if (!canViewObaolConfig) return;
+    if (!obaolCompanyId) return;
+    setSelectedObaolCompanyId((current) => current || obaolCompanyId);
+  }, [canViewObaolConfig, obaolCompanyId]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    router.replace("/dashboard/companies");
+  }, [isAdmin, router]);
+
   const pendingBannerRequestedInterests = useMemo(() => {
     if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedInterests)) {
       return latestPendingLikeReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase());
@@ -285,7 +351,17 @@ export default function CompanyWorkspacePage() {
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
 
-  if (!isAssociate) {
+  if (isAdmin) {
+    return (
+      <div className="w-full p-6">
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAssociate && !canViewObaolConfig) {
     return (
       <div className="w-full p-6">
         <div className="rounded-xl border border-default-200 bg-content1 p-6 text-default-700">
@@ -295,7 +371,7 @@ export default function CompanyWorkspacePage() {
     );
   }
 
-  if (!associateCompanyId) {
+  if (isAssociate && !associateCompanyId && !canViewObaolConfig) {
     return (
       <div className="w-full p-6">
         <div className="rounded-xl border border-default-200 bg-content1 p-6 text-default-700">
@@ -307,6 +383,59 @@ export default function CompanyWorkspacePage() {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-6">
+      {canViewObaolConfig && (
+        <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+          <div className="mb-4 flex flex-col gap-2">
+            <h2 className="text-xl font-semibold text-foreground">OBAOL Company Configuration</h2>
+            <p className="text-sm text-default-600">
+              Select the system company used for Seller ↔ OBAOL and OBAOL ↔ Buyer document generation.
+            </p>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Chip size="sm" color={obaolCompanyId ? "success" : "warning"} variant="flat">
+              {obaolCompanyId ? "Configured" : "Missing"}
+            </Chip>
+            {obaolCompany?.name && (
+              <span className="text-sm text-default-600">
+                Current: <span className="font-medium text-foreground">{obaolCompany.name}</span>
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(240px,1fr)_auto] md:items-end">
+            <Select
+              label="OBAOL Company"
+              labelPlacement="outside"
+              placeholder="Select the OBAOL company"
+              isLoading={obaolCompanyDirectoryQuery.isLoading}
+              selectedKeys={selectedObaolCompanyId ? new Set([selectedObaolCompanyId]) : new Set()}
+              onSelectionChange={(keys) => {
+                const nextValue = Array.from(keys as Set<string>)[0] || "";
+                setSelectedObaolCompanyId(nextValue);
+              }}
+            >
+              {obaolCompanies.map((companyItem: any) => (
+                <SelectItem key={companyItem?._id || companyItem?.id} value={companyItem?._id || companyItem?.id}>
+                  {companyItem?.name || "Unnamed Company"}
+                </SelectItem>
+              ))}
+            </Select>
+            <Button
+              color="primary"
+              isLoading={obaolConfigMutation.isPending}
+              isDisabled={!selectedObaolCompanyId}
+              onPress={() => obaolConfigMutation.mutate(selectedObaolCompanyId)}
+            >
+              Save OBAOL Company
+            </Button>
+          </div>
+          <div className="mt-4 text-xs text-default-500">
+            This configuration is required to draft quotations, proforma invoices, and purchase orders without errors.
+          </div>
+        </div>
+      )}
+
+      {isAssociate && (
+        <>
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
         {companyQuery.isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -696,6 +825,8 @@ export default function CompanyWorkspacePage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+        </>
+      )}
     </div>
   );
 }

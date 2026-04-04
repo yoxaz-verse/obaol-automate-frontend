@@ -176,6 +176,7 @@ export default function EnquiryDetailsPage() {
     const [revisionConfirmError, setRevisionConfirmError] = useState("");
     const [revisionReplies, setRevisionReplies] = useState<Array<{ key: string; acknowledged: boolean; counterRate?: string }>>([]);
     const [pendingActionKey, setPendingActionKey] = useState<string>("");
+    const [draftQuotationError, setDraftQuotationError] = useState<string>("");
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
         tradeType: "DOMESTIC",
         originCountry: "",
@@ -263,7 +264,7 @@ export default function EnquiryDetailsPage() {
         (enquiry as any)?.productVariant?._id ||
         (enquiry as any)?.productVariant ||
         null;
-    const { data: sellerInventoryResponse } = useQuery({
+    const { data: sellerInventoryResponse, isLoading: isSellerInventoryLoading } = useQuery({
         queryKey: ["seller-inventories", sellerCompanyId, productVariantId],
         queryFn: () =>
             getData(inventoryRoutes.getAll, {
@@ -273,7 +274,7 @@ export default function EnquiryDetailsPage() {
             }),
         enabled: Boolean(sellerCompanyId && productVariantId),
     });
-    const { data: sellerReservationResponse } = useQuery({
+    const { data: sellerReservationResponse, isLoading: isSellerReservationLoading } = useQuery({
         queryKey: ["seller-reservations", sellerCompanyId, productVariantId],
         queryFn: () =>
             getData(inventoryReservationRoutes.getAll, {
@@ -788,21 +789,49 @@ export default function EnquiryDetailsPage() {
 
     const createQuotationMutation = useMutation({
         mutationFn: async () => {
-            const res = await postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
-            return res;
+            const request = postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
+            const timeout = new Promise((_, reject) => {
+                const timer = setTimeout(() => {
+                    clearTimeout(timer);
+                    reject(new Error("Draft Quotation timed out. Please check server logs or OBAOL config."));
+                }, 15000);
+            });
+            return (await Promise.race([request, timeout])) as any;
         },
         onSuccess: (res: any) => {
             toast.success("Quotation created.");
+            setDraftQuotationError("");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
                 openDocViewer(createdDoc);
                 return;
             }
-            toast.info("Quotation drafted.");
+            (async () => {
+                try {
+                    const refresh = await getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 5, enquiryId: id, type: "QUOTATION" });
+                    const rows = Array.isArray(refresh?.data?.data?.data)
+                        ? refresh.data.data.data
+                        : Array.isArray(refresh?.data?.data)
+                            ? refresh.data.data
+                            : Array.isArray(refresh?.data)
+                                ? refresh.data
+                                : [];
+                    if (rows?.[0]) {
+                        openDocViewer(rows[0]);
+                        return;
+                    }
+                } catch {
+                    // ignore fallback failure
+                }
+                toast.info("Quotation drafted.");
+            })();
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || error?.message || "Failed to create quotation.");
+            const details = error?.response?.data?.message || error?.message || "Failed to create quotation.";
+            toast.error(details);
+            setDraftQuotationError(details);
         },
     });
     const submitQuotationMutation = useMutation({
@@ -1257,6 +1286,7 @@ export default function EnquiryDetailsPage() {
     const sellerReservationRows = Array.isArray(sellerReservationResponse?.data?.data?.data)
         ? sellerReservationResponse?.data?.data?.data
         : (sellerReservationResponse?.data?.data || []);
+    const isInventoryLoading = isSellerInventoryLoading || isSellerReservationLoading;
     const reservedByInventory = new Map<string, number>();
     for (const reservation of sellerReservationRows || []) {
         const invId = reservation.inventoryId?._id || reservation.inventoryId;
@@ -1297,13 +1327,14 @@ export default function EnquiryDetailsPage() {
 
     useEffect(() => {
         if (!inventoryAcceptOpen) return;
+        if (isInventoryLoading) return;
         if (inventoryOptions.length === 0) {
             setIsAddingNewInventory(true);
             if (!inlineQuantity) {
                 setInlineQuantity(String(requiredQty || ""));
             }
         }
-    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity]);
+    }, [inventoryAcceptOpen, inventoryOptions.length, requiredQty, inlineQuantity, isInventoryLoading]);
 
     useEffect(() => {
         if (!inventoryAcceptOpen) return;
@@ -1510,10 +1541,13 @@ export default function EnquiryDetailsPage() {
             if (normalizedStageKey === "PROFORMA_ISSUED" && normalized === "PROFORMA_CREATED") return false;
             return true;
         });
-        if (isConvertedFlow) {
-            return noProformaAction.filter((key: string) => String(key || "").toUpperCase() !== "CONVERT_TO_ORDER");
+        const baseActions = isConvertedFlow
+            ? noProformaAction.filter((key: string) => String(key || "").toUpperCase() !== "CONVERT_TO_ORDER")
+            : noProformaAction;
+        if (normalizedStageKey === "PROFORMA_ISSUED" && canCreateProformaDoc) {
+            return baseActions.includes("PROFORMA_CREATED") ? baseActions : [...baseActions, "PROFORMA_CREATED"];
         }
-        return noProformaAction;
+        return baseActions;
     })();
     const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
     const formatActionByLabel = (value: string) => {
@@ -1534,13 +1568,18 @@ export default function EnquiryDetailsPage() {
         return true;
     })();
     const canPerformAction = isSystemAdmin || isAssignedOperator || canActByRole;
+    const isActionLoading = (actionKey: string) => {
+        if (applyActionMutation.isPending && pendingActionKey === actionKey) return true;
+        if (actionKey === "QUOTATION_CREATED" && createQuotationMutation.isPending) return true;
+        return false;
+    };
     const actionLabels: Record<string, string> = {
         LOI_SUBMITTED: "Submit LOI",
         SUPPLIER_QTY_CONFIRMED: "Confirm Quantity",
         REVISION_REQUESTED: "Request Revision",
         REVISION_CONFIRMED: "Confirm Revision",
         REVISION_SKIPPED: "Skip Revision",
-        QUOTATION_CREATED: "Draft Proposal",
+        QUOTATION_CREATED: "Draft Quotation",
         QUOTATION_ACCEPTED: "Accept Quotation",
         RETURN_TO_REVISION: "Return to Revision",
         RESPONSIBILITIES_FINALIZED: "Finalize Responsibilities",
@@ -1570,6 +1609,7 @@ export default function EnquiryDetailsPage() {
             return;
         }
         if (actionKey === "QUOTATION_CREATED") {
+            setDraftQuotationError("");
             if (quotationId && quotationDoc) {
                 if (quotationStatus !== "DRAFT") {
                     setPendingActionKey("QUOTATION_CREATED");
@@ -1647,7 +1687,7 @@ export default function EnquiryDetailsPage() {
         createdAt: (enquiry as any)?.loiSubmittedAt,
         fileUrl: null,
         documentNumber: "LOI-AUTO",
-        audienceScope: "SELLER_OBAOL",
+        audienceScope: "OBAOL_BUYER",
     }] : [];
     const combinedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs];
     const uniqueDocsByType = Object.values(
@@ -1709,8 +1749,13 @@ export default function EnquiryDetailsPage() {
     const getAudienceLabel = (scope: any) => {
         const normalized = String(scope || "").toUpperCase();
         if (normalized === "SELLER_OBAOL") return "Seller ↔ OBAOL";
-        if (normalized === "OBAOL_BUYER") return "OBAOL ↔ Buyer";
+        if (normalized === "OBAOL_BUYER" || normalized === "BUYER_OBAOL") return "Buyer ↔ OBAOL";
         return "";
+    };
+    const getDocAudienceLabel = (doc: any) => {
+        const typeKey = String(doc?.type || "").toUpperCase();
+        if (typeKey === "LOI" || typeKey === "LETTER_OF_INTENT") return "Buyer ↔ OBAOL";
+        return getAudienceLabel(doc?.audienceScope);
     };
     const sortedEnquiryStages = enquiryRules
         .filter((r: any) => r?.isActive !== false)
@@ -1741,9 +1786,45 @@ export default function EnquiryDetailsPage() {
         stageLabelMap.set("QUOTATION_REVISION", "Pre Clarification");
     }
     const canBuyerActions = isBuyer || isSystemAdmin;
-    const revisionItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
-    const revisionBuyerRequestedAt = (enquiry as any)?.revisionThread?.buyerRequestedAt || null;
-    const revisionBuyerConfirmedAt = (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
+    const revisionRounds = Array.isArray((enquiry as any)?.revisionRounds) ? (enquiry as any).revisionRounds : [];
+    const legacyRevisionItems = Array.isArray((enquiry as any)?.revisionThread?.items) ? (enquiry as any).revisionThread.items : [];
+    const derivedRevisionRounds = revisionRounds.length
+        ? revisionRounds
+        : legacyRevisionItems.length
+            ? [{
+                roundId: "legacy",
+                status: (enquiry as any)?.revisionThread?.buyerConfirmedAt ? "CONFIRMED" : "OPEN",
+                items: legacyRevisionItems,
+                buyerRequestedAt: (enquiry as any)?.revisionThread?.buyerRequestedAt || null,
+                buyerConfirmedAt: (enquiry as any)?.revisionThread?.buyerConfirmedAt || null,
+                closedAt: (enquiry as any)?.revisionThread?.buyerConfirmedAt || null,
+            }]
+            : [];
+    const openRevisionRound = [...derivedRevisionRounds].reverse().find((round: any) => String(round?.status || "").toUpperCase() === "OPEN");
+    const activeRevisionRound = openRevisionRound || derivedRevisionRounds[derivedRevisionRounds.length - 1];
+    const revisionItems = Array.isArray(activeRevisionRound?.items) ? activeRevisionRound.items : [];
+    const revisionBuyerRequestedAt = activeRevisionRound?.buyerRequestedAt || (enquiry as any)?.revisionThread?.buyerRequestedAt || null;
+    const revisionBuyerConfirmedAt = activeRevisionRound?.buyerConfirmedAt || (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
+    const revisionAcknowledgedItems = revisionItems.filter((item: any) => {
+        const acknowledged = Boolean(item?.supplierAcknowledged);
+        const hasCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
+        return acknowledged || hasCounter;
+    });
+    const revisionAcknowledgedLabels = revisionAcknowledgedItems.map((item: any) => {
+        const rawKey = String(item?.key || "").toUpperCase();
+        const label =
+            rawKey === "RATE"
+                ? "Rate"
+                : rawKey === "PAYMENT_TERMS"
+                    ? "Payment"
+                    : rawKey === "DELIVERY_TIMELINE"
+                        ? "Timeline"
+                        : rawKey.replaceAll("_", " ");
+        const counter = item?.supplierCounterRate;
+        return counter !== null && counter !== undefined && counter !== ""
+            ? `${label} • Counter: ${formatRate(counter)}`
+            : label;
+    });
     const allRevisionAcknowledged = revisionItems.length > 0 && revisionItems.every((item: any) => {
         const acknowledged = Boolean(item?.supplierAcknowledged);
         const counterSaved = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
@@ -2144,6 +2225,29 @@ export default function EnquiryDetailsPage() {
                                 {isCancelled && <Chip size="sm" color="danger" variant="flat">Cancelled</Chip>}
                             </div>
                             <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
+                            {revisionItems.length > 0 && (
+                                <div className="mt-3 rounded-xl border border-default-200/60 bg-default-100/40 px-3 py-2">
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-default-500">
+                                        Revision Acknowledged
+                                    </div>
+                                    {revisionAcknowledgedLabels.length > 0 ? (
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            {revisionAcknowledgedLabels.map((label: string, idx: number) => (
+                                                <span
+                                                    key={`revision-ack-${label}-${idx}`}
+                                                    className="px-2 py-0.5 rounded-full bg-success-500/10 border border-success-500/20 text-[9px] font-black uppercase tracking-widest text-success-600"
+                                                >
+                                                    {label}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="mt-1 text-[10px] font-semibold text-default-500">
+                                            No revision acknowledgements yet.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-4 rounded-2xl border border-default-200/50 bg-foreground/[0.02] px-4 py-3">
@@ -2174,7 +2278,7 @@ export default function EnquiryDetailsPage() {
                                                 className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest uppercase"
                                                 isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
                                                 onPress={() => handleActionPress(actionKey)}
-                                                isLoading={applyActionMutation.isPending && pendingActionKey === actionKey}
+                                                isLoading={isActionLoading(actionKey)}
                                             >
                                                 {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                             </Button>
@@ -2185,6 +2289,11 @@ export default function EnquiryDetailsPage() {
                                             )}
                                         </div>
                                     ))}
+                                </div>
+                            )}
+                            {draftQuotationError && (
+                                <div className="mt-3 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200 uppercase tracking-wide">
+                                    {draftQuotationError}
                                 </div>
                             )}
                         </div>
@@ -2754,7 +2863,7 @@ export default function EnquiryDetailsPage() {
                                         const status = String(doc?.status || "DRAFT").toUpperCase();
                                         const createdAt = doc?.createdAt ? dayjs(doc.createdAt).format("DD MMM YYYY") : "";
                                         const hasFile = Boolean(doc?.fileUrl);
-                                        const audienceLabel = getAudienceLabel(doc?.audienceScope);
+                                        const audienceLabel = getDocAudienceLabel(doc);
 
                                     const isSent = status === "SENT";
                                     const isDraft = status === "DRAFT";
@@ -3135,7 +3244,7 @@ export default function EnquiryDetailsPage() {
                         </Card>
                     ) : (
                         <div className={`md:col-span-2 lg:col-span-3 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
-                            {workflowStage === "PROFORMA_ISSUED" && (
+                            {!hasResponsibilitiesFinalized && workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
                                     <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
                                     <span className="text-[10px] font-black uppercase tracking-[0.35em] text-warning-600 dark:text-warning-400">
@@ -3145,60 +3254,60 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             )}
                             <ResponsibilityEventForm
-                                incotermOptions={incotermOptions}
-                                paymentTermOptions={paymentTermOptions}
-                                selectedIncotermId={selectedIncotermId}
-                                setSelectedIncotermId={setSelectedIncotermId}
-                                selectedPaymentTermId={selectedPaymentTermId}
-                                setSelectedPaymentTermId={setSelectedPaymentTermId}
-                                isTradeTermsChanged={isTradeTermsChanged}
-                                onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
-                                savingTradeTerms={updateTradeTermsMutation.isPending}
-                                tradeTermsSavedAt={tradeTermsSavedAt}
-                                executionContext={executionContext}
-                                setExecutionContext={setExecutionContext}
-                                canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
-                                states={states}
-                                originDistrictOptions={originDistrictOptions}
-                                destinationDistrictOptions={destinationDistrictOptions}
-                                originCountryOptions={sortedCountries}
-                                destinationCountryOptions={sortedCountries}
-                                originPortOptions={originPortOptions}
-                                destinationPortOptions={destinationPortOptions}
-                                showOriginLogisticsFields={showOriginLogisticsFields}
-                                showDestinationLogisticsFields={showDestinationLogisticsFields}
-                                canEditOriginLogistics={canEditOriginLogistics}
-                                canEditDestinationLogistics={canEditDestinationLogistics}
-                                canEditRouteNotes={canEditRouteNotes}
-                                responsibilityPlan={responsibilityPlan}
-                                setResponsibilityPlan={setResponsibilityPlan}
-                                responsibilityFieldConfig={responsibilityFieldConfig}
-                                canEditResponsibilityPlan={canEditResponsibilityPlan}
-                                isReadOnlyAfterConversion={isReadOnlyAfterConversion}
-                                inlandTransportSegments={inlandTransportSegments}
-                                setInlandTransportSegments={setInlandTransportSegments}
-                                packagingSpecifications={packagingSpecifications}
-                                setPackagingSpecifications={setPackagingSpecifications}
-                                hasPackagingSpecifications={hasPackagingSpecifications}
-                                isInternational={executionContext.tradeType === "INTERNATIONAL"}
-                                showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
-                                isResponsibilityEventChanged={isResponsibilityEventChanged}
-                                onSaveFramework={() => updateResponsibilityPlanMutation.mutate()}
-                                savingFramework={updateResponsibilityPlanMutation.isPending}
-                                onFinalize={() => {
-                                    if (isResponsibilityEventChanged) {
-                                        updateResponsibilityPlanMutation.mutate(undefined, {
-                                            onSuccess: () => onFinalizeOpen()
-                                        });
-                                    } else {
-                                        onFinalizeOpen();
-                                    }
-                                }}
-                                finalizeLoading={finalizeResponsibilitiesMutation.isPending}
-                                responsibilitySavedAt={responsibilitySavedAt}
-                                showFinalizeButton={canEditResponsibilityPlan && workflowStage === "PROFORMA_ISSUED"}
-                                showSaveTermsButton={true}
-                            />
+                            incotermOptions={incotermOptions}
+                            paymentTermOptions={paymentTermOptions}
+                            selectedIncotermId={selectedIncotermId}
+                            setSelectedIncotermId={setSelectedIncotermId}
+                            selectedPaymentTermId={selectedPaymentTermId}
+                            setSelectedPaymentTermId={setSelectedPaymentTermId}
+                            isTradeTermsChanged={isTradeTermsChanged}
+                            onSaveTradeTerms={() => updateTradeTermsMutation.mutate()}
+                            savingTradeTerms={updateTradeTermsMutation.isPending}
+                            tradeTermsSavedAt={tradeTermsSavedAt}
+                            executionContext={executionContext}
+                            setExecutionContext={setExecutionContext}
+                            canToggleTradeType={(isBuyer || isAdmin) && canEditResponsibilityPlan}
+                            states={states}
+                            originDistrictOptions={originDistrictOptions}
+                            destinationDistrictOptions={destinationDistrictOptions}
+                            originCountryOptions={sortedCountries}
+                            destinationCountryOptions={sortedCountries}
+                            originPortOptions={originPortOptions}
+                            destinationPortOptions={destinationPortOptions}
+                            showOriginLogisticsFields={showOriginLogisticsFields}
+                            showDestinationLogisticsFields={showDestinationLogisticsFields}
+                            canEditOriginLogistics={canEditOriginLogistics}
+                            canEditDestinationLogistics={canEditDestinationLogistics}
+                            canEditRouteNotes={canEditRouteNotes}
+                            responsibilityPlan={responsibilityPlan}
+                            setResponsibilityPlan={setResponsibilityPlan}
+                            responsibilityFieldConfig={responsibilityFieldConfig}
+                            canEditResponsibilityPlan={canEditResponsibilityPlan}
+                            isReadOnlyAfterConversion={isReadOnlyAfterConversion || hasResponsibilitiesFinalized}
+                            inlandTransportSegments={inlandTransportSegments}
+                            setInlandTransportSegments={setInlandTransportSegments}
+                            packagingSpecifications={packagingSpecifications}
+                            setPackagingSpecifications={setPackagingSpecifications}
+                            hasPackagingSpecifications={hasPackagingSpecifications}
+                            isInternational={executionContext.tradeType === "INTERNATIONAL"}
+                            showCargoInsuranceNote={executionContext.tradeType === "INTERNATIONAL"}
+                            isResponsibilityEventChanged={isResponsibilityEventChanged}
+                            onSaveFramework={!hasResponsibilitiesFinalized ? () => updateResponsibilityPlanMutation.mutate() : undefined}
+                            savingFramework={updateResponsibilityPlanMutation.isPending}
+                            onFinalize={() => {
+                                if (isResponsibilityEventChanged) {
+                                    updateResponsibilityPlanMutation.mutate(undefined, {
+                                        onSuccess: () => onFinalizeOpen()
+                                    });
+                                } else {
+                                    onFinalizeOpen();
+                                }
+                            }}
+                            finalizeLoading={finalizeResponsibilitiesMutation.isPending}
+                            responsibilitySavedAt={responsibilitySavedAt}
+                            showFinalizeButton={false}
+                            showSaveTermsButton={true}
+                        />
                         </div>
                     )}
 
@@ -3291,15 +3400,31 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             )}
                             {isAdmin && (
-                                <Button
-                                    size="sm"
-                                    color="secondary"
-                                    isLoading={updateOperatorRolesMutation.isPending}
-                                    onPress={() => updateOperatorRolesMutation.mutate()}
-                                    isDisabled={isReadOnlyAfterConversion}
-                                >
-                                    Save Operator Roles
-                                </Button>
+                                <div className="flex flex-col gap-4 mt-2">
+                                    <Button
+                                        size="lg"
+                                        color={updateOperatorRolesMutation.isSuccess ? "success" : "secondary"}
+                                        variant={updateOperatorRolesMutation.isSuccess ? "flat" : "solid"}
+                                        className={`h-12 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] transition-all duration-500 ${
+                                            updateOperatorRolesMutation.isSuccess 
+                                            ? "bg-success-500/10 text-success shadow-[0_0_20px_rgba(34,197,94,0.1)] border border-success-500/20" 
+                                            : "shadow-xl shadow-secondary/20"
+                                        }`}
+                                        isLoading={updateOperatorRolesMutation.isPending}
+                                        onPress={() => updateOperatorRolesMutation.mutate()}
+                                        isDisabled={isReadOnlyAfterConversion}
+                                        startContent={updateOperatorRolesMutation.isSuccess ? <FiCheckCircle size={16} /> : undefined}
+                                    >
+                                        {updateOperatorRolesMutation.isSuccess ? "PROTOCOL_AUTHORIZED" : "Save Operator Roles"}
+                                    </Button>
+                                    
+                                    {updateOperatorRolesMutation.isSuccess && (
+                                        <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-success-500/5 border border-success-500/10 self-start animate-in fade-in slide-in-from-left-2 duration-500">
+                                            <div className="w-1 h-1 bg-success rounded-full animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-success-600 italic">MISSION_SUCCESS // SYSTEM_SYNCED</span>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                             {enquiry.supplierCommitUntil && (
                                 <div className="flex flex-col gap-1">
@@ -3695,7 +3820,7 @@ export default function EnquiryDetailsPage() {
                     onOpenChange={(open) => {
                         setInventoryAcceptOpen(open);
                         if (open) {
-                            if (inventoryOptions.length === 0) {
+                            if (inventoryOptions.length === 0 && !isInventoryLoading) {
                                 setIsAddingNewInventory(true);
                                 if (!inlineQuantity) {
                                     setInlineQuantity(String(requiredQty || ""));
@@ -3757,9 +3882,17 @@ export default function EnquiryDetailsPage() {
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
-                                        No existing inventory found. Please add a new warehouse and stock below.
-                                    </div>
+                                    <>
+                                        {isInventoryLoading ? (
+                                            <div className="rounded-lg border border-default-200/60 bg-default-100/50 px-3 py-2 text-sm text-default-500">
+                                                Loading inventory...
+                                            </div>
+                                        ) : (
+                                            <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
+                                                No existing inventory found. Please add a new warehouse and stock below.
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {!isAddingNewInventory && inventoryOptions.length > 0 ? (
@@ -4097,35 +4230,94 @@ export default function EnquiryDetailsPage() {
                     onOpenChange={setDocActionOpen}
                     isDismissable={false}
                     isKeyboardDismissDisabled
+                    classNames={{
+                        base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+                        wrapper: "z-[10000]",
+                        backdrop: "bg-black/60 backdrop-blur-2xl",
+                        closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
+                    }}
                 >
                     <ModalContent>
-                        <ModalHeader className="flex flex-col gap-1">
-                            {docActionRule ? `${docActionRule.docType} — ${docActionRule.actionType}` : "Create Document"}
+                        <ModalHeader className="flex flex-col gap-1 pt-10 px-8 shrink-0">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20 shadow-lg">
+                                    {String(docActionRule?.actionType || "") === "UPLOAD" ? <FiPackage size={22} /> : <FiPlus size={22} />}
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-warning-500/80 leading-none italic">
+                                        {String(docActionRule?.actionType || "EXECUTION") === "UPLOAD" ? "UPLOAD_SEQUENCE" : "GENERATION_REQUEST"}
+                                    </span>
+                                    <span className="text-xl font-black tracking-tight text-white uppercase italic leading-none mt-1">
+                                        {docActionRule ? `${docActionRule.docType.replaceAll('_', ' ')}` : "EXECUTION_DOCUMENT"}
+                                    </span>
+                                </div>
+                            </div>
                         </ModalHeader>
-                        <ModalBody>
-                            {String(docActionRule?.actionType || "") === "UPLOAD" && (
-                                <Input
-                                    label="File URL"
-                                    placeholder="https://..."
-                                    value={docActionFileUrl}
-                                    onChange={(e) => setDocActionFileUrl(e.target.value)}
-                                />
+                        <ModalBody className="px-8 py-6">
+                            {String(docActionRule?.actionType || "") === "UPLOAD" ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
+                                        <span className="text-[10px] uppercase font-black tracking-[0.2em] text-white/40">Resource Target</span>
+                                    </div>
+                                    <Input
+                                        label="TACTICAL FILE URL"
+                                        placeholder="Enter secure resource locator (https://...)"
+                                        variant="flat"
+                                        labelPlacement="outside"
+                                        value={docActionFileUrl}
+                                        onChange={(e) => setDocActionFileUrl(e.target.value)}
+                                        classNames={{
+                                            inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14 px-5 focus-within:ring-1 focus-within:ring-warning-500/40",
+                                            label: "hidden",
+                                            input: "text-[12px] font-bold text-white placeholder:text-white/20"
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-4">
+                                    <div className="mt-1 bg-warning-500/10 p-1.5 rounded-lg">
+                                        <FiInfo className="text-warning-500" size={18} />
+                                    </div>
+                                    <p className="text-[11px] font-bold text-default-400 leading-relaxed uppercase tracking-wide">
+                                        Initiating automated generation protocol for {docActionRule?.docType?.replaceAll('_', ' ')}. 
+                                        The document will be constructed based on current trade parameters and responsibility matrix.
+                                    </p>
+                                </div>
                             )}
-                            <div className="text-xs text-default-500">
-                                {docActionRule?.responsibleRole ? `Responsible: ${docActionRule.responsibleRole}` : ""}
+                            
+                            <div className="mt-6 flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/5">
+                                <div className="flex items-center gap-3">
+                                    <LuUser className="text-default-500" size={14} />
+                                    <span className="text-[10px] font-black text-default-400 uppercase tracking-widest leading-none">Authority Protocol</span>
+                                </div>
+                                <Chip 
+                                    size="sm" 
+                                    variant="flat" 
+                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-5 bg-warning-500/10 text-warning-500 border border-warning-500/20"
+                                >
+                                    {docActionRule?.responsibleRole ? docActionRule.responsibleRole : "AUTH_PENDING"}
+                                </Chip>
                             </div>
                         </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onPress={() => setDocActionOpen(false)} isDisabled={createDocMutation.isPending}>
-                                Cancel
+                        <ModalFooter className="px-8 pb-10 pt-2 flex items-center justify-between gap-4">
+                            <Button 
+                                variant="light" 
+                                onPress={() => setDocActionOpen(false)}
+                                isDisabled={createDocMutation.isPending}
+                                className="px-6 h-10 rounded-xl font-black uppercase text-[9px] tracking-[0.3em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                            >
+                                ABORT
                             </Button>
                             <Button
-                                color="primary"
-                                onPress={() => createDocMutation.mutate()}
+                                color="warning"
+                                variant="shadow"
+                                onPress={() => createDocMutation.mutate(undefined)}
                                 isLoading={createDocMutation.isPending}
                                 isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
+                                className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.2)] bg-gradient-to-r from-warning-500 to-warning-600 hover:scale-[1.02] active:scale-95 transition-all"
                             >
-                                {String(docActionRule?.actionType || "") === "UPLOAD" ? "Upload" : "Create"}
+                                {String(docActionRule?.actionType || "") === "UPLOAD" ? "UPLOAD_FILE" : "EXECUTE_INITIATION"}
                             </Button>
                         </ModalFooter>
                     </ModalContent>
@@ -4143,9 +4335,9 @@ export default function EnquiryDetailsPage() {
                             <span className="text-[10px] uppercase font-black tracking-widest text-default-400">
                                 {docViewerDoc?.documentNumber || "Draft Preview"}
                             </span>
-                            {getAudienceLabel(docViewerDoc?.audienceScope) && (
+                            {getDocAudienceLabel(docViewerDoc) && (
                                 <span className="text-[9px] uppercase font-black tracking-widest text-primary/80">
-                                    {getAudienceLabel(docViewerDoc?.audienceScope)}
+                                    {getDocAudienceLabel(docViewerDoc)}
                                 </span>
                             )}
                         </ModalHeader>
@@ -4168,7 +4360,12 @@ export default function EnquiryDetailsPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <DocumentTemplatePreview docType={String(docViewerDoc?.type || "")} actionType="CREATE" />
+                                <DocumentTemplatePreview
+                                    docType={String(docViewerDoc?.type || "")}
+                                    actionType="CREATE"
+                                    doc={docViewerDoc}
+                                    enquiry={enquiry}
+                                />
                             )}
                         </ModalBody>
                         <ModalFooter>
@@ -4287,7 +4484,7 @@ export default function EnquiryDetailsPage() {
                             </Button>
                             <Button
                                 color="danger"
-                                onPress={() => reopenRequestMutation.mutate()}
+                                onPress={() => reopenRequestMutation.mutate(undefined)}
                                 isLoading={reopenRequestMutation.isPending}
                             >
                                 Submit Request

@@ -498,6 +498,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const adminCommission = resolveAdminCommission(supplierRate, item.commission);
               const totalRate = supplierRate + adminCommission;
               const isCommissionAdded = Number(adminCommission) > 0;
+              const locationDisplay = String(item.locationDisplay || "").trim() || (
+                String(item.locationSource || "").toUpperCase() === "WAREHOUSE"
+                  ? String(item.warehouseId?.address || item.warehouseId?.name || "")
+                  : String(item.officeAddress || item.associateCompany?.address || "")
+              );
 
               // Rule: Owners see base rate only. Non-owners see final price (base + admin commission).
               const displayedPrice = (isOwner && !isMarketplace)
@@ -533,6 +538,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant: productVariantLabel,
                 product: item.productVariant?.product?.name,
+                location: locationDisplay || "--",
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
 

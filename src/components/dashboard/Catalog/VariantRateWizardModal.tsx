@@ -15,10 +15,11 @@ import {
 } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight, FiCheckCircle, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
-import { postData } from "@/core/api/apiHandler";
+import { getData, postData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
+import { associateCompanyRoutes, associateRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 
 type WizardProps = {
   isOpen: boolean;
@@ -34,8 +35,8 @@ const COMMISSION_RATE = 0.025;
 
 const stepMeta = [
   { key: 1, title: "Product & Grade", subtitle: "Define the cargo you’re listing", icon: FiPackage },
-  { key: 2, title: "Pricing & Quantity", subtitle: "Set the trade rate and volume", icon: FiZap },
-  { key: 3, title: "Supply Location", subtitle: "Pinpoint your origin hub", icon: FiMapPin },
+  { key: 2, title: "Pricing", subtitle: "Set the trade rate", icon: FiZap },
+  { key: 3, title: "Supply Location", subtitle: "Choose warehouse or office address", icon: FiMapPin },
   { key: 4, title: "Publish", subtitle: "Review and launch your listing", icon: FiTruck },
 ];
 
@@ -68,22 +69,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [products, setProducts] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [associates, setAssociates] = useState<any[]>([]);
-  const [states, setStates] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [divisions, setDivisions] = useState<any[]>([]);
-  const [pincodes, setPincodes] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
+  const [companyAddress, setCompanyAddress] = useState<string>("");
 
   const rateValue = Number(formData.rate || 0);
-  const quantityValue = Number(formData.quantity || 0);
   const computedCommission = Number.isFinite(rateValue) ? rateValue * COMMISSION_RATE : 0;
-  const projectedValue = Number.isFinite(rateValue) && Number.isFinite(quantityValue)
-    ? rateValue * quantityValue * 1000
-    : 0;
 
   useEffect(() => {
     if (!isOpen) return;
     fetchDependentOptions("category").then(setCategories);
-    fetchDependentOptions("state").then(setStates);
     if (!isAssociateUser) {
       fetchDependentOptions("associate").then(setAssociates);
     }
@@ -108,26 +103,98 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   }, [formData.product]);
 
   useEffect(() => {
-    if (!formData.state) return;
-    fetchDependentOptions("district", "state", formData.state).then(setDistricts);
-  }, [formData.state]);
+    if (!isOpen) return;
+    const resolveCompany = async () => {
+      if (isAssociateUser) {
+        const companyId = String(user?.associateCompanyId || user?.associateCompany?._id || user?.associateCompany || "").trim();
+        setResolvedCompanyId(companyId || null);
+        return;
+      }
+      const associateId = String(formData.associate || "").trim();
+      if (!associateId) {
+        setResolvedCompanyId(null);
+        return;
+      }
+      try {
+        const res = await getData(associateRoutes.getAll, { _id: associateId, limit: 1 });
+        const row = Array.isArray(res?.data?.data?.data)
+          ? res.data.data.data[0]
+          : Array.isArray(res?.data?.data)
+            ? res.data.data[0]
+            : null;
+        const companyId = String(row?.associateCompany?._id || row?.associateCompany || "").trim();
+        setResolvedCompanyId(companyId || null);
+      } catch {
+        setResolvedCompanyId(null);
+      }
+    };
+    resolveCompany();
+  }, [isOpen, isAssociateUser, formData.associate, user?.associateCompanyId, user?.associateCompany]);
 
   useEffect(() => {
-    if (!formData.district) return;
-    fetchDependentOptions("division", "district", formData.district).then(setDivisions);
-  }, [formData.district]);
+    if (!resolvedCompanyId) {
+      setCompanyAddress("");
+      return;
+    }
+    const fetchCompany = async () => {
+      try {
+        const res = await getData(associateCompanyRoutes.getAll, { _id: resolvedCompanyId, limit: 1 });
+        const row = Array.isArray(res?.data?.data?.data)
+          ? res.data.data.data[0]
+          : Array.isArray(res?.data?.data)
+            ? res.data.data[0]
+            : null;
+        setCompanyAddress(String(row?.address || "").trim());
+      } catch {
+        setCompanyAddress("");
+      }
+    };
+    fetchCompany();
+  }, [resolvedCompanyId]);
 
   useEffect(() => {
-    if (!formData.division) return;
-    fetchDependentOptions("pincodeEntry", "division", formData.division).then(setPincodes);
-  }, [formData.division]);
+    if (!isOpen) return;
+    if (companyAddress && !formData.officeAddress) {
+      setFormData((prev) => ({ ...prev, officeAddress: companyAddress }));
+    }
+  }, [companyAddress, isOpen, formData.officeAddress]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (formData.locationSource !== "WAREHOUSE") return;
+    const fetchWarehouses = async () => {
+      try {
+        const params: Record<string, any> = { scope: "my" };
+        if (!isAssociateUser && resolvedCompanyId) {
+          params.ownerCompanyId = resolvedCompanyId;
+        }
+        if (!isAssociateUser && !resolvedCompanyId) {
+          setWarehouses([]);
+          return;
+        }
+        const res = await getData(warehouseRoutes.getAll, params);
+        const rows = Array.isArray(res?.data?.data) ? res.data.data : [];
+        setWarehouses(rows);
+      } catch {
+        setWarehouses([]);
+      }
+    };
+    fetchWarehouses();
+  }, [isOpen, formData.locationSource, resolvedCompanyId, isAssociateUser]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (formData.locationSource === "WAREHOUSE" && warehouses.length === 0) {
+      setFormData((prev) => ({ ...prev, locationSource: "OFFICE_ADDRESS", warehouseId: "" }));
+    }
+  }, [isOpen, formData.locationSource, warehouses.length]);
 
   useEffect(() => {
     if (!isOpen) return;
     setErrors({});
     setSuccessData(null);
     setStep(1);
-    setFormData({});
+    setFormData({ locationSource: "WAREHOUSE" });
     setIsLive(true);
   }, [isOpen]);
 
@@ -153,17 +220,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (key === "product") {
         next.productVariant = "";
       }
-      if (key === "state") {
-        next.district = "";
-        next.division = "";
-        next.pincodeEntry = "";
-      }
-      if (key === "district") {
-        next.division = "";
-        next.pincodeEntry = "";
-      }
-      if (key === "division") {
-        next.pincodeEntry = "";
+      if (key === "locationSource") {
+        if (value === "WAREHOUSE") {
+          next.officeAddress = "";
+        }
+        if (value === "OFFICE_ADDRESS") {
+          next.warehouseId = "";
+        }
       }
       return next;
     });
@@ -183,8 +246,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.unit) nextErrors.unit = "Select a unit.";
     }
     if (step === 3) {
-      if (!formData.state) nextErrors.state = "Select a state.";
-      if (!formData.district) nextErrors.district = "Select a district.";
+      if (!formData.locationSource) nextErrors.locationSource = "Select a location source.";
+      if (formData.locationSource === "WAREHOUSE" && !formData.warehouseId) {
+        nextErrors.warehouseId = "Select a warehouse.";
+      }
+      if (formData.locationSource === "OFFICE_ADDRESS" && !String(formData.officeAddress || "").trim()) {
+        nextErrors.officeAddress = "Enter office address.";
+      }
     }
     if (!isAssociateUser && step >= 2 && !formData.associate) {
       nextErrors.associate = "Select an associate.";
@@ -198,14 +266,14 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       const payload: any = {
         rate: Number(formData.rate || 0),
         unit: formData.unit,
-        quantity: formData.quantity ? Number(formData.quantity) : undefined,
         commission: Number.isFinite(computedCommission) ? Number(computedCommission.toFixed(2)) : undefined,
         productVariant: fixedVariantId || formData.productVariant,
         associate: isAssociateUser ? user?.id : formData.associate,
-        state: formData.state || undefined,
-        district: formData.district || undefined,
-        division: formData.division || undefined,
-        pincodeEntry: formData.pincodeEntry || undefined,
+        locationSource: formData.locationSource,
+        warehouseId: formData.locationSource === "WAREHOUSE" ? formData.warehouseId : undefined,
+        officeAddress: formData.locationSource === "OFFICE_ADDRESS"
+          ? String(formData.officeAddress || "").trim()
+          : undefined,
         isLive,
         ...(additionalVariable || {}),
       };
@@ -244,7 +312,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const handleAddAnother = () => {
     setSuccessData(null);
-    setFormData({});
+    setFormData({ locationSource: "WAREHOUSE" });
     setErrors({});
     setStep(1);
   };
@@ -317,12 +385,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     <p className="text-lg font-bold text-white">{formData.rate || "--"} / {formData.unit || "KG"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-white/40">Quantity</p>
-                    <p className="text-lg font-bold text-white">{formData.quantity || "--"} MT</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase text-white/40">Origin</p>
-                    <p className="text-lg font-bold text-white">{states.find((s) => s._id === formData.state)?.name || "--"} / {districts.find((d) => d._id === formData.district)?.name || "--"}</p>
+                    <p className="text-xs uppercase text-white/40">Location</p>
+                    <p className="text-lg font-bold text-white">
+                      {formData.locationSource === "WAREHOUSE"
+                        ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
+                        : (formData.officeAddress || "--")}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs uppercase text-white/40">Status</p>
@@ -381,7 +449,6 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <SelectItem key="MT" className="text-white font-black">Metric Ton (MT)</SelectItem>
                       <SelectItem key="Quintal" className="text-white font-black">Quintal</SelectItem>
                     </Select>
-                    <Input variant="bordered" label="Quantity (MT)" type="number" classNames={darkField} value={formData.quantity || ""} onChange={(e) => setValue("quantity", e.target.value)} />
                     {!isAssociateUser && (
                       <Select variant="bordered" label="Associate" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
                         {associates.map((item) => (
@@ -396,45 +463,57 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         <span>Commission (2.5%)</span>
                         <span className="font-bold text-warning-300">{computedCommission.toFixed(2)}</span>
                       </div>
-                      <div className="mt-3 flex items-center justify-between text-sm text-white/70">
-                        <span>Projected total value</span>
-                        <span className="font-bold text-white">{projectedValue ? projectedValue.toFixed(2) : "--"}</span>
-                      </div>
                     </div>
                   </div>
                 )}
                 {step === 3 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select variant="bordered" label="State" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.state ? [formData.state] : []} onSelectionChange={(keys) => setValue("state", Array.from(keys)[0])} isInvalid={!!errors.state} errorMessage={errors.state}>
-                      {states.map((item) => (
-                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
-                          {getOptionLabel(item)}
-                        </SelectItem>
-                      ))}
+                    <Select
+                      variant="bordered"
+                      label="Location Source"
+                      classNames={darkField}
+                      listboxProps={{ itemClasses }}
+                      selectedKeys={formData.locationSource ? [formData.locationSource] : []}
+                      onSelectionChange={(keys) => setValue("locationSource", Array.from(keys)[0])}
+                      isInvalid={!!errors.locationSource}
+                      errorMessage={errors.locationSource}
+                    >
+                      <SelectItem key="WAREHOUSE" className="uppercase text-white font-black">Warehouse</SelectItem>
+                      <SelectItem key="OFFICE_ADDRESS" className="uppercase text-white font-black">Office Address</SelectItem>
                     </Select>
-                    <Select variant="bordered" label="District" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.district ? [formData.district] : []} onSelectionChange={(keys) => setValue("district", Array.from(keys)[0])} isDisabled={!formData.state} isInvalid={!!errors.district} errorMessage={errors.district}>
-                      {districts.map((item) => (
-                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
-                          {getOptionLabel(item)}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                    <Select variant="bordered" label="Division" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.division ? [formData.division] : []} onSelectionChange={(keys) => setValue("division", Array.from(keys)[0])} isDisabled={!formData.district}>
-                      {divisions.map((item) => (
-                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
-                          {getOptionLabel(item)}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                    <Select variant="bordered" label="Pin Code" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.pincodeEntry ? [formData.pincodeEntry] : []} onSelectionChange={(keys) => setValue("pincodeEntry", Array.from(keys)[0])} isDisabled={!formData.division}>
-                      {pincodes.map((item) => (
-                        <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
-                          {getOptionLabel(item)}
-                        </SelectItem>
-                      ))}
-                    </Select>
+                    {formData.locationSource === "WAREHOUSE" ? (
+                      <Select
+                        variant="bordered"
+                        label="Warehouse"
+                        classNames={darkField}
+                        listboxProps={{ itemClasses }}
+                        selectedKeys={formData.warehouseId ? [formData.warehouseId] : []}
+                        onSelectionChange={(keys) => setValue("warehouseId", Array.from(keys)[0])}
+                        isDisabled={!isAssociateUser && !resolvedCompanyId}
+                        isInvalid={!!errors.warehouseId}
+                        errorMessage={errors.warehouseId}
+                      >
+                        {warehouses.map((item) => (
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                            {getOptionLabel(item)}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Input
+                        variant="bordered"
+                        label="Office Address"
+                        classNames={darkField}
+                        value={formData.officeAddress || ""}
+                        onChange={(e) => setValue("officeAddress", e.target.value)}
+                        isInvalid={!!errors.officeAddress}
+                        errorMessage={errors.officeAddress}
+                      />
+                    )}
                     <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-                      Origin confirmed: {states.find((s) => s._id === formData.state)?.name || "—"}, {districts.find((d) => d._id === formData.district)?.name || "—"}.
+                      Location: {formData.locationSource === "WAREHOUSE"
+                        ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "—")
+                        : (formData.officeAddress || "—")}
                     </div>
                   </div>
                 )}
@@ -448,12 +527,12 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           <div className="text-lg font-bold text-white">{formData.rate || "--"} / {formData.unit || "KG"}</div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-white/40">Quantity</div>
-                          <div className="text-lg font-bold text-white">{formData.quantity || "--"} MT</div>
-                        </div>
-                        <div>
-                          <div className="text-xs uppercase text-white/40">Origin</div>
-                          <div className="text-lg font-bold text-white">{states.find((s) => s._id === formData.state)?.name || "--"} / {districts.find((d) => d._id === formData.district)?.name || "--"}</div>
+                          <div className="text-xs uppercase text-white/40">Location</div>
+                          <div className="text-lg font-bold text-white">
+                            {formData.locationSource === "WAREHOUSE"
+                              ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
+                              : (formData.officeAddress || "--")}
+                          </div>
                         </div>
                         <div>
                           <div className="text-xs uppercase text-white/40">Commission</div>

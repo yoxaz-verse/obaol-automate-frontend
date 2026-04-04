@@ -43,7 +43,8 @@ import {
   FiTruck,
   FiEdit3,
   FiX,
-  FiExternalLink
+  FiExternalLink,
+  FiCheck
 } from "react-icons/fi";
 import { 
   LuFileCheck, 
@@ -1457,103 +1458,186 @@ export default function ImportsPage() {
         isDismissable={false}
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
+        classNames={{
+          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden",
+          header: "border-b border-white/5 p-8",
+          footer: "border-t border-white/5 p-8",
+          body: "p-8",
+          closeButton: "hover:bg-white/5 active:bg-white/10 transition-colors top-6 right-6",
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Manage Reservations</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Logistics Oversight</span>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">Manage Reservations</h3>
+              </ModalHeader>
               <ModalBody className="gap-4">
                 {reservations.length === 0 && (
-                  <div className="text-default-500 text-sm">No reservations yet.</div>
+                  <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/20">
+                      <FiPackage size={32} />
+                    </div>
+                    <div className="text-default-400 font-medium">No reservations recorded for this listing.</div>
+                  </div>
                 )}
-                {reservations.map((reservation: any) => (
-                  <Card key={reservation._id} className="border border-default-200">
-                    <CardBody className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold">{reservation.buyerCompanyId?.name || "Buyer"}</div>
-                          <div className="text-xs text-default-500">
-                            {reservation.listingId?.commodityName || "Import"}{" "}
-                            {reservation.listingId?.expectedArrivalDate
-                              ? `• ETA ${new Date(reservation.listingId.expectedArrivalDate).toLocaleDateString()}`
-                              : ""}
+                <div className="grid gap-4">
+                  {reservations.map((reservation: any) => (
+                    <motion.div 
+                      key={reservation._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="group relative overflow-hidden"
+                    >
+                      <Card className="bg-white/[0.02] border border-white/10 hover:bg-white/[0.04] transition-all rounded-[1.5rem] shadow-none">
+                        <CardBody className="p-6 gap-6">
+                            {/* Reservation Content */}
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center text-warning-500 shrink-0">
+                                <FiBriefcase size={20} />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-white font-bold text-lg leading-tight uppercase tracking-tight">
+                                  {reservation.buyerCompanyId?.name || "Independent Buyer"}
+                                </span>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">
+                                    {reservation.listingId?.commodityName || "Export Order"}
+                                  </span>
+                                  <div className="w-1 h-1 rounded-full bg-white/10" />
+                                  <div className="flex items-center gap-1.5 text-default-500">
+                                    <FiCalendar size={12} className="text-warning-500/50" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                                      {reservation.listingId?.expectedArrivalDate
+                                        ? `ETA ${new Date(reservation.listingId.expectedArrivalDate).toLocaleDateString()}`
+                                        : "NO ETA SET"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2 shrink-0">
+                              <div className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <span className="text-2xl font-black text-white">{reservation.quantityRequested}</span>
+                                  <span className="text-xs font-bold text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-lg border border-warning-500/20">MT</span>
+                                </div>
+                                <span className="text-[9px] font-bold text-default-500 uppercase tracking-[0.2em]">Allocated Volume</span>
+                              </div>
+                              <Chip 
+                                size="sm" 
+                                variant="flat" 
+                                className="h-6 gap-1 px-3 bg-white/5 border border-white/10"
+                                startContent={
+                                  resolveReservationStatus(reservation) === "PENDING" ? <FiClock size={10} className="text-warning-500" /> :
+                                  resolveReservationStatus(reservation) === "APPROVED" ? <LuCheck size={10} className="text-success-500" /> :
+                                  <FiX size={10} className="text-danger-500" />
+                                }
+                                classNames={{
+                                  content: "text-[10px] font-black uppercase tracking-widest text-white"
+                                }}
+                              >
+                                {resolveReservationStatus(reservation)}
+                              </Chip>
+                            </div>
                           </div>
-                        </div>
-                        <Chip size="sm" color="warning" variant="flat">
-                          {resolveReservationStatus(reservation)}
-                        </Chip>
-                      </div>
-                      <div className="text-sm">
-                        Quantity: <span className="font-semibold">{reservation.quantityRequested} MT</span>
-                      </div>
-                      {resolveReservationStatus(reservation) === "PENDING" && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            color="warning"
-                            className="rounded-xl font-bold"
-                            isLoading={acceptMutation.isPending && pendingReservationId === reservation._id}
-                            isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
-                            onClick={() => {
-                              setPendingReservationId(reservation._id);
-                              setActionErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
-                              acceptMutation.mutate(reservation._id);
-                            }}
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            className="rounded-xl font-bold"
-                            isLoading={rejectMutation.isPending && pendingReservationId === reservation._id}
-                            isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
-                            onClick={() => {
-                              setPendingReservationId(reservation._id);
-                              setActionErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
-                              rejectMutation.mutate(reservation._id);
-                            }}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      )}
-                      {actionErrorById[reservation._id] && (
-                        <div className="text-xs text-danger-400 mt-1">{actionErrorById[reservation._id]}</div>
-                      )}
-                      {resolveReservationStatus(reservation) === "APPROVED" && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            color="success"
-                            className="rounded-xl font-bold"
-                            isLoading={lockReservationMutation.isPending && pendingReservationId === reservation._id}
-                            isDisabled={lockReservationMutation.isPending && pendingReservationId === reservation._id}
-                            onPress={() =>
-                              (() => {
-                                setPendingReservationId(reservation._id);
-                                setLockErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
-                                lockReservationMutation.mutate({
-                                  listingId: String(reservation.listingId?._id || reservation.listingId || ""),
-                                  reservationId: reservation._id,
-                                });
-                              })()
-                            }
-                          >
-                            Lock & Create Enquiry
-                          </Button>
-                          {lockErrorById[reservation._id] && (
-                            <div className="text-xs text-danger-400 mt-1">{lockErrorById[reservation._id]}</div>
+
+                          {/* Footer Actions Overlay */}
+                          {resolveReservationStatus(reservation) === "PENDING" && (
+                            <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                              <Button
+                                size="sm"
+                                color="warning"
+                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest flex-1 bg-warning-500 text-black shadow-lg shadow-warning-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                isLoading={acceptMutation.isPending && pendingReservationId === reservation._id}
+                                isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
+                                onClick={() => {
+                                  setPendingReservationId(reservation._id);
+                                  setActionErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
+                                  acceptMutation.mutate(reservation._id);
+                                }}
+                                startContent={<FiCheck size={14} />}
+                              >
+                                Approve Allocation
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest px-6 bg-white/5 text-default-400 hover:text-white hover:bg-danger-500/20 active:scale-95 transition-all"
+                                isLoading={rejectMutation.isPending && pendingReservationId === reservation._id}
+                                isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
+                                onClick={() => {
+                                  setPendingReservationId(reservation._id);
+                                  setActionErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
+                                  rejectMutation.mutate(reservation._id);
+                                }}
+                                startContent={<FiX size={14} />}
+                              >
+                                Reject
+                              </Button>
+                            </div>
                           )}
-                        </div>
-                      )}
-                    </CardBody>
-                  </Card>
-                ))}
+
+                          {resolveReservationStatus(reservation) === "APPROVED" && (
+                            <div className="flex flex-col gap-3 pt-4 border-t border-white/5">
+                              <Button
+                                size="sm"
+                                color="success"
+                                className="h-10 rounded-xl font-black uppercase text-[10px] tracking-widest bg-success-500 text-black shadow-lg shadow-success-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                isLoading={lockReservationMutation.isPending && pendingReservationId === reservation._id}
+                                isDisabled={lockReservationMutation.isPending && pendingReservationId === reservation._id}
+                                onPress={() =>
+                                  (() => {
+                                    setPendingReservationId(reservation._id);
+                                    setLockErrorById((prev) => ({ ...prev, [reservation._id]: "" }));
+                                    lockReservationMutation.mutate({
+                                      listingId: String(reservation.listingId?._id || reservation.listingId || ""),
+                                      reservationId: reservation._id,
+                                    });
+                                  })()
+                                }
+                                startContent={<FiLock size={14} />}
+                              >
+                                Finalize & Initialize Enquiry
+                              </Button>
+                              {lockErrorById[reservation._id] && (
+                                <motion.div 
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  className="text-[10px] font-bold text-danger-400 uppercase bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
+                                >
+                                  {lockErrorById[reservation._id]}
+                                </motion.div>
+                              )}
+                            </div>
+                          )}
+
+                          {actionErrorById[reservation._id] && (
+                            <motion.div 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              className="text-[10px] font-bold text-danger-400 uppercase bg-danger-400/5 p-2 rounded-lg border border-danger-400/10"
+                            >
+                              {actionErrorById[reservation._id]}
+                            </motion.div>
+                          )}
+                        </CardBody>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onClick={onClose}>
-                  Close
+              <ModalFooter className="gap-3">
+                <Button 
+                  variant="flat" 
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-white/5 text-white hover:bg-white/10"
+                  onClick={onClose}
+                >
+                  Close Control Panel
                 </Button>
               </ModalFooter>
             </>

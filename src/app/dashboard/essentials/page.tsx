@@ -2,9 +2,10 @@
 "use client";
 
 import React from "react";
-import { Tabs, Tab, Spacer } from "@nextui-org/react";
+import { Tabs, Tab, Spacer, Button } from "@nextui-org/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
+import Link from "next/link";
 
 export default function Essentials() {
   const [companyEssentials, setCompanyEssentials] =
@@ -33,12 +34,10 @@ export default function Essentials() {
     { key: "jobType", title: "Job Type" }, // Translate Title
     { key: "language", title: "Language" }, // Translate Title
   ];
-  const [enquiryEssentials, setEnquiryEssentials] = React.useState("designenquiryProcessStatusation");
+  const [enquiryEssentials, setEnquiryEssentials] = React.useState("enquiryProcessStatus");
 
   const enquiryTabs = [
     { key: "enquiryProcessStatus", title: "Enquiry Process" }, // Translate Title
-    { key: "incoterm", title: "Incoterms" }, // Preferred trade terms
-    { key: "paymentTerm", title: "Payment Terms" },
   ];
   return (
     <div className="flex items-center justify-center w-full min-w-0 max-w-full">
@@ -102,6 +101,14 @@ export default function Essentials() {
               </Tab>
             ))}
           </Tabs>
+          <div className="mt-4 rounded-xl border border-default-200/60 bg-content1/95 p-4">
+            <p className="text-xs text-default-600">
+              Incoterms and Payment Terms have moved to Payment Rules.
+            </p>
+            <Button as={Link} href="/dashboard/payments" size="sm" variant="flat" color="warning" className="mt-2">
+              Open Payment Rules
+            </Button>
+          </div>
         </div>
       </div>
     </div>

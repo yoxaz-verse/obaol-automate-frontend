@@ -55,6 +55,7 @@ const BASE_PATHS = {
   LANGUAGE: "/languages",
   INCOTERM: "/incoterms",
   PAYMENT_TERM: "/payment-terms",
+  COMMISSION_RULE: "/commission-rules",
   COMPANY_FUNCTION: "/company-functions",
   COMPANY_SUB_FUNCTION: "/company-sub-functions",
   COMPANY_FUNCTION_MAPPING: "/company-function-mappings",
@@ -240,6 +241,9 @@ export const catalogItemRoutes = createCRUDRoutes("/catalog-items");
 export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY), {
   seaPorts: `${BASE_PATHS.ENQUIRY}/sea-ports`,
 });
+export const systemConfigRoutes = {
+  obaolCompany: "/system-config/obaol-company",
+};
 
 export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);
 export const unLoCodeRoutes = createCRUDRoutes(BASE_PATHS.UN_LO_CODE);
@@ -259,6 +263,7 @@ export const jobTypeRoutes = createCRUDRoutes(BASE_PATHS.JOB_TYPE);
 export const languageRoutes = createCRUDRoutes(BASE_PATHS.LANGUAGE);
 export const incotermRoutes = createCRUDRoutes(BASE_PATHS.INCOTERM);
 export const paymentTermRoutes = createCRUDRoutes(BASE_PATHS.PAYMENT_TERM);
+export const commissionRuleRoutes = createCRUDRoutes(BASE_PATHS.COMMISSION_RULE);
 export const companyFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION);
 export const companySubFunctionRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_SUB_FUNCTION);
 export const companyFunctionMappingRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_FUNCTION_MAPPING);
@@ -453,6 +458,7 @@ export const apiRoutes = {
     inventory: `${BASE_PATHS.DEMO}/inventory`,
   },
   enquiry: enquiryRoutes,
+  systemConfig: systemConfigRoutes,
   orders: {
     create: "/orders",
     createExternal: "/orders/external",
@@ -483,6 +489,7 @@ export const apiRoutes = {
   language: languageRoutes,
   incoterm: incotermRoutes,
   paymentTerm: paymentTermRoutes,
+  commissionRule: commissionRuleRoutes,
   companyFunction: companyFunctionRoutes,
   companySubFunction: companySubFunctionRoutes,
   companyFunctionMapping: companyFunctionMappingRoutes,

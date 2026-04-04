@@ -315,7 +315,7 @@ export default function WarehousesPage() {
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0}</p>
+                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0} MT</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -347,7 +347,7 @@ export default function WarehousesPage() {
                                                                     : wh.category === "AGRO" ? "Agro Warehouse"
                                                                         : "General Warehouse"}
                                                         </span>
-                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0}</span>
+                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0} MT</span>
                                                     </div>
                                                     {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 pt-1">
@@ -381,7 +381,7 @@ export default function WarehousesPage() {
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="font-black text-sm text-foreground tracking-tight truncate">{wh.name}</h3>
-                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0}</p>
+                                                            <p className="text-[10px] text-default-400 font-medium uppercase tracking-widest">Capacity · {wh.totalCapacity ?? 0} MT</p>
                                                         </div>
                                                     </div>
                                                     <Chip size="sm" variant="flat" color="warning" className="text-[9px] font-bold uppercase tracking-wide">Rental</Chip>
@@ -398,7 +398,7 @@ export default function WarehousesPage() {
                                                                     : wh.category === "AGRO" ? "Agro Warehouse"
                                                                         : "General Warehouse"}
                                                         </span>
-                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0}</span>
+                                                        <span className="font-bold text-foreground">Capacity: {wh.totalCapacity ?? 0} MT</span>
                                                     </div>
                                                     {Array.isArray(wh.allowedCategoryIds) && wh.allowedCategoryIds.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 pt-1">

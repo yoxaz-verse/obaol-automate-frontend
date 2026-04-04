@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -16,7 +16,7 @@ import {
   SelectItem,
   Switch,
   Textarea,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import Title from "@/components/titles";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -24,12 +24,14 @@ import { showToastMessage } from "@/utils/utils";
 import { WarehouseLocationValue } from "@/components/Warehouse/WarehouseLocationPicker";
 import { FiMapPin, FiLoader } from "react-icons/fi";
 import { LuWarehouse } from "react-icons/lu";
+import AuthContext from "@/context/AuthContext";
 
 type WarehouseForm = {
   name: string;
   address: string;
   pincode: string;
   totalCapacity: number;
+  ownerCompanyId: string;
   category: "GENERAL" | "COLD_STORAGE" | "BONDED" | "AGRO";
   allowedCategoryIds: string[];
   storageRatePerUnit: number;
@@ -53,6 +55,7 @@ const EMPTY_FORM: WarehouseForm = {
   address: "",
   pincode: "",
   totalCapacity: 0,
+  ownerCompanyId: "",
   category: "GENERAL",
   allowedCategoryIds: [],
   storageRatePerUnit: 0,
@@ -115,6 +118,9 @@ const forwardGeocode = async (query: string) => {
 export default function WarehouseLocationPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isAdmin = roleLower === "admin";
   const [form, setForm] = useState<WarehouseForm>(EMPTY_FORM);
   const [pendingLocation, setPendingLocation] = useState<WarehouseLocationValue | null>(null);
   const [locationBusy, setLocationBusy] = useState(false);
@@ -139,8 +145,29 @@ export default function WarehouseLocationPage() {
 
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
+  const { data: associateCompaniesData } = useQuery({
+    queryKey: ["associate-companies"],
+    queryFn: async () => {
+      const res: any = await getData(apiRoutes.associateCompany.getAll, { limit: 500 });
+      const raw = res?.data?.data;
+      if (Array.isArray(raw?.data)) return raw.data;
+      if (Array.isArray(raw)) return raw;
+      if (Array.isArray(res?.data)) return res.data;
+      return [];
+    },
+    enabled: isAdmin,
+  });
+
+  const associateCompanies = Array.isArray(associateCompaniesData) ? associateCompaniesData : [];
+
   const createMutation = useMutation({
-    mutationFn: (payload: WarehouseForm) => postData(apiRoutes.warehouses.create, payload),
+    mutationFn: (payload: WarehouseForm) => {
+      const cleaned = {
+        ...payload,
+        ownerCompanyId: payload.ownerCompanyId || undefined,
+      };
+      return postData(apiRoutes.warehouses.create, cleaned);
+    },
     onSuccess: () => {
       showToastMessage({ type: "success", message: "Warehouse created successfully!" });
       queryClient.invalidateQueries({ queryKey: ["warehouses"] });
@@ -268,7 +295,7 @@ export default function WarehouseLocationPage() {
 
   return (
     <>
-      <section className="w-full min-h-screen p-6 md:p-10 bg-background text-foreground">
+      <section className="w-full min-h-screen p-6 md:p-10 bg-[#04070f] text-white">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <Title title="Warehouse Location" />
         <Button variant="light" onPress={() => router.push("/dashboard/warehouses")}>
@@ -277,16 +304,14 @@ export default function WarehouseLocationPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
-        <Card className="border border-default-200/60 bg-content1/70 backdrop-blur-md rounded-2xl">
-          <CardHeader className="px-6 pt-6">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500">
-                <FiMapPin />
-              </div>
+        <Card className="border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden">
+          <CardHeader className="p-8 border-b border-white/5">
+            <div className="flex items-center gap-4">
+              <div className="w-1 h-3 bg-warning-500 rounded-full" />
               <div>
-                <h2 className="text-lg font-black tracking-tight">Pin Warehouse Location</h2>
-                <p className="text-xs text-default-500 mt-1">
-                  Click the map to pin the exact warehouse location. City, district, and state will be filled automatically.
+                <h2 className="text-xl font-bold text-white uppercase tracking-tight">Pin Warehouse Location</h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">
+                  Global Coordinate Synchronization
                 </p>
               </div>
             </div>
@@ -301,8 +326,8 @@ export default function WarehouseLocationPage() {
                 {form.location.state && ` • ${form.location.state}`}
               </div>
             )}
-            <div className="rounded-2xl overflow-hidden border border-default-200/60 warehouse-location-map">
-              <WarehouseLocationPicker value={pendingLocation} onChange={setPendingLocation} height={420} />
+            <div className="rounded-[2rem] overflow-hidden border border-white/10 shadow-lg shadow-warning-500/5 warehouse-location-map">
+              <WarehouseLocationPicker value={pendingLocation} onChange={setPendingLocation} height={460} />
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {pendingLocation && (
@@ -318,41 +343,70 @@ export default function WarehouseLocationPage() {
           </CardBody>
         </Card>
 
-        <Card className="border border-default-200/60 bg-content1/70 backdrop-blur-md rounded-2xl">
-          <CardHeader className="px-6 pt-6">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
-                <LuWarehouse />
-              </div>
+        <Card className="border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden">
+          <CardHeader className="p-8 border-b border-white/5">
+            <div className="flex items-center gap-4">
+              <div className="w-1 h-3 bg-primary-500 rounded-full" />
               <div>
-                <h2 className="text-lg font-black tracking-tight">Warehouse Details</h2>
-                <p className="text-xs text-default-500 mt-1">Complete the details and save the warehouse.</p>
+                <h2 className="text-xl font-bold text-white uppercase tracking-tight">Warehouse Parameters</h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">Entity Asset Configuration</p>
               </div>
             </div>
           </CardHeader>
           <CardBody className="px-6 pb-6 space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Warehouse Name <span className="text-danger-500">*</span></label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Warehouse Profile</label>
               <Input
-                placeholder="e.g. Chennai Cold Storage"
+                label="Full Commercial Name"
+                variant="flat"
+                placeholder="e.g. OBAOL CORE CHENNAI"
                 value={form.name}
                 onValueChange={(v) => setForm((f) => ({ ...f, name: v }))}
-                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                  label: "text-default-400 font-medium",
+                  input: "text-white font-bold uppercase text-sm"
+                }}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Category <span className="text-danger-500">*</span></label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Operational Category</label>
               <Select
+                label="Classification"
+                variant="flat"
                 selectedKeys={[form.category]}
                 onSelectionChange={(keys) => setForm((f) => ({ ...f, category: Array.from(keys)[0] as any }))}
-                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                  label: "text-default-400 font-medium",
+                  value: "text-white font-bold uppercase text-xs",
+                  popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                }}
+                popoverProps={{ shouldCloseOnBlur: false }}
               >
-                <SelectItem key="GENERAL">General warehouse</SelectItem>
-                <SelectItem key="COLD_STORAGE">Cold storage</SelectItem>
-                <SelectItem key="BONDED">Bonded warehouse</SelectItem>
-                <SelectItem key="AGRO">Agro warehouse</SelectItem>
+                <SelectItem key="GENERAL" className="text-white">General Logistic Node</SelectItem>
+                <SelectItem key="COLD_STORAGE" className="text-white">Cold Chain Facility</SelectItem>
+                <SelectItem key="BONDED" className="text-white">Bonded Secure Node</SelectItem>
+                <SelectItem key="AGRO" className="text-white">Agricultural Asset</SelectItem>
               </Select>
             </div>
+            {isAdmin && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-foreground pl-0.5">Associate Company</label>
+                <Select
+                  selectedKeys={form.ownerCompanyId ? [form.ownerCompanyId] : []}
+                  onSelectionChange={(keys) =>
+                    setForm((f) => ({ ...f, ownerCompanyId: String(Array.from(keys)[0] || "") }))
+                  }
+                  classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                  placeholder={associateCompanies.length ? "Select associate company" : "No companies available"}
+                >
+                  {associateCompanies.map((company: any) => (
+                    <SelectItem key={company._id}>{company.name || company.companyName || "Company"}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
               <Select
@@ -400,13 +454,19 @@ export default function WarehouseLocationPage() {
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Total Capacity</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Infrastructure Capacity</label>
               <Input
-                placeholder="e.g. 2500"
+                label="Total Mission Volume (MT)"
+                variant="flat"
+                placeholder="00.00"
                 type="number"
                 value={String(form.totalCapacity)}
                 onValueChange={(v) => setForm((f) => ({ ...f, totalCapacity: Number(v) }))}
-                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                  label: "text-default-400 font-medium",
+                  input: "text-white font-bold uppercase text-sm"
+                }}
               />
             </div>
             <div className="flex items-center justify-between px-1">
@@ -445,12 +505,12 @@ export default function WarehouseLocationPage() {
               </div>
               <Button
                 color="warning"
-                className="font-bold"
+                className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
                 isDisabled={!form.name.trim() || !form.location}
                 isLoading={createMutation.isPending}
                 onPress={() => createMutation.mutate(form)}
               >
-                Create Warehouse
+                Deploy Infrastructure
               </Button>
             </div>
           </CardBody>
@@ -458,8 +518,11 @@ export default function WarehouseLocationPage() {
       </div>
       </section>
       <style jsx global>{`
-        .warehouse-location-map .leaflet-control-attribution a[href*="leaflet"] {
+        .warehouse-location-map .leaflet-control-attribution {
           display: none !important;
+        }
+        .warehouse-location-map .leaflet-tile {
+          filter: brightness(1.1) contrast(1.15) saturate(1.05);
         }
       `}</style>
     </>

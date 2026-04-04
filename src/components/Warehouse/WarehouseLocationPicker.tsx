@@ -72,7 +72,10 @@ export default function WarehouseLocationPicker({
       >
         <SyncView value={value} />
         <ClickHandler onPick={onChange} />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer 
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
         {value && (
           <Marker position={[value.latitude, value.longitude]} icon={markerIcon} />
         )}

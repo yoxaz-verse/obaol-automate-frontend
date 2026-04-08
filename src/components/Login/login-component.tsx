@@ -7,36 +7,78 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowRight } from "react-icons/fi";
-import { useRouter } from "next/navigation";
+import { FiAlertCircle, FiArrowRight, FiCheck } from "react-icons/fi";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { useSoundEffect } from "@/context/SoundContext";
+import { postData } from "@/core/api/apiHandler";
+import { baseUrl } from "@/core/api/axiosInstance";
 
 
 interface ILoginProps {
   role: string;
+  mode?: "login" | "signup";
 }
 
-const LoginComponent = ({ role }: ILoginProps) => {
+const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [notFoundEmail, setNotFoundEmail] = useState("");
+  const [showNotFoundCta, setShowNotFoundCta] = useState(false);
   const isInvalidEmail = useEmailValidation(email);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpAttempted, setOtpAttempted] = useState(false);
+  const [hasOnboardingSession, setHasOnboardingSession] = useState(false);
+  const [existingAccountFlow, setExistingAccountFlow] = useState(false);
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
+  const [resendAvailableAt, setResendAvailableAt] = useState<number | null>(null);
+  const [nowTs, setNowTs] = useState(Date.now());
+
+  const normalizeSignupError = (message: string) => {
+    const raw = String(message || "");
+    const lower = raw.toLowerCase();
+    if (lower.includes("invalid email") || lower.includes("invalid email address")) {
+      return "Invalid email address.";
+    }
+    if (lower.includes("status code 400") && lower.includes("email")) {
+      return "Invalid email address.";
+    }
+    if (lower.includes("session cookie") || lower.includes("cookie blocked")) {
+      return "Session cookie blocked. Allow cookies for the API domain and retry.";
+    }
+    return raw || "Unable to send OTP. Please try again.";
+  };
+  const [signupMethod, setSignupMethod] = useState<"email" | "google">("email");
   const [loginStatus, setLoginStatus] = useState<"idle" | "success" | "error">("idle");
-  const [isRoutingToRegister, setIsRoutingToRegister] = useState(false);
   const registerRouteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { play } = useSoundEffect();
   const roleLower = String(role || "").toLowerCase();
+  const authMode = mode;
+
+  const inputClasses = {
+    label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-2 ml-1",
+    inputWrapper: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-warning-500/50 transition-all h-12 rounded-2xl shadow-sm",
+    input: "font-medium text-sm text-foreground placeholder:text-default-300",
+    base: "mb-2"
+  };
 
   const router = useRouter();
-  const { isAuthenticated, loading, login, loginWithGoogle, user } = useContext(AuthContext);
+  const searchParams = useSearchParams();
+  const { isAuthenticated, loading, login, loginWithGoogle, user, refreshUser } = useContext(AuthContext);
   const [googleReady, setGoogleReady] = useState(false);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
@@ -50,8 +92,29 @@ const LoginComponent = ({ role }: ILoginProps) => {
   }, []);
 
   useEffect(() => {
+    if (authMode !== "login") return;
+    const prefill = String(searchParams?.get("prefill") || "").trim();
+    if (!prefill) return;
+    setEmail((prev) => (prev ? prev : prefill));
+  }, [authMode, searchParams]);
+
+  useEffect(() => {
+    if (!otpSent || otpVerified) return;
+    const timer = setInterval(() => {
+      setNowTs(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpSent, otpVerified]);
+
+  useEffect(() => {
+    if (authMode === "signup") {
+      return;
+    }
     if (!loading && isAuthenticated) {
+      setIsRedirecting(true);
       const authRoleLower = String(user?.role || "").toLowerCase();
+      const requiresOnboarding = ["associate", "operator", "team"].includes(authRoleLower)
+        && user?.onboardingComplete === false;
       if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
         showToastMessage({
           type: "warning",
@@ -59,9 +122,9 @@ const LoginComponent = ({ role }: ILoginProps) => {
           position: "top-right",
         });
       }
-      router.push("/dashboard");
+      router.push(requiresOnboarding ? "/dashboard/onboarding" : "/dashboard");
     }
-  }, [isAuthenticated, loading, router, user]);
+  }, [authMode, isAuthenticated, loading, router, user]);
 
   useEffect(() => {
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
@@ -86,7 +149,8 @@ const LoginComponent = ({ role }: ILoginProps) => {
     if (!googleReady) return;
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
     if (!window?.google?.accounts?.id) return;
-    const container = document.getElementById(`google-login-${roleLower}`);
+    const containerId = authMode === "signup" ? `google-signup-${roleLower}` : `google-login-${roleLower}`;
+    const container = document.getElementById(containerId);
     if (!container) return;
     const buttonWidth = Math.min(400, Math.max(280, container.clientWidth || 320));
     window.google.accounts.id.initialize({
@@ -95,14 +159,42 @@ const LoginComponent = ({ role }: ILoginProps) => {
         try {
           if (!resp?.credential) throw new Error("Google credential not returned.");
           setIsLoading(true);
-          await loginWithGoogle({
-            idToken: resp.credential,
-            role: roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate",
-            rememberMe,
-          });
-          setLoginStatus("success");
-        } catch (error: any) {
-          const message = error?.response?.data?.message || error?.message || "Google login failed.";
+          const roleValue = roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate";
+          if (authMode === "signup") {
+            setSignupMethod("google");
+            setErrorMessage("");
+            await postData("/auth/google", {
+              idToken: resp.credential,
+              role: roleValue,
+              intent: "register",
+            });
+            const refreshed = await refreshUser();
+            if (!refreshed) {
+              throw new Error("Session cookie blocked. Allow cookies for the API domain and retry.");
+            }
+            setLoginStatus("success");
+            setIsRedirecting(true);
+            router.push("/dashboard/onboarding?auth=google");
+          } else {
+            await loginWithGoogle({
+              idToken: resp.credential,
+              role: roleValue,
+              rememberMe,
+            });
+            setLoginStatus("success");
+            setIsRedirecting(true);
+          }
+          } catch (error: any) {
+          const rawMessage = error?.response?.data?.message || error?.message || "Google login failed.";
+          const status = error?.response?.status ? ` (HTTP ${error.response.status})` : "";
+          const isNetwork = error?.message === "Network Error" || error?.code === "ERR_NETWORK";
+          const networkHint = isNetwork
+            ? `Google signup failed: Network error contacting ${baseUrl}/auth/google. Ensure backend is running and CORS/cookies allow ${baseUrl}.`
+            : null;
+          const message =
+            authMode === "signup"
+              ? networkHint || `Google signup failed: ${rawMessage}${status}`
+              : rawMessage;
           setErrorMessage(message);
           setLoginStatus("error");
           showToastMessage({ type: "error", message, position: "top-right" });
@@ -113,18 +205,26 @@ const LoginComponent = ({ role }: ILoginProps) => {
     });
     window.google.accounts.id.renderButton(container, {
       theme: "filled_black",
-      size: "large",
-      width: buttonWidth,
+      size: "medium",
+      width: Math.min(340, buttonWidth),
       text: "continue_with",
       shape: "pill",
     });
-  }, [googleReady, role, googleClientId, loginWithGoogle, rememberMe]);
+  }, [googleReady, role, googleClientId, loginWithGoogle, rememberMe, authMode, roleLower]);
+
+  if (isRedirecting) {
+    return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isRoutingToRegister) return;
+    if (isLoading) return;
     setIsLoading(true);
     setErrorMessage("");
+    if (authMode === "signup") {
+      setIsLoading(false);
+      return;
+    }
 
     if (!email || !password) {
       setIsLoading(false);
@@ -151,6 +251,7 @@ const LoginComponent = ({ role }: ILoginProps) => {
 
       play("success");
       setLoginStatus("success");
+      setIsRedirecting(true);
       showToastMessage({
         type: "success",
         message: "Login Successful",
@@ -167,6 +268,20 @@ const LoginComponent = ({ role }: ILoginProps) => {
       });
 
       const backendData = error?.response?.data;
+      const rawMessage = String(backendData?.message || error?.message || "").toLowerCase();
+      const isNotFound = rawMessage.includes("not found")
+        || rawMessage.includes("not registered")
+        || rawMessage.includes("no account")
+        || rawMessage.includes("does not exist")
+        || Number(error?.response?.status) === 404;
+
+      if (isNotFound) {
+        setErrorMessage("Account not found. Create a new account.");
+        setNotFoundEmail(email.trim());
+        setShowNotFoundCta(true);
+        return;
+      }
+
       const apiErrorMessage = error?.code === "SESSION_COOKIE_BLOCKED"
         ? "Session cookie was blocked by browser privacy settings. Lower your shields for obaol.com and retry."
         : error.message === "Network Error" || error.code === "ERR_NETWORK"
@@ -187,20 +302,139 @@ const LoginComponent = ({ role }: ILoginProps) => {
   };
 
   const handleCreateAccount = () => {
-    if (isLoading || isRoutingToRegister) return;
-    setIsRoutingToRegister(true);
-    if (registerRouteTimeoutRef.current) {
-      clearTimeout(registerRouteTimeoutRef.current);
-    }
-    registerRouteTimeoutRef.current = setTimeout(() => {
-      setIsRoutingToRegister(false);
-      registerRouteTimeoutRef.current = null;
-    }, 6000);
-    if (roleLower === "operator" || roleLower === "team") {
-      router.push("/auth/operator/register");
+    if (isLoading) return;
+    const target = roleLower === "operator" || roleLower === "team"
+      ? "/auth/operator/register"
+      : "/auth/register";
+    router.push(target);
+  };
+
+  const handleSendOtp = async () => {
+    setOtpAttempted(true);
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email first.");
       return;
     }
-    router.push("/auth/register");
+    if (!isInvalidEmail) {
+      setErrorMessage("Please enter a valid email.");
+      return;
+    }
+    setIsSendingOtp(true);
+    try {
+      setErrorMessage("");
+      let useExistingFlow = existingAccountFlow;
+      if (!useExistingFlow && !hasOnboardingSession) {
+        try {
+          const payload = {
+            email: email.trim(),
+            role: roleLower === "operator" || roleLower === "team" ? "Operator" : "Associate",
+          };
+          await postData("/auth/onboarding/start", payload);
+          const refreshed = await refreshUser();
+          if (!refreshed) {
+            throw new Error("Session cookie was blocked. Allow cookies for the API domain and retry.");
+          }
+          setHasOnboardingSession(true);
+        } catch (startError: any) {
+          const status = Number(startError?.response?.status || 0);
+          if (status === 409) {
+            setExistingAccountFlow(true);
+            setErrorMessage("Verify ownership to continue. We'll send a code if this email exists.");
+            useExistingFlow = true;
+          } else {
+            throw startError;
+          }
+        }
+      }
+      if (useExistingFlow) {
+        await postData("/verification/send-otp-existing", { method: "email", email: email.trim() }, {});
+        showToastMessage({
+          type: "success",
+          message: "If an account exists for this email, an OTP has been sent.",
+          position: "top-right",
+        });
+      } else {
+        await postData("/verification/send-otp", { method: "email", email: email.trim() }, {});
+        showToastMessage({ type: "success", message: "OTP sent to your email.", position: "top-right" });
+      }
+      setOtpSent(true);
+      setOtp("");
+      setOtpVerified(false);
+      const now = Date.now();
+      setOtpExpiresAt(now + 3 * 60 * 1000);
+      setResendAvailableAt(now + 2 * 60 * 1000);
+    } catch (err: any) {
+      const rawMessage = err?.response?.data?.message || err?.message || "Failed to send OTP.";
+      const message = normalizeSignupError(rawMessage);
+      setErrorMessage(message);
+      showToastMessage({ type: "error", message, position: "top-right" });
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (isSendingOtp) return;
+    await handleSendOtp();
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6) {
+      setErrorMessage("Enter the 6-digit OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+      if (existingAccountFlow) {
+        const verifyRes = await postData("/verification/verify-otp-existing", { code: otp, method: "email", email: email.trim() }, {});
+        const nextRoute = String(verifyRes?.data?.next || "");
+        showToastMessage({ type: "success", message: "OTP verified.", position: "top-right" });
+        if (nextRoute) {
+          router.push(nextRoute);
+          return;
+        }
+        const target = roleLower === "operator" || roleLower === "team" ? "/auth/operator" : "/auth";
+        router.push(`${target}?prefill=${encodeURIComponent(email.trim())}`);
+        return;
+      }
+      await postData("/verification/verify-otp", { code: otp, method: "email", email: email.trim() }, {});
+      setOtpVerified(true);
+      showToastMessage({ type: "success", message: "Email verified.", position: "top-right" });
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.message || "OTP verification failed.";
+      setErrorMessage(message);
+      showToastMessage({ type: "error", message, position: "top-right" });
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleCreateAccountInline = async () => {
+    if (isCreatingAccount || isLoading) return;
+    const targetEmail = (notFoundEmail || email).trim();
+    if (!targetEmail) {
+      setErrorMessage("Please enter a valid email to create your account.");
+      return;
+    }
+    if (!otpVerified) {
+      setErrorMessage("Please verify your email with OTP before continuing.");
+      return;
+    }
+    setIsCreatingAccount(true);
+    try {
+      const refreshed = await refreshUser();
+      if (!refreshed) {
+        throw new Error("Session cookie blocked. Allow cookies for the API domain and retry.");
+      }
+      setIsRedirecting(true);
+      router.push("/dashboard/onboarding?auth=email");
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.message || "Could not create account. Please try again.";
+      setErrorMessage(message);
+      showToastMessage({ type: "error", message, position: "top-right" });
+    } finally {
+      setIsCreatingAccount(false);
+    }
   };
 
   const roleContent: Record<string, any> = {
@@ -302,13 +536,23 @@ const LoginComponent = ({ role }: ILoginProps) => {
       description: "Create an account to start trading",
     };
 
+  const canSendOtp = !!email.trim() && isInvalidEmail;
+  const otpExpiryRemaining = Math.max(0, (otpExpiresAt || 0) - nowTs);
+  const resendRemaining = Math.max(0, (resendAvailableAt || 0) - nowTs);
+  const formatCountdown = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
   return (
     <AuthLayout
-      title={role}
-      subtitle="Login"
+      title={authMode === "signup" ? `${role} — Create Account` : role}
+      subtitle={authMode === "signup" ? "Create Account" : "Login"}
       leftPanel={currentRoleContent}
       topContent={
-        !isAuthenticated && (
+        !isAuthenticated && authMode !== "signup" && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -320,16 +564,12 @@ const LoginComponent = ({ role }: ILoginProps) => {
               <span className="text-sm font-medium text-foreground/80 leading-snug">{joinCta.description}</span>
             </div>
             <div className="flex items-center gap-2 text-warning-500 font-bold text-sm group-hover/banner:translate-x-1 transition-transform duration-300">
-              {isRoutingToRegister ? (
-                <span className="w-4 h-4 rounded-full border-2 border-warning-500 border-t-transparent animate-spin" />
-              ) : (
-                <>
-                  Join Now
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </>
-              )}
+              <>
+                Join Now
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
             </div>
             {/* Ambient shine */}
             <div className="absolute inset-0 -translate-x-full group-hover/banner:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-in-out skew-x-12" />
@@ -337,7 +577,113 @@ const LoginComponent = ({ role }: ILoginProps) => {
         )
       }
     >
-      <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
+      <form
+        className="w-full flex flex-col gap-6"
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (authMode === "signup" && e.key === "Enter") {
+            e.preventDefault();
+          }
+        }}
+      >
+        {authMode === "signup" && (
+          <div className="w-full flex flex-col gap-5">
+            {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && (
+              <div className="w-full flex flex-col gap-4">
+                <div className="relative flex items-center w-full px-4">
+                  <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
+                  <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Signup via Google</span>
+                  <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                <div className="w-full flex flex-col gap-6">
+                  <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-inner group/google">
+                    <div className="flex items-center justify-center p-3 gap-3 border-b border-default-100/50 mb-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50">Sign in with Google</span>
+                    </div>
+                    {googleClientId ? (
+                      <div className="p-2 overflow-hidden transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.15)]">
+                        <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-danger-500/70 font-black uppercase tracking-[0.4em] text-center py-4 italic">Google_Engine_Offline</p>
+                    )}
+                  </div>
+                  <p className="text-[10px] font-bold text-center text-foreground/30 uppercase tracking-[0.2em] px-4 leading-relaxed italic opacity-60">
+                    Propagate verification via Google OAuth 2.0 protocol.
+                  </p>
+                </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Highlighted Error Message for Signup/Login */}
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={`p-4 rounded-2xl border flex flex-col gap-3 shadow-xl relative overflow-hidden group mb-2 ${
+              errorMessage.toLowerCase().includes("already exist")
+                ? "bg-warning-500/10 border-warning-500/20 text-warning-700 dark:text-warning-400"
+                : "bg-danger-500/10 border-danger-500/20 text-danger-700 dark:text-danger-400"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${
+                errorMessage.toLowerCase().includes("already exist") ? "bg-warning-500/20" : "bg-danger-500/20"
+              }`}>
+                <FiAlertCircle className="text-lg" />
+              </div>
+              <div className="flex-1 flex flex-col gap-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">
+                   {errorMessage.toLowerCase().includes("already exist") ? "Notice" : "Error"}
+                </span>
+                <p className="text-sm font-bold leading-relaxed">
+                  {errorMessage.replace(/sign in\.?$/i, "")}
+                </p>
+              </div>
+            </div>
+
+            {errorMessage.toLowerCase().includes("already exist") && (
+              <div className="flex items-center gap-3 pl-11">
+                <Button
+                  size="sm"
+                  radius="lg"
+                  className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest px-6 h-8"
+                  onPress={() => {
+                    const authRole = roleLower === "team" || roleLower === "operator" ? "operator" : "associate";
+                    const target = authRole === "operator" ? "/auth/operator" : "/auth";
+                    router.push(target);
+                  }}
+                >
+                  Sign In Now
+                </Button>
+              </div>
+            )}
+            
+            {showNotFoundCta && authMode === "login" && (
+              <div className="flex items-center gap-3 pl-11">
+                <Button
+                  size="sm"
+                  radius="lg"
+                  className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest px-6 h-8"
+                  onPress={handleCreateAccount}
+                >
+                  Create account
+                </Button>
+              </div>
+            )}
+
+            {/* Ambient Background Pulse */}
+            <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] rounded-full opacity-10 -mr-16 -mt-16 animate-pulse ${
+               errorMessage.toLowerCase().includes("already exist") ? "bg-warning-500" : "bg-danger-500"
+            }`} />
+          </motion.div>
+        )}
+
         <Input
           value={email}
           className="w-full"
@@ -345,129 +691,229 @@ const LoginComponent = ({ role }: ILoginProps) => {
           variant="bordered"
           label="Email Address"
           labelPlacement="outside"
-          isInvalid={!isInvalidEmail && email.length > 0}
-          errorMessage={!isInvalidEmail && email.length > 0 ? "Please enter a valid email" : ""}
+          isDisabled={authMode === "signup" && otpSent}
+          isInvalid={authMode === "signup"
+            ? (otpAttempted && (!email.trim() || !isInvalidEmail))
+            : (!isInvalidEmail && email.length > 0)}
+          errorMessage={authMode === "signup"
+            ? (otpAttempted && !email.trim()
+              ? "Email is required"
+              : otpAttempted && !isInvalidEmail
+                ? "Enter a valid email address"
+                : "")
+            : (!isInvalidEmail && email.length > 0 ? "Enter a valid email address" : "")}
           isRequired
           placeholder="name@example.com"
           onValueChange={(val) => {
             setEmail(val);
+            setNotFoundEmail("");
+            setShowNotFoundCta(false);
+            setExistingAccountFlow(false);
+            setOtpSent(false);
+            setOtpVerified(false);
+            setOtp("");
+            if (errorMessage) setErrorMessage("");
             if (loginStatus !== "idle") setLoginStatus("idle");
           }}
-          classNames={{
-            inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
-          }}
+          classNames={inputClasses}
         />
 
-        <Input
-          value={password}
-          className="w-full"
-          label="Password"
-          labelPlacement="outside"
-          placeholder="Enter your password"
-          variant="bordered"
-          isRequired
-          endContent={
-            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-              {isVisible ? (
-                <IoEye className="text-2xl text-foreground/40 pointer-events-none" />
-              ) : (
-                <IoEyeOff className="text-2xl text-foreground/40 pointer-events-none" />
-              )}
+        {authMode === "login" && (
+          <Input
+            value={password}
+            className="w-full"
+            label="Password"
+            labelPlacement="outside"
+            placeholder="Enter your password"
+            variant="bordered"
+            isRequired
+            isInvalid={false}
+            errorMessage={""}
+            endContent={
+              <button className="focus:outline-none p-1 hover:text-warning-500 transition-colors" type="button" onClick={toggleVisibility}>
+                {isVisible ? (
+                  <IoEye className="text-xl opacity-60 pointer-events-none" />
+                ) : (
+                  <IoEyeOff className="text-xl opacity-60 pointer-events-none" />
+                )}
+              </button>
+            }
+            type={isVisible ? "text" : "password"}
+            onValueChange={(val) => {
+              setPassword(val);
+              if (loginStatus !== "idle") setLoginStatus("idle");
+            }}
+            classNames={inputClasses}
+          />
+        )}
+
+        {authMode === "login" && (
+          <div className="flex justify-between items-center w-full px-2">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-divider bg-content2 text-warning-500 focus:ring-warning-500/20 transition-all cursor-pointer"
+                />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-foreground transition-colors">
+                Remember me
+              </span>
+            </label>
+            <button
+              type="button"
+              onClick={() => router.push(`/auth/forgot-password?role=${roleLower === 'operator' || roleLower === 'team' ? 'Operator' : 'Associate'}`)}
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 hover:text-warning-400 hover:scale-105 transition-all italic underline decoration-warning-500/20 underline-offset-4"
+            >
+              Forgot password?
             </button>
-          }
-          type={isVisible ? "text" : "password"}
-          onValueChange={(val) => {
-            setPassword(val);
-            if (loginStatus !== "idle") setLoginStatus("idle");
-          }}
-          classNames={{
-            inputWrapper: "bg-default-100 data-[hover=true]:bg-default-200 group-data-[focus=true]:bg-default-100",
-          }}
-        />
+          </div>
+        )}
 
-        <div className="flex justify-between items-center w-full px-1">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="peer appearance-none w-5 h-5 rounded border-2 border-default-300 checked:border-warning-500 checked:bg-warning-500 transition-all cursor-pointer"
-              />
-              <svg
-                className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none left-0.5 top-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={4}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <span className="text-sm text-foreground/50 group-hover:text-foreground transition-colors font-medium">Remember me</span>
-          </label>
-          <p
-            onClick={() => router.push(`/auth/forgot-password?role=${role}`)}
-            className="text-sm text-foreground/50 hover:text-foreground cursor-pointer transition-colors font-medium"
-          >
-            Forgot password?
-          </p>
-        </div>
 
-        {errorMessage && (
+
+        {authMode === "login" && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-danger-500/10 border border-danger-500/20 flex items-center gap-3 text-danger-600 dark:text-danger-400 text-sm font-semibold shadow-sm overflow-hidden relative group"
+            className="mt-6"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="shrink-0 w-8 h-8 rounded-full bg-danger-500/20 flex items-center justify-center">
-              <FiAlertCircle className="text-lg" />
-            </div>
-            <div className="flex-1 leading-relaxed">
-              {errorMessage}
-            </div>
-            {/* Ambient pulse */}
-            <div className="absolute inset-0 bg-danger-500/5 animate-pulse pointer-events-none" />
+            <Button
+              type="submit"
+              className={`w-full font-black uppercase italic tracking-[0.2em] h-14 rounded-2xl shadow-2xl transition-all duration-500 ${
+                loginStatus === "success" 
+                  ? "bg-success-500 shadow-success-500/20" 
+                  : loginStatus === "error"
+                    ? "bg-danger-500 shadow-danger-500/20"
+                    : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20"
+              }`}
+              color="warning"
+              size="lg"
+              radius="lg"
+              isLoading={isLoading}
+            >
+              {loginStatus === "success"
+                ? "Signed In"
+                : loginStatus === "error"
+                  ? "Sign In"
+                  : isLoading
+                    ? "Signing in..."
+                    : "Sign In"}
+            </Button>
           </motion.div>
         )}
 
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full"
-        >
-          <Button
-            className={`w-full font-bold shadow-xl transition-all duration-500 h-12 border-none
-              ${loginStatus === "success"
-                ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success/20"
-                : loginStatus === "error"
-                  ? "bg-gradient-to-r from-danger-500 to-red-600 shadow-danger/20"
-                  : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning/20"
-              }`}
-            color={loginStatus === "success" ? "success" : loginStatus === "error" ? "danger" : "warning"}
-            type="submit"
-            isLoading={isLoading || isRoutingToRegister}
-            isDisabled={isRoutingToRegister}
-            size="lg"
-            radius="lg"
-          >
-            {isRoutingToRegister
-              ? "Opening registration..."
-              : loginStatus === "success"
-                ? "Access Granted"
-                : loginStatus === "error"
-                  ? "Check Credentials"
-                  : isLoading
-                    ? "Verifying..."
-                    : "Sign In"}
-          </Button>
-        </motion.div>
+        {authMode === "signup" && (
+          <div className="w-full flex flex-col gap-5">
+            {!otpSent ? (
+              <>
+                <Button
+                  className="w-full font-black uppercase italic tracking-[0.2em] h-12 rounded-2xl bg-warning-500 shadow-xl shadow-warning-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  color="warning"
+                  size="md"
+                  radius="lg"
+                  isLoading={isSendingOtp}
+                  isDisabled={!canSendOtp}
+                  onPress={handleSendOtp}
+                >
+                  {"Send OTP"}
+                </Button>
+                {!canSendOtp && (
+                  <p className="text-[10px] font-semibold text-foreground/50 text-center">
+                    Enter a valid email to continue.
+                  </p>
+                )}
+                {errorMessage && authMode === "signup" && (
+                  <div className="rounded-lg border border-danger-500/40 bg-danger-500/15 px-3 py-2 text-[11px] font-semibold text-danger-400 text-center shadow-[0_0_18px_rgba(244,63,94,0.18)]">
+                    {errorMessage}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <Input
+                  value={otp}
+                  className="w-full"
+                  type="text"
+                  variant="bordered"
+                  label="Email OTP"
+                  labelPlacement="outside"
+                  isRequired
+                  placeholder="000 000"
+                  onValueChange={(val) => {
+                    const clean = val.replace(/\D/g, "").slice(0, 6);
+                    setOtp(clean);
+                  }}
+                  classNames={inputClasses}
+                />
+                <div className="flex flex-col items-center gap-1 text-[11px] font-semibold text-foreground/60">
+                  <span>Code expires in {formatCountdown(otpExpiryRemaining)}</span>
+                  {resendRemaining <= 0 && (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      className="text-warning-500 hover:text-warning-400 transition-colors"
+                    >
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
+                <div className="w-full flex flex-col gap-4">
+                  {!otpVerified ? (
+                    <Button
+                      className="w-full font-black uppercase italic tracking-[0.2em] h-12 rounded-2xl bg-warning-500 shadow-xl shadow-warning-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      color="warning"
+                      size="lg"
+                      radius="lg"
+                      isLoading={isVerifyingOtp}
+                      onPress={handleVerifyOtp}
+                    >
+                      Verify OTP
+                    </Button>
+                  ) : (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center justify-center gap-3 py-4 rounded-xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 font-black uppercase text-[11px] tracking-[0.2em] shadow-inner"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-success-500 text-white flex items-center justify-center shadow-lg shadow-success-500/40">
+                        <FiCheck size={12} strokeWidth={4} />
+                      </div>
+                      OTP Verified
+                    </motion.div>
+                  )}
 
-        {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && (
+                  {otpVerified && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="w-full"
+                    >
+                      <Button
+                        className="w-full font-bold h-12 bg-gradient-to-r from-success-500 to-green-600 shadow-xl shadow-success-500/20"
+                        color="success"
+                        size="lg"
+                        radius="lg"
+                        isLoading={isCreatingAccount}
+                        onPress={handleCreateAccountInline}
+                      >
+                        Continue to Onboarding
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "login" && (
           <div className="mt-8 flex flex-col items-center gap-5">
             <div className="relative flex items-center w-full px-4">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
-              <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Protocol Sync</span>
+              <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Or continue with</span>
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
             </div>
 
@@ -475,62 +921,96 @@ const LoginComponent = ({ role }: ILoginProps) => {
               <div className="p-1 px-1.5 rounded-[2rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-inner group/google">
                 <div className="flex items-center justify-center p-3 gap-3 border-b border-default-100/50 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Secured Identity Link</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Sign in with Google</span>
                 </div>
                 {googleClientId ? (
                   <div className="p-1.5 overflow-hidden transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.1)]">
                     <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[1.02]" />
                   </div>
                 ) : (
-                  <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google Engine Offline</p>
+                  <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
               <p className="text-[9px] font-bold text-center text-foreground/30 uppercase tracking-[0.15em] px-4 leading-relaxed">
-                Connect via Google for instant biometric-grade authentication across the OBAOL trade network.
+                Use Google to sign in quickly and securely.
               </p>
             </div>
           </div>
         )}
 
-        <div className="mt-4 pt-2 w-full">
-          <div className="relative flex items-center mb-5">
-            <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
-            <span className="flex-shrink-0 mx-4 text-foreground/40 text-[10px] uppercase tracking-widest font-bold">Role Switching</span>
-            <div className="flex-grow border-t border-default-200/60 dark:border-default-100/10"></div>
+        <div className="mt-4 flex items-center justify-center">
+          {authMode === "login" ? (
+            <button
+              type="button"
+              onClick={handleCreateAccount}
+              className="text-xs text-foreground/50 hover:text-warning-500 font-semibold transition-colors"
+            >
+              New here? Create account
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const target = roleLower === "operator" || roleLower === "team" ? "/auth/operator" : "/auth";
+                router.push(target);
+              }}
+              className="text-xs text-foreground/50 hover:text-warning-500 font-semibold transition-colors"
+            >
+              Already have an account? Sign in
+            </button>
+          )}
+        </div>
+
+        <div className="mt-8 pt-4 w-full">
+          <div className="relative flex items-center mb-10">
+            <div className="flex-grow border-t border-divider h-px"></div>
+            <span className="flex-shrink-0 mx-6 text-default-400 text-[9px] font-black uppercase tracking-[0.4em] italic opacity-60">Switch Role</span>
+            <div className="flex-grow border-t border-divider h-px"></div>
           </div>
 
-          {role === "Associate" ? (
-            <button
-              type="button"
-              onClick={() => router.push("/auth/operator")}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-default-100/50 hover:bg-default-200/80 dark:bg-default-50/5 dark:hover:bg-default-100/20 text-foreground font-semibold transition-all duration-300 border border-default-200 cursor-pointer shadow-sm group/btn"
-            >
-              <span>Sign in as Operator</span>
-              <svg className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-          ) : role === "Operator" || role === "team" ? (
-            <button
-              type="button"
-              onClick={() => router.push("/auth")}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-default-100/50 hover:bg-default-200/80 dark:bg-default-50/5 dark:hover:bg-default-100/20 text-foreground font-semibold transition-all duration-300 border border-default-200 cursor-pointer shadow-sm group/btn"
-            >
-              <span>Sign in as Associate</span>
-              <svg className="w-4 h-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-          ) : null}
+          <div className="space-y-4">
+            {role === "Associate" ? (
+              <button
+                type="button"
+                onClick={() => router.push("/auth/operator")}
+                className="w-full flex items-center justify-between px-6 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[11px] tracking-widest transition-all duration-500 group/btn shadow-sm"
+              >
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="opacity-40 text-[8px] tracking-[0.6em]">Switch Role</span>
+                  <span>Sign in as Operator</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
+                  <FiArrowRight className="text-sm group-hover/btn:text-black transition-colors" />
+                </div>
+              </button>
+            ) : (role === "Operator" || role === "team") ? (
+              <button
+                type="button"
+                onClick={() => router.push("/auth")}
+                className="w-full flex items-center justify-between px-6 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[11px] tracking-widest transition-all duration-500 group/btn shadow-sm"
+              >
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="opacity-40 text-[8px] tracking-[0.6em]">Switch Role</span>
+                  <span>Sign in as Associate</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
+                  <FiArrowRight className="text-sm group-hover/btn:text-black transition-colors" />
+                </div>
+              </button>
+            ) : null}
 
-          <div className="mt-6 flex justify-center w-full">
-            <button
-              type="button"
-              onClick={() => router.push("/roles")}
-              className="text-xs text-foreground/50 hover:text-orange-500 font-medium transition-colors flex items-center gap-1"
-            >
-              Know more about platform roles <FiArrowRight size={12} />
-            </button>
+            <div className="mt-10 flex justify-center w-full">
+              <button
+                type="button"
+                onClick={() => router.push("/roles")}
+                className="group flex flex-col items-center gap-2"
+              >
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-default-400 group-hover:text-warning-500 transition-colors italic leading-none">
+                  View all roles
+                </span>
+                <div className="h-px w-24 bg-gradient-to-r from-transparent via-divider to-transparent group-hover:via-warning-500 transition-all" />
+              </button>
+            </div>
           </div>
         </div>
       </form>

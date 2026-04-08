@@ -691,20 +691,46 @@ export default function ExecutionEnquiriesPage() {
                                         <Autocomplete
                                           placeholder="Bid on behalf"
                                           variant="flat"
-                                          radius="md"
+                                          radius="lg"
                                           selectedKey={selectedExecutionBidProvider[key] || ""}
                                           onSelectionChange={(value) =>
                                             setSelectedExecutionBidProvider((prev) => ({ ...prev, [key]: String(value || "") }))
                                           }
-                                          classNames={{ listbox: "bg-content1", trigger: "h-8 min-h-[32px] text-xs bg-content2/50 px-3 py-0" }}
+                                          popoverProps={{
+                                            classNames: {
+                                              content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                            },
+                                            offset: 8
+                                          }}
+                                          listboxProps={{
+                                            itemClasses: {
+                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                            }
+                                          }}
+                                          classNames={{ 
+                                            listbox: "bg-transparent", 
+                                            trigger: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50",
+                                            input: "text-xs font-black uppercase tracking-tight"
+                                          }}
                                           items={bidCompanyOptions}
                                         >
                                           {(company: any) => {
                                             const companyId = getCompanyId(company);
                                             const companyName = getCompanyLabel(company);
                                             return (
-                                              <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
-                                                {companyName}
+                                              <AutocompleteItem 
+                                                key={companyId} 
+                                                textValue={companyName}
+                                              >
+                                                <div className="flex items-center gap-3">
+                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black border border-divider">
+                                                      <FiPackage size={14} />
+                                                   </div>
+                                                   <div className="flex flex-col">
+                                                      <span className="text-[11px] font-black uppercase italic tracking-tighter leading-tight">{companyName}</span>
+                                                      <span className="text-[8px] font-bold text-default-400 lowercase tracking-widest opacity-60">id_{companyId.slice(-6)}</span>
+                                                   </div>
+                                                </div>
                                               </AutocompleteItem>
                                             );
                                           }}
@@ -786,20 +812,46 @@ export default function ExecutionEnquiriesPage() {
                                         <Autocomplete
                                           placeholder="Provider to Commit"
                                           variant="flat"
-                                          radius="md"
+                                          radius="lg"
                                           selectedKey={selectedExecutionCommitProvider[key] || ""}
                                           onSelectionChange={(value) =>
                                             setSelectedExecutionCommitProvider((prev) => ({ ...prev, [key]: String(value || "") }))
                                           }
-                                          classNames={{ listbox: "bg-content1", trigger: "h-8 min-h-[32px] text-xs bg-content2/50 px-3 py-0" }}
+                                          popoverProps={{
+                                            classNames: {
+                                              content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                            },
+                                            offset: 8
+                                          }}
+                                          listboxProps={{
+                                            itemClasses: {
+                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                            }
+                                          }}
+                                          classNames={{ 
+                                            listbox: "bg-transparent", 
+                                            trigger: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50",
+                                            input: "text-xs font-black uppercase tracking-tight"
+                                          }}
                                           items={commitOptions}
                                         >
                                           {(company: any) => {
                                             const companyId = getCompanyId(company);
                                             const companyName = getCompanyLabel(company);
                                             return (
-                                              <AutocompleteItem key={companyId} textValue={companyName} className="font-bold text-xs">
-                                                {companyName}
+                                              <AutocompleteItem 
+                                                key={companyId} 
+                                                textValue={companyName}
+                                              >
+                                                <div className="flex items-center gap-3">
+                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black border border-divider">
+                                                      <FiShield size={14} />
+                                                   </div>
+                                                   <div className="flex flex-col">
+                                                      <span className="text-[11px] font-black uppercase italic tracking-tighter leading-tight">{companyName}</span>
+                                                      <span className="text-[8px] font-bold text-default-400 lowercase tracking-widest opacity-60">id_{companyId.slice(-6)}</span>
+                                                   </div>
+                                                </div>
                                               </AutocompleteItem>
                                             );
                                           }}

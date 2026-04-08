@@ -20,6 +20,8 @@ export interface User {
   associateCompanyId?: string | null;
   companyInterestsConfigured?: boolean;
   companyInterests?: string[];
+  onboardingComplete?: boolean;
+  registrationStatus?: string | null;
   verified: {
     email: boolean;
     phone?: boolean;
@@ -32,6 +34,7 @@ interface AuthContextProps extends AuthState {
   login: (data: LoginData) => Promise<void>;
   loginWithGoogle: (data: GoogleLoginData) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<boolean>;
 }
 
 interface LoginData {
@@ -54,6 +57,7 @@ const AuthContext = createContext<AuthContextProps>({
   login: async () => { },
   loginWithGoogle: async () => { },
   logout: async () => { },
+  refreshUser: async () => false,
 });
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
@@ -178,6 +182,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const userResponse = await getData("/verify-token");
+      if (userResponse?.data?.success) {
+        setAuth({
+          isAuthenticated: true,
+          user: userResponse.data.user,
+          loading: false,
+        });
+        return true;
+      } else {
+        setAuth({
+          isAuthenticated: false,
+          user: null,
+          loading: false,
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Refresh user error:", error);
+      setAuth({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+      });
+      return false;
+    }
+  };
+
   // Check authentication status on mount
   useEffect(() => {
 
@@ -218,7 +251,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ ...auth, login, loginWithGoogle, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

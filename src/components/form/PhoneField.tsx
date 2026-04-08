@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
-import { COMMON_DIAL_CODES, parsePhoneValue } from "@/utils/phone";
+import { COMMON_DIAL_CODES, parsePhoneValue, normalizeDialCode } from "@/utils/phone";
 
 type PhoneFieldProps = {
   label: string;
@@ -12,6 +12,8 @@ type PhoneFieldProps = {
   nationalValue?: any;
   disabled?: boolean;
   className?: string;
+  isInvalid?: boolean;
+  errorMessage?: string;
   onChange: (next: { e164: string; countryCode: string; national: string }) => void;
 };
 
@@ -23,19 +25,26 @@ export default function PhoneField({
   nationalValue,
   disabled,
   className,
+  isInvalid,
+  errorMessage,
   onChange,
 }: PhoneFieldProps) {
   const AutocompleteAny = Autocomplete as any;
   const AutocompleteItemAny = AutocompleteItem as any;
 
+  const allowedDialCodes = useMemo(() => new Set(COMMON_DIAL_CODES.map((item) => item.key)), []);
+  const normalizedCountryCode = normalizeDialCode(countryCodeValue);
+  const hasValidCountryCode = allowedDialCodes.has(normalizedCountryCode);
+
   const parsed = useMemo(
     () =>
       parsePhoneValue({
         raw: value,
-        countryCode: countryCodeValue,
+        countryCode: hasValidCountryCode ? normalizedCountryCode : undefined,
         national: nationalValue,
+        fallbackCountryCode: "+91",
       }),
-    [value, countryCodeValue, nationalValue]
+    [value, hasValidCountryCode, normalizedCountryCode, nationalValue]
   );
 
   return (
@@ -52,13 +61,14 @@ export default function PhoneField({
             listboxWrapper: "max-h-[300px]",
           }}
           inputProps={{
+            autoComplete: "off",
             classNames: {
-              inputWrapper: "shadow-none bg-transparent border-none min-h-[44px] h-[44px] px-3",
-              input: "text-xs font-bold",
+              inputWrapper: "shadow-none bg-transparent border-none min-h-[44px] h-[44px] px-3 ring-0 outline-none data-[focus=true]:bg-warning-500/5 group-data-[focus=true]:border-none shadow-none",
+              input: "text-xs font-black tracking-widest selection:bg-warning-500/20 selection:text-warning-600 outline-none ring-0",
             }
           }}
           disabledKeys={[]}
-          defaultSelectedKey={parsed.countryCode || "+91"}
+          defaultSelectedKey={hasValidCountryCode ? normalizedCountryCode : "+91"}
           onSelectionChange={(key: any) => {
             const selected = String(key || "+91");
             onChange({
@@ -90,12 +100,14 @@ export default function PhoneField({
             type="tel"
             variant="light"
             isDisabled={disabled}
+            isInvalid={isInvalid}
             placeholder="Phone number"
+            autoComplete="tel-national"
             value={parsed.national}
             className="w-full"
             classNames={{
-              inputWrapper: "bg-transparent border-none min-h-[44px] h-[44px] px-4 shadow-none",
-              input: "text-sm font-medium tracking-wide placeholder:text-default-300",
+              inputWrapper: "bg-transparent border-none min-h-[44px] h-[44px] px-4 shadow-none ring-0 outline-none data-[focus=true]:bg-warning-500/5 group-data-[focus=true]:border-none shadow-none",
+              input: "text-sm font-black tracking-widest placeholder:text-default-300 selection:bg-warning-500/30 selection:text-warning-600 outline-none ring-0",
             }}
             onValueChange={(next) => {
               const national = String(next || "").replace(/\D/g, "");
@@ -108,6 +120,9 @@ export default function PhoneField({
           />
         </div>
       </div>
+      {isInvalid && errorMessage ? (
+        <div className="mt-1 px-2 text-[11px] text-danger-500">{errorMessage}</div>
+      ) : null}
     </div>
   );
 }

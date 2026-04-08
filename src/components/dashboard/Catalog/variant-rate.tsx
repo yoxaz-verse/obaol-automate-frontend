@@ -1728,41 +1728,54 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                 )}
                 {isSuccess ? (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-10 gap-6 text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-12 gap-8 text-center"
                   >
-                    <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-2">
-                      <FiCheckCircle className="text-success text-5xl" />
+                    <div className="relative">
+                       <div className="absolute inset-0 bg-success-500/20 blur-[30px] rounded-full animate-pulse" />
+                       <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-success-500 to-emerald-600 flex items-center justify-center relative shadow-[0_15px_40px_rgba(16,185,129,0.3)] border border-white/20">
+                         <FiCheckCircle className="text-white text-4xl" />
+                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="font-black text-2xl tracking-tight text-foreground uppercase">Request Sent!</h3>
-                      <p className="text-sm text-default-500 font-medium max-w-[240px] leading-relaxed">
-                        Your sample request has been successfully submitted to the supplier.
-                      </p>
-                      <p className="text-[11px] text-default-400 font-semibold uppercase tracking-widest">
-                        For the next {sampleCooldownDays} days, you cannot book another sample from this supplier.
-                      </p>
+
+                    <div className="space-y-4 px-4">
+                      <div className="space-y-1">
+                        <h3 className="font-black text-3xl tracking-tighter text-foreground uppercase italic underline decoration-success-500/30 underline-offset-8">Protocol Initiated</h3>
+                        <p className="text-[10px] font-black text-success-500 uppercase tracking-[0.4em] mt-3">Tactical Dispatch Sent</p>
+                      </div>
+                      
+                      <div className="max-w-[280px] mx-auto py-2">
+                        <p className="text-xs text-default-500 font-bold leading-relaxed uppercase tracking-wide">
+                          Your sample request has been successfully submitted to the supplier for preparation.
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-foreground/[0.03] border border-divider/50 rounded-2xl backdrop-blur-md">
+                         <p className="text-[9px] text-default-400 font-black uppercase tracking-[0.2em] leading-loose italic">
+                           Logistics Lock: Next sample dispatch protocol available in <span className="text-warning-500">{sampleCooldownDays} days</span> for this node.
+                         </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+
+                    <div className="flex flex-col w-full gap-3 mt-4">
                       <Button
-                        className="font-black uppercase tracking-widest px-10 shadow-lg shadow-success/20"
-                        color="success"
-                        variant="shadow"
+                        fullWidth
+                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-success-500/20 bg-gradient-to-r from-success-500 to-emerald-600 text-white border-none hover:scale-[1.02] active:scale-95 transition-all"
                         onPress={onClose}
                       >
-                        Acknowledge
+                        Acknowledge Protocol
                       </Button>
                       <Button
-                        className="font-black uppercase tracking-widest px-10"
-                        color="warning"
+                        fullWidth
                         variant="flat"
+                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] bg-foreground/5 hover:bg-foreground/10 border border-divider transition-all active:scale-95"
                         onPress={() => {
                           onClose();
                           router.push("/dashboard/sample-requests");
                         }}
                       >
-                        Go To Sample Requests
+                        Navigate to Hub
                       </Button>
                     </div>
                   </motion.div>

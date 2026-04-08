@@ -148,13 +148,13 @@ export default function Header() {
                       }}
                     >
                       <DropdownItem key="associate" textValue="Join as Associate">
-                        <Link href="/auth/register" className="flex flex-col gap-0.5 px-1 py-1">
+                        <Link href="/auth" className="flex flex-col gap-0.5 px-1 py-1">
                           <span className="text-sm font-bold text-foreground">Join as Associate</span>
                           <span className="text-[11px] text-foreground/50">For companies & traders</span>
                         </Link>
                       </DropdownItem>
                       <DropdownItem key="operator" textValue="Join as Operator">
-                        <Link href="/auth/operator/register" className="flex flex-col gap-0.5 px-1 py-1">
+                        <Link href="/auth/operator" className="flex flex-col gap-0.5 px-1 py-1">
                           <span className="text-sm font-bold text-foreground">Join as Operator</span>
                           <span className="text-[11px] text-foreground/50">For platform managers</span>
                         </Link>
@@ -278,14 +278,14 @@ export default function Header() {
                 {!loading && !isAuthenticated && (
                   <div className="flex flex-col gap-2 pt-2">
                     <Link
-                      href="/auth/register"
+                      href="/auth"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
                     >
                       Join as Associate
                     </Link>
                     <Link
-                      href="/auth/operator/register"
+                      href="/auth/operator"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center py-2 text-xs font-bold text-orange-500 uppercase tracking-tight"
                     >

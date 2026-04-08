@@ -111,7 +111,7 @@ export default function AssociateRolePage() {
                 className="flex flex-wrap gap-4 pt-4"
               >
                 <Link
-                  href="/auth/register"
+                  href="/auth"
                   className="px-8 py-4 rounded-2xl bg-orange-600 text-white font-bold text-lg shadow-[0_0_30px_-5px_rgba(234,88,12,0.5)] hover:bg-orange-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 group"
                 >
                   Join as Associate
@@ -276,7 +276,7 @@ export default function AssociateRolePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               <Link
-                href="/auth/register"
+                href="/auth"
                 className="px-12 py-6 rounded-[2rem] bg-orange-600 text-white font-black text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:bg-orange-700 hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-4 group"
               >
                 Register Now

@@ -112,7 +112,7 @@ export default function OperatorTeamPage() {
   const referralLink = useMemo(() => {
     if (!referralCode) return "";
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/auth/operator/register?ref=${referralCode}`;
+    return `${window.location.origin}/auth/operator?ref=${referralCode}`;
   }, [referralCode]);
 
   const directTeam: TeamRow[] = useMemo(() => {

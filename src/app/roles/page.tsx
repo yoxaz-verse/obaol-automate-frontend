@@ -25,7 +25,7 @@ export default function RolesPage() {
 
   const handleRegister = () => {
     setIsRegisterLoading(true);
-    router.push("/auth/register");
+    router.push("/auth");
   };
 
   const handleJoin = () => {

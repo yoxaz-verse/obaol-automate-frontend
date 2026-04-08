@@ -160,6 +160,7 @@ export default function EnquiryDetailsPage() {
     const [docViewerOpen, setDocViewerOpen] = useState(false);
     const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
     const [conversionError, setConversionError] = useState("");
+    const [isConvertingOrder, setIsConvertingOrder] = useState(false);
     const [reopenRequestOpen, setReopenRequestOpen] = useState(false);
     const [reopenReason, setReopenReason] = useState("");
     const [clarificationOpen, setClarificationOpen] = useState(false);
@@ -1360,18 +1361,9 @@ export default function EnquiryDetailsPage() {
     const normalizedStatus = String(enquiry.status || "").toUpperCase();
     const hasSellerAccepted = Boolean(enquiry.sellerAcceptedAt) || isImportEnquiry;
     const hasBuyerConfirmed = Boolean(enquiry.buyerConfirmedAt);
-    const stageLockKeys = new Set([
-        "RESPONSIBILITIES_FINALIZED",
-        "PROFORMA_ISSUED",
-        "OTHER_DOCUMENTS",
-        "PURCHASE_ORDER_CREATED",
-        "PURCHASE_ORDER_RECEIVED",
-        "ORDER_CONFIRMED",
-    ]);
     const hasResponsibilitiesFinalized = Boolean(
         (enquiry as any).responsibilitiesFinalizedAt ||
-        responsibilitiesLockedOverride ||
-        stageLockKeys.has(String(workflowStage || "").toUpperCase())
+        responsibilitiesLockedOverride
     );
     const hasExecutionContextForStage = executionContext.tradeType === "DOMESTIC"
         ? Boolean(executionContext.originState.trim()) &&
@@ -1532,8 +1524,14 @@ export default function EnquiryDetailsPage() {
         if (roleKey === "SELLER") return Boolean(isSeller);
         return false;
     };
+    const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
+    const hasDocType = (type: string) => safeDocs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
     const currentRule = enquiryRules.find((r: any) => String(r.stageKey || "").toUpperCase() === normalizedStageKey);
     const requiredActions = Array.isArray(currentRule?.requiredActions) ? currentRule.requiredActions : [];
+    const canCreateProformaDoc =
+        (isSystemAdmin || isOperatorUser) &&
+        normalizedStageKey === "PROFORMA_ISSUED" &&
+        !hasDocType("PROFORMA_INVOICE");
     const displayActions = (() => {
         const filtered = requiredActions.filter((key: string) => !["REVISION_REQUESTED", "REVISION_CONFIRMED", "REVISION_SKIPPED"].includes(String(key || "").toUpperCase()));
         const noProformaAction = filtered.filter((key: string) => {
@@ -1571,6 +1569,7 @@ export default function EnquiryDetailsPage() {
     const isActionLoading = (actionKey: string) => {
         if (applyActionMutation.isPending && pendingActionKey === actionKey) return true;
         if (actionKey === "QUOTATION_CREATED" && createQuotationMutation.isPending) return true;
+        if (actionKey === "CONVERT_TO_ORDER" && isConvertingOrder) return true;
         return false;
     };
     const actionLabels: Record<string, string> = {
@@ -1771,8 +1770,6 @@ export default function EnquiryDetailsPage() {
         );
     }
     const currentStepIndex = Math.max(0, workflowStageOptions.indexOf(workflowStage));
-    const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
-    const hasDocType = (type: string) => safeDocs.some((doc: any) => String(doc?.type || "").toUpperCase() === type);
     const hasSubmittedDoc = (type: string) =>
         safeDocs.some(
             (doc: any) => String(doc?.type || "").toUpperCase() === type && String(doc?.status || "").toUpperCase() !== "DRAFT"
@@ -1832,7 +1829,6 @@ export default function EnquiryDetailsPage() {
     });
     const canBuyerRevision = isBuyer || isSystemAdmin || isAssignedOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isAssignedOperator;
-    const canCreateProformaDoc = (isSystemAdmin || isOperatorUser) && normalizedStageKey === "PROFORMA_ISSUED" && !hasDocType("PROFORMA_INVOICE");
     const fallbackProformaRule = {
         docType: "PROFORMA_INVOICE",
         actionType: "CREATE",
@@ -2157,14 +2153,40 @@ export default function EnquiryDetailsPage() {
                                                     <div className="flex flex-col items-end gap-0.5">
                                                         {!op && <span className="text-[11px] font-black text-foreground uppercase tracking-tight mb-1">OBAOL Desk</span>}
                                                         {op && <span className="text-[8px] font-bold text-default-400 uppercase tracking-tighter">Escalation Desk</span>}
-                                                        <a
-                                                            href="https://wa.me/919019351483"
+                                                        {(() => {
+                                                            const enquiryIdShort = (Array.isArray(id) ? id[0] : id || "").slice(-6).toUpperCase();
+                                                            const orderIdShort = (enquiry as any)?.order?._id || (enquiry as any)?.order || null;
+                                                            const orderShort = orderIdShort ? String(orderIdShort).slice(-6).toUpperCase() : "";
+                                                            const stageLabel = String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ");
+                                                            const productLabel = getProductDisplayName(enquiry);
+                                                            const variantLabel = getVariantDisplayName(enquiry, liveRate);
+                                                            const qtyLabel = enquiry?.quantity ? `${enquiry.quantity} MT` : "N/A";
+                                                            const buyerLabel = enquiry?.buyerAssociateId?.associateCompany?.name || enquiry?.buyerAssociateCompanyName || "N/A";
+                                                            const sellerLabel = enquiry?.sellerAssociateId?.associateCompany?.name || enquiry?.sellerAssociateCompanyName || "N/A";
+                                                            const messageLines = [
+                                                                "OBAOL Support Request",
+                                                                `Enquiry ID: #${enquiryIdShort}`,
+                                                                orderShort ? `Order ID: #${orderShort}` : null,
+                                                                `Stage: ${stageLabel}`,
+                                                                `Status: ${waitingMessage}`,
+                                                                `Product: ${productLabel}${variantLabel ? ` (${variantLabel})` : ""}`,
+                                                                `Quantity: ${qtyLabel}`,
+                                                                `Buyer: ${buyerLabel}`,
+                                                                `Seller: ${sellerLabel}`,
+                                                            ].filter(Boolean);
+                                                            const message = messageLines.join("\n");
+                                                            const whatsappUrl = `https://wa.me/919019351483?text=${encodeURIComponent(message)}`;
+                                                            return (
+                                                                <a
+                                                                    href={whatsappUrl}
                                                             target="_blank"
                                                             className="flex items-center gap-2 px-3 py-1.5 bg-success-500 text-white rounded-xl text-[10px] font-black border border-success-600/20 hover:bg-success-600 transition-all hover:scale-105 active:scale-95 no-underline"
-                                                        >
-                                                            <FaWhatsapp size={13} />
-                                                            WHATSAPP SUPPORT
-                                                        </a>
+                                                                >
+                                                                    <FaWhatsapp size={13} />
+                                                                    WHATSAPP SUPPORT
+                                                                </a>
+                                                            );
+                                                        })()}
                                                         <span className="text-[9px] text-default-400 font-bold tracking-wider mt-0.5">+91 90193 51483</span>
                                                     </div>
                                                 </div>
@@ -2276,11 +2298,13 @@ export default function EnquiryDetailsPage() {
                                                 color="primary"
                                                 variant={actionKey === "RETURN_TO_REVISION" || actionKey === "OTHER_DOCS_SKIPPED" || actionKey === "PO_SKIPPED" ? "flat" : "solid"}
                                                 className="font-bold px-4 rounded-xl h-9 text-[10px] tracking-widest uppercase"
-                                                isDisabled={!canPerformAction || Boolean(actionStatus[actionKey])}
+                                                isDisabled={!canPerformAction || Boolean(actionStatus[actionKey]) || isConvertingOrder}
                                                 onPress={() => handleActionPress(actionKey)}
                                                 isLoading={isActionLoading(actionKey)}
                                             >
-                                                {actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
+                                                {actionKey === "CONVERT_TO_ORDER" && isConvertingOrder
+                                                    ? "Converting..."
+                                                    : actionLabels[actionKey] || actionKey.replaceAll("_", " ")}
                                             </Button>
                                             {isSystemAdmin && actionByLabelText && (
                                                 <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">
@@ -2289,6 +2313,11 @@ export default function EnquiryDetailsPage() {
                                             )}
                                         </div>
                                     ))}
+                                </div>
+                            )}
+                            {isConvertingOrder && (
+                                <div className="mt-3 text-[10px] font-semibold text-default-500">
+                                    Converting order… Please wait.
                                 </div>
                             )}
                             {draftQuotationError && (
@@ -4197,6 +4226,7 @@ export default function EnquiryDetailsPage() {
                                                     return;
                                                 }
                                                 try {
+                                                    setIsConvertingOrder(true);
                                                     const res = await applyActionMutation.mutateAsync({
                                                         actionKey: "CONVERT_TO_ORDER",
                                                         notes: conversionNote,
@@ -4210,13 +4240,15 @@ export default function EnquiryDetailsPage() {
                                                 } catch (error: any) {
                                                     const msg = error?.response?.data?.message || error?.message || "Failed to convert to order.";
                                                     setConversionError(msg);
+                                                } finally {
+                                                    setIsConvertingOrder(false);
                                                 }
                                             }}
-                                            isLoading={applyActionMutation.isPending}
+                                            isLoading={applyActionMutation.isPending || isConvertingOrder}
                                             className="flex-1 max-w-[320px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_30px_rgba(0,112,243,0.3)] bg-gradient-to-r from-primary to-primary-600 hover:scale-[1.02] active:scale-95 transition-all"
-                                            startContent={!applyActionMutation.isPending && <FiCheckCircle size={16} />}
+                                            startContent={!applyActionMutation.isPending && !isConvertingOrder && <FiCheckCircle size={16} />}
                                         >
-                                            ESTABLISH_ORDER_PROTOCOL
+                                            {isConvertingOrder ? "Converting..." : "ESTABLISH_ORDER_PROTOCOL"}
                                         </Button>
                                     </div>
                                 </ModalFooter>

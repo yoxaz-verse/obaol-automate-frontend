@@ -6,7 +6,7 @@ import TopBar from "@/components/dashboard/TopBar";
 import Sidebar from "@/components/dashboard/Sidebar";
 import BottomNav from "@/components/dashboard/BottomNav";
 import PrivateRoute from "@/components/Login/private-route";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getAllowedRoles } from "@/utils/roleHelpers";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { postData } from "@/core/api/apiHandler";
@@ -39,6 +39,7 @@ export default function DashboardLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Load state on mount
   useEffect(() => {
@@ -56,7 +57,13 @@ export default function DashboardLayout({
   };
 
   const allowedRoles = getAllowedRoles(pathname);
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isOnboardingLocked = ["associate", "operator", "team"].includes(roleLower)
+    && user?.onboardingComplete === false;
+  const isApprovalPending = ["associate", "operator", "team"].includes(roleLower)
+    && user?.onboardingComplete === true
+    && String(user?.registrationStatus || "APPROVED").toUpperCase() !== "APPROVED";
 
   useEffect(() => {
     if (!user?.id) return;
@@ -92,6 +99,24 @@ export default function DashboardLayout({
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (loading) return;
+    if (!user) return;
+    const isOnboardingRoute = pathname.startsWith("/dashboard/onboarding");
+    const isPendingRoute = pathname.startsWith("/dashboard/pending-approval");
+    if (isOnboardingLocked && !isOnboardingRoute) {
+      router.replace("/dashboard/onboarding");
+      return;
+    }
+    if (isApprovalPending && !isPendingRoute) {
+      router.replace("/dashboard/pending-approval");
+      return;
+    }
+    if (!isOnboardingLocked && isOnboardingRoute) {
+      router.replace("/dashboard");
+    }
+  }, [isOnboardingLocked, isApprovalPending, loading, pathname, router, user]);
+
   if (!isMounted) {
     return (
       <section className="bg-content1 min-h-screen">
@@ -103,15 +128,18 @@ export default function DashboardLayout({
   return (
     <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative lg:h-screen">
       <PrivateRoute allowedRoles={allowedRoles}>
-        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} />
+        {!isOnboardingLocked && !isApprovalPending && (
+          <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} isOnboardingLocked={isOnboardingLocked} />
+        )}
 
-        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]"}`}>
+        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${!isOnboardingLocked && !isApprovalPending ? (isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]") : "md:ml-0"}`}>
           <div className="w-full lg:h-screen overflow-hidden flex flex-col relative">
             {/* Check if user data is available before rendering TopBar */}
-            {user && (
+            {user && !isApprovalPending && (
               <TopBar
                 username={user.email} // Assuming user.email exists
                 role={user.role} // Assuming user.role is a string
+                isOnboardingLocked={isOnboardingLocked}
               />
             )}
 
@@ -127,7 +155,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </div>
-        <BottomNav />
+        {!isApprovalPending && <BottomNav isOnboardingLocked={isOnboardingLocked} />}
       </PrivateRoute>
     </section>
   );

@@ -19,7 +19,7 @@ import { TbContainer, TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
-import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3 } from "react-icons/fi";
+import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen } from "react-icons/fi";
 import { LuBox, LuTruck, LuWallet, LuBuilding2 } from "react-icons/lu";
 
 
@@ -203,6 +203,11 @@ export const sidebarOptions = [
     name: "Notifications",
     icon: <FiBell />,
     link: "/dashboard/notifications",
+  },
+  {
+    name: "Guidance",
+    icon: <FiBookOpen />,
+    link: "/dashboard/guidance",
   },
 
   {

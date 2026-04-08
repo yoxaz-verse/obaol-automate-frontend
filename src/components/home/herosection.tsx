@@ -419,10 +419,10 @@ export default function HeroSection() {
 
               {!loading && !isAuthenticated && (
                 <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-                  <Link href="/auth/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
+                  <Link href="/auth" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
                     Join as Associate
                   </Link>
-                  <Link href="/auth/operator/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
+                  <Link href="/auth/operator" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
                     Join as Operator
                   </Link>
                 </div>

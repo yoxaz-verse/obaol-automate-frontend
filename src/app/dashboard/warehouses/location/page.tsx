@@ -295,11 +295,15 @@ export default function WarehouseLocationPage() {
 
   return (
     <>
-      <section className="w-full min-h-screen p-6 md:p-10 bg-[#04070f] text-white">
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+      <section className="w-full min-h-screen p-6 md:p-10 bg-[#04070f] text-white dark">
+      <div className="flex items-center justify-between mb-10 gap-4 flex-wrap">
         <Title title="Warehouse Location" />
-        <Button variant="light" onPress={() => router.push("/dashboard/warehouses")}>
-          Back to Warehouses
+        <Button 
+          variant="flat" 
+          className="bg-white/5 text-white font-bold uppercase tracking-widest text-[10px] rounded-xl px-6 h-10 border border-white/10"
+          onPress={() => router.push("/dashboard/warehouses")}
+        >
+          Back to Asset Registry
         </Button>
       </div>
 
@@ -318,12 +322,12 @@ export default function WarehouseLocationPage() {
           </CardHeader>
           <CardBody className="px-6 pb-6 space-y-4">
             {form.location && (
-              <div className="text-xs text-default-500">
-                <span className="font-semibold text-foreground">Detected:</span> {locationLabel}
-                {form.location.district && ` • ${form.location.district}`}
-                {form.location.pincode && ` • ${form.location.pincode}`}
-                {form.location.city && ` • ${form.location.city}`}
-                {form.location.state && ` • ${form.location.state}`}
+              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 flex flex-wrap gap-x-2 gap-y-1">
+                <span className="text-warning-500">Detected Node:</span> {locationLabel}
+                {form.location.district && <><span className="text-white/10">•</span> {form.location.district}</>}
+                {form.location.pincode && <><span className="text-white/10">•</span> {form.location.pincode}</>}
+                {form.location.city && <><span className="text-white/10">•</span> {form.location.city}</>}
+                {form.location.state && <><span className="text-white/10">•</span> {form.location.state}</>}
               </div>
             )}
             <div className="rounded-[2rem] overflow-hidden border border-white/10 shadow-lg shadow-warning-500/5 warehouse-location-map">
@@ -392,38 +396,58 @@ export default function WarehouseLocationPage() {
             </div>
             {isAdmin && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-foreground pl-0.5">Associate Company</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Management Entity</label>
                 <Select
+                  label="Associate Company"
+                  variant="flat"
                   selectedKeys={form.ownerCompanyId ? [form.ownerCompanyId] : []}
                   onSelectionChange={(keys) =>
                     setForm((f) => ({ ...f, ownerCompanyId: String(Array.from(keys)[0] || "") }))
                   }
-                  classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                  classNames={{
+                    trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                    label: "text-default-400 font-medium",
+                    value: "text-white font-bold uppercase text-xs",
+                    popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                  }}
+                  popoverProps={{ shouldCloseOnBlur: false }}
                   placeholder={associateCompanies.length ? "Select associate company" : "No companies available"}
                 >
                   {associateCompanies.map((company: any) => (
-                    <SelectItem key={company._id}>{company.name || company.companyName || "Company"}</SelectItem>
+                    <SelectItem key={company._id} className="text-white">
+                      {company.name || company.companyName || "Company"}
+                    </SelectItem>
                   ))}
                 </Select>
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Allowed Commodities</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Logistics Permissions</label>
               <Select
+                label="Allowed Commodities"
+                variant="flat"
                 selectionMode="multiple"
                 selectedKeys={form.allowedCategoryIds}
                 onSelectionChange={(keys) => setForm((f) => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
-                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                  label: "text-default-400 font-medium",
+                  value: "text-white font-bold uppercase text-xs",
+                  popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                }}
+                popoverProps={{ shouldCloseOnBlur: false }}
                 placeholder={categories.length ? "Select categories" : "No categories available"}
               >
                 {categories.map((cat: any) => (
-                  <SelectItem key={cat._id}>{cat.name}</SelectItem>
+                  <SelectItem key={cat._id} className="text-white">{cat.name}</SelectItem>
                 ))}
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Address</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-default-400 px-1">Spatial Identity</label>
               <Textarea
+                label="Physical Address"
+                variant="flat"
                 placeholder="Full warehouse address"
                 value={form.address}
                 onValueChange={(v) => {
@@ -431,26 +455,35 @@ export default function WarehouseLocationPage() {
                   setForm((f) => ({ ...f, address: v }));
                 }}
                 minRows={3}
-                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  inputWrapper: "bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors p-4",
+                  label: "text-default-400 font-medium",
+                  input: "text-white font-bold uppercase text-sm"
+                }}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground pl-0.5">Pincode</label>
               <Input
+                label="Mission Pincode"
+                variant="flat"
                 placeholder="e.g. 600001"
                 value={form.pincode}
                 onValueChange={(v) => {
                   manualInputRef.current = true;
                   setForm((f) => ({ ...f, pincode: v }));
                 }}
-                classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                classNames={{
+                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
+                  label: "text-default-400 font-medium",
+                  input: "text-white font-bold uppercase text-sm"
+                }}
               />
             </div>
             {form.location && (
-              <div className="flex flex-wrap gap-2">
-                {form.location.city && <Chip size="sm" variant="flat">{form.location.city}</Chip>}
-                {form.location.district && <Chip size="sm" variant="flat">{form.location.district}</Chip>}
-                {form.location.state && <Chip size="sm" variant="flat">{form.location.state}</Chip>}
+              <div className="flex flex-wrap gap-2 px-1">
+                {form.location.city && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.city}</Chip>}
+                {form.location.district && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.district}</Chip>}
+                {form.location.state && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.state}</Chip>}
               </div>
             )}
             <div className="flex flex-col gap-1.5">
@@ -469,10 +502,10 @@ export default function WarehouseLocationPage() {
                 }}
               />
             </div>
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between px-2 py-4 rounded-2xl bg-white/[0.02] border border-white/5">
               <div>
-                <p className="text-sm font-semibold text-foreground">List for Rental</p>
-                <p className="text-xs text-default-400">Allow other associates to use this warehouse</p>
+                <p className="text-xs font-bold text-white uppercase tracking-wider">List for Rental</p>
+                <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Open node to associate network</p>
               </div>
               <Switch
                 isSelected={form.listingType === "RENTAL" && form.isRentalActive}
@@ -486,10 +519,10 @@ export default function WarehouseLocationPage() {
                 color="warning"
               />
             </div>
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between px-2 py-4 rounded-2xl bg-white/[0.02] border border-white/5">
               <div>
-                <p className="text-sm font-semibold text-foreground">Active</p>
-                <p className="text-xs text-default-400">Enable this warehouse for use</p>
+                <p className="text-xs font-bold text-white uppercase tracking-wider">Active Status</p>
+                <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Ready for operational deployment</p>
               </div>
               <Switch
                 isSelected={form.isActive}

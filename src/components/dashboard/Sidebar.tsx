@@ -17,9 +17,10 @@ import { notificationRoutes } from "@/core/api/apiRoutes";
 interface SidebarProps {
     isCollapsed: boolean;
     setIsCollapsed: (value: boolean) => void;
+    isOnboardingLocked?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboardingLocked = false }) => {
     const router = useRouter();
     const pathname = usePathname();
     const { user } = useContext(AuthContext);
@@ -77,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                 "/dashboard/company",
                 "/dashboard/companies",
                 "/dashboard/notifications",
+                "/dashboard/guidance",
                 "/dashboard/approvals",
                 "/dashboard/reports",
                 "/dashboard/profile",
@@ -131,6 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
 
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
         e.preventDefault();
+        if (isOnboardingLocked) return;
         if (pathname === optionLink) return;
 
         play("nav");
@@ -164,7 +167,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
             </button>
 
             {/* Console Header */}
-            <div className={`relative px-6 py-10 flex cursor-pointer group ${isCollapsed ? "justify-center" : "gap-4 items-center"}`} onClick={() => router.push("/dashboard")}>
+            <div
+                className={`relative px-6 py-10 flex cursor-pointer group ${isCollapsed ? "justify-center" : "gap-4 items-center"} ${isOnboardingLocked ? "cursor-not-allowed opacity-70" : ""}`}
+                onClick={() => {
+                    if (isOnboardingLocked) return;
+                    router.push("/dashboard");
+                }}
+            >
                 <div className="relative group-hover:scale-110 transition-transform duration-500">
                     <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-default-100 to-transparent dark:from-white/10 dark:to-transparent border border-default-200 dark:border-white/10 flex items-center justify-center shadow-sm overflow-hidden">
@@ -182,6 +191,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
 
             {/* Navigation Array */}
             <div className="flex-1 px-4 space-y-6 overflow-y-auto no-scrollbar pb-10">
+                {isOnboardingLocked && !isCollapsed && (
+                    <div className="mx-2 mb-2 rounded-xl border border-warning-500/20 bg-warning-500/10 px-3 py-2">
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">
+                            Complete onboarding to unlock navigation
+                        </p>
+                    </div>
+                )}
                 {sidebarSections.map((section, idx) => {
                     const sectionOptions = section.links.map(l => optionMap.get(l)).filter(Boolean) as typeof filteredOptions;
                     if (sectionOptions.length === 0) return null;
@@ -207,7 +223,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
                                                 isActive 
                                                 ? "bg-warning-500/10 text-warning-700 dark:text-white font-bold shadow-sm" 
                                                 : "text-default-500 hover:text-foreground hover:bg-default-100"
-                                            } ${isCollapsed ? "justify-center" : "px-3 gap-3"}`}
+                                            } ${isCollapsed ? "justify-center" : "px-3 gap-3"} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
+                                            aria-disabled={isOnboardingLocked}
                                         >
                                             {isActive && (
                                                 <div className="absolute left-0 w-[2.5px] h-5 bg-warning-500 rounded-r-full shadow-[0_0_10px_rgba(245,165,36,0.6)]" />

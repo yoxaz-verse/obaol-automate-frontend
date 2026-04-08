@@ -299,6 +299,8 @@ export default function SampleRequestDetailPage() {
   const productName = request?.variantRateId?.productVariant?.product?.name || "Product";
   const buyerName = request?.buyerAssociateId?.name || "Buyer";
   const supplierName = request?.supplierCompanyId?.name || "Supplier";
+  const buyerDisplay = !isAssociate ? buyerName : isBuyer ? buyerName : "";
+  const supplierDisplay = !isAssociate ? supplierName : isSupplier ? supplierName : "";
   const samplePaymentTermLabel =
     String(request?.samplePaymentTerm || "ADVANCE") === "COURIER_CHARGES"
       ? "Courier Charges"
@@ -357,19 +359,21 @@ export default function SampleRequestDetailPage() {
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Request Owner</span>
-                    <p className="text-sm font-bold uppercase tracking-tight">{buyerName}</p>
+                    <p className="text-sm font-bold uppercase tracking-tight">{buyerDisplay || "—"}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                    <LuBuilding2 size={24} />
+                {!isAssociate && (
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                      <LuBuilding2 size={24} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Supplier</span>
+                      <p className="text-sm font-bold uppercase tracking-tight">{supplierDisplay || "—"}</p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 block mb-0.5">Supplier</span>
-                    <p className="text-sm font-bold uppercase tracking-tight">{supplierName}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-6 p-6 rounded-[2rem] bg-foreground/[0.03] border border-foreground/5 justify-center">
@@ -461,131 +465,175 @@ export default function SampleRequestDetailPage() {
 
         {/* Action Panel */}
         <div className="lg:col-span-4 sticky top-8">
-           <Card className="rounded-[2rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-warning/10 text-warning flex items-center justify-center">
-                  <LuActivity size={16} />
+          <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-2xl overflow-hidden p-0">
+            <div className="p-8 border-b border-foreground/5 bg-foreground/[0.01]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-warning-500/10 rounded-2xl text-warning-500 shadow-inner group">
+                  <LuActivity className="group-hover:animate-pulse" size={20} />
                 </div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Next Action</h3>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground">Operational Protocol</h3>
+                  <p className="text-[9px] font-black text-default-400 uppercase tracking-widest mt-1 italic">Tactical Fulfillment Sequence</p>
+                </div>
               </div>
+            </div>
 
+            <div className="p-8 space-y-6">
               <div className="flex flex-col gap-4">
                 {status === "REQUESTED" && canSupplier && (
-                  <Button 
-                    color="warning" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-black bg-warning shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
-                    onPress={() => {
-                      setSamplePaymentTerm(String(request?.samplePaymentTerm || "ADVANCE"));
-                      setQuoteModalOpen(true);
-                    }}
-                    startContent={<LuActivity size={18} />}
-                  >
-                    Quote Sample
-                  </Button>
+                  <div className="space-y-4">
+                     <div className="p-5 rounded-2xl bg-warning-500/5 border border-warning-500/10 mb-2">
+                        <p className="text-[11px] font-bold text-warning-200/80 uppercase tracking-widest leading-relaxed">
+                          Awaiting Quote Submission. Tactical parameter input required for procurement link.
+                        </p>
+                     </div>
+                     <Button 
+                       fullWidth
+                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                       onPress={() => {
+                         setSamplePaymentTerm(request?.samplePaymentTerm || "ADVANCE");
+                         setQuoteModalOpen(true);
+                       }}
+                       startContent={<LuFileText size={18} />}
+                     >
+                       INITIALIZE SAMPLE QUOTE
+                     </Button>
+                  </div>
                 )}
+
                 {status === "QUOTED" && canBuyer && (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-4">
+                    <div className="p-5 rounded-2xl bg-primary-500/5 border border-primary-500/10 mb-2">
+                       <p className="text-[11px] font-bold text-primary-200/80 uppercase tracking-widest leading-relaxed">
+                         Quote received. Awaiting Associate Authorization to proceed with procurement.
+                       </p>
+                    </div>
                     <Button 
-                      color="success" 
-                      className="h-12 rounded-xl font-bold uppercase tracking-wider text-white"
+                      fullWidth
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 shadow-[0_10px_30px_rgba(34,197,94,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => decisionMutation.mutate("ACCEPT")}
                       startContent={<LuCheck size={18} />}
                     >
-                      Accept Quote
+                      AUTHORIZE QUOTE
                     </Button>
                     <Button 
-                      color="danger" 
-                      variant="flat" 
-                      className="h-12 rounded-xl font-bold uppercase tracking-wider"
+                      fullWidth
+                      variant="flat"
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-danger-500 bg-danger-500/10 hover:bg-danger-500/20 border-none transition-all"
                       onPress={() => decisionMutation.mutate("REJECT")}
                       startContent={<LuX size={18} />}
                     >
-                      Reject
+                      ABORT REQUEST
                     </Button>
                   </div>
                 )}
+
                 {status === "ACCEPTED" && canBuyer && (
                   <Button 
-                    color="primary" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 shadow-[0_10px_30px_rgba(0,112,243,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => paymentMutation.mutate()}
                     startContent={<LuWallet size={18} />}
                   >
-                    Mark Payment Received
+                    CONFIRM PAYMENT RECEIPT
                   </Button>
                 )}
+
                 {status === "PAYMENT_RECEIVED" && canSupplier && (
                   <Button 
-                    color="warning" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-black"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => packagingStartMutation.mutate()}
                     startContent={<LuPackageOpen size={18} />}
                   >
-                    Start Packaging
+                    INITIATE PACKAGING PROTOCOL
                   </Button>
                 )}
+
                 {status === "PREPARING_PACKAGING" && canSupplier && (
                   <Button 
-                    color="warning" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-black"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => packagedMutation.mutate()}
                     startContent={<LuPackage size={18} />}
                   >
-                    Mark Packaged
+                    FINALIZE SHIPMENT READY
                   </Button>
                 )}
+
                 {status === "PACKAGED" && canSupplier && (
                   <Button 
-                    color="primary" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 shadow-[0_10px_30px_rgba(0,112,243,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setCourierModalOpen(true)}
                     startContent={<LuTruck size={18} />}
                   >
-                    Submit to Courier
+                    SUBMIT COURIER TELEMETRY
                   </Button>
                 )}
+
                 {status === "COURIER_SUBMITTED" && canSupplier && (
                   <Button 
-                    color="secondary" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-secondary-500 shadow-[0_10px_30px_rgba(151,114,255,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => inTransitMutation.mutate()}
                     startContent={<LuMapPin size={18} />}
                   >
-                    Mark In Transit
+                    ACTIVATE IN-TRANSIT STATE
                   </Button>
                 )}
+
                 {status === "IN_TRANSIT" && canBuyer && (
                   <Button 
-                    color="success" 
-                    className="h-12 rounded-xl font-bold uppercase tracking-wider text-white"
+                    fullWidth
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 shadow-[0_10px_30px_rgba(34,197,94,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setReceiptModalOpen(true)}
                     startContent={<LuCheck size={18} />}
                   >
-                    Buyer Accept Delivery
+                    AUTHORIZE DELIVERY RECEIPT
                   </Button>
                 )}
+
                 {status === "IN_TRANSIT" && !canBuyer && (
-                  <div className="flex flex-col items-center gap-3 py-6 text-center bg-foreground/[0.03] rounded-2xl border border-divider/40">
-                    <LuClock size={28} className="text-default-500" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-default-500">
-                      Waiting for buyer acceptance
-                    </p>
+                  <div className="flex flex-col items-center gap-4 py-10 text-center bg-foreground/[0.03] rounded-[2rem] border border-divider/40">
+                    <LuClock size={32} className="text-default-500 animate-[spin_10s_linear_infinite]" />
+                    <div>
+                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">
+                         Logistics Hold
+                       </p>
+                       <p className="text-[9px] font-bold text-default-400/60 uppercase tracking-widest mt-2 px-10 leading-loose italic">
+                         Waiting for buyer authorization at the destination terminal.
+                       </p>
+                    </div>
                   </div>
                 )}
+
                 {(status === "REJECTED" || status === "CANCELLED") && (
-                  <div className="flex flex-col items-center gap-4 py-8 text-center bg-foreground/[0.03] rounded-2xl border border-divider/40">
-                    <LuX size={32} className="text-danger" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-default-500">Flux Inhibited // Flow Terminated</p>
+                  <div className="flex flex-col items-center gap-6 py-10 text-center bg-danger-500/5 rounded-[2rem] border border-danger-500/10">
+                    <div className="w-16 h-16 rounded-2xl bg-danger-500/10 flex items-center justify-center text-danger-500">
+                       <LuX size={32} />
+                    </div>
+                    <div>
+                       <p className="text-xs font-black uppercase tracking-[0.3em] text-danger-500">Flow Terminated</p>
+                       <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest mt-2">Operational inhibitors detected.</p>
+                    </div>
                   </div>
                 )}
+
                 {status === "RECEIPT_CONFIRMED" && (
-                  <div className="flex flex-col items-center gap-4 py-8 text-center bg-success-500/5 rounded-2xl border border-success-500/20">
-                    <LuCheck size={32} className="text-success" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-success-600">Buyer Accepted // Mission Complete</p>
+                  <div className="flex flex-col items-center gap-6 py-10 text-center bg-success-500/5 rounded-[2rem] border border-success-500/20 shadow-[0_0_50px_rgba(34,197,94,0.05)]">
+                    <div className="w-16 h-16 rounded-2xl bg-success-500/10 flex items-center justify-center text-success-500">
+                       <LuCheck size={32} />
+                    </div>
+                    <div>
+                       <p className="text-xs font-black uppercase tracking-[0.3em] text-success-500">Mission Complete</p>
+                       <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest mt-2">Delivery handshake successful.</p>
+                    </div>
                   </div>
                 )}
               </div>
-           </Card>
+            </div>
+          </Card>
 
            <div className="mt-6 flex justify-center">
               <p className="text-[9px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-40">Obaol Core Telemetry // {id.slice(-8).toUpperCase()}</p>
@@ -594,7 +642,7 @@ export default function SampleRequestDetailPage() {
       </div>
     </motion.section>
 
-      <Modal 
+    <Modal 
         isOpen={quoteModalOpen} 
         onOpenChange={setQuoteModalOpen} 
         size="md" 
@@ -812,7 +860,7 @@ export default function SampleRequestDetailPage() {
             </>
           )}
         </ModalContent>
-      </Modal>
+    </Modal>
     </>
   );
 }

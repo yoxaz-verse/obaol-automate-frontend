@@ -13,6 +13,7 @@ export interface ToastMessage {
 export interface TopbarProps {
   username: string;
   role: string;
+  isOnboardingLocked?: boolean;
 }
 export interface DashboardTileProps {
   heading?: string;

@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getData, patchData } from "@/core/api/apiHandler";
+import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { LuWarehouse, LuPencil, LuPlus } from "react-icons/lu";
@@ -23,12 +23,12 @@ interface Warehouse {
     _id: string;
     name: string;
     address?: string;
-    category?: "GENERAL" | "COLD_STORAGE" | "BONDED" | "AGRO";
+    category?: string;
     allowedCategoryIds?: string[];
     storageRatePerUnit: number;
     totalCapacity?: number;
     isActive: boolean;
-    listingType?: "PRIVATE" | "RENTAL";
+    listingType?: string;
     isRentalActive?: boolean;
     location?: {
         latitude?: number;
@@ -44,12 +44,12 @@ interface Warehouse {
 const EMPTY_WAREHOUSE = {
     name: "",
     address: "",
-    category: "GENERAL" as const,
+    category: "GENERAL",
     allowedCategoryIds: [] as string[],
     storageRatePerUnit: 0,
     totalCapacity: 0,
     isActive: true,
-    listingType: "PRIVATE" as const,
+    listingType: "PRIVATE",
     isRentalActive: false,
     location: null as Warehouse["location"],
 };
@@ -498,12 +498,46 @@ export default function WarehousesPage() {
                             <Select
                                 selectedKeys={[warehouseForm.category]}
                                 onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, category: Array.from(keys)[0] as any }))}
-                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                                popoverProps={{
+                                  classNames: {
+                                    content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                  },
+                                  offset: 8
+                                }}
+                                listboxProps={{
+                                  itemClasses: {
+                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                  }
+                                }}
+                                classNames={{ 
+                                  trigger: "h-11 min-h-[44px] bg-default-100/60 border-default-200",
+                                  value: "text-xs font-black uppercase tracking-tight"
+                                }}
                             >
-                                <SelectItem key="GENERAL">General warehouse</SelectItem>
-                                <SelectItem key="COLD_STORAGE">Cold storage</SelectItem>
-                                <SelectItem key="BONDED">Bonded warehouse</SelectItem>
-                                <SelectItem key="AGRO">Agro warehouse</SelectItem>
+                                <SelectItem key="GENERAL" textValue="General Warehouse">
+                                    <div className="flex items-center gap-3">
+                                        <LuWarehouse className="text-default-400" />
+                                        <span className="text-xs font-bold uppercase tracking-tight">General Warehouse</span>
+                                    </div>
+                                </SelectItem>
+                                <SelectItem key="COLD_STORAGE" textValue="Cold Storage">
+                                    <div className="flex items-center gap-3">
+                                        <LuWarehouse className="text-info-500" />
+                                        <span className="text-xs font-bold uppercase tracking-tight">Cold Storage</span>
+                                    </div>
+                                </SelectItem>
+                                <SelectItem key="BONDED" textValue="Bonded Warehouse">
+                                    <div className="flex items-center gap-3">
+                                        <LuWarehouse className="text-warning-500" />
+                                        <span className="text-xs font-bold uppercase tracking-tight">Bonded Warehouse</span>
+                                    </div>
+                                </SelectItem>
+                                <SelectItem key="AGRO" textValue="Agro Warehouse">
+                                    <div className="flex items-center gap-3">
+                                        <LuWarehouse className="text-success-500" />
+                                        <span className="text-xs font-bold uppercase tracking-tight">Agro Warehouse</span>
+                                    </div>
+                                </SelectItem>
                             </Select>
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -531,7 +565,7 @@ export default function WarehousesPage() {
                                 <p className="text-xs text-default-400">Allow other associates to use this warehouse</p>
                             </div>
                             <Switch
-                                isSelected={warehouseForm.listingType === "RENTAL" && warehouseForm.isRentalActive}
+                                isSelected={warehouseForm.listingType === "RENTAL"}
                                 onValueChange={(v) =>
                                     setWarehouseForm((f) => ({
                                         ...f,
@@ -589,10 +623,32 @@ export default function WarehousesPage() {
                                 placeholder="Select a warehouse"
                                 selectedKeys={movementForm.warehouseId ? [movementForm.warehouseId] : []}
                                 onSelectionChange={(keys) => setMovementForm(f => ({ ...f, warehouseId: Array.from(keys)[0] as string }))}
-                                classNames={{ trigger: "bg-default-100/60 border-default-200" }}
+                                popoverProps={{
+                                  classNames: {
+                                    content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                  },
+                                  offset: 8
+                                }}
+                                listboxProps={{
+                                  itemClasses: {
+                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                  }
+                                }}
+                                classNames={{ 
+                                  trigger: "h-11 min-h-[44px] bg-default-100/60 border-default-200",
+                                  value: "text-xs font-black uppercase tracking-tight"
+                                }}
                             >
                                 {warehouses.filter(w => w.isActive).map(wh => (
-                                    <SelectItem key={wh._id} textValue={wh.name}>{wh.name}</SelectItem>
+                                    <SelectItem key={wh._id} textValue={wh.name}>
+                                        <div className="flex items-center gap-3">
+                                            <BsBoxes className="text-warning-500" />
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-black uppercase italic tracking-tighter leading-tight">{wh.name}</span>
+                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-60">ID: {wh._id.slice(-6)}</span>
+                                            </div>
+                                        </div>
+                                    </SelectItem>
                                 ))}
                             </Select>
                         </div>

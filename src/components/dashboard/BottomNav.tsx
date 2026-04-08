@@ -11,7 +11,7 @@ import { FiShoppingBag } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 
-const BottomNav = () => {
+const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
     const pathname = usePathname();
     const { user } = useContext(AuthContext);
 
@@ -63,14 +63,34 @@ const BottomNav = () => {
             <div className="flex justify-between items-center h-full px-4 max-w-lg mx-auto">
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
+                    const isDisabled = isOnboardingLocked;
                     return (
-                        <Link
-                            key={item.name}
-                            href={item.link}
-                            className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 ${
-                                isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400 group-hover:text-foreground"
-                            }`}
-                        >
+                        isDisabled ? (
+                            <div
+                                key={item.name}
+                                className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 opacity-40 cursor-not-allowed ${
+                                    isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400"
+                                }`}
+                                aria-disabled="true"
+                            >
+                                {isActive && (
+                                    <div className="absolute -top-[1px] w-8 h-[2px] bg-warning-500 rounded-full shadow-[0_2px_10px_rgba(245,165,36,0.5)]" />
+                                )}
+                                <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
+                                    {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
+                                </div>
+                                <span className={`text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${isActive ? "opacity-100 -translate-y-0.5" : "opacity-0 translate-y-1 h-0"}`}>
+                                    {item.name.slice(0, 8)}
+                                </span>
+                            </div>
+                        ) : (
+                            <Link
+                                key={item.name}
+                                href={item.link}
+                                className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 ${
+                                    isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400 group-hover:text-foreground"
+                                }`}
+                            >
                             {isActive && (
                                 <div className="absolute -top-[1px] w-8 h-[2px] bg-warning-500 rounded-full shadow-[0_2px_10px_rgba(245,165,36,0.5)]" />
                             )}
@@ -80,7 +100,8 @@ const BottomNav = () => {
                             <span className={`text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${isActive ? "opacity-100 -translate-y-0.5" : "opacity-0 translate-y-1 h-0"}`}>
                                 {item.name.slice(0, 8)}
                             </span>
-                        </Link>
+                            </Link>
+                        )
                     );
                 })}
             </div>

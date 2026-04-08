@@ -1,11 +1,13 @@
 import LoginComponent from "@/components/Login/login-component";
-import Title from "@/components/titles";
-import Image from "next/image";
+import React, { Suspense } from "react";
+import BrandedLoader from "@/components/ui/BrandedLoader";
 
 export default function SuperadminLoginPage() {
   return (
     <>
-      <LoginComponent role="Associate" mode="login" />
+      <Suspense fallback={<BrandedLoader fullScreen message="Loading sign in" />}>
+        <LoginComponent role="Associate" mode="login" />
+      </Suspense>
     </>
   );
 }

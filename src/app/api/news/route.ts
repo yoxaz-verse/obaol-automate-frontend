@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import Parser from "rss-parser";
 import { newsFeeds } from "@/data/newsFeeds";
 
+export const dynamic = "force-dynamic";
+
 type CacheEntry = {
   createdAt: number;
   items: any[];

@@ -90,7 +90,7 @@ export default function OtpVerification({ user }: IVerification) {
   };
 
   return (
-    <Card className="max-w-md w-full mx-auto bg-content1/50 backdrop-blur-3xl border border-divider shadow-2xl rounded-[2rem] overflow-hidden">
+    <Card className="max-w-md w-full mx-auto bg-white/85 dark:bg-content1/50 backdrop-blur-3xl border border-divider shadow-xl dark:shadow-2xl rounded-[2rem] overflow-hidden shadow-slate-200/40 dark:shadow-black/40">
       <CardBody className="p-8 lg:p-10 flex flex-col items-center">
         <div className="w-16 h-16 rounded-2xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center mb-8 relative">
           <FiShield className="text-3xl text-warning-500" />
@@ -126,9 +126,9 @@ export default function OtpVerification({ user }: IVerification) {
                 sendOtpMutation.mutate();
               }}
               isLoading={loading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-xl shadow-warning-500/20"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-lg shadow-warning-500/10"
             >
-              Initialize Telemetry
+              Initialize Access
             </Button>
           </motion.div>
         ) : (
@@ -150,7 +150,7 @@ export default function OtpVerification({ user }: IVerification) {
                 
                 <div className="flex justify-center">
                   <InputOtp
-                    length={6}
+                    {...({ length: 6 } as any)}
                     color="warning"
                     variant="bordered"
                     onValueChange={handleChange}
@@ -167,7 +167,7 @@ export default function OtpVerification({ user }: IVerification) {
                   type="submit"
                   disabled={otp.length !== 6 || loading}
                   isLoading={loading}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-xl shadow-warning-500/20"
+                     className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-lg shadow-warning-500/10"
                 >
                   Verify Protocol Access
                 </Button>

@@ -133,12 +133,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
     }
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-[#04070f] relative text-foreground font-sans selection:bg-warning-500/30">
+        <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#04070f] dark:text-foreground relative font-sans selection:bg-warning-500/30">
             {/* Mission Control Background Layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.03)_0%,_transparent_50%)]" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:10px_10px]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.03)_0%,_transparent_50%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:10px_10px]" />
                 
                 {[...Array(20)].map((_, i) => (
                     <FloatingPixel key={i} delay={i * 0.5} />
@@ -152,7 +152,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
             <div className="relative z-10 w-full h-full flex flex-col lg:flex-row">
                 {/* Left Side: Tactical Branding */}
                 <motion.div
-                    className="hidden lg:flex w-5/12 flex-col justify-between p-16 xl:p-24 relative border-r border-white/5 bg-white/[0.01] backdrop-blur-2xl overflow-hidden"
+                    className="hidden lg:flex w-5/12 flex-col justify-between p-12 xl:p-16 relative border-r border-slate-200 bg-white/70 backdrop-blur-2xl overflow-hidden dark:border-white/5 dark:bg-white/[0.01]"
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -161,14 +161,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
                     <div className="relative z-20">
-                        <div className="flex items-center gap-4 mb-20 group cursor-pointer">
-                            <div className="w-12 h-12 relative flex items-center justify-center bg-warning-500/10 rounded-xl border border-warning-500/20 group-hover:scale-110 transition-transform duration-500">
+                        <div className="flex items-center gap-4 mb-12 group cursor-pointer">
+                            <div className="w-12 h-12 relative flex items-center justify-center bg-warning-500/10 rounded-xl border border-warning-500/30 group-hover:scale-110 transition-transform duration-500">
                                 <Image src="/logo.png" alt="OBAOL" width={32} height={32} className="object-contain" />
                                 <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xl font-black italic tracking-tighter leading-none">OBAOL <span className="text-warning-500">SUPREME</span></span>
-                                <span className="text-[9px] font-black tracking-[0.4em] text-default-400">COMMAND_NODE_v3.2</span>
+                                <span className="text-[9px] font-black tracking-[0.4em] text-slate-500 dark:text-default-400">GO-TO PLATFORM FOR AGRO TRADE ECOSYSTEM</span>
                             </div>
                         </div>
 
@@ -179,7 +179,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.2 }}
                                 >
-                                    <h1 className="text-5xl xl:text-7xl font-black tracking-tighter text-foreground mb-4 leading-[0.85] uppercase italic">
+                                    <h1 className="text-4xl xl:text-6xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-3 leading-[0.9] uppercase italic">
                                         {leftPanel.headline} <br />
                                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-500 to-amber-600">
                                             {leftPanel.highlight || "CORE_NETWORK"}
@@ -193,14 +193,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 0.6, delay: 0.4 }}
                                 >
-                                    <p className="text-lg xl:text-xl text-foreground/60 pl-6 border-l-2 border-warning-500/40 leading-relaxed font-medium italic">
+                                    <p className="text-base xl:text-lg text-slate-600 dark:text-foreground/60 pl-5 border-l-2 border-warning-500/40 leading-relaxed font-medium italic">
                                         {leftPanel.description}
                                     </p>
 
                                     {!!leftPanel.points?.length && (
-                                        <div className="grid gap-3 pt-4">
+                                        <div className="grid gap-2 pt-3">
                                             {leftPanel.points.map((point, idx) => (
-                                                <div key={idx} className="flex items-center gap-3 text-xs font-bold text-foreground/40 uppercase tracking-widest group/point">
+                                                <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-foreground/40 uppercase tracking-widest group/point">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-warning-500/20 group-hover:bg-warning-500 transition-colors" />
                                                     {point}
                                                 </div>
@@ -208,62 +208,53 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-6">
+                                    {!!leftPanel.tags?.length && (
+                                        <div className="pt-1 space-y-2">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 dark:text-default-400">
+                                                Who Can Access
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {leftPanel.tags.map((tag, idx) => (
+                                                    <span
+                                                        key={`${tag}-${idx}`}
+                                                        className="px-2.5 py-0.5 rounded-full border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-widest text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
                                         {leftPanel.knowMoreLink && (
                                             <Link
                                                 href={leftPanel.knowMoreLink}
-                                                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/[0.03] border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-warning-500/10 hover:text-warning-500 hover:border-warning-500/20 transition-all group shadow-sm justify-center"
+                                                className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/30 transition-all group shadow-sm justify-center dark:bg-white/[0.03] dark:border-white/10 dark:hover:text-warning-500 dark:hover:border-warning-500/20"
                                             >
                                                 Access Specifications
                                                 <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                                             </Link>
                                         )}
-                                        <div className="px-8 py-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 flex flex-col justify-center gap-1.5 group/key cursor-help">
-                                            <span className="text-[8px] font-black text-warning-500 tracking-[0.4em] uppercase opacity-50 group-hover/key:opacity-100 transition-opacity leading-none">Global Join Key</span>
-                                            <span className="text-xs font-black text-white/90 tracking-[0.25em] leading-none font-mono">OBAOL-S-2026</span>
-                                        </div>
                                     </div>
                                 </motion.div>
                             </div>
                         ) : (
                             <div className="space-y-8">
-                                <h1 className="text-5xl xl:text-7xl font-black tracking-tighter text-foreground mb-4 leading-[0.85] uppercase italic">
+                                <h1 className="text-5xl xl:text-7xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-4 leading-[0.85] uppercase italic">
                                     OBAOL <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-500 to-amber-600 min-h-[1.2em] block leading-tight">
                                         <TypewriterEffect words={["AUTOMATION", "LOGISTICS", "CHAIN_CORE", "INVENTORY", "TRADE_FLOW"]} />
                                     </span>
                                 </h1>
-                                <p className="text-xl text-foreground/60 pl-6 border-l-2 border-warning-500/40 leading-relaxed font-medium italic max-w-sm">
+                                <p className="text-xl text-slate-600 dark:text-foreground/60 pl-6 border-l-2 border-warning-500/40 leading-relaxed font-medium italic max-w-sm">
                                     Executing the future of Global Agro-Trade via autonomous protocol synchronization.
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Telemetry Footer */}
-                    <div className="relative z-20 flex flex-col gap-4">
-                        <div className="h-px w-full bg-gradient-to-r from-divider to-transparent opacity-20" />
-                        <div className="flex flex-row items-end justify-between gap-8 text-[9px] font-black uppercase tracking-[0.4em] text-default-500 overflow-visible">
-                            <div className="flex flex-row items-center gap-4 xl:gap-8 shrink-0">
-                                <div className="flex flex-col gap-1.5">
-                                    <span className="text-success-500 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
-                                        {leftPanel?.footer || "CORE_STABLE"}
-                                    </span>
-                                    <span className="opacity-40 tracking-[0.6em]">NODE_AUTH_SECURED</span>
-                                </div>
-                                <div className="hidden xl:block w-px h-8 bg-white/10" />
-                                <div className="flex flex-col gap-1.5">
-                                    <span className="opacity-40 tracking-[0.6em]">CONNECTION_PORT</span>
-                                    <span className="text-warning-500/60 font-mono tracking-widest">TSL_v3.1_NODE_8080</span>
-                                </div>
-                            </div>
-                            <div className="text-right shrink-0 pb-0.5 leading-relaxed">
-                                <span className="opacity-60">© 2026 OBAOL_CORP</span> <br/>
-                                <span className="opacity-30 tracking-[0.2em] text-[8px]">ALL_RIGS_RESERVED</span>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </motion.div>
 
                 {/* Right Side: Operative Terminal */}
@@ -280,20 +271,20 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                             {/* Mobile Identity */}
                             <div className="lg:hidden mb-12 flex flex-col items-center">
-                                <div className="w-16 h-16 relative bg-warning-500/10 rounded-2xl border border-warning-500/20 mb-6 flex items-center justify-center shadow-xl shadow-warning-500/10">
+                                <div className="w-16 h-16 relative bg-warning-500/10 rounded-2xl border border-warning-500/30 mb-6 flex items-center justify-center shadow-xl shadow-warning-500/10">
                                     <Image src="/logo.png" alt="OBAOL" width={40} height={40} className="object-contain" />
                                 </div>
-                                <h2 className="text-3xl font-black italic tracking-tighter text-foreground uppercase">
+                                <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase">
                                     OBAOL <span className="text-warning-500">Supreme</span>
                                 </h2>
-                                <p className="text-[9px] font-black tracking-[0.5em] text-default-400 mt-2 uppercase">Command_Interface</p>
+                                <p className="text-[9px] font-black tracking-[0.5em] text-slate-500 dark:text-default-400 mt-2 uppercase">Go-To Agro Trade Platform</p>
                             </div>
 
                             <div className="relative group">
                                 <motion.div
-                                    className="relative bg-content1/80 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-8 lg:p-14 shadow-2xl overflow-hidden shadow-black/80"
-                                    whileHover={{ boxShadow: "0 40px 80px -20px rgba(0, 0, 0, 0.6)" }}
-                                    transition={{ duration: 0.6 }}
+                                    className="relative bg-white/85 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[3rem] p-8 lg:p-14 shadow-xl dark:shadow-2xl overflow-hidden shadow-slate-200/40 dark:shadow-black/40"
+                                    whileHover={{ boxShadow: "0 40px 120px -20px rgba(15, 23, 42, 0.08)" }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
                                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -302,13 +293,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <div className="mb-12 relative">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_10px_rgba(245,165,36,0.5)]" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500/60">Operative_Access</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-600/70 dark:text-warning-500/60">Secure Access</span>
                                         </div>
-                                        <h2 className="text-3xl lg:text-4xl font-black italic tracking-tighter text-foreground uppercase leading-none">
+                                        <h2 className="text-3xl lg:text-4xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase leading-none">
                                             {title}
                                         </h2>
                                         {subtitle && (
-                                            <p className="text-default-400 text-xs font-bold uppercase tracking-[0.2em] mt-4 opacity-60">
+                                            <p className="text-slate-500 dark:text-default-400 text-xs font-bold uppercase tracking-[0.2em] mt-4 opacity-60">
                                                 {subtitle}
                                             </p>
                                         )}
@@ -318,10 +309,10 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 </motion.div>
 
                                 {/* Terminal Footer Decor */}
-                                <div className="mt-8 flex items-center justify-center gap-6 opacity-20">
+                                <div className="mt-8 flex items-center justify-center gap-6 opacity-40 dark:opacity-20">
                                     <div className="h-px flex-grow bg-gradient-to-r from-transparent to-divider" />
-                                    <div className="text-[8px] font-black uppercase tracking-[0.6em] text-default-400 whitespace-nowrap">
-                                        Node_Auth_Authenticated
+                                    <div className="text-[8px] font-black uppercase tracking-[0.6em] text-slate-500 dark:text-default-400 whitespace-nowrap">
+                                        Secure Connection
                                     </div>
                                     <div className="h-px flex-grow bg-gradient-to-l from-transparent to-divider" />
                                 </div>

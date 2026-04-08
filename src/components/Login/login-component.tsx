@@ -469,7 +469,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     operator: {
       headline: "OBAOL",
       highlight: "OPERATOR PORTAL",
-      description: "Designed for internal operators, mediators, and individuals entering digital agro-trading.",
+      description: "Your go-to platform for the agro trade ecosystem. Manage enquiries, orders, and operations in one place.",
       tags: [
         "Individuals",
         "Portfolio Managers",
@@ -597,7 +597,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 </div>
                 <div className="w-full flex flex-col gap-3">
                 <div className="w-full flex flex-col gap-6">
-                  <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-inner group/google">
+                  <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-soft group/google">
                     <div className="flex items-center justify-center p-3 gap-3 border-b border-default-100/50 mb-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50">Sign in with Google</span>
@@ -782,12 +782,12 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           >
             <Button
               type="submit"
-              className={`w-full font-black uppercase italic tracking-[0.2em] h-14 rounded-2xl shadow-2xl transition-all duration-500 ${
+              className={`w-full font-black uppercase italic tracking-[0.2em] h-14 rounded-2xl shadow-xl transition-all duration-500 ${
                 loginStatus === "success" 
-                  ? "bg-success-500 shadow-success-500/20" 
+                  ? "bg-success-500 shadow-success-500/10" 
                   : loginStatus === "error"
-                    ? "bg-danger-500 shadow-danger-500/20"
-                    : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20"
+                    ? "bg-danger-500 shadow-danger-500/10"
+                    : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/10"
               }`}
               color="warning"
               size="lg"

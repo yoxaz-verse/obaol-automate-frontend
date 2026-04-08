@@ -88,7 +88,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-[440px] px-4"
         >
-            <Card className="w-full bg-content1/80 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-divider shadow-2xl rounded-[2.5rem] p-2 md:p-4 overflow-hidden relative">
+            <Card className="w-full bg-content1/80 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-divider shadow-xl dark:shadow-2xl rounded-[2.5rem] p-2 md:p-4 overflow-hidden relative shadow-slate-200/40 dark:shadow-black/40">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary-500/5 blur-[60px] rounded-full -ml-12 -mb-12 pointer-events-none" />
 
@@ -149,7 +149,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 <Button
                                     type="submit"
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-xl shadow-warning-500/20 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     isLoading={isLoading}
                                 >
                                     Send OTP
@@ -193,7 +193,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                     <Button
                                         type="submit"
                                         color="warning"
-                                        className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-xl shadow-warning-500/20 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                        className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                         disabled={otp.length !== 6 || isLoading}
                                         isLoading={isLoading}
                                     >
@@ -256,7 +256,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 <Button
                                     type="submit"
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-xl shadow-warning-500/20 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     isLoading={isLoading}
                                 >
                                     Reset Password
@@ -285,7 +285,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 </div>
                                 <Button
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-xl shadow-warning-500/20 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     onClick={() => {
                                         const r = role.toLowerCase();
                                         const target = r === 'operator' || r === 'team' ? '/auth/operator' : '/auth';

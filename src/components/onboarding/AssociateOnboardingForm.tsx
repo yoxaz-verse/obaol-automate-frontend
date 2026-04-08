@@ -18,7 +18,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff, IoLockClosed, IoMail, IoPerson } from "react-icons/io5";
-import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiChevronLeft, FiChevronRight, FiChevronUp } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { showToastMessage } from "@/utils/utils";
@@ -33,6 +33,16 @@ import AuthContext from "@/context/AuthContext";
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const MAIN_CATEGORY_SLUGS = new Set([
+  "sourcing",
+  "packaging",
+  "testing",
+  "warehouse-storage",
+  "finance-risk",
+  "importing-distribution",
+  "freight-forwarding",
+  "inland-logistics",
+]);
 // Global window extension handled by explicit casting to avoid declaration conflicts
 const decodeJwt = (token: string): any => {
   try {
@@ -110,7 +120,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     companyDistrict: "",
     companyDivision: "",
     companyPincodeEntry: "",
-    companySubFunctionIds: [] as string[],
+    companyFunctionIds: [] as string[],
+    companyFunctionPriorities: [] as string[],
     contactPreference: "phone",
     contactNotes: "",
     associateAddress: "",
@@ -414,33 +425,154 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     ? selectedExistingCompany.serviceCapabilities
     : [];
   const existingCompanyCapabilityLabels = selectedExistingCompanyInterests.map((cap: any) => {
-    const matched = companySubFunctions.find((sub: any) => String(sub?._id || "") === String(cap || ""));
-    return matched?.name || String(cap || "").trim();
+    const token = String(cap || "").trim();
+    const matchedById = companyFunctions.find((fn: any) => String(fn?._id || "") === token);
+    if (matchedById?.name) return matchedById.name;
+    const normalized = token.replace(/[\s-]+/g, "_").toUpperCase();
+    const matchedBySlug = companyFunctions.find(
+      (fn: any) => String(fn?.slug || "").replace(/[\s-]+/g, "_").toUpperCase() === normalized
+    );
+    return matchedBySlug?.name || token;
   }).filter(Boolean);
   const selectedCountryName =
     countries.find((c: any) => String(c?._id || "") === String(formData.companyCountry || ""))?.name ||
     formData.companyCountry ||
     "";
-  const selectedStateName = states.find((s: any) => String(s?._id || "") === String(formData.companyState || ""))?.name || "";
-  const selectedDistrictName = districts.find((d: any) => String(d?._id || "") === String(formData.companyDistrict || ""))?.name || "";
-  const selectedDivisionName = divisions.find((d: any) => String(d?._id || "") === String(formData.companyDivision || ""))?.name || "";
-  const filteredDistricts = useMemo(
-    () => districts.filter((item: any) => String(item?.state || "") === String(formData.companyState || "")),
-    [districts, formData.companyState]
-  );
-  const filteredDivisions = useMemo(
-    () => divisions.filter((item: any) => String(item?.district || "") === String(formData.companyDistrict || "")),
-    [divisions, formData.companyDistrict]
-  );
+  const selectedCompanyStateName =
+    states.find((s: any) => String(s?._id || "") === String(formData.companyState || ""))?.name || "";
+  const selectedCompanyDistrictName =
+    districts.find((d: any) => String(d?._id || "") === String(formData.companyDistrict || ""))?.name || "";
+  const selectedCompanyDivisionName =
+    divisions.find((d: any) => String(d?._id || "") === String(formData.companyDivision || ""))?.name || "";
+  const selectedAssociateStateName =
+    states.find((s: any) => String(s?._id || "") === String(formData.associateState || ""))?.name || "";
+  const selectedAssociateDistrictName =
+    districts.find((d: any) => String(d?._id || "") === String(formData.associateDistrict || ""))?.name || "";
+
+  const normalizeName = (value: any) => String(value || "").trim().toLowerCase();
+  const getDistrictStateId = (item: any) =>
+    String(
+      item?.state ||
+        item?.stateId ||
+        item?.state_id ||
+        item?.state?._id ||
+        item?.state?.id ||
+        ""
+    );
+  const getDistrictStateName = (item: any) =>
+    normalizeName(item?.stateName || item?.state_name || item?.state?.name || "");
+  const getDivisionDistrictId = (item: any) =>
+    String(
+      item?.district ||
+        item?.districtId ||
+        item?.district_id ||
+        item?.district?._id ||
+        item?.district?.id ||
+        ""
+    );
+  const getDivisionDistrictName = (item: any) =>
+    normalizeName(item?.districtName || item?.district_name || item?.district?.name || "");
+
+  const filteredCompanyDistricts = useMemo(() => {
+    const stateId = String(formData.companyState || "");
+    const stateName = normalizeName(selectedCompanyStateName);
+    return districts.filter((item: any) => {
+      const matchId = stateId && getDistrictStateId(item) === stateId;
+      const matchName = stateName && getDistrictStateName(item) === stateName;
+      return matchId || matchName;
+    });
+  }, [districts, formData.companyState, selectedCompanyStateName]);
+
+  const filteredCompanyDivisions = useMemo(() => {
+    const districtId = String(formData.companyDistrict || "");
+    const districtName = normalizeName(selectedCompanyDistrictName);
+    return divisions.filter((item: any) => {
+      const matchId = districtId && getDivisionDistrictId(item) === districtId;
+      const matchName = districtName && getDivisionDistrictName(item) === districtName;
+      return matchId || matchName;
+    });
+  }, [divisions, formData.companyDistrict, selectedCompanyDistrictName]);
+
+  const filteredAssociateDistricts = useMemo(() => {
+    const stateId = String(formData.associateState || "");
+    const stateName = normalizeName(selectedAssociateStateName);
+    return districts.filter((item: any) => {
+      const matchId = stateId && getDistrictStateId(item) === stateId;
+      const matchName = stateName && getDistrictStateName(item) === stateName;
+      return matchId || matchName;
+    });
+  }, [districts, formData.associateState, selectedAssociateStateName]);
+
+  const filteredAssociateDivisions = useMemo(() => {
+    const districtId = String(formData.associateDistrict || "");
+    const districtName = normalizeName(selectedAssociateDistrictName);
+    return divisions.filter((item: any) => {
+      const matchId = districtId && getDivisionDistrictId(item) === districtId;
+      const matchName = districtName && getDivisionDistrictName(item) === districtName;
+      return matchId || matchName;
+    });
+  }, [divisions, formData.associateDistrict, selectedAssociateDistrictName]);
+
   const filteredPincodes = dynamicPincodes;
   const groupedCompanyFunctions = useMemo(() => {
-    return companyFunctions.map((fn: any) => ({
-      ...fn,
-      subFunctions: companySubFunctions.filter(
-        (sub: any) => String(sub?.functionId || "") === String(fn?._id || "")
-      ),
-    }));
-  }, [companyFunctions, companySubFunctions]);
+    const seen = new Map<string, any>();
+    companyFunctions.forEach((fn: any) => {
+      const slug = String(fn?.slug || "").trim();
+      if (MAIN_CATEGORY_SLUGS.size && !MAIN_CATEGORY_SLUGS.has(slug)) return;
+      const key = slug || String(fn?._id || fn?.name || "");
+      if (!key || seen.has(key)) return;
+      seen.set(key, fn);
+    });
+    return Array.from(seen.values()).sort((a: any, b: any) => {
+      const orderA = Number(a?.orderIndex || 0);
+      const orderB = Number(b?.orderIndex || 0);
+      if (orderA !== orderB) return orderA - orderB;
+      return String(a?.name || "").localeCompare(String(b?.name || ""));
+    });
+  }, [companyFunctions]);
+  const companyFunctionNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    groupedCompanyFunctions.forEach((fn: any) => {
+      const id = String(fn?._id || "");
+      if (id) map.set(id, String(fn?.name || ""));
+    });
+    return map;
+  }, [groupedCompanyFunctions]);
+
+  const updateCompanyFunctionSelection = (functionId: string) => {
+    setFormData((prev) => {
+      const currentIds = Array.isArray(prev.companyFunctionIds) ? prev.companyFunctionIds : [];
+      const currentPriorities = Array.isArray(prev.companyFunctionPriorities) ? prev.companyFunctionPriorities : [];
+    const isSelected = currentIds.includes(functionId);
+      let nextIds = currentIds;
+      if (isSelected) {
+        nextIds = currentIds.filter((id) => id !== functionId);
+      } else if (currentIds.length < 6) {
+        nextIds = [...currentIds, functionId];
+      }
+
+      let nextPriorities = currentPriorities.filter((id) => nextIds.includes(id));
+      if (!isSelected && nextPriorities.length < 3 && nextIds.includes(functionId)) {
+        nextPriorities = [...nextPriorities, functionId];
+      }
+
+      return { ...prev, companyFunctionIds: nextIds, companyFunctionPriorities: nextPriorities };
+    });
+    if (errors.companyFunctionIds) setErrors((prev) => ({ ...prev, companyFunctionIds: "" }));
+  };
+
+  const moveCompanyFunctionPriority = (functionId: string, direction: "up" | "down") => {
+    setFormData((prev) => {
+      const current = Array.isArray(prev.companyFunctionPriorities) ? [...prev.companyFunctionPriorities] : [];
+      const index = current.indexOf(functionId);
+      if (index === -1) return prev;
+      const swapWith = direction === "up" ? index - 1 : index + 1;
+      if (swapWith < 0 || swapWith >= current.length) return prev;
+      const next = [...current];
+      [next[index], next[swapWith]] = [next[swapWith], next[index]];
+      return { ...prev, companyFunctionPriorities: next };
+    });
+  };
 
   const validatePassword = (password: string) => {
     const missing: string[] = [];
@@ -607,7 +739,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           }
           if (!formData.companyState) stepErrors.companyState = "State is required";
           if (!formData.companyDistrict) stepErrors.companyDistrict = "District is required";
-          if (!formData.companyDivision) stepErrors.companyDivision = "Division is required";
+          if (filteredCompanyDivisions.length > 0 && !formData.companyDivision) {
+            stepErrors.companyDivision = "Division is required";
+          }
         }
       } else if (!isCompanyFlow) {
         if (!formData.associateAddress.trim()) stepErrors.associateAddress = "Address is required";
@@ -623,11 +757,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
     if (step === 3) {
       if (isNewCompany) {
-        if (!Array.isArray(formData.companySubFunctionIds) || formData.companySubFunctionIds.length < 1) {
-          stepErrors.companySubFunctionIds = "Select at least 1 sub-function.";
+        if (!Array.isArray(formData.companyFunctionIds) || formData.companyFunctionIds.length < 1) {
+          stepErrors.companyFunctionIds = "Select at least 1 main category.";
         }
-        if (Array.isArray(formData.companySubFunctionIds) && formData.companySubFunctionIds.length > 10) {
-          stepErrors.companySubFunctionIds = "You can select up to 10 sub-functions.";
+        if (Array.isArray(formData.companyFunctionIds) && formData.companyFunctionIds.length > 6) {
+          stepErrors.companyFunctionIds = "You can select up to 6 main categories.";
         }
       }
     }
@@ -799,9 +933,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           legalComplianceInfo: formData.companyGeoType === "INTERNATIONAL"
             ? formData.companyLegalInformation.trim()
             : undefined,
-          subFunctionIds: Array.from(
-            new Set((formData.companySubFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
+          functionIds: Array.from(
+            new Set((formData.companyFunctionIds || []).map((id) => String(id || "").trim()).filter(Boolean))
           ),
+          functionPriorities: Array.from(
+            new Set((formData.companyFunctionPriorities || []).map((id) => String(id || "").trim()).filter(Boolean))
+          ).slice(0, 3),
           phone: normalizedCompanyPhone.e164,
           phoneCountryCode: normalizedCompanyPhone.countryCode,
           phoneNational: normalizedCompanyPhone.national,
@@ -1347,7 +1484,26 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 isDisabled={!formData.companyState}
                                 classNames={{ trigger: "h-12 border-default-200" }}
                               >
-                                {filteredDistricts.map((item: any) => (
+                                {filteredCompanyDistricts.map((item: any) => (
+                                  <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                ))}
+                              </Select>
+                              <Select
+                                label="Division"
+                                labelPlacement="outside"
+                                variant="bordered"
+                                placeholder="Select"
+                                selectedKeys={formData.companyDivision ? [formData.companyDivision] : []}
+                                onSelectionChange={(keys) => {
+                                  const selected = Array.from(keys as Set<string>)[0] || "";
+                                  setCompanyLocationField("companyDivision", selected);
+                                }}
+                                isInvalid={!!errors.companyDivision}
+                                errorMessage={errors.companyDivision}
+                                isDisabled={!formData.companyDistrict}
+                                classNames={{ trigger: "h-12 border-default-200" }}
+                              >
+                                {filteredCompanyDivisions.map((item: any) => (
                                   <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                                 ))}
                               </Select>
@@ -1417,7 +1573,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isDisabled={!formData.associateState}
                             classNames={{ trigger: "h-12 border-default-200" }}
                           >
-                            {filteredDistricts.map((item: any) => (
+                            {filteredAssociateDistricts.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                             ))}
                           </Select>
@@ -1436,7 +1592,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             isDisabled={!formData.associateDistrict}
                             classNames={{ trigger: "h-12 border-default-200" }}
                           >
-                            {filteredDivisions.map((item: any) => (
+                            {filteredAssociateDivisions.map((item: any) => (
                               <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                             ))}
                           </Select>
@@ -1478,9 +1634,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   className="flex flex-col gap-6"
                 >
                   <div className="p-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 text-xs font-black uppercase tracking-widest text-warning-500 text-center">
-                    Select 1 to 10 company capabilities
+                    Select 1 to 6 main categories
                     <p className="mt-2 text-[10px] font-semibold tracking-wide text-default-500 normal-case">
-                      These choices shape the tools and dashboards you see after onboarding.
+                      Your choices customize the platform you see after onboarding. Pick up to 3 priorities.
                     </p>
                   </div>
 
@@ -1489,22 +1645,58 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     <ul className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-default-500 font-semibold">
                       <li className="flex items-start gap-2">
                         <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
-                        Enables relevant marketplace filters and discovery.
+                        Shows tools and workflows based on your selected categories.
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
-                        Customizes workflows based on your services.
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
-                        Unlocks feature panels tied to your capabilities.
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
-                        Improves matching for inquiries and requests.
+                        Your top priorities appear first on the dashboard.
                       </li>
                     </ul>
                   </div>
+
+                  {isNewCompany && (
+                    <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4">
+                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Priority Order (1–3)</p>
+                      {formData.companyFunctionPriorities.length ? (
+                        <div className="mt-3 space-y-2">
+                          {formData.companyFunctionPriorities.map((id, index) => (
+                            <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
+                              <div className="flex items-center gap-3">
+                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-warning-500 text-black text-[10px] font-black">
+                                  {index + 1}
+                                </span>
+                                <span className="text-xs font-bold text-foreground/80">
+                                  {companyFunctionNameById.get(id) || "Selected category"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => moveCompanyFunctionPriority(id, "up")}
+                                  disabled={index === 0}
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <FiChevronUp className="mx-auto text-sm" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => moveCompanyFunctionPriority(id, "down")}
+                                  disabled={index === formData.companyFunctionPriorities.length - 1}
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <FiChevronDown className="mx-auto text-sm" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-3 text-xs text-default-400">
+                          Select categories below to set your top priorities.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {isNewCompany ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1523,53 +1715,51 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           </button>
                         </div>
                       )}
-                      {groupedCompanyFunctions.map((fn: any) => {
-                        const fnSubFunctions = Array.isArray(fn?.subFunctions) ? fn.subFunctions : [];
-                        if (!fnSubFunctions.length) return null;
-                        return (
-                          <div key={String(fn?._id || "")} className="space-y-3">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-default-400 pl-2">{fn?.name}</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {fnSubFunctions.map((sub: any) => {
-                                const subId = String(sub?._id || "");
-                                const isSelected = formData.companySubFunctionIds.includes(subId);
-                                const isDisabled = !isSelected && formData.companySubFunctionIds.length >= 10;
-                                return (
-                                  <button
-                                    key={subId}
-                                    type="button"
-                                    disabled={isDisabled}
-                                    onClick={() => {
-                                      setFormData((prev) => {
-                                        const current = Array.isArray(prev.companySubFunctionIds) ? prev.companySubFunctionIds : [];
-                                        if (isSelected) {
-                                          return { ...prev, companySubFunctionIds: current.filter((id) => id !== subId) };
-                                        }
-                                        if (current.length >= 10) return prev;
-                                        return { ...prev, companySubFunctionIds: [...current, subId] };
-                                      });
-                                      if (errors.companySubFunctionIds) setErrors((prev) => ({ ...prev, companySubFunctionIds: "" }));
-                                    }}
-                                    className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
-                                      ? "border-warning-500 bg-warning-500/10 shadow-lg shadow-warning-500/5 ring-1 ring-warning-500/20"
-                                      : isDisabled
-                                        ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
-                                        : "border-default-200 bg-content2/20 hover:border-warning-500/50 hover:bg-content2/40"
-                                      }`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-warning-500 bg-warning-500" : "border-default-300"}`}>
-                                        {isSelected && <FiCheck className="text-[10px] text-white stroke-[4]" />}
-                                      </div>
-                                      <p className={`text-xs font-bold ${isSelected ? "text-warning-600" : "text-foreground/70"}`}>{sub?.name}</p>
+                      {groupedCompanyFunctions.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {groupedCompanyFunctions.map((fn: any) => {
+                            const fnId = String(fn?._id || "");
+                            const isSelected = formData.companyFunctionIds.includes(fnId);
+    const isDisabled = !isSelected && formData.companyFunctionIds.length >= 6;
+                            const priorityIndex = formData.companyFunctionPriorities.indexOf(fnId);
+                            return (
+                              <button
+                                key={fnId}
+                                type="button"
+                                disabled={isDisabled}
+                                onClick={() => updateCompanyFunctionSelection(fnId)}
+                                className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
+                                  ? "border-warning-500 bg-warning-500/10 shadow-lg shadow-warning-500/5 ring-1 ring-warning-500/20"
+                                  : isDisabled
+                                    ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
+                                    : "border-default-200 bg-content2/20 hover:border-warning-500/50 hover:bg-content2/40"
+                                  }`}
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-warning-500 bg-warning-500" : "border-default-300"}`}>
+                                      {isSelected && <FiCheck className="text-[10px] text-white stroke-[4]" />}
                                     </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
+                                    <p className={`text-xs font-bold ${isSelected ? "text-warning-600" : "text-foreground/70"}`}>{fn?.name}</p>
+                                  </div>
+                                  {priorityIndex > -1 && (
+                                    <span className="inline-flex items-center gap-2">
+                                      <span className="rounded-full bg-warning-500/20 text-warning-600 text-[9px] font-black uppercase tracking-widest px-2 py-1">
+                                        Priority {priorityIndex + 1}
+                                      </span>
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {errors.companyFunctionIds && (
+                        <p className="text-xs text-danger-500 font-semibold mt-2 text-center">
+                          {errors.companyFunctionIds}
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="rounded-[2rem] border-2 border-dashed border-default-200 bg-content2/20 p-6">

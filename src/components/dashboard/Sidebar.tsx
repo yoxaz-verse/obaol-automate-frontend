@@ -106,6 +106,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 "/dashboard/flow-rules",
                 "/dashboard/operators/overview",
                 "/dashboard/users",
+                "/dashboard/function-preview",
+                "/dashboard/shortcuts",
                 "/dashboard/essentials",
                 "/dashboard/geosphere",
             ],
@@ -214,6 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                 {sectionOptions.map((opt) => {
                                     const isDash = opt.link === "/dashboard";
                                     const isActive = isDash ? pathname === "/dashboard" : pathname.startsWith(opt.link);
+                                    const badgeCount = Number(dotMap[opt.link] || 0);
 
                                     return (
                                         <button
@@ -236,6 +239,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                                 <span className="text-[11px] tracking-[0.15em] uppercase font-black tabular-nums truncate">
                                                     {opt.name}
                                                 </span>
+                                            )}
+                                            {!isCollapsed && badgeCount > 0 && (
+                                               <span className="ml-auto px-2 py-0.5 rounded-full bg-danger-500 text-white text-[9px] font-black tracking-widest">
+                                                   {badgeCount > 99 ? "99+" : badgeCount}
+                                               </span>
+                                            )}
+                                            {isCollapsed && badgeCount > 0 && (
+                                               <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                                             )}
                                             {isCollapsed && isActive && (
                                                <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-warning-500 shadow-[0_0_8px_rgba(245,165,36,0.6)]" />

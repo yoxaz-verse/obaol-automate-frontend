@@ -17,7 +17,6 @@ import {
   LuFileText, 
   LuLayoutGrid,
   LuClock,
-  LuCheckCircle,
   LuLock,
   LuSearch
 } from "react-icons/lu";

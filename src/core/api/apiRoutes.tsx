@@ -290,6 +290,9 @@ export const dashboardRoutes = {
   systemMetrics: `${ANALYTICS_BASE}/metrics/system`,
   associateMetrics: `${ANALYTICS_BASE}/metrics/associate`,
   operatorMetrics: `${ANALYTICS_BASE}/metrics/operator`,
+  companyFunctionMetrics: `${ANALYTICS_BASE}/metrics/company-functions`,
+  companyFunctionComponents: `${ANALYTICS_BASE}/components/company-functions`,
+  companyFunctionComponentsGlobal: `${ANALYTICS_BASE}/components/company-functions/global`,
 };
 
 export const approvalRoutes = {
@@ -308,6 +311,7 @@ export const notificationRoutes = {
   markSectionRead: (section: string) => `/notifications/mark-section-read?section=${section}`,
   readOne: (id: string) => `/notifications/${id}/read`,
   readAll: "/notifications/read-all",
+  broadcast: "/notifications/broadcast",
 };
 
 export const presenceRoutes = {

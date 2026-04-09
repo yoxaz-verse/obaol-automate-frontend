@@ -223,6 +223,7 @@ export const initialTableConfig: Record<
     inEdit?: boolean;
     dependsOn?: string;
     values?: { key: string; value: string }[];
+    placeholder?: string;
     accept?: string;
     required?: boolean;
     showWhen?: { key: string; equals: any[] };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import AuthContext from "@/context/AuthContext";
 import {
   Avatar as HeroAvatar,
@@ -26,6 +26,7 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiUser, FiMoreVertical } from "react-icons/fi";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 function AdminDashboardPanel() {
   const { data: globalStats } = useQuery({
@@ -496,6 +497,25 @@ export default function ProfilePage() {
                 {roleKey === "admin" && <AdminDashboardPanel />}
                 {roleKey === "associate" && <AssociateDashboardPanel userId={user?.id} />}
                 {roleKey === "operator" && <OperatorDashboardPanel userId={user?.id} />}
+              </div>
+
+              <div className="rounded-[2.5rem] border border-default-200/60 bg-content1/70 backdrop-blur-2xl p-8 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                    <FiInfo size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black uppercase tracking-wide">Keyboard Shortcuts</h3>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-default-400">Open the shortcuts manager</p>
+                  </div>
+                </div>
+                <Link
+                  href="/dashboard/shortcuts"
+                  className="inline-flex items-center justify-between rounded-2xl border border-default-200/60 bg-content2/30 px-6 py-4 text-xs font-black uppercase tracking-[0.3em] text-foreground hover:bg-content2/50 transition"
+                >
+                  Manage Shortcuts
+                  <FiArrowRight />
+                </Link>
               </div>
             </div>
           );

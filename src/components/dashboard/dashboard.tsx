@@ -42,10 +42,12 @@ import DashboardTile from "./dashboard-tile";
 import InsightCard from "./InsightCard";
 import TrendChart from "./TrendChart";
 import EssentialTabContent from "./Essentials/essential-tab-content";
+import CompanyFunctionComponent from "./CompanyFunctionComponent";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
+import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 
@@ -55,6 +57,7 @@ const Dashboard: NextPage = () => {
   const role = String(user?.role || "");
   const roleLower = role.trim().toLowerCase();
   const userId = String(user?.id || "");
+  const associateCompanyId = String(user?.associateCompanyId || "");
 
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate";
@@ -91,6 +94,11 @@ const Dashboard: NextPage = () => {
     isAdmin,
     isAssociate,
     isOperatorUser,
+  });
+
+  const companyFunctionDashboard = useCompanyFunctionDashboard({
+    companyId: associateCompanyId,
+    isAdmin: false,
   });
 
   const companyDirectoryQuery = useQuery({
@@ -518,67 +526,6 @@ const Dashboard: NextPage = () => {
   );
 
 
-  const associateInterestChips = useMemo(() => {
-    const rawInterests = Array.isArray(user?.companyInterests)
-      ? user?.companyInterests.map((value) => String(value || "").toUpperCase())
-      : [];
-
-    const map: Record<string, { label: string; icon: React.ReactNode }> = {
-      BUYER: { label: "Buyer", icon: <LuShoppingBag size={14} /> },
-      SUPPLIER: { label: "Supplier", icon: <LuPackage size={14} /> },
-      PROCUREMENT_PARTNER: { label: "Procurement", icon: <LuSearch size={14} /> },
-      PACKAGING_PARTNER: { label: "Packaging", icon: <LuBox size={14} /> },
-      LOGISTICS_PARTNER: { label: "Inland Transportation", icon: <LuTruck size={14} /> },
-      INLAND_TRANSPORTATION: { label: "Inland Transportation", icon: <LuTruck size={14} /> },
-      OCEAN_FREIGHT: { label: "Ocean Freight", icon: <LuAnchor size={14} /> },
-      SEA_FREIGHT_FORWARDING: { label: "Ocean Freight", icon: <LuAnchor size={14} /> },
-      AIR_FREIGHT: { label: "Air Freight", icon: <LuSend size={14} /> },
-      AIR_FREIGHT_FORWARDING: { label: "Air Freight", icon: <LuSend size={14} /> },
-      CUSTOMS_CLEARANCE: { label: "Customs", icon: <LuShield size={14} /> },
-      WAREHOUSING: { label: "Warehousing", icon: <LuLayers size={14} /> },
-      QUALITY_TESTING_PARTNER: { label: "Quality", icon: <LuCheck size={14} /> },
-      CERTIFICATION_PARTNER: { label: "Certification", icon: <LuCheck size={14} /> },
-    };
-
-    const seen = new Set<string>();
-    const chips = rawInterests
-      .map((key) => map[key])
-      .filter(Boolean)
-      .filter((item) => {
-        const token = item.label;
-        if (seen.has(token)) return false;
-        seen.add(token);
-        return true;
-      });
-
-    return chips;
-  }, [user?.companyInterests]);
-
-  const getAssociateOpsHint = (type: "execution" | "documents" | "enquiries" | "orders") => {
-    const interests = Array.isArray(user?.companyInterests)
-      ? user?.companyInterests.map((value) => String(value || "").toUpperCase())
-      : [];
-    const hasLogistics = interests.includes("LOGISTICS_PARTNER") || interests.includes("INLAND_TRANSPORTATION");
-    const hasProcurement = interests.includes("PROCUREMENT_PARTNER");
-    const hasPackaging = interests.includes("PACKAGING_PARTNER");
-    const hasQuality = interests.includes("QUALITY_TESTING_PARTNER") || interests.includes("CERTIFICATION_PARTNER");
-
-    if (type === "execution") {
-      if (hasLogistics) return "Manage shipment execution and delivery coordination.";
-      if (hasPackaging) return "Track packaging assignments and readiness.";
-      if (hasProcurement) return "Follow procurement execution milestones.";
-      return "Monitor execution tasks and fulfillment updates.";
-    }
-    if (type === "documents") {
-      if (hasQuality) return "Track certificates and compliance files.";
-      return "Manage deal documents and trade files.";
-    }
-    if (type === "enquiries") {
-      return "Track active enquiries and incoming requests.";
-    }
-    return "Monitor orders and execution stages.";
-  };
-
   const renderAdminDashboard = () => (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -752,55 +699,65 @@ const Dashboard: NextPage = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
-          <CardBody className="p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-foreground text-xs">Execution Panel</h4>
-              <LuActivity className="text-default-400" size={14} />
-            </div>
-            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("execution")}</p>
-            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-lg font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/execution-enquiries")}>
-              Control Feed
-            </Button>
-          </CardBody>
-        </Card>
-        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
-          <CardBody className="p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-foreground text-xs">Documents</h4>
-              <LuCheck className="text-default-400 group-hover:text-primary transition-colors" size={14} />
-            </div>
-            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("documents")}</p>
-            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/documents")}>
-              Protocol Hub
-            </Button>
-          </CardBody>
-        </Card>
-        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
-          <CardBody className="p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-foreground text-xs">Enquiries</h4>
-              <LuShoppingBag className="text-default-400 group-hover:text-primary transition-colors" size={14} />
-            </div>
-            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("enquiries")}</p>
-            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/enquiries")}>
-              Market Stream
-            </Button>
-          </CardBody>
-        </Card>
-        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-xl overflow-hidden group">
-          <CardBody className="p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-foreground text-xs">Orders</h4>
-              <LuPackage className="text-default-400 group-hover:text-primary transition-colors" size={14} />
-            </div>
-            <p className="text-[9px] text-default-500 font-medium leading-tight line-clamp-2">{getAssociateOpsHint("orders")}</p>
-            <Button size="sm" variant="flat" color="primary" className="h-7 w-full rounded-xl font-bold uppercase tracking-wider text-[8px]" onPress={() => router.push("/dashboard/orders")}>
-              Active Missions
-            </Button>
-          </CardBody>
-        </Card>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-default-400">Company Functions</h3>
+            <p className="text-xs text-default-500">Panels reflect your company priorities and capabilities.</p>
+          </div>
+        </div>
+
+        {companyFunctionDashboard.isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <Card key={idx} className="border border-default-200/60 bg-content1/70">
+                <CardBody className="space-y-3">
+                  <Skeleton className="h-5 w-1/3 rounded-lg" />
+                  <Skeleton className="h-4 w-2/3 rounded-lg" />
+                  <div className="grid grid-cols-3 gap-2">
+                    <Skeleton className="h-14 rounded-xl" />
+                    <Skeleton className="h-14 rounded-xl" />
+                    <Skeleton className="h-14 rounded-xl" />
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        ) : companyFunctionDashboard.isError ? (
+          <Card className="border border-danger-200 bg-danger-50/40">
+            <CardBody className="text-sm text-danger-600">
+              Unable to load company function panels right now.
+            </CardBody>
+          </Card>
+        ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
+          <Card className="border border-warning-200 bg-warning-50/60">
+            <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h4 className="font-semibold text-warning-700">No company functions configured yet.</h4>
+                <p className="text-xs text-warning-600/80 mt-1">
+                  Add company priorities so this dashboard can personalize your workflow.
+                </p>
+              </div>
+              <Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>
+                Configure Company
+              </Button>
+            </CardBody>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {companyFunctionDashboard.orderedFunctions.map((fn: any) => (
+              <CompanyFunctionComponent
+                key={fn._id}
+                name={fn.name}
+                slug={fn.slug}
+                priorityRank={fn.priorityRank}
+                metrics={fn.metrics}
+                recentExecutionInquiries={fn.recentExecutionInquiries}
+                recentOrders={fn.recentOrders}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

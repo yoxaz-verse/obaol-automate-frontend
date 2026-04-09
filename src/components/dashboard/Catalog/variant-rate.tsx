@@ -59,6 +59,11 @@ const resolveAdminCommission = (rateValue: any, commissionValue: any) => {
   if (Number.isFinite(numericCommission) && numericCommission > 0) return numericCommission;
   return round2(Number(rateValue || 0) * COMMISSION_RATE);
 };
+const truncateWithDots = (value: any, limit = 12) => {
+  const str = String(value ?? "");
+  if (str.length <= limit) return str;
+  return `${str.slice(0, limit)}..`;
+};
 const formatLastLiveDate = (value: any) => {
   if (!value) return "";
   const date = new Date(value);
@@ -509,12 +514,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ? supplierRate
                 : totalRate;
 
-              const productVariantLabel = String(
-                (
-                  (item.productVariant?.product?.name || "") +
-                  " " +
-                  (item.productVariant?.name || item.productVariantName || "")
-                ).trim() || "N/A"
+              const productVariantLabel = truncateWithDots(
+                String(
+                  (
+                    (item.productVariant?.product?.name || "") +
+                    " " +
+                    (item.productVariant?.name || item.productVariantName || "")
+                  ).trim() || "N/A"
+                )
               );
 
               return {
@@ -537,7 +544,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant: productVariantLabel,
-                product: item.productVariant?.product?.name,
+                product: truncateWithDots(item.productVariant?.product?.name),
                 location: locationDisplay || "--",
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
@@ -628,8 +635,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associateId: item.associateId?._id || item.associateId,
                 originalOwnerId: baseRate?.associate?._id || baseRate?.associate,
                 companyId: item.associateCompanyId?._id || item.associateCompanyId,
-                productVariant: item.productVariantId?.name,
-                product: item.productVariantId?.product?.name,
+                productVariant: truncateWithDots(item.productVariantId?.name),
+                product: truncateWithDots(item.productVariantId?.product?.name),
                 productId: item.productVariantId?.product?._id || item.productVariantId?.product,
                 productVariantId: item.productVariantId?._id,
                 rawBasePrice: (supplierRate + adminCommission),
@@ -665,8 +672,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 quantityRaw: quantityValue,
                 associateId: item.associate?._id,
                 companyId: item.associate?.associateCompany,
-                productVariant: item.variantRate?.productVariant?.name,
-                product: item.variantRate?.productVariant?.product?.name,
+                productVariant: truncateWithDots(item.variantRate?.productVariant?.name),
+                product: truncateWithDots(item.variantRate?.productVariant?.product?.name),
                 productId: item.variantRate?.productVariant?.product?._id || item.variantRate?.productVariant?.product,
                 productVariantId: item.variantRate?.productVariant?._id,
                 rawBasePrice: basePriceForUser,

@@ -11,6 +11,7 @@ import { getAllowedRoles } from "@/utils/roleHelpers";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { ACTION_ROUTES, loadShortcuts, ShortcutAction } from "@/utils/shortcutConfig";
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [
@@ -116,6 +117,33 @@ export default function DashboardLayout({
       router.replace("/dashboard");
     }
   }, [isOnboardingLocked, isApprovalPending, loading, pathname, router, user]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handler = (event: KeyboardEvent) => {
+      const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
+      const metaPressed = isMac ? event.metaKey : event.ctrlKey;
+      if (!metaPressed) return;
+      const key = String(event.key || "").toUpperCase();
+      if (!key) return;
+
+      const shortcuts = loadShortcuts();
+      const entries = Object.entries(shortcuts) as [ShortcutAction, string][];
+      const match = entries.find(([, value]) => String(value || "").toUpperCase() === key);
+      if (!match) return;
+
+      const [action] = match;
+      const route = ACTION_ROUTES[action];
+      if (!route) return;
+
+      event.preventDefault();
+      router.push(route);
+    };
+
+    window.addEventListener("keydown", handler, { capture: true });
+    return () => window.removeEventListener("keydown", handler, { capture: true } as any);
+  }, [router]);
 
   if (!isMounted) {
     return (

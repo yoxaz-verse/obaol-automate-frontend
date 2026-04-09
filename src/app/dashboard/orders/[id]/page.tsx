@@ -722,9 +722,11 @@ export default function OrderDetailsPage() {
     });
     const mappedDocTypes = new Set<string>();
     Object.values(SUBFLOW_DOC_MAP).forEach((types) => types.forEach((t) => mappedDocTypes.add(t)));
-    const docsForOrderTypes = Array.from(new Set((docsForOrder || []).map((doc: any) => String(doc?.type || "").toUpperCase())));
+    const docsForOrderTypes = Array.from(
+        new Set((docsForOrder || []).map((doc: any) => String(doc?.type || "").toUpperCase()))
+    ) as string[];
     const extraDocTypes = docsForOrderTypes.filter((type) => !mappedDocTypes.has(type) && !ORDER_CORE_DOC_TYPES.includes(type));
-    const orderCoreDocTypes = [...ORDER_CORE_DOC_TYPES, ...extraDocTypes];
+    const orderCoreDocTypes = [...ORDER_CORE_DOC_TYPES, ...extraDocTypes] as string[];
     const getDocRule = (docType: string) => docRuleByType.get(String(docType || "").toUpperCase());
 
     const fallbackGateStage = sortedOrderStages[0] || "ORDER_CREATED";
@@ -1066,7 +1068,7 @@ export default function OrderDetailsPage() {
                         <div className="flex items-center gap-2">
                             <Button
                                 className="bg-warning text-black font-bold"
-                                isLoading={updateOrderOperatorsMutation.isLoading}
+                                isLoading={updateOrderOperatorsMutation.isPending}
                                 onPress={() => {
                                     updateOrderOperatorsMutation.mutate({
                                         supplierOperatorId: selectedSupplierOperatorId || null,

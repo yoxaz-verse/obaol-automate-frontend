@@ -58,12 +58,13 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     queryKey: ["notifications", "unread-count"],
     queryFn: async () => {
       const res: any = await getData(notificationRoutes.unreadCount);
-      return Number(res?.data?.unreadCount || 0);
+      return Number(res?.data?.data?.unreadCount || 0);
     },
     refetchInterval: 25000,
   });
 
   const unreadCount = Number(unreadData || 0);
+  const unreadBadge = unreadCount > 99 ? "99+" : String(unreadCount);
 
   useEffect(() => {
     const handleOutside = (event: MouseEvent) => {
@@ -142,7 +143,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     { label: "News", links: ["/dashboard/news"] },
     { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
-    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/essentials", "/dashboard/geosphere"] },
+    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
   ];
 
   return (
@@ -291,7 +292,12 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 >
                   <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-danger-500 rounded-full border-2 border-white dark:border-[#0B0F14]" />
+                    <>
+                      <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-white dark:border-[#0B0F14] shadow-[0_4px_12px_rgba(239,68,68,0.35)]">
+                        {unreadBadge}
+                      </span>
+                      <span className="absolute -top-1.5 -right-1.5 z-0 h-5 w-5 rounded-full bg-danger-500/40 animate-ping" />
+                    </>
                   )}
                 </button>
                 <AnimatePresence>

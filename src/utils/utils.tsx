@@ -231,6 +231,16 @@ export const sidebarOptions = [
     link: "/dashboard/users",
   },
   {
+    name: "Function Preview",
+    icon: <FiLayers />,
+    link: "/dashboard/function-preview",
+  },
+  {
+    name: "Keyboard Shortcuts",
+    icon: <FiLayers />,
+    link: "/dashboard/shortcuts",
+  },
+  {
     name: "Essentials", //Translate
     icon: <MdOutlineSettingsInputComponent />,
     link: "/dashboard/essentials",

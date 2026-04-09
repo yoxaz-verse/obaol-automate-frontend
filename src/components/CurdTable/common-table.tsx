@@ -19,6 +19,7 @@ import EmptyState from "../ui/EmptyState";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
 import { getLanguageCookie } from "@/utils/languageCookie";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function CommonTable({
   TableData = [], // Default value as an empty array
@@ -34,6 +35,7 @@ export default function CommonTable({
   rowsPerPage: serverRowsPerPage,
   onPageChange,
 }: TableProps & { emptyContent?: React.ReactNode }) {
+  const { formatRate } = useCurrency();
   type UserData = (typeof TableData)[0];
   const effectiveColumns = Math.max(1, columns?.length || 0);
   const minTableWidthPx = Math.max(1100, effectiveColumns * 170);
@@ -74,6 +76,11 @@ export default function CommonTable({
       const columnType = column?.type;
 
       switch (columnType) {
+        case "currency": {
+          const numeric = Number(cellValue);
+          if (Number.isNaN(numeric)) return "—";
+          return formatRate(numeric);
+        }
         case "date":
           if (cellValue) {
             const date = new Date(cellValue);

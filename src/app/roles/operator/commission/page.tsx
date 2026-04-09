@@ -5,6 +5,7 @@ import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
     FiArrowLeft,
     FiClock,
@@ -20,6 +21,7 @@ import {
 } from "react-icons/fi";
 
 export default function OperatorCommissionDocsPage() {
+    const { formatRate } = useCurrency();
     const fadeIn = {
         initial: { opacity: 0, y: 20 },
         whileInView: { opacity: 1, y: 0 },
@@ -274,28 +276,28 @@ export default function OperatorCommissionDocsPage() {
                                 <div className="space-y-8">
                                     <div className="p-6 rounded-2xl bg-default-100 border border-default-200">
                                         <div className="text-sm font-bold text-default-400 uppercase tracking-widest mb-2">Trade Net Profit</div>
-                                        <div className="text-4xl font-black text-foreground tracking-tighter">₹1,00,000</div>
+                                        <div className="text-4xl font-black text-foreground tracking-tighter">{formatRate(100000)}</div>
                                     </div>
 
                                     <div className="flex items-center gap-6">
                                         <div className="flex-1 p-6 rounded-2xl bg-orange-500 shadow-xl shadow-orange-500/20 text-white">
                                             <div className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">Commission Pool (30%)</div>
-                                            <div className="text-3xl font-black">₹30,000</div>
+                                            <div className="text-3xl font-black">{formatRate(30000)}</div>
                                         </div>
                                     </div>
 
                                     <ul className="space-y-4 text-foreground font-bold">
                                         <li className="flex justify-between p-4 rounded-xl border border-default-100">
                                             <span className="text-foreground/50">Deal Closer (40%)</span>
-                                            <span>₹12,000</span>
+                                            <span>{formatRate(12000)}</span>
                                         </li>
                                         <li className="flex justify-between p-4 rounded-xl border border-default-100">
                                             <span className="text-foreground/50">Portfolio Owner (30%)</span>
-                                            <span>₹9,000</span>
+                                            <span>{formatRate(9000)}</span>
                                         </li>
                                         <li className="flex justify-between p-4 rounded-xl border border-default-100 italic text-orange-500">
                                             <span className="opacity-70">Leadership Share (30%)</span>
-                                            <span>₹9,000</span>
+                                            <span>{formatRate(9000)}</span>
                                         </li>
                                     </ul>
                                 </div>

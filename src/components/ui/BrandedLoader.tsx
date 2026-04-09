@@ -63,7 +63,7 @@ export default function BrandedLoader({
   const ActiveIcon = active.icon;
 
   const containerBase = fullScreen
-    ? "fixed inset-0 z-[9999] bg-[#04070f] flex flex-col items-center justify-center overflow-hidden"
+    ? "fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center overflow-hidden"
     : `w-full flex flex-col items-center justify-center ${compact ? "py-8" : "py-24"} bg-transparent`;
 
   return (
@@ -118,7 +118,7 @@ export default function BrandedLoader({
           <motion.div
             animate={{ scale: [1, 1.04, 1] }}
             transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
-            className="relative bg-[#04070f] p-6 rounded-3xl border border-white/[0.07] shadow-[0_0_40px_rgba(234,179,8,0.08)] z-10"
+            className="relative bg-background p-6 rounded-3xl border border-default-200 shadow-[0_0_40px_rgba(234,179,8,0.08)] z-10"
           >
             <Image
               src="/logo.png"
@@ -130,7 +130,7 @@ export default function BrandedLoader({
 
             {/* Stage badge — always rendered, icon swaps with CSS transition */}
             <div
-              className="absolute -top-5 -right-5 w-11 h-11 bg-warning-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.5)] border-2 border-[#04070f]"
+              className="absolute -top-5 -right-5 w-11 h-11 bg-warning-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.5)] border-2 border-background"
               style={{ transition: "opacity 0.3s", opacity: textVisible ? 1 : 0 }}
             >
               <ActiveIcon size={currentSize.iconSize} className="text-black" />
@@ -146,10 +146,10 @@ export default function BrandedLoader({
           <p className="text-[10px] font-black tracking-[0.45em] text-warning-500 uppercase italic leading-none">
             {active.title}
           </p>
-          <h3 className="text-base font-black text-white uppercase tracking-tight leading-snug mt-1 min-h-[1.4em]">
+          <h3 className="text-base font-black text-foreground uppercase tracking-tight leading-snug mt-1 min-h-[1.4em]">
             {active.status}
           </h3>
-          <div className="flex items-center gap-2 mt-3 text-[9px] font-bold text-white/30 tracking-[0.3em] uppercase">
+          <div className="flex items-center gap-2 mt-3 text-[9px] font-bold text-default-400 tracking-[0.3em] uppercase">
             <LuNetwork className="text-warning-500/50 shrink-0" size={12} />
             {message}
           </div>
@@ -158,7 +158,7 @@ export default function BrandedLoader({
         {/* ── Progress bar ── */}
         <div className="w-full flex gap-1.5 mt-8 px-8">
           {MISSION_STAGES.map((_, i) => (
-            <div key={i} className="flex-1 h-[2px] rounded-full bg-white/[0.06] relative overflow-hidden">
+            <div key={i} className="flex-1 h-[2px] rounded-full bg-default-100 relative overflow-hidden">
               {i < stage && (
                 <div className="absolute inset-0 bg-warning-500/40 rounded-full" />
               )}
@@ -175,7 +175,7 @@ export default function BrandedLoader({
           ))}
         </div>
 
-        <span className="mt-6 text-[8px] font-black text-white/20 uppercase tracking-[0.4em] italic">
+        <span className="mt-6 text-[8px] font-black text-default-400/50 uppercase tracking-[0.4em] italic">
           OBAOL MISSION CONTROL // STATUS NORMAL
         </span>
       </div>

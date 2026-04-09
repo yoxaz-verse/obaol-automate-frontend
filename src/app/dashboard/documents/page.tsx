@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import Title from "@/components/titles";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
@@ -50,6 +51,7 @@ const ORDER_STAGES = ["ORDER_CREATED", "CONTRACT_SIGNED", "PRODUCTION_STARTED", 
 
 export default function DocumentsPage() {
   const router = useRouter();
+  const { formatRate } = useCurrency();
   const queryClient = useQueryClient();
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
@@ -325,7 +327,7 @@ export default function DocumentsPage() {
                     <td className="px-8 py-5 font-bold text-foreground">{doc.documentNumber}</td>
                     <td className="px-8 py-5 text-default-500 font-medium">{doc.type?.replace(/_/g, " ")}</td>
                     <td className="px-8 py-5 text-foreground">{doc?.seller?.name || "-"}</td>
-                    <td className="px-8 py-5 text-warning">₹ {Number(doc?.totals?.grandTotal || 0).toLocaleString()}</td>
+                    <td className="px-8 py-5 text-warning">{formatRate(Number(doc?.totals?.grandTotal || 0))}</td>
                     <td className="px-8 py-5">
                        <span className={`px-3 py-1 rounded-lg text-[9px] font-bold border border-foreground/5 ${
                          doc.status === "ACCEPTED" ? "bg-success-500/10 text-success" : 

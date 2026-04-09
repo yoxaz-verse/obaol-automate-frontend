@@ -18,7 +18,7 @@ export const SHORTCUT_STORAGE_KEY = "dashboardShortcuts";
 export const DEFAULT_SHORTCUTS: ShortcutConfig = {
   marketplace: "M",
   enquiries: "E",
-  sampleRequests: "R",
+  sampleRequests: "S",
   orders: "O",
   documents: "K",
   imports: "I",

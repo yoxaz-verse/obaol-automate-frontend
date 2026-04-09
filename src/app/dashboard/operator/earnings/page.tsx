@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 
@@ -26,12 +27,6 @@ type CommissionRow = {
 };
 
 const toNumber = (value: unknown) => Number(value || 0);
-
-const formatAmount = (value: unknown) =>
-  new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(toNumber(value));
 
 const formatDateTime = (value: unknown) => {
   if (!value) return "-";
@@ -77,6 +72,8 @@ const typeTone = (type: string) => {
   if (key === "closer") return "primary" as const;
   if (key === "portfolio") return "success" as const;
   if (key === "leadership") return "secondary" as const;
+  if (key === "procurement") return "warning" as const;
+  if (key === "handler") return "primary" as const;
   return "default" as const;
 };
 
@@ -92,6 +89,7 @@ const extractList = (response: any): any[] => {
 
 export default function OperatorEarningsPage() {
   const { user } = useContext(AuthContext);
+  const { formatRate } = useCurrency();
   const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
@@ -253,13 +251,13 @@ export default function OperatorEarningsPage() {
         <Card className="border border-default-200/80">
           <CardBody>
             <p className="text-xs uppercase tracking-wide text-default-500">Total Commission Earned</p>
-            <p className="text-2xl font-semibold text-foreground">₹{formatAmount(summary.totalEarnings || 0)}</p>
+            <p className="text-2xl font-semibold text-foreground">{formatRate(Number(summary.totalEarnings || 0))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
           <CardBody>
             <p className="text-xs uppercase tracking-wide text-default-500">This Month Earnings</p>
-            <p className="text-2xl font-semibold text-foreground">₹{formatAmount(summary.monthlyEarnings || 0)}</p>
+            <p className="text-2xl font-semibold text-foreground">{formatRate(Number(summary.monthlyEarnings || 0))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
@@ -271,7 +269,7 @@ export default function OperatorEarningsPage() {
         <Card className="border border-default-200/80">
           <CardBody>
             <p className="text-xs uppercase tracking-wide text-default-500">Leadership Earnings</p>
-            <p className="text-2xl font-semibold text-foreground">₹{formatAmount(leadershipEarnings)}</p>
+            <p className="text-2xl font-semibold text-foreground">{formatRate(Number(leadershipEarnings))}</p>
           </CardBody>
         </Card>
       </div>
@@ -295,10 +293,10 @@ export default function OperatorEarningsPage() {
                   tick={{ fill: "currentColor", fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `₹${formatAmount(value)}`}
+                  tickFormatter={(value) => formatRate(Number(value))}
                 />
                 <Tooltip
-                  formatter={(value: any) => [`₹${formatAmount(value)}`, "Commission"]}
+                  formatter={(value: any) => [formatRate(Number(value)), "Commission"]}
                   labelStyle={{ color: "#94a3b8" }}
                   contentStyle={{
                     borderRadius: 12,
@@ -342,7 +340,7 @@ export default function OperatorEarningsPage() {
                       </Chip>
                     </td>
                     <td className="px-3 py-3 text-default-700 dark:text-default-300">{row.level ?? "-"}</td>
-                    <td className="px-3 py-3 text-default-700 dark:text-default-300">₹{formatAmount(row.amount || 0)}</td>
+                    <td className="px-3 py-3 text-default-700 dark:text-default-300">{formatRate(Number(row.amount || 0))}</td>
                     <td className="px-3 py-3 text-default-700 dark:text-default-300">{formatDateTime(row.createdAt)}</td>
                   </tr>
                 ))}

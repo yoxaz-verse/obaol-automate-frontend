@@ -17,6 +17,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { apiRoutesByRole } from "@/utils/tableValues";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 
@@ -34,6 +35,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
   const { user } = useContext(AuthContext);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const queryClient = useQueryClient();
+  const { formatRate, selectedCurrency, exchangeRates } = useCurrency();
 
   const userRole = String(user?.role || "").toLowerCase();
   const associateId = user?.id;
@@ -74,6 +76,12 @@ const SelectModal: React.FC<SelectModalProps> = ({
 
   // 4. Form State
   const [commission, setCommission] = useState<number>(0);
+  const exchangeRate = exchangeRates[selectedCurrency.toUpperCase()];
+
+  const toSelectedCurrency = (valueInINR: number) => {
+    if (selectedCurrency === "inr" || !exchangeRate) return valueInINR;
+    return valueInINR * exchangeRate;
+  };
 
   // Sync state when modal opens or data changes
   useEffect(() => {
@@ -81,16 +89,28 @@ const SelectModal: React.FC<SelectModalProps> = ({
       if (isNewRecord) {
         setCommission(0);
       } else if (recordToUse) {
-        setCommission(recordToUse.commission ?? 0);
+        setCommission(toSelectedCurrency(recordToUse.commission ?? 0));
       }
     }
-  }, [isOpen, recordToUse, isNewRecord]);
+  }, [isOpen, recordToUse, isNewRecord, selectedCurrency, exchangeRate]);
 
   // 5. Mutation
+  const basePriceInINR = Number(variantRate.rawBasePrice) || 0;
+  const basePriceInSelected =
+    selectedCurrency === "inr" || !exchangeRate ? basePriceInINR : basePriceInINR * exchangeRate;
+  const finalPriceInSelected = basePriceInSelected + commission;
+  const formatSelectedCurrency = (value: number) => {
+    if (selectedCurrency === "inr") return formatRate(value);
+    if (!exchangeRate) return "…";
+    return `${selectedCurrency.toUpperCase()} ${value.toFixed(2)}`;
+  };
+
   const mutation = useMutation<AxiosResponse<any, any>, Error, void>({
     mutationFn: async () => {
+      const commissionInINR =
+        selectedCurrency === "inr" || !exchangeRate ? commission : commission / exchangeRate;
       const payload: any = {
-        commission,
+        commission: commissionInINR,
         selected: true, // Auto-select when saved
       };
 
@@ -173,23 +193,27 @@ const SelectModal: React.FC<SelectModalProps> = ({
                     <div className="bg-default-50 p-4 rounded-2xl border border-default-100 flex flex-col gap-2">
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-default-500 font-medium">Base Price</span>
-                        <span className="text-foreground font-bold">₹{(Number(variantRate.rawBasePrice) || 0).toFixed(2)}</span>
+                        <span className="text-foreground font-bold">{formatSelectedCurrency(basePriceInSelected)}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-default-500 font-medium">Your Commission</span>
-                        <span className="text-warning-500 font-bold">+ ₹{commission.toFixed(2)}</span>
+                        <span className="text-warning-500 font-bold">+ {formatSelectedCurrency(commission)}</span>
                       </div>
                       <Divider className="my-1" />
                       <div className="flex justify-between items-center">
                         <span className="text-default-700 font-bold">Final Selling Price</span>
-                        <span className="text-success-600 font-black text-lg">₹{(Number(variantRate.rawBasePrice || 0) + Number(commission)).toFixed(2)}</span>
+                        <span className="text-success-600 font-black text-lg">{formatSelectedCurrency(finalPriceInSelected)}</span>
                       </div>
                     </div>
                   )}
 
                   <Input
                     type="number"
-                    label={userRole === "Associate" ? "Adjust Your Commission (₹)" : "Commission (₹)"}
+                    label={
+                      userRole === "Associate"
+                        ? `Adjust Your Commission (${selectedCurrency.toUpperCase()})`
+                        : `Commission (${selectedCurrency.toUpperCase()})`
+                    }
                     description={userRole === "Associate" ? "This margin is added to the base price" : "Enter the markup/commission for this variant"}
                     placeholder="0.00"
                     variant="flat"
@@ -199,7 +223,9 @@ const SelectModal: React.FC<SelectModalProps> = ({
                     value={commission.toString()}
                     startContent={
                       <div className="pointer-events-none flex items-center">
-                        <span className="text-default-400 text-lg">₹</span>
+                        <span className="text-default-400 text-xs font-semibold uppercase">
+                          {selectedCurrency.toUpperCase()}
+                        </span>
                       </div>
                     }
                     classNames={{

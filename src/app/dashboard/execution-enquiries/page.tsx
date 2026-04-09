@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { toast } from "react-toastify";
 import {
   FiNavigation,
@@ -59,6 +60,7 @@ const extractArray = (response: any) => {
 export default function ExecutionEnquiriesPage() {
   const queryClient = useQueryClient();
   const { user } = useContext(AuthContext);
+  const { formatRate } = useCurrency();
   const isAdmin = user?.role === "Admin" || user?.role === "Operator";
   const roleLower = String(user?.role || "").toLowerCase();
   const myCompanyId = String((user as any)?.associateCompany?._id || (user as any)?.associateCompany || "");
@@ -664,7 +666,7 @@ export default function ExecutionEnquiriesPage() {
                                           <tr key={`${key}-task-bid-${bidIdx}`} className="border-t border-default-100/50 font-bold">
                                             <td className="py-0.5 truncate max-w-[120px] text-foreground">{getName(bid?.company)}</td>
                                             <td className="py-0.5 text-warning-600">
-                                              {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? `₹${bid.amount.toLocaleString()}` : "-"}
+                                              {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? formatRate(bid.amount) : "-"}
                                             </td>
                                             <td className="py-0.5 text-default-500 truncate max-w-[140px]">{bid?.note || "-"}</td>
                                             <td className="py-0.5 text-default-500 opacity-80">{String(bid?.status || "SUBMITTED")}</td>

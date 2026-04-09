@@ -51,13 +51,15 @@ import TableFrame from "@/components/CurdTable/table-frame";
 import { useCurrency } from "@/context/CurrencyContext";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
+import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 
-const COMMISSION_RATE = 0.025;
 const round2 = (value: number) => Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
-const resolveAdminCommission = (rateValue: any, commissionValue: any) => {
+const resolveAdminCommission = (rateValue: any, commissionValue: any, commissionPercent: number) => {
   const numericCommission = Number(commissionValue);
   if (Number.isFinite(numericCommission) && numericCommission > 0) return numericCommission;
-  return round2(Number(rateValue || 0) * COMMISSION_RATE);
+  const rate = Number(rateValue || 0);
+  const percent = Number.isFinite(commissionPercent) ? commissionPercent : DEFAULT_CALCULATION_CONFIG.variantRateCommissionPercent;
+  return round2(rate * (percent / 100));
 };
 const truncateWithDots = (value: any, limit = 12) => {
   const str = String(value ?? "");
@@ -172,6 +174,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   const { convertRate, formatRate } = useCurrency();
   const roleLower = String(user?.role || "").toLowerCase();
+  const { data: calculationConfig } = useCalculationConfig(roleLower === "admin");
+  const commissionPercent =
+    calculationConfig?.variantRateCommissionPercent ??
+    DEFAULT_CALCULATION_CONFIG.variantRateCommissionPercent;
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAdminUser = roleLower === "admin" || isOperatorUser;
   const isAssociateUser = roleLower === "associate";
@@ -500,7 +506,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
               const supplierRate = item.rate || 0;
               const quantityValue = item.quantity;
-              const adminCommission = resolveAdminCommission(supplierRate, item.commission);
+              const adminCommission = resolveAdminCommission(supplierRate, item.commission, commissionPercent);
               const totalRate = supplierRate + adminCommission;
               const isCommissionAdded = Number(adminCommission) > 0;
               const locationDisplay = String(item.locationDisplay || "").trim() || (
@@ -530,15 +536,15 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 liveStatus: (
                   <div className="flex items-center gap-2.5">
                     <div className={`w-1.5 h-1.5 rounded-full ${item.isLive ? "bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-danger-500/40"}`} />
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${item.isLive ? "text-success-400" : "text-white/20"}`}>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${item.isLive ? "text-success-400" : "text-default-400"}`}>
                       {item.isLive ? "LIVE_NODE" : "OFFLINE"}
                     </span>
                   </div>
                 ),
                 associate: (
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-bold text-white uppercase tracking-tight line-clamp-1">{item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL")}</span>
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest">ID: {String(item.associate?._id || item.associate || "---").slice(-6)}</span>
+                    <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">{item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL")}</span>
+                    <span className="text-[9px] text-default-400 uppercase tracking-widest">ID: {String(item.associate?._id || item.associate || "---").slice(-6)}</span>
                   </div>
                 ),
                 associateId: item.associate?._id || item.associate,
@@ -561,7 +567,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ),
                 commission: (
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] font-black ${isCommissionAdded ? "text-primary-400" : "text-white/20"}`}>
+                    <span className={`text-[10px] font-black ${isCommissionAdded ? "text-primary-400" : "text-default-400"}`}>
                       {isAdminUser && isMarketplace
                         ? (isCommissionAdded ? formatRate(adminCommission) : "-")
                         : adminCommission
@@ -573,16 +579,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ),
                 commissionStatus: isCommissionAdded ? "+" : "-",
                 finalRate: (
-                  <span className="text-white font-black text-sm tracking-tight border-b border-white/10 pb-0.5">
+                  <span className="text-foreground font-black text-sm tracking-tight border-b border-default-200 pb-0.5">
                     {formatRate(totalRate)}
                   </span>
                 ),
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? (
                     <div className="flex items-center gap-1.5">
-                      <FiPackage size={12} className="text-white/30" />
-                      <span className="font-bold">{quantityValue}</span>
-                      <span className="text-[9px] text-white/40 uppercase">{item.quantityUnit || "MT"}</span>
+                      <FiPackage size={12} className="text-default-400" />
+                      <span className="font-bold text-foreground">{quantityValue}</span>
+                      <span className="text-[9px] text-default-400 uppercase">{item.quantityUnit || "MT"}</span>
                     </div>
                   )
                   : "-",
@@ -614,7 +620,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const baseRate = item.baseRateId;
               const supplierRate = baseRate?.rate || 0;
               const quantityValue = baseRate?.quantity;
-              const adminCommission = resolveAdminCommission(baseRate?.rate, baseRate?.commission);
+              const adminCommission = resolveAdminCommission(baseRate?.rate, baseRate?.commission, commissionPercent);
               const mediatorMarkup = item.margin || 0;
 
               // Rule: Mediator sees final display rate (Base + Admin + Mediator Markup)
@@ -626,8 +632,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 actualIsLive: item.isLive,
                 supplierIsLive: baseRate?.isLive !== false,
                 associate: item.associateCompanyId?.name || "My Company",
-                rate: formatRate(finalPrice),
-                commission: mediatorMarkup ? formatRate(mediatorMarkup) : formatRate(0),
+                rate: finalPrice,
+                commission: mediatorMarkup || 0,
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",
@@ -656,7 +662,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               // Row is a DisplayedRate (Personalized - fallback/old)
               const supplierRate = item.variantRate?.rate || 0;
               const quantityValue = item.variantRate?.quantity;
-              const adminCommission = resolveAdminCommission(item.variantRate?.rate, item.variantRate?.commission);
+              const adminCommission = resolveAdminCommission(item.variantRate?.rate, item.variantRate?.commission, commissionPercent);
               const basePriceForUser = supplierRate + adminCommission;
 
               const associateMargin = item.commission || 0;
@@ -665,7 +671,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...rest,
                 isLive: item.isLive,
                 associate: item.associateCompany?.name || "My Company",
-                rate: formatRate(totalRate),
+                rate: totalRate,
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
                   : "-",

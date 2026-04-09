@@ -19,7 +19,7 @@ import { TbContainer, TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
-import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen } from "react-icons/fi";
+import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
 import { LuBox, LuTruck, LuWallet, LuBuilding2 } from "react-icons/lu";
 
 
@@ -163,6 +163,11 @@ export const sidebarOptions = [
     name: "Payment Rules",
     icon: <LuWallet />,
     link: "/dashboard/payments",
+  },
+  {
+    name: "Calculations",
+    icon: <FiSliders />,
+    link: "/dashboard/calculations",
   },
   {
     name: "Flow Rules",

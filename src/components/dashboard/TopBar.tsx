@@ -30,10 +30,12 @@ import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
   const router = useRouter();
+  const { rateError } = useCurrency();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -143,7 +145,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     { label: "News", links: ["/dashboard/news"] },
     { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
-    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
+    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/calculations", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
   ];
 
   return (
@@ -281,6 +283,11 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           <>
             <div className="flex items-center bg-default-100/50 dark:bg-black/20 border border-default-200/50 dark:border-white/5 rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
               <CurrencySelector />
+              {rateError && (
+                <div className="px-2 py-1 rounded-xl bg-warning-500/10 text-warning-600 text-[9px] font-black uppercase tracking-[0.2em]">
+                  Rates Offline · INR
+                </div>
+              )}
               <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
               
               <div className="relative" ref={notificationRef}>

@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
@@ -19,6 +20,7 @@ export default function DocumentDetailPage() {
   const id = String(params?.id || "");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { formatRate } = useCurrency();
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const canManage = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
@@ -168,8 +170,8 @@ export default function DocumentDetailPage() {
                         <td className="py-2">{item.productName || "-"}</td>
                         <td className="py-2">{item.productVariantName || "-"}</td>
                         <td className="py-2 text-right">{Number(item.quantityMT || 0).toFixed(2)}</td>
-                        <td className="py-2 text-right">₹ {Number(item.ratePerKg || 0).toFixed(2)}</td>
-                        <td className="py-2 text-right">₹ {Number(item.amount || 0).toFixed(2)}</td>
+                        <td className="py-2 text-right">{formatRate(Number(item.ratePerKg || 0))}</td>
+                        <td className="py-2 text-right">{formatRate(Number(item.amount || 0))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -183,8 +185,8 @@ export default function DocumentDetailPage() {
           <Card className="invoice-card">
             <CardHeader className="font-semibold">Totals</CardHeader>
             <CardBody className="text-sm space-y-2">
-              <div className="flex justify-between"><span>Subtotal</span><span>₹ {subtotal.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span>Commission</span><span>₹ {commissionTotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Subtotal</span><span>{formatRate(subtotal)}</span></div>
+              <div className="flex justify-between"><span>Commission</span><span>{formatRate(commissionTotal)}</span></div>
               <div className="flex justify-between items-center gap-2">
                 <span>Tax</span>
                 {canManage ? (
@@ -195,10 +197,10 @@ export default function DocumentDetailPage() {
                     onChange={(e) => setTaxAmount(e.target.value)}
                   />
                 ) : (
-                  <span>₹ {displayTax.toFixed(2)}</span>
+                  <span>{formatRate(displayTax)}</span>
                 )}
               </div>
-              <div className="flex justify-between font-semibold text-base"><span>Grand Total</span><span>₹ {displayGrandTotal.toFixed(2)}</span></div>
+              <div className="flex justify-between font-semibold text-base"><span>Grand Total</span><span>{formatRate(displayGrandTotal)}</span></div>
             </CardBody>
           </Card>
           <Card className="invoice-card">

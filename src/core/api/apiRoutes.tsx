@@ -243,6 +243,7 @@ export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY
 });
 export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",
+  calculations: "/system-config/calculations",
 };
 
 export const countryRoutes = createCRUDRoutes(BASE_PATHS.COUNTRY);

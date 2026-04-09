@@ -16,6 +16,7 @@ import {
     Button, Input, Select, SelectItem, Switch, Textarea
 } from "@heroui/react";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export default function WarehousesPage() {
     const queryClient = useQueryClient();
     const router = useRouter();
     const { user } = useContext(AuthContext);
+    const { formatRate } = useCurrency();
     const roleLower = String(user?.role || "").toLowerCase();
     const initialTab = roleLower === "admin" ? "my" : "available";
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -464,7 +466,7 @@ export default function WarehousesPage() {
                                                     <Chip size="sm" variant="flat" color={c.status === "paid" ? "success" : c.status === "pending" ? "warning" : "default"} className="text-[9px] font-bold uppercase">
                                                         {c.status || "Draft"}
                                                     </Chip>
-                                                    {c.amount && <p className="text-xs font-black text-foreground mt-1">₹{c.amount}</p>}
+                                                    {c.amount && <p className="text-xs font-black text-foreground mt-1">{formatRate(Number(c.amount))}</p>}
                                                 </div>
                                             </CardBody>
                                         </Card>

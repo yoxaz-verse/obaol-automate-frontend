@@ -7,6 +7,7 @@ interface CurrencyContextProps {
   selectedCurrency: string;
   setSelectedCurrency: (currency: string) => void;
   exchangeRates: ExchangeRates;
+  rateError: string | null;
   convertRate: (rateInINR: number) => string;
   formatRate: (rateInINR: number) => string;
 }
@@ -25,6 +26,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
     return "inr";
   });
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
+  const [rateError, setRateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -35,19 +37,19 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const fetchExchangeRates = async () => {
       if (selectedCurrency === "inr") {
-        setExchangeRates({});
+        setRateError(null);
         return;
       }
 
       try {
-        const [res, curRes] = await Promise.all([
-          fetch(`https://api.frankfurter.app/latest?from=INR&to=${selectedCurrency.toUpperCase()}`),
-          fetch(`https://api.frankfurter.app/currencies`)
-        ]);
+        setRateError(null);
+        const res = await fetch(
+          `https://api.frankfurter.app/latest?from=INR&to=${selectedCurrency.toUpperCase()}`
+        );
 
         if (!res.ok) {
-          console.warn(`Exchange rate API returned ${res.status}. Falling back to INR.`);
-          setExchangeRates({});
+          console.warn(`Exchange rate API returned ${res.status}. Keeping last known rate.`);
+          setRateError("Exchange rate unavailable. Showing INR values.");
           return;
         }
 
@@ -57,10 +59,12 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error("Invalid response or missing rate from API");
         }
 
-        setExchangeRates(data.rates);
+        const nextRate = data.rates[selectedCurrency.toUpperCase()];
+        setExchangeRates((prev) => ({ ...prev, [selectedCurrency.toUpperCase()]: nextRate }));
+        setRateError(null);
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
-        setExchangeRates({}); // Fallback to base currency (INR)
+        setRateError("Exchange rate unavailable. Showing INR values.");
       }
     };
 
@@ -68,14 +72,16 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [selectedCurrency]);
 
   const convertRate = (rateInINR: number): string => {
-    if (!rateInINR) return "—";
+    if (rateInINR === null || rateInINR === undefined) return "—";
+    const numericRate = Number(rateInINR);
+    if (Number.isNaN(numericRate)) return "—";
 
-    if (selectedCurrency === "inr") return `₹${rateInINR.toFixed(2)}`;
+    if (selectedCurrency === "inr" || rateError) return `₹${numericRate.toFixed(2)}`;
 
     const exchangeRate = exchangeRates[selectedCurrency.toUpperCase()];
-    if (!exchangeRate) return `₹${rateInINR.toFixed(2)} `;
+    if (!exchangeRate) return "…";
 
-    const converted = rateInINR * exchangeRate;
+    const converted = numericRate * exchangeRate;
     return `${selectedCurrency.toUpperCase()} ${converted.toFixed(2)}`;
   };
   const formatRate = (rateInINR: number): string => {
@@ -88,6 +94,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
         selectedCurrency,
         setSelectedCurrency,
         exchangeRates,
+        rateError,
         convertRate,
         formatRate,
       }}

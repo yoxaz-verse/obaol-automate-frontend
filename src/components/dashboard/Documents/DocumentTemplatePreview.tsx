@@ -440,7 +440,7 @@ export default function DocumentTemplatePreview({
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Coverage</div>
-                  <div className="font-semibold">₹ 6,000,000</div>
+                  <div className="font-semibold">{formatRate(6000000)}</div>
                 </div>
               </div>
               <div className="text-[10px] uppercase tracking-widest text-default-400">Commodity</div>
@@ -453,7 +453,7 @@ export default function DocumentTemplatePreview({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Amount Paid</div>
-                  <div className="font-semibold">₹ 5,505,000</div>
+                  <div className="font-semibold">{formatRate(5505000)}</div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-widest text-default-400">Mode</div>

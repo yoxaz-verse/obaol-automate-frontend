@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import { associateCompanyRoutes, associateRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
+import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 
 type WizardProps = {
   isOpen: boolean;
@@ -30,8 +31,6 @@ type WizardProps = {
   productVariantValue?: any | null;
   user?: any;
 };
-
-const COMMISSION_RATE = 0.025;
 
 const stepMeta = [
   { key: 1, title: "Product & Grade", subtitle: "Define the cargo you’re listing", icon: FiPackage },
@@ -61,7 +60,13 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successData, setSuccessData] = useState<any>(null);
 
-  const isAssociateUser = String(user?.role || "").toLowerCase() === "associate";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const { data: calculationConfig } = useCalculationConfig(roleLower === "admin");
+  const commissionPercent =
+    calculationConfig?.variantRateCommissionPercent ??
+    DEFAULT_CALCULATION_CONFIG.variantRateCommissionPercent;
+
+  const isAssociateUser = roleLower === "associate";
   const fixedVariantId = productVariantValue?._id || productVariantValue;
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -74,7 +79,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [companyAddress, setCompanyAddress] = useState<string>("");
 
   const rateValue = Number(formData.rate || 0);
-  const computedCommission = Number.isFinite(rateValue) ? rateValue * COMMISSION_RATE : 0;
+  const computedCommission = Number.isFinite(rateValue) ? rateValue * (commissionPercent / 100) : 0;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -317,25 +322,25 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setStep(1);
   };
 
-  const darkField = {
-    base: "text-white",
-    label: "font-black uppercase text-[10px] tracking-[0.2em] text-white/30 mb-2 ml-1",
-    trigger: "rounded-2xl border-white/10 bg-[#1A1F26] hover:bg-[#232932] data-[open=true]:border-warning-500/40 data-[hover=true]:border-white/20 transition-all border shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)] h-14",
-    inputWrapper: "rounded-2xl border-white/10 bg-[#1A1F26] hover:bg-[#232932] data-[focus=true]:border-warning-500/40 data-[hover=true]:border-white/20 transition-all border shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)] h-14",
-    innerWrapper: "text-white",
-    value: "text-white font-black uppercase text-[11px] tracking-widest !text-white",
-    input: "text-white placeholder:text-white/20 font-bold text-sm !text-white",
-    selectorIcon: "text-white/60",
-    popoverContent: "bg-[#0B0F14] border border-white/10 shadow-2xl rounded-3xl p-2 backdrop-blur-3xl !text-white",
-    listbox: "bg-transparent !text-white",
+  const themeField = {
+    base: "text-foreground",
+    label: "font-black uppercase text-[10px] tracking-[0.2em] text-default-400 mb-2 ml-1",
+    trigger: "rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-14",
+    inputWrapper: "rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-14",
+    innerWrapper: "text-foreground",
+    value: "text-foreground font-black uppercase text-[11px] tracking-widest !text-foreground",
+    input: "text-foreground placeholder:text-default-300 font-bold text-sm !text-foreground",
+    selectorIcon: "text-default-500",
+    popoverContent: "bg-background border border-default-200 shadow-2xl rounded-3xl p-2 backdrop-blur-3xl !text-foreground",
+    listbox: "bg-transparent !text-foreground",
     errorMessage: "text-danger-400 text-xs",
-    description: "text-white/40 text-xs",
+    description: "text-default-400 text-xs",
     helperWrapper: "ml-1",
   };
 
   const itemClasses = {
-    base: "rounded-xl text-white data-[hover=true]:bg-white/10 data-[selectable=true]:focus:bg-white/10 data-[selected=true]:text-warning-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-white/10",
-    title: "font-black uppercase tracking-widest text-[11px] text-white",
+    base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-warning-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
+    title: "font-black uppercase tracking-widest text-[11px] text-foreground",
   };
 
   return (
@@ -348,9 +353,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       isKeyboardDismissDisabled={true}
       backdrop="blur"
       classNames={{
-        base: "bg-gradient-to-br from-[#0B0F14] via-[#0B1016] to-[#151A22] border border-white/10 max-h-[92vh] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)]",
-        header: "border-b border-white/10",
-        footer: "border-t border-white/10",
+        base: "bg-background border border-default-200 max-h-[92vh] backdrop-blur-3xl shadow-2xl",
+        header: "border-b border-default-100",
+        footer: "border-t border-default-100",
         body: "overflow-y-auto",
       }}
     >
@@ -362,39 +367,39 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           <div className="flex items-center gap-3">
             {stepLabel?.icon && <stepLabel.icon size={28} className="text-warning-400" />}
             <div>
-              <h3 className="text-2xl font-black text-white">{stepLabel?.title}</h3>
-              <p className="text-sm text-white/60">{stepLabel?.subtitle}</p>
+              <h3 className="text-2xl font-black text-foreground">{stepLabel?.title}</h3>
+              <p className="text-sm text-default-500">{stepLabel?.subtitle}</p>
             </div>
           </div>
         </ModalHeader>
         <ModalBody className="pb-8">
           <div className="flex items-center gap-2 mb-6">
             {stepMeta.map((item) => (
-              <div key={item.key} className={`flex-1 h-1 rounded-full ${item.key <= step ? "bg-warning-400" : "bg-white/10"}`} />
+              <div key={item.key} className={`flex-1 h-1 rounded-full ${item.key <= step ? "bg-warning-400" : "bg-default-200"}`} />
             ))}
           </div>
           <AnimatePresence mode="wait">
             {successData ? (
               <motion.div key="success" {...motionVariants} className="rounded-3xl border border-success-500/30 bg-success-500/10 p-8 text-center">
                 <FiCheckCircle size={42} className="mx-auto text-success-400 mb-4" />
-                <h4 className="text-xl font-black text-white mb-2">Mission complete</h4>
-                <p className="text-sm text-white/70 mb-6">Your product is now live in the trade network.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-black/30 border border-white/10 rounded-2xl p-4 text-left">
+                <h4 className="text-xl font-black text-foreground mb-2">Mission complete</h4>
+                <p className="text-sm text-default-500 mb-6">Your product is now live in the trade network.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-content2 border border-default-200 rounded-2xl p-4 text-left">
                   <div>
-                    <p className="text-xs uppercase text-white/40">Rate</p>
-                    <p className="text-lg font-bold text-white">{formData.rate || "--"} / {formData.unit || "KG"}</p>
+                    <p className="text-xs uppercase text-default-400">Rate</p>
+                    <p className="text-lg font-bold text-foreground">{formData.rate || "--"} / {formData.unit || "KG"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-white/40">Location</p>
-                    <p className="text-lg font-bold text-white">
+                    <p className="text-xs uppercase text-default-400">Location</p>
+                    <p className="text-lg font-bold text-foreground">
                       {formData.locationSource === "WAREHOUSE"
                         ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
                         : (formData.officeAddress || "--")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase text-white/40">Status</p>
-                    <p className="text-lg font-bold text-white">{isLive ? "Live" : "Draft"}</p>
+                    <p className="text-xs uppercase text-default-400">Status</p>
+                    <p className="text-lg font-bold text-foreground">{isLive ? "Live" : "Draft"}</p>
                   </div>
                 </div>
               </motion.div>
@@ -404,28 +409,28 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {!fixedVariantId && (
                       <>
-                        <Select variant="bordered" label="Category" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
+                        <Select variant="bordered" label="Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
                           {categories.map((item) => (
                             <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Sub Category" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onSelectionChange={(keys) => setValue("subCategory", Array.from(keys)[0])} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
+                        <Select variant="bordered" label="Sub Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onSelectionChange={(keys) => setValue("subCategory", Array.from(keys)[0])} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
                           {subCategories.map((item) => (
                             <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Product" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.product ? [formData.product] : []} onSelectionChange={(keys) => setValue("product", Array.from(keys)[0])} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
+                        <Select variant="bordered" label="Product" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.product ? [formData.product] : []} onSelectionChange={(keys) => setValue("product", Array.from(keys)[0])} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
                           {products.map((item) => (
                             <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Product Variant" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.productVariant ? [formData.productVariant] : []} onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])} isDisabled={!formData.product} isInvalid={!!errors.productVariant} errorMessage={errors.productVariant}>
+                        <Select variant="bordered" label="Product Variant" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.productVariant ? [formData.productVariant] : []} onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])} isDisabled={!formData.product} isInvalid={!!errors.productVariant} errorMessage={errors.productVariant}>
                           {variants.map((item) => (
                             <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
                               {getOptionLabel(item)}
@@ -443,14 +448,14 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 )}
                 {step === 2 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input variant="bordered" label="Price (per KG)" type="number" classNames={darkField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
-                    <Select variant="bordered" label="Unit" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.unit ? [formData.unit] : []} onSelectionChange={(keys) => setValue("unit", Array.from(keys)[0])} isInvalid={!!errors.unit} errorMessage={errors.unit}>
-                      <SelectItem key="KG" className="text-white font-black">KG</SelectItem>
-                      <SelectItem key="MT" className="text-white font-black">Metric Ton (MT)</SelectItem>
-                      <SelectItem key="Quintal" className="text-white font-black">Quintal</SelectItem>
+                    <Input variant="bordered" label="Price (per KG)" type="number" classNames={themeField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
+                    <Select variant="bordered" label="Unit" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.unit ? [formData.unit] : []} onSelectionChange={(keys) => setValue("unit", Array.from(keys)[0])} isInvalid={!!errors.unit} errorMessage={errors.unit}>
+                      <SelectItem key="KG" className="font-black">KG</SelectItem>
+                      <SelectItem key="MT" className="font-black">Metric Ton (MT)</SelectItem>
+                      <SelectItem key="Quintal" className="font-black">Quintal</SelectItem>
                     </Select>
                     {!isAssociateUser && (
-                      <Select variant="bordered" label="Associate" classNames={darkField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
+                      <Select variant="bordered" label="Associate" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
                         {associates.map((item) => (
                           <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className="uppercase text-white font-black">
                             {getOptionLabel(item) || item.email}
@@ -460,7 +465,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     )}
                     <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4">
                       <div className="flex items-center justify-between text-sm text-white/70">
-                        <span>Commission (2.5%)</span>
+                        <span>Commission ({commissionPercent}%)</span>
                         <span className="font-bold text-warning-300">{computedCommission.toFixed(2)}</span>
                       </div>
                     </div>
@@ -471,7 +476,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     <Select
                       variant="bordered"
                       label="Location Source"
-                      classNames={darkField}
+                      classNames={themeField}
                       listboxProps={{ itemClasses }}
                       selectedKeys={formData.locationSource ? [formData.locationSource] : []}
                       onSelectionChange={(keys) => setValue("locationSource", Array.from(keys)[0])}
@@ -485,7 +490,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <Select
                         variant="bordered"
                         label="Warehouse"
-                        classNames={darkField}
+                        classNames={themeField}
                         listboxProps={{ itemClasses }}
                         selectedKeys={formData.warehouseId ? [formData.warehouseId] : []}
                         onSelectionChange={(keys) => setValue("warehouseId", Array.from(keys)[0])}
@@ -503,7 +508,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <Input
                         variant="bordered"
                         label="Office Address"
-                        classNames={darkField}
+                        classNames={themeField}
                         value={formData.officeAddress || ""}
                         onChange={(e) => setValue("officeAddress", e.target.value)}
                         isInvalid={!!errors.officeAddress}
@@ -519,31 +524,31 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 )}
                 {step === 4 && (
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/80">
+                    <div className="rounded-2xl border border-default-200 bg-content2 p-5 text-sm text-foreground">
                       Review your trade mission before launch.
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className="text-xs uppercase text-white/40">Rate</div>
-                          <div className="text-lg font-bold text-white">{formData.rate || "--"} / {formData.unit || "KG"}</div>
+                          <div className="text-xs uppercase text-default-400">Rate</div>
+                          <div className="text-lg font-bold text-foreground">{formData.rate || "--"} / {formData.unit || "KG"}</div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-white/40">Location</div>
-                          <div className="text-lg font-bold text-white">
+                          <div className="text-xs uppercase text-default-400">Location</div>
+                          <div className="text-lg font-bold text-foreground">
                             {formData.locationSource === "WAREHOUSE"
                               ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "--")
                               : (formData.officeAddress || "--")}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase text-white/40">Commission</div>
-                          <div className="text-lg font-bold text-warning-300">{computedCommission.toFixed(2)}</div>
+                          <div className="text-xs uppercase text-default-400">Commission</div>
+                          <div className="text-lg font-bold text-warning-500">{computedCommission.toFixed(2)}</div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-5">
+                    <div className="flex items-center justify-between rounded-2xl border border-default-200 bg-content2 p-5">
                       <div>
-                        <div className="text-sm text-white font-semibold">Launch listing live</div>
-                        <div className="text-xs text-white/60">Toggle if you want to keep it as draft.</div>
+                        <div className="text-sm text-foreground font-semibold">Launch listing live</div>
+                        <div className="text-xs text-default-500">Toggle if you want to keep it as draft.</div>
                       </div>
                       <Switch isSelected={isLive} onValueChange={setIsLive} color="warning" />
                     </div>

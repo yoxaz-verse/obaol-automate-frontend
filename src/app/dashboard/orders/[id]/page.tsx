@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
     Card,
     CardBody,
@@ -90,6 +91,7 @@ export default function OrderDetailsPage() {
     const router = useRouter();
     const orderId = Array.isArray(id) ? id[0] : id;
     const queryClient = useQueryClient();
+    const { formatRate } = useCurrency();
     const [logisticsList, setLogisticsList] = useState<any[]>([]);
     const [trackingId, setTrackingId] = useState("");
     const [planError, setPlanError] = useState<string>("");
@@ -101,6 +103,10 @@ export default function OrderDetailsPage() {
     const [docViewerDoc, setDocViewerDoc] = useState<any>(null);
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState("");
     const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState("");
+    const [selectedProcurementOperatorId, setSelectedProcurementOperatorId] = useState("");
+    const [selectedHandlerOperatorId, setSelectedHandlerOperatorId] = useState("");
+    const [handlerBuyerRating, setHandlerBuyerRating] = useState("");
+    const [handlerSellerRating, setHandlerSellerRating] = useState("");
     const [responsibilities, setResponsibilities] = useState<any>({
         procurementBy: "",
         certificateBy: "",
@@ -218,8 +224,16 @@ export default function OrderDetailsPage() {
             (linkedEnquiry as any)?.dealCloserOperatorId?._id ||
             (linkedEnquiry as any)?.dealCloserOperatorId ||
             "";
+        const procurementOp = (order as any)?.procurementOperatorId?._id || (order as any)?.procurementOperatorId || "";
+        const handlerOp = (order as any)?.handlerOperatorId?._id || (order as any)?.handlerOperatorId || "";
+        const buyerRating = (order as any)?.handlerBuyerRating;
+        const sellerRating = (order as any)?.handlerSellerRating;
         setSelectedSupplierOperatorId(String(supplierOp || ""));
         setSelectedDealCloserOperatorId(String(dealCloserOp || ""));
+        setSelectedProcurementOperatorId(String(procurementOp || ""));
+        setSelectedHandlerOperatorId(String(handlerOp || ""));
+        setHandlerBuyerRating(buyerRating !== undefined && buyerRating !== null ? String(buyerRating) : "");
+        setHandlerSellerRating(sellerRating !== undefined && sellerRating !== null ? String(sellerRating) : "");
     }, [order, linkedEnquiry]);
     const updateOrderOperatorsMutation = useMutation({
         mutationFn: (payload: any) => patchData(`${apiRoutes.orders.update}/${orderId}`, payload),
@@ -1024,60 +1038,140 @@ export default function OrderDetailsPage() {
 
             {(roleLower === "admin" || roleLower === "operator" || roleLower === "team") && (
                 <Card className="border border-divider bg-content1/60">
-                    <CardBody className="flex flex-col gap-4 md:flex-row md:items-end">
-                        <div className="flex-1">
-                            <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
-                                Supplier Ownership Operator
+                    <CardBody className="flex flex-col gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div>
+                                <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
+                                    Supplier Ownership Operator
+                                </div>
+                                <Select
+                                    aria-label="Supplier operator"
+                                    placeholder="Select supplier operator"
+                                    selectedKeys={selectedSupplierOperatorId ? [selectedSupplierOperatorId] : []}
+                                    onSelectionChange={(keys) => {
+                                        const nextId = Array.from(keys as Set<string>)[0] || "";
+                                        setSelectedSupplierOperatorId(String(nextId));
+                                    }}
+                                >
+                                    {operatorOptions.map((op: any) => (
+                                        <SelectItem key={String(op._id)} value={String(op._id)}>
+                                            {op.name || "Operator"}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
                             </div>
-                            <Select
-                                aria-label="Supplier operator"
-                                placeholder="Select supplier operator"
-                                selectedKeys={selectedSupplierOperatorId ? [selectedSupplierOperatorId] : []}
-                                onSelectionChange={(keys) => {
-                                    const nextId = Array.from(keys as Set<string>)[0] || "";
-                                    setSelectedSupplierOperatorId(String(nextId));
-                                }}
-                            >
-                                {operatorOptions.map((op: any) => (
-                                    <SelectItem key={String(op._id)} value={String(op._id)}>
-                                        {op.name || "Operator"}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                        <div className="flex-1">
-                            <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
-                                Deal Closer Operator
+                            <div>
+                                <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
+                                    Deal Closer Operator
+                                </div>
+                                <Select
+                                    aria-label="Deal closer operator"
+                                    placeholder="Select deal closer operator"
+                                    selectedKeys={selectedDealCloserOperatorId ? [selectedDealCloserOperatorId] : []}
+                                    onSelectionChange={(keys) => {
+                                        const nextId = Array.from(keys as Set<string>)[0] || "";
+                                        setSelectedDealCloserOperatorId(String(nextId));
+                                    }}
+                                >
+                                    {operatorOptions.map((op: any) => (
+                                        <SelectItem key={String(op._id)} value={String(op._id)}>
+                                            {op.name || "Operator"}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
                             </div>
-                            <Select
-                                aria-label="Deal closer operator"
-                                placeholder="Select deal closer operator"
-                                selectedKeys={selectedDealCloserOperatorId ? [selectedDealCloserOperatorId] : []}
-                                onSelectionChange={(keys) => {
-                                    const nextId = Array.from(keys as Set<string>)[0] || "";
-                                    setSelectedDealCloserOperatorId(String(nextId));
-                                }}
-                            >
-                                {operatorOptions.map((op: any) => (
-                                    <SelectItem key={String(op._id)} value={String(op._id)}>
-                                        {op.name || "Operator"}
-                                    </SelectItem>
-                                ))}
-                            </Select>
+                            <div>
+                                <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
+                                    Procurement Operator
+                                </div>
+                                <Select
+                                    aria-label="Procurement operator"
+                                    placeholder="Select procurement operator"
+                                    selectedKeys={selectedProcurementOperatorId ? [selectedProcurementOperatorId] : []}
+                                    onSelectionChange={(keys) => {
+                                        const nextId = Array.from(keys as Set<string>)[0] || "";
+                                        setSelectedProcurementOperatorId(String(nextId));
+                                    }}
+                                >
+                                    {operatorOptions.map((op: any) => (
+                                        <SelectItem key={String(op._id)} value={String(op._id)}>
+                                            {op.name || "Operator"}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                            </div>
+                            <div>
+                                <div className="text-xs font-semibold text-default-500 uppercase tracking-wide mb-2">
+                                    Handler Operator
+                                </div>
+                                <Select
+                                    aria-label="Handler operator"
+                                    placeholder="Select handler operator"
+                                    selectedKeys={selectedHandlerOperatorId ? [selectedHandlerOperatorId] : []}
+                                    onSelectionChange={(keys) => {
+                                        const nextId = Array.from(keys as Set<string>)[0] || "";
+                                        setSelectedHandlerOperatorId(String(nextId));
+                                    }}
+                                >
+                                    {operatorOptions.map((op: any) => (
+                                        <SelectItem key={String(op._id)} value={String(op._id)}>
+                                            {op.name || "Operator"}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                className="bg-warning text-black font-bold"
-                                isLoading={updateOrderOperatorsMutation.isPending}
-                                onPress={() => {
-                                    updateOrderOperatorsMutation.mutate({
-                                        supplierOperatorId: selectedSupplierOperatorId || null,
-                                        dealCloserOperatorId: selectedDealCloserOperatorId || null,
-                                    });
-                                }}
-                            >
-                                Save Operators
-                            </Button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                type="number"
+                                min={1}
+                                max={5}
+                                step={1}
+                                label="Handler Buyer Rating"
+                                labelPlacement="outside"
+                                placeholder="1-5"
+                                value={handlerBuyerRating}
+                                onChange={(event) => setHandlerBuyerRating(event.target.value)}
+                            />
+                            <Input
+                                type="number"
+                                min={1}
+                                max={5}
+                                step={1}
+                                label="Handler Seller Rating"
+                                labelPlacement="outside"
+                                placeholder="1-5"
+                                value={handlerSellerRating}
+                                onChange={(event) => setHandlerSellerRating(event.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div className="text-[11px] font-semibold text-default-500">
+                                Handler payout = buyer stars + seller stars (max 10%).
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    className="bg-warning text-black font-bold"
+                                    isLoading={updateOrderOperatorsMutation.isPending}
+                                    onPress={() => {
+                                        const parseRating = (value: string) => {
+                                            if (!value && value !== "0") return null;
+                                            const num = Number(value);
+                                            return Number.isFinite(num) ? num : null;
+                                        };
+                                        updateOrderOperatorsMutation.mutate({
+                                            supplierOperatorId: selectedSupplierOperatorId || null,
+                                            dealCloserOperatorId: selectedDealCloserOperatorId || null,
+                                            procurementOperatorId: selectedProcurementOperatorId || null,
+                                            handlerOperatorId: selectedHandlerOperatorId || null,
+                                            handlerBuyerRating: parseRating(handlerBuyerRating),
+                                            handlerSellerRating: parseRating(handlerSellerRating),
+                                        });
+                                    }}
+                                >
+                                    Save Operators
+                                </Button>
+                            </div>
                         </div>
                     </CardBody>
                 </Card>
@@ -1917,7 +2011,7 @@ export default function OrderDetailsPage() {
                                                                                 {getCompanyName(bid?.company || bid?.companyId || bid?.provider)}
                                                                             </td>
                                                                             <td className="py-1 text-warning-600">
-                                                                                {amount !== null ? `₹${Number(amount).toLocaleString()}` : "-"}
+                                                                                {amount !== null ? formatRate(Number(amount)) : "-"}
                                                                             </td>
                                                                             <td className="py-1 text-default-500 truncate max-w-[160px]">{bid?.note || "-"}</td>
                                                                             <td className="py-1 text-default-500 opacity-80">{String(bid?.status || "SUBMITTED")}</td>

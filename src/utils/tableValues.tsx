@@ -1799,6 +1799,24 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
+      label: "Procurement %",
+      type: "number",
+      key: "procurementPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
+      label: "Handler %",
+      type: "number",
+      key: "handlerPercent",
+      inForm: true,
+      inEdit: true,
+      inTable: true,
+      required: true,
+    },
+    {
       label: "Closer %",
       type: "number",
       key: "closerPercent",
@@ -2136,7 +2154,7 @@ export const initialTableConfig: Record<
   variantRate: [
     {
       label: "Price (per KG)",
-      type: "number",
+      type: "currency",
       key: "rate",
       inForm: true,
       inTable: true,
@@ -2183,7 +2201,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Commission",
-      type: "number",
+      type: "currency",
       key: "commission",
       inForm: true,
       inTable: true,
@@ -2198,7 +2216,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Final Rate",
-      type: "number",
+      type: "currency",
       key: "finalRate",
       inForm: false,
       inTable: true,
@@ -2306,7 +2324,7 @@ export const initialTableConfig: Record<
     },
     {
       label: "Rate (per KG)",
-      type: "number",
+      type: "currency",
       key: "rate",
       inForm: true,
       inTable: true,
@@ -2358,14 +2376,14 @@ export const initialTableConfig: Record<
     },
     {
       label: "Final Price (per KG)",
-      type: "number",
+      type: "currency",
       key: "rate",
       inForm: false,
       inTable: true,
     },
     {
       label: "Commission",
-      type: "number",
+      type: "currency",
       key: "commission",
       inForm: false,
       inTable: true,

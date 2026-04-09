@@ -642,15 +642,16 @@ export default function SampleRequestDetailPage() {
       </div>
     </motion.section>
 
-    <Modal 
+      <Modal 
         isOpen={quoteModalOpen} 
         onOpenChange={setQuoteModalOpen} 
         size="md" 
         placement="center"
+        backdrop="opaque"
         isDismissable={false}
         isKeyboardDismissDisabled
         classNames={{
-          base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+          base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
           header: "border-b border-white/5",
           footer: "border-t border-white/5",
           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
@@ -666,8 +667,8 @@ export default function SampleRequestDetailPage() {
                  </div>
                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-warning-500/60 mt-1 italic">Tactical Parameter Selection</p>
               </ModalHeader>
-              <ModalBody className="gap-6 px-8 py-8">
-                <div className="space-y-4">
+              <ModalBody className="px-8 py-8">
+                <div className="space-y-10">
                   <Input
                     label="Supplier Min Qty (kg)"
                     type="number"
@@ -744,10 +745,11 @@ export default function SampleRequestDetailPage() {
          onOpenChange={setCourierModalOpen} 
          size="md" 
          placement="center"
+         backdrop="opaque"
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
            closeButton: "hover:bg-white/5 active:scale-95 transition-all",
          }}
       >
@@ -761,7 +763,7 @@ export default function SampleRequestDetailPage() {
                  </div>
                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mt-1 italic">Submit Distribution Data</p>
               </ModalHeader>
-              <ModalBody className="gap-6 px-10 pb-10">
+              <ModalBody className="gap-10 px-10 pb-10">
                 <Input
                   label="Courier Agency"
                   placeholder="Carrier service identity..."
@@ -817,10 +819,11 @@ export default function SampleRequestDetailPage() {
          onOpenChange={setReceiptModalOpen} 
          size="md" 
          placement="center"
+         backdrop="opaque"
          isDismissable={false}
          isKeyboardDismissDisabled
          classNames={{
-           base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-2xl backdrop-blur-3xl",
+           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
            closeButton: "hover:bg-white/5 active:scale-95 transition-all",
          }}
       >

@@ -137,6 +137,7 @@ export default function EnquiryDetailsPage() {
     const { user } = useContext(AuthContext);
     const [selectedSupplierOperatorId, setSelectedSupplierOperatorId] = useState<string>("");
     const [selectedDealCloserOperatorId, setSelectedDealCloserOperatorId] = useState<string>("");
+    const [selectedHandlerOperatorId, setSelectedHandlerOperatorId] = useState<string>("");
     const [commitUntil, setCommitUntil] = useState<string>("");
     const [buyerSpecification, setBuyerSpecification] = useState<string>("");
     const [packagingSpecifications, setPackagingSpecifications] = useState<string>("");
@@ -433,6 +434,7 @@ export default function EnquiryDetailsPage() {
         setImportDeliveryMode(String((enquiry as any)?.importDeliveryMode || ""));
         setSelectedSupplierOperatorId(String((enquiry as any)?.supplierOperatorId?._id || (enquiry as any)?.supplierOperatorId || ""));
         setSelectedDealCloserOperatorId(String((enquiry as any)?.dealCloserOperatorId?._id || (enquiry as any)?.dealCloserOperatorId || ""));
+        setSelectedHandlerOperatorId(String((enquiry as any)?.handlerOperatorId?._id || (enquiry as any)?.handlerOperatorId || ""));
         const savedPlan = (enquiry as any)?.responsibilityPlan || {};
         const savedCtx = (enquiry as any)?.executionContext || {};
         setResponsibilityPlan({
@@ -680,11 +682,17 @@ export default function EnquiryDetailsPage() {
     );
 
     const updateOperatorRolesMutation = useMutation({
-        mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+        mutationFn: async () => {
+            const roleLower = String(user?.role || "").toLowerCase();
+            const payload: any = {
                 supplierOperatorId: selectedSupplierOperatorId || null,
                 dealCloserOperatorId: selectedDealCloserOperatorId || null,
-            }),
+            };
+            if (roleLower === "admin") {
+                payload.handlerOperatorId = selectedHandlerOperatorId || null;
+            }
+            return patchData(`${apiRoutes.enquiry.getAll}/${id}`, payload);
+        },
         onSuccess: () => {
             toast.success("Operator roles updated.");
             setAssignmentSavedAt(new Date().toISOString());
@@ -692,6 +700,20 @@ export default function EnquiryDetailsPage() {
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to update operator roles.";
+            toast.error(msg);
+        },
+    });
+    const volunteerHandlerMutation = useMutation({
+        mutationFn: async () =>
+            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+                handlerOperatorId: user?.id || null,
+            }),
+        onSuccess: () => {
+            toast.success("You are now assigned as handler.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+        },
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message || "Failed to volunteer as handler.";
             toast.error(msg);
         },
     });
@@ -1386,6 +1408,9 @@ export default function EnquiryDetailsPage() {
     const dealCloserOperatorObj = ((enquiry as any)?.dealCloserOperatorId && typeof (enquiry as any).dealCloserOperatorId === "object")
         ? (enquiry as any).dealCloserOperatorId
         : null;
+    const handlerOperatorObj = ((enquiry as any)?.handlerOperatorId && typeof (enquiry as any).handlerOperatorId === "object")
+        ? (enquiry as any).handlerOperatorId
+        : null;
 
     // ─── Role Detection ───────────────────────────────────────────────────────
     const roleLower = String(user?.role || "").toLowerCase();
@@ -1395,11 +1420,13 @@ export default function EnquiryDetailsPage() {
     const canManageWorkflow = isSystemAdmin || isOperatorUser;
     const supplierOperatorId = (supplierOperatorObj?._id || (enquiry as any)?.supplierOperatorId || "").toString();
     const dealCloserOperatorId = (dealCloserOperatorObj?._id || (enquiry as any)?.dealCloserOperatorId || "").toString();
+    const handlerOperatorId = (handlerOperatorObj?._id || (enquiry as any)?.handlerOperatorId || "").toString();
     const isAssignedOperator = Boolean(
         isOperatorUser &&
         user?.id &&
         (supplierOperatorId === String(user.id) ||
-            dealCloserOperatorId === String(user.id))
+            dealCloserOperatorId === String(user.id) ||
+            handlerOperatorId === String(user.id))
     );
     const isAdmin = isSystemAdmin || isAssignedOperator;
     const isOperatorBlocked = Boolean(isOperatorUser && !isAssignedOperator);
@@ -1480,6 +1507,7 @@ export default function EnquiryDetailsPage() {
     };
     const supplierOperatorName = supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Not assigned";
     const dealCloserOperatorName = dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Not assigned";
+    const handlerOperatorName = handlerOperatorObj?.name || handlerOperatorObj?.firstName || "Not assigned";
     const userIdStr = user?.id?.toString();
     const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
     const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
@@ -2068,6 +2096,19 @@ export default function EnquiryDetailsPage() {
 
                         {/* Right Side: Contact & Actions */}
                         <div className="flex flex-col gap-5 w-full md:w-auto items-end">
+                            {(isSystemAdmin || isOperatorUser) && (
+                                <Chip
+                                    size="sm"
+                                    variant="flat"
+                                    className={`font-black uppercase tracking-[0.2em] border-none h-6 w-fit ${
+                                        handlerOperatorId
+                                            ? "bg-success-500/15 text-success-600"
+                                            : "bg-danger-500/15 text-danger-600"
+                                    }`}
+                                >
+                                    {handlerOperatorId ? "Handler Assigned" : "Handler Missing"}
+                                </Chip>
+                            )}
                             {isImportEnquiry && (
                                 <div className="w-full md:w-[280px] group">
                                     <Select
@@ -3384,6 +3425,13 @@ export default function EnquiryDetailsPage() {
                                     <span className={dealCloserOperatorName === "Not assigned" ? "text-default-500" : "text-warning-500"}>{dealCloserOperatorName}</span>
                                 </div>
                             </div>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
+                                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                    <div className={`w-2 h-2 rounded-full ${handlerOperatorName === "Not assigned" ? "bg-default-400" : "bg-primary-500 animate-pulse"}`} />
+                                    <span className={handlerOperatorName === "Not assigned" ? "text-default-500" : "text-primary"}>{handlerOperatorName}</span>
+                                </div>
+                            </div>
                             {isAdmin && (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Supplier Ownership Operator</span>
@@ -3426,6 +3474,43 @@ export default function EnquiryDetailsPage() {
                                             </SelectItem>
                                         ))}
                                     </Select>
+                                </div>
+                            )}
+                            {isSystemAdmin && (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
+                                    <Select
+                                        size="sm"
+                                        selectedKeys={selectedHandlerOperatorId ? [selectedHandlerOperatorId] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys as Set<string>);
+                                            setSelectedHandlerOperatorId(arr[0] || "");
+                                        }}
+                                        className="flex-1"
+                                        placeholder="Select handler operator"
+                                        isDisabled={isReadOnlyAfterConversion}
+                                    >
+                                        {operatorOptions.map((emp: any) => (
+                                            <SelectItem key={emp._id} value={emp._id}>
+                                                {emp.name || emp.firstName || emp.email}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+                            )}
+                            {!isSystemAdmin && isOperatorUser && !handlerOperatorId && (supplierOperatorId === String(user?.id || "") || dealCloserOperatorId === String(user?.id || "")) && (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] uppercase font-bold text-default-400">Handler Volunteer</span>
+                                    <Button
+                                        size="sm"
+                                        color="primary"
+                                        variant="flat"
+                                        isLoading={volunteerHandlerMutation.isPending}
+                                        onPress={() => volunteerHandlerMutation.mutate()}
+                                        isDisabled={isReadOnlyAfterConversion}
+                                    >
+                                        Volunteer as Handler
+                                    </Button>
                                 </div>
                             )}
                             {isAdmin && (

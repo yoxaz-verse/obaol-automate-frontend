@@ -34,8 +34,20 @@ export default function PaymentsHubPage() {
           </p>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-foreground">
             <div className="rounded-xl border border-default-200/60 bg-content1/80 p-4">
+              <div className="text-xs uppercase tracking-widest text-default-400">Total Commission</div>
+              <div className="text-lg font-semibold">50% of profit</div>
+            </div>
+            <div className="rounded-xl border border-default-200/60 bg-content1/80 p-4">
               <div className="text-xs uppercase tracking-widest text-default-400">Pool</div>
               <div className="text-lg font-semibold">30% of profit</div>
+            </div>
+            <div className="rounded-xl border border-default-200/60 bg-content1/80 p-4">
+              <div className="text-xs uppercase tracking-widest text-default-400">Procurement</div>
+              <div className="text-lg font-semibold">10% of profit</div>
+            </div>
+            <div className="rounded-xl border border-default-200/60 bg-content1/80 p-4">
+              <div className="text-xs uppercase tracking-widest text-default-400">Handler</div>
+              <div className="text-lg font-semibold">10% of profit</div>
             </div>
             <div className="rounded-xl border border-default-200/60 bg-content1/80 p-4">
               <div className="text-xs uppercase tracking-widest text-default-400">Closer</div>

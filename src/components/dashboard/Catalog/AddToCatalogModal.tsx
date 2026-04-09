@@ -13,6 +13,7 @@ import {
 import { postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface AddToCatalogModalProps {
     isOpen: boolean;
@@ -38,16 +39,28 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
     const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [margin, setMargin] = useState<number>(0);
+    const { selectedCurrency, exchangeRates, formatRate } = useCurrency();
 
-    const sellingPrice = Number(basePrice) + Number(margin);
+    const exchangeRate = exchangeRates[selectedCurrency.toUpperCase()];
+    const basePriceInINR = Number(basePrice) || 0;
+    const basePriceInSelected =
+        selectedCurrency === "inr" || !exchangeRate ? basePriceInINR : basePriceInINR * exchangeRate;
+    const sellingPriceInSelected = basePriceInSelected + margin;
+    const formatSelectedCurrency = (value: number) => {
+        if (selectedCurrency === "inr") return formatRate(value);
+        if (!exchangeRate) return "…";
+        return `${selectedCurrency.toUpperCase()} ${value.toFixed(2)}`;
+    };
 
     const handleAddToCatalog = async () => {
         try {
             setLoading(true);
+            const marginInINR =
+                selectedCurrency === "inr" || !exchangeRate ? margin : margin / exchangeRate;
             const payload = {
                 productVariantId,
                 baseRateId,
-                margin: Number(margin),
+                margin: Number(marginInINR),
             };
 
             const response = await postData(apiRoutes.catalog.add, payload);
@@ -85,7 +98,7 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
                         <div className="flex gap-4">
                             <Input
                                 label="Base Price"
-                                value={basePrice.toString()}
+                                value={formatSelectedCurrency(basePriceInSelected)}
                                 isReadOnly
                                 variant="flat"
                                 className="opacity-70"
@@ -109,7 +122,7 @@ const AddToCatalogModal: React.FC<AddToCatalogModalProps> = ({
 
                         <div className="p-3 bg-primary-50 rounded-lg border border-primary-100">
                             <p className="text-tiny text-primary-600 font-medium">Final Selling Price</p>
-                            <p className="text-xl font-bold text-primary-700">₹{sellingPrice.toFixed(2)}</p>
+                            <p className="text-xl font-bold text-primary-700">{formatSelectedCurrency(sellingPriceInSelected)}</p>
                         </div>
                     </div>
                 </ModalBody>

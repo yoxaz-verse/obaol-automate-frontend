@@ -106,6 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 "/dashboard/flow-rules",
                 "/dashboard/operators/overview",
                 "/dashboard/users",
+                "/dashboard/calculations",
                 "/dashboard/function-preview",
                 "/dashboard/shortcuts",
                 "/dashboard/essentials",

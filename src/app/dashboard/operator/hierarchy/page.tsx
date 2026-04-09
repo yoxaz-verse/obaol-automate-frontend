@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
 import { FiAward, FiBriefcase, FiChevronDown, FiChevronUp, FiMaximize, FiMinus, FiMinusCircle, FiMousePointer, FiPlus, FiPlusCircle, FiRefreshCw, FiShield, FiTarget, FiUsers, FiX, FiZap } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
@@ -57,12 +58,6 @@ type TreeNode = {
 const toId = (value: unknown) => String(value || "").trim();
 const toName = (value: unknown) => String(value || "").trim() || "Unknown";
 const toNumber = (value: unknown) => Number(value || 0);
-
-const formatCurrency = (value: unknown) =>
-  new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(toNumber(value));
 
 const extractList = (response: any): any[] => {
   const payload = response?.data;
@@ -281,7 +276,7 @@ function HierarchyBranch({
                 {node.__meta.totalCommission > 0 && (
                   <div className="flex items-center gap-1.5 text-primary-500">
                     <FiZap size={11} />
-                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">₹{formatCurrency(node.__meta.totalCommission)}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">{formatRate(Number(node.__meta.totalCommission || 0))}</span>
                   </div>
                 )}
               </div>
@@ -338,6 +333,7 @@ function HierarchyBranch({
 
 export default function OperatorHierarchyPage() {
   const { user } = useContext(AuthContext);
+  const { formatRate } = useCurrency();
   const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
@@ -775,7 +771,7 @@ export default function OperatorHierarchyPage() {
           { label: "Vantage Level", value: `L${operatorLevel}`, icon: <FiAward className="text-warning-500" />, sub: "Rank" },
           { label: "Strategic Mentor", value: mentor ? toName(mentor.name) : "Autonomous", icon: <FiTarget className="text-secondary-500" />, sub: "Upline" },
           { label: "Network Size", value: networkCount, icon: <FiUsers className="text-success-500" />, sub: "Members" },
-          { label: "Total Yield", value: `₹${formatCurrency(summary.totalEarnings || 0)}`, icon: <FiZap className="text-yellow-500" />, sub: "Commissions" },
+          { label: "Total Yield", value: formatRate(Number(summary.totalEarnings || 0)), icon: <FiZap className="text-yellow-500" />, sub: "Commissions" },
         ].map((card, i) => (
           <Card key={i} className="border border-divider/50 bg-white/50 dark:bg-black/20 backdrop-blur-xl shadow-none rounded-[1.5rem] group hover:border-primary-500/30 transition-all duration-300">
             <CardBody className="p-5 flex flex-row items-center gap-4">
@@ -940,7 +936,7 @@ export default function OperatorHierarchyPage() {
                           <FiZap size={18} />
                           <span className="text-[10px] font-black uppercase tracking-widest leading-none">Total Earnings</span>
                         </div>
-                        <span className="text-lg font-black text-success-700 tracking-tighter">₹{formatCurrency(selectedSummary.totalEarnings || 0)}</span>
+                        <span className="text-lg font-black text-success-700 tracking-tighter">{formatRate(Number(selectedSummary.totalEarnings || 0))}</span>
                       </div>
                       <div className="flex justify-between items-center p-4 rounded-2xl border border-divider/50 bg-primary-500/5 group hover:border-primary-500/30 transition-all">
                         <div className="flex items-center gap-3 text-primary-600">

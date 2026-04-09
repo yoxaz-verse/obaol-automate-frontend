@@ -16,6 +16,7 @@ import { FiEye } from "react-icons/fi";
 import Image from "next/image";
 import { DetailsModalProps } from "@/data/interface-data";
 import StatusHistoryTabContent from "../StatusHistory/statusHistory";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface DetailsModalCustomProps extends DetailsModalProps {
   customTrigger?: React.ReactNode;
@@ -28,6 +29,7 @@ export default function DetailsModal({
   customTrigger,
 }: DetailsModalCustomProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { formatRate } = useCurrency();
 
   // List of fields you want to exclude from being displayed
   const excludeFields = [
@@ -128,6 +130,12 @@ export default function DetailsModal({
       case "number":
         if (value !== undefined && value !== null) {
           return value.toLocaleString(); // Format numbers with commas
+        }
+        return "N/A";
+
+      case "currency":
+        if (value !== undefined && value !== null) {
+          return formatRate(Number(value));
         }
         return "N/A";
 

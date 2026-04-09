@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, CardBody, Input, Skeleton } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
@@ -31,12 +32,6 @@ const toId = (value: unknown) => String(value || "").trim();
 const toName = (value: unknown) => String(value || "").trim() || "-";
 const toNumber = (value: unknown) => Number(value || 0);
 
-const formatAmount = (value: unknown) =>
-  new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(toNumber(value));
-
 const formatDate = (value: unknown) => {
   if (!value) return "-";
   const date = new Date(String(value));
@@ -58,6 +53,7 @@ const extractList = (response: any): any[] => {
 
 export default function OperatorTeamPage() {
   const { user } = useContext(AuthContext);
+  const { formatRate } = useCurrency();
   const selfOperatorId = toId(user?.id);
   const roleLower = String(user?.role || "").trim().toLowerCase();
   const isAdmin = roleLower === "admin";
@@ -414,7 +410,7 @@ export default function OperatorTeamPage() {
         <Card className="border border-default-200/80">
           <CardBody>
             <p className="text-xs uppercase tracking-wide text-default-500">Total Team Earnings</p>
-            <p className="text-2xl font-semibold text-foreground">₹{formatAmount(totalTeamEarnings)}</p>
+            <p className="text-2xl font-semibold text-foreground">{formatRate(Number(totalTeamEarnings))}</p>
           </CardBody>
         </Card>
         <Card className="border border-default-200/80">
@@ -491,7 +487,7 @@ export default function OperatorTeamPage() {
                       </td>
                       <td className="px-3 py-3 text-default-700 dark:text-default-300">{row.mentor}</td>
                       <td className="px-3 py-3 text-default-700 dark:text-default-300">{row.teamSize}</td>
-                      <td className="px-3 py-3 text-default-700 dark:text-default-300">₹{formatAmount(row.totalCommission)}</td>
+                      <td className="px-3 py-3 text-default-700 dark:text-default-300">{formatRate(Number(row.totalCommission))}</td>
                       <td className="px-3 py-3 text-default-700 dark:text-default-300">{formatDate(row.joinDate)}</td>
                     </tr>
                   ))

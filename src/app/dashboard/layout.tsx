@@ -60,8 +60,10 @@ export default function DashboardLayout({
   const allowedRoles = getAllowedRoles(pathname);
   const { user, loading } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
+  const profileComplete = Boolean(user?.name && user?.email && (user as any)?.phone);
   const isOnboardingLocked = ["associate", "operator", "team"].includes(roleLower)
-    && user?.onboardingComplete === false;
+    && user?.onboardingComplete === false
+    && !profileComplete;
   const isApprovalPending = ["associate", "operator", "team"].includes(roleLower)
     && user?.onboardingComplete === true
     && String(user?.registrationStatus || "APPROVED").toUpperCase() !== "APPROVED";

@@ -187,7 +187,7 @@ export default function DocumentsPage() {
                   setRuleStageKey(next === "INQUIRY" ? "ENQUIRY_CREATED" : "ORDER_CREATED");
                 }}
               >
-                {STAGE_TYPES.map((t) => (<SelectItem key={t} className="capitalize">{t.toLowerCase()}</SelectItem>))}
+                {STAGE_TYPES.map((t) => (<SelectItem key={t} className="capitalize text-foreground">{t.toLowerCase()}</SelectItem>))}
               </Select>
               <Select
                 className="w-56"
@@ -197,7 +197,7 @@ export default function DocumentsPage() {
                 selectedKeys={[ruleStageKey]}
                 onSelectionChange={(keys) => setRuleStageKey(String(Array.from(keys)[0] || ""))}
               >
-                {stageOptions.map((t) => (<SelectItem key={t} className="capitalize">{t.toLowerCase().replace(/_/g, " ")}</SelectItem>))}
+                {stageOptions.map((t) => (<SelectItem key={t} className="capitalize text-foreground">{t.toLowerCase().replace(/_/g, " ")}</SelectItem>))}
               </Select>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function DocumentsPage() {
             onSelectionChange={(keys) => setStatusFilter(String(Array.from(keys)[0] || "ALL"))}
           >
             {STATUS_OPTIONS.map((status) => (
-              <SelectItem key={status} value={status} className="capitalize">
+              <SelectItem key={status} value={status} className="capitalize text-foreground">
                 {status.toLowerCase()}
               </SelectItem>
             ))}
@@ -290,7 +290,7 @@ export default function DocumentsPage() {
               onSelectionChange={(keys) => setCompanyFilter(String(Array.from(keys)[0] || ""))}
             >
               {companies.map((company: any) => (
-                <SelectItem key={company._id} value={company._id}>
+                <SelectItem key={company._id} value={company._id} className="text-foreground">
                   {company.name}
                 </SelectItem>
               ))}
@@ -363,7 +363,7 @@ export default function DocumentsPage() {
               onSelectionChange={(keys) => setCreateType(String(Array.from(keys)[0] || "QUOTATION"))}
             >
               {TYPE_TABS.filter((t) => t.key !== "ALL").map((tab) => (
-                <SelectItem key={tab.key} value={tab.key}>
+                <SelectItem key={tab.key} value={tab.key} className="text-foreground">
                   {tab.label}
                 </SelectItem>
               ))}
@@ -373,8 +373,8 @@ export default function DocumentsPage() {
               selectedKeys={[createMode]}
               onSelectionChange={(keys) => setCreateMode((String(Array.from(keys)[0] || "CREATE") as "CREATE" | "UPLOAD"))}
             >
-              <SelectItem key="CREATE">CREATE</SelectItem>
-              <SelectItem key="UPLOAD">UPLOAD</SelectItem>
+              <SelectItem key="CREATE" className="text-foreground">CREATE</SelectItem>
+              <SelectItem key="UPLOAD" className="text-foreground">UPLOAD</SelectItem>
             </Select>
             {createMode === "UPLOAD" && (
               <Input

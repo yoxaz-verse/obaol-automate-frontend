@@ -161,7 +161,7 @@ const NotificationsPage = () => {
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.5 }}
         >
-          <Card className="border border-default-200/50 bg-content1/70 backdrop-blur-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] rounded-[3rem] overflow-hidden">
+          <Card className="border border-default-200/80 bg-content1/70 backdrop-blur-3xl shadow-none rounded-[3rem] overflow-hidden">
             <CardHeader className="px-10 pt-10 pb-2 flex flex-col items-start border-none">
                 <SectionHeader 
                     title="General Message" 
@@ -277,7 +277,7 @@ const NotificationsPage = () => {
                 </div>
                 <Button
                   color="primary"
-                  className="h-14 px-12 rounded-full text-xs font-black uppercase tracking-widest shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+                  className="h-14 px-12 rounded-full text-xs font-black uppercase tracking-widest shadow-none hover:bg-primary/90"
                   onPress={handleBroadcastSubmit}
                   isLoading={broadcastMutation.isPending}
                   startContent={<LuSend size={16} />}
@@ -302,7 +302,7 @@ const NotificationsPage = () => {
             subtitle="Scoped Operations & Status Logs" 
             icon={LuBell} 
           />
-          <div className="flex items-center gap-3 p-2 bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-2xl">
+          <div className="flex items-center gap-3 p-2 bg-content1/50 backdrop-blur-xl border border-default-200/80 rounded-2xl shadow-none">
             <Button
                 size="sm"
                 variant={unreadOnly ? "shadow" : "flat"}
@@ -329,7 +329,7 @@ const NotificationsPage = () => {
           </div>
         </div>
 
-        <Card className="border border-default-200/50 bg-content1/40 backdrop-blur-3xl shadow-2xl rounded-[3rem] overflow-hidden">
+        <Card className="border border-default-200/80 bg-content1/40 backdrop-blur-3xl shadow-none rounded-[3rem] overflow-hidden">
           <CardBody className="p-4 md:p-8">
             {isLoading ? (
               <div className="py-24 flex flex-col items-center justify-center gap-6">
@@ -358,8 +358,8 @@ const NotificationsPage = () => {
                       transition={{ duration: 0.3, delay: idx * 0.03 }}
                       className={`relative group h-full rounded-[2rem] border transition-all duration-500 overflow-hidden ${
                         item.isRead 
-                        ? "border-default-200/40 bg-transparent hover:bg-content2/10" 
-                        : "border-primary/20 bg-primary/5 hover:border-primary/40 shadow-xl shadow-primary/5"
+                        ? "border-default-200/60 bg-transparent hover:bg-content1" 
+                        : "border-primary/40 bg-primary/5 hover:bg-primary/10 shadow-none"
                       }`}
                     >
                       {/* Status indicator line */}
@@ -415,7 +415,7 @@ const NotificationsPage = () => {
                               size="md"
                               color="primary"
                               variant={item.isRead ? "flat" : "shadow"}
-                              className={`h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border border-transparent ${item.isRead ? 'bg-default-100 text-default-400 border-default-200' : 'shadow-[0_4px_12px_rgba(249,115,22,0.3)]'}`}
+                              className={`h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border border-transparent ${item.isRead ? 'bg-default-100 text-default-400 border-default-200 shadow-none' : 'shadow-none hover:bg-primary/80'}`}
                               endContent={<LuExternalLink size={14} />}
                               onPress={async () => {
                                 if (!item.isRead) {
@@ -438,7 +438,7 @@ const NotificationsPage = () => {
         </Card>
 
         {/* Improved Pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-4 md:p-6 rounded-[2.5rem] bg-content1/40 backdrop-blur-xl border border-default-200/50 shadow-xl">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-4 md:p-6 rounded-[2.5rem] bg-content1/40 backdrop-blur-xl border border-default-200/80 shadow-none">
             <div className="flex items-center gap-5">
                 <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group transition-colors">
                     {isFetching ? <Spinner size="sm" color="primary" /> : <LuLayoutGrid size={18} />}

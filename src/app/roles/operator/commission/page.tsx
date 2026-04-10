@@ -120,22 +120,73 @@ export default function OperatorCommissionDocsPage() {
                         </div>
                     </motion.section>
 
-                    {/* --- SECTION 3: DISTRIBUTION --- */}
+                    {/* --- SECTION 3: WHO IS WHO --- */}
+                    <motion.section {...fadeIn} className="mb-12 md:mb-20 text-left">
+                        <div className="p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] bg-default-50 border border-default-100">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-[10px] mb-3">
+                                        Clarity First
+                                    </div>
+                                    <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">Who Is Who In The Commission Flow</h2>
+                                    <p className="text-lg text-foreground/60 leading-relaxed font-medium mt-3">
+                                        These terms appear in the simulator and breakdown cards. Use this section as your quick reference.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {[
+                                    {
+                                        title: "Deal Closer (DC)",
+                                        desc: "The operator who takes the trade from inquiry to successful completion. This is about execution, not supplier ownership."
+                                    },
+                                    {
+                                        title: "Supplier Portfolio Owner (Owner)",
+                                        desc: "The operator who manages the supplier account in OBAOL. This is not the supplier’s company owner or founder."
+                                    },
+                                    {
+                                        title: "L1 Mentor",
+                                        desc: "Direct mentor or reporting manager of the Supplier Portfolio Owner."
+                                    },
+                                    {
+                                        title: "L2 Mentor",
+                                        desc: "Senior mentor or team lead above L1 in the ownership chain."
+                                    },
+                                    {
+                                        title: "L3+ Leadership",
+                                        desc: "Extended leadership layers above L2. This pool is shared across all active layers."
+                                    },
+                                    {
+                                        title: "Supplier Company Owner",
+                                        desc: "The real-world business owner of the supplier. This role is not part of the commission split unless they are also an OBAOL operator."
+                                    }
+                                ].map((item, i) => (
+                                    <div key={i} className="p-5 md:p-6 rounded-2xl bg-background border border-default-100">
+                                        <div className="text-sm font-black uppercase tracking-widest text-foreground/40 mb-2">{item.title}</div>
+                                        <p className="text-foreground/70 font-medium leading-relaxed text-sm">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.section>
+
+                    {/* --- SECTION 4: DISTRIBUTION --- */}
                     <motion.section {...fadeIn} className="mb-12 md:mb-20 text-left md:text-center">
                         <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight mb-8 md:mb-12">Pool Distribution</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
                                 {
-                                    title: "Deal Closer",
+                                    title: "Deal Closer (DC)",
                                     share: "40%",
                                     desc: "Person who successfully finalizes the trade from inquiry to completion.",
                                     icon: <FiTarget />,
                                     color: "bg-orange-500"
                                 },
                                 {
-                                    title: "Portfolio Owner",
+                                    title: "Supplier Portfolio Owner",
                                     share: "30%",
-                                    desc: "Registered manager of the supplier who executed the trade.",
+                                    desc: "Registered OBAOL operator managing the supplier account involved in the trade.",
                                     icon: <FiUsers />,
                                     color: "bg-indigo-500"
                                 },
@@ -159,14 +210,14 @@ export default function OperatorCommissionDocsPage() {
                         </div>
                     </motion.section>
 
-                    {/* --- SECTION 4: PORTFOLIO OWNERSHIP --- */}
+                    {/* --- SECTION 5: PORTFOLIO OWNERSHIP --- */}
                     <motion.section {...fadeIn} className="mb-12 md:mb-20 space-y-8 md:space-y-12">
                         <div className="p-6 md:p-14 rounded-[2rem] md:rounded-[3rem] border border-orange-500/20 bg-orange-500/[0.02] relative overflow-hidden">
                             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                                 <div>
                                     <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6">Supplier Portfolio Ownership</h2>
                                     <p className="text-lg text-foreground/60 leading-relaxed mb-8 font-medium">
-                                        Each operator is assigned a group of supplier associates on the platform. Your success is tied to their activation and performance.
+                                        Each operator is assigned a group of supplier associates on the platform. This is a portfolio responsibility, not business ownership. Your success is tied to their activation and performance.
                                     </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {[
@@ -201,7 +252,7 @@ export default function OperatorCommissionDocsPage() {
                         </div>
                     </motion.section>
 
-                    {/* --- SECTION 5: LEADERSHIP LAYERS --- */}
+                    {/* --- SECTION 6: LEADERSHIP LAYERS --- */}
                     <motion.section {...fadeIn} className="mb-12 md:mb-20 space-y-8 md:space-y-12 text-left">
                         <div className="md:text-center space-y-4">
                             <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">Leadership Layer Rewards</h2>
@@ -267,7 +318,7 @@ export default function OperatorCommissionDocsPage() {
                         </div>
                     </motion.section>
 
-                    {/* --- SECTION 6: CALCULATION EXAMPLE --- */}
+                    {/* --- SECTION 7: CALCULATION EXAMPLE --- */}
                     <motion.section {...fadeIn} className="mb-12 md:mb-20 text-left">
                         <div className="p-6 md:p-16 rounded-[2.5rem] md:rounded-[4rem] bg-content1 border border-default-200">
                             <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight mb-8 md:mb-12">Calculation Example</h2>

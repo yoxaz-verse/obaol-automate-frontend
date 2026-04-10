@@ -14,8 +14,6 @@ import {
   LuPackage,
   LuUserCheck,
   LuLayers,
-  LuZap,
-  LuInfo,
   LuArrowRight,
   LuChartPie,
   LuGlobe,
@@ -23,9 +21,10 @@ import {
   LuCpu,
   LuNetwork,
   LuActivity,
-  LuTarget
+  LuTarget,
+  LuBookOpen
 } from "react-icons/lu";
-import { Card, CardBody, Divider, Button, Tooltip, Progress, Slider, Tabs, Tab } from "@heroui/react";
+import { Card, CardBody, Button, Slider, Tabs, Tab } from "@heroui/react";
 import { useCurrency } from "@/context/CurrencyContext";
 
 const DecorativeNode = ({ className = "" }: { className?: string }) => (
@@ -71,27 +70,27 @@ export default function CommissionStructurePage() {
     L1: {
       title: "Mentor (L1)",
       pct: "12%",
-      focus: "Direct Multiplier",
-      desc: "Activate this tier the moment you onboard a new Operator. You immediately earn a 12% lifetime override on their direct trade yields as they close deals.",
-      impact: "Rewards direct leadership and active ecosystem expansion.",
+      focus: "Direct Mentor",
+      desc: "You earn this share when you directly mentor a Supplier Portfolio Owner. It applies to their completed trades.",
+      impact: "Rewards direct guidance and active support.",
       icon: LuUserCheck,
       color: "text-primary-400"
     },
     L2: {
       title: "Cluster Leader (L2)",
       pct: "8%",
-      focus: "Structural Override",
-      desc: "Unlocks organically when the Operators you mentored start building their own teams. You passively earn an 8% yield on every trade finalized by their sub-nodes.",
-      impact: "Encourages multi-generational growth and network stability.",
+      focus: "Senior Mentor",
+      desc: "Applies when your L1 mentors build their own teams. You receive this share on their team’s completed trades.",
+      impact: "Rewards long-term team growth.",
       icon: LuNetwork,
       color: "text-secondary-400"
     },
     L3: {
       title: "Executive Circle (L3+)",
       pct: "10%",
-      focus: "Ecosystem Dividend",
-      desc: "Secured when your operational network scales deep across multiple levels. You gain access to a 10% ecosystem dividend pool. To ensure balanced structural expansion, the maximum yield extracted per network layer is capped at 5%. This means your 10% override naturally stretches down across multiple deep-tier generations.",
-      impact: "The 5% per-layer limit guarantees sustainable, long-term passive yield across massive global networks.",
+      focus: "Extended Leadership",
+      desc: "Shared across leadership levels beyond L2. The 10% pool is split across active L3+ layers, with a 5% cap per layer.",
+      impact: "Keeps deep leadership rewards balanced and clear.",
       icon: LuGlobe,
       color: "text-warning-400"
     }
@@ -113,12 +112,15 @@ export default function CommissionStructurePage() {
             className="mb-16 text-center max-w-3xl mx-auto relative z-10"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-warning-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6 shadow-lg">
-              <LuChartPie size={12} className="animate-pulse" /> Unified rewards engine v4.2
+              <LuChartPie size={12} className="animate-pulse" /> Commission Structure
             </div>
             <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 leading-tight uppercase italic text-foreground">
-              Supreme <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 via-amber-500 to-orange-600">Execution</span> <br/> 
-              <span className="text-foreground/90">Incentives</span>
+              Clear <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 via-amber-500 to-orange-600">Commission</span> <br/> 
+              <span className="text-foreground/90">Breakdown</span>
             </h1>
+            <p className="text-sm md:text-base text-foreground/70 font-medium leading-relaxed">
+              Simple, step-by-step explanation of how commissions are created and shared after a trade is completed.
+            </p>
           </motion.div>
 
           {/* 01. Layering Structure Hub */}
@@ -131,31 +133,31 @@ export default function CommissionStructurePage() {
                       <div className="h-10 w-10 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20">
                         <LuNetwork size={20} />
                       </div>
-                      <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Layering Structure</h2>
+                      <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Commission Pool</h2>
                     </div>
                     <p className="text-base text-foreground/70 leading-relaxed font-medium mb-10">
-                      Our system activates a 50% system-wide commission pool sourced from net operational yields, distributed across three primary hubs.
+                      When a trade is fully completed and profit is confirmed, 50% of that profit becomes the total commission pool.
                     </p>
                     <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-warning-500 to-orange-700 text-white shadow-xl overflow-hidden group">
                       <div className="relative z-10 flex items-end gap-2">
                         <span className="text-5xl md:text-6xl font-black tracking-tighter leading-none">50%</span>
                         <div className="flex flex-col mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Commission Pool</span>
-                          <span className="text-[10px] font-bold uppercase tracking-widest italic opacity-70 leading-none">Of Net Trade Profit</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest italic opacity-70 leading-none">Of Trade Profit</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="lg:w-1/2 p-8 md:p-12 bg-content2/20">
                     <h3 className="text-xs font-black uppercase tracking-widest text-primary-500 mb-6 font-bold flex items-center gap-2">
-                      <LuActivity size={12} /> Execution Triggers
+                      <LuActivity size={12} /> When Commission Is Released
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
-                        { text: "Terminal Dispatch", icon: LuPackage, active: true },
-                        { text: "Ledger Verification", icon: LuShieldCheck, active: true },
-                        { text: "Negotiation Hub", icon: LuCircleX, active: false },
-                        { text: "Draft Inquiries", icon: LuCircleX, active: false }
+                        { text: "Product dispatched", icon: LuPackage, active: true },
+                        { text: "Payment verified", icon: LuShieldCheck, active: true },
+                        { text: "Negotiations only", icon: LuCircleX, active: false },
+                        { text: "Draft inquiries", icon: LuCircleX, active: false }
                       ].map((item, i) => (
                         <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border ${item.active ? 'bg-content1/80 border-success-500/20 text-success-600' : 'bg-content1/80 border-danger-500/20 text-danger-600 opacity-60'} text-[10px] font-black uppercase tracking-widest`}>
                           <item.icon size={14} />
@@ -169,33 +171,95 @@ export default function CommissionStructurePage() {
             </Card>
           </div>
 
-          {/* 02. Allocation Matrix */}
-          <div className="mb-20 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
-            {[
-              { label: "Core Pool", share: "30%", icon: LuCpu, color: "text-primary-500", tone: "bg-primary-500/5", border: "border-primary-500/20" },
-              { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-warning-500", tone: "bg-warning-500/5", border: "border-warning-500/20" },
-              { label: "Handler", share: "10%", icon: LuLayers, color: "text-secondary-500", tone: "bg-secondary-500/5", border: "border-secondary-500/20" },
-            ].map((item, index) => (
-              <Card key={index} className={`bg-content1/50 backdrop-blur-xl ${item.border} shadow-lg rounded-[2rem]`}>
-                <CardBody className="p-8 flex items-center gap-5">
-                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${item.tone} ${item.color} border border-current/10`}>
-                    <item.icon size={20} />
+          {/* 02. How The Commission Works */}
+          <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden">
+              <CardBody className="p-8 md:p-12">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/20">
+                    <LuCircleCheck size={20} />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-[11px] font-black uppercase tracking-widest text-foreground/80 leading-none mb-1">{item.label}</div>
-                    <div className={`text-2xl font-black italic tracking-tighter ${item.color}`}>{item.share}</div>
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+                  <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">How The Commission Works</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    "Trade completes and profit is confirmed.",
+                    "50% of profit becomes the commission pool.",
+                    "Pool splits into Core, Procurement, and Handler.",
+                    "Core splits into DC, Supplier Portfolio Owner, L1, L2, L3+."
+                  ].map((step, i) => (
+                    <div key={i} className="p-5 rounded-2xl bg-background border border-default-100">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-2">{`Step ${String(i + 1).padStart(2, "0")}`}</div>
+                      <p className="text-sm text-foreground/70 font-medium leading-relaxed">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
           </div>
 
-          {/* 03. Dynamic Yield Scanner (REORDERED) */}
+          {/* 03. Glossary */}
+          <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden">
+              <CardBody className="p-8 md:p-12">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-10 w-10 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20">
+                    <LuBookOpen size={20} />
+                  </div>
+                  <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Glossary</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { term: "DC", def: "Person who closed the deal." },
+                    { term: "Supplier Portfolio Owner", def: "Person who manages the supplier’s portfolio in OBAOL." },
+                    { term: "Important", def: "The supplier’s business owner is not part of commission unless they also operate the account in OBAOL." },
+                    { term: "Handler", def: "Person who handles the deal after buyer and seller show interest." }
+                  ].map((item, i) => (
+                    <div key={i} className="p-5 rounded-2xl bg-background border border-default-100">
+                      <div className="text-[11px] font-black uppercase tracking-widest text-foreground/50 mb-2">{item.term}</div>
+                      <p className="text-sm text-foreground/70 font-medium leading-relaxed">{item.def}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* 04. Allocation Matrix */}
+          <div className="mb-20 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
+              {[
+                { label: "Core Pool", share: "30%", icon: LuCpu, color: "text-primary-500", tone: "bg-primary-500/5", border: "border-primary-500/20" },
+                { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-warning-500", tone: "bg-warning-500/5", border: "border-warning-500/20" },
+                { label: "Handler", share: "10%", icon: LuLayers, color: "text-secondary-500", tone: "bg-secondary-500/5", border: "border-secondary-500/20" },
+              ].map((item, index) => (
+                <Card key={index} className={`bg-content1/50 backdrop-blur-xl ${item.border} shadow-lg rounded-[2rem]`}>
+                  <CardBody className="p-8 flex items-center gap-5">
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${item.tone} ${item.color} border border-current/10`}>
+                      <item.icon size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-[11px] font-black uppercase tracking-widest text-foreground/80 leading-none mb-1">{item.label}</div>
+                      <div className={`text-2xl font-black italic tracking-tighter ${item.color}`}>{item.share}</div>
+                      {item.label === "Handler" && (
+                        <div className="mt-2 text-[9px] font-bold uppercase tracking-widest text-foreground/50">
+                          Rating-based: buyer 1–5 stars + seller 1–5 stars. Each star = 1% (max 10%).
+                        </div>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+          </div>
+
+          {/* 05. Commission Simulator */}
           <div className="mb-32 relative z-10 w-full">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-5xl font-black leading-tight uppercase tracking-tighter italic text-foreground block">
-                Dynamic <span className="text-foreground/70">Yield Scanner</span>
+                Commission <span className="text-foreground/70">Simulator</span>
               </h2>
+              <p className="text-sm md:text-base text-foreground/70 font-medium max-w-2xl mx-auto mt-4 leading-relaxed">
+                What this simulator shows: enter trade profit and see how the commission pool is created and split.
+              </p>
             </div>
 
             <Card className="max-w-5xl mx-auto bg-content1/50 backdrop-blur-3xl border-default-200/50 shadow-2xl rounded-[3rem] overflow-hidden">
@@ -203,7 +267,7 @@ export default function CommissionStructurePage() {
                     {/* Controller */}
                     <div className="flex flex-col items-center text-center space-y-8 border-b border-default-200/50 pb-12 mb-12">
                         <div className="flex flex-col gap-4 w-full max-w-xl px-4">
-                            <span className="text-[11px] font-black uppercase text-warning-500 tracking-[0.4em] mb-1">Adjust Net Yield Input</span>
+                            <span className="text-[11px] font-black uppercase text-warning-500 tracking-[0.4em] mb-1">Trade Profit Input</span>
                             <div className="flex items-center justify-center mb-2">
                                <span className="text-4xl md:text-6xl font-black text-foreground tracking-tighter leading-none italic tabular-nums">{displayRate(profit)}</span>
                             </div>
@@ -229,14 +293,19 @@ export default function CommissionStructurePage() {
                             <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-warning-500 to-orange-700 text-white shadow-lg flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Total Pool (50%)</span>
                                 <span className="text-3xl font-black tracking-tighter italic leading-none">{displayRate(shares.totalCommissionPool)}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-3">Total commission created</span>
                             </div>
                             <Card className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase text-foreground/70 font-black tracking-widest mb-2">Procurement (10%)</span>
                                 <span className="text-2xl font-black text-foreground italic">{displayRate(shares.procurement)}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3">Procurement share</span>
                             </Card>
                             <Card className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase text-foreground/70 font-black tracking-widest mb-2">Handler (10%)</span>
                                 <span className="text-2xl font-black text-foreground italic">{displayRate(shares.handler)}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3 text-center">
+                                  Rating-based: buyer 1–5 + seller 1–5. Each star = 1% (max 10%).
+                                </span>
                             </Card>
                         </div>
                     </div>
@@ -251,10 +320,10 @@ export default function CommissionStructurePage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                             {[
                                 { label: "DC", share: "40%", amt: shares.closer, color: "text-warning-500", bg: "bg-warning-500", icon: LuUserCheck },
-                                { label: "Owner", share: "30%", amt: shares.owner, color: "text-primary-500", bg: "bg-primary-500", icon: LuBriefcase },
+                                { label: "Supplier Portfolio Owner", share: "30%", amt: shares.owner, color: "text-primary-500", bg: "bg-primary-500", icon: LuBriefcase },
                                 { label: "L1 Mentor", share: "12%", amt: shares.l1, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuShieldCheck },
-                                { label: "L2 Cluster", share: "8%", amt: shares.l2, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuNetwork },
-                                { label: "L3+ Div", share: "10%", amt: shares.l3plus, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuGlobe },
+                                { label: "L2 Mentor", share: "8%", amt: shares.l2, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuNetwork },
+                                { label: "L3+", share: "10%", amt: shares.l3plus, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuGlobe },
                             ].map((item, i) => (
                                 <div key={i} className="p-4 rounded-[1.5rem] bg-content2/20 border border-default-200/50 flex flex-col items-center text-center hover:bg-content2/40 transition-all cursor-default group">
                                     <div className={`h-8 w-8 rounded-lg ${item.bg}/10 border border-current/10 flex items-center justify-center ${item.color} mb-3 group-hover:scale-110 transition-transform`}>
@@ -262,6 +331,13 @@ export default function CommissionStructurePage() {
                                     </div>
                                     <span className="text-[11px] font-black uppercase text-foreground/80 tracking-widest mb-1 leading-none">{item.label} ({item.share})</span>
                                     <div className="text-base font-black text-foreground tracking-tighter italic">{displayRate(item.amt)}</div>
+                                    <div className="text-[9px] font-bold uppercase tracking-widest text-foreground/50 mt-2">
+                                      {item.label === "DC" && "Deal closer share"}
+                                      {item.label === "Supplier Portfolio Owner" && "Supplier portfolio owner share"}
+                                      {item.label === "L1 Mentor" && "L1 leadership share"}
+                                      {item.label === "L2 Mentor" && "L2 leadership share"}
+                                      {item.label === "L3+" && "L3+ leadership share"}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -270,21 +346,46 @@ export default function CommissionStructurePage() {
             </Card>
           </div>
 
-          {/* 04. How You Become a Leader (REORDERED) */}
+          {/* 06. Handler Star Dependency */}
+          <div className="mb-24 relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">
+                Handler <span className="text-warning-500">Star Dependency</span>
+              </h2>
+              <div className="h-1 w-20 bg-warning-500 mx-auto rounded-full mb-6" />
+              <p className="text-sm text-foreground/70 font-medium max-w-2xl mx-auto leading-relaxed">
+                The Handler’s 10% share is earned through ratings from both buyer and seller.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                "Buyer gives 1–5 stars and seller gives 1–5 stars.",
+                "Each star equals 1%. Total ranges from 0% to 10% (max)."
+              ].map((item, i) => (
+                <div key={i} className="p-6 rounded-2xl bg-content1/50 border border-default-200/50">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-2">{`Rule ${String(i + 1).padStart(2, "0")}`}</div>
+                  <p className="text-sm text-foreground/70 font-medium leading-relaxed">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 07. How You Become a Leader */}
           <div className="mb-32 relative z-10">
             <div className="text-center mb-16">
                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">How You Become a <span className="text-warning-500">Leader</span></h2>
                <div className="h-1 w-20 bg-warning-500 mx-auto rounded-full mb-6" />
                <p className="text-sm text-foreground/70 font-medium max-w-xl mx-auto leading-relaxed">
-                 Transform from a tactical operator to a strategic architect by scaling your mentorship activities across the OBAOL ecosystem.
+                 Grow by mentoring others. Leadership rewards follow the portfolio ownership chain.
                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
               {[
-                { step: "Step 01", title: "Active Assets", icon: LuUserCheck, color: "text-warning-500", desc: "Secure your operational foundation. Finalize deals to earn your 40% Deal Closer share and maintain assigned suppliers for a 30% Portfolio Owner yield." },
-                { step: "Step 02", title: "Mentorship", icon: LuUsers, color: "text-primary-500", desc: "Onboard new Operators to multiply your yield. You instantly earn a 12% L1 override on every finalized trade they execute." },
-                { step: "Step 03", title: "Strategic Arc", icon: LuTrendingUp, color: "text-secondary-500", desc: "Scale your network autonomously. As your team recruits their own operators, capture 8% (L2) and 10% (L3+) passive overrides on all sub-node volume." }
+                { step: "Step 01", title: "Active Deals", icon: LuUserCheck, color: "text-warning-500", desc: "Close trades and manage your supplier portfolio. This earns the DC and Supplier Portfolio Owner shares." },
+                { step: "Step 02", title: "Mentor Others", icon: LuUsers, color: "text-primary-500", desc: "Onboard new operators. You receive the L1 share on their completed trades." },
+                { step: "Step 03", title: "Build A Team", icon: LuTrendingUp, color: "text-secondary-500", desc: "As your team grows, L2 and L3+ shares apply across deeper levels." }
               ].map((item, i) => (
                 <div key={i} className="group relative">
                   <div className="absolute -inset-2 bg-gradient-to-b from-content2/50 to-transparent rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-all" />
@@ -303,14 +404,14 @@ export default function CommissionStructurePage() {
             </div>
           </div>
 
-          {/* 05. Interactive Hierarchy Flow (NEW) */}
+          {/* 07. Leadership Levels */}
           <div className="mb-24 relative z-10 w-full text-white">
              <div className="text-center mb-16 px-4">
-                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-primary-500 block mb-6 px-4">Deep Logic Hub</span>
-                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic text-foreground mb-4">Hierarchical <span className="text-primary-500">Yield Mechanics</span></h2>
+                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-primary-500 block mb-6 px-4">Leadership Levels</span>
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic text-foreground mb-4">Leadership <span className="text-primary-500">Shares</span></h2>
                 <div className="h-1 w-32 bg-primary-500 mx-auto rounded-full mb-10" />
                 <p className="max-w-xl mx-auto text-foreground/70 font-medium text-sm leading-relaxed">
-                   Explaining the tactical flow of override commissions through our multi-generational mentorship model.
+                   These shares are tied to mentorship levels in the portfolio ownership chain.
                 </p>
              </div>
 
@@ -355,10 +456,10 @@ export default function CommissionStructurePage() {
                                     className="space-y-6"
                                 >
                                     <div>
-                                        <span className="text-[10px] font-black uppercase text-foreground/70 tracking-[0.4em] block mb-2">{tierData[activeTier as keyof typeof tierData].focus}</span>
-                                        <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${tierData[activeTier as keyof typeof tierData].color}`}>{tierData[activeTier as keyof typeof tierData].title}</h3>
-                                    </div>
-                                    <p className="text-foreground/90 font-medium leading-relaxed">{tierData[activeTier as keyof typeof tierData].desc}</p>
+                                    <span className="text-[10px] font-black uppercase text-foreground/70 tracking-[0.4em] block mb-2">{tierData[activeTier as keyof typeof tierData].focus}</span>
+                                    <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${tierData[activeTier as keyof typeof tierData].color}`}>{tierData[activeTier as keyof typeof tierData].title}</h3>
+                                  </div>
+                                  <p className="text-foreground/90 font-medium leading-relaxed">{tierData[activeTier as keyof typeof tierData].desc}</p>
                                     <div className="p-6 rounded-[1.5rem] bg-content2/50 border border-default-200/50 flex items-start gap-4">
                                         <LuTarget className={tierData[activeTier as keyof typeof tierData].color} size={24} />
                                         <p className="text-xs text-foreground/90 leading-relaxed font-bold italic">{tierData[activeTier as keyof typeof tierData].impact}</p>

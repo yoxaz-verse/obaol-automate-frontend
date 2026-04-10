@@ -22,7 +22,6 @@ import AuthContext from "@/context/AuthContext";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import Image from "next/image";
-import CurrencySelector from "./Catalog/currency-selector";
 import { FiBell, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut, FiMoon, FiSun } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
@@ -30,12 +29,10 @@ import { getData } from "@/core/api/apiHandler";
 import { notificationRoutes } from "@/core/api/apiRoutes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
-import { useCurrency } from "@/context/CurrencyContext";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
   const { logout } = useContext(AuthContext);
   const router = useRouter();
-  const { rateError } = useCurrency();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -282,12 +279,6 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
         ) : (
           <>
             <div className="flex items-center bg-default-100/50 dark:bg-black/20 border border-default-200/50 dark:border-white/5 rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
-              <CurrencySelector />
-              {rateError && (
-                <div className="px-2 py-1 rounded-xl bg-warning-500/10 text-warning-600 text-[9px] font-black uppercase tracking-[0.2em]">
-                  Rates Offline · INR
-                </div>
-              )}
               <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
               
               <div className="relative" ref={notificationRef}>

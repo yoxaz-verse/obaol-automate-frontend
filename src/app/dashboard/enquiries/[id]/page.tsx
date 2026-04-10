@@ -39,7 +39,6 @@ import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, 
 import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity, LuFileText, LuHistory, LuClock, LuStore } from "react-icons/lu";
 import { FaWhatsapp } from "react-icons/fa";
 import { useCurrency } from "@/context/CurrencyContext";
-import CurrencySelector from "@/components/dashboard/Catalog/currency-selector";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
@@ -3213,9 +3212,6 @@ export default function EnquiryDetailsPage() {
                         </CardHeader>
                         <Divider />
                         <CardBody className="px-6 pb-6 pt-4">
-                            <div className="flex justify-end">
-                                <CurrencySelector />
-                            </div>
                             <div className="mt-3 text-[11px] text-default-500 font-medium leading-relaxed">
                                 Base price only (Ex-Mill / EXW / Ex-Factory). Execution services (procurement/logistics/packaging/etc.) have separate charges.
                             </div>

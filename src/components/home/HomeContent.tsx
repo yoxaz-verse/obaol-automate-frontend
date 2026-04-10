@@ -176,15 +176,15 @@ export default function HomeContent() {
 
                         <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 relative z-10">
                             {[
-                                { title: "Enquiry", desc: "Marketplace enquiry generated and assigned to verified participants." },
-                                { title: "Documentation", desc: "Compliance certificates and initial product documentation verified." },
-                                { title: "Order Confirmed", desc: "Negotiation finalized and formal order securely logged into the panel." },
-                                { title: "Tested", desc: "Comprehensive quality testing and laboratory analysis successfully completed." },
-                                { title: "Procured", desc: "Goods actively procured from verified suppliers and safely consolidated." },
-                                { title: "Packed", desc: "Final packaging updates, weighing, and grading criteria logged." },
-                                { title: "Inland Transport", desc: "Inland logistics coordinated and warehouse holding space reserved." },
-                                { title: "BL Issued", desc: "Customs properly cleared and Bill of Lading (BL) successfully issued." },
-                                { title: "Delivered", desc: "Final delivery verified, cargo securely handed over, and settlement closed." },
+                                { title: "Enquiry", desc: "Marketplace enquiry routed to trusted, verified suppliers for action." },
+                                { title: "Documentation", desc: "Trade docs are created step‑by‑step: PO, quotation, proforma invoice, and compliance files." },
+                                { title: "Order Confirmed", desc: "Order is confirmed only after roles are finalized (buyer/seller/OBAOL responsibility)." },
+                                { title: "Tested", desc: "Laboratory testing and quality analysis executed when the execution panel requires it." },
+                                { title: "Procured", desc: "OBAOL procurement team checks stock on‑ground and completes due diligence for the buyer." },
+                                { title: "Packed", desc: "Customized packing and grading are completed after procurement and readiness checks." },
+                                { title: "Inland Transport", desc: "Inland transport partners handle pickup, movement, and handoff." },
+                                { title: "BL Issued", desc: "Freight forwarders manage customs clearance and issue the Bill of Lading (BL)." },
+                                { title: "Delivered", desc: "Final delivery verified, handover completed, and settlement closed." },
                             ].map((step, idx) => (
                                 <motion.div
                                     key={step.title}

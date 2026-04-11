@@ -120,7 +120,7 @@ export default function HeroSection() {
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
 
   // DYNAMIC STATE FOR HEADLINE SYNC
-  const [dynamicText, setDynamicText] = useState<{ text: string, isHeadline: boolean }>({ text: "Agro Commodity.", isHeadline: true });
+  const [dynamicText, setDynamicText] = useState<{ text: string, isHeadline: boolean }>({ text: "B2B Agro Trade.", isHeadline: true });
   const [gridColor, setGridColor] = useState("currentColor");
 
   const handleChipHover = (active: boolean, role: string, benefitText: string, hexColor?: string) => {
@@ -129,7 +129,7 @@ export default function HeroSection() {
       setDynamicText({ text: benefitText, isHeadline: false });
       if (hexColor) setGridColor(hexColor);
     } else {
-      setDynamicText({ text: "Agro Commodity.", isHeadline: true });
+      setDynamicText({ text: "B2B Agro Trade.", isHeadline: true });
       setGridColor("currentColor");
     }
   };

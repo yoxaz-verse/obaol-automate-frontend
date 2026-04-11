@@ -4,7 +4,7 @@ import { buildMetadata, buildWebPageJsonLd, buildWebSiteJsonLd } from "@/utils/s
 export const metadata = buildMetadata({
   title: "OBAOL Supreme | Commodity & Agro Trading Platform",
   description:
-    "Starting in India, OBAOL is a verified commodity trading operating system. Securely trade agro commodities with integrated procurement, logistics, and execution support as we expand globally.",
+    "Starting in India, OBAOL is a verified commodity trading execution ecosystem. Securely trade agro commodities with integrated procurement, logistics, and execution support as we expand globally.",
   keywords: [
     "agro commodities",
     "commodity trading",
@@ -21,7 +21,7 @@ const webSiteJsonLd = buildWebSiteJsonLd();
 const webPageJsonLd = buildWebPageJsonLd({
   title: "OBAOL Supreme | Commodity & Agro Trading Platform",
   description:
-    "Verified commodity trade operating system for supplier discovery, verification, and execution support.",
+    "Verified commodity trade execution ecosystem for supplier discovery, verification, and execution support.",
   path: "/",
 });
 

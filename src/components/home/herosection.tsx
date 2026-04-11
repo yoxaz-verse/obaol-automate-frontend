@@ -349,9 +349,9 @@ export default function HeroSection() {
               onMouseEnter={() => setIsSystemActive(true)}
               onMouseLeave={() => setIsSystemActive(false)}
             >
-              The Operating <br />
+              The Execution <br />
               <span className="italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent animate-subtle-glint group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all">
-                System
+                Ecosystem
               </span>
             </motion.h1>
 

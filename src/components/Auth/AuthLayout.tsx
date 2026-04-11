@@ -161,7 +161,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
                     <div className="relative z-20">
-                        <div className="flex items-center gap-4 mb-12 group cursor-pointer">
+                        <Link href="/" className="flex items-center gap-4 mb-12 group cursor-pointer">
                             <div className="w-12 h-12 relative flex items-center justify-center bg-warning-500/10 rounded-xl border border-warning-500/30 group-hover:scale-110 transition-transform duration-500">
                                 <Image src="/logo.png" alt="OBAOL" width={32} height={32} className="object-contain" />
                                 <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -170,7 +170,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 <span className="text-xl font-black italic tracking-tighter leading-none">OBAOL <span className="text-warning-500">SUPREME</span></span>
                                 <span className="text-[9px] font-black tracking-[0.4em] text-slate-500 dark:text-default-400">GO-TO PLATFORM FOR AGRO TRADE ECOSYSTEM</span>
                             </div>
-                        </div>
+                        </Link>
 
                         {leftPanel ? (
                             <div className="space-y-10">
@@ -270,15 +270,15 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-warning-500/[0.03] blur-[120px] rounded-full -z-10" />
 
                             {/* Mobile Identity */}
-                            <div className="lg:hidden mb-12 flex flex-col items-center">
-                                <div className="w-16 h-16 relative bg-warning-500/10 rounded-2xl border border-warning-500/30 mb-6 flex items-center justify-center shadow-xl shadow-warning-500/10">
+                            <Link href="/" className="lg:hidden mb-12 flex flex-col items-center group cursor-pointer">
+                                <div className="w-16 h-16 relative bg-warning-500/10 rounded-2xl border border-warning-500/30 mb-6 flex items-center justify-center shadow-xl shadow-warning-500/10 group-hover:scale-110 transition-transform">
                                     <Image src="/logo.png" alt="OBAOL" width={40} height={40} className="object-contain" />
                                 </div>
                                 <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase">
                                     OBAOL <span className="text-warning-500">Supreme</span>
                                 </h2>
                                 <p className="text-[9px] font-black tracking-[0.5em] text-slate-500 dark:text-default-400 mt-2 uppercase">Go-To Agro Trade Platform</p>
-                            </div>
+                            </Link>
 
                             <div className="relative group">
                                 <motion.div

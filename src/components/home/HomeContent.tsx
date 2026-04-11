@@ -42,7 +42,7 @@ export default function HomeContent() {
                                     What This Panel Does
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                                    OBAOL is a commodity execution platform — the operating system for agro trade workflows, not a marketplace.
+                                    OBAOL is a commodity execution platform — the execution ecosystem for agro trade workflows, not a marketplace.
                                 </p>
                             </div>
                             <div className="lg:col-span-7 space-y-4 lg:pt-14">

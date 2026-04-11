@@ -204,8 +204,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       },
     });
     window.google.accounts.id.renderButton(container, {
-      theme: "filled_black",
-      size: "medium",
+      theme: "outline",
+      size: "large",
       width: Math.min(340, buttonWidth),
       text: "continue_with",
       shape: "pill",
@@ -586,39 +586,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           }
         }}
       >
-        {authMode === "signup" && (
-          <div className="w-full flex flex-col gap-5">
-            {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && (
-              <div className="w-full flex flex-col gap-4">
-                <div className="relative flex items-center w-full px-4">
-                  <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
-                  <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Signup via Google</span>
-                  <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
-                </div>
-                <div className="w-full flex flex-col gap-3">
-                <div className="w-full flex flex-col gap-6">
-                  <div className="p-1 rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 shadow-soft group/google">
-                    <div className="flex items-center justify-center p-3 gap-3 border-b border-default-100/50 mb-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50">Sign in with Google</span>
-                    </div>
-                    {googleClientId ? (
-                      <div className="p-2 overflow-hidden transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.15)]">
-                        <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
-                      </div>
-                    ) : (
-                      <p className="text-[10px] text-danger-500/70 font-black uppercase tracking-[0.4em] text-center py-4 italic">Google_Engine_Offline</p>
-                    )}
-                  </div>
-                  <p className="text-[10px] font-bold text-center text-foreground/30 uppercase tracking-[0.2em] px-4 leading-relaxed italic opacity-60">
-                    Propagate verification via Google OAuth 2.0 protocol.
-                  </p>
-                </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+
 
         {/* Highlighted Error Message for Signup/Login */}
         {errorMessage && (
@@ -918,28 +886,30 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-4">
-              <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4 shadow-inner group/google">
+              <div className="rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-4 shadow-soft group/google">
                 <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/50 mb-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex justify-center rounded-xl bg-content1/80 border border-default-200/60 p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
-                    <div id={`google-login-${roleLower}`} className="w-full flex justify-center" />
+                  <div className="w-full flex justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                    <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
                   </div>
                 ) : (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[10px] font-semibold text-center text-foreground/40">
+              <p className="text-[10px] font-semibold text-center text-foreground/40 italic opacity-60">
                 Use Google to sign in faster.
               </p>
             </div>
           </div>
         )}
 
+
+
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "signup" && (
-          <div className="mt-6 flex flex-col items-center gap-4">
+          <div className="mt-8 flex flex-col items-center gap-5">
             <div className="relative flex items-center w-full px-4">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
               <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Sign up with</span>
@@ -947,20 +917,20 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-4">
-              <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4 shadow-inner group/google">
+              <div className="rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-4 shadow-soft group/google">
                 <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/50 mb-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex justify-center rounded-xl bg-content1/80 border border-default-200/60 p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
-                    <div id={`google-login-${roleLower}`} className="w-full flex justify-center" />
+                  <div className="w-full flex justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                    <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
                   </div>
                 ) : (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[10px] font-semibold text-center text-foreground/40">
+              <p className="text-[10px] font-semibold text-center text-foreground/40 italic opacity-60">
                 Use Google to sign up faster.
               </p>
             </div>

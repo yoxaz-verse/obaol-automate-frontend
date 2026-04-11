@@ -173,25 +173,43 @@ export default function CommissionStructurePage() {
 
           {/* 02. How The Commission Works */}
           <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden">
+            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
               <CardBody className="p-8 md:p-12">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/20">
-                    <LuCircleCheck size={20} />
+                <div className="flex items-center gap-4 mb-12">
+                  <div className="h-14 w-14 rounded-[1.25rem] bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/30 shadow-inner">
+                    <LuCircleCheck size={28} />
                   </div>
-                  <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">How The Commission Works</h2>
+                  <div>
+                      <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-foreground italic">How It Works</h2>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mt-1">Four Step Sequence</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                  {/* Subtle connection line hidden on mobile */}
+                  <div className="hidden md:block absolute top-[28px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-primary-500/0 via-primary-500/30 to-primary-500/0 z-0" />
+                  
                   {[
-                    "Trade completes and profit is confirmed.",
-                    "50% of profit becomes the commission pool.",
-                    "Pool splits into Core, Procurement, and Handler.",
-                    "Core splits into DC, Supplier Portfolio Owner, L1, L2, L3+."
+                    { label: "Trade Execution", desc: "Trade completes and net profit is confirmed by system.", icon: LuTarget },
+                    { label: "Pool Creation", desc: "50% of profit becomes the active commission pool.", icon: LuTrendingUp },
+                    { label: "Primary Split", desc: "Pool splits into Core, Procurement, and Handler.", icon: LuLayers },
+                    { label: "Core Allocation", desc: "Core splits into DC, Portfolio Owner, L1, L2, L3+.", icon: LuNetwork }
                   ].map((step, i) => (
-                    <div key={i} className="p-5 rounded-2xl bg-background border border-default-100">
-                      <div className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-2">{`Step ${String(i + 1).padStart(2, "0")}`}</div>
-                      <p className="text-sm text-foreground/70 font-medium leading-relaxed">{step}</p>
-                    </div>
+                    <motion.div 
+                        key={i} 
+                        whileHover={{ y: -5, scale: 1.02 }}
+                        className="relative z-10 p-6 md:p-8 rounded-[2rem] bg-content1/80 backdrop-blur-xl border border-primary-500/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)] hover:shadow-[0_0_40px_rgba(var(--primary-rgb),0.15)] hover:border-primary-500/40 transition-all duration-500 group flex flex-col items-start overflow-hidden"
+                    >
+                      <div className="absolute -bottom-4 -right-4 text-[120px] font-black text-foreground/[0.02] select-none pointer-events-none transition-all duration-700 group-hover:text-primary-500/[0.04]">
+                        {i + 1}
+                      </div>
+                      <div className="h-14 w-14 rounded-2xl bg-background border-2 border-primary-500/30 flex items-center justify-center text-primary-500 mb-6 shadow-xl group-hover:bg-primary-500 group-hover:text-white transition-colors duration-500">
+                        <step.icon size={24} />
+                      </div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-500/70 mb-2">{`Step ${String(i + 1).padStart(2, "0")}`}</div>
+                      <h3 className="text-xl font-black tracking-tight text-foreground mb-3">{step.label}</h3>
+                      <p className="text-sm text-foreground/60 font-medium leading-relaxed relative z-10">{step.desc}</p>
+                    </motion.div>
                   ))}
                 </div>
               </CardBody>
@@ -200,27 +218,57 @@ export default function CommissionStructurePage() {
 
           {/* 03. Glossary */}
           <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden">
+            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
               <CardBody className="p-8 md:p-12">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="h-10 w-10 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20">
-                    <LuBookOpen size={20} />
+                <div className="flex items-center gap-4 mb-12">
+                  <div className="h-14 w-14 rounded-[1.25rem] bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/30 shadow-inner">
+                    <LuBookOpen size={28} />
                   </div>
-                  <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Glossary</h2>
+                  <div>
+                      <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-foreground italic">Glossary</h2>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mt-1">Terminology Reference</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {[
-                    { term: "DC", def: "Person who closed the deal." },
-                    { term: "Supplier Portfolio Owner", def: "Person who manages the supplier’s portfolio in OBAOL." },
-                    { term: "Important", def: "The supplier’s business owner is not part of commission unless they also operate the account in OBAOL." },
-                    { term: "Handler", def: "Person who handles the deal after buyer and seller show interest." }
+                    { term: "DC", def: "Person who executed and closed the deal.", icon: LuUserCheck },
+                    { term: "Portfolio Owner", def: "Person who manages the supplier’s portfolio in OBAOL.", icon: LuBriefcase },
+                    { term: "Handler", def: "Person who coordinates the deal after buyer and seller show interest.", icon: LuActivity }
                   ].map((item, i) => (
-                    <div key={i} className="p-5 rounded-2xl bg-background border border-default-100">
-                      <div className="text-[11px] font-black uppercase tracking-widest text-foreground/50 mb-2">{item.term}</div>
-                      <p className="text-sm text-foreground/70 font-medium leading-relaxed">{item.def}</p>
-                    </div>
+                    <motion.div 
+                      key={i} 
+                      whileHover={{ scale: 1.03 }}
+                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-warning-500/30"
+                    >
+                      <div className="flex items-center gap-4">
+                         <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-warning-500 group-hover:border-warning-500/30 transition-colors shadow-sm">
+                           <item.icon size={18} />
+                         </div>
+                         <div className="text-[14px] font-black uppercase tracking-[0.1em] text-foreground/90">{item.term}</div>
+                      </div>
+                      <p className="text-sm text-foreground/60 font-medium leading-relaxed">{item.def}</p>
+                    </motion.div>
                   ))}
                 </div>
+                
+                {/* Important Alert styled beautifully */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="p-8 rounded-[2rem] bg-gradient-to-r from-warning-500/10 to-transparent border border-warning-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group shadow-inner"
+                >
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-warning-500/10 blur-3xl rounded-full pointer-events-none" />
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-warning-500 text-white flex items-center justify-center shadow-lg shadow-warning-500/30">
+                       <LuShieldCheck size={28} />
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-warning-600 dark:text-warning-500 mb-2">Critical System Rule</div>
+                        <p className="text-base md:text-lg text-foreground/80 font-bold leading-relaxed">
+                            The supplier’s business owner is <span className="text-warning-600 dark:text-warning-500 px-1 decoration-warning-500/50 underline">not part of commission</span> unless they explicitly operate the account natively in the OBAOL platform.
+                        </p>
+                    </div>
+                </motion.div>
               </CardBody>
             </Card>
           </div>

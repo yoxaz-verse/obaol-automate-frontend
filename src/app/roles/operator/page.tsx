@@ -313,7 +313,8 @@ export default function OperatorRolePage() {
                   {[
                     { label: "Deal Execution", sub: "Closing the final trade", val: "Major Pool Share" },
                     { label: "Supplier Ownership", sub: "Managing verified sources", val: "Recurring Flow" },
-                    { label: "Execution Layers", sub: "Logistics & Audit assistance", val: "Fixed per Node" }
+                    { label: "Handling", sub: "Managing successful orders & enquiries", val: "Rating Based" },
+                    { label: "Leadership", sub: "Mentoring & growing operators", val: "Tiered Share" }
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between items-start group">
                       <div>
@@ -348,7 +349,7 @@ export default function OperatorRolePage() {
 
             <div className="mt-20 text-center">
               <Link
-                href="/roles/operator/commission"
+                href="/commission-structure"
                 className="group inline-flex items-center gap-4 px-10 py-5 rounded-[2rem] bg-white/10 text-white font-black text-xl hover:bg-white/20 transition-all border border-white/10 shadow-2xl"
               >
                 View Detailed Commission Structure
@@ -493,15 +494,23 @@ export default function OperatorRolePage() {
                 </p>
               </div>
 
-              <Link
-                href="https://forms.obaol.com/operator"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative inline-flex items-center gap-4 md:gap-6 px-10 md:px-16 py-5 md:py-8 rounded-full bg-orange-500 text-white font-black text-xl md:text-2xl shadow-[0_25px_80px_-15px_rgba(245,165,36,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
-              >
-                Start Operator Entry
-                <FiArrowRight size={28} className="transition-transform group-hover:translate-x-3" />
-              </Link>
+              <div className="flex flex-col md:flex-row justify-center gap-6 md:gap-8">
+                <Link
+                  href="/auth/operator"
+                  className="group relative inline-flex justify-center items-center gap-4 md:gap-6 px-10 md:px-14 py-5 md:py-7 rounded-full bg-orange-500 text-white font-black text-xl shadow-[0_25px_80px_-15px_rgba(245,165,36,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
+                >
+                  Start Operator Entry
+                  <FiArrowRight size={24} className="transition-transform group-hover:translate-x-3" />
+                </Link>
+                
+                <Link
+                  href="/commission-structure"
+                  className="group relative inline-flex justify-center items-center gap-4 px-10 py-5 rounded-full bg-content2 text-foreground font-black text-lg border-2 border-default-200 hover:border-orange-500/50 hover:bg-content3 hover:scale-[1.05] active:scale-[0.98] transition-all"
+                >
+                  Commission Structure
+                  <FiArrowRight size={20} className="text-orange-500 transition-transform group-hover:translate-x-2" />
+                </Link>
+              </div>
             </div>
           </motion.div>
         </div>

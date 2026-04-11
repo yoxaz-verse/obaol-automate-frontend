@@ -30,10 +30,7 @@ export default function RolesPage() {
 
   const handleJoin = () => {
     setIsJoinLoading(true);
-    setTimeout(() => {
-      window.open("https://forms.obaol.com/operator", "_blank", "noopener,noreferrer");
-      setIsJoinLoading(false);
-    }, 800);
+    router.push("/auth/operator");
   };
 
   return (

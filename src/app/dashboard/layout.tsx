@@ -61,10 +61,14 @@ export default function DashboardLayout({
   const { user, loading } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const profileComplete = Boolean(user?.name && user?.email && (user as any)?.phone);
+  const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
+  const isRejected = ["associate", "operator", "team"].includes(roleLower)
+    && registrationStatus === "REJECTED";
   const isOnboardingLocked = ["associate", "operator", "team"].includes(roleLower)
     && user?.onboardingComplete === false
     && !profileComplete;
   const isApprovalPending = ["associate", "operator", "team"].includes(roleLower)
+    && !isRejected
     && user?.onboardingComplete === true
     && String(user?.registrationStatus || "APPROVED").toUpperCase() !== "APPROVED";
 
@@ -109,6 +113,10 @@ export default function DashboardLayout({
     const isPendingRoute = pathname.startsWith("/dashboard/pending-approval");
     if (isOnboardingLocked && !isOnboardingRoute) {
       router.replace("/dashboard/onboarding");
+      return;
+    }
+    if (isRejected && !pathname.startsWith("/dashboard/rejected")) {
+      router.replace("/dashboard/rejected");
       return;
     }
     if (isApprovalPending && !isPendingRoute) {

@@ -16,12 +16,14 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  phone?: string;
   role: string;
   associateCompanyId?: string | null;
   companyInterestsConfigured?: boolean;
   companyInterests?: string[];
   onboardingComplete?: boolean;
   registrationStatus?: string | null;
+  rejectionReason?: string | null;
   verified: {
     email: boolean;
     phone?: boolean;

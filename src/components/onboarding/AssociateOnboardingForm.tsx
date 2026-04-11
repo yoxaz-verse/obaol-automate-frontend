@@ -135,11 +135,12 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   });
 
   const draftLoadedRef = useRef(false);
-  const DRAFT_KEY = "onboarding_draft_associate";
+  const DRAFT_KEY = `onboarding_draft_associate_${user?.id || "anonymous"}`;
 
   useEffect(() => {
     if (!isOnboarding) return;
     if (typeof window === "undefined") return;
+    if (!user?.id) return;
     try {
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (!raw) {
@@ -155,12 +156,13 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     } finally {
       draftLoadedRef.current = true;
     }
-  }, [isOnboarding]);
+  }, [isOnboarding, user?.id]);
 
   useEffect(() => {
     if (!isOnboarding) return;
     if (!draftLoadedRef.current) return;
     if (typeof window === "undefined") return;
+    if (!user?.id) return;
     const timer = setTimeout(() => {
       const payload = {
         formData,
@@ -180,7 +182,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [formData, currentStep, completedStep, isOnboarding]);
+  }, [formData, currentStep, completedStep, isOnboarding, user?.id]);
 
   React.useEffect(() => {
     if (!isOnboarding || !user) return;

@@ -88,11 +88,12 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
   });
 
   const draftLoadedRef = useRef(false);
-  const DRAFT_KEY = "onboarding_draft_operator";
+  const DRAFT_KEY = `onboarding_draft_operator_${user?.id || "anonymous"}`;
 
   useEffect(() => {
     if (!isOnboarding) return;
     if (typeof window === "undefined") return;
+    if (!user?.id) return;
     try {
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (!raw) {
@@ -108,12 +109,13 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     } finally {
       draftLoadedRef.current = true;
     }
-  }, [isOnboarding]);
+  }, [isOnboarding, user?.id]);
 
   useEffect(() => {
     if (!isOnboarding) return;
     if (!draftLoadedRef.current) return;
     if (typeof window === "undefined") return;
+    if (!user?.id) return;
     const timer = setTimeout(() => {
       const payload = {
         form,
@@ -133,7 +135,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [form, currentStep, completedStep, isOnboarding]);
+  }, [form, currentStep, completedStep, isOnboarding, user?.id]);
   const referralParam = String(searchParams?.get("ref") || "").trim();
 
   useEffect(() => {

@@ -71,9 +71,25 @@ export default function ImportsPage() {
   const needsCompanySelect = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canSetCommission = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
   const canEditAny = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
-  const canReserve = roleLower === "associate" || roleLower === "admin";
-  const canEditListing = (listing: any) =>
-    canEditAny || String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
+  const canReserve = roleLower === "associate" || roleLower === "admin" || roleLower === "operator" || roleLower === "team";
+  const canEditListing = (listing: any) => {
+    if (roleLower === "admin") return true;
+    if (roleLower === "operator" || roleLower === "team") {
+      const assignedOperator = listing?.importerCompanyId?.assignedOperator;
+      return String(assignedOperator || "") === String(user?.id || "");
+    }
+    if (roleLower === "associate") {
+      return String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
+    }
+    return false;
+  };
+  const canSyncReserves = (listing: any) => {
+    if (roleLower === "admin") return true;
+    if (roleLower === "associate") {
+      return String(listing?.importerAssociateId?._id || listing?.importerAssociateId || "") === String(user?.id || "");
+    }
+    return false;
+  };
   const associateCompanyId = String(user?.associateCompanyId || "");
   const reserveNeedsCompany = needsCompanySelect;
 
@@ -719,7 +735,7 @@ export default function ImportsPage() {
                                     Edit
                                    </Button>
                               )}
-                              {(activeTab === "mine" || canEditAny) && (
+                              {canSyncReserves(listing) && (
                                 <Button
                                   variant="flat"
                                   className="h-10 rounded-xl font-bold uppercase tracking-[0.1em] text-[9px] bg-foreground/5 hover:bg-foreground/10"
@@ -734,7 +750,7 @@ export default function ImportsPage() {
                               )}
                             </div>
 
-                            {(activeTab === "mine" || canEditAny) && (
+                            {canEditListing(listing) && (
                                <Button
                                    fullWidth
                                    color="danger"

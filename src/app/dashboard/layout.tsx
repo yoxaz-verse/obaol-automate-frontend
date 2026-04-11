@@ -60,13 +60,15 @@ export default function DashboardLayout({
   const allowedRoles = getAllowedRoles(pathname);
   const { user, loading } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
+  const isOperatorFamily = roleLower === "operator" || roleLower === "team";
+  const isAssociate = roleLower === "associate";
   const profileComplete = Boolean(user?.name && user?.email && (user as any)?.phone);
   const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
   const isRejected = ["associate", "operator", "team"].includes(roleLower)
     && registrationStatus === "REJECTED";
-  const isOnboardingLocked = ["associate", "operator", "team"].includes(roleLower)
-    && user?.onboardingComplete === false
-    && !profileComplete;
+  const isOnboardingLocked =
+    (isOperatorFamily && user?.onboardingComplete === false) ||
+    (isAssociate && user?.onboardingComplete === false && !profileComplete);
   const isApprovalPending = ["associate", "operator", "team"].includes(roleLower)
     && !isRejected
     && user?.onboardingComplete === true
@@ -111,12 +113,12 @@ export default function DashboardLayout({
     if (!user) return;
     const isOnboardingRoute = pathname.startsWith("/dashboard/onboarding");
     const isPendingRoute = pathname.startsWith("/dashboard/pending-approval");
-    if (isOnboardingLocked && !isOnboardingRoute) {
-      router.replace("/dashboard/onboarding");
-      return;
-    }
     if (isRejected && !pathname.startsWith("/dashboard/rejected")) {
       router.replace("/dashboard/rejected");
+      return;
+    }
+    if (isOnboardingLocked && !isOnboardingRoute) {
+      router.replace("/dashboard/onboarding");
       return;
     }
     if (isApprovalPending && !isPendingRoute) {
@@ -126,7 +128,7 @@ export default function DashboardLayout({
     if (!isOnboardingLocked && isOnboardingRoute) {
       router.replace("/dashboard");
     }
-  }, [isOnboardingLocked, isApprovalPending, loading, pathname, router, user]);
+  }, [isOnboardingLocked, isApprovalPending, isRejected, loading, pathname, router, user]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

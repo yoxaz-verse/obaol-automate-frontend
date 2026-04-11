@@ -10,7 +10,7 @@ import { LuUser, LuPackage, LuMapPin, LuArrowRight, LuSearch, LuActivity, LuBox,
 
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes, associateCompanyRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 
 const statusColor = (status: string) => {
@@ -50,6 +50,19 @@ export default function SampleRequestsPage() {
     queryFn: () => getData(apiRoutes.sampleRequest.list, { page: 1, limit: 100 }),
   });
 
+  const { data: operatorCompanyData, isLoading: operatorCompaniesLoading } = useQuery({
+    queryKey: ["sample-requests-operator-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
+    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
+    enabled: isOperatorUser,
+  });
+
+  const operatorCompanyIds: string[] = useMemo(() => {
+    if (!isOperatorUser) return [];
+    return ((operatorCompanyData?.data?.data?.data || []) as Array<{ _id?: string }>)
+      .map((company) => company?._id)
+      .filter((id): id is string => Boolean(id));
+  }, [operatorCompanyData, isOperatorUser]);
+
   const sampleRows = Array.isArray(sampleResponse?.data?.data?.data)
     ? sampleResponse?.data?.data?.data
     : (sampleResponse?.data?.data || []);
@@ -76,6 +89,24 @@ export default function SampleRequestsPage() {
       return stack.includes(term);
     });
   }, [sampleRows, search, isAssociate, associateCompanyId, associateId]);
+
+  const scopedRows = useMemo(() => {
+    if (!isOperatorUser) return filteredRows;
+    if (operatorCompaniesLoading || operatorCompanyIds.length === 0) return [];
+    return (filteredRows || []).filter((row: any) => {
+      const supplierCompanyId =
+        row?.supplierCompanyId?._id || row?.supplierCompanyId || "";
+      const buyerCompanyId =
+        row?.buyerAssociateId?.associateCompanyId?._id ||
+        row?.buyerAssociateId?.associateCompanyId ||
+        row?.buyerAssociateCompanyId?._id ||
+        row?.buyerAssociateCompanyId ||
+        "";
+      const supplierMatch = operatorCompanyIds.includes(String(supplierCompanyId));
+      const buyerMatch = operatorCompanyIds.includes(String(buyerCompanyId));
+      return supplierMatch || buyerMatch;
+    });
+  }, [filteredRows, isOperatorUser, operatorCompanyIds, operatorCompaniesLoading]);
 
   return (
     <section className="pb-20">
@@ -180,7 +211,7 @@ export default function SampleRequestsPage() {
       </motion.div>
 
       <div className="mx-4 md:mx-10 pb-20">
-        {(filteredRows || []).length === 0 ? (
+        {(scopedRows || []).length === 0 ? (
           <div className="rounded-[3rem] border border-dashed border-divider bg-content1/30 px-10 py-40 flex flex-col items-center justify-center text-center backdrop-blur-xl">
              <div className="w-20 h-20 bg-warning-500/10 rounded-3xl flex items-center justify-center mb-8 text-warning-500 shadow-inner">
                <LuPackage size={36} />
@@ -226,7 +257,7 @@ export default function SampleRequestsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {(filteredRows || []).map((row: any, idx: number) => {
+            {(scopedRows || []).map((row: any, idx: number) => {
               const variantName = row?.variantRateId?.productVariant?.name || "Cargo ID Pending";
               const productName = row?.variantRateId?.productVariant?.product?.name || "Unidentified Product";
               const buyerName = row?.buyerAssociateId?.name || "Unknown Buyer";

@@ -24,6 +24,7 @@ export interface User {
   onboardingComplete?: boolean;
   registrationStatus?: string | null;
   rejectionReason?: string | null;
+  pendingSince?: string | null;
   verified: {
     email: boolean;
     phone?: boolean;

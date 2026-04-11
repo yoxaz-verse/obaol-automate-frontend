@@ -307,8 +307,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     setEmailCheckStatus("idle");
     setEmailCheckMessage("");
     try {
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const res = await getData(`${apiRoot}/auth/email-status`, { email: form.email.trim() });
+      const res = await getData("/auth/email-status", { email: form.email.trim() });
       if (res?.data?.exists) {
         setEmailCheckStatus("exists");
         setEmailCheckMessage("This email is already registered — please sign in.");
@@ -368,11 +367,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
         joiningDate: new Date().toISOString(),
       };
 
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
       if (isOnboarding) {
-        await postData(`${apiRoot}/auth/onboarding`, { role: "Operator", ...payload });
+        await postData("/auth/onboarding", { role: "Operator", ...payload });
       } else if (googleSignUp) {
-        await postData(`${apiRoot}/auth/google`, {
+        await postData("/auth/google", {
           idToken: googleIdToken,
           role: "Operator",
           intent: "register",

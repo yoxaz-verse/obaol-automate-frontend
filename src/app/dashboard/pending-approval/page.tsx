@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import AuthContext from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Button } from "@nextui-org/react";
@@ -260,6 +260,28 @@ export default function PendingApprovalPage() {
   const { user, loading, logout } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const guidanceRole = roleLower === "operator" || roleLower === "team" ? "operator" : "associate";
+  const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
+  const pendingSinceRaw = String(user?.pendingSince || "").trim();
+  const pendingAgeHours = useMemo(() => {
+    if (!pendingSinceRaw) return null;
+    const ts = new Date(pendingSinceRaw).getTime();
+    if (Number.isNaN(ts)) return null;
+    const diffMs = Date.now() - ts;
+    if (diffMs < 0) return 0;
+    return Math.floor(diffMs / (1000 * 60 * 60));
+  }, [pendingSinceRaw]);
+  const showWhatsAppEscalation = Boolean(
+    registrationStatus === "PENDING_REVIEW" &&
+    pendingAgeHours !== null &&
+    pendingAgeHours >= 48
+  );
+  const whatsappLink = useMemo(() => {
+    if (!showWhatsAppEscalation) return "";
+    const roleLabel = roleLower === "team" ? "operator" : roleLower || "user";
+    const hours = pendingAgeHours ?? 48;
+    const message = `Hi OBAOL support, my ${roleLabel} approval is pending for ${hours} hours. Email: ${user?.email || "N/A"}. Please assist.`;
+    return `https://wa.me/919019351483?text=${encodeURIComponent(message)}`;
+  }, [showWhatsAppEscalation, roleLower, pendingAgeHours, user?.email]);
 
   if (loading) return null;
 
@@ -277,6 +299,25 @@ export default function PendingApprovalPage() {
         </Button>
       </div>
       {roleLower === "operator" || roleLower === "team" ? <OperatorPanel /> : <AssociatePanel />}
+      <div className="mt-8 rounded-[1.5rem] border border-warning-500/20 bg-warning-500/8 p-5">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-warning-500">
+          Approval in progress. Please come back after some time.
+        </p>
+        <p className="mt-2 text-[11px] font-semibold text-default-400">
+          If your request is pending for more than 48 hours, contact support on WhatsApp.
+        </p>
+        {showWhatsAppEscalation && (
+          <Button
+            className="mt-4 bg-success-600 text-white font-black uppercase tracking-[0.1em]"
+            onPress={() => {
+              if (!whatsappLink) return;
+              window.open(whatsappLink, "_blank", "noopener,noreferrer");
+            }}
+          >
+            Contact WhatsApp Support
+          </Button>
+        )}
+      </div>
       <div className="mt-16">
         <GuidanceContent roleView={guidanceRole} showToggle={false} />
       </div>

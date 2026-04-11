@@ -113,8 +113,18 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     if (!loading && isAuthenticated) {
       setIsRedirecting(true);
       const authRoleLower = String(user?.role || "").toLowerCase();
+      const registrationStatus = String(user?.registrationStatus || "APPROVED").toUpperCase();
+      const isOperatorFamily = authRoleLower === "operator" || authRoleLower === "team";
       const requiresOnboarding = ["associate", "operator", "team"].includes(authRoleLower)
         && user?.onboardingComplete === false;
+      const isPendingApproval = isOperatorFamily
+        && user?.onboardingComplete === true
+        && registrationStatus !== "APPROVED";
+      const targetRoute = requiresOnboarding
+        ? "/dashboard/onboarding"
+        : isPendingApproval
+          ? "/dashboard/pending-approval"
+          : "/dashboard";
       if (authRoleLower === "associate" && user?.associateCompanyId && user?.companyInterestsConfigured === false) {
         showToastMessage({
           type: "warning",
@@ -122,7 +132,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           position: "top-right",
         });
       }
-      router.push(requiresOnboarding ? "/dashboard/onboarding" : "/dashboard");
+      router.push(targetRoute);
     }
   }, [authMode, isAuthenticated, loading, router, user]);
 
@@ -287,7 +297,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         : error.message === "Network Error" || error.code === "ERR_NETWORK"
           ? "Connection refused. Please check your internet or retry later."
           : (backendData?.status === "rejected" || backendData?.isRejected || String(backendData?.message).toLowerCase().includes("rejected"))
-            ? "Your account verification has been rejected by the administrator. Contact support for more details."
+            ? "This account is blocked from OBAOL ecosystem. Please contact support."
             : (backendData?.message || "Invalid credentials. Please verify your email/password.");
 
       setErrorMessage(apiErrorMessage);

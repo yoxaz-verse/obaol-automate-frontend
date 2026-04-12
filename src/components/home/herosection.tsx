@@ -258,7 +258,7 @@ export default function HeroSection() {
               <span>Aggregate_Volume: 2.4M MT</span>
             </div>
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
-              <FiGlobe size={400} className="text-emerald-500" />
+              {/* Globe logo removed as per request */}
             </div>
           </motion.div>
         )}

@@ -59,6 +59,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     password: "",
     confirmPassword: "",
     address: "",
+    country: "",
     state: "",
     district: "",
   });
@@ -82,6 +83,8 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     confirmPassword: "",
     referralCode: "",
     address: "",
+    geoType: "INDIAN",
+    country: "",
     state: "",
     district: "",
     languageKnown: [] as string[],
@@ -223,6 +226,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
   }, [googleReady, googleClientId]);
 
   const languages = Array.isArray(optionsResponse?.languages) ? optionsResponse.languages : EMPTY_LIST;
+  const countries = Array.isArray(optionsResponse?.countries) ? optionsResponse.countries : EMPTY_LIST;
   const states = Array.isArray(optionsResponse?.states) ? optionsResponse.states : EMPTY_LIST;
   const districts = Array.isArray(optionsResponse?.districts) ? optionsResponse.districts : EMPTY_LIST;
   const filteredDistricts = useMemo(
@@ -238,6 +242,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       password: "",
       confirmPassword: "",
       address: "",
+      country: "",
       state: "",
       district: "",
     };
@@ -253,6 +258,15 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       if (!form.confirmPassword) nextErrors.confirmPassword = "Confirm your password.";
       if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
         nextErrors.confirmPassword = "Passwords do not match.";
+      }
+    }
+    if (step === 3) {
+      if (!form.address) nextErrors.address = "Full address is required.";
+      if (form.geoType === "INTERNATIONAL") {
+        if (!form.country) nextErrors.country = "Country is required for international operators.";
+      } else {
+        if (!form.state) nextErrors.state = "State is required.";
+        if (!form.district) nextErrors.district = "District is required.";
       }
     }
     return nextErrors;
@@ -280,6 +294,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       password: "",
       confirmPassword: "",
       address: "",
+      country: "",
       state: "",
       district: "",
     });
@@ -328,12 +343,17 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     if (isLoading) return;
     setFormError("");
 
-    if (!form.address || !form.state || !form.district) {
+    const requiresIndianLocation = form.geoType !== "INTERNATIONAL";
+    const missingCountry = form.geoType === "INTERNATIONAL" && !form.country;
+    const missingState = requiresIndianLocation && !form.state;
+    const missingDistrict = requiresIndianLocation && !form.district;
+    if (!form.address || missingCountry || missingState || missingDistrict) {
       setFieldErrors((prev) => ({
         ...prev,
         address: !form.address ? "Full address is required." : "",
-        state: !form.state ? "State is required." : "",
-        district: !form.district ? "District is required." : "",
+        country: missingCountry ? "Country is required for international operators." : "",
+        state: missingState ? "State is required." : "",
+        district: missingDistrict ? "District is required." : "",
       }));
       setFormError("Please complete all required location fields.");
       return;
@@ -360,8 +380,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
         password: requiresPassword ? form.password : undefined,
         referralCode: form.referralCode ? form.referralCode.trim() : undefined,
         address: form.address,
-        state: form.state,
-        district: form.district,
+        geoType: form.geoType,
+        country: form.geoType === "INTERNATIONAL" ? form.country : undefined,
+        state: form.geoType === "INDIAN" ? form.state : undefined,
+        district: form.geoType === "INDIAN" ? form.district : undefined,
         languageKnown: form.languageKnown,
         workingHours: [],
         joiningDate: new Date().toISOString(),
@@ -678,51 +700,108 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                 errorMessage={fieldErrors.address}
               />
 
-              <div className="grid grid-cols-2 gap-3">
-                <AutocompleteAny
-                  label="State"
-                  variant="bordered"
-                  selectedKey={form.state || null}
-                  onSelectionChange={(key: any) => {
-                    setForm({ ...form, state: String(key || ""), district: "" });
-                    if (fieldErrors.state || fieldErrors.district) {
+              <div className="space-y-2">
+                <label className="text-xs text-default-500 font-medium">Operator Location Type</label>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={form.geoType === "INDIAN" ? "solid" : "bordered"}
+                    className={form.geoType === "INDIAN" ? "bg-warning-500 text-black" : "border-default-300 text-default-500"}
+                    onPress={() => {
+                      setForm((prev) => ({ ...prev, geoType: "INDIAN", country: "" }));
+                      setFieldErrors((prev) => ({ ...prev, country: "" }));
+                    }}
+                  >
+                    Indian
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={form.geoType === "INTERNATIONAL" ? "solid" : "bordered"}
+                    className={form.geoType === "INTERNATIONAL" ? "bg-warning-500 text-black" : "border-default-300 text-default-500"}
+                    onPress={() => {
+                      setForm((prev) => ({ ...prev, geoType: "INTERNATIONAL", state: "", district: "" }));
                       setFieldErrors((prev) => ({ ...prev, state: "", district: "" }));
-                    }
-                  }}
-                  isLoading={optionsLoading}
-                  defaultItems={states}
-                  classNames={{ base: "rounded-xl" }}
-                  isInvalid={!!fieldErrors.state}
-                  errorMessage={fieldErrors.state}
-                >
-                  {(item: any) => (
-                    <AutocompleteItem key={item._id} textValue={item.name}>
-                      {item.name}
-                    </AutocompleteItem>
-                  )}
-                </AutocompleteAny>
-                <AutocompleteAny
-                  label="District"
-                  variant="bordered"
-                  selectedKey={form.district || null}
-                  onSelectionChange={(key: any) => {
-                    setForm({ ...form, district: String(key || "") });
-                    if (fieldErrors.district) {
-                      setFieldErrors((prev) => ({ ...prev, district: "" }));
-                    }
-                  }}
-                  isLoading={optionsLoading}
-                  isDisabled={!form.state}
-                  defaultItems={filteredDistricts}
-                  isInvalid={!!fieldErrors.district}
-                  errorMessage={fieldErrors.district}
-                >
-                  {(item: any) => (
-                    <AutocompleteItem key={item._id} textValue={item.name}>
-                      {item.name}
-                    </AutocompleteItem>
-                  )}
-                </AutocompleteAny>
+                    }}
+                  >
+                    International
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {form.geoType === "INTERNATIONAL" ? (
+                  <div className="col-span-2">
+                    <AutocompleteAny
+                      label="Country"
+                      variant="bordered"
+                      selectedKey={form.country || null}
+                      onSelectionChange={(key: any) => {
+                        setForm({ ...form, country: String(key || "") });
+                        if (fieldErrors.country) {
+                          setFieldErrors((prev) => ({ ...prev, country: "" }));
+                        }
+                      }}
+                      isLoading={optionsLoading}
+                      defaultItems={countries}
+                      classNames={{ base: "rounded-xl" }}
+                      isInvalid={!!fieldErrors.country}
+                      errorMessage={fieldErrors.country}
+                    >
+                      {(item: any) => (
+                        <AutocompleteItem key={item._id} textValue={item.name}>
+                          {item.name}
+                        </AutocompleteItem>
+                      )}
+                    </AutocompleteAny>
+                  </div>
+                ) : (
+                  <>
+                    <AutocompleteAny
+                      label="State"
+                      variant="bordered"
+                      selectedKey={form.state || null}
+                      onSelectionChange={(key: any) => {
+                        setForm({ ...form, state: String(key || ""), district: "" });
+                        if (fieldErrors.state || fieldErrors.district) {
+                          setFieldErrors((prev) => ({ ...prev, state: "", district: "" }));
+                        }
+                      }}
+                      isLoading={optionsLoading}
+                      defaultItems={states}
+                      classNames={{ base: "rounded-xl" }}
+                      isInvalid={!!fieldErrors.state}
+                      errorMessage={fieldErrors.state}
+                    >
+                      {(item: any) => (
+                        <AutocompleteItem key={item._id} textValue={item.name}>
+                          {item.name}
+                        </AutocompleteItem>
+                      )}
+                    </AutocompleteAny>
+                    <AutocompleteAny
+                      label="District"
+                      variant="bordered"
+                      selectedKey={form.district || null}
+                      onSelectionChange={(key: any) => {
+                        setForm({ ...form, district: String(key || "") });
+                        if (fieldErrors.district) {
+                          setFieldErrors((prev) => ({ ...prev, district: "" }));
+                        }
+                      }}
+                      isLoading={optionsLoading}
+                      isDisabled={!form.state}
+                      defaultItems={filteredDistricts}
+                      isInvalid={!!fieldErrors.district}
+                      errorMessage={fieldErrors.district}
+                    >
+                      {(item: any) => (
+                        <AutocompleteItem key={item._id} textValue={item.name}>
+                          {item.name}
+                        </AutocompleteItem>
+                      )}
+                    </AutocompleteAny>
+                  </>
+                )}
               </div>
 
               <div className="space-y-4">

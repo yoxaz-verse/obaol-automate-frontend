@@ -8,7 +8,6 @@ import Image from "next/image";
 import AuthContext from "@/context/AuthContext";
 import {
   FiShield,
-  FiGlobe,
   FiTarget,
   FiZap,
   FiArrowRight,

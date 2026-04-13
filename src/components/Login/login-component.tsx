@@ -115,9 +115,13 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       const authRoleLower = String(user?.role || "").toLowerCase();
       const registrationStatus = String(user?.registrationStatus || "APPROVED").toUpperCase();
       const isOperatorFamily = authRoleLower === "operator" || authRoleLower === "team";
-      const requiresOnboarding = ["associate", "operator", "team"].includes(authRoleLower)
-        && user?.onboardingComplete === false;
-      const isPendingApproval = isOperatorFamily
+      const isAssociate = authRoleLower === "associate";
+      const profileComplete = Boolean(user?.name && user?.email && user?.phone);
+      const hasAssociateCompany = Boolean(user?.associateCompanyId);
+      const canBypassAssociateOnboarding = isAssociate && profileComplete && hasAssociateCompany;
+      const requiresOnboarding = (isOperatorFamily && user?.onboardingComplete === false)
+        || (isAssociate && user?.onboardingComplete === false && !canBypassAssociateOnboarding);
+      const isPendingApproval = ["associate", "operator", "team"].includes(authRoleLower)
         && user?.onboardingComplete === true
         && registrationStatus !== "APPROVED";
       const targetRoute = requiresOnboarding

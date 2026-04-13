@@ -63,12 +63,14 @@ export default function DashboardLayout({
   const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const isAssociate = roleLower === "associate";
   const profileComplete = Boolean(user?.name && user?.email && (user as any)?.phone);
+  const hasAssociateCompany = Boolean(user?.associateCompanyId);
+  const canBypassAssociateOnboarding = isAssociate && profileComplete && hasAssociateCompany;
   const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
   const isRejected = ["associate", "operator", "team"].includes(roleLower)
     && registrationStatus === "REJECTED";
   const isOnboardingLocked =
     (isOperatorFamily && user?.onboardingComplete === false) ||
-    (isAssociate && user?.onboardingComplete === false && !profileComplete);
+    (isAssociate && user?.onboardingComplete === false && !canBypassAssociateOnboarding);
   const isApprovalPending = ["associate", "operator", "team"].includes(roleLower)
     && !isRejected
     && user?.onboardingComplete === true

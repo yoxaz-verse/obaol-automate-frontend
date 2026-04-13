@@ -29,6 +29,7 @@ import PhoneField from "@/components/form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
 import { useSoundEffect } from "@/context/SoundContext";
 import AuthContext from "@/context/AuthContext";
+import { getData, postData } from "@/core/api/apiHandler";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -786,10 +787,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     if (currentStep === 1 && !googleSignUp && !isOnboarding) {
       setIsLoading(true);
       try {
-        const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-        const res = await axios.get(`${apiRoot}/auth/email-status`, {
-          params: { email: formData.email.trim() },
-        });
+        const res = await getData("/auth/email-status", { email: formData.email.trim() });
         if (res.data?.exists) {
           setErrors((prev) => ({ ...prev, email: "Email already registered. Sign in instead." }));
           showToastMessage({ type: "warning", message: "Email already exists.", position: "top-right" });
@@ -841,10 +839,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     setEmailCheckStatus("idle");
     setEmailCheckMessage("");
     try {
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const res = await axios.get(`${apiRoot}/auth/email-status`, {
-        params: { email: formData.email.trim() },
-      });
+      const res = await getData("/auth/email-status", { email: formData.email.trim() });
       if (res.data?.exists) {
         setEmailCheckStatus("exists");
         setEmailCheckMessage("This email is already registered — please sign in.");
@@ -958,17 +953,16 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         };
       }
 
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
       const response = isOnboarding
-        ? await axios.post(`${apiRoot}/auth/onboarding`, { role: "Associate", ...payload })
+        ? await postData("/auth/onboarding", { role: "Associate", ...payload })
         : googleSignUp
-          ? await axios.post(`${apiRoot}/auth/google`, {
+          ? await postData("/auth/google", {
             idToken: googleIdToken,
             role: "Associate",
             intent: "register",
             registerPayload: payload,
           })
-          : await axios.post(`${apiRoot}/auth/register`, payload);
+          : await postData("/auth/register", payload);
 
       if (response.data?.success) {
         setIsSubmittingSuccess(true);
@@ -1635,9 +1629,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="p-4 rounded-2xl bg-warning-500/5 border border-warning-500/10 text-xs font-black uppercase tracking-widest text-warning-500 text-center">
-                    Select 1 to 6 main categories
-                    <p className="mt-2 text-[10px] font-semibold tracking-wide text-default-500 normal-case">
+                  <div className="p-5 rounded-2xl bg-warning-500/10 border-2 border-warning-500/50 shadow-[0_0_20px_rgba(245,158,11,0.2)] text-center">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-warning-500">
+                      Select 1 to 6 main categories
+                    </h3>
+                    <p className="mt-2 text-xs font-semibold tracking-wide text-warning-500/80 normal-case">
                       Your choices customize the platform you see after onboarding. Pick up to 3 priorities.
                     </p>
                   </div>
@@ -1656,49 +1652,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </ul>
                   </div>
 
-                  {isNewCompany && (
-                    <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Priority Order (1–3)</p>
-                      {formData.companyFunctionPriorities.length ? (
-                        <div className="mt-3 space-y-2">
-                          {formData.companyFunctionPriorities.map((id, index) => (
-                            <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
-                              <div className="flex items-center gap-3">
-                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-warning-500 text-black text-[10px] font-black">
-                                  {index + 1}
-                                </span>
-                                <span className="text-xs font-bold text-foreground/80">
-                                  {companyFunctionNameById.get(id) || "Selected category"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => moveCompanyFunctionPriority(id, "up")}
-                                  disabled={index === 0}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                                >
-                                  <FiChevronUp className="mx-auto text-sm" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => moveCompanyFunctionPriority(id, "down")}
-                                  disabled={index === formData.companyFunctionPriorities.length - 1}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                                >
-                                  <FiChevronDown className="mx-auto text-sm" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="mt-3 text-xs text-default-400">
-                          Select categories below to set your top priorities.
-                        </p>
-                      )}
-                    </div>
-                  )}
 
                   {isNewCompany ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1790,6 +1743,50 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             Back to Company Step
                           </button>
                         </div>
+                      )}
+                    </div>
+                  )}
+
+                  {isNewCompany && (
+                    <div className="rounded-2xl border border-default-200/60 bg-content2/30 p-4">
+                      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">Priority Order (1–3)</p>
+                      {formData.companyFunctionPriorities.length ? (
+                        <div className="mt-3 space-y-2">
+                          {formData.companyFunctionPriorities.map((id, index) => (
+                            <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
+                              <div className="flex items-center gap-3">
+                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-warning-500 text-black text-[10px] font-black">
+                                  {index + 1}
+                                </span>
+                                <span className="text-xs font-bold text-foreground/80">
+                                  {companyFunctionNameById.get(id) || "Selected category"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => moveCompanyFunctionPriority(id, "up")}
+                                  disabled={index === 0}
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <FiChevronUp className="mx-auto text-sm" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => moveCompanyFunctionPriority(id, "down")}
+                                  disabled={index === formData.companyFunctionPriorities.length - 1}
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <FiChevronDown className="mx-auto text-sm" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-3 text-xs text-default-400">
+                          Select categories above to set your top priorities.
+                        </p>
                       )}
                     </div>
                   )}

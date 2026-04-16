@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import AuthContext from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Button } from "@nextui-org/react";
@@ -257,10 +257,12 @@ const OperatorPanel = () => (
 );
 
 export default function PendingApprovalPage() {
-  const { user, loading, logout } = useContext(AuthContext);
+  const { user, loading, logout, refreshUser } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const guidanceRole = roleLower === "operator" || roleLower === "team" ? "operator" : "associate";
   const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
+  const isPendingRole = roleLower === "associate" || roleLower === "operator" || roleLower === "team";
+  const shouldPollApprovalStatus = isPendingRole && registrationStatus !== "APPROVED" && registrationStatus !== "REJECTED";
   const pendingSinceRaw = String(user?.pendingSince || "").trim();
   const pendingAgeHours = useMemo(() => {
     if (!pendingSinceRaw) return null;
@@ -282,6 +284,30 @@ export default function PendingApprovalPage() {
     const message = `Hi OBAOL support, my ${roleLabel} approval is pending for ${hours} hours. Email: ${user?.email || "N/A"}. Please assist.`;
     return `https://wa.me/919019351483?text=${encodeURIComponent(message)}`;
   }, [showWhatsAppEscalation, roleLower, pendingAgeHours, user?.email]);
+
+  useEffect(() => {
+    if (!shouldPollApprovalStatus) return;
+    let mounted = true;
+
+    const tick = async () => {
+      if (!mounted) return;
+      try {
+        await refreshUser();
+      } catch {
+        // Best effort refresh; layout guard handles route transitions.
+      }
+    };
+
+    void tick();
+    const timer = setInterval(() => {
+      void tick();
+    }, 25_000);
+
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [refreshUser, shouldPollApprovalStatus]);
 
   if (loading) return null;
 

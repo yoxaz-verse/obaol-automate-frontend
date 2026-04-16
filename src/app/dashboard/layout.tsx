@@ -127,6 +127,10 @@ export default function DashboardLayout({
       router.replace("/dashboard/pending-approval");
       return;
     }
+    if (!isApprovalPending && isPendingRoute) {
+      router.replace("/dashboard?approval=approved");
+      return;
+    }
     if (!isOnboardingLocked && isOnboardingRoute) {
       router.replace("/dashboard");
     }

@@ -315,6 +315,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
   }
   if (isMarketplaceView) {
     columns = columns.filter((column: any) => column.uid !== "inventoryQty");
+    if (isAssociateUser || isOperatorUser) {
+      columns = columns.filter((column: any) => column.uid !== "location");
+    }
   }
 
   if (

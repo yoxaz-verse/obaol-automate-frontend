@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
@@ -8,12 +9,33 @@ import { LuWarehouse } from "react-icons/lu";
 import MarketplaceFilterBar, {
   MarketplaceFilterState,
 } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
+import AuthContext from "@/context/AuthContext";
+import { getData } from "@/core/api/apiHandler";
+import { variantRateRoutes } from "@/core/api/apiRoutes";
 
 type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
 
 const emptyState: MarketplaceFilterState = { search: "", filters: {} };
 
+const parseTotalCount = (response: any) => {
+    const payload = response?.data?.data;
+    if (typeof payload?.totalCount === "number") return payload.totalCount;
+    if (typeof payload?.data?.totalCount === "number") return payload.data.totalCount;
+    return 0;
+};
+
+const StatCard = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-default-400">{label}</p>
+        <p className="mt-1 text-2xl font-black tracking-tight text-foreground">{value}</p>
+    </div>
+);
+
 export default function MarketplacePage() {
+    const { user } = useContext(AuthContext);
+    const roleLower = String(user?.role || "").toLowerCase();
+    const isAdmin = roleLower === "admin";
+
     const [currentTable, setCurrentTable] = useState<MarketplaceTabKey>("marketplace-live");
     const [liveState, setLiveState] = useState<MarketplaceFilterState>(emptyState);
     const [offlineState, setOfflineState] = useState<MarketplaceFilterState>(emptyState);
@@ -33,6 +55,45 @@ export default function MarketplacePage() {
             return;
         }
         setOfflineState(normalizedState);
+    };
+    const liveCountQuery = useQuery({
+        queryKey: ["marketplace-count", "live"],
+        queryFn: async () => {
+            const response = await getData(variantRateRoutes.getAll, {
+                page: 1,
+                limit: 1,
+                view: "marketplace",
+                isLive: true,
+            });
+            return parseTotalCount(response);
+        },
+        enabled: isAdmin,
+    });
+
+    const offlineCountQuery = useQuery({
+        queryKey: ["marketplace-count", "offline"],
+        queryFn: async () => {
+            const response = await getData(variantRateRoutes.getAll, {
+                page: 1,
+                limit: 1,
+                view: "marketplace",
+                isLive: false,
+            });
+            return parseTotalCount(response);
+        },
+        enabled: isAdmin,
+    });
+
+    const liveCount = liveCountQuery.data ?? 0;
+    const offlineCount = offlineCountQuery.data ?? 0;
+    const totalCount = liveCount + offlineCount;
+    const isCountLoading = liveCountQuery.isLoading || offlineCountQuery.isLoading;
+    const hasCountError = liveCountQuery.isError || offlineCountQuery.isError;
+
+    const displayCount = (value: number) => {
+        if (isCountLoading) return "—";
+        if (hasCountError) return 0;
+        return value;
     };
 
     return (
@@ -54,6 +115,13 @@ export default function MarketplacePage() {
                         </div>
                     </div>
                 </header>
+                {isAdmin && (
+                    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <StatCard label="Total Products" value={displayCount(totalCount)} />
+                        <StatCard label="Live Products" value={displayCount(liveCount)} />
+                        <StatCard label="Offline Products" value={displayCount(offlineCount)} />
+                    </div>
+                )}
 
                 <div className="bg-content1 rounded-3xl border border-default-200 shadow-sm overflow-hidden">
                     <div className="p-6">

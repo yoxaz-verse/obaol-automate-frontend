@@ -24,6 +24,7 @@ interface ILoginProps {
 }
 
 const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
+  const BLOCKED_ACCOUNT_COPY = "This account is banned/blocked from OBAOL backend. Access is disabled.";
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +52,12 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const normalizeSignupError = (message: string) => {
     const raw = String(message || "");
     const lower = raw.toLowerCase();
+    if (lower.includes("banned/blocked from obaol backend") || lower.includes("blocked from obaol backend") || lower.includes("status\":\"blocked\"") || lower.includes("status: blocked")) {
+      return BLOCKED_ACCOUNT_COPY;
+    }
+    if (lower.includes("blocked") || lower.includes("banned")) {
+      return BLOCKED_ACCOUNT_COPY;
+    }
     if (lower.includes("invalid email") || lower.includes("invalid email address")) {
       return "Invalid email address.";
     }
@@ -300,8 +307,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         ? "Session cookie was blocked by browser privacy settings. Lower your shields for obaol.com and retry."
         : error.message === "Network Error" || error.code === "ERR_NETWORK"
           ? "Connection refused. Please check your internet or retry later."
-          : (backendData?.status === "rejected" || backendData?.isRejected || String(backendData?.message).toLowerCase().includes("rejected"))
-            ? "This account is blocked from OBAOL ecosystem. Please contact support."
+          : (backendData?.status === "blocked" || backendData?.status === "rejected" || backendData?.isRejected || String(backendData?.message).toLowerCase().includes("rejected") || String(backendData?.message).toLowerCase().includes("blocked"))
+            ? BLOCKED_ACCOUNT_COPY
             : (backendData?.message || "Invalid credentials. Please verify your email/password.");
 
       setErrorMessage(apiErrorMessage);

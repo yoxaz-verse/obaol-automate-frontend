@@ -46,7 +46,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/verification" className="hover:text-foreground">
+                <Link href="/about" className="hover:text-foreground">
                   About OBAOL
                 </Link>
               </li>

@@ -1,6 +1,7 @@
 // app/sitemap.ts
 import { MetadataRoute } from "next";
 import { buildPublicWebApiUrl } from "@/utils/publicApi";
+import { associateRoleSlugs, getAssociateRolePath } from "@/data/associateRoles";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://obaol.com";
@@ -26,6 +27,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/terms-and-conditions`, priority: 0.5, changeFrequency: "yearly", lastModified },
     { url: `${baseUrl}/disclaimer`, priority: 0.4, changeFrequency: "yearly", lastModified },
   ];
+
+  const associateRoleEntries: MetadataRoute.Sitemap = associateRoleSlugs.map((slug) => ({
+    url: `${baseUrl}${getAssociateRolePath(slug)}`,
+    priority: 0.65,
+    changeFrequency: "monthly",
+    lastModified,
+  }));
 
   try {
     const res = await fetch(buildPublicWebApiUrl("/products?limit=1000&fields=slug"), { cache: "no-store" });
@@ -74,8 +82,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified,
       }));
 
-    return [...staticEntries, ...productEntries, ...brandEntries, ...catalogEntries];
+    return [...staticEntries, ...associateRoleEntries, ...productEntries, ...brandEntries, ...catalogEntries];
   } catch {
-    return staticEntries;
+    return [...staticEntries, ...associateRoleEntries];
   }
 }

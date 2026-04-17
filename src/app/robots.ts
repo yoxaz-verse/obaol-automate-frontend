@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           "/news",
           "/roles",
           "/roles/associate",
+          "/roles/associate/",
           "/roles/operator",
           "/product",
           "/brand",

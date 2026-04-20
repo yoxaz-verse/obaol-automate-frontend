@@ -73,6 +73,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
+  const [isLoadingVariants, setIsLoadingVariants] = useState(false);
   const [associates, setAssociates] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
@@ -103,8 +104,35 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   }, [formData.subCategory]);
 
   useEffect(() => {
-    if (!formData.product) return;
-    fetchDependentOptions("productVariant", "product", formData.product).then(setVariants);
+    if (!formData.product) {
+      setVariants([]);
+      setIsLoadingVariants(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingVariants(true);
+
+    fetchDependentOptions("productVariant", "product", formData.product)
+      .then((data) => {
+        if (isMounted) {
+          setVariants(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setVariants([]);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingVariants(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [formData.product]);
 
   useEffect(() => {
@@ -430,7 +458,21 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             </SelectItem>
                           ))}
                         </Select>
-                        <Select variant="bordered" label="Product Variant" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.productVariant ? [formData.productVariant] : []} onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])} isDisabled={!formData.product} isInvalid={!!errors.productVariant} errorMessage={errors.productVariant}>
+                        <Select
+                          variant="bordered"
+                          label="Product Variant"
+                          classNames={themeField}
+                          listboxProps={{
+                            itemClasses,
+                            emptyContent: isLoadingVariants ? "Loading variants..." : "No variants found.",
+                          }}
+                          selectedKeys={formData.productVariant ? [formData.productVariant] : []}
+                          onSelectionChange={(keys) => setValue("productVariant", Array.from(keys)[0])}
+                          isLoading={isLoadingVariants}
+                          isDisabled={!formData.product}
+                          isInvalid={!!errors.productVariant}
+                          errorMessage={errors.productVariant}
+                        >
                           {variants.map((item) => (
                             <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
                               {getOptionLabel(item)}

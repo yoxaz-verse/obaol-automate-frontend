@@ -24,6 +24,7 @@ export default function CompanyProductPage() {
   const [search, setSearch] = useState("");
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [isConfigExpanded, setIsConfigExpanded] = useState(false);
 
   const obaolConfigQuery = useQuery({
     queryKey: ["system-config-obaol-company"],
@@ -49,6 +50,44 @@ export default function CompanyProductPage() {
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
   const companies = useMemo(() => extractList(companiesQuery.data?.data), [companiesQuery.data]);
+  const toText = (value: any, fallback = ""): string => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      const out = String(value).trim();
+      return out || fallback;
+    }
+    if (Array.isArray(value)) {
+      const out = value
+        .map((entry) => toText(entry, ""))
+        .filter(Boolean)
+        .join(", ");
+      return out || fallback;
+    }
+    if (typeof value === "object") {
+      const out =
+        toText(value?.name, "") ||
+        toText(value?.label, "") ||
+        toText(value?.title, "") ||
+        toText(value?.slug, "");
+      return out || fallback;
+    }
+    return fallback;
+  };
+  const toName = (value: any, fallback = "") => toText(value?.name ?? value, fallback);
+  const normalizeInterestList = (raw: any) => {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((entry: any, idx: number) => {
+        const key = toText(entry?._id, "") || `${toText(entry?.slug, "") || toText(entry, "interest")}-${idx}`;
+        const labelSource = toName(entry, "") || toText(entry, "");
+        const label = labelSource
+          .replace(/_/g, " ")
+          .replace(/-/g, " ")
+          .trim();
+        return { key, label: label || "UNKNOWN" };
+      })
+      .filter((entry: { label: string }) => Boolean(entry.label));
+  };
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -88,6 +127,16 @@ export default function CompanyProductPage() {
       return name.includes(needle) || email.includes(needle) || phone.includes(needle);
     });
   }, [companies, search]);
+  const assignedCount = useMemo(
+    () => companies.filter((company: any) => Boolean(company?.assignedOperator)).length,
+    [companies]
+  );
+  const unassignedCount = companies.length - assignedCount;
+  const liveCount = useMemo(
+    () => companies.filter((company: any) => company?.isWebsiteLive === true).length,
+    [companies]
+  );
+  const notLiveCount = companies.length - liveCount;
 
   const PALETTE = [
     "bg-warning-500/10 text-warning-600",
@@ -165,6 +214,18 @@ export default function CompanyProductPage() {
   });
 
   const selectedCompany = selectedCompanyQuery.data?.data?.data || null;
+  const selectedCompanyName = toName(selectedCompany, "Target Entity");
+  const selectedCompanyEmail = toText(selectedCompany?.email, "NOT_ASSIGNED");
+  const selectedCompanyPhone = toText(selectedCompany?.phone, "NO_UPLINK");
+  const selectedCompanyAddress = toText(selectedCompany?.address, "COORDINATES_MISSING");
+  const selectedCompanyWebsite = toText(selectedCompany?.website, "");
+  const selectedCompanyDescription = toText(selectedCompany?.description, "No mission statement recorded.");
+  const selectedCompanyAbout = toText(
+    selectedCompany?.aboutUs,
+    "Awaiting profile finalization and entity narrative baseline..."
+  );
+  const selectedCompanyBanner = toText(selectedCompany?.banner, "");
+  const selectedCompanyLogo = toText(selectedCompany?.logo, "");
   const associates = useMemo(
     () => extractList(selectedCompanyAssociatesQuery.data?.data),
     [selectedCompanyAssociatesQuery.data]
@@ -174,11 +235,15 @@ export default function CompanyProductPage() {
     selectedCompanyAssociatesQuery.data?.data?.data?.totalCount ||
     0;
   const interestPayload = selectedCompanyInterestsQuery.data?.data?.data || {};
-  const companyInterests = Array.isArray(interestPayload.companyInterests)
+  const companyInterestsSource = Array.isArray(interestPayload.companyInterests)
     ? interestPayload.companyInterests
     : Array.isArray(selectedCompany?.serviceCapabilities)
       ? selectedCompany.serviceCapabilities
       : [];
+  const companyInterests = useMemo(
+    () => normalizeInterestList(companyInterestsSource),
+    [companyInterestsSource]
+  );
   const enquiries = Array.isArray(selectedCompanyEnquiriesQuery.data?.data?.data)
     ? selectedCompanyEnquiriesQuery.data?.data?.data
     : [];
@@ -265,151 +330,178 @@ export default function CompanyProductPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative p-8 md:p-10 rounded-[2.5rem] bg-content1/50 dark:bg-white/[0.02] border border-divider shadow-2xl overflow-hidden group backdrop-blur-3xl"
+        className="rounded-[2rem] border border-divider bg-content1/50 shadow-xl backdrop-blur-2xl"
       >
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-warning-500/[0.03] blur-[100px] rounded-full -mr-20 pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-10">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20">
-                <LuSettings className="text-warning-500 animate-pulse" size={14} />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-500">System Parameter // NODE_01</span>
+        <button
+          type="button"
+          onClick={() => setIsConfigExpanded((current) => !current)}
+          className="w-full px-5 md:px-7 py-5 text-left"
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-warning-500/10 border border-warning-500/20">
+                <LuSettings className="text-warning-500" size={12} />
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-warning-500">Configuration Terminal</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black text-foreground uppercase tracking-tight italic leading-none">
-                Configuration <span className="text-warning-500 underline decoration-warning-500/20 underline-offset-8">Terminal</span>
-              </h1>
-              <p className="text-[11px] font-bold text-default-500 dark:text-default-400 uppercase tracking-widest max-w-2xl leading-relaxed opacity-80">
-                Define the primary corporate entity for Seller ↔ OBAOL and OBAOL ↔ Buyer document generation sequences. 
-                Incorrect mapping will disrupt the automated trade protocol.
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">
+                {obaolCompanyId ? "Protocol_Synchronized" : "Mapping_Required"}
+                {toName(obaolCompany, "") ? ` // Active: ${toName(obaolCompany, "").toUpperCase()}` : ""}
               </p>
             </div>
-
-            <div className="flex flex-col items-start lg:items-end gap-3 shrink-0">
-               <div className={`px-4 py-2.5 rounded-2xl border transition-all duration-500 flex items-center gap-4 ${
-                 obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-warning-500/10 border-warning-500/20"
-               }`}>
-                 <div className={`w-2 h-2 rounded-full animate-pulse ${
-                    obaolCompanyId ? "bg-success-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]" : "bg-warning-500 shadow-[0_0_12px_rgba(245,158,11,0.6)]"
-                 }`} />
-                 <div className="flex flex-col">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400 leading-none mb-1">Node Status</span>
-                   <span className={`text-[11px] font-black uppercase italic ${obaolCompanyId ? "text-success-500" : "text-warning-500"}`}>
-                     {obaolCompanyId ? "Protocol_Synchronized" : "Mapping_Required"}
-                   </span>
-                 </div>
-               </div>
-               
-               {obaolCompany?.name && (
-                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-content2/50 dark:bg-white/[0.03] border border-divider">
-                   <span className="text-[9px] font-black text-default-500 uppercase tracking-widest">Active Entity:</span>
-                   <span className="text-[10px] font-black text-warning-500 uppercase italic tracking-wider">{obaolCompany.name}</span>
-                 </div>
-               )}
+            <div className="flex items-center gap-3">
+              <div className={`px-3 py-2 rounded-xl border flex items-center gap-2 ${
+                obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-warning-500/10 border-warning-500/20"
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${obaolCompanyId ? "bg-success-500" : "bg-warning-500"}`} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${obaolCompanyId ? "text-success-500" : "text-warning-500"}`}>
+                  {obaolCompanyId ? "Live" : "Pending"}
+                </span>
+              </div>
+              <div className={`transition-transform duration-300 ${isConfigExpanded ? "rotate-[-90deg]" : "rotate-180"}`}>
+                <LuChevronLeft size={20} className="text-default-500" />
+              </div>
             </div>
           </div>
+        </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] items-end gap-6 p-6 md:p-8 rounded-[2rem] bg-content2/30 dark:bg-black/20 border border-divider shadow-inner relative group/form overflow-hidden">
-            {/* Corner Decorative Elements */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-warning-500/20 rounded-tl-sm transition-all group-hover/form:border-warning-500/50" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-warning-500/20 rounded-br-sm transition-all group-hover/form:border-warning-500/50" />
-            
-            <Select
-              label="Select Command Entity"
-              labelPlacement="outside"
-              placeholder="Search Corporate Directory..."
-              isLoading={companiesQuery.isLoading}
-              selectedKeys={selectedObaolCompanyId ? new Set([selectedObaolCompanyId]) : new Set()}
-              onSelectionChange={(keys) => {
-                const nextValue = Array.from(keys as Set<string>)[0] || "";
-                setSelectedObaolCompanyId(nextValue);
-              }}
-              popoverProps={{
-                classNames: {
-                  base: "before:bg-divider",
-                  content: "bg-content1/90 dark:bg-[#0B0F14]/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] p-2",
-                },
-                offset: 12
-              }}
-              listboxProps={{
-                itemClasses: {
-                  base: [
-                    "rounded-2xl",
-                    "transition-opacity",
-                    "data-[hover=true]:bg-warning-500/10",
-                    "data-[selectable=true]:focus:bg-warning-500/10",
-                    "data-[selected=true]:bg-warning-500/20",
-                    "data-[selected=true]:text-warning-500",
-                    "py-3",
-                    "px-4",
-                    "my-1"
-                  ],
-                },
-              }}
-              classNames={{
-                trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-warning-500/50 transition-all h-14 rounded-2xl shadow-sm",
-                label: "text-[10px] font-black uppercase tracking-[0.3em] text-default-400 mb-3 ml-1",
-                value: "text-sm font-black text-foreground uppercase tracking-widest",
-                base: "max-w-full"
-              }}
-              renderValue={(items) => {
-                return items.map((item) => (
-                  <div key={item.key} className="flex items-center gap-3">
-                    <div className="w-1 h-3 bg-warning-500 rounded-full" />
-                    <span className="text-sm font-black uppercase italic tracking-tighter">{item.data?.name}</span>
-                  </div>
-                ));
-              }}
-            >
-              {companies.map((companyItem: any) => {
-                const cName = companyItem?.name || "Unnamed Entity";
-                const cEmail = companyItem?.email || "protocol_link_pending";
-                return (
-                  <SelectItem 
-                    key={companyItem?._id || companyItem?.id} 
-                    textValue={cName}
-                    className="group"
-                  >
-                    <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black transition-all border border-divider">
+        {isConfigExpanded ? (
+          <div className="px-5 md:px-7 pb-6 md:pb-7 border-t border-divider/70">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] items-end gap-6 p-6 md:p-7 mt-5 rounded-[1.5rem] bg-content2/30 dark:bg-black/20 border border-divider shadow-inner relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-warning-500/20 rounded-tl-sm" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-warning-500/20 rounded-br-sm" />
+              <Select
+                label="Select Command Entity"
+                labelPlacement="outside"
+                placeholder="Search Corporate Directory..."
+                isLoading={companiesQuery.isLoading}
+                selectedKeys={selectedObaolCompanyId ? new Set([selectedObaolCompanyId]) : new Set()}
+                onSelectionChange={(keys) => {
+                  const nextValue = Array.from(keys as Set<string>)[0] || "";
+                  setSelectedObaolCompanyId(nextValue);
+                }}
+                popoverProps={{
+                  classNames: {
+                    base: "before:bg-divider",
+                    content: "bg-content1/90 dark:bg-[#0B0F14]/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] p-2",
+                  },
+                  offset: 12
+                }}
+                listboxProps={{
+                  itemClasses: {
+                    base: [
+                      "rounded-2xl",
+                      "transition-opacity",
+                      "data-[hover=true]:bg-warning-500/10",
+                      "data-[selectable=true]:focus:bg-warning-500/10",
+                      "data-[selected=true]:bg-warning-500/20",
+                      "data-[selected=true]:text-warning-500",
+                      "py-3",
+                      "px-4",
+                      "my-1"
+                    ],
+                  },
+                }}
+                classNames={{
+                  trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-warning-500/50 transition-all h-14 rounded-2xl shadow-sm",
+                  label: "text-[10px] font-black uppercase tracking-[0.3em] text-default-400 mb-3 ml-1",
+                  value: "text-sm font-black text-foreground uppercase tracking-widest",
+                  base: "max-w-full"
+                }}
+                renderValue={(items) => {
+                  return items.map((item) => (
+                    <div key={item.key} className="flex items-center gap-3">
+                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <span className="text-sm font-black uppercase italic tracking-tighter">{toName(item.data, "UNNAMED")}</span>
+                    </div>
+                  ));
+                }}
+              >
+                {companies.map((companyItem: any) => {
+                  const cName = toName(companyItem, "Unnamed Entity");
+                  const cEmail = toText(companyItem?.email, "protocol_link_pending");
+                  return (
+                    <SelectItem
+                      key={companyItem?._id || companyItem?.id}
+                      textValue={cName}
+                      className="group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black transition-all border border-divider">
                           <LuBox size={18} />
-                       </div>
-                       <div className="flex flex-col gap-0.5">
+                        </div>
+                        <div className="flex flex-col gap-0.5">
                           <span className="text-[12px] font-black uppercase italic tracking-tighter leading-tight">{cName}</span>
                           <span className="text-[9px] font-bold text-default-500 dark:text-default-400 lowercase tracking-[0.1em] opacity-60">{cEmail}</span>
-                       </div>
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </Select>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </Select>
 
-            <Button
-              className="h-14 px-10 rounded-2xl bg-warning-500 text-black font-black uppercase tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-warning-500/40"
-              isLoading={obaolConfigMutation.isPending}
-              isDisabled={!selectedObaolCompanyId}
-              onPress={() => obaolConfigMutation.mutate(selectedObaolCompanyId)}
-              endContent={<LuArrowRight size={16} className="ml-1" />}
-            >
-              Apply Protocol
-            </Button>
-          </div>
-
-          <div className="mt-8 flex items-center justify-center gap-6 opacity-40 group-hover:opacity-100 transition-opacity">
-            <div className="h-px w-20 bg-gradient-to-r from-transparent to-divider" />
-            <div className="flex items-center gap-3">
+              <Button
+                className="h-14 px-10 rounded-2xl bg-warning-500 text-black font-black uppercase tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-warning-500/40"
+                isLoading={obaolConfigMutation.isPending}
+                isDisabled={!selectedObaolCompanyId}
+                onPress={() => obaolConfigMutation.mutate(selectedObaolCompanyId)}
+                endContent={<LuArrowRight size={16} className="ml-1" />}
+              >
+                Apply Protocol
+              </Button>
+            </div>
+            <div className="mt-5 flex items-center justify-center gap-4 opacity-50">
               <LuTerminal className="text-default-400" size={12} />
-              <p className="text-[9px] font-black text-default-400 uppercase tracking-[0.4em] italic">
+              <p className="text-[9px] font-black text-default-400 uppercase tracking-[0.3em] italic">
                 Secure_Config_Chain_v4.2 // OBAOL_SYSTEM_CORE
               </p>
             </div>
-            <div className="h-px w-20 bg-gradient-to-l from-transparent to-divider" />
           </div>
-        </div>
+        ) : null}
       </motion.div>
 
       {/* Directory Section */}
       <div className="relative space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Operator Allocation</p>
+                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Assigned vs Unassigned</p>
+              </div>
+              <LuUsers className="text-primary-500/70" size={18} />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Assigned</p>
+                <p className="text-2xl font-black text-success-500">{assignedCount}</p>
+              </div>
+              <div className="rounded-xl border border-warning-500/20 bg-warning-500/10 p-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">Unassigned</p>
+                <p className="text-2xl font-black text-warning-500">{unassignedCount}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Website Status</p>
+                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Live vs Not Live</p>
+              </div>
+              <LuGlobe className="text-warning-500/70" size={18} />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Live</p>
+                <p className="text-2xl font-black text-success-500">{liveCount}</p>
+              </div>
+              <div className="rounded-xl border border-danger-500/20 bg-danger-500/10 p-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-danger-600">Not Live</p>
+                <p className="text-2xl font-black text-danger-500">{notLiveCount}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
@@ -481,7 +573,7 @@ export default function CompanyProductPage() {
                                 {name}
                               </span>
                               <span className="text-[10px] font-black text-default-500 uppercase tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
-                                {company?.companyType?.name || "TYPE_PENDING"}
+                                {toName(company?.companyType, "TYPE_PENDING")}
                               </span>
                             </div>
                           </div>
@@ -489,11 +581,11 @@ export default function CompanyProductPage() {
                           <div className="space-y-2 mt-auto">
                             <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest truncate">
                               <LuGlobe size={14} className="shrink-0 text-warning-500/40" />
-                              {company?.email || "NO_UPLINK"}
+                              {toText(company?.email, "NO_UPLINK")}
                             </div>
                             <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest">
                               <LuPhone size={14} className="shrink-0 text-primary-500/40" />
-                              {company?.phone || "NO_COMM_LINE"}
+                              {toText(company?.phone, "NO_COMM_LINE")}
                             </div>
                           </div>
 
@@ -531,13 +623,13 @@ export default function CompanyProductPage() {
                       <div className="w-1.5 h-1.5 bg-warning-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
                       <span className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-600 dark:text-warning-500 italic">Corporate Entity Details</span>
                     </div>
-                    <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase italic">{selectedCompany?.name || "Target Entity"}</h3>
+                    <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase italic">{selectedCompanyName}</h3>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {selectedCompany?.companyType?.name && (
+                  {toName(selectedCompany?.companyType, "") && (
                     <Chip size="sm" variant="flat" color="primary" className="font-black uppercase text-[10px] tracking-[0.2em] px-4 py-4 rounded-xl border border-primary-500/20">
-                      {selectedCompany.companyType.name}
+                      {toName(selectedCompany?.companyType, "TYPE_PENDING")}
                     </Chip>
                   )}
                   {typeof selectedCompany?.isWebsiteLive === "boolean" && (
@@ -574,20 +666,20 @@ export default function CompanyProductPage() {
                         <div className="space-y-5">
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Primary Link</span>
-                            <p className="text-sm font-black text-foreground break-all tracking-tight">{selectedCompany?.email || "NOT_ASSIGNED"}</p>
+                            <p className="text-sm font-black text-foreground break-all tracking-tight">{selectedCompanyEmail}</p>
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Secure Line</span>
-                            <p className="text-sm font-black text-foreground tracking-tight">{selectedCompany?.phone || "NO_UPLINK"}</p>
+                            <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyPhone}</p>
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Geospatial Vector</span>
-                            <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed uppercase tracking-widest">{selectedCompany?.address || "COORDINATES_MISSING"}</p>
+                            <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed uppercase tracking-widest">{selectedCompanyAddress}</p>
                           </div>
-                          {selectedCompany?.website && (
+                          {selectedCompanyWebsite && (
                              <div className="pt-4 border-t border-divider">
                                <a 
-                                 href={selectedCompany.website.startsWith('http') ? selectedCompany.website : `https://${selectedCompany.website}`} 
+                                 href={selectedCompanyWebsite.startsWith("http") ? selectedCompanyWebsite : `https://${selectedCompanyWebsite}`} 
                                  target="_blank" 
                                  rel="noopener noreferrer"
                                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-warning-500/5 hover:bg-warning-500/10 border border-warning-500/10 text-xs font-black text-warning-600 dark:text-warning-500 transition-all group/link"
@@ -609,10 +701,10 @@ export default function CompanyProductPage() {
                       {selectedCompany?.assignedOperator ? (
                         <div className="flex items-center gap-5 p-4 rounded-3xl bg-primary-500/5 border border-primary-500/10">
                           <div className="w-12 h-12 rounded-2xl bg-primary-500 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary-500/20">
-                            {initials(selectedCompany.assignedOperator.name || "OP")}
+                            {initials(toName(selectedCompany?.assignedOperator, "OP"))}
                           </div>
                           <div className="flex flex-col overflow-hidden">
-                            <p className="text-sm font-black text-foreground truncate uppercase tracking-tight">{selectedCompany.assignedOperator.name || "UNNAMED_OPERATOR"}</p>
+                            <p className="text-sm font-black text-foreground truncate uppercase tracking-tight">{toName(selectedCompany?.assignedOperator, "UNNAMED_OPERATOR")}</p>
                             <p className="text-[9px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest mt-1">Active Sequence Handler</p>
                           </div>
                         </div>
@@ -630,9 +722,9 @@ export default function CompanyProductPage() {
                       </div>
                       {companyInterests.length ? (
                         <div className="flex flex-wrap gap-2.5">
-                          {companyInterests.map((interest: string) => (
-                            <Chip key={interest} size="sm" variant="flat" color="warning" className="font-black uppercase text-[9px] tracking-[0.2em] px-3 py-3 rounded-lg border border-warning-500/10">
-                              {String(interest || "").replace(/_/g, " ")}
+                          {companyInterests.map((interest) => (
+                            <Chip key={interest.key} size="sm" variant="flat" color="warning" className="font-black uppercase text-[9px] tracking-[0.2em] px-3 py-3 rounded-lg border border-warning-500/10">
+                              {interest.label}
                             </Chip>
                           ))}
                         </div>
@@ -644,27 +736,27 @@ export default function CompanyProductPage() {
 
                   <div className="lg:col-span-8 space-y-8">
                     {/* Media & About Section */}
-                    {(selectedCompany?.banner || selectedCompany?.logo || selectedCompany?.description) && (
+                    {(selectedCompanyBanner || selectedCompanyLogo || selectedCompanyDescription) && (
                       <div className="rounded-[3rem] bg-content1 border border-divider overflow-hidden shadow-2xl relative">
                          <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/5 blur-[80px] rounded-full -mr-16 -mt-16 pointer-events-none" />
-                         {selectedCompany?.banner && (
+                         {selectedCompanyBanner && (
                             <div className="h-64 w-full relative">
-                               <img src={selectedCompany.banner} alt="Banner" className="w-full h-full object-cover" />
+                               <img src={selectedCompanyBanner} alt="Banner" className="w-full h-full object-cover" />
                                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                             </div>
                          )}
                          <div className="p-8 md:p-12 -mt-20 relative z-10">
                             <div className="flex flex-col md:flex-row gap-10 items-start md:items-end">
-                               {selectedCompany?.logo && (
+                               {selectedCompanyLogo && (
                                   <div className="w-40 h-40 shrink-0 rounded-[2.5rem] bg-background border-4 border-divider shadow-2xl overflow-hidden group">
-                                     <img src={selectedCompany.logo} alt="Logo" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                     <img src={selectedCompanyLogo} alt="Logo" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                   </div>
                                )}
                                <div className="flex-1 space-y-6 pb-2">
                                   <div className="space-y-3">
                                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500 italic">Strategic Narrative</span>
                                      <p className="text-lg font-black text-foreground italic leading-tight uppercase tracking-tight">
-                                        "{selectedCompany?.description || "No mission statement recorded."}"
+                                        {selectedCompanyDescription}
                                      </p>
                                   </div>
                                </div>
@@ -676,7 +768,7 @@ export default function CompanyProductPage() {
                                   <div className="flex-1 h-px bg-divider" />
                                </div>
                                <div className="text-[13px] font-bold text-default-600 dark:text-default-400 leading-relaxed whitespace-pre-wrap uppercase tracking-widest opacity-90 first-letter:text-2xl first-letter:font-black first-letter:text-warning-500">
-                                  {selectedCompany?.aboutUs || "Awaiting profile finalization and entity narrative baseline..."}
+                                  {selectedCompanyAbout}
                                </div>
                             </div>
                          </div>

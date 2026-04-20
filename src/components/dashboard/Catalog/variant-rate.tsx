@@ -66,6 +66,29 @@ const truncateWithDots = (value: any, limit = 12) => {
   if (str.length <= limit) return str;
   return `${str.slice(0, limit)}..`;
 };
+const toDisplayText = (value: any, fallback = "N/A"): string => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    const out = String(value).trim();
+    return out || fallback;
+  }
+  if (Array.isArray(value)) {
+    const out = value
+      .map((entry) => toDisplayText(entry, ""))
+      .filter(Boolean)
+      .join(", ");
+    return out || fallback;
+  }
+  if (typeof value === "object") {
+    const out =
+      toDisplayText(value?.name, "") ||
+      toDisplayText(value?.label, "") ||
+      toDisplayText(value?.title, "") ||
+      toDisplayText(value?.slug, "");
+    return out || fallback;
+  }
+  return fallback;
+};
 const formatLastLiveDate = (value: any) => {
   if (!value) return "";
   const date = new Date(value);
@@ -512,10 +535,10 @@ const VariantRate: React.FC<VariantRateProps> = ({
               const adminCommission = resolveAdminCommission(supplierRate, item.commission, commissionPercent);
               const totalRate = supplierRate + adminCommission;
               const isCommissionAdded = Number(adminCommission) > 0;
-              const locationDisplay = String(item.locationDisplay || "").trim() || (
-                String(item.locationSource || "").toUpperCase() === "WAREHOUSE"
-                  ? String(item.warehouseId?.address || item.warehouseId?.name || "")
-                  : String(item.officeAddress || item.associateCompany?.address || "")
+              const locationDisplay = toDisplayText(item.locationDisplay, "").trim() || (
+                toDisplayText(item.locationSource, "").toUpperCase() === "WAREHOUSE"
+                  ? toDisplayText(item.warehouseId?.address || item.warehouseId?.name, "")
+                  : toDisplayText(item.officeAddress || item.associateCompany?.address, "")
               );
 
               // Rule: Owners see base rate only. Non-owners see final price (base + admin commission).
@@ -546,14 +569,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ),
                 associate: (
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">{item.associateCompany?.name || (isOwner ? "My Company" : "OBAOL")}</span>
+                    <span className="font-bold text-foreground uppercase tracking-tight line-clamp-1">{toDisplayText(item.associateCompany?.name, isOwner ? "My Company" : "OBAOL")}</span>
                     <span className="text-[9px] text-default-400 uppercase tracking-widest">ID: {String(item.associate?._id || item.associate || "---").slice(-6)}</span>
                   </div>
                 ),
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant: productVariantLabel,
-                product: truncateWithDots(item.productVariant?.product?.name),
+                product: truncateWithDots(toDisplayText(item.productVariant?.product?.name)),
                 location: locationDisplay || "--",
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
@@ -634,7 +657,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isLive: item.isLive && (baseRate?.isLive !== false),
                 actualIsLive: item.isLive,
                 supplierIsLive: baseRate?.isLive !== false,
-                associate: item.associateCompanyId?.name || "My Company",
+                associate: toDisplayText(item.associateCompanyId?.name || item.associateCompanyId, "My Company"),
                 rate: finalPrice,
                 commission: mediatorMarkup || 0,
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
@@ -644,8 +667,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associateId: item.associateId?._id || item.associateId,
                 originalOwnerId: baseRate?.associate?._id || baseRate?.associate,
                 companyId: item.associateCompanyId?._id || item.associateCompanyId,
-                productVariant: truncateWithDots(item.productVariantId?.name),
-                product: truncateWithDots(item.productVariantId?.product?.name),
+                productVariant: truncateWithDots(toDisplayText(item.productVariantId?.name)),
+                product: truncateWithDots(toDisplayText(item.productVariantId?.product?.name)),
                 productId: item.productVariantId?.product?._id || item.productVariantId?.product,
                 productVariantId: item.productVariantId?._id,
                 rawBasePrice: (supplierRate + adminCommission),
@@ -673,7 +696,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               return {
                 ...rest,
                 isLive: item.isLive,
-                associate: item.associateCompany?.name || "My Company",
+                associate: toDisplayText(item.associateCompany?.name || item.associateCompany, "My Company"),
                 rate: totalRate,
                 quantity: quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
                   ? `${quantityValue} MT`
@@ -681,8 +704,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 quantityRaw: quantityValue,
                 associateId: item.associate?._id,
                 companyId: item.associate?.associateCompany,
-                productVariant: truncateWithDots(item.variantRate?.productVariant?.name),
-                product: truncateWithDots(item.variantRate?.productVariant?.product?.name),
+                productVariant: truncateWithDots(toDisplayText(item.variantRate?.productVariant?.name)),
+                product: truncateWithDots(toDisplayText(item.variantRate?.productVariant?.product?.name)),
                 productId: item.variantRate?.productVariant?.product?._id || item.variantRate?.productVariant?.product,
                 productVariantId: item.variantRate?.productVariant?._id,
                 rawBasePrice: basePriceForUser,
@@ -702,12 +725,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
           searchText
             ? tableData.filter((row: any) => {
               const haystack = [
-                row.product,
-                row.productVariant,
-                row.associate,
+                toDisplayText(row.product, ""),
+                toDisplayText(row.productVariant, ""),
+                toDisplayText(row.associate, ""),
                 row.warehouseName,
-                row.rate,
-                row.quantity,
+                toDisplayText(row.rate, ""),
+                toDisplayText(row.quantity, ""),
               ]
                 .filter(Boolean)
                 .join(" ")
@@ -742,7 +765,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
                       startContent={<FiPlus size={16} />}
                     >
-                      Post New Rate
+                      Create Rate Listing
                     </Button>
                     <VariantRateWizardModal
                       isOpen={wizardOpen}
@@ -1105,14 +1128,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0 pr-2">
                         <p className="text-[10px] font-semibold text-warning-500 uppercase tracking-widest truncate mb-0.5">
-                          {item.product || "Product"}
+                          {toDisplayText(item.product, "Product")}
                         </p>
                         <p className="text-sm font-bold text-foreground truncate">
-                          {item.productVariant || "Variant"}
+                          {toDisplayText(item.productVariant, "Variant")}
                         </p>
                         <div className="flex items-center gap-1 mt-0.5">
                           <FiUser size={10} className="shrink-0 text-default-400" />
-                          <span className="text-[10px] text-default-400 truncate">{item.associate || "N/A"}</span>
+                          <span className="text-[10px] text-default-400 truncate">{toDisplayText(item.associate, "N/A")}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">

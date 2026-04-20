@@ -51,9 +51,33 @@ export default function CommonTable({
     [getColumn]
   );
 
+  const toDisplayText = React.useCallback((value: any, fallback = "N/A"): string => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      const out = String(value).trim();
+      return out || fallback;
+    }
+    if (Array.isArray(value)) {
+      const out = value
+        .map((entry) => toDisplayText(entry, ""))
+        .filter(Boolean)
+        .join(", ");
+      return out || fallback;
+    }
+    if (typeof value === "object") {
+      const out =
+        toDisplayText(value?.name, "") ||
+        toDisplayText(value?.label, "") ||
+        toDisplayText(value?.title, "") ||
+        toDisplayText(value?.slug, "");
+      return out || fallback;
+    }
+    return fallback;
+  }, []);
+
   const renderTruncatedText = React.useCallback((value: any, maxWidthClass?: string, allowWrap?: boolean) => {
     if (React.isValidElement(value)) return value;
-    const str = String(value ?? "N/A");
+    const str = toDisplayText(value, "N/A");
     if (allowWrap) {
       return <span className={`block ${maxWidthClass || "max-w-[220px]"} whitespace-normal break-words`}>{str}</span>;
     }
@@ -62,7 +86,7 @@ export default function CommonTable({
         <span className={`block ${maxWidthClass || "max-w-[220px]"} truncate whitespace-nowrap`}>{str}</span>
       </Tooltip>
     );
-  }, []);
+  }, [toDisplayText]);
 
   const renderCell = React.useCallback(
     (item: UserData, columnKey: React.Key) => {

@@ -75,11 +75,31 @@ const getCompanyPreviewUrl = (company: any) => {
   return "";
 };
 
+const approvalStatusColor = (status: string) => {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "APPROVED") return "success";
+  if (normalized === "REJECTED") return "danger";
+  return "warning";
+};
+
+const buildTemporaryPassword = () => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    const bytes = new Uint32Array(14);
+    window.crypto.getRandomValues(bytes);
+    return Array.from(bytes)
+      .map((value) => chars[value % chars.length])
+      .join("");
+  }
+  return `${Math.random().toString(36).slice(-8)}A!9`;
+};
+
 export default function CompanyWorkspacePage() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
   const roleLower = String(user?.role || "").toLowerCase();
   const isAssociate = roleLower === "associate";
+  const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const isAdmin = roleLower === "admin";
   const canViewObaolConfig = isAdmin;
   const associateCompanyId = String(user?.associateCompanyId || "");
@@ -96,6 +116,35 @@ export default function CompanyWorkspacePage() {
     requestedInterests: string[];
     createdAt: string;
     syncing: boolean;
+  } | null>(null);
+  const [isAddCompanyModalOpen, setIsAddCompanyModalOpen] = useState(false);
+  const [isAddAssociateModalOpen, setIsAddAssociateModalOpen] = useState(false);
+  const [operatorCompanyForm, setOperatorCompanyForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    phoneSecondary: "",
+    address: "",
+    geoType: "INDIAN",
+    country: "",
+    state: "",
+    district: "",
+    division: "",
+    pincodeEntry: "",
+    companyType: "",
+    serviceCapabilities: [] as string[],
+  });
+  const [operatorAssociateForm, setOperatorAssociateForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    phoneSecondary: "",
+    associateCompany: "",
+  });
+  const [createdAssociateCredential, setCreatedAssociateCredential] = useState<{
+    name: string;
+    email: string;
+    password: string;
   } | null>(null);
 
   const companyQuery = useQuery({
@@ -144,6 +193,112 @@ export default function CompanyWorkspacePage() {
       return response?.data?.data || null;
     },
     enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
+  const operatorAssignedCompaniesQuery = useQuery({
+    queryKey: ["company-workspace-operator-companies"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 250,
+        sort: "createdAt:desc",
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily,
+  });
+
+  const operatorAssociatesQuery = useQuery({
+    queryKey: ["company-workspace-operator-associates"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.associate.getAll, {
+        page: 1,
+        limit: 250,
+        sort: "createdAt:desc",
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily,
+  });
+
+  const countriesQuery = useQuery({
+    queryKey: ["company-workspace-countries"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.country.getAll, {
+        page: 1,
+        limit: 400,
+        sort: "name:asc",
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily,
+  });
+
+  const statesQuery = useQuery({
+    queryKey: ["company-workspace-states"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.state.getAll, {
+        page: 1,
+        limit: 500,
+        sort: "name:asc",
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily,
+  });
+
+  const districtsQuery = useQuery({
+    queryKey: ["company-workspace-districts", operatorCompanyForm.state],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.district.getAll, {
+        page: 1,
+        limit: 500,
+        sort: "name:asc",
+        state: operatorCompanyForm.state,
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily && Boolean(operatorCompanyForm.state),
+  });
+
+  const divisionsQuery = useQuery({
+    queryKey: ["company-workspace-divisions", operatorCompanyForm.district],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.division.getAll, {
+        page: 1,
+        limit: 500,
+        sort: "name:asc",
+        district: operatorCompanyForm.district,
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily && Boolean(operatorCompanyForm.district),
+  });
+
+  const pincodeEntriesQuery = useQuery({
+    queryKey: ["company-workspace-pincode-entries", operatorCompanyForm.division],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.pincodeEntry.getAll, {
+        page: 1,
+        limit: 500,
+        division: operatorCompanyForm.division,
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily && Boolean(operatorCompanyForm.division),
+  });
+
+  const companyTypesQuery = useQuery({
+    queryKey: ["company-workspace-company-types"],
+    queryFn: async () => {
+      const response = await getData(apiRoutes.companyType.getAll, {
+        page: 1,
+        limit: 250,
+        sort: "name:asc",
+      });
+      return extractList(response);
+    },
+    enabled: isOperatorFamily,
   });
 
   const obaolConfigQuery = useQuery({
@@ -261,6 +416,113 @@ export default function CompanyWorkspacePage() {
     },
   });
 
+  const operatorCreateCompanyMutation = useMutation({
+    mutationFn: async () => {
+      const payload: any = {
+        name: operatorCompanyForm.name.trim(),
+        email: operatorCompanyForm.email.trim(),
+        phone: operatorCompanyForm.phone.trim(),
+        phoneSecondary: operatorCompanyForm.phoneSecondary.trim(),
+      };
+
+      if (operatorCompanyForm.address.trim()) payload.address = operatorCompanyForm.address.trim();
+      payload.geoType = operatorCompanyForm.geoType;
+      if (operatorCompanyForm.companyType) payload.companyType = operatorCompanyForm.companyType;
+      if (operatorCompanyForm.serviceCapabilities.length) payload.serviceCapabilities = operatorCompanyForm.serviceCapabilities;
+
+      if (operatorCompanyForm.geoType === "INTERNATIONAL") {
+        if (operatorCompanyForm.country) payload.country = operatorCompanyForm.country;
+      } else {
+        if (operatorCompanyForm.state) payload.state = operatorCompanyForm.state;
+        if (operatorCompanyForm.district) payload.district = operatorCompanyForm.district;
+        if (operatorCompanyForm.division) payload.division = operatorCompanyForm.division;
+        if (operatorCompanyForm.pincodeEntry) payload.pincodeEntry = operatorCompanyForm.pincodeEntry;
+      }
+
+      const response = await postData(apiRoutes.associateCompany.getAll, payload);
+      return response?.data?.data || null;
+    },
+    onSuccess: () => {
+      showToastMessage({
+        type: "success",
+        message: "Company added successfully and sent for admin approval.",
+        position: "top-right",
+      });
+      setIsAddCompanyModalOpen(false);
+      setOperatorCompanyForm({
+        name: "",
+        email: "",
+        phone: "",
+        phoneSecondary: "",
+        address: "",
+        geoType: "INDIAN",
+        country: "",
+        state: "",
+        district: "",
+        division: "",
+        pincodeEntry: "",
+        companyType: "",
+        serviceCapabilities: [],
+      });
+      queryClient.invalidateQueries({ queryKey: ["company-workspace-operator-companies"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Failed to add company.",
+        position: "top-right",
+      });
+    },
+  });
+
+  const operatorCreateAssociateMutation = useMutation({
+    mutationFn: async () => {
+      const temporaryPassword = buildTemporaryPassword();
+      const payload = {
+        name: operatorAssociateForm.name.trim(),
+        email: operatorAssociateForm.email.trim(),
+        phone: operatorAssociateForm.phone.trim(),
+        phoneSecondary: operatorAssociateForm.phoneSecondary.trim(),
+        associateCompany: operatorAssociateForm.associateCompany,
+        password: temporaryPassword,
+      };
+      const response = await postData(apiRoutes.associate.getAll, payload);
+      return {
+        created: response?.data?.data || null,
+        temporaryPassword,
+      };
+    },
+    onSuccess: (result: any) => {
+      showToastMessage({
+        type: "success",
+        message: "Associate created successfully.",
+        position: "top-right",
+      });
+      setIsAddAssociateModalOpen(false);
+      setOperatorAssociateForm({
+        name: "",
+        email: "",
+        phone: "",
+        phoneSecondary: "",
+        associateCompany: "",
+      });
+      setCreatedAssociateCredential({
+        name: String(result?.created?.name || ""),
+        email: String(result?.created?.email || operatorAssociateForm.email || ""),
+        password: String(result?.temporaryPassword || ""),
+      });
+      queryClient.invalidateQueries({ queryKey: ["company-workspace-operator-associates"] });
+      queryClient.invalidateQueries({ queryKey: ["company-workspace-operator-companies"] });
+    },
+    onError: (error: any) => {
+      showToastMessage({
+        type: "error",
+        message: error?.response?.data?.message || "Failed to add associate.",
+        position: "top-right",
+      });
+    },
+  });
+
   const company = companyQuery.data;
   const previewUrl = getCompanyPreviewUrl(company);
   const isWebsiteLive = Boolean((company as any)?.isWebsiteLive);
@@ -336,6 +598,30 @@ export default function CompanyWorkspacePage() {
     router.replace("/dashboard/companies");
   }, [isAdmin, router]);
 
+  useEffect(() => {
+    setOperatorCompanyForm((current) => ({
+      ...current,
+      district: "",
+      division: "",
+      pincodeEntry: "",
+    }));
+  }, [operatorCompanyForm.state]);
+
+  useEffect(() => {
+    setOperatorCompanyForm((current) => ({
+      ...current,
+      division: "",
+      pincodeEntry: "",
+    }));
+  }, [operatorCompanyForm.district]);
+
+  useEffect(() => {
+    setOperatorCompanyForm((current) => ({
+      ...current,
+      pincodeEntry: "",
+    }));
+  }, [operatorCompanyForm.division]);
+
   const pendingBannerRequestedInterests = useMemo(() => {
     if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedInterests)) {
       return latestPendingLikeReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase());
@@ -350,6 +636,38 @@ export default function CompanyWorkspacePage() {
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
+  const operatorAssignedCompanies = useMemo(
+    () => (Array.isArray(operatorAssignedCompaniesQuery.data) ? operatorAssignedCompaniesQuery.data : []),
+    [operatorAssignedCompaniesQuery.data]
+  );
+  const operatorAssociates = useMemo(
+    () => (Array.isArray(operatorAssociatesQuery.data) ? operatorAssociatesQuery.data : []),
+    [operatorAssociatesQuery.data]
+  );
+  const locationCountries = useMemo(
+    () => (Array.isArray(countriesQuery.data) ? countriesQuery.data : []),
+    [countriesQuery.data]
+  );
+  const locationStates = useMemo(
+    () => (Array.isArray(statesQuery.data) ? statesQuery.data : []),
+    [statesQuery.data]
+  );
+  const locationDistricts = useMemo(
+    () => (Array.isArray(districtsQuery.data) ? districtsQuery.data : []),
+    [districtsQuery.data]
+  );
+  const locationDivisions = useMemo(
+    () => (Array.isArray(divisionsQuery.data) ? divisionsQuery.data : []),
+    [divisionsQuery.data]
+  );
+  const locationPincodes = useMemo(
+    () => (Array.isArray(pincodeEntriesQuery.data) ? pincodeEntriesQuery.data : []),
+    [pincodeEntriesQuery.data]
+  );
+  const availableCompanyTypes = useMemo(
+    () => (Array.isArray(companyTypesQuery.data) ? companyTypesQuery.data : []),
+    [companyTypesQuery.data]
+  );
 
   if (isAdmin) {
     return (
@@ -361,11 +679,11 @@ export default function CompanyWorkspacePage() {
     );
   }
 
-  if (!isAssociate && !canViewObaolConfig) {
+  if (!isAssociate && !isOperatorFamily && !canViewObaolConfig) {
     return (
       <div className="w-full p-6">
         <div className="rounded-xl border border-default-200 bg-content1 p-6 text-default-700">
-          This workspace is available only for associates.
+          This workspace is available for associates and operators.
         </div>
       </div>
     );
@@ -432,6 +750,153 @@ export default function CompanyWorkspacePage() {
             This configuration is required to draft quotations, proforma invoices, and purchase orders without errors.
           </div>
         </div>
+      )}
+
+      {isOperatorFamily && (
+        <>
+          <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Operator Company Workspace</h1>
+                <p className="text-sm text-default-600">
+                  Manage companies assigned to you and onboard their associates.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button color="primary" onPress={() => setIsAddCompanyModalOpen(true)}>
+                  Add Company
+                </Button>
+                <Button
+                  color="secondary"
+                  variant="flat"
+                  onPress={() => setIsAddAssociateModalOpen(true)}
+                >
+                  Add Associate
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-foreground">Assigned Companies</h2>
+              <p className="text-sm text-default-600">These are the companies currently handled by you.</p>
+            </div>
+            {operatorAssignedCompaniesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner />
+              </div>
+            ) : operatorAssignedCompaniesQuery.isError ? (
+              <div className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-200">
+                Failed to load assigned companies.
+              </div>
+            ) : operatorAssignedCompanies.length === 0 ? (
+              <div className="rounded-lg border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800 dark:border-warning-400/30 dark:bg-warning-500/10 dark:text-warning-100">
+                No companies are assigned yet. Use <span className="font-semibold">Add Company</span> to onboard one.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] text-sm">
+                  <thead className="bg-default-100/70">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Company</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Phone</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Company Type</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {operatorAssignedCompanies.map((item: any, idx: number) => (
+                      <tr
+                        key={item?._id || idx}
+                        className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                      >
+                        <td className="px-3 py-2 font-medium text-foreground">{item?.name || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">{item?.email || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">{item?.phone || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">
+                          {item?.companyType?.name || item?.companyTypeName || "-"}
+                        </td>
+                        <td className="px-3 py-2">
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            color={approvalStatusColor(String(item?.registrationStatus || "")) as any}
+                          >
+                            {String(item?.registrationStatus || "PENDING_REVIEW")}
+                          </Chip>
+                        </td>
+                        <td className="px-3 py-2 text-default-600">{formatDate(item?.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-foreground">Company Associates</h2>
+              <p className="text-sm text-default-600">
+                Members visible here belong to companies assigned to your operator account.
+              </p>
+            </div>
+            {operatorAssociatesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner />
+              </div>
+            ) : operatorAssociatesQuery.isError ? (
+              <div className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-200">
+                Failed to load associates.
+              </div>
+            ) : operatorAssociates.length === 0 ? (
+              <div className="py-4 text-sm text-default-500">No associates found for your assigned companies.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] text-sm">
+                  <thead className="bg-default-100/70">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Name</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Phone</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Company</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
+                      <th className="text-left px-3 py-2 font-semibold text-default-700">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {operatorAssociates.map((item: any, idx: number) => (
+                      <tr
+                        key={item?._id || idx}
+                        className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                      >
+                        <td className="px-3 py-2 font-medium text-foreground">{item?.name || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">{item?.email || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">{item?.phone || "-"}</td>
+                        <td className="px-3 py-2 text-default-600">
+                          {item?.associateCompany?.name || item?.associateCompanyName || "-"}
+                        </td>
+                        <td className="px-3 py-2">
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            color={approvalStatusColor(String(item?.registrationStatus || "")) as any}
+                          >
+                            {String(item?.registrationStatus || "PENDING_REVIEW")}
+                          </Chip>
+                        </td>
+                        <td className="px-3 py-2 text-default-600">{formatDate(item?.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {isAssociate && (
@@ -827,6 +1292,351 @@ export default function CompanyWorkspacePage() {
       </Modal>
         </>
       )}
+
+      <Modal
+        isOpen={isAddCompanyModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsAddCompanyModalOpen(false);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>Add Company</ModalHeader>
+          <ModalBody>
+            <Input
+              label="Company Name"
+              labelPlacement="outside"
+              value={operatorCompanyForm.name}
+              onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, name: value }))}
+              isRequired
+            />
+            <Input
+              label="Email"
+              type="email"
+              labelPlacement="outside"
+              value={operatorCompanyForm.email}
+              onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, email: value }))}
+              isRequired
+            />
+            <Input
+              label="Phone"
+              labelPlacement="outside"
+              value={operatorCompanyForm.phone}
+              onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phone: value }))}
+              isRequired
+            />
+            <Input
+              label="Phone Secondary"
+              labelPlacement="outside"
+              value={operatorCompanyForm.phoneSecondary}
+              onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, phoneSecondary: value }))}
+              isRequired
+            />
+            <Textarea
+              label="Address (Optional)"
+              labelPlacement="outside"
+              minRows={2}
+              value={operatorCompanyForm.address}
+              onValueChange={(value) => setOperatorCompanyForm((current) => ({ ...current, address: value }))}
+            />
+            <Select
+              label="Geo Type"
+              labelPlacement="outside"
+              selectedKeys={new Set([operatorCompanyForm.geoType])}
+              onSelectionChange={(keys) => {
+                const value = Array.from(keys as Set<string>)[0] || "INDIAN";
+                setOperatorCompanyForm((current) => ({ ...current, geoType: String(value) }));
+              }}
+            >
+              <SelectItem key="INDIAN" value="INDIAN">
+                Indian
+              </SelectItem>
+              <SelectItem key="INTERNATIONAL" value="INTERNATIONAL">
+                International
+              </SelectItem>
+            </Select>
+            {operatorCompanyForm.geoType === "INTERNATIONAL" ? (
+              <Select
+                label="Country (Optional)"
+                labelPlacement="outside"
+                selectedKeys={operatorCompanyForm.country ? new Set([operatorCompanyForm.country]) : new Set()}
+                onSelectionChange={(keys) => {
+                  const value = Array.from(keys as Set<string>)[0] || "";
+                  setOperatorCompanyForm((current) => ({ ...current, country: String(value) }));
+                }}
+                isLoading={countriesQuery.isLoading}
+              >
+                {locationCountries.map((countryItem: any) => (
+                  <SelectItem key={countryItem?._id || countryItem?.id} value={countryItem?._id || countryItem?.id}>
+                    {countryItem?.name || "Unnamed Country"}
+                  </SelectItem>
+                ))}
+              </Select>
+            ) : (
+              <>
+                <Select
+                  label="State (Optional)"
+                  labelPlacement="outside"
+                  selectedKeys={operatorCompanyForm.state ? new Set([operatorCompanyForm.state]) : new Set()}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setOperatorCompanyForm((current) => ({ ...current, state: String(value) }));
+                  }}
+                  isLoading={statesQuery.isLoading}
+                >
+                  {locationStates.map((stateItem: any) => (
+                    <SelectItem key={stateItem?._id || stateItem?.id} value={stateItem?._id || stateItem?.id}>
+                      {stateItem?.name || "Unnamed State"}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="District (Optional)"
+                  labelPlacement="outside"
+                  selectedKeys={operatorCompanyForm.district ? new Set([operatorCompanyForm.district]) : new Set()}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setOperatorCompanyForm((current) => ({ ...current, district: String(value) }));
+                  }}
+                  isDisabled={!operatorCompanyForm.state}
+                  isLoading={districtsQuery.isLoading}
+                >
+                  {locationDistricts.map((districtItem: any) => (
+                    <SelectItem key={districtItem?._id || districtItem?.id} value={districtItem?._id || districtItem?.id}>
+                      {districtItem?.name || "Unnamed District"}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Division (Optional)"
+                  labelPlacement="outside"
+                  selectedKeys={operatorCompanyForm.division ? new Set([operatorCompanyForm.division]) : new Set()}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setOperatorCompanyForm((current) => ({ ...current, division: String(value) }));
+                  }}
+                  isDisabled={!operatorCompanyForm.district}
+                  isLoading={divisionsQuery.isLoading}
+                >
+                  {locationDivisions.map((divisionItem: any) => (
+                    <SelectItem key={divisionItem?._id || divisionItem?.id} value={divisionItem?._id || divisionItem?.id}>
+                      {divisionItem?.name || "Unnamed Division"}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Pincode (Optional)"
+                  labelPlacement="outside"
+                  selectedKeys={operatorCompanyForm.pincodeEntry ? new Set([operatorCompanyForm.pincodeEntry]) : new Set()}
+                  onSelectionChange={(keys) => {
+                    const value = Array.from(keys as Set<string>)[0] || "";
+                    setOperatorCompanyForm((current) => ({ ...current, pincodeEntry: String(value) }));
+                  }}
+                  isDisabled={!operatorCompanyForm.division}
+                  isLoading={pincodeEntriesQuery.isLoading}
+                >
+                  {locationPincodes.map((entry: any) => (
+                    <SelectItem key={entry?._id || entry?.id} value={entry?._id || entry?.id}>
+                      {entry?.pincode ? `${entry.pincode}${entry?.officename ? ` - ${entry.officename}` : ""}` : "Pincode Entry"}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </>
+            )}
+            <Select
+              label="Company Type (Optional)"
+              labelPlacement="outside"
+              selectedKeys={operatorCompanyForm.companyType ? new Set([operatorCompanyForm.companyType]) : new Set()}
+              onSelectionChange={(keys) => {
+                const value = Array.from(keys as Set<string>)[0] || "";
+                setOperatorCompanyForm((current) => ({ ...current, companyType: String(value) }));
+              }}
+              isLoading={companyTypesQuery.isLoading}
+            >
+              {availableCompanyTypes.map((companyType: any) => (
+                <SelectItem key={companyType?._id || companyType?.id} value={companyType?._id || companyType?.id}>
+                  {companyType?.name || "Unnamed Company Type"}
+                </SelectItem>
+              ))}
+            </Select>
+            <Select
+              label="Service Capabilities (Optional)"
+              labelPlacement="outside"
+              selectionMode="multiple"
+              selectedKeys={new Set(operatorCompanyForm.serviceCapabilities)}
+              onSelectionChange={(keys) =>
+                setOperatorCompanyForm((current) => ({
+                  ...current,
+                  serviceCapabilities: Array.from(keys as Set<string>).map((value) => String(value)),
+                }))
+              }
+            >
+              {INTEREST_OPTIONS.map((interest) => (
+                <SelectItem key={interest} value={interest}>
+                  {interest.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </Select>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setIsAddCompanyModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              isLoading={operatorCreateCompanyMutation.isPending}
+              isDisabled={
+                !operatorCompanyForm.name.trim() ||
+                !operatorCompanyForm.email.trim() ||
+                !operatorCompanyForm.phone.trim() ||
+                !operatorCompanyForm.phoneSecondary.trim()
+              }
+              onPress={() => operatorCreateCompanyMutation.mutate()}
+            >
+              Add Company
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isAddAssociateModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsAddAssociateModalOpen(false);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>Add Associate</ModalHeader>
+          <ModalBody>
+            <Input
+              label="Associate Name"
+              labelPlacement="outside"
+              value={operatorAssociateForm.name}
+              onValueChange={(value) => setOperatorAssociateForm((current) => ({ ...current, name: value }))}
+              isRequired
+            />
+            <Input
+              label="Email"
+              type="email"
+              labelPlacement="outside"
+              value={operatorAssociateForm.email}
+              onValueChange={(value) => setOperatorAssociateForm((current) => ({ ...current, email: value }))}
+              isRequired
+            />
+            <Input
+              label="Phone"
+              labelPlacement="outside"
+              value={operatorAssociateForm.phone}
+              onValueChange={(value) => setOperatorAssociateForm((current) => ({ ...current, phone: value }))}
+              isRequired
+            />
+            <Input
+              label="Phone Secondary"
+              labelPlacement="outside"
+              value={operatorAssociateForm.phoneSecondary}
+              onValueChange={(value) => setOperatorAssociateForm((current) => ({ ...current, phoneSecondary: value }))}
+              isRequired
+            />
+            <Select
+              label="Assign Company"
+              labelPlacement="outside"
+              selectedKeys={operatorAssociateForm.associateCompany ? new Set([operatorAssociateForm.associateCompany]) : new Set()}
+              onSelectionChange={(keys) => {
+                const value = Array.from(keys as Set<string>)[0] || "";
+                setOperatorAssociateForm((current) => ({ ...current, associateCompany: String(value) }));
+              }}
+              isRequired
+            >
+              {operatorAssignedCompanies.map((companyItem: any) => (
+                <SelectItem key={companyItem?._id || companyItem?.id} value={companyItem?._id || companyItem?.id}>
+                  {companyItem?.name || "Unnamed Company"}
+                </SelectItem>
+              ))}
+            </Select>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setIsAddAssociateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              color="secondary"
+              isLoading={operatorCreateAssociateMutation.isPending}
+              isDisabled={
+                !operatorAssociateForm.name.trim() ||
+                !operatorAssociateForm.email.trim() ||
+                !operatorAssociateForm.phone.trim() ||
+                !operatorAssociateForm.phoneSecondary.trim() ||
+                !operatorAssociateForm.associateCompany
+              }
+              onPress={() => operatorCreateAssociateMutation.mutate()}
+            >
+              Add Associate
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(createdAssociateCredential)}
+        onOpenChange={(open) => {
+          if (!open) setCreatedAssociateCredential(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>Associate Credentials</ModalHeader>
+          <ModalBody>
+            <p className="text-sm text-default-600">
+              Credentials are shown once. Share these securely with the associate.
+            </p>
+            <Input
+              label="Associate"
+              labelPlacement="outside"
+              value={createdAssociateCredential?.name || "-"}
+              isReadOnly
+            />
+            <Input
+              label="Email"
+              labelPlacement="outside"
+              value={createdAssociateCredential?.email || "-"}
+              isReadOnly
+            />
+            <Input
+              label="Temporary Password"
+              labelPlacement="outside"
+              value={createdAssociateCredential?.password || "-"}
+              isReadOnly
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="flat"
+              color="primary"
+              onPress={async () => {
+                const password = createdAssociateCredential?.password || "";
+                if (!password) return;
+                try {
+                  await navigator.clipboard.writeText(password);
+                  showToastMessage({
+                    type: "success",
+                    message: "Temporary password copied.",
+                    position: "top-right",
+                  });
+                } catch {
+                  showToastMessage({
+                    type: "error",
+                    message: "Unable to copy password.",
+                    position: "top-right",
+                  });
+                }
+              }}
+            >
+              Copy Password
+            </Button>
+            <Button color="primary" onPress={() => setCreatedAssociateCredential(null)}>
+              Done
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

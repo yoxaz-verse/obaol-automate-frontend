@@ -464,9 +464,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       </Select>
                     )}
                     <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="flex items-center justify-between text-sm text-white/70">
-                        <span>Commission ({commissionPercent}%)</span>
-                        <span className="font-bold text-warning-300">{computedCommission.toFixed(2)}</span>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between text-sm text-white/70">
+                          <span>Commission ({commissionPercent}%)</span>
+                          <span className="font-bold text-warning-300">{computedCommission.toFixed(2)}</span>
+                        </div>
+                        <div className="h-[1px] w-full bg-white/10"></div>
+                        <div className="flex items-center justify-between text-sm font-medium text-white/90">
+                          <span>Price after commission</span>
+                          <span className="font-bold text-success-400">{(rateValue + computedCommission).toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -542,6 +549,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         <div>
                           <div className="text-xs uppercase text-default-400">Commission</div>
                           <div className="text-lg font-bold text-warning-500">{computedCommission.toFixed(2)}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs uppercase text-default-400">Price After Commission</div>
+                          <div className="text-lg font-bold text-success-500">{(rateValue + computedCommission).toFixed(2)}</div>
                         </div>
                       </div>
                     </div>

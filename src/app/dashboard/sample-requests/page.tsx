@@ -2,7 +2,7 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import { Button } from "@heroui/react";
-import { Chip, Input, Card, CardBody, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react";
+import { Chip, Input, Card, CardBody, Divider } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -42,8 +42,6 @@ export default function SampleRequestsPage() {
 
   const [search, setSearch] = useState("");
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
-  const [sellerGateOpen, setSellerGateOpen] = useState(false);
-  const [sellerGateRow, setSellerGateRow] = useState<any | null>(null);
 
   const { data: sampleResponse } = useQuery({
     queryKey: ["sample-requests"],
@@ -111,72 +109,6 @@ export default function SampleRequestsPage() {
   return (
     <section className="pb-20">
       <Title title="Sample Requests" />
-      <Modal
-        isOpen={sellerGateOpen}
-        onOpenChange={setSellerGateOpen}
-        size="md"
-        placement="center"
-        isDismissable
-        backdrop="blur"
-        classNames={{
-          base: "bg-[#04070f] dark:bg-[#04070f] border border-white/10 shadow-2xl rounded-[2.5rem] overflow-hidden",
-          closeButton: "hover:bg-white/5 active:scale-95 transition-all text-white",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1 py-10 px-10 border-b border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className="p-4 bg-warning-500/10 rounded-2xl text-warning-500 shadow-[0_0_20px_rgba(245,165,36,0.15)]">
-                    <LuBox className="animate-pulse" size={24} />
-                  </div>
-                  <div>
-                    <span className="text-xl font-black uppercase tracking-tight text-white leading-none">Security Gate: <span className="text-warning-500">Hold</span></span>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mt-2 italic">Awaiting Supplier Protocol</p>
-                  </div>
-                </div>
-              </ModalHeader>
-              <ModalBody className="gap-6 px-10 py-10">
-                <div className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/5 space-y-5 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/5 blur-[50px] rounded-full -mr-16 -mt-16 group-hover:bg-warning-500/10 transition-colors" />
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-warning-500 shadow-[0_0_10px_rgba(245,165,36,0.8)]" />
-                    <p className="text-[12px] font-black text-white uppercase tracking-widest leading-relaxed">
-                      Supplier Acceptance Required
-                    </p>
-                  </div>
-                  
-                  <div className="bg-black/40 rounded-[1.25rem] p-5 border border-white/5">
-                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.15em] leading-loose italic">
-                      The tactical sequence is paused pending supplier acknowledgement.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                     <span className="text-[9px] font-black text-warning-500/60 uppercase tracking-widest">Global Watch: Online</span>
-                     <div className="flex gap-1">
-                        <div className="w-1 h-1 rounded-full bg-warning-500" />
-                        <div className="w-1 h-1 rounded-full bg-warning-500/40" />
-                        <div className="w-1 h-1 rounded-full bg-warning-500/20" />
-                     </div>
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter className="px-10 pb-10 pt-2 flex items-center justify-center">
-                <Button
-                  variant="flat"
-                  onPress={onClose}
-                  className="w-full h-14 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] bg-white/5 text-white/60 hover:text-white border border-white/10 hover:bg-white/10 transition-all active:scale-95"
-                >
-                  Return to Sample Hub
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
 
       <motion.div 
         initial={{ opacity: 0, y: -30 }}
@@ -275,6 +207,12 @@ export default function SampleRequestsPage() {
               const requestedQty = row?.requestedSampleQtyKg ? `${row.requestedSampleQtyKg} KG` : "N/A";
               const canView = isAdmin || isOperatorUser || isAssociate;
               const isMoving = navigatingId === row._id;
+              const rowStatus = String(row?.status || "").toUpperCase();
+              const hideStatusChip = rowStatus === "REQUESTED" && Boolean(isAssociateSeller);
+              const ctaLabel =
+                isAssociate && rowStatus === "REQUESTED"
+                  ? (isAssociateSeller ? "View Request" : isAssociateBuyer ? "View Status" : "Execute Flow")
+                  : "Execute Flow";
 
               return (
                 <motion.div 
@@ -292,14 +230,16 @@ export default function SampleRequestsPage() {
                                 <span className="text-[8px] font-black text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-full border border-warning-500/20">ID: {String(row._id).slice(-6).toUpperCase()}</span>
                                 <div className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
                             </div>
-                            <Chip 
-                            size="sm" 
-                            variant="flat" 
-                            color={statusColor(String(row.status || ""))}
-                            className="font-black uppercase text-[8px] tracking-[0.1em] h-6 px-3 border border-white/5"
-                            >
-                            {String(row.status || "").replaceAll("_", " ").toLowerCase()}
-                            </Chip>
+                            {!hideStatusChip && (
+                              <Chip 
+                              size="sm" 
+                              variant="flat" 
+                              color={statusColor(String(row.status || ""))}
+                              className="font-black uppercase text-[8px] tracking-[0.1em] h-6 px-3 border border-white/5"
+                              >
+                              {String(row.status || "").replaceAll("_", " ").toLowerCase()}
+                              </Chip>
+                            )}
                         </div>
                         <div>
                             <h3 className="text-lg font-black text-foreground tracking-tight group-hover:text-warning-500 transition-colors uppercase leading-tight">{productName}</h3>
@@ -333,18 +273,12 @@ export default function SampleRequestsPage() {
                             className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl h-10 shadow-lg shadow-warning-500/10 hover:scale-[1.02] active:scale-95 transition-all"
                             isLoading={isMoving}
                             onPress={() => {
-                               const rowStatus = String(row?.status || "").toUpperCase();
-                               if (isAssociate && rowStatus === "REQUESTED") {
-                                 setSellerGateRow(row);
-                                 setSellerGateOpen(true);
-                                 return;
-                               }
                                setNavigatingId(row._id);
                                router.push(`/dashboard/sample-requests/${row._id}`);
                             }}
                             endContent={!isMoving && <LuArrowRight size={14} />}
                           >
-                            {isMoving ? "Loading..." : "Execute Flow"}
+                            {isMoving ? "Loading..." : ctaLabel}
                           </Button>
                         )}
                       </div>

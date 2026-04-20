@@ -422,7 +422,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       setOtpVerified(true);
       showToastMessage({ type: "success", message: "Email verified.", position: "top-right" });
     } catch (err: any) {
-      const message = err?.response?.data?.message || err?.message || "OTP verification failed.";
+      const rawMessage = err?.response?.data?.message || err?.message || "OTP verification failed.";
+      const message = normalizeSignupError(rawMessage);
       setErrorMessage(message);
       showToastMessage({ type: "error", message, position: "top-right" });
     } finally {

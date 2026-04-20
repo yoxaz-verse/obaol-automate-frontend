@@ -1777,15 +1777,16 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                     <div className="flex flex-col w-full gap-3 mt-4">
                       <Button
                         fullWidth
-                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-success-500/20 bg-gradient-to-r from-success-500 to-emerald-600 text-white border-none hover:scale-[1.02] active:scale-95 transition-all"
+                        variant="light"
+                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] text-success-500 hover:bg-success-500/10 transition-all"
                         onPress={onClose}
                       >
                         Acknowledge Protocol
                       </Button>
                       <Button
                         fullWidth
-                        variant="flat"
-                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] bg-foreground/5 hover:bg-foreground/10 border border-divider transition-all active:scale-95"
+                        variant="light"
+                        className="h-14 font-black uppercase tracking-[0.2em] text-[11px] text-default-500 hover:text-foreground transition-all"
                         onPress={() => {
                           onClose();
                           router.push("/dashboard/sample-requests");

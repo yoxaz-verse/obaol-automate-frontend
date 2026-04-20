@@ -94,16 +94,19 @@ export default function SampleRequestDetailPage() {
   const associateCompanyId = (user as any)?.associateCompanyId || null;
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [courierModalOpen, setCourierModalOpen] = useState(false);
   const [receiptModalOpen, setReceiptModalOpen] = useState(false);
   const [quoteMinQty, setQuoteMinQty] = useState("");
   const [quotePrice, setQuotePrice] = useState("");
   const [samplePaymentTerm, setSamplePaymentTerm] = useState("ADVANCE");
+  const [paymentMode, setPaymentMode] = useState<"CASH" | "ONLINE" | "">("");
+  const [onlinePaymentMethod, setOnlinePaymentMethod] = useState<"GPAY" | "CARD" | "">("");
   const [courierAgencyName, setCourierAgencyName] = useState("");
   const [courierTrackingNumber, setCourierTrackingNumber] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  const { data: detailResponse, isLoading } = useQuery({
+  const { data: detailResponse, isLoading, isError, error } = useQuery({
     queryKey: ["sample-request", id],
     queryFn: () => getData(apiRoutes.sampleRequest.getOne(id)),
     enabled: Boolean(id),
@@ -189,9 +192,16 @@ export default function SampleRequestDetailPage() {
   });
 
   const paymentMutation = useMutation({
-    mutationFn: async () => patchData(apiRoutes.sampleRequest.paymentReceived(id), {}),
+    mutationFn: async () =>
+      patchData(apiRoutes.sampleRequest.paymentReceived(id), {
+        paymentMode,
+        onlinePaymentMethod: paymentMode === "ONLINE" ? onlinePaymentMethod : undefined,
+      }),
     onSuccess: () => {
       showToastMessage({ type: "success", message: "Payment confirmed.", position: "top-right" });
+      setPaymentModalOpen(false);
+      setPaymentMode("");
+      setOnlinePaymentMethod("");
       queryClient.invalidateQueries({ queryKey: ["sample-request", id] });
       queryClient.invalidateQueries({ queryKey: ["sample-requests"] });
     },
@@ -302,6 +312,35 @@ export default function SampleRequestDetailPage() {
     );
   }
 
+  const errorStatus = (error as any)?.response?.status;
+  const errorMessage = (error as any)?.response?.data?.message || "Unable to load this sample request right now.";
+
+  if (isError) {
+    const isAccessError = errorStatus === 403;
+    const isMissingError = errorStatus === 404;
+    return (
+      <section className="flex flex-col items-center justify-center min-h-[60vh] px-6">
+        <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center text-default-400 mb-6">
+          <LuFileSearch size={40} />
+        </div>
+        <h2 className="text-xl font-bold mb-2">
+          {isAccessError ? "Access Restricted" : isMissingError ? "Request Not Found" : "Unable to Load Request"}
+        </h2>
+        <p className="text-default-500 text-sm mb-8 text-center max-w-sm">
+          {errorMessage}
+        </p>
+        <Button
+          variant="flat"
+          className="h-11 rounded-xl font-bold px-8"
+          onPress={() => router.push("/dashboard/sample-requests")}
+          startContent={<LuChevronLeft size={18} />}
+        >
+          Return to Hub
+        </Button>
+      </section>
+    );
+  }
+
   if (!request) {
     return (
       <section className="flex flex-col items-center justify-center min-h-[60vh] px-6">
@@ -365,6 +404,18 @@ export default function SampleRequestDetailPage() {
     String(request?.samplePaymentTerm || "ADVANCE") === "COURIER_CHARGES"
       ? "Courier Charges"
       : "Advance";
+  const paymentModeLabel =
+    String(request?.paymentMode || "").toUpperCase() === "ONLINE"
+      ? "Online"
+      : String(request?.paymentMode || "").toUpperCase() === "CASH"
+        ? "Cash"
+        : "—";
+  const onlinePaymentMethodLabel =
+    String(request?.onlinePaymentMethod || "").toUpperCase() === "GPAY"
+      ? "GPay"
+      : String(request?.onlinePaymentMethod || "").toUpperCase() === "CARD"
+        ? "Card"
+        : "—";
   const receiptFileUrl = request?.receiptFileId?.fileURL || request?.receiptFileId?.fileId || null;
 
   return (
@@ -455,6 +506,20 @@ export default function SampleRequestDetailPage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Sample Payment Term</span>
                     <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
                     <span className="text-sm font-bold text-foreground">{samplePaymentTermLabel}</span>
+                  </div>
+                )}
+                {request?.paymentMode && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Payment Mode</span>
+                    <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
+                    <span className="text-sm font-bold text-foreground">{paymentModeLabel}</span>
+                  </div>
+                )}
+                {String(request?.paymentMode || "").toUpperCase() === "ONLINE" && request?.onlinePaymentMethod && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Online Method</span>
+                    <div className="flex-1 border-b border-divider border-dashed mx-2 mb-1" />
+                    <span className="text-sm font-bold text-foreground">{onlinePaymentMethodLabel}</span>
                   </div>
                 )}
               </div>
@@ -592,22 +657,41 @@ export default function SampleRequestDetailPage() {
                   <Button 
                     fullWidth
                     className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 shadow-[0_10px_30px_rgba(0,112,243,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
-                    onPress={() => paymentMutation.mutate()}
+                    onPress={() => {
+                      setPaymentMode("");
+                      setOnlinePaymentMethod("");
+                      setPaymentModalOpen(true);
+                    }}
                     startContent={<LuWallet size={18} />}
                   >
-                    CONFIRM PAYMENT RECEIPT
+                    MAKE PAYMENT
                   </Button>
                 )}
 
+                {status === "PAYMENT_RECEIVED" && canBuyer && !canSupplier && (
+                  <div className="p-5 rounded-2xl bg-primary-500/5 border border-primary-500/10">
+                    <p className="text-[11px] font-bold text-primary-200/80 uppercase tracking-widest leading-relaxed">
+                      Payment recorded ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Supplier will now continue with packaging protocol.
+                    </p>
+                  </div>
+                )}
+
                 {status === "PAYMENT_RECEIVED" && canSupplier && (
-                  <Button 
-                    fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
-                    onPress={() => packagingStartMutation.mutate()}
-                    startContent={<LuPackageOpen size={18} />}
-                  >
-                    INITIATE PACKAGING PROTOCOL
-                  </Button>
+                  <div className="space-y-4">
+                    <div className="p-5 rounded-2xl bg-warning-500/5 border border-warning-500/10">
+                      <p className="text-[11px] font-bold text-warning-200/80 uppercase tracking-widest leading-relaxed">
+                        Buyer payment received ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Next step: initiate packaging protocol.
+                      </p>
+                    </div>
+                    <Button 
+                      fullWidth
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      onPress={() => packagingStartMutation.mutate()}
+                      startContent={<LuPackageOpen size={18} />}
+                    >
+                      INITIATE PACKAGING PROTOCOL
+                    </Button>
+                  </div>
                 )}
 
                 {status === "PREPARING_PACKAGING" && canSupplier && (
@@ -793,6 +877,94 @@ export default function SampleRequestDetailPage() {
                    className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(245,158,11,0.2)] bg-gradient-to-r from-warning to-warning-600"
                 >
                    Execute Submission
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      <Modal 
+         isOpen={paymentModalOpen} 
+         onOpenChange={setPaymentModalOpen} 
+         size="md" 
+         placement="center"
+         backdrop="opaque"
+         isDismissable={false}
+         isKeyboardDismissDisabled
+         classNames={{
+           base: "bg-[#05070c]/95 border border-white/10 shadow-2xl backdrop-blur-2xl",
+           closeButton: "hover:bg-white/5 active:scale-95 transition-all",
+         }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 py-8 px-10">
+                 <div className="flex items-center gap-3">
+                    <LuWallet className="text-primary" size={24} />
+                    <span className="text-xl font-black uppercase italic tracking-tight text-white">Payment Confirmation</span>
+                 </div>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 mt-1 italic">Select Payment Type</p>
+              </ModalHeader>
+              <ModalBody className="gap-8 px-10 pb-10">
+                <Select
+                  label="Payment Type"
+                  variant="flat"
+                  labelPlacement="outside"
+                  selectedKeys={paymentMode ? new Set([paymentMode]) : new Set([])}
+                  onSelectionChange={(keys) => {
+                    const nextValue = (Array.from(keys as Set<string>)[0] || "") as "CASH" | "ONLINE" | "";
+                    setPaymentMode(nextValue);
+                    if (nextValue !== "ONLINE") setOnlinePaymentMethod("");
+                  }}
+                  classNames={{
+                    trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                    label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                    popoverContent: "bg-[#0B0F14] border border-white/10",
+                  }}
+                >
+                  <SelectItem key="CASH" className="text-white font-bold text-xs uppercase tracking-widest">Cash</SelectItem>
+                  <SelectItem key="ONLINE" className="text-white font-bold text-xs uppercase tracking-widest">Online</SelectItem>
+                </Select>
+
+                {paymentMode === "ONLINE" && (
+                  <Select
+                    label="Online Method"
+                    variant="flat"
+                    labelPlacement="outside"
+                    selectedKeys={onlinePaymentMethod ? new Set([onlinePaymentMethod]) : new Set([])}
+                    onSelectionChange={(keys) => {
+                      const nextValue = (Array.from(keys as Set<string>)[0] || "") as "GPAY" | "CARD" | "";
+                      setOnlinePaymentMethod(nextValue);
+                    }}
+                    classNames={{
+                      trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
+                      label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
+                      popoverContent: "bg-[#0B0F14] border border-white/10",
+                    }}
+                  >
+                    <SelectItem key="GPAY" className="text-white font-bold text-xs uppercase tracking-widest">GPay</SelectItem>
+                    <SelectItem key="CARD" className="text-white font-bold text-xs uppercase tracking-widest">Card</SelectItem>
+                  </Select>
+                )}
+              </ModalBody>
+              <ModalFooter className="px-10 pb-10 pt-2 flex items-center justify-between gap-4">
+                <Button 
+                   variant="light" 
+                   onPress={onClose}
+                   className="px-8 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest text-white/40 hover:text-white"
+                >
+                   Abort
+                </Button>
+                <Button 
+                   color="primary" 
+                   variant="shadow"
+                   onPress={() => paymentMutation.mutate()}
+                   isDisabled={!paymentMode || (paymentMode === "ONLINE" && !onlinePaymentMethod)}
+                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-[0_0_30px_rgba(0,112,243,0.2)] bg-gradient-to-r from-primary to-primary-600"
+                >
+                   Confirm Payment
                 </Button>
               </ModalFooter>
             </>

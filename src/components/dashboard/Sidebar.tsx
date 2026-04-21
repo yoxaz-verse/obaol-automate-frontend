@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         const allowedRoles = (routeRoles[option.link] || []).map((role) => String(role).toLowerCase());
         const userRole = String(user?.role || "").toLowerCase();
         if (!userRole) return false;
-        if (userRole === "admin" && option.link === "/dashboard/company") return false;
+        if ((userRole === "admin" || userRole === "operator" || userRole === "team") && option.link === "/dashboard/company") return false;
         return allowedRoles.includes(userRole);
     });
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));

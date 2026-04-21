@@ -49,6 +49,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     return () => clearInterval(timer);
   }, []);
   const normalizedRole = String(role || "").toLowerCase();
+  const isOperatorFamily = normalizedRole === "operator" || normalizedRole === "team";
   const displayRole = (normalizedRole === "operator" || normalizedRole === "team")
     ? "Operator"
     : (role?.charAt(0).toUpperCase() + role.slice(1));
@@ -135,12 +136,13 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   });
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
+  const manageCompanyLink = isOperatorFamily || normalizedRole === "admin" ? "/dashboard/companies" : "/dashboard/company";
   const mobileSections = [
     { label: "", links: ["/dashboard"] },
     { label: "Product", links: ["/dashboard/product", "/dashboard/catalog", "/dashboard/marketplace", "/dashboard/imports"] },
     { label: "Execution", links: ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/external-orders", "/dashboard/sample-requests", "/dashboard/execution-enquiries", "/dashboard/documents"] },
     { label: "News", links: ["/dashboard/news"] },
-    { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", "/dashboard/company", "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
+    { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", manageCompanyLink, "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
     { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/calculations", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
   ];

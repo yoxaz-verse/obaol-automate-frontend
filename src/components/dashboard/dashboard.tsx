@@ -50,6 +50,7 @@ import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
 import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
+import { dashboardCopy } from "@/utils/dashboardCopy";
 
 const Dashboard: NextPage = () => {
   const { user } = useContext(AuthContext);
@@ -62,12 +63,12 @@ const Dashboard: NextPage = () => {
   const isAdmin = roleLower === "admin";
   const isAssociate = roleLower === "associate";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const hubTitle = isAdmin ? "Admin Panel" : isOperatorUser ? "Operations Hub" : "Associate Hub";
+  const hubTitle = isAdmin ? "Admin Dashboard" : isOperatorUser ? "Operator Dashboard" : "Associate Dashboard";
   const hubSubtitle = isAdmin
-    ? "System oversight active."
+    ? "System overview is ready."
     : isOperatorUser
-      ? "Mission overview active."
-      : "Account overview active.";
+      ? "Operator overview is ready."
+      : "Account overview is ready.";
 
   const [companyLookup, setCompanyLookup] = useState("");
   const [associateLookup, setAssociateLookup] = useState("");
@@ -257,7 +258,7 @@ const Dashboard: NextPage = () => {
         {
           label: "Enquiry milestones pending",
           value: adminActionRequired,
-          detail: "Missing seller/buyer confirmations or conversion",
+          detail: "Missing seller or buyer confirmations",
           route: "/dashboard/enquiries",
           color: "primary" as const,
         },
@@ -267,6 +268,13 @@ const Dashboard: NextPage = () => {
           detail: "Track active operational orders",
           route: "/dashboard/orders",
           color: "success" as const,
+        },
+        {
+          label: "Unassigned companies",
+          value: Number(systemMetrics.unassignedCompanies || 0),
+          detail: "Assign operators to unmapped companies",
+          route: "/dashboard/companies",
+          color: "primary" as const,
         },
       ];
     }
@@ -283,7 +291,7 @@ const Dashboard: NextPage = () => {
         {
           label: "Catalog opportunities",
           value: Number(associateMetrics.obaolCatalogCount || 0),
-          detail: "Rates available in OBAOL catalog",
+          detail: "Products available in OBAOL catalog",
           route: "/dashboard/marketplace",
           color: "primary" as const,
         },
@@ -311,7 +319,7 @@ const Dashboard: NextPage = () => {
         {
           label: "Live-rate gap",
           value: Math.max(totalAssignedProducts - liveAssignedProducts, 0),
-          detail: "Assigned products not yet live",
+          detail: "Assigned products not live yet",
           route: "/dashboard/product",
           color: "primary" as const,
         },
@@ -334,6 +342,7 @@ const Dashboard: NextPage = () => {
     pendingApprovalsTotal,
     pendingAssociateApprovals,
     pendingCompanyApprovals,
+    systemMetrics.unassignedCompanies,
   ]);
 
   const pendingActionsList = useMemo(() => {
@@ -401,7 +410,7 @@ const Dashboard: NextPage = () => {
       <CardHeader className="px-8 pt-8">
         <div className="flex flex-col gap-1">
           <h4 className="font-bold text-foreground">Task Overview</h4>
-          <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Management priorities and active triggers.</p>
+          <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest opacity-60">Management priorities and pending actions.</p>
         </div>
       </CardHeader>
       <Divider className="my-4 mx-8 w-auto opacity-50" />
@@ -425,7 +434,7 @@ const Dashboard: NextPage = () => {
                endContent={<LuChevronRight className="w-3.5 h-3.5" />}
                onPress={() => router.push(item.route)}
              >
-               Open Hub
+               Open
              </Button>
            </div>
          ))}
@@ -434,7 +443,7 @@ const Dashboard: NextPage = () => {
             <div className="p-5 bg-danger/5 border border-danger/10 rounded-2xl animate-in slide-in-from-right duration-500">
                <div className="flex items-center gap-2 mb-3">
                   <LuAlertIcon className="text-danger" size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-danger">Urgency Protocol Required</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-danger">Urgent Action Required</span>
                </div>
                <div className="space-y-3">
                   <div className="flex items-center justify-between text-[11px] font-bold">
@@ -487,7 +496,7 @@ const Dashboard: NextPage = () => {
   const renderRecentActivity = () => (
     <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem]">
       <CardHeader className="px-8 pt-8">
-        <h4 className="font-bold text-foreground">Flux Telemetry</h4>
+        <h4 className="font-bold text-foreground">Recent Activity</h4>
       </CardHeader>
       <Divider className="my-4 mx-8 w-auto opacity-50" />
       <CardBody className="px-8 pb-8 space-y-4">
@@ -505,7 +514,7 @@ const Dashboard: NextPage = () => {
                 <div className="font-bold text-foreground uppercase tracking-tight group-hover:text-primary transition-colors">
                   {item.type} <span className="text-[10px] text-default-400 ml-1 font-medium">{String(item.id || "").slice(-6).toUpperCase()}</span>
                 </div>
-                <div className="text-[10px] text-default-500 uppercase tracking-widest font-bold opacity-60">{String(item.status || "").replace(/_/g, " ")}</div>
+                <div className="text-[10px] text-default-500 uppercase tracking-widest font-bold opacity-60">{dashboardCopy(item.status || "")}</div>
               </div>
               <span className="text-[9px] font-bold text-default-400 bg-foreground/5 px-2 py-1 rounded-md uppercase tracking-widest whitespace-nowrap">
                 {new Date(item.at).toLocaleDateString()}
@@ -515,10 +524,10 @@ const Dashboard: NextPage = () => {
         ) : (
           <div className="text-[11px] font-medium text-default-500 italic opacity-60">
             {isAssociate
-              ? "No associate telemetry detected. Initialize marketplace interaction."
+              ? "No associate activity found yet."
               : isOperatorUser
-                ? "No assigned activity telemetry. Check company mappings."
-                : "No recent activity detected in the flux stream."}
+                ? "No operator activity found yet."
+                : "No recent activity found."}
           </div>
         )}
       </CardBody>
@@ -540,7 +549,7 @@ const Dashboard: NextPage = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <InsightCard
           title="Total Enquiries"
           metric={Number(systemMetrics.totalEnquiries ?? totalEnquiries).toLocaleString()}
@@ -569,7 +578,33 @@ const Dashboard: NextPage = () => {
           icon={<LuCheck size={18} />}
           footer={<span className="text-xs text-default-500">Completed orders out of all created orders</span>}
         />
+        <InsightCard
+          title="Companies With Live Products"
+          metric={Number(systemMetrics.companiesWithLiveProducts || 0).toLocaleString()}
+          icon={<LuBox size={18} />}
+          footer={<span className="text-xs text-default-500">Companies with at least one live listing</span>}
+        />
       </div>
+
+      <Card className="border border-warning-500/20 bg-warning-500/5 rounded-[1.5rem] shadow-none">
+        <CardBody className="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-black text-foreground uppercase tracking-widest">Unassigned Companies</h4>
+            <p className="text-xs text-default-500">
+              {Number(systemMetrics.unassignedCompanies || 0).toLocaleString()} companies currently have no operator mapped.
+            </p>
+          </div>
+          <Button
+            color="warning"
+            variant="flat"
+            className="font-black uppercase tracking-[0.2em] text-[10px]"
+            endContent={<LuArrowRight className="w-3.5 h-3.5" />}
+            onPress={() => router.push("/dashboard/companies")}
+          >
+            Assign Operators
+          </Button>
+        </CardBody>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {renderActionCenter()}
@@ -766,7 +801,7 @@ const Dashboard: NextPage = () => {
               <CardHeader className="px-8 pt-8">
                  <div className="flex items-center gap-2">
                     <LuRadioIcon className="text-primary animate-pulse" size={18} />
-                    <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Intelligence Stream</h4>
+                    <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Market Updates</h4>
                  </div>
               </CardHeader>
               <Divider className="my-4 mx-8 w-auto opacity-50" />
@@ -774,17 +809,17 @@ const Dashboard: NextPage = () => {
                  <div className="space-y-4">
                     <div className="flex flex-col gap-1">
                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">System Update</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">Autonomous marketplace engine v2.0 deployed.</p>
+                       <p className="text-xs font-bold text-foreground leading-snug">Marketplace update released successfully.</p>
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">2h ago</span>
                     </div>
                     <div className="flex flex-col gap-1">
                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500">Market Insight</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">New logistics corridor opened for sea-freight.</p>
+                       <p className="text-xs font-bold text-foreground leading-snug">New logistics route opened for sea freight.</p>
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">5h ago</span>
                     </div>
                     <div className="flex flex-col gap-1">
                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-success-500">Engagement</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">Higher volume of enquiries detected in your region.</p>
+                       <p className="text-xs font-bold text-foreground leading-snug">Enquiry volume has increased in your region.</p>
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">1d ago</span>
                     </div>
                  </div>
@@ -794,8 +829,8 @@ const Dashboard: NextPage = () => {
            <Card className="border border-foreground/5 shadow-none bg-foreground/10 backdrop-blur-3xl rounded-[2rem] overflow-hidden group cursor-pointer hover:bg-foreground/20 transition-all border-dashed">
               <CardBody className="p-8 flex items-center justify-between">
                  <div className="flex flex-col gap-1">
-                    <h4 className="font-black text-foreground uppercase tracking-widest text-[10px]">History Log</h4>
-                    <p className="text-xs text-default-500 font-medium">Review your telemetry.</p>
+                    <h4 className="font-black text-foreground uppercase tracking-widest text-[10px]">History</h4>
+                    <p className="text-xs text-default-500 font-medium">Review your recent activity.</p>
                  </div>
                  <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground opacity-50 group-hover:opacity-100 transition-opacity">
                     <LuHistory size={20} />
@@ -844,7 +879,7 @@ const Dashboard: NextPage = () => {
 
     return (
       <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           <InsightCard
             title="Pending Assigned Enquiries"
             metric={Number(operatorMetrics.pendingAssignedEnquiries || 0).toLocaleString()}
@@ -861,13 +896,19 @@ const Dashboard: NextPage = () => {
             title="Live-rate Gap"
             metric={Math.max(totalAssignedProducts - liveAssignedProducts, 0).toLocaleString()}
             icon={<LuTrendingUp size={18} />}
-            footer={<span className="text-xs text-default-500">Assigned products not yet live</span>}
+            footer={<span className="text-xs text-default-500">Assigned products not live yet</span>}
           />
           <InsightCard
             title="Assigned Products"
             metric={`${liveAssignedProducts}/${totalAssignedProducts}`}
             icon={<LuBox size={18} />}
             footer={<span className="text-xs text-default-500">Live products out of assigned products</span>}
+          />
+          <InsightCard
+            title="Companies With Live Products"
+            metric={Number(operatorMetrics.assignedCompaniesWithLiveProducts || 0).toLocaleString()}
+            icon={<LuCheck size={18} />}
+            footer={<span className="text-xs text-default-500">Assigned companies with at least one live listing</span>}
           />
         </div>
 
@@ -880,10 +921,10 @@ const Dashboard: NextPage = () => {
            <CardHeader className="px-8 pt-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                 <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Ongoing Enquiry Pipeline</h4>
+                 <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Ongoing Enquiries</h4>
               </div>
               <Button size="sm" variant="light" className="text-[10px] font-bold uppercase tracking-widest" onPress={() => router.push("/dashboard/enquiries")}>
-                 Full Feed
+                 View all
               </Button>
            </CardHeader>
            <Divider className="my-4 mx-8 w-auto opacity-50" />
@@ -908,8 +949,8 @@ const Dashboard: NextPage = () => {
                           <div className="flex items-center gap-6 mt-4 md:mt-0">
                              <div className="flex flex-col items-end">
                                 <span className="text-[9px] font-black uppercase tracking-widest text-default-400">Status</span>
-                                <Chip size="sm" variant="flat" color="primary" className="h-6 font-bold uppercase text-[9px] border-none bg-primary/10">
-                                   {String(item.status).replace(/_/g, " ")}
+                                 <Chip size="sm" variant="flat" color="primary" className="h-6 font-bold uppercase text-[9px] border-none bg-primary/10">
+                                   {dashboardCopy(String(item.status || ""))}
                                 </Chip>
                              </div>
                              <Button 
@@ -918,7 +959,7 @@ const Dashboard: NextPage = () => {
                                 className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-foreground/5"
                                 onPress={() => router.push(`/dashboard/enquiries/${item._id}`)}
                              >
-                                Track
+                                Open
                              </Button>
                           </div>
                        </div>
@@ -1017,7 +1058,7 @@ const Dashboard: NextPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-3">
-                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                  <span className="text-[10px] font-black tracking-widest uppercase text-primary">System Online</span>
               </div>
               <div className="space-y-1">
@@ -1038,7 +1079,7 @@ const Dashboard: NextPage = () => {
                   {role || "User"}
                 </Chip>
                 <Chip variant="flat" color="primary" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 border border-primary/20">
-                  {activeOrders} Active Missions
+                  {activeOrders} Active Orders
                 </Chip>
               </div>
             </div>

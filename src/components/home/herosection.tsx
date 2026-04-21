@@ -113,6 +113,7 @@ export default function HeroSection() {
   const router = useRouter();
   const { isAuthenticated, loading } = useContext(AuthContext);
   const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isSystemActive, setIsSystemActive] = useState(false);
   const [isAgroActive, setIsAgroActive] = useState(false);
@@ -149,13 +150,22 @@ export default function HeroSection() {
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setShowDesktopVisuals(media.matches);
+    const desktopMedia = window.matchMedia("(min-width: 1024px)");
+    const mobileMedia = window.matchMedia("(max-width: 768px)");
+
+    const update = () => {
+      setShowDesktopVisuals(desktopMedia.matches);
+      setIsMobile(mobileMedia.matches);
+    };
+
     update();
-    media.addEventListener("change", update);
+    desktopMedia.addEventListener("change", update);
+    mobileMedia.addEventListener("change", update);
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      media.removeEventListener("change", update);
+      desktopMedia.removeEventListener("change", update);
+      mobileMedia.removeEventListener("change", update);
     };
   }, [mouseX, mouseY]);
 
@@ -197,6 +207,7 @@ export default function HeroSection() {
 
       {/* Grid Overlay */}
       <motion.div
+        initial={{ opacity: 0.08 }}
         animate={{
           opacity: (isSystemActive || isAgroActive || !!hoveredRole) ? 0.25 : 0.08,
         }}
@@ -329,7 +340,7 @@ export default function HeroSection() {
         className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-center text-center w-full"
       >
         <motion.div
-          initial="hidden"
+          initial={isMobile ? false : "hidden"}
           animate="visible"
           variants={containerVariants}
           className="w-full max-w-4xl lg:max-w-5xl"
@@ -343,13 +354,15 @@ export default function HeroSection() {
             </motion.p>
 
             <motion.h1
+              initial={isMobile ? false : "hidden"}
+              animate="visible"
               variants={itemVariants}
               className="w-fit mx-auto text-3xl sm:text-5xl md:text-7xl lg:text-[clamp(4.2rem,8vw,7rem)] font-black tracking-tighter leading-[0.95] text-foreground cursor-pointer select-none group px-4"
               onMouseEnter={() => setIsSystemActive(true)}
               onMouseLeave={() => setIsSystemActive(false)}
             >
               The Execution <br />
-              <span className="italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent animate-subtle-glint group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all">
+              <span className={`italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent ${!isMobile ? "animate-subtle-glint" : ""} group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all`}>
                 Ecosystem
               </span>
             </motion.h1>
@@ -361,32 +374,34 @@ export default function HeroSection() {
             </motion.div>
 
             <motion.h2
+              initial={isMobile ? false : "hidden"}
+              animate="visible"
               variants={itemVariants}
               className="w-full relative flex flex-col items-center justify-center text-2xl sm:text-4xl md:text-6xl lg:text-[clamp(1.5rem,6vw,5.2rem)] font-black tracking-tighter text-foreground leading-none cursor-pointer select-none group px-4 min-h-[120px] md:min-h-[160px] overflow-hidden"
               onMouseEnter={() => setIsAgroActive(true)}
               onMouseLeave={() => setIsAgroActive(false)}
             >
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={dynamicText.text}
-                  initial={{ y: 30, opacity: 0, filter: "blur(10px)" }}
-                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                  exit={{ y: -30, opacity: 0, filter: "blur(10px)" }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1]
-                  }}
-                  className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-                >
-                  <span className={`transition-all duration-1000 ease-out text-center px-4 w-full ${isAgroActive
-                    ? 'text-emerald-500 scale-105'
-                    : (dynamicText.isHeadline
-                      ? 'text-foreground'
-                      : 'text-foreground/80 italic font-bold uppercase tracking-[0.15em] animate-typewriter text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-5xl')
-                    }`}>
-                    {dynamicText.text}
-                  </span>
-                </motion.div>
+                  <motion.div
+                    key={dynamicText.text}
+                    initial={isMobile ? false : { y: 30, opacity: 0, filter: "blur(10px)" }}
+                    animate={isMobile ? { y: 0, opacity: 1, filter: "blur(0px)" } : { y: 0, opacity: 1, filter: "blur(0px)" }}
+                    exit={isMobile ? { y: 0, opacity: 0 } : { y: -30, opacity: 0, filter: "blur(10px)" }}
+                    transition={{
+                      duration: isMobile ? 0 : 0.8,
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
+                    className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+                  >
+                    <span className={`transition-all duration-1000 ease-out text-center px-4 w-full ${isAgroActive
+                      ? "text-emerald-500 scale-105"
+                      : (dynamicText.isHeadline
+                        ? "text-foreground"
+                        : `text-foreground/80 italic font-bold uppercase tracking-[0.15em] ${!isMobile ? "animate-typewriter" : ""} text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-5xl`)
+                      }`}>
+                      {dynamicText.text}
+                    </span>
+                  </motion.div>
               </AnimatePresence>
             </motion.h2>
           </div>

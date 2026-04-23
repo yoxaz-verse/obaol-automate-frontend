@@ -2,9 +2,8 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer } from "@heroui/react";
+import { Spacer, Tab, Tabs } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
-import { Tab, Tabs } from "@nextui-org/tabs";
 import { LuWarehouse } from "react-icons/lu";
 import MarketplaceFilterBar, {
   MarketplaceFilterState,

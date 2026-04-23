@@ -25,12 +25,12 @@ export default function RolesPage() {
 
   const handleRegister = () => {
     setIsRegisterLoading(true);
-    router.push("/auth");
+    router.push("/auth/register");
   };
 
   const handleJoin = () => {
     setIsJoinLoading(true);
-    router.push("/auth/operator");
+    router.push("/auth/operator/register");
   };
 
   return (

@@ -20,7 +20,7 @@ import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
-import { LuBox, LuTruck, LuWallet, LuBuilding2 } from "react-icons/lu";
+import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage } from "react-icons/lu";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -76,7 +76,7 @@ export const sidebarOptions = [
   },
   {
     name: "Marketplace",
-    icon: <FiShoppingBag />,
+    icon: <LuStore />,
     link: "/dashboard/marketplace",
   },
   {
@@ -131,7 +131,7 @@ export const sidebarOptions = [
   },
   {
     name: "Internal Orders",
-    icon: <FiShoppingBag />,
+    icon: <LuPackage />,
     link: "/dashboard/orders",
   },
   {

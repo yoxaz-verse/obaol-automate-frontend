@@ -496,7 +496,7 @@ export default function OperatorRolePage() {
 
               <div className="flex flex-col md:flex-row justify-center gap-6 md:gap-8">
                 <Link
-                  href="/auth/operator"
+                  href="/auth/operator/register"
                   className="group relative inline-flex justify-center items-center gap-4 md:gap-6 px-10 md:px-14 py-5 md:py-7 rounded-full bg-orange-500 text-white font-black text-xl shadow-[0_25px_80px_-15px_rgba(245,165,36,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
                 >
                   Start Operator Entry

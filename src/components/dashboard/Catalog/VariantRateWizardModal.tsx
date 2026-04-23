@@ -67,6 +67,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     DEFAULT_CALCULATION_CONFIG.variantRateCommissionPercent;
 
   const isAssociateUser = roleLower === "associate";
+  const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const fixedVariantId = productVariantValue?._id || productVariantValue;
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -290,6 +291,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (!isAssociateUser && step >= 2 && !formData.associate) {
       nextErrors.associate = "Select an associate.";
     }
+    if (!isAssociateUser && isOperatorUser && step >= 2 && formData.associate && !resolvedCompanyId) {
+      nextErrors.associate = "Selected associate is not linked to a company.";
+    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -302,6 +306,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         commission: Number.isFinite(computedCommission) ? Number(computedCommission.toFixed(2)) : undefined,
         productVariant: fixedVariantId || formData.productVariant,
         associate: isAssociateUser ? user?.id : formData.associate,
+        ...(!isAssociateUser && isOperatorUser && resolvedCompanyId ? { associateCompany: resolvedCompanyId } : {}),
         locationSource: formData.locationSource,
         warehouseId: formData.locationSource === "WAREHOUSE" ? formData.warehouseId : undefined,
         officeAddress: formData.locationSource === "OFFICE_ADDRESS"

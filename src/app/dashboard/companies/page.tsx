@@ -36,6 +36,7 @@ export default function CompanyProductPage() {
   const [search, setSearch] = useState("");
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [activeDetailTab, setActiveDetailTab] = useState("catalog");
   const [isConfigExpanded, setIsConfigExpanded] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
@@ -260,6 +261,7 @@ export default function CompanyProductPage() {
   );
   const selectedCompanyBanner = toText(selectedCompany?.banner, "");
   const selectedCompanyLogo = toText(selectedCompany?.logo, "");
+  const selectedCompanyAssignedOperatorName = toName(selectedCompany?.assignedOperator, "Unassigned");
   const associates = useMemo(
     () => extractList(selectedCompanyAssociatesQuery.data?.data),
     [selectedCompanyAssociatesQuery.data]
@@ -808,6 +810,223 @@ export default function CompanyProductPage() {
                         </div>
                       </div>
                     </Card>
+
+                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <LuUser className="text-primary-500" size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Execution Proxy</span>
+                          </div>
+                          {isAdmin ? (
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="warning"
+                              onPress={() => setIsAssignModalOpen(true)}
+                            >
+                              Assign Operator
+                            </Button>
+                          ) : null}
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Assigned Operator</p>
+                          <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyAssignedOperatorName}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Mission Profile</p>
+                          <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">
+                            {selectedCompanyDescription}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Strategic Narrative</p>
+                          <p className="text-[11px] font-bold text-default-500 dark:text-default-400 leading-relaxed">
+                            {selectedCompanyAbout}
+                          </p>
+                        </div>
+                        {selectedCompanyWebsite ? (
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            color="primary"
+                            startContent={<LuExternalLink size={14} />}
+                            onPress={() => window.open(selectedCompanyWebsite, "_blank", "noopener,noreferrer")}
+                          >
+                            Open Website
+                          </Button>
+                        ) : null}
+                      </div>
+                    </Card>
+
+                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <LuTag className="text-secondary-500" size={16} />
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
+                        </div>
+                        {companyInterests.length ? (
+                          <div className="flex flex-wrap gap-2">
+                            {companyInterests.map((interest: { key: string; label: string }) => (
+                              <Chip key={interest.key} size="sm" color="secondary" variant="flat">
+                                {interest.label}
+                              </Chip>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-default-500">No sector tags configured for this company.</p>
+                        )}
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div className="lg:col-span-8 space-y-6">
+                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-6 shadow-sm backdrop-blur-xl">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <LuUsers className="text-warning-500" size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Personnel Network</span>
+                          </div>
+                          <Chip size="sm" color="primary" variant="flat">
+                            {associatesTotal || associates.length} Associates
+                          </Chip>
+                        </div>
+                        {selectedCompanyAssociatesQuery.isLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Spinner />
+                          </div>
+                        ) : selectedCompanyAssociatesQuery.isError ? (
+                          <div className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-200">
+                            Failed to load associates.
+                          </div>
+                        ) : associates.length === 0 ? (
+                          <p className="text-sm text-default-500 py-2">No associates linked to this company.</p>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full min-w-[720px] text-sm">
+                              <thead className="bg-default-100/70">
+                                <tr>
+                                  <th className="text-left px-3 py-2 font-semibold text-default-700">Name</th>
+                                  <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
+                                  <th className="text-left px-3 py-2 font-semibold text-default-700">Phone</th>
+                                  <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {associates.map((item: any, idx: number) => (
+                                  <tr
+                                    key={item?._id || idx}
+                                    className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                                  >
+                                    <td className="px-3 py-2 font-medium text-foreground">{toName(item?.name, "-")}</td>
+                                    <td className="px-3 py-2 text-default-600">{toText(item?.email, "-")}</td>
+                                    <td className="px-3 py-2 text-default-600">{toText(item?.phone, "-")}</td>
+                                    <td className="px-3 py-2">
+                                      <Chip size="sm" variant="flat" color={String(item?.registrationStatus || "").toUpperCase() === "APPROVED" ? "success" : "warning"}>
+                                        {toText(item?.registrationStatus, "PENDING_REVIEW")}
+                                      </Chip>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-6 shadow-sm backdrop-blur-xl">
+                      <Tabs
+                        selectedKey={activeDetailTab}
+                        onSelectionChange={(key) => setActiveDetailTab(String(key))}
+                        variant="underlined"
+                        classNames={{
+                          tabList: "gap-6 border-b border-divider/60",
+                          tab: "text-[10px] font-black uppercase tracking-[0.2em]",
+                        }}
+                      >
+                        <Tab key="catalog" title="Catalog">
+                          <div className="pt-5">
+                            <VariantRate
+                              rate="variantRate"
+                              additionalParams={{ associateCompany: [selectedCompanyId], view: "catalog" }}
+                              hideBuiltInFilters
+                              showAssociateColumn={isAdmin}
+                            />
+                          </div>
+                        </Tab>
+                        <Tab key="orders" title="Orders">
+                          <div className="pt-5">
+                            {selectedCompanyOrdersQuery.isLoading ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Spinner />
+                              </div>
+                            ) : orders.length === 0 ? (
+                              <p className="text-sm text-default-500 py-2">No orders found for this company.</p>
+                            ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {orders.map((order: any, idx: number) => (
+                                  <OrderCard key={order?._id || idx} data={order} />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </Tab>
+                        <Tab key="enquiries" title="Enquiries">
+                          <div className="pt-5">
+                            {selectedCompanyEnquiriesQuery.isLoading ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Spinner />
+                              </div>
+                            ) : mappedEnquiries.length === 0 ? (
+                              <p className="text-sm text-default-500 py-2">No enquiries found for this company.</p>
+                            ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {mappedEnquiries.map((enquiry: any, idx: number) => (
+                                  <EnquiryCard key={enquiry?._id || idx} data={enquiry} />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </Tab>
+                        <Tab key="activity" title="Activity">
+                          <div className="pt-5">
+                            {selectedCompanyActivityQuery.isLoading ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Spinner />
+                              </div>
+                            ) : activity.length === 0 ? (
+                              <p className="text-sm text-default-500 py-2">No activity recorded yet.</p>
+                            ) : (
+                              <div className="overflow-x-auto">
+                                <table className="w-full min-w-[720px] text-sm">
+                                  <thead className="bg-default-100/70">
+                                    <tr>
+                                      <th className="text-left px-3 py-2 font-semibold text-default-700">Event</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-default-700">Description</th>
+                                      <th className="text-left px-3 py-2 font-semibold text-default-700">Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {activity.map((row: any, idx: number) => (
+                                      <tr
+                                        key={row?._id || idx}
+                                        className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                                      >
+                                        <td className="px-3 py-2 font-medium text-foreground">{toText(row?.type || row?.action, "Update")}</td>
+                                        <td className="px-3 py-2 text-default-600">{toText(row?.description || row?.message, "No description")}</td>
+                                        <td className="px-3 py-2 text-default-600">{dayjs(row?.createdAt || row?.timestamp).format("DD MMM YYYY, hh:mm A")}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        </Tab>
+                      </Tabs>
+                    </Card>
                   </div>
                 </div>
               )}
@@ -815,6 +1034,62 @@ export default function CompanyProductPage() {
           )}
         </div>
       </div>
+
+      <Modal isOpen={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
+        <ModalContent>
+          <ModalHeader>Assign Operator</ModalHeader>
+          <ModalBody>
+            <div className="space-y-2">
+              <p className="text-sm text-default-600">
+                Company: <span className="font-semibold text-foreground">{selectedCompanyName}</span>
+              </p>
+              <p className="text-xs text-default-500">
+                Choose an approved active operator for this company.
+              </p>
+            </div>
+            <Autocomplete
+              label="Operator"
+              labelPlacement="outside"
+              placeholder="Search operator by name or email"
+              selectedKey={selectedOperatorId || null}
+              inputValue={operatorSearchText}
+              onInputChange={setOperatorSearchText}
+              onSelectionChange={(key) => setSelectedOperatorId(String(key || ""))}
+              isDisabled={!isAdmin}
+            >
+              {filteredOperatorOptions.map((option) => (
+                <AutocompleteItem key={option.id} textValue={`${option.name} ${option.email}`}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{option.name}</span>
+                    <span className="text-xs text-default-500">{option.email || "-"}</span>
+                  </div>
+                </AutocompleteItem>
+              ))}
+            </Autocomplete>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setIsAssignModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="flat"
+              color="danger"
+              isDisabled={!isAdmin || assignOperatorMutation.isPending || !selectedCompanyAssignedOperatorId}
+              onPress={() => assignOperatorMutation.mutate(null)}
+            >
+              Unassign
+            </Button>
+            <Button
+              color="primary"
+              isLoading={assignOperatorMutation.isPending}
+              isDisabled={!isAdmin || !selectedOperatorId}
+              onPress={() => assignOperatorMutation.mutate(selectedOperatorId)}
+            >
+              Save Assignment
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

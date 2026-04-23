@@ -245,7 +245,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-orange-500/50 to-transparent mb-12" />
             <h2 className="text-4xl font-bold mb-8">Execute With Precision</h2>
             <Link
-              href="/auth"
+              href="/auth/register"
               className="inline-flex items-center gap-3 px-10 py-5 rounded-[2rem] bg-orange-600 text-white font-bold text-lg hover:bg-orange-700 hover:scale-[1.02] shadow-[0_10px_30px_-10px_rgba(234,88,12,0.5)] transition-all group"
             >
               Join as Associate

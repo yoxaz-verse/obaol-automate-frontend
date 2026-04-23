@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -24,7 +24,7 @@ export const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <NextUIProvider>
+      <HeroUIProvider>
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
@@ -34,7 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <CurrencyProvider>{children}</CurrencyProvider>
           </SoundProvider>
         </NextThemesProvider>
-      </NextUIProvider>
+      </HeroUIProvider>
       {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}

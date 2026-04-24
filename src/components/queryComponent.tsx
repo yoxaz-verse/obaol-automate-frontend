@@ -33,8 +33,18 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     ...(additionalParams || {}),
   };
 
+  const effectiveQueryKey = useMemo(() => {
+    return [
+      ...queryKey,
+      page ?? null,
+      limit ?? null,
+      search ?? "",
+      additionalParams ?? {},
+    ];
+  }, [queryKey, page, limit, search, additionalParams]);
+
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey,
+    queryKey: effectiveQueryKey,
     queryFn: () => getData(api, params),
     staleTime: 30_000,
     gcTime: 300_000,

@@ -97,6 +97,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       const response = await getData(apiRoutes.companyType.getAll, { page: 1, limit: 100, sort: "name:asc" });
       return extractList(response);
     },
+    enabled: isOpen,
   });
 
   const countriesQuery = useQuery({
@@ -105,6 +106,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       const response = await getData(apiRoutes.country.getAll, { page: 1, limit: 400, sort: "name:asc" });
       return extractList(response);
     },
+    enabled: isOpen,
   });
 
   const statesQuery = useQuery({
@@ -113,6 +115,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       const response = await getData(apiRoutes.state.getAll, { page: 1, limit: 100, sort: "name:asc" });
       return extractList(response);
     },
+    enabled: isOpen,
   });
 
   const districtsQuery = useQuery({
@@ -126,7 +129,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       });
       return extractList(response);
     },
-    enabled: Boolean(operatorCompanyForm.state),
+    enabled: isOpen && Boolean(operatorCompanyForm.state),
   });
 
   const companyFunctionsQuery = useQuery({
@@ -139,6 +142,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       });
       return extractList(response);
     },
+    enabled: isOpen,
   });
 
   const assignedCompaniesQuery = useQuery({
@@ -151,7 +155,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       });
       return extractList(response);
     },
-    enabled: Boolean(user?.id),
+    enabled: isOpen && Boolean(user?.id),
   });
 
   useEffect(() => {

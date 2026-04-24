@@ -34,6 +34,8 @@ export default function CompanyProductPage() {
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [directoryPage, setDirectoryPage] = useState(1);
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState("catalog");
@@ -51,22 +53,103 @@ export default function CompanyProductPage() {
     enabled: isAdmin,
   });
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  const DIRECTORY_PAGE_SIZE = 24;
+
   const companiesQuery = useQuery({
-    queryKey: ["company-directory", roleLower, user?.id],
+    queryKey: ["company-directory", roleLower, user?.id, directoryPage, debouncedSearch],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: directoryPage,
+        limit: DIRECTORY_PAGE_SIZE,
+        sort: "name:asc",
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
+        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+      }),
+    enabled: canAccessCompaniesWorkspace,
+    placeholderData: (previousData) => previousData,
+  });
+
+  const configCompaniesQuery = useQuery({
+    queryKey: ["company-config-selector-list", isAdmin],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
-        limit: 500,
+        limit: 200,
         sort: "name:asc",
+      }),
+    enabled: isAdmin && isConfigExpanded,
+  });
+
+  const totalCompaniesQuery = useQuery({
+    queryKey: ["company-metrics-total", roleLower, user?.id],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
       }),
     enabled: canAccessCompaniesWorkspace,
   });
 
+  const liveCompaniesQuery = useQuery({
+    queryKey: ["company-metrics-live", roleLower, user?.id],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 1,
+        isWebsiteLive: true,
+        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+      }),
+    enabled: canAccessCompaniesWorkspace,
+  });
+
+  const systemMetricsQuery = useQuery({
+    queryKey: ["company-metrics-system", isAdmin],
+    queryFn: () => getData(apiRoutes.analytics.systemMetrics),
+    enabled: isAdmin,
+  });
+
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
-  const companies = useMemo(() => extractList(companiesQuery.data?.data), [companiesQuery.data]);
+  const companiesPayload = companiesQuery.data?.data;
+  const companies = useMemo(() => extractList(companiesPayload), [companiesPayload]);
+  const configCompanies = useMemo(
+    () => extractList(configCompaniesQuery.data?.data),
+    [configCompaniesQuery.data]
+  );
+
+  const getTotalCount = (payload: any): number => {
+    const raw =
+      payload?.totalCount ??
+      payload?.data?.totalCount ??
+      payload?.data?.data?.totalCount ??
+      0;
+    return Number(raw || 0);
+  };
+
+  const directoryTotalCount = getTotalCount(companiesPayload);
+  const directoryCurrentPage = Number(
+    companiesPayload?.currentPage ??
+      companiesPayload?.data?.currentPage ??
+      directoryPage
+  );
+  const directoryTotalPages = Math.max(
+    Number(
+      companiesPayload?.totalPages ??
+        companiesPayload?.data?.totalPages ??
+        Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE) ??
+        1
+    ) || 1,
+    1
+  );
 
   const toText = (value: any, fallback = ""): string => {
     if (value === null || value === undefined) return fallback;
@@ -144,27 +227,14 @@ export default function CompanyProductPage() {
     },
   });
 
-  const filteredCompanies = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    if (!needle) return companies;
-    return companies.filter((company: any) => {
-      const name = String(company?.name || "").toLowerCase();
-      const email = String(company?.email || "").toLowerCase();
-      const phone = String(company?.phone || "").toLowerCase();
-      return name.includes(needle) || email.includes(needle) || phone.includes(needle);
-    });
-  }, [companies, search]);
-
-  const assignedCount = useMemo(
-    () => companies.filter((company: any) => Boolean(company?.assignedOperator)).length,
-    [companies]
-  );
-  const unassignedCount = companies.length - assignedCount;
-  const liveCount = useMemo(
-    () => companies.filter((company: any) => company?.isWebsiteLive === true).length,
-    [companies]
-  );
-  const notLiveCount = companies.length - liveCount;
+  const totalCompaniesCount = getTotalCount(totalCompaniesQuery.data?.data);
+  const liveCompaniesCount = getTotalCount(liveCompaniesQuery.data?.data);
+  const unassignedCount = isAdmin
+    ? Number(systemMetricsQuery.data?.data?.data?.unassignedCompanies || 0)
+    : 0;
+  const assignedCount = Math.max(totalCompaniesCount - unassignedCount, 0);
+  const liveCount = liveCompaniesCount;
+  const notLiveCount = Math.max(totalCompaniesCount - liveCompaniesCount, 0);
 
   const PALETTE = [
     "bg-warning-500/10 text-warning-600",
@@ -226,7 +296,7 @@ export default function CompanyProductPage() {
         limit: 8,
         sort: "createdAt:desc",
       }),
-    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId),
+    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId) && activeDetailTab === "orders",
   });
 
   const selectedCompanyEnquiriesQuery = useQuery({
@@ -235,7 +305,7 @@ export default function CompanyProductPage() {
       getData(`/api/v1/web/associate-companies/${selectedCompanyId}/enquiries`, {
         limit: 8,
       }),
-    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId),
+    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId) && activeDetailTab === "enquiries",
   });
 
   const selectedCompanyActivityQuery = useQuery({
@@ -244,7 +314,7 @@ export default function CompanyProductPage() {
       getData(`/api/v1/web/associate-companies/${selectedCompanyId}/activity`, {
         limit: 16,
       }),
-    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId),
+    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId) && activeDetailTab === "activity",
   });
 
   const selectedCompany = selectedCompanyQuery.data?.data?.data || null;
@@ -481,7 +551,7 @@ export default function CompanyProductPage() {
                 label="Select company"
                 labelPlacement="outside"
                 placeholder="Search companies..."
-                isLoading={companiesQuery.isLoading}
+                isLoading={configCompaniesQuery.isLoading}
                 selectedKeys={selectedObaolCompanyId ? new Set([selectedObaolCompanyId]) : new Set()}
                 onSelectionChange={(keys) => {
                   const nextValue = Array.from(keys as Set<string>)[0] || "";
@@ -524,7 +594,7 @@ export default function CompanyProductPage() {
                   ));
                 }}
               >
-                {companies.map((companyItem: any) => {
+                {configCompanies.map((companyItem: any) => {
                   const cName = toName(companyItem, "Unnamed Entity");
                   const cEmail = toText(companyItem?.email, "not available");
                   return (
@@ -625,7 +695,10 @@ export default function CompanyProductPage() {
             <Input
               placeholder="Search records..."
               value={search}
-              onValueChange={setSearch}
+              onValueChange={(value) => {
+                setSearch(value);
+                setDirectoryPage(1);
+              }}
               radius="full"
               className="sm:w-80"
               startContent={<LuSearch className="text-default-400" size={18} />}
@@ -660,7 +733,7 @@ export default function CompanyProductPage() {
                   <div className="w-12 h-12 border-2 border-warning-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(245,158,11,0.2)]" />
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-500/60 animate-pulse">Loading companies...</p>
                 </div>
-              ) : filteredCompanies.length === 0 ? (
+              ) : companies.length === 0 ? (
                 <div className="py-24 text-center bg-content1/20 rounded-[2.5rem] border border-dashed border-divider">
                   <LuSearch className="mx-auto text-default-300 mb-4" size={32} />
                   <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">No companies found.</p>
@@ -670,12 +743,17 @@ export default function CompanyProductPage() {
                   <div className="flex items-center gap-4 px-2">
                     <LuUsers className="text-warning-500/50" size={14} />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">
-                      {filteredCompanies.length} companies found
+                      {directoryTotalCount} companies found
                     </span>
+                    {companiesQuery.isFetching ? (
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500/70">
+                        Refreshing...
+                      </span>
+                    ) : null}
                     <div className="flex-1 h-px bg-gradient-to-r from-divider to-transparent" />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredCompanies.map((company: any, idx: number) => {
+                    {companies.map((company: any, idx: number) => {
                       const name = String(company?.name || "Unnamed Company");
                       return (
                         <motion.button
@@ -726,6 +804,29 @@ export default function CompanyProductPage() {
                         </motion.button>
                       );
                     })}
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-divider/70 bg-content1/30 px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500">
+                      Page {directoryCurrentPage} of {directoryTotalPages}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        onPress={() => setDirectoryPage((prev) => Math.max(prev - 1, 1))}
+                        isDisabled={directoryCurrentPage <= 1 || companiesQuery.isFetching}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        onPress={() => setDirectoryPage((prev) => Math.min(prev + 1, directoryTotalPages))}
+                        isDisabled={directoryCurrentPage >= directoryTotalPages || companiesQuery.isFetching}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

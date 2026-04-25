@@ -116,10 +116,23 @@ export default function SampleRequestDetailPage() {
   const status = String(request?.status || "").toUpperCase();
   const statusLabel = status === "RECEIPT_CONFIRMED" ? "BUYER ACCEPTED" : status.replace(/_/g, " ");
 
+  const viewerId = String((user as any)?.id || user?.id || "");
+  const buyerOperatorId = String(
+    request?.buyerAssociateId?.associateCompany?.assignedOperator?._id ||
+      request?.buyerAssociateId?.associateCompany?.assignedOperator ||
+      ""
+  );
+  const sellerOperatorId = String(
+    request?.supplierCompanyId?.assignedOperator?._id ||
+      request?.supplierCompanyId?.assignedOperator ||
+      ""
+  );
+  const isBuyerOperator = isOperatorUser && Boolean(viewerId) && buyerOperatorId === viewerId;
+  const isSellerOperator = isOperatorUser && Boolean(viewerId) && sellerOperatorId === viewerId;
   const isBuyer = isAssociate && String(request?.buyerAssociateId?._id || request?.buyerAssociateId) === String(user?.id || "");
   const isSupplier = isAssociate && associateCompanyId && String(request?.supplierCompanyId?._id || request?.supplierCompanyId) === String(associateCompanyId);
-  const canSupplier = isSupplier || isAdmin || isOperatorUser;
-  const canBuyer = isBuyer || isAdmin || isOperatorUser;
+  const canSupplier = isSupplier || isAdmin || isSellerOperator;
+  const canBuyer = isBuyer || isAdmin || isBuyerOperator;
 
   const formatDate = (value: any) => {
     if (!value) return "—";

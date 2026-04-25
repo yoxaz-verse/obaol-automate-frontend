@@ -40,7 +40,7 @@ import { motion } from "framer-motion";
 
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutes, associateCompanyRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, patchData, postMultipart } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 
@@ -112,36 +112,9 @@ export default function SampleRequestDetailPage() {
     enabled: Boolean(id),
   });
 
-  const { data: operatorCompanyData, isLoading: operatorCompaniesLoading } = useQuery({
-    queryKey: ["sample-request-operator-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
-    enabled: isOperatorUser,
-  });
-
-  const operatorCompanyIds: string[] = useMemo(() => {
-    if (!isOperatorUser) return [];
-    return ((operatorCompanyData?.data?.data?.data || []) as Array<{ _id?: string }>)
-      .map((company) => company?._id)
-      .filter((cid): cid is string => Boolean(cid));
-  }, [operatorCompanyData, isOperatorUser]);
-
   const request = detailResponse?.data?.data;
   const status = String(request?.status || "").toUpperCase();
   const statusLabel = status === "RECEIPT_CONFIRMED" ? "BUYER ACCEPTED" : status.replace(/_/g, " ");
-
-  const supplierCompanyId =
-    request?.supplierCompanyId?._id || request?.supplierCompanyId || "";
-  const buyerCompanyId =
-    request?.buyerAssociateId?.associateCompanyId?._id ||
-    request?.buyerAssociateId?.associateCompanyId ||
-    request?.buyerAssociateCompanyId?._id ||
-    request?.buyerAssociateCompanyId ||
-    "";
-  const isOperatorScoped = !isOperatorUser
-    ? true
-    : operatorCompanyIds.length > 0 &&
-      (operatorCompanyIds.includes(String(supplierCompanyId)) ||
-        operatorCompanyIds.includes(String(buyerCompanyId)));
 
   const isBuyer = isAssociate && String(request?.buyerAssociateId?._id || request?.buyerAssociateId) === String(user?.id || "");
   const isSupplier = isAssociate && associateCompanyId && String(request?.supplierCompanyId?._id || request?.supplierCompanyId) === String(associateCompanyId);
@@ -351,39 +324,6 @@ export default function SampleRequestDetailPage() {
         <p className="text-default-500 text-sm mb-8 text-center max-w-xs">The sample request you are looking for might have been removed or moved.</p>
         <Button 
           variant="flat" 
-          className="h-11 rounded-xl font-bold px-8"
-          onPress={() => router.push("/dashboard/sample-requests")}
-          startContent={<LuChevronLeft size={18} />}
-        >
-          Return to Hub
-        </Button>
-      </section>
-    );
-  }
-
-  if (isOperatorUser && operatorCompaniesLoading) {
-    return (
-      <section className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-warning border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-semibold uppercase tracking-widest text-default-400">Validating Operator Scope...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (isOperatorUser && !isOperatorScoped) {
-    return (
-      <section className="flex flex-col items-center justify-center min-h-[60vh] px-6">
-        <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center text-default-400 mb-6">
-          <LuFileSearch size={40} />
-        </div>
-        <h2 className="text-xl font-bold mb-2">Access Restricted</h2>
-        <p className="text-default-500 text-sm mb-8 text-center max-w-xs">
-          This sample request is outside your assigned company scope.
-        </p>
-        <Button
-          variant="flat"
           className="h-11 rounded-xl font-bold px-8"
           onPress={() => router.push("/dashboard/sample-requests")}
           startContent={<LuChevronLeft size={18} />}

@@ -10,7 +10,7 @@ import { LuUser, LuPackage, LuMapPin, LuArrowRight, LuSearch, LuActivity, LuBox,
 
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutes, associateCompanyRoutes } from "@/core/api/apiRoutes";
+import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 
 const statusColor = (status: string) => {
@@ -48,19 +48,6 @@ export default function SampleRequestsPage() {
     queryFn: () => getData(apiRoutes.sampleRequest.list, { page: 1, limit: 100 }),
   });
 
-  const { data: operatorCompanyData, isLoading: operatorCompaniesLoading } = useQuery({
-    queryKey: ["sample-requests-operator-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
-    enabled: isOperatorUser,
-  });
-
-  const operatorCompanyIds: string[] = useMemo(() => {
-    if (!isOperatorUser) return [];
-    return ((operatorCompanyData?.data?.data?.data || []) as Array<{ _id?: string }>)
-      .map((company) => company?._id)
-      .filter((id): id is string => Boolean(id));
-  }, [operatorCompanyData, isOperatorUser]);
-
   const sampleRows = Array.isArray(sampleResponse?.data?.data?.data)
     ? sampleResponse?.data?.data?.data
     : (sampleResponse?.data?.data || []);
@@ -88,23 +75,7 @@ export default function SampleRequestsPage() {
     });
   }, [sampleRows, search, isAssociate, associateCompanyId, associateId]);
 
-  const scopedRows = useMemo(() => {
-    if (!isOperatorUser) return filteredRows;
-    if (operatorCompaniesLoading || operatorCompanyIds.length === 0) return [];
-    return (filteredRows || []).filter((row: any) => {
-      const supplierCompanyId =
-        row?.supplierCompanyId?._id || row?.supplierCompanyId || "";
-      const buyerCompanyId =
-        row?.buyerAssociateId?.associateCompanyId?._id ||
-        row?.buyerAssociateId?.associateCompanyId ||
-        row?.buyerAssociateCompanyId?._id ||
-        row?.buyerAssociateCompanyId ||
-        "";
-      const supplierMatch = operatorCompanyIds.includes(String(supplierCompanyId));
-      const buyerMatch = operatorCompanyIds.includes(String(buyerCompanyId));
-      return supplierMatch || buyerMatch;
-    });
-  }, [filteredRows, isOperatorUser, operatorCompanyIds, operatorCompaniesLoading]);
+  const scopedRows = filteredRows;
 
   return (
     <section className="pb-20">

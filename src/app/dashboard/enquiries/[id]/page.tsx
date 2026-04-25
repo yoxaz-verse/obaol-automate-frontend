@@ -1415,18 +1415,26 @@ export default function EnquiryDetailsPage() {
     const roleLower = String(user?.role || "").toLowerCase();
     const isSystemAdmin = roleLower === "admin";
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
-    const canManageDocs = isSystemAdmin || isOperatorUser;
-    const canManageWorkflow = isSystemAdmin || isOperatorUser;
     const supplierOperatorId = (supplierOperatorObj?._id || (enquiry as any)?.supplierOperatorId || "").toString();
     const dealCloserOperatorId = (dealCloserOperatorObj?._id || (enquiry as any)?.dealCloserOperatorId || "").toString();
     const handlerOperatorId = (handlerOperatorObj?._id || (enquiry as any)?.handlerOperatorId || "").toString();
+    const isSupplierSideOperator = Boolean(
+        isOperatorUser &&
+        user?.id &&
+        (supplierOperatorId === String(user.id) || handlerOperatorId === String(user.id))
+    );
+    const isBuyerSideOperator = Boolean(
+        isOperatorUser &&
+        user?.id &&
+        (dealCloserOperatorId === String(user.id) || handlerOperatorId === String(user.id))
+    );
     const isAssignedOperator = Boolean(
         isOperatorUser &&
         user?.id &&
-        (supplierOperatorId === String(user.id) ||
-            dealCloserOperatorId === String(user.id) ||
-            handlerOperatorId === String(user.id))
+        (isSupplierSideOperator || isBuyerSideOperator)
     );
+    const canManageDocs = isSystemAdmin || isAssignedOperator;
+    const canManageWorkflow = isSystemAdmin || isAssignedOperator;
     const isAdmin = isSystemAdmin || isAssignedOperator;
     const isOperatorBlocked = Boolean(isOperatorUser && !isAssignedOperator);
     if (isOperatorBlocked) {
@@ -1537,7 +1545,7 @@ export default function EnquiryDetailsPage() {
         .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
     const canSeeRule = (rule: any) => {
         const visibility = String(rule.visibility || "BOTH");
-        if (isAdmin || isOperatorUser) return true;
+        if (isAdmin) return true;
         if (visibility === "INTERNAL") return false;
         if (visibility === "BOTH") return true;
         if (visibility === "BUYER") return Boolean(isBuyer);
@@ -1545,10 +1553,11 @@ export default function EnquiryDetailsPage() {
         return false;
     };
     const canActOnRule = (rule: any) => {
-        if (isAdmin || isOperatorUser) return true;
+        if (isSystemAdmin) return true;
         const roleKey = String(rule.responsibleRole || "");
-        if (roleKey === "BUYER") return Boolean(isBuyer);
-        if (roleKey === "SELLER") return Boolean(isSeller);
+        if (roleKey === "BUYER") return Boolean(isBuyer || isBuyerSideOperator);
+        if (roleKey === "SELLER" || roleKey === "SUPPLIER") return Boolean(isSeller || isSupplierSideOperator);
+        if (isOperatorUser) return isAssignedOperator;
         return false;
     };
     const safeDocs = Array.isArray(docsForEnquiry) ? docsForEnquiry : [];
@@ -1592,7 +1601,14 @@ export default function EnquiryDetailsPage() {
         if (actionBy === "EITHER") return Boolean(isBuyer || isSeller);
         return true;
     })();
-    const canPerformAction = isSystemAdmin || isAssignedOperator || canActByRole;
+    const canOperatorActByPerspective = (() => {
+        if (!isOperatorUser) return false;
+        if (actionBy === "BUYER") return isBuyerSideOperator;
+        if (actionBy === "SUPPLIER") return isSupplierSideOperator;
+        if (actionBy === "BOTH" || actionBy === "EITHER") return isBuyerSideOperator || isSupplierSideOperator;
+        return isAssignedOperator;
+    })();
+    const canPerformAction = isSystemAdmin || canOperatorActByPerspective || canActByRole;
     const isActionLoading = (actionKey: string) => {
         if (applyActionMutation.isPending && pendingActionKey === actionKey) return true;
         if (actionKey === "QUOTATION_CREATED" && createQuotationMutation.isPending) return true;
@@ -1854,8 +1870,8 @@ export default function EnquiryDetailsPage() {
         const counterSaved = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
         return acknowledged || counterSaved;
     });
-    const canBuyerRevision = isBuyer || isSystemAdmin || isAssignedOperator;
-    const canSupplierRevision = isSeller || isSystemAdmin || isAssignedOperator;
+    const canBuyerRevision = isBuyer || isSystemAdmin || isBuyerSideOperator;
+    const canSupplierRevision = isSeller || isSystemAdmin || isSupplierSideOperator;
     const fallbackProformaRule = {
         docType: "PROFORMA_INVOICE",
         actionType: "CREATE",

@@ -1436,6 +1436,10 @@ export default function EnquiryDetailsPage() {
     const canManageDocs = isSystemAdmin || isAssignedOperator;
     const canManageWorkflow = isSystemAdmin || isAssignedOperator;
     const isAdmin = isSystemAdmin || isAssignedOperator;
+    const isHandlerAssigned = Boolean(isOperatorUser && user?.id && handlerOperatorId === String(user.id));
+    const canSeeBuyerSide = Boolean(isBuyer || isSystemAdmin || isBuyerSideOperator);
+    const canSeeSupplierSide = Boolean(isSeller || isSystemAdmin || isSupplierSideOperator);
+    const canSeeBoth = Boolean(isSystemAdmin || isHandlerAssigned);
     const isOperatorBlocked = Boolean(isOperatorUser && !isAssignedOperator);
     if (isOperatorBlocked) {
         return (
@@ -1545,11 +1549,11 @@ export default function EnquiryDetailsPage() {
         .sort((a: any, b: any) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
     const canSeeRule = (rule: any) => {
         const visibility = String(rule.visibility || "BOTH");
-        if (isAdmin) return true;
+        if (canSeeBoth) return true;
         if (visibility === "INTERNAL") return false;
-        if (visibility === "BOTH") return true;
-        if (visibility === "BUYER") return Boolean(isBuyer);
-        if (visibility === "SELLER") return Boolean(isSeller);
+        if (visibility === "BOTH") return Boolean(canSeeBuyerSide || canSeeSupplierSide || isMediator);
+        if (visibility === "BUYER") return Boolean(canSeeBuyerSide);
+        if (visibility === "SELLER") return Boolean(canSeeSupplierSide);
         return false;
     };
     const canActOnRule = (rule: any) => {
@@ -1732,8 +1736,19 @@ export default function EnquiryDetailsPage() {
         audienceScope: "OBAOL_BUYER",
     }] : [];
     const combinedEnquiryDocs = [...syntheticLoiDoc, ...filteredEnquiryDocs];
+    const canSeeDocByScope = (doc: any) => {
+        if (canSeeBoth) return true;
+        const normalizedScope = String(doc?.audienceScope || "").toUpperCase();
+        const isBuyerScope = normalizedScope === "OBAOL_BUYER" || normalizedScope === "BUYER_OBAOL";
+        const isSupplierScope = normalizedScope === "SELLER_OBAOL";
+        if (!normalizedScope) return Boolean(canSeeBuyerSide || canSeeSupplierSide);
+        if (isBuyerScope) return Boolean(canSeeBuyerSide);
+        if (isSupplierScope) return Boolean(canSeeSupplierSide);
+        return false;
+    };
+    const visibleCombinedDocs = combinedEnquiryDocs.filter(canSeeDocByScope);
     const uniqueDocsByType = Object.values(
-        combinedEnquiryDocs.reduce((acc: Record<string, any>, doc: any) => {
+        visibleCombinedDocs.reduce((acc: Record<string, any>, doc: any) => {
             const typeKey = String(doc?.type || "").toUpperCase();
             const scopeKey = String(doc?.audienceScope || "SELLER_OBAOL").toUpperCase();
             if (!typeKey) return acc;
@@ -3101,44 +3116,48 @@ export default function EnquiryDetailsPage() {
                 {/* Details Grid */}
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Parties Involved */}
-                    {(isAdmin || isMediator) && (
+                    {(canSeeBuyerSide || canSeeSupplierSide || isMediator) && (
                         <Card className="md:col-span-1 border border-divider bg-content1/50">
                             <CardHeader className="font-semibold text-base px-6 pt-6 uppercase tracking-wider text-default-400">Parties Involved</CardHeader>
                             <Divider className="my-1" />
                             <CardBody className="flex flex-col gap-4 px-6 pb-6">
                                 <div className="grid grid-cols-1 gap-3">
-                                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
-                                        <span className="font-semibold text-base">{buyerAssociateName}</span>
-                                        <span className={`text-xs font-semibold ${buyerPresence.online ? "text-success-600" : "text-default-500"}`}>
-                                            {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
-                                        </span>
-                                        <span className="text-sm text-default-500 font-medium">{buyerCompanyName}</span>
-                                        {buyerPhone && isAdmin && (
-                                            <span
-                                                className="font-medium text-primary hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
-                                                onClick={() => window.location.href = `tel:${buyerPhone}`}
-                                            >
-                                                <FiPhone size={12} /> {buyerPhone}
+                                    {(canSeeBuyerSide || canSeeBoth || isMediator) && (
+                                        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex flex-col gap-1">
+                                            <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">Buyer</span>
+                                            <span className="font-semibold text-base">{buyerAssociateName}</span>
+                                            <span className={`text-xs font-semibold ${buyerPresence.online ? "text-success-600" : "text-default-500"}`}>
+                                                {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
                                             </span>
-                                        )}
-                                    </div>
-                                    <div className="rounded-xl border border-success/20 bg-success/5 p-3 flex flex-col gap-1">
-                                        <span className="text-[10px] uppercase font-black tracking-widest text-success-700">Supplier</span>
-                                        <span className="font-semibold text-base">{sellerAssociateName}</span>
-                                        <span className={`text-xs font-semibold ${sellerPresence.online ? "text-success-600" : "text-default-500"}`}>
-                                            {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
-                                        </span>
-                                        <span className="text-sm text-default-500 font-medium">{sellerCompanyName}</span>
-                                        {sellerPhone && isAdmin && (
-                                            <span
-                                                className="font-medium text-success hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
-                                                onClick={() => window.location.href = `tel:${sellerPhone}`}
-                                            >
-                                                <FiPhone size={12} /> {sellerPhone}
+                                            <span className="text-sm text-default-500 font-medium">{buyerCompanyName}</span>
+                                            {buyerPhone && isAdmin && (
+                                                <span
+                                                    className="font-medium text-primary hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
+                                                    onClick={() => window.location.href = `tel:${buyerPhone}`}
+                                                >
+                                                    <FiPhone size={12} /> {buyerPhone}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(canSeeSupplierSide || canSeeBoth || isMediator) && (
+                                        <div className="rounded-xl border border-success/20 bg-success/5 p-3 flex flex-col gap-1">
+                                            <span className="text-[10px] uppercase font-black tracking-widest text-success-700">Supplier</span>
+                                            <span className="font-semibold text-base">{sellerAssociateName}</span>
+                                            <span className={`text-xs font-semibold ${sellerPresence.online ? "text-success-600" : "text-default-500"}`}>
+                                                {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
                                             </span>
-                                        )}
-                                    </div>
+                                            <span className="text-sm text-default-500 font-medium">{sellerCompanyName}</span>
+                                            {sellerPhone && isAdmin && (
+                                                <span
+                                                    className="font-medium text-success hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
+                                                    onClick={() => window.location.href = `tel:${sellerPhone}`}
+                                                >
+                                                    <FiPhone size={12} /> {sellerPhone}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </CardBody>
                         </Card>
@@ -3231,13 +3250,13 @@ export default function EnquiryDetailsPage() {
                             <div className="mt-3 text-[11px] text-default-500 font-medium leading-relaxed">
                                 Base price only (Ex-Mill / EXW / Ex-Factory). Execution services (procurement/logistics/packaging/etc.) have separate charges.
                             </div>
-                            {(isAdmin || isMediator) ? (
+                            {(canSeeSupplierSide || canSeeBoth || isMediator) ? (
                                 <div className="flex flex-col gap-3">
                                     <div className="flex justify-between items-center text-sm mt-1">
                                         <span className="text-default-500 font-medium">Ex-Mill Rate (Supplier)</span>
                                         <span className="font-bold text-foreground">{formatRate(baseRate)}</span>
                                     </div>
-                                    {isAdmin && adminCommission > 0 && (
+                                    {isSystemAdmin && adminCommission > 0 && (
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-default-500 font-medium">+ OBAOL Margin</span>
                                             <span className="font-bold text-success">{formatRate(adminCommission)}</span>
@@ -3263,7 +3282,7 @@ export default function EnquiryDetailsPage() {
                                             {quantity} Ton ({quantityKg.toLocaleString("en-IN")} KG) × {formatRate(netRate)}/KG
                                         </span>
                                     </div>
-                                    {isAdmin && (
+                                    {isSystemAdmin && (
                                         <div className="flex justify-between items-center text-sm bg-success/5 border border-success/20 rounded-lg px-3 py-2 mt-1">
                                             <span className="text-default-500 font-medium">OBAOL Est. Earnings</span>
                                             <span className="font-black text-success">{convertRate(estimatedProfit)}</span>

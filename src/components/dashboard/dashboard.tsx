@@ -475,7 +475,11 @@ const Dashboard: NextPage = () => {
                 <button
                   key={item.id}
                   className="w-full flex items-center justify-between gap-2 text-left text-xs px-2 py-1.5 rounded-lg hover:bg-default-100/70 transition-colors"
-                  onClick={() => router.push(`/dashboard/enquiries/${item.id}`)}
+                  onClick={() => {
+                    const targetId = String((item as any)?._id || item?.id || "").trim();
+                    if (!targetId) return;
+                    router.push(`/dashboard/enquiries/${targetId}`);
+                  }}
                 >
                   <span className="font-semibold text-foreground">
                     Enquiry #{String(item.id || "").slice(-6).toUpperCase()}
@@ -957,7 +961,11 @@ const Dashboard: NextPage = () => {
                                 size="sm" 
                                 variant="flat" 
                                 className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-foreground/5"
-                                onPress={() => router.push(`/dashboard/enquiries/${item._id}`)}
+                                onPress={() => {
+                                  const targetId = String(item?._id || item?.id || "").trim();
+                                  if (!targetId) return;
+                                  router.push(`/dashboard/enquiries/${targetId}`);
+                                }}
                              >
                                 Open
                              </Button>

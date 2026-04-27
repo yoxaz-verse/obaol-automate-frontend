@@ -127,6 +127,8 @@ const getVariantDisplayName = (enquiry: any, liveRate: any): string => {
 
 export default function EnquiryDetailsPage() {
     const { id } = useParams();
+    const enquiryId = String(Array.isArray(id) ? id[0] : id || "").trim();
+    const isValidEnquiryId = /^[a-fA-F0-9]{24}$/.test(enquiryId);
     const router = useRouter();
     const queryClient = useQueryClient();
     const { convertRate, formatRate } = useCurrency();
@@ -212,15 +214,16 @@ export default function EnquiryDetailsPage() {
     const [assignmentSavedAt, setAssignmentSavedAt] = useState<string>("");
 
     // Fetch Enquiry Data
-    const { data: enquiry, isLoading } = useQuery({
-        queryKey: ["enquiry", id],
-        queryFn: () => getData(`${apiRoutes.enquiry.getAll}/${id}`),
+    const { data: enquiry, isLoading, isError: isEnquiryError, error: enquiryError } = useQuery({
+        queryKey: ["enquiry", enquiryId],
+        queryFn: () => getData(`${apiRoutes.enquiry.getAll}/${enquiryId}`),
         select: (res) => res?.data?.data,
+        enabled: isValidEnquiryId,
     });
     const { data: quotationResponse } = useQuery({
-        queryKey: ["trade-documents", id],
-        queryFn: () => getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 20, enquiryId: id, type: "QUOTATION" }),
-        enabled: Boolean(id),
+        queryKey: ["trade-documents", enquiryId],
+        queryFn: () => getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 20, enquiryId, type: "QUOTATION" }),
+        enabled: isValidEnquiryId,
     });
     const { data: enquiryRulesResponse } = useQuery({
         queryKey: ["flow-rules", "TRADE_ENQUIRY"],
@@ -333,9 +336,9 @@ export default function EnquiryDetailsPage() {
         queryFn: () => getData(apiRoutes.documentRules.list),
     });
     const { data: enquiryDocsResponse } = useQuery({
-        queryKey: ["trade-documents", "enquiry", id],
-        queryFn: () => getData(apiRoutes.tradeDocuments.list, { enquiryId: id, page: 1, limit: 200 }),
-        enabled: Boolean(id),
+        queryKey: ["trade-documents", "enquiry", enquiryId],
+        queryFn: () => getData(apiRoutes.tradeDocuments.list, { enquiryId, page: 1, limit: 200 }),
+        enabled: isValidEnquiryId,
     });
 
     const incotermOptions = Array.isArray(incotermResponse?.data?.data?.data)
@@ -535,7 +538,6 @@ export default function EnquiryDetailsPage() {
     // Convert to Order Mutation
     const convertMutation = useMutation({
         mutationFn: async () => {
-            const enquiryId = Array.isArray(id) ? id[0] : id;
             const normalizedPlan = {
                 procurementBy: sanitizeOwner(responsibilityPlan.procurementBy),
                 certificateBy: sanitizeOwner(responsibilityPlan.exportCustomsBy || responsibilityPlan.certificateBy),
@@ -594,7 +596,7 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: (orderId) => {
             toast.success("Enquiry converted to Order!");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
             router.push(`/dashboard/orders/${orderId}`);
         },
         onError: (error: any) => {
@@ -690,12 +692,12 @@ export default function EnquiryDetailsPage() {
             if (roleLower === "admin") {
                 payload.handlerOperatorId = selectedHandlerOperatorId || null;
             }
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}`, payload);
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, payload);
         },
         onSuccess: () => {
             toast.success("Operator roles updated.");
             setAssignmentSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to update operator roles.";
@@ -704,12 +706,12 @@ export default function EnquiryDetailsPage() {
     });
     const volunteerHandlerMutation = useMutation({
         mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
                 handlerOperatorId: user?.id || null,
             }),
         onSuccess: () => {
             toast.success("You are now assigned as handler.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to volunteer as handler.";
@@ -720,13 +722,13 @@ export default function EnquiryDetailsPage() {
     const commitUntilMutation = useMutation({
         mutationFn: async () => {
             if (!commitUntil) return;
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}/commit`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/commit`, {
                 commitUntil,
             });
         },
         onSuccess: () => {
             toast.success("Commit-until date updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => {
             toast.error("Failed to update commit-until date.");
@@ -771,7 +773,7 @@ export default function EnquiryDetailsPage() {
                 if (!targetInvId) throw new Error("Failed to resolve inventory ID.");
 
                 // 2. Finally Accept with the target inventory
-                return patchData(`${apiRoutes.enquiry.getAll}/${id}/seller-accept`, {
+                return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/seller-accept`, {
                     inventoryId: targetInvId,
                 });
             }
@@ -783,7 +785,7 @@ export default function EnquiryDetailsPage() {
             if (selectedInventory && (selectedInventory.availableQty || 0) < Number(enquiry?.quantity || 0)) {
                 throw new Error("Please add the quantity as per the order into your warehouse. Otherwise, select another warehouse with the desired quantity.");
             }
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}/seller-accept`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/seller-accept`, {
                 inventoryId: selectedInventoryId,
             });
         },
@@ -794,7 +796,7 @@ export default function EnquiryDetailsPage() {
             setIsAddingNewInventory(false);
             setInlineQuantity("");
             setInlineWarehouseName("");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
             queryClient.invalidateQueries({ queryKey: ["seller-inventories", sellerCompanyId, productVariantId] });
             queryClient.invalidateQueries({ queryKey: ["variantRate", variantRateId] });
         },
@@ -811,7 +813,7 @@ export default function EnquiryDetailsPage() {
 
     const createQuotationMutation = useMutation({
         mutationFn: async () => {
-            const request = postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId: id });
+            const request = postData(apiRoutes.tradeDocuments.create, { type: "QUOTATION", enquiryId });
             const timeout = new Promise((_, reject) => {
                 const timer = setTimeout(() => {
                     clearTimeout(timer);
@@ -823,8 +825,8 @@ export default function EnquiryDetailsPage() {
         onSuccess: (res: any) => {
             toast.success("Quotation created.");
             setDraftQuotationError("");
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
                 openDocViewer(createdDoc);
@@ -832,7 +834,7 @@ export default function EnquiryDetailsPage() {
             }
             (async () => {
                 try {
-                    const refresh = await getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 5, enquiryId: id, type: "QUOTATION" });
+                    const refresh = await getData(apiRoutes.tradeDocuments.list, { page: 1, limit: 5, enquiryId: enquiryId, type: "QUOTATION" });
                     const rows = Array.isArray(refresh?.data?.data?.data)
                         ? refresh.data.data.data
                         : Array.isArray(refresh?.data?.data)
@@ -860,13 +862,13 @@ export default function EnquiryDetailsPage() {
         mutationFn: async () => {
             if (!quotationId) throw new Error("Quotation not found.");
             await patchData(apiRoutes.tradeDocuments.update(quotationId), { status: "SENT" });
-            await patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, { actionKey: "QUOTATION_CREATED" });
+            await patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/actions`, { actionKey: "QUOTATION_CREATED" });
             return true;
         },
         onSuccess: () => {
             toast.success("Quotation submitted.");
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error?.message || "Failed to submit quotation.");
@@ -879,8 +881,8 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: () => {
             toast.success("Quotation reopened for revision.");
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", id] });
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error?.message || "Failed to reopen quotation.");
@@ -889,10 +891,10 @@ export default function EnquiryDetailsPage() {
 
     const buyerConfirmMutation = useMutation({
         mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/buyer-confirm`, {}),
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/buyer-confirm`, {}),
         onSuccess: () => {
             toast.success("Marked as all good to go.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => {
             toast.error("Failed to confirm enquiry.");
@@ -900,10 +902,10 @@ export default function EnquiryDetailsPage() {
     });
     const applyActionMutation = useMutation({
         mutationFn: async (payload: Record<string, any>) =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, payload),
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/actions`, payload),
         onSuccess: () => {
             toast.success("Action applied.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to apply action.");
@@ -918,7 +920,7 @@ export default function EnquiryDetailsPage() {
             if (clarificationReasonRate) reasons.push("RATE");
             if (clarificationReasonPayment) reasons.push("PAYMENT_TERMS");
             if (clarificationReasonTimeline) reasons.push("DELIVERY_TIMELINE");
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}/actions`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/actions`, {
                 actionKey: "REVISION_REQUESTED",
                 reasons,
                 revisionRate: clarificationReasonRate ? Number(clarificationRate) : undefined,
@@ -938,7 +940,7 @@ export default function EnquiryDetailsPage() {
             setClarificationDeliveryMode("");
             setClarificationDeliveryDate("");
             setRevisionError("");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || "Failed to request revision.";
@@ -951,7 +953,7 @@ export default function EnquiryDetailsPage() {
             if (!revisionReplies.length) {
                 throw new Error("No replies to save.");
             }
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}/revision-reply`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/revision-reply`, {
             replies: revisionReplies.map((item) => ({
                 key: String(item.key || "").toUpperCase(),
                 acknowledged: item.acknowledged,
@@ -984,9 +986,9 @@ export default function EnquiryDetailsPage() {
             }
             if (savedInquiry) {
                 // Ensure cached data structure matches what's expected by useQuery's select function
-                queryClient.setQueryData(["enquiry", id], { data: { data: savedInquiry } });
+                queryClient.setQueryData(["enquiry", enquiryId], { data: { data: savedInquiry } });
             }
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || error?.message || "Failed to save revision reply.";
@@ -997,7 +999,7 @@ export default function EnquiryDetailsPage() {
     });
     const finalizeResponsibilitiesMutation = useMutation({
         mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/finalize-responsibilities`, {
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/finalize-responsibilities`, {
                 executionContext,
                 packagingSpecifications,
                 inlandTransportSegments,
@@ -1005,7 +1007,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: (res: any) => {
             toast.success("Responsibilities finalized and execution inquiries generated.");
             setResponsibilitiesLockedOverride(true);
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => {
             toast.error("Failed to finalize responsibilities.");
@@ -1014,19 +1016,19 @@ export default function EnquiryDetailsPage() {
 
     const updateStatusMutation = useMutation({
         mutationFn: (newStatus: string) =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/status`, { status: String(newStatus || "").toUpperCase() }),
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/status`, { status: String(newStatus || "").toUpperCase() }),
         onSuccess: () => {
             toast.success("Status updated successfully!");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => { toast.error("Failed to update status."); },
     });
     const updateWorkflowStageMutation = useMutation({
         mutationFn: (stage: string) =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}/workflow-stage`, { workflowStage: stage }),
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/workflow-stage`, { workflowStage: stage }),
         onSuccess: () => {
             toast.success("Workflow stage updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to update workflow stage.");
@@ -1040,7 +1042,7 @@ export default function EnquiryDetailsPage() {
             const productName = productNameLabel;
             const variantName = variantNameLabel;
 
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
                 specifications: buyerSpecification,
                 history: [
                     ...(enquiry.history || []),
@@ -1055,16 +1057,16 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Specification updated.");
             setSpecSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => { toast.error("Failed to update specification."); },
     });
     const updateImportDeliveryModeMutation = useMutation({
         mutationFn: (mode: string) =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}`, { importDeliveryMode: mode }),
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, { importDeliveryMode: mode }),
         onSuccess: () => {
             toast.success("Import delivery mode updated.");
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || "Failed to update import delivery mode.");
@@ -1092,7 +1094,7 @@ export default function EnquiryDetailsPage() {
                 destinationInspectionBy: sanitizeBuyerOrObaol(responsibilityPlan.destinationInspectionBy),
                 finalDeliveryConfirmationBy: sanitizeObaolOnly(responsibilityPlan.finalDeliveryConfirmationBy),
             };
-            return patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+            return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
                 responsibilityPlan: normalizedPlan,
                 executionContext,
                 packagingSpecifications,
@@ -1109,7 +1111,7 @@ export default function EnquiryDetailsPage() {
         onSuccess: () => {
             toast.success("Responsibility plan saved.");
             setResponsibilitySavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => {
             toast.error("Failed to save responsibility plan.");
@@ -1185,14 +1187,14 @@ export default function EnquiryDetailsPage() {
     }, [responsibilityPlan, enquiry, executionContext, incotermOptions, paymentTermOptions, selectedIncotermId, selectedPaymentTermId, packagingSpecifications, getCountryNameById]);
     const updateTradeTermsMutation = useMutation({
         mutationFn: () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${id}`, {
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
                 preferredIncoterm: selectedIncotermId || null,
                 paymentTermId: selectedPaymentTermId || null,
             }),
         onSuccess: () => {
             toast.success("Trade terms updated.");
             setTradeTermsSavedAt(new Date().toISOString());
-            queryClient.invalidateQueries({ queryKey: ["enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: () => {
             toast.error("Failed to update trade terms.");
@@ -1204,7 +1206,7 @@ export default function EnquiryDetailsPage() {
             if (!activeRule) throw new Error("No document rule selected.");
             const payload: any = {
                 type: activeRule.docType,
-                enquiryId: id,
+                enquiryId: enquiryId,
             };
             const docTypeKey = String(activeRule.docType || "").toUpperCase();
             const actionTypeKey = String(activeRule.actionType || "").toUpperCase();
@@ -1224,10 +1226,10 @@ export default function EnquiryDetailsPage() {
             setDocActionOpen(false);
             setDocActionRule(null);
             setDocActionFileUrl("");
-            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", id] });
+            queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
-                queryClient.setQueryData(["trade-documents", "enquiry", id], (prev: any) => {
+                queryClient.setQueryData(["trade-documents", "enquiry", enquiryId], (prev: any) => {
                     const getRows = (raw: any): any[] => {
                         if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
                         if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
@@ -1271,7 +1273,7 @@ export default function EnquiryDetailsPage() {
         mutationFn: async () => {
             if (!docViewerDoc?._id) throw new Error("No document selected.");
             return postData(apiRoutes.tradeDocuments.email(String(docViewerDoc._id)), {
-                enquiryId: id,
+                enquiryId: enquiryId,
             });
         },
         onSuccess: () => {
@@ -1284,12 +1286,12 @@ export default function EnquiryDetailsPage() {
 
     const reopenRequestMutation = useMutation({
         mutationFn: async () => {
-            if (!id) throw new Error("Missing enquiry id.");
+            if (!enquiryId) throw new Error("Missing enquiry id.");
             const description = reopenReason.trim() || "Reopen enquiry request";
             return postData(apiRoutes.organizationReports.create, {
                 reasonCode: "REOPEN_INQUIRY_REQUEST",
                 description,
-                payload: { inquiryId: id, note: description },
+                payload: { inquiryId: enquiryId, note: description },
             });
         },
         onSuccess: () => {
@@ -1367,7 +1369,24 @@ export default function EnquiryDetailsPage() {
         setInlineQuantity(String(missingQty));
     }, [inventoryAcceptOpen, isAddingNewInventory, selectedInventoryId, missingQty, inlineQuantity, selectedInventory]);
 
+    if (!isValidEnquiryId) {
+        return (
+            <div className="p-10 text-center space-y-2">
+                <h2 className="text-xl font-bold">Invalid enquiry link</h2>
+                <p className="text-default-500">This enquiry ID format is not valid.</p>
+            </div>
+        );
+    }
     if (isLoading) return <BrandedLoader fullScreen message="SYNCING TRADE PROTOCOL" />;
+    if (isEnquiryError) {
+        const message = (enquiryError as any)?.response?.data?.message || (enquiryError as any)?.message || "Unable to load enquiry details right now.";
+        return (
+            <div className="p-10 text-center space-y-2">
+                <h2 className="text-xl font-bold">Unable to load enquiry</h2>
+                <p className="text-default-500">{message}</p>
+            </div>
+        );
+    }
     if (!enquiry) return <div className="p-10 text-center">Enquiry not found</div>;
 
     const handleInventoryAccept = () => {
@@ -2053,7 +2072,7 @@ export default function EnquiryDetailsPage() {
                 <Breadcrumbs size="sm" variant="light" color="primary">
                     <BreadcrumbItem href="/dashboard">Dashboard</BreadcrumbItem>
                     <BreadcrumbItem href="/dashboard/enquiries">Enquiries</BreadcrumbItem>
-                    <BreadcrumbItem isCurrent>#{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}</BreadcrumbItem>
+                    <BreadcrumbItem isCurrent>#{enquiryId.slice(-6).toUpperCase()}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
             {isReadOnlyAfterConversion && (
@@ -2085,7 +2104,7 @@ export default function EnquiryDetailsPage() {
                         <div className="flex flex-col gap-2 text-left">
                             <div className="flex flex-wrap items-center gap-3">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-all text-foreground">
-                                    Enquiry #{(Array.isArray(id) ? id[0] : id)?.slice(-6).toUpperCase()}
+                                    Enquiry #{enquiryId.slice(-6).toUpperCase()}
                                 </h1>
                                 <Chip
                                     color={normalizedStatus === "CONVERTED" ? "success" : normalizedStatus === "CANCELLED" ? "danger" : "warning"}
@@ -2225,7 +2244,7 @@ export default function EnquiryDetailsPage() {
                                                         {!op && <span className="text-[11px] font-black text-foreground uppercase tracking-tight mb-1">OBAOL Desk</span>}
                                                         {op && <span className="text-[8px] font-bold text-default-400 uppercase tracking-tighter">Escalation Desk</span>}
                                                         {(() => {
-                                                            const enquiryIdShort = (Array.isArray(id) ? id[0] : id || "").slice(-6).toUpperCase();
+                                                            const enquiryIdShort = enquiryId.slice(-6).toUpperCase();
                                                             const orderIdShort = (enquiry as any)?.order?._id || (enquiry as any)?.order || null;
                                                             const orderShort = orderIdShort ? String(orderIdShort).slice(-6).toUpperCase() : "";
                                                             const stageLabel = String(stageLabelMap.get(workflowStage) || workflowStage).replaceAll("_", " ");
@@ -4315,7 +4334,7 @@ export default function EnquiryDetailsPage() {
                                     <div className="flex items-center justify-between w-full gap-4">
                                         <Button
                                             variant="flat"
-                                            onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${Array.isArray(id) ? id[0] : id}`, "_blank")}
+                                            onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${enquiryId}`, "_blank")}
                                             className="flex-1 max-w-[240px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20 shadow-xl shadow-warning-500/5"
                                         >
                                             Open Execution Panel

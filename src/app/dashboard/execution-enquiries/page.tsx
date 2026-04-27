@@ -172,11 +172,13 @@ export default function ExecutionEnquiriesPage() {
   const enquiriesWithTasks = useMemo(() => {
     const results = rawInquiries
       .map((inquiry: any) => {
-        const tasks = (inquiry.executionInquiries || []).map((task: any) => ({
-          ...task,
-          key: `${inquiry._id}-${task.type}`,
-          enquiryId: inquiry._id,
-        }));
+        const tasks = (inquiry.executionInquiries || [])
+          .filter((task: any) => String(task?.ownerBy || "").toLowerCase() === "obaol")
+          .map((task: any) => ({
+            ...task,
+            key: `${inquiry._id}-${task.type}`,
+            enquiryId: inquiry._id,
+          }));
         if (!tasks.length) return null;
         return {
           id: inquiry._id,
@@ -219,6 +221,7 @@ export default function ExecutionEnquiriesPage() {
     const results = rawInquiries
       .map((inquiry: any) => {
         const tasks = (inquiry.executionInquiries || [])
+          .filter((task: any) => String(task?.ownerBy || "").toLowerCase() === "obaol")
           .map((task: any) => ({
             ...task,
             key: `${inquiry._id}-${task.type}`,

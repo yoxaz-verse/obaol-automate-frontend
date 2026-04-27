@@ -361,9 +361,11 @@ export default function EnquiryPage() {
                               data={item}
                               onCardClick={() => {
                                 if (navigatingId) return;
+                                const targetId = String(item?._id || item?.id || "").trim();
+                                if (!targetId) return;
                                 play("nav");
-                                setNavigatingId(item._id);
-                                router.push(`/dashboard/enquiries/${item._id}`);
+                                setNavigatingId(targetId);
+                                router.push(`/dashboard/enquiries/${targetId}`);
                               }}
                               action={
                                 <Tooltip
@@ -374,17 +376,19 @@ export default function EnquiryPage() {
                                 >
                                   <Button
                                     isIconOnly
-                                    isLoading={navigatingId === item._id}
+                                    isLoading={navigatingId === String(item?._id || item?.id || "")}
                                     variant="flat"
                                     onPress={(e) => {
                                       if (navigatingId) return;
+                                      const targetId = String(item?._id || item?.id || "").trim();
+                                      if (!targetId) return;
                                       play("nav");
-                                      setNavigatingId(item._id);
-                                      router.push(`/dashboard/enquiries/${item._id}`);
+                                      setNavigatingId(targetId);
+                                      router.push(`/dashboard/enquiries/${targetId}`);
                                     }}
                                     className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl p-0 min-w-10"
                                   >
-                                    {!navigatingId || navigatingId !== item._id ? <FiArrowRight size={20} /> : null}
+                                    {!navigatingId || navigatingId !== String(item?._id || item?.id || "") ? <FiArrowRight size={20} /> : null}
                                   </Button>
                                 </Tooltip>
                               }

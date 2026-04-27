@@ -2187,6 +2187,17 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   productVariant,
   onClose,
 }) => {
+  const OBJECT_ID_REGEX = /^[a-fA-F0-9]{24}$/;
+  const normalizeObjectId = (value: any): string => {
+    const raw =
+      typeof value === "string"
+        ? value
+        : typeof value === "object" && value !== null
+          ? (value._id || value.id || "")
+          : "";
+    const normalized = String(raw || "").trim();
+    return OBJECT_ID_REGEX.test(normalized) ? normalized : "";
+  };
   const router = useRouter();
   const queryClient = useQueryClient();
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -2213,8 +2224,14 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const associateProfile = Array.isArray(associateRaw)
     ? associateRaw[0]
     : associateRaw?.data || associateRaw?.data?.data || associateRaw || null;
-  const activeAssociateId = associateProfile?._id || user?.id;
-  const defaultSellerAssociateId = variantRate.associateId || variantRate.associate?._id || variantRate.associate || "";
+  const activeAssociateId = normalizeObjectId(associateProfile?._id || user?.id);
+  const defaultSellerAssociateId = normalizeObjectId(
+    variantRate.associateId ||
+    variantRate.associate?._id ||
+    variantRate.originalOwnerId ||
+    variantRate.variantRate?.associate?._id ||
+    variantRate.baseRateId?.associate?._id
+  );
 
   const { data: associatesResponse } = useQuery({
     queryKey: ["associates-list-for-enquiry"],
@@ -2290,19 +2307,35 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         const pv = pvRes?.data?.data || pvRes?.data || pvRes;
         resolvedProductId = pv?.product?._id || pv?.product || null;
       }
+      const normalizedProductId = normalizeObjectId(resolvedProductId);
       const resolvedSellerAssociateId = defaultSellerAssociateId;
       const resolvedBuyerAssociateId = isAdminUser
-        ? buyerAssociateId
+        ? normalizeObjectId(buyerAssociateId)
         : activeAssociateId;
+      const normalizedPreferredIncotermId = preferredIncotermId ? normalizeObjectId(preferredIncotermId) : "";
+      const normalizedVariantRateId = variantRate.isCatalogView ? "" : normalizeObjectId(variantRate._id);
+      const normalizedCatalogItemId = variantRate.isCatalogView ? normalizeObjectId(variantRate._id) : "";
+      const normalizedMediatorAssociateId = variantRate.mediatorAssociateId
+        ? normalizeObjectId(variantRate.mediatorAssociateId)
+        : "";
 
-      if (!resolvedProductId) {
+      if (!normalizedProductId) {
         throw new Error("Product is missing for this rate. Please refresh and try again.");
       }
       if (!resolvedBuyerAssociateId) {
         throw new Error("Buyer associate is required.");
       }
       if (!resolvedSellerAssociateId) {
-        throw new Error("Seller associate is required.");
+        throw new Error("Invalid seller mapping for this row. Please refresh marketplace data or contact admin.");
+      }
+      if (preferredIncotermId && !normalizedPreferredIncotermId) {
+        throw new Error("Preferred incoterm is invalid. Please reselect and try again.");
+      }
+      if (!variantRate.isCatalogView && !normalizedVariantRateId) {
+        throw new Error("Variant rate is invalid. Please refresh and try again.");
+      }
+      if (variantRate.isCatalogView && !normalizedCatalogItemId) {
+        throw new Error("Catalog item is invalid. Please refresh and try again.");
       }
 
       const baseSpecification = `Variant: ${variantRate.productVariant || "Standard"}`;
@@ -2312,15 +2345,15 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
           : baseSpecification;
 
       const payload = {
-        productId: resolvedProductId,
+        productId: normalizedProductId,
         quantity: Number(quantity) || 1,
         specifications: finalSpecification,
         buyerAssociateId: resolvedBuyerAssociateId,
         sellerAssociateId: resolvedSellerAssociateId,
-        mediatorAssociateId: variantRate.mediatorAssociateId || null,
-        variantRateId: variantRate.isCatalogView ? null : variantRate._id,
-        catalogItemId: variantRate.isCatalogView ? variantRate._id : null,
-        preferredIncoterm: preferredIncotermId || null,
+        mediatorAssociateId: normalizedMediatorAssociateId || null,
+        variantRateId: variantRate.isCatalogView ? null : normalizedVariantRateId,
+        catalogItemId: variantRate.isCatalogView ? normalizedCatalogItemId : null,
+        preferredIncoterm: normalizedPreferredIncotermId || null,
         ...(isOperatorCreator && user?.id ? { assignedOperatorId: user.id } : {}),
         // Optional name/phone if they were overridden in the form
         ...(name && name !== associateProfile?.name && { name }),
@@ -2352,15 +2385,19 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       const backendMessage = error?.response?.data?.message;
       const validationMessage = error?.response?.data?.error?.message;
       const fallback = error?.message || "Something went wrong. Please try again.";
-      alert(backendMessage || validationMessage || fallback);
+      showToastMessage({ type: "error", message: backendMessage || validationMessage || fallback });
       setIsLoading(false);
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isAdminUser && !buyerAssociateId) {
-      alert("Please select a buyer associate.");
+    if (isAdminUser && !normalizeObjectId(buyerAssociateId)) {
+      showToastMessage({ type: "error", message: "Please select a valid buyer associate." });
+      return;
+    }
+    if (!defaultSellerAssociateId) {
+      showToastMessage({ type: "error", message: "Invalid seller mapping for this row. Please refresh marketplace data." });
       return;
     }
     createEnquiryMutation.mutate();

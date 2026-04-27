@@ -507,6 +507,7 @@ export const apiRoutes = {
     list: "/warehouses",
     create: "/warehouses",
     update: (id: string) => `/warehouses/${id}`,
+    assignments: "/warehouse/assignments",
     inbound: "/warehouse/inbound",
     outbound: "/warehouse/outbound",
     adjust: "/warehouse/adjust",

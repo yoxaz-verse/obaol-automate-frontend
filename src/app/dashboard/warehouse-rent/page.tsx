@@ -21,13 +21,18 @@ type Warehouse = {
 };
 
 export default function WarehouseRentPage() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["warehouse-rentals"],
     queryFn: async () => {
       const res: any = await getData(apiRoutes.warehouses.list, { scope: "available" });
       return res?.data?.data || res?.data || [];
     },
   });
+  const errorStatus = Number((error as any)?.response?.status || 0);
+  const errorMessage =
+    errorStatus === 403
+      ? "Access denied for your role."
+      : ((error as any)?.response?.data?.message || "Unable to load warehouse space right now.");
 
   const rentalWarehouses = useMemo(() => {
     const list: Warehouse[] = Array.isArray(data) ? data : [];
@@ -59,7 +64,7 @@ export default function WarehouseRentPage() {
 
           {isError && (
             <div className="text-sm text-danger-400 py-10">
-              Unable to load warehouse space right now.
+              {errorMessage}
             </div>
           )}
 

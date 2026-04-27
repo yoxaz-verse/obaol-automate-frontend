@@ -54,6 +54,7 @@ import { showToastMessage } from "@/utils/utils";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 
 const round2 = (value: number) => Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
+const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
 const resolveAdminCommission = (rateValue: any, commissionValue: any, commissionPercent: number) => {
   const numericCommission = Number(commissionValue);
   if (Number.isFinite(numericCommission) && numericCommission > 0) return numericCommission;
@@ -2430,9 +2431,13 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             className="rounded-2xl font-black tracking-wide shadow-md"
             isDisabled={!createdEnquiryId}
             onPress={() => {
-              if (!createdEnquiryId) return;
+              const enquiryId = String(createdEnquiryId || "").trim();
+              if (!isValidObjectId(enquiryId)) {
+                showToastMessage({ type: "error", message: "Unable to open enquiry details. Invalid enquiry ID." });
+                return;
+              }
               onClose?.();
-              router.push(`/dashboard/enquiries/${createdEnquiryId}`);
+              router.push(`/dashboard/enquiries/${enquiryId}`);
             }}
             endContent={<FiArrowRight size={16} />}
           >

@@ -53,6 +53,7 @@ import { sidebarOptions } from "@/utils/utils";
 import { dashboardCopy } from "@/utils/dashboardCopy";
 
 const Dashboard: NextPage = () => {
+  const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const { user } = useContext(AuthContext);
   const router = useRouter();
   const role = String(user?.role || "");
@@ -477,7 +478,7 @@ const Dashboard: NextPage = () => {
                   className="w-full flex items-center justify-between gap-2 text-left text-xs px-2 py-1.5 rounded-lg hover:bg-default-100/70 transition-colors"
                   onClick={() => {
                     const targetId = String((item as any)?._id || item?.id || "").trim();
-                    if (!targetId) return;
+                    if (!isValidObjectId(targetId)) return;
                     router.push(`/dashboard/enquiries/${targetId}`);
                   }}
                 >
@@ -963,7 +964,7 @@ const Dashboard: NextPage = () => {
                                 className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-foreground/5"
                                 onPress={() => {
                                   const targetId = String(item?._id || item?.id || "").trim();
-                                  if (!targetId) return;
+                                  if (!isValidObjectId(targetId)) return;
                                   router.push(`/dashboard/enquiries/${targetId}`);
                                 }}
                              >

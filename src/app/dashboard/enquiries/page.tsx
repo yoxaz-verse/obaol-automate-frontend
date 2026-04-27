@@ -30,6 +30,7 @@ import { useSoundEffect } from "@/context/SoundContext";
  * The main Enquiry page
  */
 export default function EnquiryPage() {
+  const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const [selectedType, setSelectedType] = React.useState<string>("All");
   const [selectedStage, setSelectedStage] = React.useState<string>("All");
   const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -362,7 +363,7 @@ export default function EnquiryPage() {
                               onCardClick={() => {
                                 if (navigatingId) return;
                                 const targetId = String(item?._id || item?.id || "").trim();
-                                if (!targetId) return;
+                                if (!isValidObjectId(targetId)) return;
                                 play("nav");
                                 setNavigatingId(targetId);
                                 router.push(`/dashboard/enquiries/${targetId}`);
@@ -381,7 +382,7 @@ export default function EnquiryPage() {
                                     onPress={(e) => {
                                       if (navigatingId) return;
                                       const targetId = String(item?._id || item?.id || "").trim();
-                                      if (!targetId) return;
+                                      if (!isValidObjectId(targetId)) return;
                                       play("nav");
                                       setNavigatingId(targetId);
                                       router.push(`/dashboard/enquiries/${targetId}`);

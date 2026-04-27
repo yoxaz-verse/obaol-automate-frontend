@@ -63,6 +63,7 @@ import {
 type ImportTab = "all" | "mine" | "reservations";
 
 export default function ImportsPage() {
+  const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -330,8 +331,8 @@ export default function ImportsPage() {
       queryClient.invalidateQueries({ queryKey: ["import-reservations"] });
       setPendingReservationId(null);
       const linked = response?.data?.data?.linkedEnquiryId;
-      const enquiryId = typeof linked === "string" ? linked : linked?._id;
-      if (enquiryId) {
+      const enquiryId = String(typeof linked === "string" ? linked : linked?._id || "").trim();
+      if (isValidObjectId(enquiryId)) {
         if (response?.config?.data) {
           try {
             const parsed = JSON.parse(response.config.data);
@@ -340,7 +341,7 @@ export default function ImportsPage() {
         }
         router.push(`/dashboard/enquiries/${enquiryId}`);
       } else {
-        showToastMessage({ type: "info", message: "Enquiry created, but ID was not returned. Please check the Enquiries list." });
+        showToastMessage({ type: "info", message: "Enquiry created, but a valid enquiry link was not returned. Please check the Enquiries list." });
       }
       // Clear any inline error for this reservation
       if (response?.config?.data) {
@@ -906,8 +907,8 @@ export default function ImportsPage() {
                               isLoading={redirectingEnquiryId === reservation._id}
                               onPress={() => {
                                 const linked = reservation?.linkedEnquiryId;
-                                const enquiryId = typeof linked === "string" ? linked : linked?._id;
-                                if (enquiryId) {
+                                const enquiryId = String(typeof linked === "string" ? linked : linked?._id || "").trim();
+                                if (isValidObjectId(enquiryId)) {
                                   setRedirectingEnquiryId(reservation._id);
                                   router.push(`/dashboard/enquiries/${enquiryId}`);
                                 } else {

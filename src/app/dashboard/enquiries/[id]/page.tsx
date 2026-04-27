@@ -1430,6 +1430,12 @@ export default function EnquiryDetailsPage() {
         ? (enquiry as any).handlerOperatorId
         : null;
 
+    const buyerId = (enquiry as any)?.buyerAssociateId?._id || enquiry?.buyerAssociateId;
+    const sellerId = (enquiry as any)?.sellerAssociateId?._id || enquiry?.sellerAssociateId;
+    const userIdStr = String(user?.id || "").trim();
+    const isBuyer = Boolean(buyerId && userIdStr && String(buyerId) === userIdStr);
+    const isSeller = Boolean(sellerId && userIdStr && String(sellerId) === userIdStr);
+
     // ─── Role Detection ───────────────────────────────────────────────────────
     const roleLower = String(user?.role || "").toLowerCase();
     const isSystemAdmin = roleLower === "admin";
@@ -1472,8 +1478,6 @@ export default function EnquiryDetailsPage() {
         ? enquiry?.mediatorAssociateId?._id.toString() === user?.id?.toString()
         : enquiry?.mediatorAssociateId?.toString() === user?.id?.toString();
 
-    const buyerId = (enquiry as any)?.buyerAssociateId?._id || enquiry?.buyerAssociateId;
-    const sellerId = (enquiry as any)?.sellerAssociateId?._id || enquiry?.sellerAssociateId;
     const buyerAssociateObj = typeof (enquiry as any)?.buyerAssociateId === "object" ? (enquiry as any).buyerAssociateId : null;
     const sellerAssociateObj = typeof (enquiry as any)?.sellerAssociateId === "object" ? (enquiry as any).sellerAssociateId : null;
     const importListing = (enquiry as any)?.importListingId;
@@ -1538,10 +1542,6 @@ export default function EnquiryDetailsPage() {
     const supplierOperatorName = supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Not assigned";
     const dealCloserOperatorName = dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Not assigned";
     const handlerOperatorName = handlerOperatorObj?.name || handlerOperatorObj?.firstName || "Not assigned";
-    const userIdStr = user?.id?.toString();
-    const isBuyer = buyerId && userIdStr && buyerId.toString() === userIdStr;
-    const isSeller = sellerId && userIdStr && sellerId.toString() === userIdStr;
-
     const docRules = parseMasterRows(docRulesResponse).filter((item: any) => !item?.isDeleted);
     const normalizedStageKey = String(workflowStage || "").toUpperCase();
     const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data?.data)

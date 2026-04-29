@@ -7,7 +7,7 @@ import {
   Spinner, Card, Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter 
 } from "@nextui-org/react";
 import { 
-  LuFilter, LuSearch, LuExternalLink, LuActivity, LuUser, LuPlus, LuGlobe, 
+  LuSearch, LuExternalLink, LuActivity, LuUser, LuPlus, LuGlobe, 
   LuChevronLeft, LuBox, LuArrowRight, LuTerminal, LuArrowUpRight, LuUsers, 
   LuSettings, LuPhone, LuTag, LuPackage, LuHistory, LuClock, LuMail, LuLock 
 } from "react-icons/lu";
@@ -43,6 +43,8 @@ export default function CompanyProductPage() {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [operatorSearchText, setOperatorSearchText] = useState("");
+  const [assignmentFilter, setAssignmentFilter] = useState<"all" | "assigned" | "unassigned">("all");
+  const [liveProductFilter, setLiveProductFilter] = useState<"all" | "live" | "not_live">("all");
 
   const obaolConfigQuery = useQuery({
     queryKey: ["system-config-obaol-company"],
@@ -63,7 +65,15 @@ export default function CompanyProductPage() {
   const DIRECTORY_PAGE_SIZE = 24;
 
   const companiesQuery = useQuery({
-    queryKey: ["company-directory", roleLower, user?.id, directoryPage, debouncedSearch],
+    queryKey: [
+      "company-directory",
+      roleLower,
+      user?.id,
+      directoryPage,
+      debouncedSearch,
+      assignmentFilter,
+      liveProductFilter,
+    ],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: directoryPage,
@@ -71,6 +81,8 @@ export default function CompanyProductPage() {
         sort: "name:asc",
         ...(debouncedSearch ? { search: debouncedSearch } : {}),
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+        ...(isAdmin ? { assignmentStatus: assignmentFilter } : {}),
+        liveProductStatus: liveProductFilter,
       }),
     enabled: canAccessCompaniesWorkspace,
     placeholderData: (previousData) => previousData,
@@ -88,24 +100,26 @@ export default function CompanyProductPage() {
   });
 
   const totalCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-total", roleLower, user?.id],
+    queryKey: ["company-metrics-total", roleLower, user?.id, assignmentFilter],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+        ...(isAdmin ? { assignmentStatus: assignmentFilter } : {}),
       }),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const liveCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-live", roleLower, user?.id],
+    queryKey: ["company-metrics-live", roleLower, user?.id, assignmentFilter],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
-        isWebsiteLive: true,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+        ...(isAdmin ? { assignmentStatus: assignmentFilter } : {}),
+        liveProductStatus: "live",
       }),
     enabled: canAccessCompaniesWorkspace,
   });
@@ -114,6 +128,11 @@ export default function CompanyProductPage() {
     queryKey: ["company-metrics-system", isAdmin],
     queryFn: () => getData(apiRoutes.analytics.systemMetrics),
     enabled: isAdmin,
+  });
+  const operatorMetricsQuery = useQuery({
+    queryKey: ["dashboard-operator-metrics", user?.id],
+    queryFn: () => getData(apiRoutes.analytics.operatorMetrics, {}),
+    enabled: isOperatorFamily,
   });
 
   const obaolConfig = obaolConfigQuery.data;
@@ -205,6 +224,14 @@ export default function CompanyProductPage() {
     setSelectedObaolCompanyId((current) => current || obaolCompanyId);
   }, [isAdmin, obaolCompanyId]);
 
+  useEffect(() => {
+    if (!isOperatorFamily) return;
+    if (assignmentFilter !== "assigned") {
+      setAssignmentFilter("assigned");
+      setDirectoryPage(1);
+    }
+  }, [isOperatorFamily, assignmentFilter]);
+
   const obaolConfigMutation = useMutation({
     mutationFn: async (companyId: string) => {
       const response = await postData(apiRoutes.systemConfig.obaolCompany, { companyId });
@@ -229,10 +256,11 @@ export default function CompanyProductPage() {
 
   const totalCompaniesCount = getTotalCount(totalCompaniesQuery.data?.data);
   const liveCompaniesCount = getTotalCount(liveCompaniesQuery.data?.data);
-  const unassignedCount = isAdmin
-    ? Number(systemMetricsQuery.data?.data?.data?.unassignedCompanies || 0)
-    : 0;
-  const assignedCount = Math.max(totalCompaniesCount - unassignedCount, 0);
+  const adminUnassignedCount = Number(systemMetricsQuery.data?.data?.data?.unassignedCompanies || 0);
+  const adminAssignedCount = Math.max(totalCompaniesCount - adminUnassignedCount, 0);
+  const operatorAssignedCount = Number(operatorMetricsQuery.data?.data?.data?.assignedCompanies || totalCompaniesCount || 0);
+  const assignedCount = isAdmin ? adminAssignedCount : operatorAssignedCount;
+  const unassignedCount = isAdmin && assignmentFilter === "all" ? adminUnassignedCount : Math.max(totalCompaniesCount - assignedCount, 0);
   const liveCount = liveCompaniesCount;
   const notLiveCount = Math.max(totalCompaniesCount - liveCompaniesCount, 0);
 
@@ -382,15 +410,12 @@ export default function CompanyProductPage() {
   const filteredOperatorOptions = useMemo(() => {
     const needle = operatorSearchText.trim().toLowerCase();
     if (!needle) return operatorOptions;
-    
-    const exactMatch = operatorOptions.find(o => o.name.toLowerCase() === needle);
-    if (exactMatch && selectedOperatorId === exactMatch.id) return operatorOptions;
-    
-    return operatorOptions.filter(o => 
-      o.name.toLowerCase().includes(needle) || 
+
+    return operatorOptions.filter(o =>
+      o.name.toLowerCase().includes(needle) ||
       o.email.toLowerCase().includes(needle)
     );
-  }, [operatorOptions, operatorSearchText, selectedOperatorId]);
+  }, [operatorOptions, operatorSearchText]);
 
   useEffect(() => {
     if (!isAssignModalOpen) return;
@@ -663,18 +688,18 @@ export default function CompanyProductPage() {
           <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Website Status</p>
-                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Live vs Not Live</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Live Products Status</p>
+                <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Companies with live products</p>
               </div>
               <LuGlobe className="text-warning-500/70" size={18} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Live</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Live Products</p>
                 <p className="text-2xl font-black text-success-500">{liveCount}</p>
               </div>
               <div className="rounded-xl border border-danger-500/20 bg-danger-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-danger-600">Not Live</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-danger-600">No Live Products</p>
                 <p className="text-2xl font-black text-danger-500">{notLiveCount}</p>
               </div>
             </div>
@@ -717,6 +742,61 @@ export default function CompanyProductPage() {
             >
               Add New Associate + Company
             </Button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-divider bg-content1/40 backdrop-blur-xl p-4 md:p-5 space-y-4">
+          {isAdmin ? (
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Assignment Filter</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "assigned", label: "Assigned" },
+                  { key: "unassigned", label: "Unassigned" },
+                ].map((item) => (
+                  <Button
+                    key={item.key}
+                    size="sm"
+                    radius="full"
+                    variant={assignmentFilter === item.key ? "solid" : "flat"}
+                    color={assignmentFilter === item.key ? "primary" : "default"}
+                    className="font-black uppercase tracking-wider text-[10px]"
+                    onPress={() => {
+                      setAssignmentFilter(item.key as "all" | "assigned" | "unassigned");
+                      setDirectoryPage(1);
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <div className="space-y-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Live Product Filter</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "all", label: "All" },
+                { key: "live", label: "Live Products" },
+                { key: "not_live", label: "No Live Products" },
+              ].map((item) => (
+                <Button
+                  key={item.key}
+                  size="sm"
+                  radius="full"
+                  variant={liveProductFilter === item.key ? "solid" : "flat"}
+                  color={liveProductFilter === item.key ? "secondary" : "default"}
+                  className="font-black uppercase tracking-wider text-[10px]"
+                  onPress={() => {
+                    setLiveProductFilter(item.key as "all" | "live" | "not_live");
+                    setDirectoryPage(1);
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -1159,8 +1239,22 @@ export default function CompanyProductPage() {
               selectedKey={selectedOperatorId || null}
               inputValue={operatorSearchText}
               onInputChange={setOperatorSearchText}
-              onSelectionChange={(key) => setSelectedOperatorId(String(key || ""))}
+              onSelectionChange={(key) => {
+                const nextId = String(key || "");
+                setSelectedOperatorId(nextId);
+                const selected = filteredOperatorOptions.find((option) => option.id === nextId);
+                if (selected) setOperatorSearchText(selected.name);
+              }}
               isDisabled={!isAdmin}
+              allowsCustomValue={false}
+              popoverProps={{
+                placement: "bottom-start",
+                shouldFlip: false,
+                offset: 8,
+              }}
+              listboxProps={{
+                emptyContent: "No operators found",
+              }}
             >
               {filteredOperatorOptions.map((option) => (
                 <AutocompleteItem key={option.id} textValue={`${option.name} ${option.email}`}>

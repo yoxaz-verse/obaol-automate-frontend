@@ -1136,7 +1136,11 @@ export default function CompanyProductPage() {
         </div>
       </div>
 
-      <Modal isOpen={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
+      <Modal
+        isOpen={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
+        isDismissable={false}
+      >
         <ModalContent>
           <ModalHeader>Assign Operator</ModalHeader>
           <ModalBody>

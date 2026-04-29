@@ -30,6 +30,7 @@ import { parsePhoneValue } from "@/utils/phone";
 import { useSoundEffect } from "@/context/SoundContext";
 import AuthContext from "@/context/AuthContext";
 import { getData, postData } from "@/core/api/apiHandler";
+import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -71,6 +72,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [googleSignUp, setGoogleSignUp] = useState(false);
   const [googleIdToken, setGoogleIdToken] = useState("");
   const [googleReady, setGoogleReady] = useState(false);
+  const [googleRenderError, setGoogleRenderError] = useState("");
   const authMethod = String(searchParams?.get("auth") || "").toLowerCase();
   const isGoogleOnboarding = isOnboarding && authMethod === "google";
   const requiresPassword = isOnboarding ? !isGoogleOnboarding : !googleSignUp;
@@ -325,51 +327,86 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   React.useEffect(() => {
     if (isOnboarding) return;
     if (!googleClientId || typeof window === "undefined") return;
-    if (document.getElementById("google-gsi-script")) {
-      setGoogleReady(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = "google-gsi-script";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setGoogleReady(true);
-    document.body.appendChild(script);
-    return () => {
-      if (script.parentNode) script.parentNode.removeChild(script);
-    };
+    loadGoogleGsi()
+      .then(() => setGoogleReady(true))
+      .catch(() => setGoogleRenderError("Google sign-up is temporarily unavailable."));
   }, [googleClientId]);
 
   React.useEffect(() => {
     if (isOnboarding) return;
     if (!googleReady) return;
-    if (!(window as any)?.google?.accounts?.id) return;
-    const container = document.getElementById("google-register-associate");
-    if (!container) return;
-    const buttonWidth = Math.min(360, Math.max(240, container.clientWidth || 320));
-    (window as any).google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: (resp: { credential?: string }) => {
-        if (!resp?.credential) return;
-        const payload = decodeJwt(resp.credential);
-        setGoogleIdToken(resp.credential);
-        setGoogleSignUp(true);
-        setFormData((prev) => ({
-          ...prev,
-          name: prev.name || payload?.name || "",
-          email: prev.email || payload?.email || "",
-        }));
-      },
-    });
-    (window as any).google.accounts.id.renderButton(container, {
-      theme: "outline",
-      size: "large",
-      width: buttonWidth,
-      text: "continue_with",
-      shape: "pill",
-    });
-  }, [googleReady, googleClientId]);
+    let mounted = true;
+    const containerId = "google-register-associate";
+
+    const doRender = async () => {
+      try {
+        await renderGoogleButton({
+          containerId,
+          clientId: googleClientId,
+          width: 360,
+          maxRetries: 7,
+          retryDelayMs: 120,
+          callback: (resp: { credential?: string }) => {
+            if (!resp?.credential) return;
+            const payload = decodeJwt(resp.credential);
+            setGoogleIdToken(resp.credential);
+            setGoogleSignUp(true);
+            setFormData((prev) => ({
+              ...prev,
+              name: prev.name || payload?.name || "",
+              email: prev.email || payload?.email || "",
+            }));
+          },
+        });
+        if (mounted) setGoogleRenderError("");
+      } catch {
+        if (mounted) setGoogleRenderError("Google sign-up failed to load. Please reload it.");
+      }
+    };
+
+    doRender();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") doRender();
+    };
+    const onPageShow = () => doRender();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      mounted = false;
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+      clearGoogleButton(containerId);
+    };
+  }, [googleReady, googleClientId, isOnboarding]);
+
+  const handleGoogleReload = async () => {
+    const containerId = "google-register-associate";
+    clearGoogleButton(containerId);
+    try {
+      await renderGoogleButton({
+        containerId,
+        clientId: googleClientId,
+        width: 360,
+        maxRetries: 8,
+        retryDelayMs: 140,
+        callback: (resp: { credential?: string }) => {
+          if (!resp?.credential) return;
+          const payload = decodeJwt(resp.credential);
+          setGoogleIdToken(resp.credential);
+          setGoogleSignUp(true);
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || payload?.name || "",
+            email: prev.email || payload?.email || "",
+          }));
+        },
+      });
+      setGoogleRenderError("");
+    } catch {
+      setGoogleRenderError("Google sign-up failed to load. Please try again.");
+    }
+  };
 
   const companyTypes = Array.isArray(registerOptions?.companyTypes) ? registerOptions.companyTypes : EMPTY_LIST;
   const existingCompanies = Array.isArray(registerOptions?.existingCompanies) ? registerOptions.existingCompanies : EMPTY_LIST;
@@ -1047,7 +1084,23 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           {!isOnboarding && (
             <>
               {googleClientId && !googleSignUp ? (
-                <div id="google-register-associate" className="w-full" />
+                <div className="w-full flex flex-col items-center">
+                  <div id="google-register-associate" className="w-full" />
+                  {!!googleRenderError && (
+                    <div className="mt-3 flex flex-col items-center gap-2">
+                      <p className="text-[10px] font-semibold text-danger-500 text-center">{googleRenderError}</p>
+                      <Button
+                        size="sm"
+                        radius="lg"
+                        variant="flat"
+                        className="text-[10px] font-black uppercase tracking-widest"
+                        onPress={handleGoogleReload}
+                      >
+                        Reload Google sign-in
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ) : googleClientId && googleSignUp ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}

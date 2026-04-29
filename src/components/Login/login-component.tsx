@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { showToastMessage, useEmailValidation } from "../../utils/utils";
 import {
   Button,
@@ -16,6 +16,7 @@ import BrandedLoader from "@/components/ui/BrandedLoader";
 import { useSoundEffect } from "@/context/SoundContext";
 import { postData } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
+import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 
 
 interface ILoginProps {
@@ -87,6 +88,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const searchParams = useSearchParams();
   const { isAuthenticated, loading, login, loginWithGoogle, user, refreshUser } = useContext(AuthContext);
   const [googleReady, setGoogleReady] = useState(false);
+  const [googleRenderError, setGoogleRenderError] = useState("");
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   useEffect(() => {
@@ -112,6 +114,54 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     }, 1000);
     return () => clearInterval(timer);
   }, [otpSent, otpVerified]);
+
+  const handleGoogleCredential = useCallback(async (resp: { credential?: string }) => {
+    try {
+      if (!resp?.credential) throw new Error("Google credential not returned.");
+      setIsLoading(true);
+      const roleValue = roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate";
+      if (authMode === "signup") {
+        setSignupMethod("google");
+        setErrorMessage("");
+        await postData("/auth/google", {
+          idToken: resp.credential,
+          role: roleValue,
+          intent: "register",
+        });
+        const refreshed = await refreshUser();
+        if (!refreshed) {
+          throw new Error("Session cookie blocked. Allow cookies for the API domain and retry.");
+        }
+        setLoginStatus("success");
+        setIsRedirecting(true);
+        router.push("/dashboard/onboarding?auth=google");
+      } else {
+        await loginWithGoogle({
+          idToken: resp.credential,
+          role: roleValue,
+          rememberMe,
+        });
+        setLoginStatus("success");
+        setIsRedirecting(true);
+      }
+    } catch (error: any) {
+      const rawMessage = error?.response?.data?.message || error?.message || "Google login failed.";
+      const status = error?.response?.status ? ` (HTTP ${error.response.status})` : "";
+      const isNetwork = error?.message === "Network Error" || error?.code === "ERR_NETWORK";
+      const networkHint = isNetwork
+        ? `Google signup failed: Network error contacting ${baseUrl}/auth/google. Ensure backend is running and CORS/cookies allow ${baseUrl}.`
+        : null;
+      const message =
+        authMode === "signup"
+          ? networkHint || `Google signup failed: ${rawMessage}${status}`
+          : rawMessage;
+      setErrorMessage(message);
+      setLoginStatus("error");
+      showToastMessage({ type: "error", message, position: "top-right" });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authMode, loginWithGoogle, rememberMe, refreshUser, roleLower, router]);
 
   useEffect(() => {
     if (authMode === "signup") {
@@ -150,88 +200,66 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   useEffect(() => {
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
     if (!googleClientId || typeof window === "undefined") return;
-    if (document.getElementById("google-gsi-script")) {
-      setGoogleReady(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = "google-gsi-script";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setGoogleReady(true);
-    document.body.appendChild(script);
-    return () => {
-      if (script.parentNode) script.parentNode.removeChild(script);
-    };
-  }, [role, googleClientId]);
+    loadGoogleGsi()
+      .then(() => setGoogleReady(true))
+      .catch(() => setGoogleRenderError("Google sign-in is temporarily unavailable."));
+  }, [roleLower, googleClientId]);
 
   useEffect(() => {
     if (!googleReady) return;
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
-    if (!window?.google?.accounts?.id) return;
     const containerId = authMode === "signup" ? `google-signup-${roleLower}` : `google-login-${roleLower}`;
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const buttonWidth = Math.min(400, Math.max(280, container.clientWidth || 320));
-    window.google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: async (resp: { credential?: string }) => {
-        try {
-          if (!resp?.credential) throw new Error("Google credential not returned.");
-          setIsLoading(true);
-          const roleValue = roleLower === "team" ? "Operator" : roleLower === "operator" ? "Operator" : "Associate";
-          if (authMode === "signup") {
-            setSignupMethod("google");
-            setErrorMessage("");
-            await postData("/auth/google", {
-              idToken: resp.credential,
-              role: roleValue,
-              intent: "register",
-            });
-            const refreshed = await refreshUser();
-            if (!refreshed) {
-              throw new Error("Session cookie blocked. Allow cookies for the API domain and retry.");
-            }
-            setLoginStatus("success");
-            setIsRedirecting(true);
-            router.push("/dashboard/onboarding?auth=google");
-          } else {
-            await loginWithGoogle({
-              idToken: resp.credential,
-              role: roleValue,
-              rememberMe,
-            });
-            setLoginStatus("success");
-            setIsRedirecting(true);
-          }
-          } catch (error: any) {
-          const rawMessage = error?.response?.data?.message || error?.message || "Google login failed.";
-          const status = error?.response?.status ? ` (HTTP ${error.response.status})` : "";
-          const isNetwork = error?.message === "Network Error" || error?.code === "ERR_NETWORK";
-          const networkHint = isNetwork
-            ? `Google signup failed: Network error contacting ${baseUrl}/auth/google. Ensure backend is running and CORS/cookies allow ${baseUrl}.`
-            : null;
-          const message =
-            authMode === "signup"
-              ? networkHint || `Google signup failed: ${rawMessage}${status}`
-              : rawMessage;
-          setErrorMessage(message);
-          setLoginStatus("error");
-          showToastMessage({ type: "error", message, position: "top-right" });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-    });
-    window.google.accounts.id.renderButton(container, {
-      theme: "outline",
-      size: "large",
-      width: Math.min(340, buttonWidth),
-      text: "continue_with",
-      shape: "pill",
-    });
-  }, [googleReady, role, googleClientId, loginWithGoogle, rememberMe, authMode, roleLower]);
+
+    let mounted = true;
+    const doRender = async () => {
+      try {
+        await renderGoogleButton({
+          containerId,
+          clientId: googleClientId,
+          width: 340,
+          maxRetries: 7,
+          retryDelayMs: 120,
+          callback: handleGoogleCredential,
+        });
+        if (mounted) setGoogleRenderError("");
+      } catch {
+        if (mounted) setGoogleRenderError("Google sign-in failed to load. Please reload it.");
+      }
+    };
+
+    doRender();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") doRender();
+    };
+    const onPageShow = () => doRender();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      mounted = false;
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+      clearGoogleButton(containerId);
+    };
+  }, [googleReady, role, googleClientId, authMode, roleLower, handleGoogleCredential]);
+
+  const handleGoogleReload = async () => {
+    const containerId = authMode === "signup" ? `google-signup-${roleLower}` : `google-login-${roleLower}`;
+    clearGoogleButton(containerId);
+    try {
+      await renderGoogleButton({
+        containerId,
+        clientId: googleClientId,
+        width: 340,
+        maxRetries: 8,
+        retryDelayMs: 140,
+        callback: handleGoogleCredential,
+      });
+      setGoogleRenderError("");
+    } catch {
+      setGoogleRenderError("Google sign-in failed to load. Please try again.");
+    }
+  };
 
   if (isRedirecting) {
     return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
@@ -914,8 +942,22 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                  <div className="w-full flex flex-col items-center justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
+                    {!!googleRenderError && (
+                      <div className="mt-3 flex flex-col items-center gap-2">
+                        <p className="text-[10px] font-semibold text-danger-500 text-center">{googleRenderError}</p>
+                        <Button
+                          size="sm"
+                          radius="lg"
+                          variant="flat"
+                          className="text-[10px] font-black uppercase tracking-widest"
+                          onPress={handleGoogleReload}
+                        >
+                          Reload Google sign-in
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
@@ -945,8 +987,22 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                  <div className="w-full flex flex-col items-center justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
+                    {!!googleRenderError && (
+                      <div className="mt-3 flex flex-col items-center gap-2">
+                        <p className="text-[10px] font-semibold text-danger-500 text-center">{googleRenderError}</p>
+                        <Button
+                          size="sm"
+                          radius="lg"
+                          variant="flat"
+                          className="text-[10px] font-black uppercase tracking-widest"
+                          onPress={handleGoogleReload}
+                        >
+                          Reload Google sign-in
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>

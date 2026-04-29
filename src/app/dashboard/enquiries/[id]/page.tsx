@@ -684,14 +684,11 @@ export default function EnquiryDetailsPage() {
 
     const updateOperatorRolesMutation = useMutation({
         mutationFn: async () => {
-            const roleLower = String(user?.role || "").toLowerCase();
             const payload: any = {
                 supplierOperatorId: selectedSupplierOperatorId || null,
                 dealCloserOperatorId: selectedDealCloserOperatorId || null,
+                handlerOperatorId: selectedHandlerOperatorId || null,
             };
-            if (roleLower === "admin") {
-                payload.handlerOperatorId = selectedHandlerOperatorId || null;
-            }
             return patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, payload);
         },
         onSuccess: () => {
@@ -706,15 +703,25 @@ export default function EnquiryDetailsPage() {
     });
     const volunteerHandlerMutation = useMutation({
         mutationFn: async () =>
-            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}`, {
-                handlerOperatorId: user?.id || null,
-            }),
+            postData(`${apiRoutes.enquiry.getAll}/${enquiryId}/handler-volunteer`, {}),
         onSuccess: () => {
-            toast.success("You are now assigned as handler.");
+            toast.success("Handler volunteer request submitted. Awaiting admin approval.");
             queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
         },
         onError: (error: any) => {
             const msg = error?.response?.data?.message || "Failed to volunteer as handler.";
+            toast.error(msg);
+        },
+    });
+    const reviewHandlerVolunteerMutation = useMutation({
+        mutationFn: async (action: "approve" | "reject") =>
+            patchData(`${apiRoutes.enquiry.getAll}/${enquiryId}/handler-volunteer`, { action }),
+        onSuccess: (_res, action) => {
+            toast.success(action === "approve" ? "Volunteer request approved." : "Volunteer request rejected.");
+            queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+        },
+        onError: (error: any) => {
+            const msg = error?.response?.data?.message || "Failed to review handler volunteer request.";
             toast.error(msg);
         },
     });
@@ -1461,6 +1468,7 @@ export default function EnquiryDetailsPage() {
     const canManageDocs = isSystemAdmin || isAssignedOperator;
     const canManageWorkflow = isSystemAdmin || isAssignedOperator;
     const isAdmin = isSystemAdmin || isAssignedOperator;
+    const isAssignmentAdmin = isSystemAdmin;
     const isHandlerAssigned = Boolean(isOperatorUser && user?.id && handlerOperatorId === String(user.id));
     const canSeeBuyerSide = Boolean(isBuyer || isSystemAdmin || isBuyerSideOperator);
     const canSeeSupplierSide = Boolean(isSeller || isSystemAdmin || isSupplierSideOperator);
@@ -1542,6 +1550,13 @@ export default function EnquiryDetailsPage() {
     const supplierOperatorName = supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Not assigned";
     const dealCloserOperatorName = dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Not assigned";
     const handlerOperatorName = handlerOperatorObj?.name || handlerOperatorObj?.firstName || "Not assigned";
+    const pendingHandlerOperatorObj = ((enquiry as any)?.pendingHandlerOperatorId && typeof (enquiry as any).pendingHandlerOperatorId === "object")
+        ? (enquiry as any).pendingHandlerOperatorId
+        : null;
+    const pendingHandlerOperatorName = pendingHandlerOperatorObj?.name || pendingHandlerOperatorObj?.firstName || "Unknown operator";
+    const pendingHandlerStatus = String((enquiry as any)?.pendingHandlerStatus || "NONE").toUpperCase();
+    const hasPendingHandlerRequest = pendingHandlerStatus === "PENDING";
+    const pendingHandlerRequestedAt = (enquiry as any)?.pendingHandlerRequestedAt || null;
     const docRules = parseMasterRows(docRulesResponse).filter((item: any) => !item?.isDeleted);
     const normalizedStageKey = String(workflowStage || "").toUpperCase();
     const enquiryRules = Array.isArray(enquiryRulesResponse?.data?.data?.data)
@@ -3482,7 +3497,7 @@ export default function EnquiryDetailsPage() {
                                     <span className={handlerOperatorName === "Not assigned" ? "text-default-500" : "text-primary"}>{handlerOperatorName}</span>
                                 </div>
                             </div>
-                            {isAdmin && (
+                            {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Supplier Ownership Operator</span>
                                     <Select
@@ -3504,7 +3519,7 @@ export default function EnquiryDetailsPage() {
                                     </Select>
                                 </div>
                             )}
-                            {isAdmin && (
+                            {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Deal Closer Operator</span>
                                     <Select
@@ -3526,7 +3541,7 @@ export default function EnquiryDetailsPage() {
                                     </Select>
                                 </div>
                             )}
-                            {isSystemAdmin && (
+                            {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
                                     <Select
@@ -3559,11 +3574,46 @@ export default function EnquiryDetailsPage() {
                                         onPress={() => volunteerHandlerMutation.mutate()}
                                         isDisabled={isReadOnlyAfterConversion}
                                     >
-                                        Volunteer as Handler
+                                        Request Handler Approval
                                     </Button>
                                 </div>
                             )}
-                            {isAdmin && (
+                            {hasPendingHandlerRequest && (
+                                <div className="flex flex-col gap-2 rounded-lg border border-warning-500/30 bg-warning-500/5 px-3 py-2">
+                                    <span className="text-[10px] uppercase font-black tracking-widest text-warning-600">Pending Handler Request</span>
+                                    <span className="text-xs font-semibold text-default-700">
+                                        {pendingHandlerOperatorName}
+                                        {pendingHandlerRequestedAt ? ` • ${dayjs(pendingHandlerRequestedAt).format("DD MMM YYYY, hh:mm A")}` : ""}
+                                    </span>
+                                    {isAssignmentAdmin ? (
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                color="success"
+                                                variant="flat"
+                                                isLoading={reviewHandlerVolunteerMutation.isPending}
+                                                onPress={() => reviewHandlerVolunteerMutation.mutate("approve")}
+                                                isDisabled={isReadOnlyAfterConversion}
+                                            >
+                                                Approve
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                color="danger"
+                                                variant="flat"
+                                                isLoading={reviewHandlerVolunteerMutation.isPending}
+                                                onPress={() => reviewHandlerVolunteerMutation.mutate("reject")}
+                                                isDisabled={isReadOnlyAfterConversion}
+                                            >
+                                                Reject
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <span className="text-[10px] text-default-500">Awaiting admin review</span>
+                                    )}
+                                </div>
+                            )}
+                            {isAssignmentAdmin && (
                                 <div className="flex flex-col gap-4 mt-2">
                                     <Button
                                         size="lg"

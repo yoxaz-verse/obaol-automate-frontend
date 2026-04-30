@@ -120,9 +120,9 @@ export default function CompanyProductPage() {
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
         ...(isAdmin && assignmentFilter !== "all" ? { assignmentStatus: assignmentFilter } : {}),
-        ...(liveProductFilter === "live" ? { liveProductStatus: "live" } : {}),
+        liveProductStatus: "live",
       }),
-    enabled: canAccessCompaniesWorkspace,
+    enabled: canAccessCompaniesWorkspace && liveProductFilter !== "not_live",
   });
 
   const assignedCompaniesQuery = useQuery({
@@ -283,6 +283,27 @@ export default function CompanyProductPage() {
     ? 0
     : Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
   const notLiveCount = Math.max(totalCompaniesCount - liveCount, 0);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    console.debug("[companies] directory filters", {
+      roleLower,
+      assignmentFilter,
+      liveProductFilter,
+      totalCount: totalCompaniesCount,
+      liveCount,
+      notLiveCount,
+      listCount: companies.length,
+    });
+  }, [
+    roleLower,
+    assignmentFilter,
+    liveProductFilter,
+    totalCompaniesCount,
+    liveCount,
+    notLiveCount,
+    companies.length,
+  ]);
 
   const PALETTE = [
     "bg-warning-500/10 text-warning-600",

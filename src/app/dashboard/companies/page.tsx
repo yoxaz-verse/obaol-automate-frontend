@@ -100,39 +100,53 @@ export default function CompanyProductPage() {
   });
 
   const totalCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-total", roleLower, user?.id, assignmentFilter],
+    queryKey: ["company-metrics-total", roleLower, user?.id, assignmentFilter, liveProductFilter],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
         ...(isAdmin ? { assignmentStatus: assignmentFilter } : {}),
+        liveProductStatus: liveProductFilter,
       }),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const liveCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-live", roleLower, user?.id, assignmentFilter],
+    queryKey: ["company-metrics-live", roleLower, user?.id, assignmentFilter, liveProductFilter],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
         ...(isAdmin ? { assignmentStatus: assignmentFilter } : {}),
-        liveProductStatus: "live",
+        liveProductStatus: liveProductFilter === "not_live" ? "all" : "live",
       }),
     enabled: canAccessCompaniesWorkspace,
   });
 
-  const systemMetricsQuery = useQuery({
-    queryKey: ["company-metrics-system", isAdmin],
-    queryFn: () => getData(apiRoutes.analytics.systemMetrics),
+  const assignedCompaniesQuery = useQuery({
+    queryKey: ["company-metrics-assigned", roleLower, user?.id, liveProductFilter],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 1,
+        assignmentStatus: "assigned",
+        liveProductStatus: liveProductFilter,
+      }),
     enabled: isAdmin,
   });
-  const operatorMetricsQuery = useQuery({
-    queryKey: ["dashboard-operator-metrics", user?.id],
-    queryFn: () => getData(apiRoutes.analytics.operatorMetrics, {}),
-    enabled: isOperatorFamily,
+
+  const unassignedCompaniesQuery = useQuery({
+    queryKey: ["company-metrics-unassigned", roleLower, user?.id, liveProductFilter],
+    queryFn: () =>
+      getData(apiRoutes.associateCompany.getAll, {
+        page: 1,
+        limit: 1,
+        assignmentStatus: "unassigned",
+        liveProductStatus: liveProductFilter,
+      }),
+    enabled: isAdmin,
   });
 
   const obaolConfig = obaolConfigQuery.data;
@@ -255,14 +269,20 @@ export default function CompanyProductPage() {
   });
 
   const totalCompaniesCount = getTotalCount(totalCompaniesQuery.data?.data);
-  const liveCompaniesCount = getTotalCount(liveCompaniesQuery.data?.data);
-  const adminUnassignedCount = Number(systemMetricsQuery.data?.data?.data?.unassignedCompanies || 0);
-  const adminAssignedCount = Math.max(totalCompaniesCount - adminUnassignedCount, 0);
-  const operatorAssignedCount = Number(operatorMetricsQuery.data?.data?.data?.assignedCompanies || totalCompaniesCount || 0);
-  const assignedCount = isAdmin ? adminAssignedCount : operatorAssignedCount;
-  const unassignedCount = isAdmin && assignmentFilter === "all" ? adminUnassignedCount : Math.max(totalCompaniesCount - assignedCount, 0);
-  const liveCount = liveCompaniesCount;
-  const notLiveCount = Math.max(totalCompaniesCount - liveCompaniesCount, 0);
+  const scopedLiveCompaniesCount = getTotalCount(liveCompaniesQuery.data?.data);
+  const scopedAssignedCompaniesCount = getTotalCount(assignedCompaniesQuery.data?.data);
+  const scopedUnassignedCompaniesCount = getTotalCount(unassignedCompaniesQuery.data?.data);
+
+  const assignedCount = isAdmin
+    ? scopedAssignedCompaniesCount
+    : totalCompaniesCount;
+  const unassignedCount = isAdmin
+    ? scopedUnassignedCompaniesCount
+    : 0;
+  const liveCount = liveProductFilter === "not_live"
+    ? 0
+    : Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
+  const notLiveCount = Math.max(totalCompaniesCount - liveCount, 0);
 
   const PALETTE = [
     "bg-warning-500/10 text-warning-600",

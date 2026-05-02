@@ -724,6 +724,9 @@ export default function CompanyWorkspacePage() {
               Previous pending/under-review requests were auto-cancelled. Latest request is now active.
             </div>
             <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+              Approval is completed by Admin from Dashboard &gt; Reports.
+            </div>
+            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
               Services requested:
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -748,7 +751,7 @@ export default function CompanyWorkspacePage() {
           </div>
         ) : (
           <p className="text-sm text-default-500">
-            No approved interests available yet. Submit an update request for admin approval.
+            No approved interests available yet. Submit an update request for admin approval in Dashboard &gt; Reports.
           </p>
         )}
       </div>

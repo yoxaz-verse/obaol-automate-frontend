@@ -131,6 +131,8 @@ interface VariantRateProps {
   externalFilters?: Record<string, any>;
   showInventoryStatus?: boolean;
   inventoryCompanyId?: string | null;
+  showCreateButton?: boolean;
+  openCreateModalSignal?: number;
 }
 
 /**
@@ -152,6 +154,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   externalFilters,
   showInventoryStatus = false,
   inventoryCompanyId = null,
+  showCreateButton = true,
+  openCreateModalSignal,
 }) => {
   const router = useRouter();
   const productVariantValue = productVariant || null;
@@ -227,7 +231,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const limit = 25;
+  const limit = isMarketplaceView ? 10 : 25;
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
   const [inventoryQty, setInventoryQty] = useState("");
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
@@ -235,8 +239,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [wizardOpen, setWizardOpen] = useState(false);
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
-  const shouldUseServerSearch = !(isMarketplaceView && typeof externalSearch === "string");
-  const serverSearch = shouldUseServerSearch ? effectiveSearch : "";
+  const serverSearch = effectiveSearch;
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
@@ -256,6 +259,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
     JSON.stringify(effectiveFilters || {}),
     JSON.stringify(additionalParams || {}),
   ]);
+
+  useEffect(() => {
+    if (!openCreateModalSignal) return;
+    setWizardOpen(true);
+  }, [openCreateModalSignal]);
 
   const { data: variantResponse } = useQuery({
     queryKey: ["displayedRate", user?.id],
@@ -723,22 +731,24 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
         const searchText = effectiveSearch.toLowerCase();
         const finalTableData =
-          searchText
-            ? tableData.filter((row: any) => {
-              const haystack = [
-                toDisplayText(row.product, ""),
-                toDisplayText(row.productVariant, ""),
-                toDisplayText(row.associate, ""),
-                row.warehouseName,
-                toDisplayText(row.rate, ""),
-                toDisplayText(row.quantity, ""),
-              ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-              return haystack.includes(searchText);
-            })
-            : tableData;
+          isMarketplaceView
+            ? tableData
+            : searchText
+              ? tableData.filter((row: any) => {
+                const haystack = [
+                  toDisplayText(row.product, ""),
+                  toDisplayText(row.productVariant, ""),
+                  toDisplayText(row.associate, ""),
+                  row.warehouseName,
+                  toDisplayText(row.rate, ""),
+                  toDisplayText(row.quantity, ""),
+                ]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLowerCase();
+                return haystack.includes(searchText);
+              })
+              : tableData;
 
         return (
           <div className="w-full max-w-full min-w-0">
@@ -756,7 +766,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     />
                   </div>
                 )}
-                {!displayOnly && rate === "variantRate" && canAddOwnRate && (
+                {!displayOnly && rate === "variantRate" && canAddOwnRate && showCreateButton && (
                   <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
                     <Button
                       size="sm"

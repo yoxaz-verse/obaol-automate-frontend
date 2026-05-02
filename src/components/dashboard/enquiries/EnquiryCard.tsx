@@ -160,7 +160,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                     className="w-full font-black text-[9px] tracking-widest h-10 rounded-xl bg-default-100 hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
                                     onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
                                 >
-                                    Contact Desk
+                                    View Enquiry Details
                                 </Button>
                             )}
                         </div>

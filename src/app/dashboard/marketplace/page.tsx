@@ -2,9 +2,10 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Spacer, Tab, Tabs } from "@heroui/react";
+import { Button, Spacer, Tab, Tabs } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { LuWarehouse } from "react-icons/lu";
+import { FiPlus } from "react-icons/fi";
 import MarketplaceFilterBar, {
   MarketplaceFilterState,
 } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
@@ -34,10 +35,16 @@ export default function MarketplacePage() {
     const { user } = useContext(AuthContext);
     const roleLower = String(user?.role || "").toLowerCase();
     const isAdmin = roleLower === "admin";
+    const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const isAdminUser = roleLower === "admin" || isOperatorUser;
+    const isAssociateUser = roleLower === "associate";
+    const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
+    const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
 
     const [currentTable, setCurrentTable] = useState<MarketplaceTabKey>("marketplace-live");
     const [liveState, setLiveState] = useState<MarketplaceFilterState>(emptyState);
     const [offlineState, setOfflineState] = useState<MarketplaceFilterState>(emptyState);
+    const [openCreateModalSignal, setOpenCreateModalSignal] = useState(0);
 
     const activeState = useMemo(
         () => (currentTable === "marketplace-live" ? liveState : offlineState),
@@ -47,7 +54,7 @@ export default function MarketplacePage() {
     const setActiveState = (nextState: MarketplaceFilterState) => {
         const normalizedState: MarketplaceFilterState = {
             search: String(nextState.search || ""),
-            filters: {},
+            filters: { ...(nextState.filters || {}) },
         };
         if (currentTable === "marketplace-live") {
             setLiveState(normalizedState);
@@ -131,6 +138,23 @@ export default function MarketplacePage() {
                         />
                         <div className="flex w-full gap-4">
                             <div className="w-full min-w-0 pb-10 overflow-x-auto">
+                                <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
+                                        Marketplace Listings
+                                    </div>
+                                    {canAddOwnRate && (
+                                        <Button
+                                            size="sm"
+                                            onPress={() => setOpenCreateModalSignal((prev) => prev + 1)}
+                                            variant="shadow"
+                                            color="warning"
+                                            className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
+                                            startContent={<FiPlus size={16} />}
+                                        >
+                                            Create Rate Listing
+                                        </Button>
+                                    )}
+                                </div>
                                 <Tabs
                                     aria-label="Marketplace Tabs"
                                     selectedKey={currentTable}
@@ -152,6 +176,9 @@ export default function MarketplacePage() {
                                             additionalParams={{ view: "marketplace", isLive: true }}
                                             hideBuiltInFilters
                                             externalSearch={liveState.search}
+                                            externalFilters={liveState.filters}
+                                            showCreateButton={false}
+                                            openCreateModalSignal={currentTable === "marketplace-live" ? openCreateModalSignal : 0}
                                         />
                                     </Tab>
                                     <Tab key={"marketplace-offline"} title="Marketplace (Offline)">
@@ -162,6 +189,9 @@ export default function MarketplacePage() {
                                             additionalParams={{ view: "marketplace", isLive: false }}
                                             hideBuiltInFilters
                                             externalSearch={offlineState.search}
+                                            externalFilters={offlineState.filters}
+                                            showCreateButton={false}
+                                            openCreateModalSignal={currentTable === "marketplace-offline" ? openCreateModalSignal : 0}
                                         />
                                     </Tab>
                                 </Tabs>

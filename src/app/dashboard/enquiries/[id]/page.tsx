@@ -1550,6 +1550,10 @@ export default function EnquiryDetailsPage() {
     const supplierOperatorName = supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Not assigned";
     const dealCloserOperatorName = dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Not assigned";
     const handlerOperatorName = handlerOperatorObj?.name || handlerOperatorObj?.firstName || "Not assigned";
+    const supplierOperatorAssigned = Boolean((enquiry as any)?.supplierOperatorAssigned ?? supplierOperatorId);
+    const dealCloserOperatorAssigned = Boolean((enquiry as any)?.dealCloserOperatorAssigned ?? dealCloserOperatorId);
+    const handlerOperatorAssigned = Boolean((enquiry as any)?.handlerOperatorAssigned ?? handlerOperatorId);
+    const getAssignmentStatus = (isAssigned: boolean) => (isAssigned ? "Assigned" : "Not assigned");
     const pendingHandlerOperatorObj = ((enquiry as any)?.pendingHandlerOperatorId && typeof (enquiry as any).pendingHandlerOperatorId === "object")
         ? (enquiry as any).pendingHandlerOperatorId
         : null;
@@ -1659,7 +1663,7 @@ export default function EnquiryDetailsPage() {
         REVISION_REQUESTED: "Request Revision",
         REVISION_CONFIRMED: "Confirm Revision",
         REVISION_SKIPPED: "Skip Revision",
-        QUOTATION_CREATED: "Draft Quotation",
+        QUOTATION_CREATED: "Create Quotation",
         QUOTATION_ACCEPTED: "Accept Quotation",
         RETURN_TO_REVISION: "Return to Revision",
         RESPONSIBILITIES_FINALIZED: "Finalize Responsibilities",
@@ -1931,15 +1935,64 @@ export default function EnquiryDetailsPage() {
         if (requiredActionMode === "ANY") return requiredActions.some((action: string) => actionStatus[action]);
         return requiredActions.every((action: string) => actionStatus[action]);
     })();
+    const pendingActionAudience = (() => {
+        const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
+        const userCanActAsBuyer = Boolean(isBuyer || isBuyerSideOperator);
+        const userCanActAsSupplier = Boolean(isSeller || isSupplierSideOperator);
+        const userCanActAsEitherParty = userCanActAsBuyer || userCanActAsSupplier;
+        if (isSystemAdmin) {
+            return {
+                actionBy,
+                isUserResponsible: false,
+                includesOtherParty: false,
+            };
+        }
+        if (actionBy === "BUYER") {
+            return {
+                actionBy,
+                isUserResponsible: userCanActAsBuyer,
+                includesOtherParty: false,
+            };
+        }
+        if (actionBy === "SUPPLIER") {
+            return {
+                actionBy,
+                isUserResponsible: userCanActAsSupplier,
+                includesOtherParty: false,
+            };
+        }
+        if (actionBy === "BOTH") {
+            return {
+                actionBy,
+                isUserResponsible: userCanActAsEitherParty,
+                includesOtherParty: userCanActAsEitherParty,
+            };
+        }
+        if (actionBy === "EITHER") {
+            return {
+                actionBy,
+                isUserResponsible: userCanActAsEitherParty,
+                includesOtherParty: false,
+            };
+        }
+        return {
+            actionBy,
+            isUserResponsible: false,
+            includesOtherParty: false,
+        };
+    })();
     const waitingMessage = (() => {
         if (isCancelled) return "This enquiry was cancelled.";
         if (isCompletedFlow) return "This enquiry is completed.";
         if (requiredActions.length && !isRequiredSatisfied) {
-            const actionBy = String((currentRule as any)?.actionBy || "").toUpperCase();
-            if (actionBy === "BUYER") return "Action pending from buyer.";
-            if (actionBy === "SUPPLIER") return "Action pending from supplier.";
-            if (actionBy === "BOTH") return "Action pending from buyer and supplier.";
-            if (actionBy === "EITHER") return "Action pending from buyer or supplier.";
+            const { actionBy, isUserResponsible, includesOtherParty } = pendingActionAudience;
+            if (actionBy === "BUYER") return isUserResponsible ? "Your action is pending." : "Waiting for buyer action.";
+            if (actionBy === "SUPPLIER") return isUserResponsible ? "Your action is pending." : "Waiting for supplier action.";
+            if (actionBy === "BOTH") {
+                if (isUserResponsible && includesOtherParty) return "Your action is pending along with the other party.";
+                return "Waiting for buyer and supplier action.";
+            }
+            if (actionBy === "EITHER") return isUserResponsible ? "Your action is pending." : "Waiting for buyer or supplier action.";
             return "Action pending for this stage.";
         }
         if (!isConvertedFlow) return "Waiting for OBAOL team to convert this enquiry into an order.";
@@ -1947,13 +2000,17 @@ export default function EnquiryDetailsPage() {
     })();
     const isAssociateResponsibilityLocked = hasResponsibilitiesFinalized && !isAdmin;
     const canEditResponsibilityPlan = (isAdmin || isBuyer || isSeller) && !isAssociateResponsibilityLocked && !isReadOnlyAfterConversion;
-    const transportOwner = sanitizeOwner(responsibilityPlan.transportBy || initialPlan.transportBy || "obaol");
-    const buyerHandlesTransport = transportOwner === "buyer";
-    const sellerHandlesTransport = transportOwner === "seller";
-    const showOriginLogisticsFields = isAdmin || isSeller || (isBuyer && buyerHandlesTransport);
-    const showDestinationLogisticsFields = isAdmin || isBuyer || (isSeller && sellerHandlesTransport);
-    const canEditOriginLogistics = showOriginLogisticsFields && canEditResponsibilityPlan;
-    const canEditDestinationLogistics = showDestinationLogisticsFields && canEditResponsibilityPlan;
+    const isHandlerOrAdmin = Boolean(isSystemAdmin || isHandlerAssigned);
+    const canViewOriginLogistics = Boolean(isHandlerOrAdmin || isSeller || isBuyerSideOperator || isSupplierSideOperator);
+    const canViewDestinationLogistics = Boolean(isHandlerOrAdmin || isBuyer || isBuyerSideOperator || isSupplierSideOperator);
+    const canEditOriginLogistics = Boolean(
+        canEditResponsibilityPlan &&
+        (isHandlerOrAdmin || isSeller || isSupplierSideOperator)
+    );
+    const canEditDestinationLogistics = Boolean(
+        canEditResponsibilityPlan &&
+        (isHandlerOrAdmin || isBuyer || isBuyerSideOperator)
+    );
     const canEditRouteNotes = canEditResponsibilityPlan && (isAdmin || isBuyer || isSeller);
     const hasExecutionContext = hasExecutionContextForStage;
     const canConvert =
@@ -3164,13 +3221,27 @@ export default function EnquiryDetailsPage() {
                                                 {buyerPresence.online ? "Online" : `Last seen ${buyerPresence.lastSeenLabel}`}
                                             </span>
                                             <span className="text-sm text-default-500 font-medium">{buyerCompanyName}</span>
-                                            {buyerPhone && isAdmin && (
+                                            {buyerPhone && (
                                                 <span
                                                     className="font-medium text-primary hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
                                                     onClick={() => window.location.href = `tel:${buyerPhone}`}
                                                 >
                                                     <FiPhone size={12} /> {buyerPhone}
                                                 </span>
+                                            )}
+                                            {dealCloserOperatorAssigned && dealCloserOperatorObj && (
+                                                <div className="mt-2 pt-2 border-t border-primary/20 flex flex-col gap-1">
+                                                    <span className="text-[9px] uppercase font-black tracking-widest text-primary-500">Buyer Operator</span>
+                                                    <span className="text-xs font-semibold text-default-700">
+                                                        {dealCloserOperatorObj?.name || dealCloserOperatorObj?.firstName || "Assigned"}
+                                                    </span>
+                                                    {dealCloserOperatorObj?.email && (
+                                                        <span className="text-[11px] text-default-500">{dealCloserOperatorObj.email}</span>
+                                                    )}
+                                                    {dealCloserOperatorObj?.phone && (
+                                                        <span className="text-[11px] text-default-500">{dealCloserOperatorObj.phone}</span>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     )}
@@ -3182,13 +3253,27 @@ export default function EnquiryDetailsPage() {
                                                 {sellerPresence.online ? "Online" : `Last seen ${sellerPresence.lastSeenLabel}`}
                                             </span>
                                             <span className="text-sm text-default-500 font-medium">{sellerCompanyName}</span>
-                                            {sellerPhone && isAdmin && (
+                                            {sellerPhone && (
                                                 <span
                                                     className="font-medium text-success hover:underline cursor-pointer text-sm mt-1 flex items-center gap-1"
                                                     onClick={() => window.location.href = `tel:${sellerPhone}`}
                                                 >
                                                     <FiPhone size={12} /> {sellerPhone}
                                                 </span>
+                                            )}
+                                            {supplierOperatorAssigned && supplierOperatorObj && (
+                                                <div className="mt-2 pt-2 border-t border-success/20 flex flex-col gap-1">
+                                                    <span className="text-[9px] uppercase font-black tracking-widest text-success-700">Supplier Operator</span>
+                                                    <span className="text-xs font-semibold text-default-700">
+                                                        {supplierOperatorObj?.name || supplierOperatorObj?.firstName || "Assigned"}
+                                                    </span>
+                                                    {supplierOperatorObj?.email && (
+                                                        <span className="text-[11px] text-default-500">{supplierOperatorObj.email}</span>
+                                                    )}
+                                                    {supplierOperatorObj?.phone && (
+                                                        <span className="text-[11px] text-default-500">{supplierOperatorObj.phone}</span>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     )}
@@ -3409,8 +3494,8 @@ export default function EnquiryDetailsPage() {
                             destinationCountryOptions={sortedCountries}
                             originPortOptions={originPortOptions}
                             destinationPortOptions={destinationPortOptions}
-                            showOriginLogisticsFields={showOriginLogisticsFields}
-                            showDestinationLogisticsFields={showDestinationLogisticsFields}
+                            showOriginLogisticsFields={canViewOriginLogistics}
+                            showDestinationLogisticsFields={canViewDestinationLogistics}
                             canEditOriginLogistics={canEditOriginLogistics}
                             canEditDestinationLogistics={canEditDestinationLogistics}
                             canEditRouteNotes={canEditRouteNotes}
@@ -3479,22 +3564,28 @@ export default function EnquiryDetailsPage() {
                             <div className="flex flex-col gap-2">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Supply Ownership Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <div className={`w-2 h-2 rounded-full ${supplierOperatorName === "Not assigned" ? "bg-default-400" : "bg-success-500 animate-pulse"}`} />
-                                    <span className={supplierOperatorName === "Not assigned" ? "text-default-500" : "text-primary"}>{supplierOperatorName}</span>
+                                    <div className={`w-2 h-2 rounded-full ${supplierOperatorAssigned ? "bg-success-500 animate-pulse" : "bg-default-400"}`} />
+                                    <span className={supplierOperatorAssigned ? "text-primary" : "text-default-500"}>
+                                        {isAssignmentAdmin ? supplierOperatorName : getAssignmentStatus(supplierOperatorAssigned)}
+                                    </span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Legal Closer Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <div className={`w-2 h-2 rounded-full ${dealCloserOperatorName === "Not assigned" ? "bg-default-400" : "bg-warning-500 animate-pulse"}`} />
-                                    <span className={dealCloserOperatorName === "Not assigned" ? "text-default-500" : "text-warning-500"}>{dealCloserOperatorName}</span>
+                                    <div className={`w-2 h-2 rounded-full ${dealCloserOperatorAssigned ? "bg-warning-500 animate-pulse" : "bg-default-400"}`} />
+                                    <span className={dealCloserOperatorAssigned ? "text-warning-500" : "text-default-500"}>
+                                        {isAssignmentAdmin ? dealCloserOperatorName : getAssignmentStatus(dealCloserOperatorAssigned)}
+                                    </span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Handler Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <div className={`w-2 h-2 rounded-full ${handlerOperatorName === "Not assigned" ? "bg-default-400" : "bg-primary-500 animate-pulse"}`} />
-                                    <span className={handlerOperatorName === "Not assigned" ? "text-default-500" : "text-primary"}>{handlerOperatorName}</span>
+                                    <div className={`w-2 h-2 rounded-full ${handlerOperatorAssigned ? "bg-primary-500 animate-pulse" : "bg-default-400"}`} />
+                                    <span className={handlerOperatorAssigned ? "text-primary" : "text-default-500"}>
+                                        {isAssignmentAdmin ? handlerOperatorName : getAssignmentStatus(handlerOperatorAssigned)}
+                                    </span>
                                 </div>
                             </div>
                             {isAssignmentAdmin && (

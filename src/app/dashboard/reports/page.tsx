@@ -60,6 +60,8 @@ export default function ReportsPage() {
   const [nextStatus, setNextStatus] = useState("UNDER_REVIEW");
   const [actionType, setActionType] = useState<ActionType>("NONE");
   const [adminNotes, setAdminNotes] = useState("");
+  const activeReasonCode = String(activeReport?.reasonCode || "").toUpperCase();
+  const isCompanyInterestActive = activeReasonCode === "COMPANY_INTEREST_UPDATE";
 
   const companiesQuery = useQuery({
     queryKey: ["reports-company-options"],
@@ -90,12 +92,14 @@ export default function ReportsPage() {
   });
 
   const actionMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (payload?: { status?: string; actionType?: ActionType }) => {
       if (!activeReport?._id) throw new Error("No report selected.");
+      const statusToSend = payload?.status || nextStatus;
+      const actionTypeToSend = payload?.actionType || actionType;
       await patchData(apiRoutes.organizationReports.action(activeReport._id), {
-        status: nextStatus,
+        status: statusToSend,
         adminNotes: adminNotes.trim(),
-        actionType,
+        actionType: actionTypeToSend,
       });
     },
     onSuccess: () => {
@@ -295,8 +299,9 @@ export default function ReportsPage() {
                         variant="flat"
                         onPress={() => {
                           setActiveReport(row);
-                          setNextStatus(String(row?.status || "UNDER_REVIEW"));
-                          setActionType("NONE");
+                          const isInterest = String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE";
+                          setNextStatus(isInterest ? "ACTION_TAKEN" : String(row?.status || "UNDER_REVIEW"));
+                          setActionType(isInterest ? "APPLY_COMPANY_INTERESTS" : "NONE");
                           setAdminNotes(String(row?.adminNotes || ""));
                         }}
                       >
@@ -358,8 +363,9 @@ export default function ReportsPage() {
                       variant="flat"
                       onPress={() => {
                         setActiveReport(row);
-                        setNextStatus(String(row?.status || "UNDER_REVIEW"));
-                        setActionType("NONE");
+                        const isInterest = String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE";
+                        setNextStatus(isInterest ? "ACTION_TAKEN" : String(row?.status || "UNDER_REVIEW"));
+                        setActionType(isInterest ? "APPLY_COMPANY_INTERESTS" : "NONE");
                         setAdminNotes(String(row?.adminNotes || ""));
                       }}
                     >
@@ -440,36 +446,47 @@ export default function ReportsPage() {
                 <div className="text-xs mt-1">Inquiry ID: {String(activeReport?.payload?.inquiryId || "-")}</div>
               </div>
             ) : null}
-            <Select
-              label="Status"
-              labelPlacement="outside"
-              selectedKeys={[nextStatus]}
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys as Set<string>)[0];
-                if (selected) setNextStatus(String(selected));
-              }}
-            >
-              {STATUS_OPTIONS.filter((option) => option !== "ALL").map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </Select>
-            <Select
-              label="Account Action"
-              labelPlacement="outside"
-              selectedKeys={[actionType]}
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys as Set<string>)[0] as ActionType;
-                if (selected) setActionType(selected);
-              }}
-            >
-              {ACTION_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </Select>
+            {isCompanyInterestActive ? (
+              <div className="rounded-lg border border-warning-200/60 bg-warning-50/60 px-3 py-2 text-sm text-warning-800">
+                <div className="font-semibold">Interest approval action</div>
+                <div className="text-xs mt-1">
+                  Admin decisions here update company interests directly.
+                </div>
+              </div>
+            ) : (
+              <>
+                <Select
+                  label="Status"
+                  labelPlacement="outside"
+                  selectedKeys={[nextStatus]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys as Set<string>)[0];
+                    if (selected) setNextStatus(String(selected));
+                  }}
+                >
+                  {STATUS_OPTIONS.filter((option) => option !== "ALL").map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Account Action"
+                  labelPlacement="outside"
+                  selectedKeys={[actionType]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys as Set<string>)[0] as ActionType;
+                    if (selected) setActionType(selected);
+                  }}
+                >
+                  {ACTION_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </>
+            )}
             <Textarea
               label="Admin Notes"
               labelPlacement="outside"
@@ -483,9 +500,29 @@ export default function ReportsPage() {
             <Button variant="light" onPress={() => setActiveReport(null)}>
               Cancel
             </Button>
-            <Button color="warning" isLoading={actionMutation.isPending} onPress={() => actionMutation.mutate()}>
-              Apply
-            </Button>
+            {isCompanyInterestActive ? (
+              <>
+                <Button
+                  color="danger"
+                  variant="flat"
+                  isLoading={actionMutation.isPending}
+                  onPress={() => actionMutation.mutate({ status: "REJECTED", actionType: "NONE" })}
+                >
+                  Reject Request
+                </Button>
+                <Button
+                  color="success"
+                  isLoading={actionMutation.isPending}
+                  onPress={() => actionMutation.mutate({ status: "ACTION_TAKEN", actionType: "APPLY_COMPANY_INTERESTS" })}
+                >
+                  Approve Interests
+                </Button>
+              </>
+            ) : (
+              <Button color="warning" isLoading={actionMutation.isPending} onPress={() => actionMutation.mutate()}>
+                Apply
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>

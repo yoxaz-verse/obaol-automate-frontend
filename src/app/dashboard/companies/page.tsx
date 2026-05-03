@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Button, Chip, Input, Select, SelectItem, Autocomplete, AutocompleteItem, 
@@ -25,6 +26,7 @@ import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 import { dashboardCopy } from "@/utils/dashboardCopy";
 
 export default function CompanyProductPage() {
+  const searchParams = useSearchParams();
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const isAdmin = roleLower === "admin";
@@ -245,6 +247,17 @@ export default function CompanyProductPage() {
       setDirectoryPage(1);
     }
   }, [isOperatorFamily, assignmentFilter]);
+
+  useEffect(() => {
+    const preselectedCompanyId = String(searchParams.get("companyId") || "").trim();
+    const preselectedTab = String(searchParams.get("tab") || "").trim().toLowerCase();
+    if (preselectedCompanyId) {
+      setSelectedCompanyId(preselectedCompanyId);
+    }
+    if (preselectedTab && ["catalog", "associates", "interests", "enquiries", "orders", "activity"].includes(preselectedTab)) {
+      setActiveDetailTab(preselectedTab);
+    }
+  }, [searchParams]);
 
   const obaolConfigMutation = useMutation({
     mutationFn: async (companyId: string) => {

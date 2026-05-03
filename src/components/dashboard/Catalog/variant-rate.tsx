@@ -240,6 +240,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const serverSearch = effectiveSearch;
+  const stableAdditionalParams = useMemo(
+    () => JSON.stringify(additionalParams || {}),
+    [additionalParams]
+  );
+  const stableEffectiveFilters = useMemo(
+    () => JSON.stringify(effectiveFilters || {}),
+    [effectiveFilters]
+  );
   const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
     setFilters(updatedFilters); // Update the filters
   };
@@ -383,9 +391,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
         rate,
         apiRoutesByRole[rate],
         productVariantValue?._id,
-        additionalParams,
-        refetchData,
-        effectiveFilters,
+        stableAdditionalParams,
+        stableEffectiveFilters,
         serverSearch,
         addedRateIds.size, // Refresh when catalog items change
       ]}
@@ -2193,6 +2200,17 @@ interface AddEnquiryFormProps {
   variantRate: any;
   onClose: any;
 }
+type BuyerOption = {
+  _id: string;
+  name?: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  phoneNumber?: string;
+  user?: { name?: string; phone?: string; email?: string };
+  associateCompany?: { name?: string } | string;
+  isDeleted?: boolean;
+};
 const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   variantRate,
   productVariant,
@@ -2222,7 +2240,8 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const [createdEnquiryId, setCreatedEnquiryId] = useState<string | null>(null);
 
   const { user } = useContext(AuthContext);
-  const isAdminUser = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "operator";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isAdminUser = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
 
   // Robust Associate ID Fetching
   const { data: associateDetail } = useQuery({
@@ -2244,13 +2263,13 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
     variantRate.baseRateId?.associate?._id
   );
 
-  const { data: associatesResponse } = useQuery({
-    queryKey: ["associates-list-for-enquiry"],
-    queryFn: () => getData(apiRoutesByRole["associate"], { page: 1, limit: 200 }),
+  const { data: associatesResponse, isLoading: buyerOptionsLoading } = useQuery({
+    queryKey: ["enquiry-buyer-options"],
+    queryFn: () => getData(apiRoutes.enquiry.buyerOptions, { limit: 2000 }),
     enabled: isAdminUser,
   });
 
-  const parseAssociateRows = (raw: any): any[] => {
+  const parseAssociateRows = (raw: any): BuyerOption[] => {
     if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
     if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
     if (Array.isArray(raw?.data?.docs)) return raw.data.docs;
@@ -2508,17 +2527,18 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                     }}
                     className="w-full rounded-xl border border-default-300 bg-default-50 text-foreground h-9 px-3 text-sm outline-none focus:border-primary transition-colors"
                     required
+                    disabled={buyerOptionsLoading}
                   >
-                    <option value="">Select buyer</option>
+                    <option value="">{buyerOptionsLoading ? "Loading buyers..." : "Select buyer"}</option>
                     {associateOptions.map((item: any) => {
                       const id = String(item?._id || "");
                       const label =
                         item?.name ||
-                        item?.fullName ||
                         item?.user?.name ||
+                        item?.associateCompany?.name ||
+                        item?.fullName ||
                         item?.email ||
                         item?.user?.email ||
-                        item?.associateCompany?.name ||
                         "Associate";
                       return (
                         <option key={id} value={id}>
@@ -2527,6 +2547,9 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
                       );
                     })}
                   </select>
+                  {!buyerOptionsLoading && associateOptions.length === 0 && (
+                    <p className="text-[11px] text-default-500">No active buyer associates available.</p>
+                  )}
                 </div>
               </>
             )}

@@ -17,13 +17,6 @@ type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
 
 const emptyState: MarketplaceFilterState = { search: "", filters: {} };
 
-const parseTotalCount = (response: any) => {
-    const payload = response?.data?.data;
-    if (typeof payload?.totalCount === "number") return payload.totalCount;
-    if (typeof payload?.data?.totalCount === "number") return payload.data.totalCount;
-    return 0;
-};
-
 const StatCard = ({ label, value }: { label: string; value: string | number }) => (
     <div className="rounded-2xl border border-default-200 bg-content1 p-4 shadow-sm">
         <p className="text-[10px] font-bold uppercase tracking-widest text-default-400">{label}</p>
@@ -45,6 +38,10 @@ export default function MarketplacePage() {
     const [liveState, setLiveState] = useState<MarketplaceFilterState>(emptyState);
     const [offlineState, setOfflineState] = useState<MarketplaceFilterState>(emptyState);
     const [openCreateModalSignal, setOpenCreateModalSignal] = useState(0);
+    const [loadedTabs, setLoadedTabs] = useState<Record<MarketplaceTabKey, boolean>>({
+        "marketplace-live": true,
+        "marketplace-offline": false,
+    });
 
     const activeState = useMemo(
         () => (currentTable === "marketplace-live" ? liveState : offlineState),
@@ -62,39 +59,20 @@ export default function MarketplacePage() {
         }
         setOfflineState(normalizedState);
     };
-    const liveCountQuery = useQuery({
-        queryKey: ["marketplace-count", "live"],
+    const statsQuery = useQuery({
+        queryKey: ["marketplace-stats"],
         queryFn: async () => {
-            const response = await getData(variantRateRoutes.getAll, {
-                page: 1,
-                limit: 1,
-                view: "marketplace",
-                isLive: true,
-            });
-            return parseTotalCount(response);
+            const response = await getData(variantRateRoutes.marketplaceStats);
+            return response?.data?.data || {};
         },
         enabled: isAdmin,
     });
 
-    const offlineCountQuery = useQuery({
-        queryKey: ["marketplace-count", "offline"],
-        queryFn: async () => {
-            const response = await getData(variantRateRoutes.getAll, {
-                page: 1,
-                limit: 1,
-                view: "marketplace",
-                isLive: false,
-            });
-            return parseTotalCount(response);
-        },
-        enabled: isAdmin,
-    });
-
-    const liveCount = liveCountQuery.data ?? 0;
-    const offlineCount = offlineCountQuery.data ?? 0;
-    const totalCount = liveCount + offlineCount;
-    const isCountLoading = liveCountQuery.isLoading || offlineCountQuery.isLoading;
-    const hasCountError = liveCountQuery.isError || offlineCountQuery.isError;
+    const liveCount = Number(statsQuery.data?.live ?? 0);
+    const offlineCount = Number(statsQuery.data?.offline ?? 0);
+    const totalCount = Number(statsQuery.data?.total ?? (liveCount + offlineCount));
+    const isCountLoading = statsQuery.isLoading;
+    const hasCountError = statsQuery.isError;
 
     const displayCount = (value: number) => {
         if (isCountLoading) return "—";
@@ -158,7 +136,11 @@ export default function MarketplacePage() {
                                 <Tabs
                                     aria-label="Marketplace Tabs"
                                     selectedKey={currentTable}
-                                    onSelectionChange={(key) => setCurrentTable(key as MarketplaceTabKey)}
+                                    onSelectionChange={(key) => {
+                                        const nextKey = key as MarketplaceTabKey;
+                                        setCurrentTable(nextKey);
+                                        setLoadedTabs((prev) => ({ ...prev, [nextKey]: true }));
+                                    }}
                                     variant="underlined"
                                     color="primary"
                                     classNames={{
@@ -171,28 +153,32 @@ export default function MarketplacePage() {
                                     <Tab key={"marketplace-live"} title="Marketplace (Live)">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
-                                        <VariantRate
-                                            rate="variantRate"
-                                            additionalParams={{ view: "marketplace", isLive: true }}
-                                            hideBuiltInFilters
-                                            externalSearch={liveState.search}
-                                            externalFilters={liveState.filters}
-                                            showCreateButton={false}
-                                            openCreateModalSignal={currentTable === "marketplace-live" ? openCreateModalSignal : 0}
-                                        />
+                                        {loadedTabs["marketplace-live"] && (
+                                            <VariantRate
+                                                rate="variantRate"
+                                                additionalParams={{ view: "marketplace", isLive: true }}
+                                                hideBuiltInFilters
+                                                externalSearch={liveState.search}
+                                                externalFilters={liveState.filters}
+                                                showCreateButton={false}
+                                                openCreateModalSignal={currentTable === "marketplace-live" ? openCreateModalSignal : 0}
+                                            />
+                                        )}
                                     </Tab>
                                     <Tab key={"marketplace-offline"} title="Marketplace (Offline)">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
-                                        <VariantRate
-                                            rate="variantRate"
-                                            additionalParams={{ view: "marketplace", isLive: false }}
-                                            hideBuiltInFilters
-                                            externalSearch={offlineState.search}
-                                            externalFilters={offlineState.filters}
-                                            showCreateButton={false}
-                                            openCreateModalSignal={currentTable === "marketplace-offline" ? openCreateModalSignal : 0}
-                                        />
+                                        {loadedTabs["marketplace-offline"] && (
+                                            <VariantRate
+                                                rate="variantRate"
+                                                additionalParams={{ view: "marketplace", isLive: false }}
+                                                hideBuiltInFilters
+                                                externalSearch={offlineState.search}
+                                                externalFilters={offlineState.filters}
+                                                showCreateButton={false}
+                                                openCreateModalSignal={currentTable === "marketplace-offline" ? openCreateModalSignal : 0}
+                                            />
+                                        )}
                                     </Tab>
                                 </Tabs>
                             </div>

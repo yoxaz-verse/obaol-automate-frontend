@@ -169,6 +169,7 @@ export default function EnquiryDetailsPage() {
     const [clarificationRate, setClarificationRate] = useState("");
     const [clarificationReasonRate, setClarificationReasonRate] = useState(false);
     const [clarificationReasonPayment, setClarificationReasonPayment] = useState(false);
+    const [clarificationPaymentTermId, setClarificationPaymentTermId] = useState("");
     const [clarificationReasonTimeline, setClarificationReasonTimeline] = useState(false);
     const [clarificationCommunicated, setClarificationCommunicated] = useState(false);
     const [clarificationDeliveryMode, setClarificationDeliveryMode] = useState<"DELIVER_TO_LOCATION" | "PRODUCT_READY" | "">("");
@@ -177,9 +178,17 @@ export default function EnquiryDetailsPage() {
     const [revisionReplyError, setRevisionReplyError] = useState("");
     const [revisionReplySuccess, setRevisionReplySuccess] = useState("");
     const [revisionConfirmError, setRevisionConfirmError] = useState("");
-    const [revisionReplies, setRevisionReplies] = useState<Array<{ key: string; acknowledged: boolean; counterRate?: string }>>([]);
+    const [revisionReplies, setRevisionReplies] = useState<Array<{
+        key: string;
+        acknowledged: boolean;
+        counterRate?: string;
+        counterPaymentTermId?: string;
+        counterDeliveryMode?: "DELIVER_TO_LOCATION" | "PRODUCT_READY" | "";
+        counterDeliveryDate?: string;
+    }>>([]);
     const [pendingActionKey, setPendingActionKey] = useState<string>("");
     const [draftQuotationError, setDraftQuotationError] = useState<string>("");
+    const [showDocumentationGuidance, setShowDocumentationGuidance] = useState(false);
     const [executionContext, setExecutionContext] = useState<ExecutionContext>({
         tradeType: "DOMESTIC",
         originCountry: "",
@@ -355,6 +364,14 @@ export default function EnquiryDetailsPage() {
             : Array.isArray(paymentTermResponse?.data)
                 ? paymentTermResponse.data
                 : [];
+    const selectedRevisionIncoterm = incotermOptions.find((it: any) => String(it?._id || it?.id) === String(selectedIncotermId));
+    const selectedRevisionIncotermCode = String(selectedRevisionIncoterm?.code || "").toUpperCase();
+    const revisionPaymentTermOptions = paymentTermOptions.filter((term: any) => {
+        const allowed = Array.isArray(term?.applicableIncoterms) ? term.applicableIncoterms : [];
+        if (!selectedRevisionIncotermCode) return true;
+        if (!allowed.length) return true;
+        return allowed.map((v: any) => String(v).toUpperCase()).includes(selectedRevisionIncotermCode);
+    });
     const parseMasterRows = (raw: any): any[] => {
         if (Array.isArray(raw?.data?.data?.data)) return raw.data.data.data;
         if (Array.isArray(raw?.data?.data?.docs)) return raw.data.data.docs;
@@ -491,10 +508,16 @@ export default function EnquiryDetailsPage() {
                 key: String(item?.key || "").toUpperCase(),
                 acknowledged: Boolean(item?.supplierAcknowledged),
                 counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
+                counterPaymentTermId: item?.supplierCounterPaymentTermId ? String(item.supplierCounterPaymentTermId) : "",
+                counterDeliveryMode: item?.supplierCounterDeliveryMode ? String(item.supplierCounterDeliveryMode) as any : "",
+                counterDeliveryDate: item?.supplierCounterDeliveryDate
+                    ? dayjs(item.supplierCounterDeliveryDate).format("YYYY-MM-DD")
+                    : "",
             })));
         } else {
             setRevisionReplies([]);
         }
+        setClarificationPaymentTermId("");
     }, [enquiry, enquiryDocsResponse, isImportEnquiry]);
     useEffect(() => {
         if (!enquiry) return;
@@ -817,6 +840,12 @@ export default function EnquiryDetailsPage() {
         setDocViewerDoc(doc);
         setDocViewerOpen(true);
     };
+    const scrollToDocumentationChecklist = () => {
+        if (typeof window === "undefined") return;
+        const target = document.getElementById("documentation-checklist");
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
 
     const createQuotationMutation = useMutation({
         mutationFn: async () => {
@@ -831,12 +860,16 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: (res: any) => {
             toast.success("Quotation created.");
+            setShowDocumentationGuidance(true);
             setDraftQuotationError("");
             queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
             queryClient.invalidateQueries({ queryKey: ["trade-documents", "enquiry", enquiryId] });
             const createdDoc = res?.data?.data || null;
             if (createdDoc) {
                 openDocViewer(createdDoc);
+                setTimeout(() => {
+                    scrollToDocumentationChecklist();
+                }, 200);
                 return;
             }
             (async () => {
@@ -851,12 +884,18 @@ export default function EnquiryDetailsPage() {
                                 : [];
                     if (rows?.[0]) {
                         openDocViewer(rows[0]);
+                        setTimeout(() => {
+                            scrollToDocumentationChecklist();
+                        }, 200);
                         return;
                     }
                 } catch {
                     // ignore fallback failure
                 }
                 toast.info("Quotation drafted.");
+                setTimeout(() => {
+                    scrollToDocumentationChecklist();
+                }, 200);
             })();
         },
         onError: (error: any) => {
@@ -874,8 +913,12 @@ export default function EnquiryDetailsPage() {
         },
         onSuccess: () => {
             toast.success("Quotation submitted.");
+            setShowDocumentationGuidance(true);
             queryClient.invalidateQueries({ queryKey: ["trade-documents", enquiryId] });
             queryClient.invalidateQueries({ queryKey: ["enquiry", enquiryId] });
+            setTimeout(() => {
+                scrollToDocumentationChecklist();
+            }, 200);
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error?.message || "Failed to submit quotation.");
@@ -931,6 +974,7 @@ export default function EnquiryDetailsPage() {
                 actionKey: "REVISION_REQUESTED",
                 reasons,
                 revisionRate: clarificationReasonRate ? Number(clarificationRate) : undefined,
+                revisionPaymentTermId: clarificationReasonPayment ? clarificationPaymentTermId : undefined,
                 deliveryMode: clarificationReasonTimeline ? clarificationDeliveryMode : undefined,
                 deliveryDate: clarificationReasonTimeline ? clarificationDeliveryDate : undefined,
                 communicatedConfirmed: clarificationCommunicated,
@@ -943,6 +987,7 @@ export default function EnquiryDetailsPage() {
             setClarificationReasonRate(false);
             setClarificationReasonPayment(false);
             setClarificationReasonTimeline(false);
+            setClarificationPaymentTermId("");
             setClarificationCommunicated(false);
             setClarificationDeliveryMode("");
             setClarificationDeliveryDate("");
@@ -972,6 +1017,15 @@ export default function EnquiryDetailsPage() {
                             return Number.isNaN(parsed) ? undefined : parsed;
                         })()
                         : undefined,
+                counterPaymentTermId: item.key === "PAYMENT_TERMS" && item.acknowledged
+                    ? (String(item.counterPaymentTermId || "").trim() || undefined)
+                    : undefined,
+                counterDeliveryMode: item.key === "DELIVERY_TIMELINE" && item.acknowledged
+                    ? (String(item.counterDeliveryMode || "").trim() || undefined)
+                    : undefined,
+                counterDeliveryDate: item.key === "DELIVERY_TIMELINE" && item.acknowledged
+                    ? (String(item.counterDeliveryDate || "").trim() || undefined)
+                    : undefined,
                 })),
             });
         },
@@ -989,6 +1043,11 @@ export default function EnquiryDetailsPage() {
                     key: String(item?.key || "").toUpperCase(),
                     acknowledged: Boolean(item?.supplierAcknowledged),
                     counterRate: item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined ? String(item.supplierCounterRate) : "",
+                    counterPaymentTermId: item?.supplierCounterPaymentTermId ? String(item.supplierCounterPaymentTermId) : "",
+                    counterDeliveryMode: item?.supplierCounterDeliveryMode ? String(item.supplierCounterDeliveryMode) as any : "",
+                    counterDeliveryDate: item?.supplierCounterDeliveryDate
+                        ? dayjs(item.supplierCounterDeliveryDate).format("YYYY-MM-DD")
+                        : "",
                 })));
             }
             if (savedInquiry) {
@@ -1694,13 +1753,20 @@ export default function EnquiryDetailsPage() {
         }
         if (actionKey === "QUOTATION_CREATED") {
             setDraftQuotationError("");
+            setShowDocumentationGuidance(true);
             if (quotationId && quotationDoc) {
                 if (quotationStatus !== "DRAFT") {
                     setPendingActionKey("QUOTATION_CREATED");
                     applyActionMutation.mutate({ actionKey: "QUOTATION_CREATED" });
+                    setTimeout(() => {
+                        scrollToDocumentationChecklist();
+                    }, 300);
                     return;
                 }
                 openDocViewer(quotationDoc);
+                setTimeout(() => {
+                    scrollToDocumentationChecklist();
+                }, 300);
                 return;
             }
             createQuotationMutation.mutate();
@@ -1900,8 +1966,10 @@ export default function EnquiryDetailsPage() {
     const revisionBuyerConfirmedAt = activeRevisionRound?.buyerConfirmedAt || (enquiry as any)?.revisionThread?.buyerConfirmedAt || null;
     const revisionAcknowledgedItems = revisionItems.filter((item: any) => {
         const acknowledged = Boolean(item?.supplierAcknowledged);
-        const hasCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
-        return acknowledged || hasCounter;
+        const hasRateCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
+        const hasPaymentCounter = Boolean(item?.supplierCounterPaymentTermId);
+        const hasTimelineCounter = Boolean(item?.supplierCounterDeliveryMode) && Boolean(item?.supplierCounterDeliveryDate);
+        return acknowledged || hasRateCounter || hasPaymentCounter || hasTimelineCounter;
     });
     const revisionAcknowledgedLabels = revisionAcknowledgedItems.map((item: any) => {
         const rawKey = String(item?.key || "").toUpperCase();
@@ -1913,16 +1981,92 @@ export default function EnquiryDetailsPage() {
                     : rawKey === "DELIVERY_TIMELINE"
                         ? "Timeline"
                         : rawKey.replaceAll("_", " ");
-        const counter = item?.supplierCounterRate;
-        return counter !== null && counter !== undefined && counter !== ""
-            ? `${label} • Counter: ${formatRate(counter)}`
-            : label;
+        const hasRateCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined && item?.supplierCounterRate !== "";
+        const hasPaymentCounter = Boolean(item?.supplierCounterPaymentTermId);
+        const hasTimelineCounter = Boolean(item?.supplierCounterDeliveryMode) && Boolean(item?.supplierCounterDeliveryDate);
+        if (hasRateCounter) return `${label} • Counter Suggested by Seller`;
+        if (hasPaymentCounter) return `${label} • Counter Suggested by Seller`;
+        if (hasTimelineCounter) return `${label} • Counter Suggested by Seller`;
+        return `${label} • Accepted by Seller`;
     });
     const allRevisionAcknowledged = revisionItems.length > 0 && revisionItems.every((item: any) => {
         const acknowledged = Boolean(item?.supplierAcknowledged);
-        const counterSaved = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
-        return acknowledged || counterSaved;
+        const hasRateCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
+        const hasPaymentCounter = Boolean(item?.supplierCounterPaymentTermId);
+        const hasTimelineCounter = Boolean(item?.supplierCounterDeliveryMode) && Boolean(item?.supplierCounterDeliveryDate);
+        return acknowledged || hasRateCounter || hasPaymentCounter || hasTimelineCounter;
     });
+    const hasAnySupplierReplyDraft = revisionReplies.some((item: any) => {
+        const key = String(item?.key || "").toUpperCase();
+        if (!item?.acknowledged) return false;
+        if (key === "RATE") return true;
+        if (key === "PAYMENT_TERMS") return true;
+        if (key === "DELIVERY_TIMELINE") return true;
+        return false;
+    });
+    const revisionRoleStatus = (() => {
+        if (revisionBuyerConfirmedAt) return "Revision Confirmed";
+        if (revisionItems.length > 0 && allRevisionAcknowledged) return "Waiting for Buyer Acceptance";
+        if (revisionItems.length > 0) return "Waiting for Seller Confirmation";
+        return "Revision Draft";
+    })();
+    const latestConfirmedRevisionRound = [...derivedRevisionRounds]
+        .reverse()
+        .find((round: any) => String(round?.status || "").toUpperCase() === "CONFIRMED");
+    const latestConfirmedDecisionRows = (() => {
+        const rows: Array<{ key: string; label: string; value: string; source: "Accepted Buyer Request" | "Counter Accepted" }> = [];
+        const items = Array.isArray(latestConfirmedRevisionRound?.items) ? latestConfirmedRevisionRound.items : [];
+        items.forEach((item: any) => {
+            const key = String(item?.key || "").toUpperCase();
+            if (key === "RATE") {
+                const hasCounter = item?.supplierCounterRate !== null && item?.supplierCounterRate !== undefined;
+                const finalRate = hasCounter ? item?.supplierCounterRate : item?.buyerRate;
+                rows.push({
+                    key,
+                    label: "Rate",
+                    value: finalRate !== null && finalRate !== undefined ? formatRate(Number(finalRate)) : "Not specified",
+                    source: hasCounter ? "Counter Accepted" : "Accepted Buyer Request",
+                });
+                return;
+            }
+            if (key === "PAYMENT_TERMS") {
+                const finalPaymentTermId = item?.supplierCounterPaymentTermId || item?.buyerPaymentTermId;
+                const finalPaymentTerm = paymentTermOptions.find(
+                    (it: any) => String(it?._id || it?.id) === String(finalPaymentTermId || "")
+                );
+                const hasCounter = Boolean(item?.supplierCounterPaymentTermId);
+                rows.push({
+                    key,
+                    label: "Payment Terms",
+                    value: String(finalPaymentTerm?.label || "Not specified"),
+                    source: hasCounter ? "Counter Accepted" : "Accepted Buyer Request",
+                });
+                return;
+            }
+            if (key === "DELIVERY_TIMELINE") {
+                const finalMode = item?.supplierCounterDeliveryMode || item?.buyerDeliveryMode;
+                const finalDate = item?.supplierCounterDeliveryDate || item?.buyerDeliveryDate;
+                const hasCounter = Boolean(item?.supplierCounterDeliveryMode) || Boolean(item?.supplierCounterDeliveryDate);
+                const modeLabel =
+                    finalMode === "DELIVER_TO_LOCATION"
+                        ? "To Location"
+                        : finalMode === "PRODUCT_READY"
+                            ? "Ready for Pickup"
+                            : "Not specified";
+                const dateLabel = finalDate ? dayjs(finalDate).format("DD MMM YYYY") : "Not specified";
+                rows.push({
+                    key,
+                    label: "Timeline",
+                    value: `${modeLabel} • ${dateLabel}`,
+                    source: hasCounter ? "Counter Accepted" : "Accepted Buyer Request",
+                });
+            }
+        });
+        return rows;
+    })();
+    const latestConfirmedAtLabel = latestConfirmedRevisionRound?.buyerConfirmedAt
+        ? dayjs(latestConfirmedRevisionRound.buyerConfirmedAt).format("DD MMM YYYY, hh:mm A")
+        : "";
     const canBuyerRevision = isBuyer || isSystemAdmin || isBuyerSideOperator;
     const canSupplierRevision = isSeller || isSystemAdmin || isSupplierSideOperator;
     const fallbackProformaRule = {
@@ -1981,6 +2125,18 @@ export default function EnquiryDetailsPage() {
             includesOtherParty: false,
         };
     })();
+    const workflowBlocker: "BUYER" | "SELLER" | "NEUTRAL" = (() => {
+        if (!requiredActions.length || isRequiredSatisfied) return "NEUTRAL";
+        const actionBy = String(pendingActionAudience.actionBy || "").toUpperCase();
+        if (actionBy === "BUYER") return "BUYER";
+        if (actionBy === "SUPPLIER" || actionBy === "SELLER") return "SELLER";
+        return "NEUTRAL";
+    })();
+    const workflowProgressColor = isCompletedFlow
+        ? "success"
+        : workflowBlocker === "SELLER"
+            ? "warning"
+            : "primary";
     const waitingMessage = (() => {
         if (isCancelled) return "This enquiry was cancelled.";
         if (isCompletedFlow) return "This enquiry is completed.";
@@ -2374,7 +2530,7 @@ export default function EnquiryDetailsPage() {
                                 value={workflowStageOptions.length > 1
                                     ? (currentStepIndex / (workflowStageOptions.length - 1)) * 100
                                     : 0}
-                                color={isCompletedFlow ? "success" : "primary"}
+                                color={workflowProgressColor as any}
                                 className="mb-4"
                             />
                         )}
@@ -2387,7 +2543,9 @@ export default function EnquiryDetailsPage() {
                                         <React.Fragment key={step}>
                                             <div
                                                 className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${isCurrent
-                                                    ? "bg-primary text-white border-primary"
+                                                    ? workflowBlocker === "SELLER"
+                                                        ? "bg-warning text-black border-warning"
+                                                        : "bg-primary text-white border-primary"
                                                     : isCompleted
                                                         ? "bg-success/10 text-success-700 border-success/30"
                                                         : "bg-default-100 text-default-500 border-default-200"
@@ -2409,6 +2567,50 @@ export default function EnquiryDetailsPage() {
                                 {isCancelled && <Chip size="sm" color="danger" variant="flat">Cancelled</Chip>}
                             </div>
                             <p className="text-sm font-medium text-default-700 mt-1">{waitingMessage}</p>
+                            <div className="mt-2 flex flex-wrap items-center gap-3 text-[9px] font-black uppercase tracking-widest">
+                                <span className="inline-flex items-center gap-1.5 text-primary-600">
+                                    <span className="w-2 h-2 rounded-full bg-primary" />
+                                    Buyer Pending
+                                </span>
+                                <span className="inline-flex items-center gap-1.5 text-warning-600">
+                                    <span className="w-2 h-2 rounded-full bg-warning-500" />
+                                    Seller Pending
+                                </span>
+                            </div>
+                            {latestConfirmedRevisionRound && latestConfirmedDecisionRows.length > 0 && (
+                                <div className="mt-3 rounded-xl border border-success-500/25 bg-success-500/[0.06] px-3 py-3">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-success-700 dark:text-success-300">
+                                            Revision Decision Summary
+                                        </div>
+                                        {latestConfirmedAtLabel && (
+                                            <div className="text-[9px] font-bold text-success-700/80 dark:text-success-300/80 uppercase tracking-wider">
+                                                Confirmed: {latestConfirmedAtLabel}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-[10px] font-semibold text-default-500 mt-0.5">
+                                        Latest confirmed revision
+                                    </div>
+                                    <div className="mt-2 space-y-2">
+                                        {latestConfirmedDecisionRows.map((row) => (
+                                            <div key={`revision-decision-${row.key}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2 rounded-lg bg-white/50 dark:bg-black/20 border border-success-500/15">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-default-500">{row.label}</span>
+                                                    <span className="text-sm font-black text-foreground">{row.value}</span>
+                                                </div>
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                                    row.source === "Counter Accepted"
+                                                        ? "bg-warning-500/10 border-warning-500/25 text-warning-700 dark:text-warning-300"
+                                                        : "bg-success-500/10 border-success-500/25 text-success-700 dark:text-success-300"
+                                                }`}>
+                                                    {row.source}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                             {revisionItems.length > 0 && (
                                 <div className="mt-3 rounded-xl border border-default-200/60 bg-default-100/40 px-3 py-2">
                                     <div className="text-[9px] font-black uppercase tracking-widest text-default-500">
@@ -2482,6 +2684,24 @@ export default function EnquiryDetailsPage() {
                                     Converting order… Please wait.
                                 </div>
                             )}
+                            {showDocumentationGuidance && (
+                                <div className="mt-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                        <div className="text-[11px] font-bold text-primary-700 dark:text-primary-300">
+                                            Go to Documentation Checklist to review and proceed with document decisions.
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            color="primary"
+                                            variant="shadow"
+                                            className="font-black uppercase tracking-widest text-[10px]"
+                                            onPress={scrollToDocumentationChecklist}
+                                        >
+                                            Go to Documentation
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                             {draftQuotationError && (
                                 <div className="mt-3 rounded-xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-[11px] font-bold text-danger-200 uppercase tracking-wide">
                                     {draftQuotationError}
@@ -2505,6 +2725,11 @@ export default function EnquiryDetailsPage() {
                                             Revision Hub
                                         </h3>
                                     </div>
+                                    {revisionItems.length > 0 && (
+                                        <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary-600 dark:text-primary-300 text-[10px] font-black uppercase tracking-widest">
+                                            {revisionRoleStatus}
+                                        </div>
+                                    )}
                                     {revisionBuyerConfirmedAt && (
                                         <div className="px-4 py-2 rounded-2xl bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                                             <FiCheckCircle size={14} />
@@ -2647,6 +2872,36 @@ export default function EnquiryDetailsPage() {
                                                         />
                                                     </div>
                                                 )}
+                                                {clarificationReasonPayment && (
+                                                    <div className="max-w-md">
+                                                        <Select
+                                                            label="Requested Payment Term"
+                                                            variant="bordered"
+                                                            placeholder="Select payment term"
+                                                            selectedKeys={clarificationPaymentTermId ? [clarificationPaymentTermId] : []}
+                                                            onSelectionChange={(keys) => {
+                                                                const value = Array.from(keys)[0] as string | undefined;
+                                                                setClarificationPaymentTermId(value || "");
+                                                            }}
+                                                            classNames={{
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-success-600 mb-1 pl-1",
+                                                                trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-success transition-all h-14 shadow-inner",
+                                                                value: "font-black text-xs",
+                                                            }}
+                                                        >
+                                                            {revisionPaymentTermOptions.map((term: any) => (
+                                                                <SelectItem key={String(term?._id || term?.id)}>
+                                                                    {String(term?.label || "Unnamed payment term")}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </Select>
+                                                        {clarificationReasonPayment && !clarificationPaymentTermId && (
+                                                            <div className="mt-1 text-[10px] font-bold text-warning-600 uppercase tracking-wide">
+                                                                Select a payment term to submit this revision.
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-[2rem] bg-default-100/30 border border-default-200/50">
@@ -2661,7 +2916,7 @@ export default function EnquiryDetailsPage() {
                                                             className="text-xs font-black text-foreground uppercase tracking-tight italic cursor-pointer select-none"
                                                             onClick={() => setClarificationCommunicated(!clarificationCommunicated)}
                                                         >
-                                                            External Synchronization Confirmed
+                                                            Revision Details Confirmed
                                                         </span>
                                                     </div>
                                                     <p
@@ -2688,6 +2943,7 @@ export default function EnquiryDetailsPage() {
                                                             isDisabled={
                                                                 !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
                                                                 (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                                                (clarificationReasonPayment && !clarificationPaymentTermId) ||
                                                                 (clarificationReasonTimeline && (!clarificationDeliveryMode || !clarificationDeliveryDate)) ||
                                                                 !clarificationCommunicated
                                                             }
@@ -2706,11 +2962,9 @@ export default function EnquiryDetailsPage() {
                                                             Skip Revision
                                                         </Button>
                                                     </div>
-                                                    {isSystemAdmin && (
-                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest mr-2">
-                                                            Action by: Buyer
-                                                        </span>
-                                                    )}
+                                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest mr-2">
+                                                        Action by: Buyer
+                                                    </span>
                                                 </div>
                                             </div>
                                             {revisionError && (
@@ -2724,7 +2978,13 @@ export default function EnquiryDetailsPage() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {revisionItems.map((item: any) => {
                                                     const itemKey = String(item.key || "").toUpperCase();
-                                                    const reply = revisionReplies.find((r) => r.key === itemKey) || { acknowledged: false, counterRate: "" };
+                                                    const reply = revisionReplies.find((r) => r.key === itemKey) || {
+                                                        acknowledged: false,
+                                                        counterRate: "",
+                                                        counterPaymentTermId: "",
+                                                        counterDeliveryMode: "",
+                                                        counterDeliveryDate: "",
+                                                    };
                                                     const itemLabel = itemKey.replaceAll("_", " ");
 
                                                     return (
@@ -2739,10 +2999,10 @@ export default function EnquiryDetailsPage() {
                                                                         <span className="text-base font-black text-foreground tracking-tighter">Buyer Request</span>
                                                                     </div>
                                                                 </div>
-                                                                {item.supplierAcknowledged && (
+                                                                {(item.supplierAcknowledged || item.supplierCounterRate !== null || item.supplierCounterPaymentTermId || (item.supplierCounterDeliveryMode && item.supplierCounterDeliveryDate)) && (
                                                                     <div className="px-3 py-1 rounded-full bg-success-500/10 border border-success-500/20 text-success-600 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1.5">
                                                                         <LuCheck size={12} />
-                                                                        Synced
+                                                                        {item?.supplierReplyStatus === "COUNTERED" ? "Counter Suggested by Seller" : "Accepted by Seller"}
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -2760,7 +3020,21 @@ export default function EnquiryDetailsPage() {
                                                                     </div>
                                                                 )}
                                                                 {itemKey === "PAYMENT_TERMS" && (
-                                                                    <div className="text-sm font-black text-foreground">Framework Revision Requested</div>
+                                                                    <div className="text-sm font-black text-foreground">
+                                                                        Requested Term: <span className="text-success-600">{String(paymentTermOptions.find((it: any) => String(it?._id || it?.id) === String(item?.buyerPaymentTermId))?.label || "Not specified")}</span>
+                                                                    </div>
+                                                                )}
+                                                                {itemKey === "PAYMENT_TERMS" && item?.supplierCounterPaymentTermId && (
+                                                                    <div className="text-sm font-black text-foreground">
+                                                                        Seller Counter: <span className="text-warning-600">{String(paymentTermOptions.find((it: any) => String(it?._id || it?.id) === String(item?.supplierCounterPaymentTermId))?.label || "Not specified")}</span>
+                                                                    </div>
+                                                                )}
+                                                                {itemKey === "DELIVERY_TIMELINE" && item?.supplierCounterDeliveryMode && item?.supplierCounterDeliveryDate && (
+                                                                    <div className="text-sm font-black text-foreground">
+                                                                        Seller Counter: <span className="text-warning-600 underline decoration-2 underline-offset-4">{item.supplierCounterDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span>
+                                                                        <span className="text-default-400 font-bold mx-2">•</span>
+                                                                        {dayjs(item.supplierCounterDeliveryDate).format("DD MMM YYYY")}
+                                                                    </div>
                                                                 )}
                                                             </div>
 
@@ -2774,15 +3048,15 @@ export default function EnquiryDetailsPage() {
                                                                                     size="sm"
                                                                                     variant={reply.acknowledged && !reply.counterRate ? "solid" : "flat"}
                                                                                     color="success"
-                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
-                                                                                    onPress={() => {
-                                                                                        setRevisionReplies((prev) => {
-                                                                                            const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "" }];
-                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: "" } : r);
-                                                                                        });
-                                                                                        setRevisionConfirmError("");
-                                                                                    }}
+                                                                                className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                onPress={() => {
+                                                                                    setRevisionReplies((prev) => {
+                                                                                        const existing = prev.find((r) => r.key === itemKey);
+                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" } : r);
+                                                                                    });
+                                                                                    setRevisionConfirmError("");
+                                                                                }}
                                                                                 >
                                                                                     Accept Requested Rate
                                                                                 </Button>
@@ -2790,15 +3064,15 @@ export default function EnquiryDetailsPage() {
                                                                                     size="sm"
                                                                                     variant={reply.counterRate ? "solid" : "flat"}
                                                                                     color="warning"
-                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
-                                                                                    onPress={() => {
-                                                                                        setRevisionReplies((prev) => {
-                                                                                            const existing = prev.find((r) => r.key === itemKey);
-                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "" }];
-                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
-                                                                                        });
-                                                                                        setRevisionConfirmError("");
-                                                                                    }}
+                                                                                className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                onPress={() => {
+                                                                                    setRevisionReplies((prev) => {
+                                                                                        const existing = prev.find((r) => r.key === itemKey);
+                                                                                        if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                        return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
+                                                                                    });
+                                                                                    setRevisionConfirmError("");
+                                                                                }}
                                                                                 >
                                                                                     Propose Max Rate
                                                                                 </Button>
@@ -2826,20 +3100,107 @@ export default function EnquiryDetailsPage() {
                                                                             />
                                                                         </div>
                                                                     ) : (
-                                                                        <Checkbox
-                                                                            isSelected={reply.acknowledged}
-                                                                            onValueChange={(val) => {
-                                                                                setRevisionReplies((prev) => {
-                                                                                    const existing = prev.find((r) => r.key === itemKey);
-                                                                                    if (!existing) return [...prev, { key: itemKey, acknowledged: val, counterRate: "" }];
-                                                                                    return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: val } : r);
-                                                                                });
-                                                                                setRevisionConfirmError("");
-                                                                            }}
-                                                                            classNames={{ label: "text-xs font-black uppercase tracking-tight text-foreground" }}
-                                                                        >
-                                                                            Acknowledge Parameter
-                                                                        </Checkbox>
+                                                                        <div className="flex flex-col gap-3">
+                                                                            <div className="text-[10px] font-black uppercase tracking-widest text-default-500">Supplier Response</div>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant={reply.acknowledged && ((itemKey === "PAYMENT_TERMS" && !reply.counterPaymentTermId) || (itemKey === "DELIVERY_TIMELINE" && !reply.counterDeliveryMode && !reply.counterDeliveryDate)) ? "solid" : "flat"}
+                                                                                    color="success"
+                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    onPress={() => {
+                                                                                        setRevisionReplies((prev) => {
+                                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey
+                                                                                                ? { ...r, acknowledged: true, counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }
+                                                                                                : r);
+                                                                                        });
+                                                                                        setRevisionConfirmError("");
+                                                                                    }}
+                                                                                >
+                                                                                    Accept Buyer Request
+                                                                                </Button>
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant={(itemKey === "PAYMENT_TERMS" && Boolean(reply.counterPaymentTermId)) || (itemKey === "DELIVERY_TIMELINE" && Boolean(reply.counterDeliveryMode || reply.counterDeliveryDate)) ? "solid" : "flat"}
+                                                                                    color="warning"
+                                                                                    className="font-black uppercase tracking-widest text-[10px] px-4 h-8 rounded-xl"
+                                                                                    onPress={() => {
+                                                                                        setRevisionReplies((prev) => {
+                                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true } : r);
+                                                                                        });
+                                                                                        setRevisionConfirmError("");
+                                                                                    }}
+                                                                                >
+                                                                                    Decline & Suggest
+                                                                                </Button>
+                                                                            </div>
+                                                                            {itemKey === "PAYMENT_TERMS" && (
+                                                                                <Select
+                                                                                    size="sm"
+                                                                                    label="Counter Payment Term"
+                                                                                    variant="bordered"
+                                                                                    placeholder="Select alternative term"
+                                                                                    selectedKeys={reply.counterPaymentTermId ? [reply.counterPaymentTermId] : []}
+                                                                                    onSelectionChange={(keys) => {
+                                                                                        const value = Array.from(keys)[0] as string | undefined;
+                                                                                        setRevisionReplies((prev) => {
+                                                                                            const existing = prev.find((r) => r.key === itemKey);
+                                                                                            if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: value || "", counterDeliveryMode: "", counterDeliveryDate: "" }];
+                                                                                            return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterPaymentTermId: value || "" } : r);
+                                                                                        });
+                                                                                        setRevisionConfirmError("");
+                                                                                    }}
+                                                                                >
+                                                                                    {revisionPaymentTermOptions.map((term: any) => (
+                                                                                        <SelectItem key={String(term?._id || term?.id)}>
+                                                                                            {String(term?.label || "Unnamed payment term")}
+                                                                                        </SelectItem>
+                                                                                    ))}
+                                                                                </Select>
+                                                                            )}
+                                                                            {itemKey === "DELIVERY_TIMELINE" && (
+                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                                    <Select
+                                                                                        size="sm"
+                                                                                        label="Counter Delivery Mode"
+                                                                                        variant="bordered"
+                                                                                        placeholder="Select mode"
+                                                                                        selectedKeys={reply.counterDeliveryMode ? [reply.counterDeliveryMode] : []}
+                                                                                        onSelectionChange={(keys) => {
+                                                                                            const value = Array.from(keys)[0] as string | undefined;
+                                                                                            setRevisionReplies((prev) => {
+                                                                                                const existing = prev.find((r) => r.key === itemKey);
+                                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: (value as any) || "", counterDeliveryDate: "" }];
+                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterDeliveryMode: (value as any) || "" } : r);
+                                                                                            });
+                                                                                            setRevisionConfirmError("");
+                                                                                        }}
+                                                                                    >
+                                                                                        <SelectItem key="DELIVER_TO_LOCATION">DELIVER TO LOCATION</SelectItem>
+                                                                                        <SelectItem key="PRODUCT_READY">PRODUCT READY</SelectItem>
+                                                                                    </Select>
+                                                                                    <Input
+                                                                                        type="date"
+                                                                                        size="sm"
+                                                                                        label="Counter Date"
+                                                                                        variant="bordered"
+                                                                                        value={reply.counterDeliveryDate || ""}
+                                                                                        onValueChange={(val) => {
+                                                                                            setRevisionReplies((prev) => {
+                                                                                                const existing = prev.find((r) => r.key === itemKey);
+                                                                                                if (!existing) return [...prev, { key: itemKey, acknowledged: true, counterRate: "", counterPaymentTermId: "", counterDeliveryMode: "", counterDeliveryDate: val }];
+                                                                                                return prev.map((r) => r.key === itemKey ? { ...r, acknowledged: true, counterDeliveryDate: val } : r);
+                                                                                            });
+                                                                                            setRevisionConfirmError("");
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             )}
@@ -2854,12 +3215,12 @@ export default function EnquiryDetailsPage() {
                                                     {!allRevisionAcknowledged ? (
                                                         <div className="flex items-center gap-1.5 text-warning-600 font-bold text-[10px] italic uppercase tracking-tight">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
-                                                            Waiting for supplier acknowledgment
+                                                            Waiting for supplier response
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-1.5 text-success-600 font-bold text-[10px] italic uppercase tracking-tight">
                                                             <FiCheckCircle size={14} />
-                                                            All parameters synchronized
+                                                            All parameters responded
                                                         </div>
                                                     )}
                                                 </div>
@@ -2873,13 +3234,13 @@ export default function EnquiryDetailsPage() {
                                                                 variant="shadow"
                                                                 className="px-6 h-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all outline-none"
                                                                 isLoading={revisionReplyMutation.isPending}
-                                                                isDisabled={!revisionReplies.some((item: any) => item.acknowledged)}
+                                                                isDisabled={!hasAnySupplierReplyDraft}
                                                                 onPress={() => revisionReplyMutation.mutate()}
                                                                 startContent={!revisionReplyMutation.isPending && <LuFileCheck size={14} />}
                                                             >
-                                                                Propagate Sync
+                                                                Confirm Revision
                                                             </Button>
-                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Supplier</span>}
+                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Seller</span>
                                                         </div>
                                                     )}
 
@@ -2896,7 +3257,7 @@ export default function EnquiryDetailsPage() {
                                                             >
                                                                 Authorize Revision
                                                             </Button>
-                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Buyer</span>}
+                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Buyer</span>
                                                         </div>
                                                     )}
                                                     {canBuyerRevision && (
@@ -2911,7 +3272,7 @@ export default function EnquiryDetailsPage() {
                                                             >
                                                                 Proceed Without Revision
                                                             </Button>
-                                                            {isSystemAdmin && <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Buyer</span>}
+                                                            <span className="text-[8px] font-bold text-default-400 uppercase tracking-widest mr-1">Action by: Buyer</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -2930,7 +3291,7 @@ export default function EnquiryDetailsPage() {
                     </CardBody>
                 </Card>
 
-                <Card className="w-full border border-default-200/50 shadow-md rounded-2xl">
+                <Card id="documentation-checklist" className="w-full border border-default-200/50 shadow-md rounded-2xl">
                     <CardHeader className="flex flex-col items-start gap-2 px-5 pt-5">
                         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
                             <div className="flex flex-col gap-1">
@@ -4050,6 +4411,23 @@ export default function EnquiryDetailsPage() {
                                     <Checkbox isSelected={clarificationReasonPayment} onValueChange={setClarificationReasonPayment}>
                                         Payment Terms
                                     </Checkbox>
+                                    {clarificationReasonPayment && (
+                                        <Select
+                                            label="Requested Payment Term"
+                                            placeholder="Select payment term"
+                                            selectedKeys={clarificationPaymentTermId ? [clarificationPaymentTermId] : []}
+                                            onSelectionChange={(keys) => {
+                                                const value = Array.from(keys)[0] as string | undefined;
+                                                setClarificationPaymentTermId(value || "");
+                                            }}
+                                        >
+                                            {revisionPaymentTermOptions.map((term: any) => (
+                                                <SelectItem key={String(term?._id || term?.id)}>
+                                                    {String(term?.label || "Unnamed payment term")}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+                                    )}
                                     <Checkbox isSelected={clarificationReasonTimeline} onValueChange={setClarificationReasonTimeline}>
                                         Delivery Timeline
                                     </Checkbox>
@@ -4073,6 +4451,8 @@ export default function EnquiryDetailsPage() {
                                                 ? "Select at least one reason."
                                                 : clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))
                                                     ? "Enter a valid rate."
+                                                    : clarificationReasonPayment && !clarificationPaymentTermId
+                                                        ? "Select a payment term."
                                                     : !clarificationCommunicated
                                                         ? "Confirm communication to supplier."
                                                         : ""}
@@ -4084,6 +4464,7 @@ export default function EnquiryDetailsPage() {
                                         isDisabled={
                                             !(clarificationReasonRate || clarificationReasonPayment || clarificationReasonTimeline) ||
                                             (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) ||
+                                            (clarificationReasonPayment && !clarificationPaymentTermId) ||
                                             !clarificationCommunicated
                                         }
                                         onPress={async () => {
@@ -4094,6 +4475,10 @@ export default function EnquiryDetailsPage() {
                                             }
                                             if (clarificationReasonRate && (!clarificationRate || Number.isNaN(Number(clarificationRate)))) {
                                                 setRevisionError("Enter a valid rate.");
+                                                return;
+                                            }
+                                            if (clarificationReasonPayment && !clarificationPaymentTermId) {
+                                                setRevisionError("Select a payment term.");
                                                 return;
                                             }
                                             if (!clarificationCommunicated) {

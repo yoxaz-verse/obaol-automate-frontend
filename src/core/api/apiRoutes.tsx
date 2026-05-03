@@ -234,12 +234,14 @@ export const variantRateRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.VARIANT_RATE),
   {
     count: `${BASE_PATHS.VARIANT_RATE}/associateCompany`,
+    marketplaceStats: `${BASE_PATHS.VARIANT_RATE}/marketplace-stats`,
   }
 );
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
 export const catalogItemRoutes = createCRUDRoutes("/catalog-items");
 export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY), {
   seaPorts: `${BASE_PATHS.ENQUIRY}/sea-ports`,
+  buyerOptions: `${BASE_PATHS.ENQUIRY}/buyer-options`,
 });
 export const systemConfigRoutes = {
   obaolCompany: "/system-config/obaol-company",

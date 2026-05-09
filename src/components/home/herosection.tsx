@@ -419,20 +419,22 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 z-10" />
       </motion.div>
       <motion.div
-        className="absolute right-0 bottom-0 z-10 pointer-events-none h-[74vh] w-[min(48vw,700px)] hidden md:block"
+        className="absolute inset-0 z-10 pointer-events-none hidden md:block"
         initial={{ opacity: 0, x: 24 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%)",
-          maskImage: "linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(to left, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)",
         }}
       >
         <Image
           src="/images/hero-left-spice-banner.png"
           alt="Agro supply chain visual"
           fill
-          className="object-contain object-bottom-right opacity-20"
+          className="object-contain object-right-bottom opacity-20"
+          sizes="(min-width: 1024px) 52vw, 0px"
+          style={{ objectPosition: "right bottom" }}
           priority
         />
       </motion.div>

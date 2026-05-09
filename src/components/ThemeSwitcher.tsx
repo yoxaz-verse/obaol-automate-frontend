@@ -2,7 +2,6 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@nextui-org/react";
 import { FiMoon, FiSun } from "react-icons/fi";
 
 export const ThemeSwitcher = () => {
@@ -13,17 +12,16 @@ export const ThemeSwitcher = () => {
         setMounted(true);
     }, []);
 
-    if (!mounted) return <div className="w-10 h-10" />; // Avoid hydration mismatch
+    if (!mounted) return <div className="w-24 h-10 rounded-full border border-orange-500/25 bg-orange-500/10" />; // Avoid hydration mismatch
 
     return (
-        <Button
-            isIconOnly
-            variant="light"
-            radius="full"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            aria-label="Toggle theme"
-        >
-            {theme === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
-        </Button>
+      <button
+        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+        aria-label="Toggle theme"
+        className="h-10 px-3 rounded-full border border-orange-500/25 bg-orange-500/5 text-orange-400 hover:bg-orange-500/12 hover:border-orange-500/55 transition-all flex items-center gap-2 hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]"
+      >
+        {theme === "light" ? <FiMoon size={16} /> : <FiSun size={16} />}
+        <span className="text-[10px] font-black uppercase tracking-[0.18em]">{theme === "light" ? "Dark" : "Light"}</span>
+      </button>
     );
 };

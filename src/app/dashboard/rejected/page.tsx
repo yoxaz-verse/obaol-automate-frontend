@@ -62,7 +62,7 @@ export default function RejectedPage() {
                 <LuMail size={16} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Support Email</span>
               </div>
-              <p className="mt-2 text-xs text-default-400">support@obaol.com</p>
+              <p className="mt-2 text-xs text-default-400">info@support.obaol.com</p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
               <div className="flex items-center gap-3 text-default-300">

@@ -170,6 +170,11 @@ export const sidebarOptions = [
     link: "/dashboard/calculations",
   },
   {
+    name: "Email Templates",
+    icon: <FiEdit3 />,
+    link: "/dashboard/email-templates",
+  },
+  {
     name: "Flow Rules",
     icon: <FiActivity />,
     link: "/dashboard/flow-rules",

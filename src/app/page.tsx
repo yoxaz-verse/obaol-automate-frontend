@@ -2,9 +2,9 @@ import HomeContent from "@/components/home/HomeContent";
 import { buildMetadata, buildWebPageJsonLd, buildWebSiteJsonLd } from "@/utils/seo";
 
 export const metadata = buildMetadata({
-  title: "OBAOL Supreme | Commodity & Agro Trading Platform",
+  title: "OBAOL Supreme | B2B Agro Trade Execution Workspace",
   description:
-    "Starting in India, OBAOL is a verified commodity trading execution ecosystem. Securely trade agro commodities with integrated procurement, logistics, and execution support as we expand globally.",
+    "Starting in India, OBAOL is a verified B2B agro trade execution workspace. Plan procurement, run verification, manage logistics, and move orders in one connected system.",
   keywords: [
     "agro commodities",
     "commodity trading",
@@ -19,9 +19,9 @@ export const metadata = buildMetadata({
 
 const webSiteJsonLd = buildWebSiteJsonLd();
 const webPageJsonLd = buildWebPageJsonLd({
-  title: "OBAOL Supreme | Commodity & Agro Trading Platform",
+  title: "OBAOL Supreme | B2B Agro Trade Execution Workspace",
   description:
-    "Verified commodity trade execution ecosystem for supplier discovery, verification, and execution support.",
+    "Verified B2B agro trade execution workspace for procurement, verification, logistics, and order execution.",
   path: "/",
 });
 

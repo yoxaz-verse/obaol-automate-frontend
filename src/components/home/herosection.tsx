@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, cloneElement, type ReactElement, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AuthContext from "@/context/AuthContext";
@@ -23,6 +23,26 @@ import {
   FiAperture,
   FiNavigation,
 } from "react-icons/fi";
+
+type RoleModuleId =
+  | "procurement"
+  | "logistics"
+  | "verification"
+  | "buyer"
+  | "warehouse"
+  | "packaging"
+  | "supplier"
+  | "freight";
+
+type RoleKey =
+  | "SOURCE"
+  | "CARGO"
+  | "SECURE"
+  | "DEMAND"
+  | "STOCK"
+  | "PACK"
+  | "SUPPLY"
+  | "FORWARD";
 
 /* ================= ANIMATION VARIANTS ================= */
 
@@ -66,6 +86,74 @@ const floatingCardVariants = {
   })
 };
 
+const ROLE_CONNECTOR_ANCHORS = [
+  { id: "procurement", side: "left" as const, ringOffsetY: -34 },
+  { id: "logistics", side: "left" as const, ringOffsetY: -12 },
+  { id: "verification", side: "left" as const, ringOffsetY: 12 },
+  { id: "buyer", side: "left" as const, ringOffsetY: 34 },
+  { id: "warehouse", side: "right" as const, ringOffsetY: -34 },
+  { id: "packaging", side: "right" as const, ringOffsetY: -12 },
+  { id: "supplier", side: "right" as const, ringOffsetY: 12 },
+  { id: "freight", side: "right" as const, ringOffsetY: 34 },
+];
+
+const ROLE_CONTENT: Record<
+  RoleModuleId,
+  { roleKey: RoleKey; benefitText: string; color: string }
+> = {
+  procurement: {
+    roleKey: "SOURCE",
+    benefitText: "Procurement assistance for any trade that needs it.",
+    color: "#f97316",
+  },
+  logistics: {
+    roleKey: "CARGO",
+    benefitText: "Logistics providers can take the shipment execution.",
+    color: "#3b82f6",
+  },
+  verification: {
+    roleKey: "SECURE",
+    benefitText: "Verification steps happen across the trade.",
+    color: "#10b981",
+  },
+  buyer: {
+    roleKey: "DEMAND",
+    benefitText: "Buyer enquiries and orders are transparent step-by-step.",
+    color: "#a855f7",
+  },
+  warehouse: {
+    roleKey: "STOCK",
+    benefitText: "Rent warehouse space or list your warehouse.",
+    color: "#f97316",
+  },
+  packaging: {
+    roleKey: "PACK",
+    benefitText: "Packaging enquiries flow through the execution panel.",
+    color: "#ec4899",
+  },
+  supplier: {
+    roleKey: "SUPPLY",
+    benefitText: "Suppliers list products and stand out in the market.",
+    color: "#3b82f6",
+  },
+  freight: {
+    roleKey: "FORWARD",
+    benefitText: "Bid the freight forwarding part of execution.",
+    color: "#84cc16",
+  },
+};
+
+const HOVER_TIMING = {
+  blend: { duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
+  textSwap: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+  cardUiClass: "duration-700",
+};
+
+const FLOW_TIMING = {
+  activeDuration: 2.4,
+  idleDuration: 4.2,
+};
+
 /* ================= HELPER COMPONENTS ================= */
 
 const EcosystemChip = ({
@@ -78,7 +166,7 @@ const EcosystemChip = ({
   onHover,
   reverse = false
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   benefit: string;
   color: string;
@@ -108,8 +196,66 @@ const EcosystemChip = ({
   );
 };
 
+const RoleCard = ({
+  icon,
+  label,
+  color,
+  custom,
+  onHover,
+  isActive,
+  align = "left",
+  anchorId
+}: {
+  icon: ReactNode;
+  label: string;
+  color: string;
+  custom: number;
+  onHover: (active: boolean) => void;
+  isActive?: boolean;
+  align?: "left" | "right";
+  anchorId: string;
+}) => {
+  const anchorSide = align === "right" ? "right" : "left";
+  return (
+    <motion.div
+      custom={custom}
+      variants={itemVariants}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+      className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.04] backdrop-blur-md border transition-all ${HOVER_TIMING.cardUiClass} cursor-pointer w-full max-w-[180px] ${align === "right" ? "flex-row-reverse text-right" : ""} ${isActive ? "border-white/40 bg-white/[0.12] shadow-[0_0_25px_rgba(255,255,255,0.12)]" : "border-white/10 hover:border-white/30 hover:bg-white/[0.08] hover:shadow-[0_0_15px_rgba(255,255,255,0.08)]"}`}
+    >
+      <div className={`w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center ${color} transition-all group-hover:scale-110 ${HOVER_TIMING.cardUiClass} group-hover:bg-white/10`}>
+        {cloneElement(icon as ReactElement, { size: 16 })}
+      </div>
+      <div className="flex flex-col overflow-hidden">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-foreground truncate">
+          {label}
+        </span>
+      </div>
+      
+      {isActive && (
+        <motion.div
+          layoutId="active-glow-node"
+          className="absolute inset-0 rounded-2xl bg-orange-500/[0.02] pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={HOVER_TIMING.blend}
+        />
+      )}
+      <span
+        data-role-anchor={anchorId}
+        data-anchor-side={anchorSide}
+        className={`absolute top-1/2 -translate-y-1/2 w-1 h-1 pointer-events-none ${anchorSide === "right" ? "right-0 translate-x-1/2" : "left-0 -translate-x-1/2"}`}
+      />
+    </motion.div>
+  );
+};
+
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
+  const networkRef = useRef<HTMLDivElement>(null);
+  const hubRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { isAuthenticated, loading } = useContext(AuthContext);
   const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
@@ -117,18 +263,32 @@ export default function HeroSection() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isSystemActive, setIsSystemActive] = useState(false);
   const [isAgroActive, setIsAgroActive] = useState(false);
-  const [hoveredRole, setHoveredRole] = useState<string | null>(null);
+  const [activeRoleKey, setActiveRoleKey] = useState<RoleKey | null>(null);
+  const [activeConnectorId, setActiveConnectorId] = useState<RoleModuleId | null>(null);
+  const [connectorPaths, setConnectorPaths] = useState<Array<{ id: string; d: string }>>([]);
+  const [networkSize, setNetworkSize] = useState({ width: 600, height: 600 });
+  const [viewportWidth, setViewportWidth] = useState(1440);
 
   // DYNAMIC STATE FOR HEADLINE SYNC
   const [dynamicText, setDynamicText] = useState<{ text: string, isHeadline: boolean }>({ text: "B2B Agro Trade.", isHeadline: true });
   const [gridColor, setGridColor] = useState("currentColor");
+  const activeRoleRef = useRef<RoleModuleId | null>(null);
 
-  const handleChipHover = (active: boolean, role: string, benefitText: string, hexColor?: string) => {
-    setHoveredRole(active ? role : null);
+  const handleRoleHover = (moduleId: RoleModuleId, active: boolean) => {
     if (active) {
-      setDynamicText({ text: benefitText, isHeadline: false });
-      if (hexColor) setGridColor(hexColor);
-    } else {
+      activeRoleRef.current = moduleId;
+      setActiveConnectorId(moduleId);
+      setActiveRoleKey(ROLE_CONTENT[moduleId].roleKey);
+      setDynamicText({ text: ROLE_CONTENT[moduleId].benefitText, isHeadline: false });
+      setGridColor(ROLE_CONTENT[moduleId].color);
+      return;
+    }
+
+    // Avoid stale mouseleave resets when quickly moving between cards.
+    if (activeRoleRef.current === moduleId) {
+      activeRoleRef.current = null;
+      setActiveConnectorId(null);
+      setActiveRoleKey(null);
       setDynamicText({ text: "B2B Agro Trade.", isHeadline: true });
       setGridColor("currentColor");
     }
@@ -169,6 +329,13 @@ export default function HeroSection() {
     };
   }, [mouseX, mouseY]);
 
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener("resize", updateViewportWidth);
+    return () => window.removeEventListener("resize", updateViewportWidth);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -176,22 +343,103 @@ export default function HeroSection() {
 
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
+  const hubLayout = {
+    width: 600,
+    height: 600,
+    centerX: 332,
+    centerY: 300,
+    coreRadius: 48,
+  };
+
+  useEffect(() => {
+    let rafId = 0;
+    const updateConnectorPaths = () => {
+      if (!networkRef.current || !hubRef.current) return;
+
+      const containerRect = networkRef.current.getBoundingClientRect();
+      const hubRect = hubRef.current.getBoundingClientRect();
+      setNetworkSize({ width: containerRect.width, height: containerRect.height });
+      const centerX = hubRect.left - containerRect.left + (hubRect.width / 2);
+      const centerY = hubRect.top - containerRect.top + (hubRect.height / 2);
+      const radius = hubRect.width / 2;
+
+      const nextPaths = ROLE_CONNECTOR_ANCHORS.map((anchor) => {
+        const marker = networkRef.current?.querySelector(`[data-role-anchor="${anchor.id}"]`) as HTMLElement | null;
+        if (!marker) return { id: anchor.id, d: "" };
+
+        const markerRect = marker.getBoundingClientRect();
+        const startX = markerRect.left - containerRect.left + (markerRect.width / 2);
+        const startY = markerRect.top - containerRect.top + (markerRect.height / 2);
+
+        const endY = centerY + anchor.ringOffsetY;
+        const safeYOffset = Math.min(Math.abs(anchor.ringOffsetY), radius - 1);
+        const endXOffset = Math.sqrt(Math.max((radius * radius) - (safeYOffset * safeYOffset), 0));
+        const endX = anchor.side === "left" ? centerX - endXOffset : centerX + endXOffset;
+        const horizontalSpan = Math.abs(endX - startX);
+        const tensionCap = viewportWidth < 640 ? 56 : viewportWidth < 1024 ? 78 : 120;
+        const tension = Math.min(Math.max(horizontalSpan * 0.36, 42), tensionCap);
+        const startCtrlX = anchor.side === "left" ? startX + tension : startX - tension;
+        const endCtrlX = anchor.side === "left" ? endX - Math.min(tension * 0.5, 52) : endX + Math.min(tension * 0.5, 52);
+        const d = `M ${startX} ${startY} C ${startCtrlX} ${startY}, ${endCtrlX} ${endY}, ${endX} ${endY}`;
+        return { id: anchor.id, d };
+      }).filter((path) => path.d);
+
+      setConnectorPaths(nextPaths);
+    };
+
+    const scheduleRecompute = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateConnectorPaths);
+    };
+
+    scheduleRecompute();
+    window.addEventListener("resize", scheduleRecompute);
+    const resizeObserver = new ResizeObserver(scheduleRecompute);
+    if (networkRef.current) resizeObserver.observe(networkRef.current);
+    if (hubRef.current) resizeObserver.observe(hubRef.current);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", scheduleRecompute);
+      resizeObserver.disconnect();
+    };
+  }, [viewportWidth]);
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background"
+      className="relative min-h-[85vh] lg:h-[800px] flex flex-col items-center justify-center overflow-hidden bg-background pt-20"
     >
       {/* ================= BACKGROUND ================= */}
       <motion.div
         className="absolute inset-0 z-0 select-none pointer-events-none"
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 2, ease: "easeOut" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 z-10" />
+      </motion.div>
+      <motion.div
+        className="absolute right-0 bottom-0 z-10 pointer-events-none h-[74vh] w-[min(48vw,700px)] hidden md:block"
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%)",
+        }}
+      >
+        <Image
+          src="/images/hero-left-spice-banner.png"
+          alt="Agro supply chain visual"
+          fill
+          className="object-contain object-bottom-right opacity-20"
+          priority
+        />
       </motion.div>
 
       {/* ECO-GHOST BACKGROUND TEXT */}
       <AnimatePresence>
-        {hoveredRole && (
+        {activeRoleKey && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -199,7 +447,7 @@ export default function HeroSection() {
             className="absolute inset-0 z-5 flex items-center justify-center pointer-events-none select-none"
           >
             <span className="text-[15vw] font-black uppercase tracking-[0.2em] text-foreground/[0.03] dark:text-foreground/[0.04]">
-              {hoveredRole}
+              {activeRoleKey}
             </span>
           </motion.div>
         )}
@@ -209,7 +457,7 @@ export default function HeroSection() {
       <motion.div
         initial={{ opacity: 0.08 }}
         animate={{
-          opacity: (isSystemActive || isAgroActive || !!hoveredRole) ? 0.25 : 0.08,
+          opacity: (isSystemActive || isAgroActive || !!activeRoleKey) ? 0.25 : 0.08,
         }}
         className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
         style={{
@@ -295,154 +543,254 @@ export default function HeroSection() {
       </div>
 
       {/* ================= ECOSYSTEM NODES ================= */}
-      {showDesktopVisuals ? (
-        <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
-          {/* LEFT NODES */}
-          <div className="absolute top-[16%] left-[10%] pointer-events-auto">
-            <EcosystemChip icon={<FiShoppingBag size={15} />} label="Procurement" benefit="Procurement assistance for any trade that needs it." color="text-orange-500" custom={0} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SOURCE", "Procurement assistance for any trade that needs it.", "#f97316")} />
-          </div>
-          <div className="absolute top-[44%] left-[6%] pointer-events-auto">
-            <EcosystemChip icon={<FiTruck size={15} />} label="Logistics" benefit="Logistics providers can take the shipment execution." color="text-blue-500" custom={1} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "CARGO", "Logistics providers can take the shipment execution.", "#3b82f6")} />
-          </div>
-          <div className="absolute top-[72%] left-[8%] pointer-events-auto">
-            <EcosystemChip icon={<FiCheckCircle size={15} />} label="Verification" benefit="Verification steps happen across the trade." color="text-emerald-500" custom={2} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SECURE", "Verification steps happen across the trade.", "#10b981")} />
-          </div>
-          <div className="absolute top-[90%] left-[14%] pointer-events-auto">
-            <EcosystemChip icon={<FiUser size={15} />} label="Buyer" benefit="Buyer enquiries and orders are transparent step-by-step." color="text-purple-500" custom={3} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "DEMAND", "Buyer enquiries and orders are transparent step-by-step.", "#a855f7")} />
-          </div>
-
-          {/* RIGHT NODES */}
-          <div className="absolute top-[14%] right-[10%] pointer-events-auto">
-            <EcosystemChip icon={<FiBox size={15} />} label="Warehouse" benefit="Rent warehouse space or list your warehouse." color="text-orange-500" custom={4} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "STOCK", "Rent warehouse space or list your warehouse.", "#f97316")} reverse />
-          </div>
-          <div className="absolute top-[40%] right-[6%] pointer-events-auto">
-            <EcosystemChip icon={<FiArchive size={15} />} label="Packaging" benefit="Packaging enquiries flow through the execution panel." color="text-pink-500" custom={5} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "PACK", "Packaging enquiries flow through the execution panel.", "#ec4899")} reverse />
-          </div>
-          <div className="absolute top-[68%] right-[8%] pointer-events-auto">
-            <EcosystemChip icon={<FiLayers size={15} />} label="Supplier" benefit="Suppliers list products and stand out in the market." color="text-blue-500" custom={6} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "SUPPLY", "Suppliers list products and stand out in the market.", "#3b82f6")} reverse />
-          </div>
-          <div className="absolute top-[88%] right-[14%] pointer-events-auto">
-            <EcosystemChip icon={<FiNavigation size={15} />} label="Freight Forwarder" benefit="Bid the freight forwarding part of execution." color="text-lime-500" custom={7} variants={floatingCardVariants} onHover={(active) => handleChipHover(active, "FORWARD", "Bid the freight forwarding part of execution.", "#84cc16")} reverse />
-          </div>
-        </div>
-      ) : (
-        /* MOBILE ECOSYSTEM PREVIEW (Tiny floating icons) */
-        <div className="absolute inset-0 z-20 pointer-events-none opacity-20">
-          <div className="absolute top-[15%] left-[10%]"><FiShoppingBag size={14} className="text-orange-500" /></div>
-          <div className="absolute top-[25%] right-[12%]"><FiBox size={14} className="text-orange-500" /></div>
-          <div className="absolute top-[75%] left-[15%]"><FiTruck size={14} className="text-blue-500" /></div>
-          <div className="absolute top-[85%] right-[8%]"><FiLayers size={14} className="text-blue-500" /></div>
-        </div>
-      )}
+      {/* Removed absolute positioned nodes to consolidate them in the main content flow */}
 
       {/* ================= MAIN CONTENT ================= */}
       <motion.div
-        className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-center text-center w-full"
+        className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-start text-left w-full"
       >
         <motion.div
           initial={isMobile ? false : "hidden"}
           animate="visible"
           variants={containerVariants}
-          className="w-full max-w-4xl lg:max-w-5xl"
+          className="w-full max-w-6xl xl:max-w-7xl"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-5">
             <motion.p
               variants={itemVariants}
-              className="text-[8px] sm:text-xs font-black uppercase tracking-[0.5em] text-orange-500 mb-6 md:mb-8"
+              className="text-[8px] sm:text-xs font-black uppercase tracking-[0.45em] text-orange-500 mb-2"
             >
-              The Go-To Platform for Agro Trade
+              The Execution Workspace for Agro Trade
             </motion.p>
 
-            <motion.h1
-              initial={isMobile ? false : "hidden"}
-              animate="visible"
-              variants={itemVariants}
-              className="w-fit mx-auto text-3xl sm:text-5xl md:text-7xl lg:text-[clamp(4.2rem,8vw,7rem)] font-black tracking-tighter leading-[0.95] text-foreground cursor-pointer select-none group px-4"
-              onMouseEnter={() => setIsSystemActive(true)}
-              onMouseLeave={() => setIsSystemActive(false)}
-            >
-              The Execution <br />
-              <span className={`italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent ${!isMobile ? "animate-subtle-glint" : ""} group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all`}>
-                Ecosystem
-              </span>
-            </motion.h1>
+            <div className="w-full lg:grid lg:grid-cols-2 lg:items-center gap-8 lg:gap-10 xl:gap-12">
+              <div className="w-full space-y-6 lg:space-y-7 lg:pr-3">
+                <motion.h1
+                  initial={isMobile ? false : "hidden"}
+                  animate="visible"
+                  variants={itemVariants}
+                  className="inline-block w-max max-w-none overflow-visible pr-8 pb-1 text-4xl sm:text-5xl md:text-6xl lg:text-[clamp(3rem,5vw,4.5rem)] font-black tracking-[-0.04em] leading-[1.08] text-foreground cursor-pointer select-none group"
+                  onMouseEnter={() => setIsSystemActive(true)}
+                  onMouseLeave={() => setIsSystemActive(false)}
+                >
+                  The Execution <br />
+                  <span className={`inline-block pr-[0.12em] italic bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent ${!isMobile ? "animate-subtle-glint" : ""} group-hover:drop-shadow-[0_0_20px_rgba(234,88,12,0.5)] transition-all`}>
+                    Ecosystem
+                  </span>
+                </motion.h1>
 
-            <motion.div variants={itemVariants} className="flex items-center justify-center gap-4 py-2 md:py-4 opacity-30">
-              <div className="h-[1px] w-6 md:w-16 bg-foreground" />
-              <span className="text-sm md:text-xl font-medium italic">for</span>
-              <div className="h-[1px] w-6 md:w-16 bg-foreground" />
-            </motion.div>
+                <motion.div variants={itemVariants} className="flex items-center gap-3 opacity-30">
+                  <span className="text-xs md:text-lg font-medium italic">for</span>
+                  <div className="h-[1px] w-20 md:w-28 bg-foreground" />
+                </motion.div>
 
-            <motion.h2
-              initial={isMobile ? false : "hidden"}
-              animate="visible"
-              variants={itemVariants}
-              className="w-full relative flex flex-col items-center justify-center text-2xl sm:text-4xl md:text-6xl lg:text-[clamp(1.5rem,6vw,5.2rem)] font-black tracking-tighter text-foreground leading-none cursor-pointer select-none group px-4 min-h-[120px] md:min-h-[160px] overflow-hidden"
-              onMouseEnter={() => setIsAgroActive(true)}
-              onMouseLeave={() => setIsAgroActive(false)}
-            >
-              <AnimatePresence mode="wait">
-                  <motion.div
-                    key={dynamicText.text}
-                    initial={isMobile ? false : { y: 30, opacity: 0, filter: "blur(10px)" }}
-                    animate={isMobile ? { y: 0, opacity: 1, filter: "blur(0px)" } : { y: 0, opacity: 1, filter: "blur(0px)" }}
-                    exit={isMobile ? { y: 0, opacity: 0 } : { y: -30, opacity: 0, filter: "blur(10px)" }}
-                    transition={{
-                      duration: isMobile ? 0 : 0.8,
-                      ease: [0.16, 1, 0.3, 1]
-                    }}
-                    className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-                  >
-                    <span className={`transition-all duration-1000 ease-out text-center px-4 w-full ${isAgroActive
-                      ? "text-emerald-500 scale-105"
-                      : (dynamicText.isHeadline
-                        ? "text-foreground"
-                        : `text-foreground/80 italic font-bold uppercase tracking-[0.15em] ${!isMobile ? "animate-typewriter" : ""} text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-5xl`)
-                      }`}>
-                      {dynamicText.text}
-                    </span>
-                  </motion.div>
-              </AnimatePresence>
-            </motion.h2>
-          </div>
+                <motion.h2
+                  initial={isMobile ? false : "hidden"}
+                  animate="visible"
+                  variants={itemVariants}
+                  className="w-full relative flex flex-col items-start justify-center text-2xl sm:text-4xl md:text-5xl lg:text-[clamp(1.5rem,3.5vw,3rem)] font-black tracking-[-0.02em] text-foreground leading-[1.1] cursor-pointer select-none group min-h-[68px] md:min-h-[92px] overflow-visible py-1"
+                  onMouseEnter={() => setIsAgroActive(true)}
+                  onMouseLeave={() => setIsAgroActive(false)}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={dynamicText.text}
+                      initial={isMobile ? false : { y: 12, opacity: 0, filter: "blur(8px)" }}
+                      animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                      exit={{ y: -12, opacity: 0, filter: "blur(8px)" }}
+                      transition={HOVER_TIMING.textSwap}
+                      className="absolute inset-0 flex flex-col items-start justify-center pointer-events-none"
+                    >
+                      <span className={`transition-all duration-700 ease-out text-left w-full ${isAgroActive
+                        ? "text-emerald-500 scale-105"
+                        : (dynamicText.isHeadline
+                          ? "text-foreground"
+                          : `text-foreground/80 italic font-semibold ${!isMobile ? "animate-typewriter" : ""} text-base sm:text-lg md:text-xl lg:text-2xl leading-snug max-w-2xl`)
+                        }`}>
+                        {dynamicText.text}
+                      </span>
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.h2>
 
-          <motion.div
-            variants={itemVariants}
-            className="mt-8 md:mt-12 max-w-2xl mx-auto space-y-8 md:space-y-12"
-          >
-            <p className="text-sm sm:text-lg md:text-xl text-foreground/60 font-medium leading-relaxed px-4">
-              A professional-grade execution platform connecting every participant
-              across the agro-grid. <span className="text-foreground font-bold">Designed to reduce friction.</span>
-            </p>
+                <motion.div
+                  variants={itemVariants}
+                  className="pt-2 md:pt-5 max-w-3xl space-y-6 md:space-y-8"
+                >
+                  <p className="text-base sm:text-lg md:text-xl text-foreground/70 font-medium leading-relaxed">
+                    Plan procurement, manage logistics, run verification, and move orders in one execution workspace.
+                    <span className="text-foreground font-bold"> Built for real B2B agro trade operations.</span>
+                  </p>
 
-            <div className="flex flex-col items-center gap-8 md:gap-10">
-              <button
-                onMouseEnter={() => setIsSystemActive(true)}
-                onMouseLeave={() => setIsSystemActive(false)}
-                onClick={() => {
-                  if (loading) return;
-                  setIsNavigating(true);
-                  router.push(isAuthenticated ? "/dashboard" : "/auth");
-                }}
-                className="group relative px-6 py-3.5 md:px-10 md:py-5 rounded-[2.5rem] bg-orange-600 hover:bg-orange-700 text-white font-black text-base md:text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 md:gap-4 border border-orange-400/20"
+                  <div className="flex flex-col items-start gap-8 md:gap-10">
+                    <button
+                      onMouseEnter={() => setIsSystemActive(true)}
+                      onMouseLeave={() => setIsSystemActive(false)}
+                      onClick={() => {
+                        if (loading) return;
+                        setIsNavigating(true);
+                        router.push(isAuthenticated ? "/dashboard" : "/auth");
+                      }}
+                      className="group relative px-6 py-3 md:px-9 md:py-4 rounded-[2rem] bg-orange-600 hover:bg-orange-700 text-white font-black text-base md:text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] transition-all hover:scale-105 active:scale-95 flex items-center gap-2.5 md:gap-3 border border-orange-400/20"
+                    >
+                      {isNavigating ? "Establishing..." : (isAuthenticated ? "Access Workspace" : "Sign In to Access")}
+                      <FiArrowRight size={20} className="md:size-6 group-hover:translate-x-2 transition-transform" />
+                      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+
+                    {!loading && !isAuthenticated && (
+                      <div className="flex flex-wrap items-center gap-6 md:gap-10">
+                        <Link href="/auth/register" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
+                          Join as Associate
+                        </Link>
+                        <Link href="/auth/operator/register" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
+                          Join as Operator
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Consolidated Ecosystem Nodes Hub - Final High Fidelity Design */}
+              <motion.div 
+                variants={itemVariants}
+                className="w-full relative mt-3 lg:mt-0 group/network min-h-[430px] sm:min-h-[470px] lg:min-h-[500px] flex items-center justify-center lg:translate-x-5 xl:translate-x-8"
+                ref={networkRef}
               >
-                {isNavigating ? "Establishing..." : (isAuthenticated ? "Access Workspace" : "Sign In to Access")}
-                <FiArrowRight size={20} className="md:size-[24px] group-hover:translate-x-2 transition-transform" />
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-
-              {!loading && !isAuthenticated && (
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-                  <Link href="/auth/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
-                    Join as Associate
-                  </Link>
-                  <Link href="/auth/operator/register" className="text-[9px] sm:text-[11px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-widest transition-colors flex items-center gap-2">
-                    Join as Operator
-                  </Link>
+                {/* CENTRAL HUB ENGINE */}
+                <div
+                  className="absolute z-20"
+                  style={{ left: `${(hubLayout.centerX / hubLayout.width) * 100}%`, top: `${(hubLayout.centerY / hubLayout.height) * 100}%`, transform: "translate(-50%, -50%)" }}
+                  ref={hubRef}
+                >
+                  <div className="relative w-[84px] h-[84px] sm:w-[100px] sm:h-[100px] lg:w-24 lg:h-24">
+                    {/* Core Hub */}
+                    <motion.div 
+                      className="relative w-full h-full rounded-full bg-background border-2 border-orange-500/80 flex items-center justify-center shadow-[0_0_30px_rgba(234,88,12,0.3)] z-10 overflow-hidden"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/30 to-transparent" />
+                      <div className="flex flex-col items-center">
+                        <span className="text-[9px] font-black tracking-[0.3em] text-orange-500 leading-none">OBAOL</span>
+                        <div className="w-8 h-[1.5px] bg-orange-500 my-1.5 shadow-[0_0_12px_rgba(234,88,12,1)]" />
+                        <span className="text-[7px] font-bold text-foreground/70 dark:text-white/65 tracking-[0.25em] leading-none">ENGINE</span>
+                      </div>
+                    </motion.div>
+                    
+                  </div>
                 </div>
-              )}
+
+                {/* Connection Lines (Bezier S-Curves) */}
+                <div className="absolute inset-0 z-0 pointer-events-none opacity-100">
+                  <svg className="w-full h-full" viewBox={`0 0 ${networkSize.width} ${networkSize.height}`} preserveAspectRatio="none">
+                    <defs>
+                      <filter id="hub-glow">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                      <filter id="hub-flow-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
+
+                    {connectorPaths.map((path, i) => (
+                      <motion.g key={path.id}>
+                        {(() => {
+                          const isActivePath = activeConnectorId === path.id;
+                          const hasActiveFocus = Boolean(activeConnectorId);
+                          const connectorColor = isAgroActive ? "#10b981" : isSystemActive ? "#ea580c" : "#f97316";
+                          const dimmedOpacity = hasActiveFocus && !isActivePath ? 0.3 : 1;
+                          return (
+                            <>
+                              <motion.path
+                                d={path.d}
+                                stroke={connectorColor}
+                                animate={{
+                                  strokeWidth: isActivePath ? 4.2 : 3.2,
+                                  strokeOpacity: isActivePath ? 0.26 : 0.18,
+                                  opacity: dimmedOpacity,
+                                }}
+                                fill="none"
+                                strokeLinecap="round"
+                                filter="url(#hub-glow)"
+                                transition={HOVER_TIMING.blend}
+                              />
+                              <motion.path
+                                d={path.d}
+                                stroke={connectorColor}
+                                animate={{
+                                  strokeWidth: isActivePath ? 2.35 : 1.85,
+                                  strokeOpacity: isActivePath ? 0.88 : 0.58,
+                                  opacity: dimmedOpacity,
+                                }}
+                                fill="none"
+                                strokeLinecap="round"
+                                transition={HOVER_TIMING.blend}
+                              />
+                              <motion.path
+                                d={path.d}
+                                stroke={connectorColor}
+                                animate={{
+                                  strokeDashoffset: isActivePath ? [-300, 0] : [-220, 0],
+                                  opacity: isActivePath ? [0.45, 0.9, 0.45] : [0.14, 0.4, 0.14],
+                                  strokeWidth: isActivePath ? 3.45 : 2.35,
+                                  strokeOpacity: isActivePath ? 0.9 : 0.62,
+                                }}
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeDasharray={isActivePath ? "18 126" : "12 138"}
+                                filter="url(#hub-flow-glow)"
+                                transition={{
+                                  duration: isActivePath ? FLOW_TIMING.activeDuration : FLOW_TIMING.idleDuration,
+                                  repeat: Infinity,
+                                  ease: "linear",
+                                  delay: i * 0.16,
+                                }}
+                                style={{ opacity: dimmedOpacity }}
+                              />
+                            </>
+                          );
+                        })()}
+                      </motion.g>
+                    ))}
+                  </svg>
+                </div>
+
+                {/* ROLE MODULES GRID */}
+                <div className="relative z-30 w-full grid grid-cols-2 gap-x-14 sm:gap-x-24 md:gap-x-36 lg:gap-x-56 gap-y-7 sm:gap-y-9 lg:gap-y-12">
+                  {/* LEFT COLUMN */}
+                  <div className="space-y-10 lg:space-y-12 flex flex-col items-start">
+                    <RoleCard icon={<FiShoppingBag size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" />
+                    <RoleCard icon={<FiTruck size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" />
+                    <RoleCard icon={<FiCheckCircle size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" />
+                    <RoleCard icon={<FiUser size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" />
+                  </div>
+
+                  {/* RIGHT COLUMN */}
+                  <div className="space-y-10 lg:space-y-12 flex flex-col items-end">
+                    <RoleCard icon={<FiBox size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} anchorId="warehouse" />
+                    <RoleCard icon={<FiArchive size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} anchorId="packaging" />
+                    <RoleCard icon={<FiLayers size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} anchorId="supplier" />
+                    <RoleCard icon={<FiNavigation size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} anchorId="freight" />
+                  </div>
+                </div>
+
+                {/* HUD HUD Technical Details Overlay */}
+                <div className="absolute top-0 right-0 p-4 border-r border-t border-white/5 rounded-tr-3xl pointer-events-none opacity-20">
+                  <div className="text-[7px] font-mono flex flex-col gap-1 tracking-tighter">
+                    <span>SYS_LINK: ESTABLISHED</span>
+                    <span>ENCRYPTION: AES-256</span>
+                    <span>CORE_LATENCY: 4ms</span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </motion.div>
 

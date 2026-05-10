@@ -86,7 +86,7 @@ const floatingCardVariants = {
   })
 };
 
-const ROLE_CONNECTOR_ANCHORS = [
+const DESKTOP_ROLE_CONNECTOR_ANCHORS = [
   { id: "procurement", side: "left" as const, ringOffsetY: -34 },
   { id: "logistics", side: "left" as const, ringOffsetY: -12 },
   { id: "verification", side: "left" as const, ringOffsetY: 12 },
@@ -95,6 +95,17 @@ const ROLE_CONNECTOR_ANCHORS = [
   { id: "packaging", side: "right" as const, ringOffsetY: -12 },
   { id: "supplier", side: "right" as const, ringOffsetY: 12 },
   { id: "freight", side: "right" as const, ringOffsetY: 34 },
+];
+
+const COMPACT_ROLE_CONNECTOR_ANCHORS = [
+  { id: "procurement", side: "left" as const, ringOffsetY: -30 },
+  { id: "warehouse", side: "right" as const, ringOffsetY: -18 },
+  { id: "logistics", side: "left" as const, ringOffsetY: -6 },
+  { id: "packaging", side: "right" as const, ringOffsetY: 6 },
+  { id: "verification", side: "left" as const, ringOffsetY: 18 },
+  { id: "supplier", side: "right" as const, ringOffsetY: 30 },
+  { id: "buyer", side: "left" as const, ringOffsetY: 42 },
+  { id: "freight", side: "right" as const, ringOffsetY: 54 },
 ];
 
 const ROLE_CONTENT: Record<
@@ -154,6 +165,12 @@ const FLOW_TIMING = {
   idleDuration: 4.2,
 };
 
+const COMPACT_HUB_TOP = "12%";
+const COMPACT_ROW_OFFSET = {
+  left: "mr-7 sm:mr-10",
+  right: "ml-7 sm:ml-10",
+};
+
 /* ================= HELPER COMPONENTS ================= */
 
 const EcosystemChip = ({
@@ -204,7 +221,8 @@ const RoleCard = ({
   onHover,
   isActive,
   align = "left",
-  anchorId
+  anchorId,
+  compact = false,
 }: {
   icon: ReactNode;
   label: string;
@@ -214,6 +232,7 @@ const RoleCard = ({
   isActive?: boolean;
   align?: "left" | "right";
   anchorId: string;
+  compact?: boolean;
 }) => {
   const anchorSide = align === "right" ? "right" : "left";
   return (
@@ -222,7 +241,7 @@ const RoleCard = ({
       variants={itemVariants}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.04] backdrop-blur-md border transition-all ${HOVER_TIMING.cardUiClass} cursor-pointer w-full max-w-[180px] ${align === "right" ? "flex-row-reverse text-right" : ""} ${isActive ? "border-white/40 bg-white/[0.12] shadow-[0_0_25px_rgba(255,255,255,0.12)]" : "border-white/10 hover:border-white/30 hover:bg-white/[0.08] hover:shadow-[0_0_15px_rgba(255,255,255,0.08)]"}`}
+      className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.04] backdrop-blur-md border transition-all ${HOVER_TIMING.cardUiClass} cursor-pointer w-full ${compact ? "max-w-[240px]" : "max-w-[180px]"} ${align === "right" ? "flex-row-reverse text-right" : ""} ${isActive ? "border-white/40 bg-white/[0.12] shadow-[0_0_25px_rgba(255,255,255,0.12)]" : "border-white/10 hover:border-white/30 hover:bg-white/[0.08] hover:shadow-[0_0_15px_rgba(255,255,255,0.08)]"}`}
     >
       <div className={`w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center ${color} transition-all group-hover:scale-110 ${HOVER_TIMING.cardUiClass} group-hover:bg-white/10`}>
         {cloneElement(icon as ReactElement, { size: 16 })}
@@ -350,6 +369,10 @@ export default function HeroSection() {
     centerY: 300,
     coreRadius: 48,
   };
+  const isCompactNetwork = viewportWidth < 1024;
+  const activeConnectorAnchors = isCompactNetwork
+    ? COMPACT_ROLE_CONNECTOR_ANCHORS
+    : DESKTOP_ROLE_CONNECTOR_ANCHORS;
 
   useEffect(() => {
     let rafId = 0;
@@ -363,7 +386,7 @@ export default function HeroSection() {
       const centerY = hubRect.top - containerRect.top + (hubRect.height / 2);
       const radius = hubRect.width / 2;
 
-      const nextPaths = ROLE_CONNECTOR_ANCHORS.map((anchor) => {
+      const nextPaths = activeConnectorAnchors.map((anchor) => {
         const marker = networkRef.current?.querySelector(`[data-role-anchor="${anchor.id}"]`) as HTMLElement | null;
         if (!marker) return { id: anchor.id, d: "" };
 
@@ -376,8 +399,8 @@ export default function HeroSection() {
         const endXOffset = Math.sqrt(Math.max((radius * radius) - (safeYOffset * safeYOffset), 0));
         const endX = anchor.side === "left" ? centerX - endXOffset : centerX + endXOffset;
         const horizontalSpan = Math.abs(endX - startX);
-        const tensionCap = viewportWidth < 640 ? 56 : viewportWidth < 1024 ? 78 : 120;
-        const tension = Math.min(Math.max(horizontalSpan * 0.36, 42), tensionCap);
+        const tensionCap = viewportWidth < 640 ? 48 : viewportWidth < 1024 ? 66 : 120;
+        const tension = Math.min(Math.max(horizontalSpan * (isCompactNetwork ? 0.28 : 0.36), isCompactNetwork ? 28 : 42), tensionCap);
         const startCtrlX = anchor.side === "left" ? startX + tension : startX - tension;
         const endCtrlX = anchor.side === "left" ? endX - Math.min(tension * 0.5, 52) : endX + Math.min(tension * 0.5, 52);
         const d = `M ${startX} ${startY} C ${startCtrlX} ${startY}, ${endCtrlX} ${endY}, ${endX} ${endY}`;
@@ -402,7 +425,7 @@ export default function HeroSection() {
       window.removeEventListener("resize", scheduleRecompute);
       resizeObserver.disconnect();
     };
-  }, [viewportWidth]);
+  }, [viewportWidth, activeConnectorAnchors, isCompactNetwork]);
 
   return (
     <section
@@ -657,13 +680,17 @@ export default function HeroSection() {
               {/* Consolidated Ecosystem Nodes Hub - Final High Fidelity Design */}
               <motion.div 
                 variants={itemVariants}
-                className="w-full relative mt-3 lg:mt-0 group/network min-h-[430px] sm:min-h-[470px] lg:min-h-[500px] flex items-center justify-center lg:translate-x-5 xl:translate-x-8"
+                className="w-full relative mt-3 lg:mt-0 group/network min-h-[560px] sm:min-h-[620px] lg:min-h-[500px] flex items-start lg:items-center justify-center lg:translate-x-5 xl:translate-x-8"
                 ref={networkRef}
               >
                 {/* CENTRAL HUB ENGINE */}
                 <div
                   className="absolute z-20"
-                  style={{ left: `${(hubLayout.centerX / hubLayout.width) * 100}%`, top: `${(hubLayout.centerY / hubLayout.height) * 100}%`, transform: "translate(-50%, -50%)" }}
+                  style={{
+                    left: isCompactNetwork ? "50%" : `${(hubLayout.centerX / hubLayout.width) * 100}%`,
+                    top: isCompactNetwork ? COMPACT_HUB_TOP : `${(hubLayout.centerY / hubLayout.height) * 100}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                   ref={hubRef}
                 >
                   <div className="relative w-[84px] h-[84px] sm:w-[100px] sm:h-[100px] lg:w-24 lg:h-24">
@@ -713,8 +740,8 @@ export default function HeroSection() {
                                 d={path.d}
                                 stroke={connectorColor}
                                 animate={{
-                                  strokeWidth: isActivePath ? 4.2 : 3.2,
-                                  strokeOpacity: isActivePath ? 0.26 : 0.18,
+                                  strokeWidth: isCompactNetwork ? (isActivePath ? 3.3 : 2.4) : (isActivePath ? 4.2 : 3.2),
+                                  strokeOpacity: isCompactNetwork ? (isActivePath ? 0.2 : 0.14) : (isActivePath ? 0.26 : 0.18),
                                   opacity: dimmedOpacity,
                                 }}
                                 fill="none"
@@ -726,8 +753,8 @@ export default function HeroSection() {
                                 d={path.d}
                                 stroke={connectorColor}
                                 animate={{
-                                  strokeWidth: isActivePath ? 2.35 : 1.85,
-                                  strokeOpacity: isActivePath ? 0.88 : 0.58,
+                                  strokeWidth: isCompactNetwork ? (isActivePath ? 1.95 : 1.45) : (isActivePath ? 2.35 : 1.85),
+                                  strokeOpacity: isCompactNetwork ? (isActivePath ? 0.72 : 0.46) : (isActivePath ? 0.88 : 0.58),
                                   opacity: dimmedOpacity,
                                 }}
                                 fill="none"
@@ -739,9 +766,11 @@ export default function HeroSection() {
                                 stroke={connectorColor}
                                 animate={{
                                   strokeDashoffset: isActivePath ? [-300, 0] : [-220, 0],
-                                  opacity: isActivePath ? [0.45, 0.9, 0.45] : [0.14, 0.4, 0.14],
-                                  strokeWidth: isActivePath ? 3.45 : 2.35,
-                                  strokeOpacity: isActivePath ? 0.9 : 0.62,
+                                  opacity: isCompactNetwork
+                                    ? (isActivePath ? [0.34, 0.62, 0.34] : [0.1, 0.26, 0.1])
+                                    : (isActivePath ? [0.45, 0.9, 0.45] : [0.14, 0.4, 0.14]),
+                                  strokeWidth: isCompactNetwork ? (isActivePath ? 2.75 : 1.95) : (isActivePath ? 3.45 : 2.35),
+                                  strokeOpacity: isCompactNetwork ? (isActivePath ? 0.72 : 0.48) : (isActivePath ? 0.9 : 0.62),
                                 }}
                                 fill="none"
                                 strokeLinecap="round"
@@ -764,6 +793,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* ROLE MODULES GRID */}
+                {!isCompactNetwork && (
                 <div className="relative z-30 w-full grid grid-cols-2 gap-x-14 sm:gap-x-24 md:gap-x-36 lg:gap-x-56 gap-y-7 sm:gap-y-9 lg:gap-y-12">
                   {/* LEFT COLUMN */}
                   <div className="space-y-10 lg:space-y-12 flex flex-col items-start">
@@ -781,6 +811,36 @@ export default function HeroSection() {
                     <RoleCard icon={<FiNavigation size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} anchorId="freight" />
                   </div>
                 </div>
+                )}
+
+                {isCompactNetwork && (
+                  <div className="relative z-30 w-full pt-[170px] sm:pt-[190px] flex flex-col items-center gap-4 sm:gap-5">
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
+                      <RoleCard icon={<FiShoppingBag size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
+                      <RoleCard icon={<FiBox size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} align="left" anchorId="warehouse" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
+                      <RoleCard icon={<FiTruck size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
+                      <RoleCard icon={<FiArchive size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} align="left" anchorId="packaging" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
+                      <RoleCard icon={<FiCheckCircle size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
+                      <RoleCard icon={<FiLayers size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} align="left" anchorId="supplier" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
+                      <RoleCard icon={<FiUser size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" compact />
+                    </div>
+                    <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
+                      <RoleCard icon={<FiNavigation size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} align="left" anchorId="freight" compact />
+                    </div>
+                  </div>
+                )}
 
                 {/* HUD HUD Technical Details Overlay */}
                 <div className="absolute top-0 right-0 p-4 border-r border-t border-white/5 rounded-tr-3xl pointer-events-none opacity-20">

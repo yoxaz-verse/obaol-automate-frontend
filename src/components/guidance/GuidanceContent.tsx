@@ -101,7 +101,7 @@ const associateFeatureSections = [
         actions: "Track import requests, link documents, follow progress.",
       },
       {
-        name: "Warehouse Space",
+        name: "Warehouse Booking",
         route: "/dashboard/warehouse-rent",
         what: "Find and reserve storage capacity for shipments.",
         actions: "Search availability, request slots, manage bookings.",
@@ -262,7 +262,7 @@ const operatorFeatureSections = [
         actions: "Track shipment status, validate documents.",
       },
       {
-        name: "Warehouse Space",
+        name: "Warehouse Booking",
         route: "/dashboard/warehouse-rent",
         what: "Coordinate storage capacity for active orders.",
         actions: "Check availability, reserve slots, log updates.",

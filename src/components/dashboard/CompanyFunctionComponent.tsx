@@ -82,7 +82,7 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
   "warehouse-storage": [
     { label: "Warehouses", href: "/dashboard/warehouses", description: "Manage storage sites and capacity." },
     { label: "Inventory", href: "/dashboard/inventory", description: "Track stock levels and movements." },
-    { label: "Warehouse Space", href: "/dashboard/warehouse-rent", description: "Allocate or rent extra space." },
+    { label: "Warehouse Booking", href: "/dashboard/warehouse-rent", description: "Allocate or rent extra space." },
   ],
   "freight-forwarding": [
     { label: "Execution Feed", href: "/dashboard/execution-enquiries", description: "Coordinate freight tasks and legs." },

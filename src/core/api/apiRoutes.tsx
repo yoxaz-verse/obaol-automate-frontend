@@ -64,6 +64,9 @@ const BASE_PATHS = {
   INVENTORY_RESERVATION: "/inventory-reservations",
   SAMPLE_REQUEST: "/sample-requests",
   TRADE_DOCUMENT: "/trade-documents",
+  DOCUMENT_TEMPLATE: "/document-templates",
+  DOCUMENT_TYPE: "/document-types",
+  LETTERHEAD_PRESET: "/letterhead-presets",
   DOCUMENT_RULE: "/document-rules",
   ENQUIRY_RULE: "/enquiry-rules",
   ORDER_RULE: "/order-rules",
@@ -126,6 +129,9 @@ export const inventoryReservationRoutes = createCRUDRoutes(
 );
 export const sampleRequestRoutes = createCRUDRoutes(BASE_PATHS.SAMPLE_REQUEST);
 export const tradeDocumentRoutes = createCRUDRoutes(BASE_PATHS.TRADE_DOCUMENT);
+export const documentTemplateRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_TEMPLATE);
+export const documentTypeRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_TYPE);
+export const letterheadPresetRoutes = createCRUDRoutes(BASE_PATHS.LETTERHEAD_PRESET);
 export const documentRuleRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_RULE);
 export const flowRuleRoutes = createCRUDRoutes(BASE_PATHS.FLOW_RULE);
 export const demoRoutes = createCRUDRoutes(BASE_PATHS.DEMO);
@@ -429,6 +435,28 @@ export const apiRoutes = {
     getOne: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     update: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}`,
     email: (id: string) => `${BASE_PATHS.TRADE_DOCUMENT}/${id}/email`,
+  },
+  documentTemplates: {
+    list: `${BASE_PATHS.DOCUMENT_TEMPLATE}`,
+    create: `${BASE_PATHS.DOCUMENT_TEMPLATE}`,
+    getOne: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}`,
+    update: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}`,
+    publish: (id: string) => `${BASE_PATHS.DOCUMENT_TEMPLATE}/${id}/publish`,
+    seed: `${BASE_PATHS.DOCUMENT_TEMPLATE}/seed`,
+    preview: `${BASE_PATHS.DOCUMENT_TEMPLATE}/preview`,
+    generate: `${BASE_PATHS.DOCUMENT_TEMPLATE}/generate`,
+  },
+  documentTypes: {
+    list: `${BASE_PATHS.DOCUMENT_TYPE}`,
+    create: `${BASE_PATHS.DOCUMENT_TYPE}`,
+    update: (id: string) => `${BASE_PATHS.DOCUMENT_TYPE}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.DOCUMENT_TYPE}/${id}`,
+  },
+  letterheadPresets: {
+    list: `${BASE_PATHS.LETTERHEAD_PRESET}`,
+    create: `${BASE_PATHS.LETTERHEAD_PRESET}`,
+    update: (id: string) => `${BASE_PATHS.LETTERHEAD_PRESET}/${id}`,
+    delete: (id: string) => `${BASE_PATHS.LETTERHEAD_PRESET}/${id}`,
   },
   documentRules: {
     list: `${BASE_PATHS.DOCUMENT_RULE}`,

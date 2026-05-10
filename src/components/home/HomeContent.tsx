@@ -83,7 +83,7 @@ export default function HomeContent() {
                                 },
                                 {
                                     title: "Warehouse Rent Management",
-                                    desc: "Warehouse Space rentals with capacity planning and reservations.",
+                                    desc: "Warehouse booking services with capacity planning and reservations.",
                                 },
                                 {
                                     title: "Orders & External Orders",

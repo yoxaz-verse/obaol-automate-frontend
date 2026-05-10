@@ -35,7 +35,7 @@ export const ACTION_LABELS: Record<ShortcutAction, string> = {
   documents: "Documents",
   imports: "Imports",
   panels: "Dashboard Panels",
-  warehouseSpace: "Warehouse Space",
+  warehouseSpace: "Warehouse Booking",
   externalOrders: "External Orders",
 };
 

@@ -134,7 +134,7 @@ const ROLE_CONTENT: Record<
   },
   warehouse: {
     roleKey: "STOCK",
-    benefitText: "Rent warehouse space or list your warehouse.",
+    benefitText: "Book warehouse capacity or list your warehouse.",
     color: "#f97316",
   },
   packaging: {

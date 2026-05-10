@@ -144,7 +144,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     { label: "News", links: ["/dashboard/news"] },
     { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", manageCompanyLink, "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
     { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
-    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/calculations", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
+    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/documentation-templates", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/calculations", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
   ];
 
   return (

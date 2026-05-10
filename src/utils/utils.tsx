@@ -100,7 +100,7 @@ export const sidebarOptions = [
     link: "/dashboard/warehouses",
   },
   {
-    name: "Warehouse Space",
+    name: "Warehouse Booking",
     icon: <TbBuildingWarehouse />,
     link: "/dashboard/warehouse-rent",
   },
@@ -151,13 +151,18 @@ export const sidebarOptions = [
   },
   {
     name: "Documentation Rules",
-    icon: <FiEdit3 />,
+    icon: <MdOutlineSettingsInputComponent />,
     link: "/dashboard/documentation-rules",
   },
   {
     name: "Documentation Preview",
     icon: <FiEye />,
     link: "/dashboard/documentation-preview",
+  },
+  {
+    name: "Documentation Templates",
+    icon: <FiLayers />,
+    link: "/dashboard/documentation-templates",
   },
   {
     name: "Payment Rules",

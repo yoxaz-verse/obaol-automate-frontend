@@ -103,6 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             links: [
                 "/dashboard/documentation-rules",
                 "/dashboard/documentation-preview",
+                "/dashboard/documentation-templates",
                 "/dashboard/flow-rules",
                 "/dashboard/operators/overview",
                 "/dashboard/users",

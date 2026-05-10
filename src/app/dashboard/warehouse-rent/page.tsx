@@ -9,6 +9,8 @@ import {
   CardHeader,
   Chip,
   Divider,
+  Input,
+  Textarea,
   Modal,
   ModalBody,
   ModalContent,
@@ -22,7 +24,18 @@ import AuthContext from "@/context/AuthContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { FiBox, FiLoader, FiMapPin } from "react-icons/fi";
+import { FiLoader, FiMapPin, FiSearch } from "react-icons/fi";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCalculationConfig } from "@/hooks/useCalculationConfig";
 
 type Warehouse = {
   _id: string;
@@ -34,6 +47,12 @@ type Warehouse = {
   listingType?: "PRIVATE" | "RENTAL";
   isRentalActive?: boolean;
   isActive?: boolean;
+  location?: {
+    latitude?: number;
+    longitude?: number;
+    city?: string;
+    state?: string;
+  } | null;
 };
 
 type AssociateCompany = {
@@ -46,6 +65,7 @@ type WarehouseAssignment = {
   warehouseId?: string | { _id?: string };
   companyId?: string | { _id?: string };
   status?: "ACTIVE" | "INACTIVE";
+  bookingStatus?: "PENDING_QUOTE" | "BOOKED" | "REJECTED" | "CANCELLED";
 };
 
 const toArrayData = (response: any): any[] => {
@@ -55,6 +75,49 @@ const toArrayData = (response: any): any[] => {
   if (Array.isArray(response?.data)) return response.data;
   return [];
 };
+
+const DEFAULT_CENTER: [number, number] = [20.5937, 78.9629];
+const DEFAULT_ZOOM = 5;
+const SEARCH_RADIUS_KM = 100;
+
+const CATEGORY_COLOR: Record<string, string> = {
+  GENERAL: "#f59e0b",
+  COLD_STORAGE: "#06b6d4",
+  BONDED: "#8b5cf6",
+  AGRO: "#22c55e",
+};
+
+const mkDotIcon = (color: string) =>
+  L.divIcon({
+    className: "warehouse-dot-icon",
+    html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;background:${color};border:2px solid rgba(255,255,255,0.95);box-shadow:0 0 0 3px color-mix(in oklab, ${color} 26%, transparent), 0 4px 12px rgba(0,0,0,0.45);"></span>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+  });
+
+type SearchPoint = { latitude: number; longitude: number; label: string };
+
+const toRad = (deg: number) => (deg * Math.PI) / 180;
+const haversineKm = (aLat: number, aLng: number, bLat: number, bLng: number) => {
+  const dLat = toRad(bLat - aLat);
+  const dLng = toRad(bLng - aLng);
+  const aa =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(aLat)) *
+      Math.cos(toRad(bLat)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  return 6371 * (2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa)));
+};
+
+function MapAutoCenter({ point }: { point: SearchPoint | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!point) return;
+    map.setView([point.latitude, point.longitude], 8, { animate: true });
+  }, [map, point]);
+  return null;
+}
 
 export default function WarehouseRentPage() {
   const queryClient = useQueryClient();
@@ -67,6 +130,13 @@ export default function WarehouseRentPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [requiredMT, setRequiredMT] = useState("1");
+  const [durationMonths, setDurationMonths] = useState("1");
+  const [requirementNotes, setRequirementNotes] = useState("");
+  const [expectedStartDate, setExpectedStartDate] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [searchPoint, setSearchPoint] = useState<SearchPoint | null>(null);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
   const {
     data: warehousesData,
@@ -80,6 +150,7 @@ export default function WarehouseRentPage() {
       return toArrayData(res);
     },
   });
+  const { data: calculationConfig } = useCalculationConfig(true);
 
   const { data: companiesData } = useQuery({
     queryKey: ["warehouse-rent-companies", roleLower, user?.id],
@@ -102,7 +173,10 @@ export default function WarehouseRentPage() {
     enabled: isAssociate ? Boolean(userAssociateCompanyId) : Boolean(selectedCompanyId),
   });
 
-  const companies: AssociateCompany[] = Array.isArray(companiesData) ? companiesData : [];
+  const companies: AssociateCompany[] = useMemo(
+    () => (Array.isArray(companiesData) ? companiesData : []),
+    [companiesData]
+  );
   useEffect(() => {
     if (isAssociate) {
       if (userAssociateCompanyId && selectedCompanyId !== userAssociateCompanyId) {
@@ -120,22 +194,57 @@ export default function WarehouseRentPage() {
     return list.filter((w) => w?.listingType === "RENTAL" && w?.isRentalActive !== false);
   }, [warehousesData]);
 
-  const activeAssignments: WarehouseAssignment[] = Array.isArray(assignmentsData) ? assignmentsData : [];
+  const mappableWarehouses = useMemo(() => {
+    return rentalWarehouses.filter((warehouse) => {
+      const lat = Number(warehouse?.location?.latitude);
+      const lng = Number(warehouse?.location?.longitude);
+      return Number.isFinite(lat) && Number.isFinite(lng);
+    });
+  }, [rentalWarehouses]);
+
+  const filteredWarehouses = useMemo(() => {
+    if (!searchPoint) return mappableWarehouses;
+    return mappableWarehouses.filter((warehouse) => {
+      const lat = Number(warehouse?.location?.latitude);
+      const lng = Number(warehouse?.location?.longitude);
+      const distance = haversineKm(searchPoint.latitude, searchPoint.longitude, lat, lng);
+      return distance <= SEARCH_RADIUS_KM;
+    });
+  }, [mappableWarehouses, searchPoint]);
+
+  const activeAssignments: WarehouseAssignment[] = useMemo(
+    () => (Array.isArray(assignmentsData) ? assignmentsData : []),
+    [assignmentsData]
+  );
   const bookedWarehouseIdSet = useMemo(() => {
     const ids = new Set<string>();
+    const pendingIds = new Set<string>();
     activeAssignments.forEach((assignment) => {
       const value = assignment?.warehouseId;
       const warehouseId = typeof value === "string" ? value : String(value?._id || "");
-      if (warehouseId) ids.add(warehouseId);
+      if (!warehouseId) return;
+      if (assignment?.bookingStatus === "PENDING_QUOTE") pendingIds.add(warehouseId);
+      if ((assignment?.bookingStatus || "BOOKED") === "BOOKED") ids.add(warehouseId);
     });
-    return ids;
+    return { booked: ids, pending: pendingIds };
   }, [activeAssignments]);
 
   const bookMutation = useMutation({
-    mutationFn: (payload: { warehouseId: string; companyId?: string }) =>
+    mutationFn: (payload: {
+      warehouseId: string;
+      companyId?: string;
+      requestType: "QUOTE_REQUEST" | "DIRECT_BOOKING";
+      requiredMT: number;
+      durationMonths: number;
+      requirementNotes?: string;
+      expectedStartDate?: string;
+      taxPercent: number;
+      handlingPercent: number;
+      estimateCurrency: string;
+    }) =>
       postData(apiRoutes.warehouses.assignments, payload),
     onSuccess: () => {
-      showToastMessage({ type: "success", message: "Warehouse space booked successfully." });
+      showToastMessage({ type: "success", message: "Warehouse booking request submitted successfully." });
       queryClient.invalidateQueries({ queryKey: ["warehouse-assignments"] });
       setIsBookModalOpen(false);
       setSelectedWarehouse(null);
@@ -143,26 +252,99 @@ export default function WarehouseRentPage() {
     onError: (error: any) => {
       showToastMessage({
         type: "error",
-        message: error?.response?.data?.message || "Failed to book warehouse space.",
+        message: error?.response?.data?.message || "Failed to submit warehouse booking request.",
       });
     },
   });
 
   const openBookModal = (warehouse: Warehouse) => {
     setSelectedWarehouse(warehouse);
+    setRequiredMT("1");
+    setDurationMonths("1");
+    setRequirementNotes("");
+    setExpectedStartDate("");
     setIsBookModalOpen(true);
   };
 
-  const submitBooking = () => {
+  const geocodeLocation = async (query: string): Promise<SearchPoint | null> => {
+    const q = String(query || "").trim();
+    if (!q) return null;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+    const lat = Number(data[0]?.lat);
+    const lon = Number(data[0]?.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return {
+      latitude: lat,
+      longitude: lon,
+      label: String(data[0]?.display_name || q),
+    };
+  };
+
+  const handleLocationSearch = async () => {
+    const q = String(locationQuery || "").trim();
+    if (!q) {
+      setSearchPoint(null);
+      return;
+    }
+    try {
+      setIsSearchingLocation(true);
+      const result = await geocodeLocation(q);
+      if (!result) {
+        showToastMessage({ type: "warning", message: "Location not found. Try a more specific area." });
+        return;
+      }
+      setSearchPoint(result);
+    } catch {
+      showToastMessage({ type: "warning", message: "Unable to search location right now." });
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
+  const taxPercent = Number(calculationConfig?.warehouseTaxPercent ?? calculationConfig?.gstPercent ?? 0);
+  const handlingPercent = Number(
+    calculationConfig?.warehouseHandlingPercent ?? calculationConfig?.importAdminCommissionDefault ?? 0
+  );
+  const parsedRequiredMT = Math.max(0, Number(requiredMT || 0));
+  const parsedMonths = Math.max(1, Math.floor(Number(durationMonths || 1)));
+  const ratePerUnit = Number(selectedWarehouse?.storageRatePerUnit ?? 0);
+  const estimateBase = Number((parsedRequiredMT * ratePerUnit * parsedMonths).toFixed(2));
+  const estimateTax = Number(((estimateBase * taxPercent) / 100).toFixed(2));
+  const estimateHandling = Number(((estimateBase * handlingPercent) / 100).toFixed(2));
+  const estimateTotal = Number((estimateBase + estimateTax + estimateHandling).toFixed(2));
+
+  const submitBooking = (requestType: "QUOTE_REQUEST" | "DIRECT_BOOKING") => {
     if (!selectedWarehouse?._id) return;
     if (!isAssociate && !selectedCompanyId) {
       showToastMessage({ type: "warning", message: "Select an associate company first." });
+      return;
+    }
+    if (!Number.isFinite(parsedRequiredMT) || parsedRequiredMT <= 0) {
+      showToastMessage({ type: "warning", message: "Enter a valid required quantity in MT." });
+      return;
+    }
+    if (!Number.isFinite(parsedMonths) || parsedMonths <= 0) {
+      showToastMessage({ type: "warning", message: "Enter a valid duration in months." });
       return;
     }
 
     bookMutation.mutate({
       warehouseId: selectedWarehouse._id,
       ...(isAssociate ? {} : { companyId: selectedCompanyId }),
+      requestType,
+      requiredMT: Number(parsedRequiredMT.toFixed(3)),
+      durationMonths: parsedMonths,
+      requirementNotes: requirementNotes.trim(),
+      ...(expectedStartDate ? { expectedStartDate } : {}),
+      taxPercent,
+      handlingPercent,
+      estimateCurrency: "INR",
     });
   };
 
@@ -170,145 +352,439 @@ export default function WarehouseRentPage() {
   const warehousesErrorMessage =
     warehousesErrorStatus === 403
       ? "Access denied for your role."
-      : ((warehousesError as any)?.response?.data?.message || "Unable to load warehouse space right now.");
+      : ((warehousesError as any)?.response?.data?.message || "Unable to load warehouse booking right now.");
 
   return (
-    <section className="w-full min-h-screen p-6 md:p-10 bg-background text-foreground">
-      <Title title="Warehouse Space" />
-      <Card className="border border-default-200/60 bg-content1/70 backdrop-blur-md rounded-2xl max-w-5xl">
-        <CardHeader className="px-6 pt-6">
-          <div className="w-full">
-            <h1 className="text-xl font-black tracking-tight">Warehouse Space</h1>
-            <p className="text-sm text-default-500 mt-2">
-              Book rental warehouse space for active operational demand.
+    <section className="w-full min-h-screen p-4 md:p-8 bg-[#030303] text-foreground">
+      <div className="max-w-[1400px] mx-auto space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-orange-500 mb-2"
+            >
+              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Operations_Terminal</span>
+            </motion.div>
+            <Title title="Warehouse Booking" />
+            <p className="text-sm text-default-400 max-w-xl">
+              Centralized warehouse booking management. Capture requirement in MT and get an approximate quotation before final allocation.
             </p>
-            {needsCompanySelect && (
-              <div className="mt-4 max-w-md">
-                <Select
-                  label="Book On Behalf Of"
-                  variant="flat"
-                  selectedKeys={selectedCompanyId ? [selectedCompanyId] : []}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setSelectedCompanyId(key || "");
-                  }}
-                  placeholder="Select associate company"
-                >
-                  {companies.map((company) => (
-                    <SelectItem key={company._id} value={company._id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-            )}
           </div>
-        </CardHeader>
-        <CardBody className="px-6 pb-6">
-          <Divider className="mb-5" />
 
-          {isLoadingWarehouses && (
-            <div className="flex items-center gap-2 text-default-400 py-10">
-              <FiLoader className="animate-spin" />
-              <span className="text-sm font-medium">Loading available warehouse space...</span>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end gap-1 font-mono text-[9px] text-default-400 uppercase tracking-tighter">
+              <span>Link_Status: Encrypted</span>
+              <span>Hub_Location: Asia-South</span>
             </div>
-          )}
+          </div>
+        </div>
 
-          {isWarehousesError && (
-            <div className="text-sm text-danger-400 py-10">
-              {warehousesErrorMessage}
-            </div>
-          )}
-
-          {!isLoadingWarehouses && !isWarehousesError && rentalWarehouses.length === 0 && (
-            <div className="flex flex-col items-center justify-center text-center py-14">
-              <div className="w-14 h-14 rounded-2xl bg-default-100 flex items-center justify-center text-2xl text-default-400 mb-3">
-                <FiBox />
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          {/* LEFT COLUMN: CONTROLS & MAP */}
+          <div className="xl:col-span-8 space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <FiMapPin size={120} />
               </div>
-              <div className="text-sm font-semibold text-foreground">No rental warehouses listed yet.</div>
-              <div className="text-xs text-default-400 mt-1">
-                Rental listings will appear here as they become available.
-              </div>
-            </div>
-          )}
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {needsCompanySelect && (
+                    <div className="flex-1">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">
+                        Trade Entity
+                      </div>
+                      <Select
+                        variant="bordered"
+                        classNames={{
+                          base: "max-w-md",
+                          trigger: "bg-white/[0.03] border-white/10 hover:border-orange-500/50 transition-colors h-12",
+                          value: "text-sm font-bold truncate",
+                          popoverContent: "bg-[#0A0A0A] border border-white/10 rounded-xl",
+                        }}
+                        selectedKeys={selectedCompanyId ? [selectedCompanyId] : []}
+                        onSelectionChange={(keys) => {
+                          const key = Array.from(keys)[0] as string | undefined;
+                          setSelectedCompanyId(key || "");
+                        }}
+                        placeholder="Select associate company"
+                      >
+                        {companies.map((company) => (
+                          <SelectItem key={company._id} value={company._id} className="hover:bg-orange-500/10">
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                  )}
+                  
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">
+                      Strategic Location
+                    </div>
+                    <Input
+                      placeholder="Search city, district, or state"
+                      variant="bordered"
+                      classNames={{
+                        base: "w-full",
+                        inputWrapper: "bg-white/[0.03] border-white/10 hover:border-orange-500/50 transition-colors h-12",
+                        input: "text-sm",
+                      }}
+                      value={locationQuery}
+                      onValueChange={setLocationQuery}
+                      startContent={<FiSearch className="text-orange-500" />}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          handleLocationSearch();
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex items-end gap-2 pb-[1px]">
+                    <Button
+                      color="warning"
+                      className="h-12 px-8 font-black uppercase tracking-widest text-xs rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.2)]"
+                      isLoading={isSearchingLocation}
+                      onPress={handleLocationSearch}
+                    >
+                      Search
+                    </Button>
+                    <Button
+                      variant="bordered"
+                      className="h-12 px-6 border-white/10 hover:bg-white/5 font-black uppercase tracking-widest text-xs rounded-xl"
+                      onPress={() => {
+                        setLocationQuery("");
+                        setSearchPoint(null);
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
 
-          {!isLoadingWarehouses && !isWarehousesError && rentalWarehouses.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {rentalWarehouses.map((warehouse) => {
-                const isBooked = bookedWarehouseIdSet.has(String(warehouse._id || ""));
-                const bookingDisabled = isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutation.isPending;
+                <div className="relative group">
+                  {/* Corner Accents */}
+                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-orange-500/40 rounded-tl z-20" />
+                  <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-orange-500/40 rounded-tr z-20" />
+                  <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-orange-500/40 rounded-bl z-20" />
+                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-orange-500/40 rounded-br z-20" />
+                  
+                  <div className="h-[450px] w-full overflow-hidden rounded-2xl border border-white/10 relative shadow-inner">
+                    <MapContainer
+                      center={DEFAULT_CENTER}
+                      zoom={DEFAULT_ZOOM}
+                      scrollWheelZoom
+                      style={{ height: "100%", width: "100%" }}
+                    >
+                      <MapAutoCenter point={searchPoint} />
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                      />
+                      {filteredWarehouses.map((warehouse) => {
+                        const lat = Number(warehouse.location?.latitude);
+                        const lng = Number(warehouse.location?.longitude);
+                        const category = String(warehouse.category || "GENERAL");
+                        const color = CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL;
+                        const warehouseId = String(warehouse._id || "");
+                        const isBooked = bookedWarehouseIdSet.booked.has(warehouseId);
+                        const isQuoteRequested = bookedWarehouseIdSet.pending.has(warehouseId);
+                        const bookingDisabled = isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutation.isPending;
 
-                return (
-                  <Card key={warehouse._id} className="border border-default-200/60 bg-content1">
-                    <CardBody className="p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="text-base font-semibold text-foreground">{warehouse.name}</div>
-                          <div className="text-xs text-default-400 mt-1 flex items-center gap-1">
-                            <FiMapPin size={12} />
-                            <span>{warehouse.address || "Location not specified"}</span>
+                        return (
+                          <Marker
+                            key={warehouse._id}
+                            position={[lat, lng]}
+                            icon={mkDotIcon(color)}
+                          >
+                            <Popup className="tactical-popup">
+                              <div className="min-w-[200px] p-2 space-y-3 bg-[#0A0A0A] text-foreground">
+                                <div className="space-y-1">
+                                  <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">W_Node_{warehouse._id.slice(-4)}</div>
+                                  <div className="text-sm font-black">{warehouse.name}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+                                  <div className="text-[10px] font-bold uppercase text-default-400">{warehouse.category || "GENERAL"}</div>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                                  <div className="text-[10px] text-default-500 uppercase tracking-tight">Storage Rate</div>
+                                  <div className="text-sm font-mono font-bold text-orange-400">
+                                    {warehouse.storageRatePerUnit ?? "—"} {warehouse.unit || "MT"} <span className="text-[9px] text-default-600">/ unit</span>
+                                  </div>
+                                </div>
+                                <Button
+                                  color={isBooked ? "success" : "warning"}
+                                  variant={isBooked ? "flat" : "solid"}
+                                  size="sm"
+                                  fullWidth
+                                  isDisabled={bookingDisabled}
+                                  onPress={() => openBookModal(warehouse)}
+                                  className="font-black uppercase tracking-wider text-[10px]"
+                                >
+                                  {isBooked ? "Booked" : isQuoteRequested ? "Quote Requested" : "Start Booking"}
+                                </Button>
+                              </div>
+                            </Popup>
+                          </Marker>
+                        );
+                      })}
+                    </MapContainer>
+
+                    {/* HUD Overlay for Map */}
+                    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+                      <div className="p-3 rounded-xl bg-[#0A0A0A]/80 backdrop-blur-md border border-white/10 flex flex-col gap-2">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1 border-b border-white/5 pb-1 font-mono">Legend_Diagnostics</div>
+                        {[
+                          ["GENERAL", CATEGORY_COLOR.GENERAL],
+                          ["COLD_STORAGE", CATEGORY_COLOR.COLD_STORAGE],
+                          ["BONDED", CATEGORY_COLOR.BONDED],
+                          ["AGRO", CATEGORY_COLOR.AGRO],
+                        ].map(([label, color]) => (
+                          <div key={label} className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]" style={{ background: color }} />
+                            <span className="text-[9px] font-bold text-default-300 uppercase tracking-tight">{label.replace('_', ' ')}</span>
                           </div>
-                        </div>
-                        <Chip size="sm" variant="flat" color={isBooked ? "success" : "warning"}>
-                          {isBooked ? "Booked" : "Rental"}
-                        </Chip>
+                        ))}
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
 
-                      <div className="mt-3 text-xs text-default-500">
-                        Category: <span className="text-foreground font-semibold">{warehouse.category || "General"}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-default-500">
-                        Rate:{" "}
-                        <span className="text-foreground font-semibold">
-                          {warehouse.storageRatePerUnit ?? "—"} {warehouse.unit || "MT"}
-                        </span>{" "}
-                        / storage unit
-                      </div>
-
-                      <div className="mt-4">
-                        <Button
-                          color={isBooked ? "success" : "warning"}
-                          variant={isBooked ? "flat" : "solid"}
-                          size="sm"
-                          isDisabled={bookingDisabled}
-                          onPress={() => openBookModal(warehouse)}
-                        >
-                          {isBooked ? "Already Booked" : "Book Space"}
-                        </Button>
-                      </div>
-                    </CardBody>
-                  </Card>
-                );
-              })}
+          {/* RIGHT COLUMN: LIST VIEW */}
+          <div className="xl:col-span-4 space-y-6 h-full flex flex-col">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
+              <span className="text-[10px] font-mono text-orange-500/60">{filteredWarehouses.length} Nodes Found</span>
             </div>
-          )}
-        </CardBody>
-      </Card>
 
-      <Modal isOpen={isBookModalOpen} onOpenChange={setIsBookModalOpen}>
+            <div className="flex-1 space-y-4 max-h-[680px] overflow-y-auto pr-2 custom-scrollbar">
+              <AnimatePresence mode="popLayout">
+                {isLoadingWarehouses ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-20 border border-dashed border-white/10 rounded-3xl"
+                  >
+                    <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
+                  </motion.div>
+                ) : filteredWarehouses.length === 0 ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-20 border border-dashed border-white/10 rounded-3xl text-center px-6"
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
+                  </motion.div>
+                ) : (
+                  filteredWarehouses.map((warehouse, idx) => {
+                    const warehouseId = String(warehouse._id || "");
+                    const isBooked = bookedWarehouseIdSet.booked.has(warehouseId);
+                    const isQuoteRequested = bookedWarehouseIdSet.pending.has(warehouseId);
+                    const bookingDisabled = isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutation.isPending;
+                    const color = CATEGORY_COLOR[warehouse.category || "GENERAL"];
+
+                    return (
+                      <motion.div
+                        key={warehouse._id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.04, duration: 0.22 }}
+                        whileHover={{ y: -1 }}
+                      >
+                        <Card className="border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/20 transition-all rounded-2xl overflow-hidden shadow-[0_10px_28px_rgba(0,0,0,0.2)] group">
+                          <CardBody className="p-6">
+                            <div className="flex justify-between items-start gap-4">
+                              <div className="flex items-start gap-3 min-w-0 flex-1">
+                                <div
+                                  className="w-2.5 h-2.5 rounded-full mt-2 shrink-0"
+                                  style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">
+                                    {warehouse.name}
+                                  </h3>
+                                  <div className="mt-2 flex items-center gap-2 text-default-400 min-w-0">
+                                    <FiMapPin size={13} className="text-default-500 shrink-0" />
+                                    <span className="text-sm truncate">{warehouse.address || "Location not specified"}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <Chip 
+                                size="sm" 
+                                variant="flat" 
+                                className="font-bold uppercase tracking-wide text-[10px] bg-white/5 border border-white/15 px-2"
+                                color={isBooked ? "success" : isQuoteRequested ? "secondary" : "warning"}
+                              >
+                                {isBooked ? "Booked" : isQuoteRequested ? "Quote Requested" : "Available"}
+                              </Chip>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mt-5 mb-6">
+                              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div className="text-[11px] font-semibold text-default-400 mb-1">Category</div>
+                                <div className="text-sm font-semibold text-foreground">
+                                  {(warehouse.category || "GENERAL").replace("_", " ")}
+                                </div>
+                              </div>
+                              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                                <div className="text-[11px] font-semibold text-default-400 mb-1">Rate</div>
+                                <div className="text-sm font-semibold text-warning-400">
+                                  {warehouse.storageRatePerUnit ?? "0"}{" "}
+                                  <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <Button
+                              color={isBooked ? "success" : "warning"}
+                              variant={isBooked ? "flat" : "solid"}
+                              size="md"
+                              fullWidth
+                              isDisabled={bookingDisabled}
+                              onPress={() => openBookModal(warehouse)}
+                              className="font-bold tracking-wide text-sm rounded-xl h-11"
+                            >
+                              {isBooked ? "Already Booked" : isQuoteRequested ? "Quote Requested" : "Book Warehouse"}
+                            </Button>
+                          </CardBody>
+                        </Card>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Modal 
+        isOpen={isBookModalOpen} 
+        onOpenChange={setIsBookModalOpen}
+        classNames={{
+          backdrop: "bg-black/80 backdrop-blur-sm",
+          base: "bg-[#0A0A0A] border border-white/10 rounded-[2.5rem]",
+          header: "border-b border-white/5 px-8 py-6",
+          footer: "border-t border-white/5 px-8 py-6",
+          body: "px-8 py-6",
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Confirm Warehouse Booking</ModalHeader>
+              <ModalHeader>
+                <div className="space-y-1">
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 font-mono">Allocation_Protocol</div>
+                  <h3 className="text-xl font-black">Warehouse Booking & Quotation</h3>
+                </div>
+              </ModalHeader>
               <ModalBody>
-                <div className="text-sm text-default-600">
-                  You are about to book <span className="font-semibold text-foreground">{selectedWarehouse?.name || "-"}</span>
-                  {needsCompanySelect ? (
-                    <>
-                      {" "}for{" "}
-                      <span className="font-semibold text-foreground">
-                        {companies.find((company) => String(company._id) === String(selectedCompanyId))?.name || "selected company"}
-                      </span>.
-                    </>
-                  ) : (
-                    <> for your associate company.</>
-                  )}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-default-500">Target Module</span>
+                    <span className="font-bold text-foreground">{selectedWarehouse?.name || "Unspecified Node"}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-default-500">Assigned Entity</span>
+                    <span className="font-bold text-orange-500">
+                      {companies.find((company) => String(company._id) === String(selectedCompanyId))?.name || "System Authorization"}
+                    </span>
+                  </div>
+                  <Divider className="bg-white/5" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.001}
+                      label="Required Quantity (MT)"
+                      value={requiredMT}
+                      onValueChange={setRequiredMT}
+                      variant="bordered"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      label="Duration (Months)"
+                      value={durationMonths}
+                      onValueChange={setDurationMonths}
+                      variant="bordered"
+                    />
+                    <Input
+                      type="date"
+                      label="Expected Start Date (Optional)"
+                      value={expectedStartDate}
+                      onValueChange={setExpectedStartDate}
+                      variant="bordered"
+                    />
+                  </div>
+                  <Textarea
+                    label="Requirement Notes"
+                    placeholder="Share storage requirement details for quotation."
+                    value={requirementNotes}
+                    onValueChange={setRequirementNotes}
+                    variant="bordered"
+                    minRows={3}
+                  />
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400">Approximate Quote (INR)</div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-default-400">Base ({parsedRequiredMT || 0} MT × {ratePerUnit} × {parsedMonths} months)</span>
+                      <span className="font-semibold">{estimateBase.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-default-400">Tax ({taxPercent}%)</span>
+                      <span className="font-semibold">{estimateTax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-default-400">Handling ({handlingPercent}%)</span>
+                      <span className="font-semibold">{estimateHandling.toFixed(2)}</span>
+                    </div>
+                    <Divider className="bg-white/10 my-2" />
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-bold">Estimated Total</span>
+                      <span className="font-black text-orange-400">{estimateTotal.toFixed(2)}</span>
+                    </div>
+                    <p className="text-[11px] text-default-500 italic">This is an approximate quotation; final charges may vary by warehouse policy and operational conditions.</p>
+                  </div>
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={onClose}>Cancel</Button>
-                <Button color="warning" isLoading={bookMutation.isPending} onPress={submitBooking}>
-                  Confirm Booking
+                <Button 
+                  variant="light" 
+                  onPress={onClose}
+                  className="font-black uppercase tracking-widest text-[10px]"
+                >
+                  Abort
+                </Button>
+                <Button 
+                  color="secondary" 
+                  isLoading={bookMutation.isPending} 
+                  onPress={() => submitBooking("QUOTE_REQUEST")}
+                  className="font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+                >
+                  Request Quote
+                </Button>
+                <Button 
+                  color="warning" 
+                  isLoading={bookMutation.isPending} 
+                  onPress={() => submitBooking("DIRECT_BOOKING")}
+                  className="font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+                >
+                  Book Now
                 </Button>
               </ModalFooter>
             </>

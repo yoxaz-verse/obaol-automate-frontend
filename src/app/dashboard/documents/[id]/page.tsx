@@ -8,6 +8,7 @@ import { FiArrowLeft } from "react-icons/fi";
 
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
@@ -119,7 +120,13 @@ export default function DocumentDetailPage() {
         </div>
       </div>
 
-      <div className="mx-2 md:mx-6 mb-6 border-b border-default-200/60 pb-4 print-header">
+      <div className="mx-2 md:mx-6 mb-6 print-only">
+        {doc ? (
+          <DocumentTemplatePreview docType={String(doc?.type || "")} doc={doc} />
+        ) : null}
+      </div>
+
+      <div className="mx-2 md:mx-6 mb-6 border-b border-default-200/60 pb-4 print-header no-print">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="OBAOL" className="h-12 w-auto" />
@@ -136,7 +143,7 @@ export default function DocumentDetailPage() {
         </div>
       </div>
 
-      <div className="mx-2 md:mx-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="mx-2 md:mx-6 grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
         <div className="space-y-6">
           <Card className="invoice-card">
             <CardHeader className="font-semibold">Bill To</CardHeader>
@@ -284,10 +291,14 @@ export default function DocumentDetailPage() {
       <style jsx global>{`
         @media print {
           .no-print { display: none !important; }
+          .print-only { display: block !important; }
           [data-sidebar], [data-topbar], [data-bottomnav] { display: none !important; }
           section { padding: 0 !important; margin: 0 !important; }
           body { background: white !important; }
           @page { margin: 12mm; }
+        }
+        @media screen {
+          .print-only { display: none !important; }
         }
         @media print {
           .print-header { margin-top: 0 !important; }

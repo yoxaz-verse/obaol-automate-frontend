@@ -43,7 +43,7 @@ const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
   "warehouse-storage": [
     { label: "Warehouses", href: "/dashboard/warehouses" },
     { label: "Inventory", href: "/dashboard/inventory" },
-    { label: "Warehouse Space", href: "/dashboard/warehouse-rent" },
+    { label: "Warehouse Booking", href: "/dashboard/warehouse-rent" },
   ],
   "freight-forwarding": [
     { label: "Execution", href: "/dashboard/execution-enquiries" },

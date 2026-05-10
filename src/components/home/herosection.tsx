@@ -441,26 +441,6 @@ export default function HeroSection() {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 z-10" />
       </motion.div>
-      <motion.div
-        className="absolute inset-0 z-10 pointer-events-none hidden md:block"
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)",
-          maskImage: "linear-gradient(to left, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)",
-        }}
-      >
-        <Image
-          src="/images/hero-left-spice-banner.png"
-          alt="Agro supply chain visual"
-          fill
-          className="object-contain object-right-bottom opacity-20"
-          sizes="(min-width: 1024px) 52vw, 0px"
-          style={{ objectPosition: "right bottom" }}
-          priority
-        />
-      </motion.div>
 
       {/* ECO-GHOST BACKGROUND TEXT */}
       <AnimatePresence>
@@ -731,9 +711,8 @@ export default function HeroSection() {
                       <motion.g key={path.id}>
                         {(() => {
                           const isActivePath = activeConnectorId === path.id;
-                          const hasActiveFocus = Boolean(activeConnectorId);
                           const connectorColor = isAgroActive ? "#10b981" : isSystemActive ? "#ea580c" : "#f97316";
-                          const dimmedOpacity = hasActiveFocus && !isActivePath ? 0.3 : 1;
+                          const activeLineOpacity = isActivePath ? 1 : 0;
                           return (
                             <>
                               <motion.path
@@ -742,12 +721,12 @@ export default function HeroSection() {
                                 animate={{
                                   strokeWidth: isCompactNetwork ? (isActivePath ? 3.3 : 2.4) : (isActivePath ? 4.2 : 3.2),
                                   strokeOpacity: isCompactNetwork ? (isActivePath ? 0.2 : 0.14) : (isActivePath ? 0.26 : 0.18),
-                                  opacity: dimmedOpacity,
+                                  opacity: activeLineOpacity,
                                 }}
                                 fill="none"
                                 strokeLinecap="round"
                                 filter="url(#hub-glow)"
-                                transition={HOVER_TIMING.blend}
+                                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                               />
                               <motion.path
                                 d={path.d}
@@ -755,11 +734,11 @@ export default function HeroSection() {
                                 animate={{
                                   strokeWidth: isCompactNetwork ? (isActivePath ? 1.95 : 1.45) : (isActivePath ? 2.35 : 1.85),
                                   strokeOpacity: isCompactNetwork ? (isActivePath ? 0.72 : 0.46) : (isActivePath ? 0.88 : 0.58),
-                                  opacity: dimmedOpacity,
+                                  opacity: activeLineOpacity,
                                 }}
                                 fill="none"
                                 strokeLinecap="round"
-                                transition={HOVER_TIMING.blend}
+                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                               />
                               <motion.path
                                 d={path.d}
@@ -782,7 +761,7 @@ export default function HeroSection() {
                                   ease: "linear",
                                   delay: i * 0.16,
                                 }}
-                                style={{ opacity: dimmedOpacity }}
+                                style={{ opacity: activeLineOpacity }}
                               />
                             </>
                           );

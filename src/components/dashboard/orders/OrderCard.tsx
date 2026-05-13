@@ -4,6 +4,7 @@ import { LuTruck, LuCalendar, LuBox, LuPhone, LuUser, LuShield, LuBriefcase, LuF
 import OrderStatus from "./OrderStatus";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
+import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
 
 interface OrderCardProps {
     data: any;
@@ -40,6 +41,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
         data.enquiry?.variantName ||
         data.variantName ||
         "Variant";
+    const classificationProduct =
+        data?.enquiry?.variantRateId?.productVariant?.product ||
+        data?.enquiry?.productVariant?.product ||
+        data?.enquiry?.productId ||
+        data?.productVariant?.product ||
+        data?.product ||
+        null;
+    const classificationBadges = getClassificationBadges(classificationProduct);
 
     // Entity Logic
     const buyerName = data.enquiry?.buyerAssociateId?.name || data.enquiry?.buyerName || data.externalBuyer?.name || "Buyer";
@@ -111,6 +120,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest bg-foreground/[0.03] px-3 py-1 rounded-lg border border-foreground/5">
                                     {variant}
                                 </span>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                                {classificationBadges.map((badge) => (
+                                    <span
+                                        key={badge.key}
+                                        className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
+                                    >
+                                        {React.createElement(classificationIcon(badge.key), { size: 10 })}
+                                        {badge.label}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                         <div className="flex flex-col items-end gap-1.5 self-start shrink-0">

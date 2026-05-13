@@ -43,6 +43,7 @@ import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 
 // Defensive aliases to avoid runtime crashes if older JSX still references Lu* icons.
 const LuTrendingDown = FiTrendingDown;
@@ -300,6 +301,13 @@ export default function EnquiryDetailsPage() {
     });
     const productNameLabel = getProductDisplayName(enquiry);
     const variantNameLabel = getVariantDisplayName(enquiry, liveRate);
+    const classificationProductObj =
+        enquiry?.productId ||
+        enquiry?.productVariant?.product ||
+        enquiry?.variantRateId?.productVariant?.product ||
+        null;
+    const classificationBadges = getClassificationBadges(classificationProductObj);
+    const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
     const { data: incotermResponse } = useQuery({
         queryKey: ["incoterms"],
         queryFn: () => getData(apiRoutes.incoterm.getAll),
@@ -2326,8 +2334,19 @@ export default function EnquiryDetailsPage() {
             )}
 
             <div className={isCancelled ? "opacity-60 pointer-events-none flex flex-col gap-10" : "flex flex-col gap-10"}>
+                <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-default-500">Classification Signal</span>
+                        {classificationBadges.map((badge) => (
+                            <span key={badge.key} className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}>
+                                {React.createElement(classificationIcon(badge.key), { size: 10 })}
+                                {badge.label}
+                            </span>
+                        ))}
+                    </div>
+                </div>
                 {/* Header & Status Card */}
-                <Card className="w-full border border-divider/50 bg-gradient-to-r from-content1 to-default-50 overflow-visible">
+                <Card className={`w-full border overflow-visible ${classificationTheme.shellBorderClass} ${classificationTheme.shellClass}`}>
                     <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4 md:px-6 py-6 border-b border-divider/50">
                         <div className="flex flex-col gap-2 text-left">
                             <div className="flex flex-wrap items-center gap-3">

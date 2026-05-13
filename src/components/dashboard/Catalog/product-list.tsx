@@ -9,15 +9,18 @@ import UserDeleteModal from "@/components/CurdTable/delete";
 import EditModal from "@/components/CurdTable/edit-model";
 import AuthContext from "@/context/AuthContext";
 import { FiPackage, FiLayers, FiInfo, FiCheckCircle, FiGrid, FiDatabase } from "react-icons/fi";
+import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
 
 interface IProductList {
   product: any;
   setProduct: (product: any) => void;
   onProductDeleted: () => void;
   myCatalogItems: any[];
+  themeShellClass?: string;
+  themeBorderClass?: string;
 }
 
-export const ProductList = ({ product, setProduct, myCatalogItems }: IProductList) => {
+export const ProductList = ({ product, setProduct, myCatalogItems, themeShellClass, themeBorderClass }: IProductList) => {
   const tableConfig = { ...initialTableConfig };
   const [isDeleted, setIsDeleted] = useState(false);
   const { user } = useContext(AuthContext);
@@ -26,10 +29,12 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
     setIsDeleted(true);
   };
 
+  const classificationBadges = getClassificationBadges(product);
+
   return product ? (
     <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* ─── Product Tactical Header ─────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-b border-foreground/5 pb-12 mb-12 relative">
+      <div className={`flex flex-col md:flex-row justify-between items-start gap-8 border-b pb-12 mb-12 relative rounded-3xl p-6 ${themeShellClass || "bg-transparent"} ${themeBorderClass || "border-foreground/5"}`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20 shadow-lg shadow-warning-500/5">
@@ -47,6 +52,17 @@ export const ProductList = ({ product, setProduct, myCatalogItems }: IProductLis
           <h2 className="text-5xl font-black tracking-tighter text-foreground mb-4 leading-[0.9] uppercase hyphens-auto text-left">
             {product.name}
           </h2>
+          <div className="mb-4 flex flex-wrap gap-2">
+            {classificationBadges.map((badge) => (
+              <span
+                key={badge.key}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
+              >
+                {React.createElement(classificationIcon(badge.key), { size: 11 })}
+                {badge.label}
+              </span>
+            ))}
+          </div>
 
           {product.description && (
             <div className="relative pl-6 border-l-2 border-warning-500/20 py-1 text-left">

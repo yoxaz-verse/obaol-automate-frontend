@@ -16,10 +16,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight, FiCheckCircle, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
+import { patchData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
-import { associateCompanyRoutes, associateRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
+import { associateCompanyRoutes, associateRoutes, productRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
 
 type WizardProps = {
@@ -45,6 +46,23 @@ const motionVariants = {
   exit: { opacity: 0, y: -12 },
 };
 
+const ORGANIC_CERT_BODIES = [
+  { key: "APEDA_NPOP", value: "APEDA NPOP Accredited Body" },
+  { key: "PGS_INDIA", value: "PGS-India Local Group" },
+  { key: "JAIVIK_BHARAT", value: "Jaivik Bharat / FSSAI Organic" },
+  { key: "NOP", value: "USDA NOP" },
+  { key: "EU_ORGANIC", value: "EU Organic" },
+  { key: "OTHER", value: "Other" },
+];
+
+const ORGANIC_SCOPES = [
+  { key: "NPOP", value: "NPOP (India)" },
+  { key: "PGS-India", value: "PGS-India" },
+  { key: "NOP", value: "USDA NOP" },
+  { key: "EU", value: "EU Organic" },
+  { key: "Other", value: "Other" },
+];
+
 const VariantRateWizardModal: React.FC<WizardProps> = ({
   isOpen,
   onClose,
@@ -56,6 +74,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 }) => {
   const [step, setStep] = useState(1);
   const [isLive, setIsLive] = useState(true);
+  const [submitPhase, setSubmitPhase] = useState<"idle" | "saving-product" | "launching-rate">("idle");
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successData, setSuccessData] = useState<any>(null);
@@ -78,6 +97,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const [associates, setAssociates] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null);
+  const [resolvedProductId, setResolvedProductId] = useState<string | null>(null);
   const [companyAddress, setCompanyAddress] = useState<string>("");
 
   const rateValue = Number(formData.rate || 0);
@@ -93,6 +113,22 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       setFormData((prev) => ({ ...prev, productVariant: fixedVariantId }));
     }
   }, [isOpen, fixedVariantId, isAssociateUser]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!fixedVariantId) return;
+    const resolveFromVariant = async () => {
+      try {
+        const res = await getData(`${productVariantRoutes.getAll}/${fixedVariantId}`);
+        const row = res?.data?.data || null;
+        const productId = String(row?.product?._id || row?.product || "").trim();
+        setResolvedProductId(productId || null);
+      } catch {
+        setResolvedProductId(null);
+      }
+    };
+    resolveFromVariant();
+  }, [isOpen, fixedVariantId]);
 
   useEffect(() => {
     if (!formData.category) return;
@@ -135,6 +171,104 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       isMounted = false;
     };
   }, [formData.product]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (fixedVariantId) return;
+    const nextProduct = String(formData.product || "").trim();
+    setResolvedProductId(nextProduct || null);
+  }, [isOpen, fixedVariantId, formData.product]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!resolvedProductId) {
+      setFormData((prev) => ({
+        ...prev,
+        isNatural: false,
+        isOrganic: false,
+        isOrganicCertified: false,
+        organicCertificationBody: "",
+        organicCertificationBodyOther: "",
+        organicCertificateNumber: "",
+        organicCertificateValidFrom: "",
+        organicCertificateValidTo: "",
+        organicCertifiedQuantity: "",
+        organicCertifiedQuantityUnit: "KG",
+        organicCertificationScope: "NPOP",
+        organicCertificateDocumentUrl: "",
+        isGiTagged: false,
+        giName: "",
+        giCertificateNumber: "",
+        giDocumentUrl: "",
+      }));
+      return;
+    }
+    const loadClassification = async () => {
+      try {
+        const res = await getData(`${productRoutes.getAll}/${resolvedProductId}`);
+        const row = res?.data?.data || {};
+        setFormData((prev) => ({
+          ...prev,
+          isNatural: Boolean(row?.isNatural),
+          isOrganic: Boolean(row?.isOrganic),
+          isOrganicCertified: Boolean(row?.isOrganicCertified),
+          organicCertificationBody: String(row?.organicCertificationBody || ""),
+          organicCertificationBodyOther: String(row?.organicCertificationBodyOther || ""),
+          organicCertificateNumber: String(row?.organicCertificateNumber || ""),
+          organicCertificateValidFrom: row?.organicCertificateValidFrom
+            ? String(new Date(row.organicCertificateValidFrom).toISOString().slice(0, 10))
+            : "",
+          organicCertificateValidTo: row?.organicCertificateValidTo
+            ? String(new Date(row.organicCertificateValidTo).toISOString().slice(0, 10))
+            : "",
+          organicCertifiedQuantity: row?.organicCertifiedQuantity ?? "",
+          organicCertifiedQuantityUnit: String(row?.organicCertifiedQuantityUnit || "KG"),
+          organicCertificationScope: String(row?.organicCertificationScope || "NPOP"),
+          organicCertificateDocumentUrl: String(row?.organicCertificateDocumentUrl || ""),
+          isGiTagged: Boolean(row?.isGiTagged),
+          giName: String(row?.giName || ""),
+          giCertificateNumber: String(row?.giCertificateNumber || ""),
+          giDocumentUrl: String(row?.giDocumentUrl || ""),
+        }));
+        setErrors((prev) => ({
+          ...prev,
+          organicCertificationBody: "",
+          organicCertificationBodyOther: "",
+          organicCertificateNumber: "",
+          organicCertificateValidFrom: "",
+          organicCertificateValidTo: "",
+          organicCertifiedQuantity: "",
+          organicCertifiedQuantityUnit: "KG",
+          organicCertificationScope: "NPOP",
+          organicCertificateDocumentUrl: "",
+          giName: "",
+          giCertificateNumber: "",
+          classification: "",
+        }));
+      } catch {
+        setFormData((prev) => ({
+        ...prev,
+        isNatural: false,
+        isOrganic: false,
+        isOrganicCertified: false,
+        organicCertificationBody: "",
+        organicCertificationBodyOther: "",
+        organicCertificateNumber: "",
+        organicCertificateValidFrom: "",
+        organicCertificateValidTo: "",
+        organicCertifiedQuantity: "",
+        organicCertifiedQuantityUnit: "KG",
+        organicCertificationScope: "NPOP",
+        organicCertificateDocumentUrl: "",
+        isGiTagged: false,
+        giName: "",
+        giCertificateNumber: "",
+          giDocumentUrl: "",
+        }));
+      }
+    };
+    loadClassification();
+  }, [isOpen, resolvedProductId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -229,7 +363,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setSuccessData(null);
     setStep(1);
     setFormData({ locationSource: "WAREHOUSE" });
+    setResolvedProductId(null);
     setIsLive(true);
+    setSubmitPhase("idle");
   }, [isOpen]);
 
   const stepLabel = useMemo(() => stepMeta.find((item) => item.key === step), [step]);
@@ -262,6 +398,26 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           next.warehouseId = "";
         }
       }
+      if (key === "isGiTagged" && !value) {
+        next.giName = "";
+        next.giCertificateNumber = "";
+        next.giDocumentUrl = "";
+      }
+      if (key === "isOrganic" && !value) {
+        next.isOrganicCertified = false;
+        next.organicCertificationBody = "";
+        next.organicCertificationBodyOther = "";
+        next.organicCertificateNumber = "";
+        next.organicCertificateValidFrom = "";
+        next.organicCertificateValidTo = "";
+        next.organicCertifiedQuantity = "";
+        next.organicCertifiedQuantityUnit = "KG";
+        next.organicCertificationScope = "NPOP";
+        next.organicCertificateDocumentUrl = "";
+      }
+      if (key === "organicCertificationBody" && value !== "OTHER") {
+        next.organicCertificationBodyOther = "";
+      }
       return next;
     });
     setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -274,6 +430,42 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
       if (!formData.product) nextErrors.product = "Select a product.";
       if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
+    }
+    if (step === 1 && formData.isGiTagged) {
+      if (!String(formData.giName || "").trim()) nextErrors.giName = "Enter GI name.";
+      if (!String(formData.giCertificateNumber || "").trim()) nextErrors.giCertificateNumber = "Enter GI certificate number.";
+    }
+    if (step === 1 && formData.isOrganic) {
+      if (!String(formData.organicCertificationBody || "").trim()) {
+        nextErrors.organicCertificationBody = "Select organic certification body.";
+      }
+      if (String(formData.organicCertificationBody || "").trim() === "OTHER" && !String(formData.organicCertificationBodyOther || "").trim()) {
+        nextErrors.organicCertificationBodyOther = "Specify certification body.";
+      }
+      if (!String(formData.organicCertificateNumber || "").trim()) {
+        nextErrors.organicCertificateNumber = "Enter organic certificate number.";
+      }
+      if (!String(formData.organicCertificateValidFrom || "").trim()) {
+        nextErrors.organicCertificateValidFrom = "Select organic valid from date.";
+      }
+      if (!String(formData.organicCertificateValidTo || "").trim()) {
+        nextErrors.organicCertificateValidTo = "Select organic valid to date.";
+      }
+      const validFromTs = Date.parse(String(formData.organicCertificateValidFrom || ""));
+      const validToTs = Date.parse(String(formData.organicCertificateValidTo || ""));
+      if (Number.isFinite(validFromTs) && Number.isFinite(validToTs) && validToTs < validFromTs) {
+        nextErrors.organicCertificateValidTo = "Valid to date cannot be before valid from date.";
+      }
+      const organicQty = Number(formData.organicCertifiedQuantity || 0);
+      if (!Number.isFinite(organicQty) || organicQty <= 0) {
+        nextErrors.organicCertifiedQuantity = "Enter certified quantity greater than zero.";
+      }
+      if (!String(formData.organicCertifiedQuantityUnit || "").trim()) {
+        nextErrors.organicCertifiedQuantityUnit = "Select certified quantity unit.";
+      }
+      if (!String(formData.organicCertificationScope || "").trim()) {
+        nextErrors.organicCertificationScope = "Select certification scope.";
+      }
     }
     if (step === 2) {
       if (!formData.rate) nextErrors.rate = "Enter price per KG.";
@@ -300,6 +492,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (!resolvedProductId) {
+        throw new Error("Select a product to define classification.");
+      }
+      const classificationPayload = normalizeClassificationPayload();
+      if (process.env.NODE_ENV !== "production") {
+        console.info("[LaunchListing] phase=saving-product", { productId: resolvedProductId, classificationPayload });
+      }
+      setSubmitPhase("saving-product");
+      await patchData(`${productRoutes.getAll}/${resolvedProductId}`, classificationPayload, {});
+
       const payload: any = {
         rate: Number(formData.rate || 0),
         unit: formData.unit,
@@ -315,6 +517,20 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         isLive,
         ...(additionalVariable || {}),
       };
+      if (process.env.NODE_ENV !== "production") {
+        console.info("[LaunchListing] phase=launching-rate", {
+          productVariant: payload.productVariant,
+          associate: payload.associate,
+          associateCompany: payload.associateCompany,
+          locationSource: payload.locationSource,
+          warehouseId: payload.warehouseId,
+          officeAddress: payload.officeAddress ? "[redacted]" : "",
+          rate: payload.rate,
+          unit: payload.unit,
+          isLive: payload.isLive,
+        });
+      }
+      setSubmitPhase("launching-rate");
       return postData(apiEndpoint, payload, {});
     },
     onSuccess: (result: any) => {
@@ -325,14 +541,31 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         message: "Trade listing launched!",
         position: "top-right",
       });
+      setSubmitPhase("idle");
       onSuccess?.(data);
     },
     onError: (error: any) => {
+      const message = error?.response?.data?.message || error?.message || "Failed to create rate.";
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[LaunchListing] error", {
+          phase: submitPhase,
+          status: error?.response?.status,
+          message,
+        });
+      }
+      const mapped = mapBackendErrorToFields(message);
+      if (Object.keys(mapped).length > 0) {
+        setErrors((prev) => ({ ...prev, ...mapped }));
+        setStep(getStepForErrors(Object.keys(mapped)));
+      }
       showToastMessage({
         type: "error",
-        message: error?.response?.data?.message || "Failed to create rate.",
+        message: submitPhase === "saving-product"
+          ? message || "Failed while saving product certification."
+          : message || "Failed while launching listing.",
         position: "top-right",
       });
+      setSubmitPhase("idle");
     },
   });
 
@@ -344,7 +577,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleSubmit = () => {
-    if (!validateStep()) return;
+    if (!validateForLaunch()) return;
+    if (isSubmitting) return;
     createMutation.mutate();
   };
 
@@ -353,6 +587,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setFormData({ locationSource: "WAREHOUSE" });
     setErrors({});
     setStep(1);
+    setSubmitPhase("idle");
   };
 
   const themeField = {
@@ -374,6 +609,117 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const itemClasses = {
     base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-warning-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
     title: "font-black uppercase tracking-widest text-[11px] text-foreground",
+  };
+  const isNatural = Boolean(formData.isNatural);
+  const isOrganic = Boolean(formData.isOrganic);
+  const isGiTagged = Boolean(formData.isGiTagged);
+  const isConventional = !(isNatural || isOrganic || isGiTagged);
+  const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
+
+  const getStepForErrors = (keys: string[]): number => {
+    const step1Keys = new Set([
+      "category", "subCategory", "product", "productVariant",
+      "giName", "giCertificateNumber",
+      "organicCertificationBody", "organicCertificationBodyOther",
+      "organicCertificateNumber", "organicCertificateValidFrom", "organicCertificateValidTo",
+      "organicCertifiedQuantity", "organicCertifiedQuantityUnit", "organicCertificationScope",
+    ]);
+    const step2Keys = new Set(["rate", "unit", "associate"]);
+    const step3Keys = new Set(["locationSource", "warehouseId", "officeAddress"]);
+    if (keys.some((k) => step1Keys.has(k))) return 1;
+    if (keys.some((k) => step2Keys.has(k))) return 2;
+    if (keys.some((k) => step3Keys.has(k))) return 3;
+    return 4;
+  };
+
+  const validateForLaunch = (): boolean => {
+    const nextErrors: Record<string, string> = {};
+    if (!fixedVariantId) {
+      if (!formData.category) nextErrors.category = "Select a category.";
+      if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
+      if (!formData.product) nextErrors.product = "Select a product.";
+      if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
+    }
+    if (isGiTagged) {
+      if (!String(formData.giName || "").trim()) nextErrors.giName = "Enter GI name.";
+      if (!String(formData.giCertificateNumber || "").trim()) nextErrors.giCertificateNumber = "Enter GI certificate number.";
+    }
+    if (isOrganic) {
+      if (!String(formData.organicCertificationBody || "").trim()) nextErrors.organicCertificationBody = "Select organic certification body.";
+      if (String(formData.organicCertificationBody || "").trim() === "OTHER" && !String(formData.organicCertificationBodyOther || "").trim()) {
+        nextErrors.organicCertificationBodyOther = "Specify certification body.";
+      }
+      if (!String(formData.organicCertificateNumber || "").trim()) nextErrors.organicCertificateNumber = "Enter organic certificate number.";
+      if (!String(formData.organicCertificateValidFrom || "").trim()) nextErrors.organicCertificateValidFrom = "Select organic valid from date.";
+      if (!String(formData.organicCertificateValidTo || "").trim()) nextErrors.organicCertificateValidTo = "Select organic valid to date.";
+      const fromTs = Date.parse(String(formData.organicCertificateValidFrom || ""));
+      const toTs = Date.parse(String(formData.organicCertificateValidTo || ""));
+      if (Number.isFinite(fromTs) && Number.isFinite(toTs) && toTs < fromTs) {
+        nextErrors.organicCertificateValidTo = "Valid to date cannot be before valid from date.";
+      }
+      const qty = Number(formData.organicCertifiedQuantity || 0);
+      if (!Number.isFinite(qty) || qty <= 0) nextErrors.organicCertifiedQuantity = "Enter certified quantity greater than zero.";
+      if (!String(formData.organicCertifiedQuantityUnit || "").trim()) nextErrors.organicCertifiedQuantityUnit = "Select certified quantity unit.";
+      if (!String(formData.organicCertificationScope || "").trim()) nextErrors.organicCertificationScope = "Select certification scope.";
+    }
+    if (!formData.rate) nextErrors.rate = "Enter price per KG.";
+    if (!formData.unit) nextErrors.unit = "Select a unit.";
+    if (!formData.locationSource) nextErrors.locationSource = "Select a location source.";
+    if (formData.locationSource === "WAREHOUSE" && !formData.warehouseId) nextErrors.warehouseId = "Select a warehouse.";
+    if (formData.locationSource === "OFFICE_ADDRESS" && !String(formData.officeAddress || "").trim()) nextErrors.officeAddress = "Enter office address.";
+    if (!isAssociateUser && !formData.associate) nextErrors.associate = "Select an associate.";
+    if (!isAssociateUser && isOperatorUser && formData.associate && !resolvedCompanyId) {
+      nextErrors.associate = "Selected associate is not linked to a company.";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setStep(getStepForErrors(Object.keys(nextErrors)));
+      showToastMessage({ type: "error", message: "Fix highlighted fields before launching listing.", position: "top-right" });
+      return false;
+    }
+    return true;
+  };
+
+  const normalizeClassificationPayload = () => ({
+    isNatural: isNatural,
+    isOrganic: isOrganic,
+    isOrganicCertified: isOrganic,
+    organicCertificationBody: isOrganic ? String(formData.organicCertificationBody || "").trim() : "",
+    organicCertificationBodyOther: isOrganic ? String(formData.organicCertificationBodyOther || "").trim() : "",
+    organicCertificateNumber: isOrganic ? String(formData.organicCertificateNumber || "").trim() : "",
+    organicCertificateValidFrom: isOrganic ? String(formData.organicCertificateValidFrom || "").trim() : "",
+    organicCertificateValidTo: isOrganic ? String(formData.organicCertificateValidTo || "").trim() : "",
+    organicCertifiedQuantity: isOrganic ? Number(formData.organicCertifiedQuantity || 0) : 0,
+    organicCertifiedQuantityUnit: isOrganic ? String(formData.organicCertifiedQuantityUnit || "KG").trim() : "KG",
+    organicCertificationScope: isOrganic ? String(formData.organicCertificationScope || "NPOP").trim() : "NPOP",
+    organicCertificateDocumentUrl: isOrganic ? String(formData.organicCertificateDocumentUrl || "").trim() : "",
+    isGiTagged: isGiTagged,
+    giName: isGiTagged ? String(formData.giName || "").trim() : "",
+    giCertificateNumber: isGiTagged ? String(formData.giCertificateNumber || "").trim() : "",
+    giDocumentUrl: isGiTagged ? String(formData.giDocumentUrl || "").trim() : "",
+  });
+
+  const mapBackendErrorToFields = (message: string): Record<string, string> => {
+    const msg = String(message || "").toLowerCase();
+    const mapped: Record<string, string> = {};
+    if (msg.includes("organic certification body")) mapped.organicCertificationBody = "Select a valid organic certification body.";
+    if (msg.includes("specify organic certification body")) mapped.organicCertificationBodyOther = "Specify certification body.";
+    if (msg.includes("organic certificate number")) mapped.organicCertificateNumber = "Enter organic certificate number.";
+    if (msg.includes("organic certificate validity")) {
+      mapped.organicCertificateValidFrom = "Provide valid certification dates.";
+      mapped.organicCertificateValidTo = "Provide valid certification dates.";
+    }
+    if (msg.includes("valid to date")) mapped.organicCertificateValidTo = "Valid to date cannot be before valid from date.";
+    if (msg.includes("organic certified quantity")) mapped.organicCertifiedQuantity = "Certified quantity must be greater than zero.";
+    if (msg.includes("gi details")) {
+      mapped.giName = "GI details are required.";
+      mapped.giCertificateNumber = "GI details are required.";
+    }
+    if (msg.includes("warehouse is required")) mapped.warehouseId = "Select a warehouse.";
+    if (msg.includes("office address is required")) mapped.officeAddress = "Enter office address.";
+    if (msg.includes("selected associate is not linked to a company")) mapped.associate = "Selected associate is not linked to a company.";
+    if (msg.includes("select a location source")) mapped.locationSource = "Select a location source.";
+    return mapped;
   };
 
   return (
@@ -491,6 +837,203 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         Variant preselected for this listing.
                       </div>
                     )}
+                    <div className="col-span-2 rounded-2xl border border-default-200 bg-content2 p-4">
+                      <div className="mb-3">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-default-400">Product Type & GI Signal</p>
+                        <p className="text-[11px] text-default-500 mt-1">
+                          Natural and Organic are type signals. GI Tag is an additional independent signal and can be combined.
+                        </p>
+                      </div>
+
+                      {!resolvedProductId ? (
+                        <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 text-xs text-default-500">
+                          Select product first to configure classification.
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">Natural</span>
+                              <Switch isSelected={isNatural} onValueChange={(v) => setValue("isNatural", v)} color="warning" />
+                            </div>
+                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">Organic</span>
+                              <Switch isSelected={isOrganic} onValueChange={(v) => setValue("isOrganic", v)} color="warning" />
+                            </div>
+                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
+                              <Switch isSelected={isGiTagged} onValueChange={(v) => setValue("isGiTagged", v)} color="warning" />
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            {isConventional && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-default-300/40 bg-default-500/10 text-default-300">
+                                Conventional
+                              </span>
+                            )}
+                            {isNatural && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-400">
+                                Natural
+                              </span>
+                            )}
+                            {isOrganic && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
+                                Organic
+                              </span>
+                            )}
+                          {isGiTagged && (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
+                              GI Tag
+                            </span>
+                          )}
+                          </div>
+
+                          {isOrganic && (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-2">
+                                Organic Certification (India Focus)
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <Select
+                                  variant="bordered"
+                                  label="Certification Body"
+                                  classNames={themeField}
+                                  listboxProps={{ itemClasses }}
+                                  selectedKeys={formData.organicCertificationBody ? [formData.organicCertificationBody] : []}
+                                  onSelectionChange={(keys) => setValue("organicCertificationBody", Array.from(keys)[0])}
+                                  isInvalid={!!errors.organicCertificationBody}
+                                  errorMessage={errors.organicCertificationBody}
+                                >
+                                  {ORGANIC_CERT_BODIES.map((item) => (
+                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-white font-black">
+                                      {item.value}
+                                    </SelectItem>
+                                  ))}
+                                </Select>
+                                {String(formData.organicCertificationBody || "") === "OTHER" && (
+                                  <Input
+                                    variant="bordered"
+                                    label="Certification Body (Other)"
+                                    classNames={themeField}
+                                    value={String(formData.organicCertificationBodyOther || "")}
+                                    onChange={(e) => setValue("organicCertificationBodyOther", e.target.value)}
+                                    isInvalid={!!errors.organicCertificationBodyOther}
+                                    errorMessage={errors.organicCertificationBodyOther}
+                                  />
+                                )}
+                                <Input
+                                  variant="bordered"
+                                  label="Organic Certificate Number"
+                                  classNames={themeField}
+                                  value={String(formData.organicCertificateNumber || "")}
+                                  onChange={(e) => setValue("organicCertificateNumber", e.target.value)}
+                                  isInvalid={!!errors.organicCertificateNumber}
+                                  errorMessage={errors.organicCertificateNumber}
+                                />
+                                <Input
+                                  variant="bordered"
+                                  label="Valid From"
+                                  type="date"
+                                  classNames={themeField}
+                                  value={String(formData.organicCertificateValidFrom || "")}
+                                  onChange={(e) => setValue("organicCertificateValidFrom", e.target.value)}
+                                  isInvalid={!!errors.organicCertificateValidFrom}
+                                  errorMessage={errors.organicCertificateValidFrom}
+                                />
+                                <Input
+                                  variant="bordered"
+                                  label="Valid To"
+                                  type="date"
+                                  classNames={themeField}
+                                  value={String(formData.organicCertificateValidTo || "")}
+                                  onChange={(e) => setValue("organicCertificateValidTo", e.target.value)}
+                                  isInvalid={!!errors.organicCertificateValidTo}
+                                  errorMessage={errors.organicCertificateValidTo}
+                                />
+                                <Input
+                                  variant="bordered"
+                                  label="Certified Quantity"
+                                  type="number"
+                                  classNames={themeField}
+                                  value={String(formData.organicCertifiedQuantity || "")}
+                                  onChange={(e) => setValue("organicCertifiedQuantity", e.target.value)}
+                                  isInvalid={!!errors.organicCertifiedQuantity}
+                                  errorMessage={errors.organicCertifiedQuantity}
+                                />
+                                <Select
+                                  variant="bordered"
+                                  label="Quantity Unit"
+                                  classNames={themeField}
+                                  listboxProps={{ itemClasses }}
+                                  selectedKeys={formData.organicCertifiedQuantityUnit ? [formData.organicCertifiedQuantityUnit] : []}
+                                  onSelectionChange={(keys) => setValue("organicCertifiedQuantityUnit", Array.from(keys)[0])}
+                                  isInvalid={!!errors.organicCertifiedQuantityUnit}
+                                  errorMessage={errors.organicCertifiedQuantityUnit}
+                                >
+                                  <SelectItem key="KG" className="uppercase text-white font-black">KG</SelectItem>
+                                  <SelectItem key="MT" className="uppercase text-white font-black">Metric Ton (MT)</SelectItem>
+                                  <SelectItem key="Quintal" className="uppercase text-white font-black">Quintal</SelectItem>
+                                </Select>
+                                <Select
+                                  variant="bordered"
+                                  label="Certification Scope"
+                                  classNames={themeField}
+                                  listboxProps={{ itemClasses }}
+                                  selectedKeys={formData.organicCertificationScope ? [formData.organicCertificationScope] : ["NPOP"]}
+                                  onSelectionChange={(keys) => setValue("organicCertificationScope", Array.from(keys)[0])}
+                                  isInvalid={!!errors.organicCertificationScope}
+                                  errorMessage={errors.organicCertificationScope}
+                                >
+                                  {ORGANIC_SCOPES.map((item) => (
+                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-white font-black">
+                                      {item.value}
+                                    </SelectItem>
+                                  ))}
+                                </Select>
+                                <Input
+                                  variant="bordered"
+                                  label="Certificate Document URL (Optional)"
+                                  classNames={themeField}
+                                  value={String(formData.organicCertificateDocumentUrl || "")}
+                                  onChange={(e) => setValue("organicCertificateDocumentUrl", e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {isGiTagged && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <Input
+                                variant="bordered"
+                                label="GI Name"
+                                classNames={themeField}
+                                value={String(formData.giName || "")}
+                                onChange={(e) => setValue("giName", e.target.value)}
+                                isInvalid={!!errors.giName}
+                                errorMessage={errors.giName}
+                              />
+                              <Input
+                                variant="bordered"
+                                label="GI Certificate Number"
+                                classNames={themeField}
+                                value={String(formData.giCertificateNumber || "")}
+                                onChange={(e) => setValue("giCertificateNumber", e.target.value)}
+                                isInvalid={!!errors.giCertificateNumber}
+                                errorMessage={errors.giCertificateNumber}
+                              />
+                              <Input
+                                variant="bordered"
+                                label="GI Document URL (Optional)"
+                                classNames={themeField}
+                                value={String(formData.giDocumentUrl || "")}
+                                onChange={(e) => setValue("giDocumentUrl", e.target.value)}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
                 {step === 2 && (
@@ -601,6 +1144,38 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           <div className="text-xs uppercase text-default-400">Price After Commission</div>
                           <div className="text-lg font-bold text-success-500">{(rateValue + computedCommission).toFixed(2)}</div>
                         </div>
+                        <div className="md:col-span-2">
+                          <div className="text-xs uppercase text-default-400">Classification</div>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {isConventional && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-default-300/40 bg-default-500/10 text-default-300">
+                                Conventional
+                              </span>
+                            )}
+                            {isNatural && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-400">
+                                Natural
+                              </span>
+                            )}
+                            {isOrganic && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
+                                Organic
+                              </span>
+                            )}
+                            {isGiTagged && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
+                                GI Tag
+                              </span>
+                            )}
+                          </div>
+                          {isOrganic && (
+                            <div className="mt-2 text-xs text-default-400">
+                              Organic Cert: {String(formData.organicCertificationBody || "—")} •
+                              Cert No: {String(formData.organicCertificateNumber || "—")} •
+                              Qty: {String(formData.organicCertifiedQuantity || "—")} {String(formData.organicCertifiedQuantityUnit || "KG")}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between rounded-2xl border border-default-200 bg-content2 p-5">
@@ -624,7 +1199,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 <Button color="warning" onPress={onClose}>View Products</Button>
               </>
             ) : (
-              <Button variant="light" onPress={step === 1 ? onClose : handleBack}>Back</Button>
+              <Button variant="light" onPress={step === 1 ? onClose : handleBack} isDisabled={isSubmitting}>Back</Button>
             )}
           </div>
           {!successData && (
@@ -632,10 +1207,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
               color="warning"
               endContent={<FiArrowRight />}
               onPress={step < 4 ? handleNext : handleSubmit}
-              isLoading={createMutation.isPending}
+              isLoading={isSubmitting}
+              isDisabled={isSubmitting}
               className="font-bold"
             >
-              {step < 4 ? "Continue" : "Launch Listing"}
+              {isSubmitting
+                ? (submitPhase === "saving-product" ? "Saving product certification..." : "Launching listing...")
+                : step < 4
+                  ? "Continue"
+                  : "Launch Listing"}
             </Button>
           )}
         </ModalFooter>

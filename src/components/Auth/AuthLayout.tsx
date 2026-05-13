@@ -22,6 +22,13 @@ interface AuthLayoutProps {
         footer?: string;
         knowMoreLink?: string;
     };
+    roleIdentity?: {
+        roleKey: "associate" | "operator";
+        panelLabel: string;
+        motifClassName: string;
+        highlightClassName: string;
+        audienceLabels?: string[];
+    };
 }
 
 const FloatingPixel = ({ delay }: { delay: number }) => {
@@ -98,7 +105,7 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
     );
 };
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel }) => {
+const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity }) => {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -152,16 +159,16 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
             <div className="relative z-10 w-full h-full flex flex-col lg:flex-row">
                 {/* Left Side: Tactical Branding */}
                 <motion.div
-                    className="hidden lg:flex w-5/12 flex-col justify-between p-12 xl:p-16 relative border-r border-slate-200 bg-white/70 backdrop-blur-2xl overflow-hidden dark:border-white/5 dark:bg-white/[0.01]"
+                    className="hidden lg:flex w-5/12 flex-col justify-center items-center p-8 xl:p-10 relative border-r border-slate-200 bg-white/70 backdrop-blur-2xl overflow-hidden dark:border-white/5 dark:bg-white/[0.01]"
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
                 >
                     {/* Background Scanline */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
-                    <div className="relative z-20">
-                        <Link href="/" className="flex items-center gap-4 mb-12 group cursor-pointer">
+                    <div className="relative z-20 w-full max-w-xl mx-auto">
+                        <Link href="/" className="flex items-center gap-4 mb-8 group cursor-pointer justify-center lg:justify-start">
                             <div className="w-12 h-12 relative flex items-center justify-center bg-warning-500/10 rounded-xl border border-warning-500/30 group-hover:scale-110 transition-transform duration-500">
                                 <Image src="/logo.png" alt="OBAOL" width={32} height={32} className="object-contain" />
                                 <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -173,27 +180,35 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                         </Link>
 
                         {leftPanel ? (
-                            <div className="space-y-10">
+                            <div className="space-y-7 text-center lg:text-left">
                                 <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 14 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.2 }}
+                                    transition={{ duration: 0.45, delay: 0.1 }}
                                 >
-                                    <h1 className="text-4xl xl:text-6xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-3 leading-[0.9] uppercase italic">
+                                    {roleIdentity && (
+                                        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1">
+                                            <span className="w-2 h-2 rounded-full bg-warning-500" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 dark:text-foreground/70">
+                                                {roleIdentity.panelLabel}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <h1 className="text-4xl xl:text-5xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-2 leading-[0.92] uppercase italic">
                                         {leftPanel.headline} <br />
-                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-500 to-amber-600">
+                                        <span className={`text-transparent bg-clip-text ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-warning-500 to-amber-600"}`}>
                                             {leftPanel.highlight || "CORE_NETWORK"}
                                         </span>
                                     </h1>
                                 </motion.div>
 
                                 <motion.div
-                                    className="max-w-md space-y-6"
-                                    initial={{ opacity: 0, x: -20 }}
+                                    className="max-w-lg mx-auto lg:mx-0 space-y-5"
+                                    initial={{ opacity: 0, x: -14 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.4 }}
+                                    transition={{ duration: 0.45, delay: 0.2 }}
                                 >
-                                    <p className="text-base xl:text-lg text-slate-600 dark:text-foreground/60 pl-5 border-l-2 border-warning-500/40 leading-relaxed font-medium italic">
+                                    <p className="text-base xl:text-lg text-slate-600 dark:text-foreground/60 pl-4 border-l-2 border-warning-500/40 leading-relaxed font-medium italic">
                                         {leftPanel.description}
                                     </p>
 
@@ -208,16 +223,16 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         </div>
                                     )}
 
-                                    {!!leftPanel.tags?.length && (
-                                        <div className="pt-1 space-y-2">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 dark:text-default-400">
-                                                Who Can Access
+                                    {!!roleIdentity?.audienceLabels?.length && (
+                                        <div className="pt-1 space-y-2.5">
+                                            <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500 dark:text-default-400">
+                                                Primary Users
                                             </p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {leftPanel.tags.map((tag, idx) => (
+                                            <div className="flex flex-wrap gap-1.5 justify-center lg:justify-start">
+                                                {roleIdentity.audienceLabels.map((tag, idx) => (
                                                     <span
                                                         key={`${tag}-${idx}`}
-                                                        className="px-2.5 py-0.5 rounded-full border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-widest text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
+                                                        className="px-2.5 py-0.5 rounded-full border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-wide text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
                                                     >
                                                         {tag}
                                                     </span>
@@ -226,11 +241,11 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         </div>
                                     )}
 
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 justify-center lg:justify-start">
                                         {leftPanel.knowMoreLink && (
                                             <Link
                                                 href={leftPanel.knowMoreLink}
-                                                className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/30 transition-all group shadow-sm justify-center dark:bg-white/[0.03] dark:border-white/10 dark:hover:text-warning-500 dark:hover:border-warning-500/20"
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-slate-200 text-[9px] font-black uppercase tracking-[0.18em] hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/30 transition-all group shadow-sm justify-center dark:bg-white/[0.03] dark:border-white/10 dark:hover:text-warning-500 dark:hover:border-warning-500/20"
                                             >
                                                 Access Specifications
                                                 <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -259,47 +274,46 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                 {/* Right Side: Operative Terminal */}
                 <div className="w-full lg:w-7/12 flex flex-col h-full bg-transparent overflow-y-auto custom-scrollbar relative">
-                    <div className="flex-grow flex items-center justify-center p-6 lg:p-12 xl:p-20 relative z-10">
+                    <div className="flex-grow flex items-center justify-center p-4 lg:p-8 xl:p-10 relative z-10">
                         <motion.div
                             className={`w-full ${cardMaxWidthClass} relative`}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ duration: 0.55, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
                         >
                             {/* Card Decoration */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-warning-500/[0.03] blur-[120px] rounded-full -z-10" />
+                            {roleIdentity && (
+                                <div className={`absolute inset-4 rounded-[2.3rem] border border-white/5 -z-10 pointer-events-none ${roleIdentity.motifClassName}`} />
+                            )}
 
                             {/* Mobile Identity */}
-                            <Link href="/" className="lg:hidden mb-12 flex flex-col items-center group cursor-pointer">
-                                <div className="w-16 h-16 relative bg-warning-500/10 rounded-2xl border border-warning-500/30 mb-6 flex items-center justify-center shadow-xl shadow-warning-500/10 group-hover:scale-110 transition-transform">
+                            <Link href="/" className="lg:hidden mb-3 flex flex-col items-center group cursor-pointer">
+                                <div className="w-11 h-11 relative bg-warning-500/10 rounded-xl border border-warning-500/30 mb-2 flex items-center justify-center shadow-xl shadow-warning-500/10 group-hover:scale-110 transition-transform">
                                     <Image src="/logo.png" alt="OBAOL" width={40} height={40} className="object-contain" />
                                 </div>
-                                <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase">
+                                <h2 className="text-xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase">
                                     OBAOL <span className="text-warning-500">Supreme</span>
                                 </h2>
-                                <p className="text-[9px] font-black tracking-[0.5em] text-slate-500 dark:text-default-400 mt-2 uppercase">Go-To Agro Trade Platform</p>
+                                <p className="text-[8px] font-black tracking-[0.35em] text-slate-500 dark:text-default-400 mt-1 uppercase">Go-To Agro Trade Platform</p>
                             </Link>
 
                             <div className="relative group">
                                 <motion.div
-                                    className="relative bg-white/85 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[3rem] p-8 lg:p-14 shadow-xl dark:shadow-2xl overflow-hidden shadow-slate-200/40 dark:shadow-black/40"
+                                    className="relative bg-white/85 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2.2rem] lg:rounded-[2.5rem] p-5 lg:p-7 shadow-xl dark:shadow-2xl overflow-hidden shadow-slate-200/40 dark:shadow-black/40"
                                     whileHover={{ boxShadow: "0 40px 120px -20px rgba(15, 23, 42, 0.08)" }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                    transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
                                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                                     <div className="absolute top-0 right-0 w-40 h-40 bg-warning-500/10 blur-[80px] rounded-full -mr-20 -mt-20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
-                                    <div className="mb-12 relative">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_10px_rgba(245,165,36,0.5)]" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-600/70 dark:text-warning-500/60">Secure Access</span>
-                                        </div>
-                                        <h2 className="text-3xl lg:text-4xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase leading-none">
+                                    <div className="mb-4 relative">
+                                        <h2 className="text-2xl lg:text-3xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase leading-none">
                                             {title}
                                         </h2>
                                         {subtitle && (
-                                            <p className="text-slate-500 dark:text-default-400 text-xs font-bold uppercase tracking-[0.2em] mt-4 opacity-60">
+                                            <p className="text-slate-500 dark:text-default-400 text-[10px] font-bold uppercase tracking-[0.18em] mt-2 opacity-60">
                                                 {subtitle}
                                             </p>
                                         )}
@@ -309,9 +323,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 </motion.div>
 
                                 {/* Terminal Footer Decor */}
-                                <div className="mt-8 flex items-center justify-center gap-6 opacity-40 dark:opacity-20">
+                                <div className="mt-4 flex items-center justify-center gap-3 opacity-35 dark:opacity-20">
                                     <div className="h-px flex-grow bg-gradient-to-r from-transparent to-divider" />
-                                    <div className="text-[8px] font-black uppercase tracking-[0.6em] text-slate-500 dark:text-default-400 whitespace-nowrap">
+                                    <div className="text-[7px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-default-400 whitespace-nowrap">
                                         Secure Connection
                                     </div>
                                     <div className="h-px flex-grow bg-gradient-to-l from-transparent to-divider" />

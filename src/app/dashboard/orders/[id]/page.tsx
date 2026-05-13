@@ -49,6 +49,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
+import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 
 dayjs.extend(relativeTime);
 
@@ -929,11 +930,31 @@ export default function OrderDetailsPage() {
             return bTime - aTime;
         })[0];
     };
+    const classificationProductObj =
+        (order as any)?.enquiry?.variantRateId?.productVariant?.product ||
+        (order as any)?.enquiry?.productVariant?.product ||
+        (order as any)?.enquiry?.productId ||
+        (order as any)?.productVariant?.product ||
+        (order as any)?.product ||
+        null;
+    const classificationBadges = getClassificationBadges(classificationProductObj);
+    const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
 
     return (
         <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-warning-500/30">
+            <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-default-500">Classification Signal</span>
+                    {classificationBadges.map((badge) => (
+                        <span key={badge.key} className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}>
+                            {React.createElement(classificationIcon(badge.key), { size: 10 })}
+                            {badge.label}
+                        </span>
+                    ))}
+                </div>
+            </div>
             {/* Header: Elite Identification */}
-            <div className="flex items-center justify-between gap-6 pb-6 border-b border-divider">
+            <div className={`flex items-center justify-between gap-6 pb-6 border-b ${classificationTheme.shellBorderClass}`}>
                 <div className="flex items-center gap-5">
                     <Button
                         isIconOnly

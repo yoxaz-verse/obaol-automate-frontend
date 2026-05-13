@@ -5,6 +5,7 @@ import EnquiryStatus from "./EnquiryStatus";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/context/CurrencyContext";
 import AuthContext from "@/context/AuthContext";
+import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
 
 interface EnquiryCardProps {
     data: any;
@@ -25,6 +26,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
     const isImportEnquiry = String(data?.sourceType || "").toUpperCase() === "IMPORT" || Boolean(data?.importListingId);
     // Filter out 'N/A' variant as it is meaningless
     const variantName = (data.productVariant && data.productVariant !== "N/A") ? data.productVariant : "";
+    const classificationBadges = getClassificationBadges(data.classificationProduct || data.productObj || null);
 
     return (
         <motion.div
@@ -65,6 +67,17 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                 {variantName}
                             </span>
                         )}
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                            {classificationBadges.map((badge) => (
+                                <span
+                                    key={badge.key}
+                                    className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
+                                >
+                                    {React.createElement(classificationIcon(badge.key), { size: 10 })}
+                                    {badge.label}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 </CardHeader>
 

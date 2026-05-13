@@ -90,6 +90,22 @@ const toDisplayText = (value: any, fallback = "N/A"): string => {
   }
   return fallback;
 };
+const extractClassifications = (product: any): string[] => {
+  if (!product) return ["Conventional"];
+  const labels: string[] = [];
+  if (product.isNatural) labels.push("Natural");
+  if (product.isOrganic) labels.push("Organic");
+  if (product.isGiTagged) labels.push("GI Tag");
+  if (labels.length === 0) labels.push("Conventional");
+  return labels;
+};
+const classificationTone = (label: string): string => {
+  const key = String(label || "").toLowerCase();
+  if (key === "organic") return "bg-success-500/15 text-success-400 border-success-500/30";
+  if (key === "natural") return "bg-secondary-500/15 text-secondary-400 border-secondary-500/30";
+  if (key.includes("gi")) return "bg-warning-500/15 text-warning-400 border-warning-500/30";
+  return "bg-default-500/15 text-default-300 border-default-400/20";
+};
 const formatLastLiveDate = (value: any) => {
   if (!value) return "";
   const date = new Date(value);
@@ -571,6 +587,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   ).trim() || "N/A"
                 )
               );
+              const productClassifications = extractClassifications(item.productVariant?.product);
+              const classificationText = productClassifications.join(" ");
 
               return {
                 ...rest,
@@ -596,6 +614,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 location: locationDisplay || "--",
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
+                classification: (
+                  <div className="flex flex-wrap gap-1">
+                    {productClassifications.map((label) => (
+                      <span key={`${item._id}-${label}`} className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ),
+                classificationText,
 
                 // Column Mapping
                 rate: (
@@ -687,6 +715,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 product: truncateWithDots(toDisplayText(item.productVariantId?.product?.name)),
                 productId: item.productVariantId?.product?._id || item.productVariantId?.product,
                 productVariantId: item.productVariantId?._id,
+                classification: (
+                  <div className="flex flex-wrap gap-1">
+                    {extractClassifications(item.productVariantId?.product).map((label) => (
+                      <span key={`${item._id}-${label}`} className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ),
+                classificationText: extractClassifications(item.productVariantId?.product).join(" "),
                 rawBasePrice: (supplierRate + adminCommission),
                 rawCommission: mediatorMarkup,
                 customTitle: item.customTitle,
@@ -724,6 +762,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 product: truncateWithDots(toDisplayText(item.variantRate?.productVariant?.product?.name)),
                 productId: item.variantRate?.productVariant?.product?._id || item.variantRate?.productVariant?.product,
                 productVariantId: item.variantRate?.productVariant?._id,
+                classification: (
+                  <div className="flex flex-wrap gap-1">
+                    {extractClassifications(item.variantRate?.productVariant?.product).map((label) => (
+                      <span key={`${item._id}-${label}`} className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${classificationTone(label)}`}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ),
+                classificationText: extractClassifications(item.variantRate?.productVariant?.product).join(" "),
                 rawBasePrice: basePriceForUser,
                 rawCommission: associateMargin,
                 variantRateId: item.variantRate?._id,
@@ -749,6 +797,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   row.warehouseName,
                   toDisplayText(row.rate, ""),
                   toDisplayText(row.quantity, ""),
+                  toDisplayText(row.classificationText, ""),
                 ]
                   .filter(Boolean)
                   .join(" ")
@@ -783,7 +832,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
                       startContent={<FiPlus size={16} />}
                     >
-                      Create Rate Listing
+                      List your product
                     </Button>
                     <VariantRateWizardModal
                       isOpen={wizardOpen}

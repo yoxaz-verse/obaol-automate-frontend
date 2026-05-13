@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -25,17 +26,13 @@ import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { FiLoader, FiMapPin, FiSearch } from "react-icons/fi";
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCalculationConfig } from "@/hooks/useCalculationConfig";
+import type { WarehouseMapItem } from "@/components/Warehouse/WarehouseRentMap";
+
+const WarehouseRentMap = dynamic(() => import("@/components/Warehouse/WarehouseRentMap"), {
+  ssr: false,
+});
 
 type Warehouse = {
   _id: string;
@@ -68,11 +65,16 @@ type WarehouseAssignment = {
   bookingStatus?: "PENDING_QUOTE" | "BOOKED" | "REJECTED" | "CANCELLED";
 };
 
-const toArrayData = (response: any): any[] => {
-  const direct = response?.data?.data;
+type ApiListResponse<T> = {
+  data?: {
+    data?: T[];
+  } | T[];
+};
+
+const toArrayData = <T,>(response: ApiListResponse<T> | null | undefined): T[] => {
+  const direct = response?.data;
   if (Array.isArray(direct)) return direct;
   if (Array.isArray(direct?.data)) return direct.data;
-  if (Array.isArray(response?.data)) return response.data;
   return [];
 };
 
@@ -86,14 +88,6 @@ const CATEGORY_COLOR: Record<string, string> = {
   BONDED: "#8b5cf6",
   AGRO: "#22c55e",
 };
-
-const mkDotIcon = (color: string) =>
-  L.divIcon({
-    className: "warehouse-dot-icon",
-    html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;background:${color};border:2px solid rgba(255,255,255,0.95);box-shadow:0 0 0 3px color-mix(in oklab, ${color} 26%, transparent), 0 4px 12px rgba(0,0,0,0.45);"></span>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-  });
 
 type SearchPoint = { latitude: number; longitude: number; label: string };
 
@@ -110,14 +104,17 @@ const haversineKm = (aLat: number, aLng: number, bLat: number, bLng: number) => 
   return 6371 * (2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa)));
 };
 
-function MapAutoCenter({ point }: { point: SearchPoint | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (!point) return;
-    map.setView([point.latitude, point.longitude], 8, { animate: true });
-  }, [map, point]);
-  return null;
-}
+const toErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null) return fallback;
+  const maybeResponse = (error as { response?: { data?: { message?: string } } }).response;
+  return maybeResponse?.data?.message || fallback;
+};
+
+const toErrorStatus = (error: unknown) => {
+  if (typeof error !== "object" || error === null) return 0;
+  const status = (error as { response?: { status?: number } }).response?.status;
+  return Number(status || 0);
+};
 
 export default function WarehouseRentPage() {
   const queryClient = useQueryClient();
@@ -229,6 +226,32 @@ export default function WarehouseRentPage() {
     return { booked: ids, pending: pendingIds };
   }, [activeAssignments]);
 
+  const mapWarehouses: WarehouseMapItem[] = useMemo(
+    () =>
+      filteredWarehouses.map((warehouse) => {
+        const warehouseId = String(warehouse._id || "");
+        const category = String(warehouse.category || "GENERAL");
+        return {
+          id: warehouseId,
+          name: warehouse.name,
+          lat: Number(warehouse.location?.latitude),
+          lng: Number(warehouse.location?.longitude),
+          category,
+          color: CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL,
+          storageRatePerUnit: warehouse.storageRatePerUnit,
+          unit: warehouse.unit,
+          isBooked: bookedWarehouseIdSet.booked.has(warehouseId),
+          isQuoteRequested: bookedWarehouseIdSet.pending.has(warehouseId),
+          isActionDisabled:
+            bookedWarehouseIdSet.booked.has(warehouseId) ||
+            (needsCompanySelect && !selectedCompanyId) ||
+            bookMutation.isPending,
+          source: warehouse,
+        };
+      }),
+    [bookMutation.isPending, bookedWarehouseIdSet, filteredWarehouses, needsCompanySelect, selectedCompanyId]
+  );
+
   const bookMutation = useMutation({
     mutationFn: (payload: {
       warehouseId: string;
@@ -249,10 +272,10 @@ export default function WarehouseRentPage() {
       setIsBookModalOpen(false);
       setSelectedWarehouse(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       showToastMessage({
         type: "error",
-        message: error?.response?.data?.message || "Failed to submit warehouse booking request.",
+        message: toErrorMessage(error, "Failed to submit warehouse booking request."),
       });
     },
   });
@@ -348,11 +371,11 @@ export default function WarehouseRentPage() {
     });
   };
 
-  const warehousesErrorStatus = Number((warehousesError as any)?.response?.status || 0);
+  const warehousesErrorStatus = toErrorStatus(warehousesError);
   const warehousesErrorMessage =
     warehousesErrorStatus === 403
       ? "Access denied for your role."
-      : ((warehousesError as any)?.response?.data?.message || "Unable to load warehouse booking right now.");
+      : toErrorMessage(warehousesError, "Unable to load warehouse booking right now.");
 
   return (
     <section className="w-full min-h-screen p-4 md:p-8 bg-[#030303] text-foreground">
@@ -478,84 +501,13 @@ export default function WarehouseRentPage() {
                   <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-orange-500/40 rounded-br z-20" />
                   
                   <div className="h-[450px] w-full overflow-hidden rounded-2xl border border-white/10 relative shadow-inner">
-                    <MapContainer
+                    <WarehouseRentMap
                       center={DEFAULT_CENTER}
                       zoom={DEFAULT_ZOOM}
-                      scrollWheelZoom
-                      style={{ height: "100%", width: "100%" }}
-                    >
-                      <MapAutoCenter point={searchPoint} />
-                      <TileLayer
-                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                      />
-                      {filteredWarehouses.map((warehouse) => {
-                        const lat = Number(warehouse.location?.latitude);
-                        const lng = Number(warehouse.location?.longitude);
-                        const category = String(warehouse.category || "GENERAL");
-                        const color = CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL;
-                        const warehouseId = String(warehouse._id || "");
-                        const isBooked = bookedWarehouseIdSet.booked.has(warehouseId);
-                        const isQuoteRequested = bookedWarehouseIdSet.pending.has(warehouseId);
-                        const bookingDisabled = isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutation.isPending;
-
-                        return (
-                          <Marker
-                            key={warehouse._id}
-                            position={[lat, lng]}
-                            icon={mkDotIcon(color)}
-                          >
-                            <Popup className="tactical-popup">
-                              <div className="min-w-[200px] p-2 space-y-3 bg-[#0A0A0A] text-foreground">
-                                <div className="space-y-1">
-                                  <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">W_Node_{warehouse._id.slice(-4)}</div>
-                                  <div className="text-sm font-black">{warehouse.name}</div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-                                  <div className="text-[10px] font-bold uppercase text-default-400">{warehouse.category || "GENERAL"}</div>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                                  <div className="text-[10px] text-default-500 uppercase tracking-tight">Storage Rate</div>
-                                  <div className="text-sm font-mono font-bold text-orange-400">
-                                    {warehouse.storageRatePerUnit ?? "—"} {warehouse.unit || "MT"} <span className="text-[9px] text-default-600">/ unit</span>
-                                  </div>
-                                </div>
-                                <Button
-                                  color={isBooked ? "success" : "warning"}
-                                  variant={isBooked ? "flat" : "solid"}
-                                  size="sm"
-                                  fullWidth
-                                  isDisabled={bookingDisabled}
-                                  onPress={() => openBookModal(warehouse)}
-                                  className="font-black uppercase tracking-wider text-[10px]"
-                                >
-                                  {isBooked ? "Booked" : isQuoteRequested ? "Quote Requested" : "Start Booking"}
-                                </Button>
-                              </div>
-                            </Popup>
-                          </Marker>
-                        );
-                      })}
-                    </MapContainer>
-
-                    {/* HUD Overlay for Map */}
-                    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-                      <div className="p-3 rounded-xl bg-[#0A0A0A]/80 backdrop-blur-md border border-white/10 flex flex-col gap-2">
-                        <div className="text-[9px] font-black uppercase tracking-widest text-default-400 mb-1 border-b border-white/5 pb-1 font-mono">Legend_Diagnostics</div>
-                        {[
-                          ["GENERAL", CATEGORY_COLOR.GENERAL],
-                          ["COLD_STORAGE", CATEGORY_COLOR.COLD_STORAGE],
-                          ["BONDED", CATEGORY_COLOR.BONDED],
-                          ["AGRO", CATEGORY_COLOR.AGRO],
-                        ].map(([label, color]) => (
-                          <div key={label} className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]" style={{ background: color }} />
-                            <span className="text-[9px] font-bold text-default-300 uppercase tracking-tight">{label.replace('_', ' ')}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                      searchPoint={searchPoint}
+                      warehouses={mapWarehouses}
+                      onBook={(item) => openBookModal(item.source as Warehouse)}
+                    />
                   </div>
                 </div>
               </div>

@@ -17,7 +17,7 @@ export interface TopbarProps {
 }
 export interface DashboardTileProps {
   heading?: string;
-  data?: any;
+  data?: unknown;
   type: string;
   stats?: string;
 }
@@ -67,7 +67,7 @@ export interface Column {
 export interface ProjectDetailProps {
   id: string;
   role: string;
-  setProjectDetail: (data: any) => void;
+  setProjectDetail: (data: unknown) => void;
 }
 export interface ProjectDetailProgressProps {
   heading: string;
@@ -113,7 +113,7 @@ export interface EditModalProps {
   formFields: FormField[];
   apiEndpoint: string;
   refetchData: () => void;
-  initialData?: any; // Existing data to populate the form
+  initialData?: Record<string, unknown>; // Existing data to populate the form
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -126,12 +126,12 @@ export interface QueryComponentMeta {
 
 export interface QueryComponentProps<T> {
   api: string;
-  queryKey: any[];
+  queryKey: readonly unknown[];
   children: (data: T, refetch?: () => void, meta?: QueryComponentMeta) => React.ReactNode; // Added refetch + meta
   page?: number; // Optional for paginated data
   limit?: number; // Optional for paginated data
   search?: string | null;
-  additionalParams?: Record<string, any>; // Dynamic additional parameters
+  additionalParams?: Record<string, unknown>; // Dynamic additional parameters
   loadingVariant?: "inline" | "skeleton" | "branded";
   loadingMessage?: string;
   emptyState?: React.ReactNode;
@@ -160,12 +160,12 @@ export interface DeleteModalProps {
 }
 export interface DetailsModalProps {
   currentTable: string;
-  data: Record<string, any>; // Use a generic record to handle dynamic fields
+  data: Record<string, unknown>; // Use a generic record to handle dynamic fields
   columns: { name: string; uid: string; type?: string }[]; // Add column metadata to handle type
 }
 
 export interface TableProps {
-  TableData?: any[]; // Optional, with a default fallback
+  TableData?: Record<string, unknown>[]; // Optional, with a default fallback
   columns: {
     name: string;
     uid: string;
@@ -174,10 +174,10 @@ export interface TableProps {
     allowWrap?: boolean;
     align?: "start" | "center" | "end";
   }[];
-  viewModal?: (item: any) => React.ReactNode;
-  deleteModal?: (item: any) => React.ReactNode;
-  editModal?: (item: any) => React.ReactNode;
-  otherModal?: (item: any) => React.ReactNode;
+  viewModal?: (item: Record<string, unknown>) => React.ReactNode;
+  deleteModal?: (item: Record<string, unknown>) => React.ReactNode;
+  editModal?: (item: Record<string, unknown>) => React.ReactNode;
+  otherModal?: (item: Record<string, unknown>) => React.ReactNode;
   isLoading?: boolean;
   page?: number;
   totalPages?: number;
@@ -197,8 +197,8 @@ export interface AddModalProps {
   formFields: FormField[];
   apiEndpoint: string;
   refetchData?: () => void;
-  additionalVariable?: Record<string, any>;
-  onSuccess?: (data?: any) => void; // callback when form successfully submits
+  additionalVariable?: Record<string, unknown>;
+  onSuccess?: (data?: unknown) => void; // callback when form successfully submits
 }
 
 export interface AddFormProps {
@@ -208,8 +208,8 @@ export interface AddFormProps {
   formFields: FormField[];
   apiEndpoint: string;
   refetchData?: () => void;
-  additionalVariable?: Record<string, any>; // Dynamic additional parameters
-  onSuccess?: (data?: any) => void; // callback when form successfully submits
+  additionalVariable?: Record<string, unknown>; // Dynamic additional parameters
+  onSuccess?: (data?: unknown) => void; // callback when form successfully submits
 }
 
 export interface FormField {

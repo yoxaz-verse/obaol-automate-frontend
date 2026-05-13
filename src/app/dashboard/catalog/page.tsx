@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useContext } from "react";
-import { Input, Chip } from "@heroui/react";
-import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight } from "react-icons/fi";
+import { Input, Chip, Tab, Tabs } from "@heroui/react";
+import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight, FiGrid } from "react-icons/fi";
 import { ProductList } from "@/components/dashboard/Catalog/product-list";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
@@ -13,6 +13,7 @@ import AddModal from "@/components/CurdTable/add-model";
 import EditModal from "@/components/CurdTable/edit-model";
 import UserDeleteModal from "@/components/CurdTable/delete";
 import { motion, AnimatePresence } from "framer-motion";
+import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 
 const CATALOG_FETCH_LIMIT = 5000;
 
@@ -79,9 +80,11 @@ function DeepSearchResult({
 // ─── Deep Search Panel ────────────────────────────────────────────────────────
 function DeepSearchPanel({
   search,
+  classifications,
   onNavigate,
 }: {
   search: string;
+  classifications: string[];
   onNavigate: (item: any, type: string) => void;
 }) {
   return (
@@ -150,7 +153,10 @@ function DeepSearchPanel({
         queryKey={["search-product", search]}
         page={1}
         limit={CATALOG_FETCH_LIMIT}
-        additionalParams={{ search }}
+        additionalParams={{
+          search,
+          ...(classifications.length ? { classifications } : {}),
+        }}
       >
         {(data: any) => {
           const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
@@ -245,6 +251,8 @@ export default function CatalogPage() {
   ]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [search, setSearch] = useState("");
+  const [classificationTab, setClassificationTab] = useState<"all" | "conventional" | "natural" | "organic" | "gi-tag">("all");
+  const [classificationFilters, setClassificationFilters] = useState<string[]>([]);
 
   // Management State
   const [editItem, setEditItem] = useState<any | null>(null);
@@ -254,6 +262,16 @@ export default function CatalogPage() {
   const currentLevel = navigation.length - 1;
   const currentNav = navigation[currentLevel];
   const isSearching = search.trim().length > 0;
+  const effectiveClassifications = classificationTab === "all"
+    ? classificationFilters
+    : Array.from(new Set([classificationTab, ...classificationFilters]));
+  const activeTheme = resolveActiveClassificationTheme(effectiveClassifications);
+
+  const toggleClassificationFilter = (value: string) => {
+    setClassificationFilters((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    );
+  };
 
   const handleSelect = (item: any) => {
     if (currentLevel < 2) {
@@ -312,8 +330,8 @@ export default function CatalogPage() {
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-64px)] w-full py-8 relative">
       {/* Background Ambient Effects */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-warning/5 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-warning/3 blur-[150px] rounded-full pointer-events-none" />
+      <div className={`absolute top-0 right-0 w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowA}`} />
+      <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowB}`} />
 
       <div className="w-full max-w-[1400px] px-6 relative z-10 flex flex-col h-full">
         {/* Header & Search */}
@@ -376,6 +394,65 @@ export default function CatalogPage() {
             )}
           </div>
         </div>
+        <div className={`mb-6 flex flex-col gap-3 rounded-2xl border p-3 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
+          <Tabs
+            aria-label="Catalog Classification Tabs"
+            selectedKey={classificationTab}
+            onSelectionChange={(key) => setClassificationTab(key as any)}
+            variant="underlined"
+            color="warning"
+            classNames={{
+              tabList: "gap-6 relative rounded-none p-0 border-b border-divider/30",
+              cursor: "bg-warning-500 w-full h-[2px] rounded-t-full",
+              tab: "max-w-fit px-2 h-11",
+              tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-400 transition-all group-data-[selected=true]:text-warning-500"
+            }}
+          >
+            <Tab
+              key="all"
+              title={(
+                <span className="inline-flex items-center gap-1.5">
+                  <FiGrid size={13} />
+                  <span>All</span>
+                </span>
+              )}
+            />
+            {getClassificationOptions().map((item) => {
+              const theme = getClassificationTheme(item.key);
+              return (
+                <Tab
+                  key={item.key}
+                  title={(
+                    <span className={`inline-flex items-center gap-1.5 transition-colors ${classificationTab === item.key ? theme.tabActiveClass : theme.tabIdleClass}`}>
+                      <item.icon size={13} className={theme.iconClass} />
+                      <span>{item.label}</span>
+                    </span>
+                  )}
+                />
+              );
+            })}
+          </Tabs>
+          <div className="flex flex-wrap gap-2">
+            {getClassificationOptions().map((option) => {
+              const selected = classificationFilters.includes(option.key);
+              const optionTheme = getClassificationTheme(option.key);
+              return (
+                <Chip
+                  key={option.key}
+                  variant={selected ? "solid" : "flat"}
+                  color={selected ? "warning" : "default"}
+                  className={`cursor-pointer border transition-all duration-300 ${selected ? activeTheme.chipActiveClass : optionTheme.chipIdleClass}`}
+                  onClick={() => toggleClassificationFilter(option.key)}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <option.icon size={13} className={optionTheme.iconClass} />
+                    <span>{option.label}</span>
+                  </span>
+                </Chip>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Navigation Breadcrumbs */}
         {!isSearching && <CatalogBreadcrumbs paths={navigation} onNavigate={handleBreadcrumbNavigate} />}
@@ -414,7 +491,7 @@ export default function CatalogPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <DeepSearchPanel search={search} onNavigate={handleSearchNavigate} />
+                <DeepSearchPanel search={search} classifications={effectiveClassifications} onNavigate={handleSearchNavigate} />
               </motion.div>
             ) : (
               <motion.div
@@ -440,11 +517,13 @@ export default function CatalogPage() {
 
                     if (selectedProduct) {
                       return (
-                        <div className="bg-foreground/[0.02] border border-foreground/10 rounded-[3rem] p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                        <div className={`rounded-[3rem] p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden border ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
                           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-warning-400 to-orange-500 opacity-50" />
                           <ProductList
                             product={selectedProduct}
                             setProduct={setSelectedProduct}
+                            themeShellClass={activeTheme.shellClass}
+                            themeBorderClass={activeTheme.shellBorderClass}
                             onProductDeleted={() => {
                               setSelectedProduct(null);
                               handleBreadcrumbNavigate(2);
@@ -459,6 +538,12 @@ export default function CatalogPage() {
                     const api = apiRoutesByRole[config.type];
                     const queryKey = [config.type, currentNav.id || "root", refreshKey];
                     const params = currentLevel === 1 ? { category: currentNav.id } : currentLevel === 2 ? { subCategory: currentNav.id } : {};
+                    const scopedParams = {
+                      ...params,
+                      ...(config.type === "product" && effectiveClassifications.length
+                        ? { classifications: effectiveClassifications }
+                        : {}),
+                    };
 
                     return (
                       <QueryComponent
@@ -466,7 +551,7 @@ export default function CatalogPage() {
                         queryKey={[...queryKey]}
                         page={1}
                         limit={CATALOG_FETCH_LIMIT}
-                        additionalParams={params}
+                        additionalParams={scopedParams}
                       >
                         {(data: any) => {
                           const items = Array.isArray(data)
@@ -493,6 +578,8 @@ export default function CatalogPage() {
                                   items={items}
                                   onSelect={handleSelect}
                                   type={config.type as any}
+                                  cardThemeClass={activeTheme.shellClass}
+                                  cardBorderClass={activeTheme.shellBorderClass}
                                   counts={counts}
                                   isAdmin={isAdmin}
                                   onEdit={setEditItem}

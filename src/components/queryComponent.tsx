@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo } from "react";
 import { getData } from "@/core/api/apiHandler";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { loadingFacts } from "@/data/loading-facts";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import InlineLoader from "@/components/ui/InlineLoader";
@@ -20,8 +20,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     loadingVariant = "skeleton",
     loadingMessage = "Loading",
     emptyState,
-  } =
-    props;
+  } = props;
   const randomFact = useMemo(() => {
     return loadingFacts[Math.floor(Math.random() * loadingFacts.length)];
   }, []);
@@ -43,13 +42,14 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     ];
   }, [queryKey, page, limit, search, additionalParams]);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: effectiveQueryKey,
     queryFn: () => getData(api, params),
     staleTime: 30_000,
     gcTime: 300_000,
     refetchOnWindowFocus: false,
     retry: 1,
+    placeholderData: keepPreviousData,
   });
 
   const rawResult = page !== undefined ? data?.data?.data : data?.data;
@@ -106,7 +106,11 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     );
   }
 
-  return <div className="w-full min-w-0 max-w-full">{children(responseData as T, refetch, responseMeta)}</div>;
+  return (
+    <div className={`w-full min-w-0 max-w-full transition-opacity duration-300 ${isFetching && !isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+      {children(responseData as T, refetch, responseMeta)}
+    </div>
+  );
 }
 
 export default QueryComponent;

@@ -7,7 +7,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowRight, FiCheck } from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiUsers } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -571,6 +571,33 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
   const roleKey = roleLower === "operator" || roleLower === "team" ? "operator" : roleLower;
   const currentRoleContent = roleContent[roleKey] || null;
+  const roleIdentity = (roleKey === "operator" || roleKey === "associate")
+    ? (roleKey === "operator"
+      ? {
+      roleKey: "operator" as const,
+      panelLabel: "Operator Console",
+      motifClassName: "bg-[linear-gradient(to_bottom,rgba(16,185,129,0.22),rgba(2,6,23,0.6))]",
+      highlightClassName: "bg-gradient-to-r from-emerald-400 to-cyan-500",
+      audienceLabels: ["Operators", "Portfolio Managers", "Internal Ops", "Business Developers", "Digital Traders"],
+      infoStripTitle: "Operator Lane",
+      infoStripMessage: "Built for active execution teams.",
+      infoStripIcon: FiBriefcase,
+      switchLabel: "Go to Associate Network",
+      switchSubLabel: "Switch Role",
+    }
+      : {
+      roleKey: "associate" as const,
+      panelLabel: "Associate Network",
+      motifClassName: "bg-[linear-gradient(to_bottom,rgba(249,115,22,0.2),rgba(2,6,23,0.65))]",
+      highlightClassName: "bg-gradient-to-r from-orange-400 to-amber-500",
+      audienceLabels: ["Manufacturers", "Traders", "Logistics Partners", "Freight Forwarders", "Export/Import Teams"],
+      infoStripTitle: "Associate Lane",
+      infoStripMessage: "Built for partner and logistics networks.",
+      infoStripIcon: FiUsers,
+      switchLabel: "Go to Operator Console",
+      switchSubLabel: "Switch Role",
+    })
+    : null;
 
   if (loading) {
     return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;
@@ -601,6 +628,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       title={authMode === "signup" ? `${role} — Create Account` : role}
       subtitle={authMode === "signup" ? "Create Account" : "Login"}
       leftPanel={currentRoleContent}
+      roleIdentity={roleIdentity || undefined}
       topContent={
         !isAuthenticated && authMode !== "signup" && (
           <motion.div
@@ -628,7 +656,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       }
     >
       <form
-        className="w-full flex flex-col gap-6"
+        className="w-full flex flex-col gap-4"
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
           if (authMode === "signup" && e.key === "Enter") {
@@ -636,6 +664,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           }
         }}
       >
+        {roleIdentity && (
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center shrink-0">
+              <roleIdentity.infoStripIcon className="text-xs text-foreground/75" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-black uppercase tracking-[0.22em] text-foreground/50">
+                {roleIdentity.infoStripTitle}
+              </p>
+              <p className="text-[11px] font-semibold text-foreground/75 leading-tight">
+                {roleIdentity.infoStripMessage}
+              </p>
+            </div>
+          </div>
+        )}
 
 
         {/* Highlighted Error Message for Signup/Login */}
@@ -794,7 +837,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
         {authMode === "login" && (
           <motion.div
-            className="mt-6"
+            className="mt-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -928,21 +971,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         )}
 
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "login" && (
-          <div className="mt-8 flex flex-col items-center gap-5">
-            <div className="relative flex items-center w-full px-4">
+          <div className="mt-4 flex flex-col items-center gap-2.5">
+            <div className="relative flex items-center w-full px-1">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
-              <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Or continue with</span>
+              <span className="flex-shrink-0 mx-3 text-foreground/30 text-[8px] uppercase tracking-[0.2em] font-black italic">Or continue with</span>
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
             </div>
 
-            <div className="w-full flex flex-col gap-4">
-              <div className="rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-4 shadow-soft group/google">
-                <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/50 mb-3">
+            <div className="w-full flex flex-col gap-1.5">
+              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
+                <div className="flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-foreground/50 mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex flex-col items-center justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                  <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
                     {!!googleRenderError && (
                       <div className="mt-3 flex flex-col items-center gap-2">
@@ -963,7 +1006,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[10px] font-semibold text-center text-foreground/40 italic opacity-60">
+              <p className="text-[9px] font-semibold text-center text-foreground/40 italic opacity-60">
                 Use Google to sign in faster.
               </p>
             </div>
@@ -973,21 +1016,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
 
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "signup" && (
-          <div className="mt-8 flex flex-col items-center gap-5">
-            <div className="relative flex items-center w-full px-4">
+          <div className="mt-4 flex flex-col items-center gap-2.5">
+            <div className="relative flex items-center w-full px-1">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
-              <span className="flex-shrink-0 mx-6 text-foreground/30 text-[9px] uppercase tracking-[0.3em] font-black italic">Sign up with</span>
+              <span className="flex-shrink-0 mx-3 text-foreground/30 text-[8px] uppercase tracking-[0.2em] font-black italic">Sign up with</span>
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
             </div>
 
-            <div className="w-full flex flex-col gap-4">
-              <div className="rounded-[2.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-4 shadow-soft group/google">
-                <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground/50 mb-3">
+            <div className="w-full flex flex-col gap-1.5">
+              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
+                <div className="flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-foreground/50 mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                   Continue with Google
                 </div>
                 {googleClientId ? (
-                  <div className="w-full flex flex-col items-center justify-center p-2 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
+                  <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
                     {!!googleRenderError && (
                       <div className="mt-3 flex flex-col items-center gap-2">
@@ -1008,14 +1051,14 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[10px] font-semibold text-center text-foreground/40 italic opacity-60">
+              <p className="text-[9px] font-semibold text-center text-foreground/40 italic opacity-60">
                 Use Google to sign up faster.
               </p>
             </div>
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-center">
+        <div className="mt-2 flex items-center justify-center">
           {authMode === "login" ? (
             <button
               type="button"
@@ -1038,51 +1081,51 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           )}
         </div>
 
-        <div className="mt-8 pt-4 w-full">
-          <div className="relative flex items-center mb-10">
+        <div className="mt-4 pt-2 w-full">
+          <div className="relative flex items-center mb-4">
             <div className="flex-grow border-t border-divider h-px"></div>
-            <span className="flex-shrink-0 mx-6 text-default-400 text-[9px] font-black uppercase tracking-[0.4em] italic opacity-60">Switch Role</span>
+            <span className="flex-shrink-0 mx-3 text-default-400 text-[8px] font-black uppercase tracking-[0.25em] italic opacity-60">Switch Role</span>
             <div className="flex-grow border-t border-divider h-px"></div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {role === "Associate" ? (
               <button
                 type="button"
                 onClick={() => router.push("/auth/operator")}
-                className="w-full flex items-center justify-between px-6 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[11px] tracking-widest transition-all duration-500 group/btn shadow-sm"
+                className="w-full flex items-center justify-between px-4 h-11 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[10px] tracking-[0.15em] transition-all duration-500 group/btn shadow-sm"
               >
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="opacity-40 text-[8px] tracking-[0.6em]">Switch Role</span>
-                  <span>Sign in as Operator</span>
+                  <span className="opacity-40 text-[7px] tracking-[0.25em]">{roleIdentity?.switchSubLabel || "Switch Role"}</span>
+                  <span>{roleIdentity?.switchLabel || "Sign in as Operator"}</span>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
-                  <FiArrowRight className="text-sm group-hover/btn:text-black transition-colors" />
+                <div className="w-7 h-7 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
+                  <FiArrowRight className="text-xs group-hover/btn:text-black transition-colors" />
                 </div>
               </button>
             ) : (role === "Operator" || role === "team") ? (
               <button
                 type="button"
                 onClick={() => router.push("/auth")}
-                className="w-full flex items-center justify-between px-6 h-14 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[11px] tracking-widest transition-all duration-500 group/btn shadow-sm"
+                className="w-full flex items-center justify-between px-4 h-11 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-warning-500/20 text-foreground font-black uppercase text-[10px] tracking-[0.15em] transition-all duration-500 group/btn shadow-sm"
               >
                 <div className="flex flex-col items-start gap-0.5">
-                  <span className="opacity-40 text-[8px] tracking-[0.6em]">Switch Role</span>
-                  <span>Sign in as Associate</span>
+                  <span className="opacity-40 text-[7px] tracking-[0.25em]">{roleIdentity?.switchSubLabel || "Switch Role"}</span>
+                  <span>{roleIdentity?.switchLabel || "Sign in as Associate"}</span>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
-                  <FiArrowRight className="text-sm group-hover/btn:text-black transition-colors" />
+                <div className="w-7 h-7 rounded-full bg-warning-500/10 flex items-center justify-center group-hover/btn:bg-warning-500 transition-all duration-500">
+                  <FiArrowRight className="text-xs group-hover/btn:text-black transition-colors" />
                 </div>
               </button>
             ) : null}
 
-            <div className="mt-10 flex justify-center w-full">
+            <div className="mt-4 flex justify-center w-full">
               <button
                 type="button"
                 onClick={() => router.push("/roles")}
                 className="group flex flex-col items-center gap-2"
               >
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-default-400 group-hover:text-warning-500 transition-colors italic leading-none">
+                <span className="text-[9px] font-black uppercase tracking-[0.24em] text-default-400 group-hover:text-warning-500 transition-colors italic leading-none">
                   View all roles
                 </span>
                 <div className="h-px w-24 bg-gradient-to-r from-transparent via-divider to-transparent group-hover:via-warning-500 transition-all" />

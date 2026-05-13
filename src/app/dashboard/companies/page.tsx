@@ -102,53 +102,50 @@ export default function CompanyProductPage() {
   });
 
   const totalCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-total", roleLower, user?.id, assignmentFilter, liveProductFilter],
+    queryKey: ["company-metrics-total", roleLower, user?.id],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-        ...(isAdmin && assignmentFilter !== "all" ? { assignmentStatus: assignmentFilter } : {}),
-        ...(liveProductFilter !== "all" ? { liveProductStatus: liveProductFilter } : {}),
       }),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const liveCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-live", roleLower, user?.id, assignmentFilter, liveProductFilter],
+    queryKey: ["company-metrics-live", roleLower, user?.id],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-        ...(isAdmin && assignmentFilter !== "all" ? { assignmentStatus: assignmentFilter } : {}),
         liveProductStatus: "live",
       }),
-    enabled: canAccessCompaniesWorkspace && liveProductFilter !== "not_live",
+    enabled: canAccessCompaniesWorkspace,
   });
 
   const assignedCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-assigned", roleLower, user?.id, liveProductFilter],
+    queryKey: ["company-metrics-assigned", roleLower, user?.id],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         assignmentStatus: "assigned",
-        ...(liveProductFilter !== "all" ? { liveProductStatus: liveProductFilter } : {}),
+        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
       }),
-    enabled: isAdmin,
+    enabled: canAccessCompaniesWorkspace,
   });
 
   const unassignedCompaniesQuery = useQuery({
-    queryKey: ["company-metrics-unassigned", roleLower, user?.id, liveProductFilter],
+    queryKey: ["company-metrics-unassigned", roleLower, user?.id],
     queryFn: () =>
       getData(apiRoutes.associateCompany.getAll, {
         page: 1,
         limit: 1,
         assignmentStatus: "unassigned",
-        ...(liveProductFilter !== "all" ? { liveProductStatus: liveProductFilter } : {}),
+        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
       }),
-    enabled: isAdmin,
+    enabled: canAccessCompaniesWorkspace,
   });
 
   const obaolConfig = obaolConfigQuery.data;
@@ -219,6 +216,23 @@ export default function CompanyProductPage() {
     return "";
   };
 
+  const hasAssignment = (company: any): boolean => {
+    const assigned = company?.assignedOperator;
+    if (assigned === null || assigned === undefined) return false;
+    if (typeof assigned === "string") return assigned.trim().length > 0;
+    const assignedId = toIdValue(assigned);
+    return assignedId.trim().length > 0;
+  };
+
+  const hasLiveProducts = (company: any): boolean => {
+    const rawLiveProducts =
+      company?.stats?.liveProducts ??
+      company?.liveProducts ??
+      company?.metrics?.liveProducts ??
+      0;
+    return Number(rawLiveProducts || 0) > 0;
+  };
+
   const normalizeInterestList = (raw: any) => {
     if (!Array.isArray(raw)) return [];
     return raw
@@ -286,15 +300,9 @@ export default function CompanyProductPage() {
   const scopedAssignedCompaniesCount = getTotalCount(assignedCompaniesQuery.data?.data);
   const scopedUnassignedCompaniesCount = getTotalCount(unassignedCompaniesQuery.data?.data);
 
-  const assignedCount = isAdmin
-    ? scopedAssignedCompaniesCount
-    : totalCompaniesCount;
-  const unassignedCount = isAdmin
-    ? scopedUnassignedCompaniesCount
-    : 0;
-  const liveCount = liveProductFilter === "not_live"
-    ? 0
-    : Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
+  const assignedCount = scopedAssignedCompaniesCount;
+  const unassignedCount = scopedUnassignedCompaniesCount;
+  const liveCount = Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
   const notLiveCount = Math.max(totalCompaniesCount - liveCount, 0);
 
   useEffect(() => {
@@ -889,6 +897,8 @@ export default function CompanyProductPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {companies.map((company: any, idx: number) => {
                       const name = String(company?.name || "Unnamed Company");
+                      const companyIsAssigned = hasAssignment(company);
+                      const companyIsLive = hasLiveProducts(company);
                       return (
                         <motion.button
                           key={company?._id || idx}
@@ -924,6 +934,24 @@ export default function CompanyProductPage() {
                             <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest">
                               <LuPhone size={14} className="shrink-0 text-primary-500/40" />
                               {toText(company?.phone, "Not available")}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <Chip
+                                size="sm"
+                                variant="flat"
+                                color={companyIsAssigned ? "success" : "warning"}
+                                className="text-[9px] font-black uppercase tracking-wider"
+                              >
+                                {companyIsAssigned ? "Assigned" : "Unassigned"}
+                              </Chip>
+                              <Chip
+                                size="sm"
+                                variant="flat"
+                                color={companyIsLive ? "success" : "danger"}
+                                className="text-[9px] font-black uppercase tracking-wider"
+                              >
+                                {companyIsLive ? "Live Products" : "No Live Products"}
+                              </Chip>
                             </div>
                           </div>
 

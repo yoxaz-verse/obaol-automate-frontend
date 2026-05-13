@@ -4,7 +4,8 @@ import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
 import { Button } from "@nextui-org/react";
 import { motion } from "framer-motion";
-import { LuShieldOff, LuAlertTriangle, LuMail, LuPhone } from "react-icons/lu";
+import { LuShieldOff, LuMail, LuPhone } from "react-icons/lu";
+import { FiAlertTriangle as LuAlertTriangle } from "react-icons/fi";
 
 export default function RejectedPage() {
   const { user, logout } = useContext(AuthContext);

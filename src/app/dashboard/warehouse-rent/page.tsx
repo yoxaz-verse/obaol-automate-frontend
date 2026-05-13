@@ -195,7 +195,14 @@ export default function WarehouseRentPage() {
     return rentalWarehouses.filter((warehouse) => {
       const lat = Number(warehouse?.location?.latitude);
       const lng = Number(warehouse?.location?.longitude);
-      return Number.isFinite(lat) && Number.isFinite(lng);
+      return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+      );
     });
   }, [rentalWarehouses]);
 
@@ -226,32 +233,6 @@ export default function WarehouseRentPage() {
     return { booked: ids, pending: pendingIds };
   }, [activeAssignments]);
 
-  const mapWarehouses: WarehouseMapItem[] = useMemo(
-    () =>
-      filteredWarehouses.map((warehouse) => {
-        const warehouseId = String(warehouse._id || "");
-        const category = String(warehouse.category || "GENERAL");
-        return {
-          id: warehouseId,
-          name: warehouse.name,
-          lat: Number(warehouse.location?.latitude),
-          lng: Number(warehouse.location?.longitude),
-          category,
-          color: CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL,
-          storageRatePerUnit: warehouse.storageRatePerUnit,
-          unit: warehouse.unit,
-          isBooked: bookedWarehouseIdSet.booked.has(warehouseId),
-          isQuoteRequested: bookedWarehouseIdSet.pending.has(warehouseId),
-          isActionDisabled:
-            bookedWarehouseIdSet.booked.has(warehouseId) ||
-            (needsCompanySelect && !selectedCompanyId) ||
-            bookMutation.isPending,
-          source: warehouse,
-        };
-      }),
-    [bookMutation.isPending, bookedWarehouseIdSet, filteredWarehouses, needsCompanySelect, selectedCompanyId]
-  );
-
   const bookMutation = useMutation({
     mutationFn: (payload: {
       warehouseId: string;
@@ -279,6 +260,32 @@ export default function WarehouseRentPage() {
       });
     },
   });
+
+  const mapWarehouses: WarehouseMapItem[] = useMemo(
+    () =>
+      filteredWarehouses.map((warehouse) => {
+        const warehouseId = String(warehouse._id || "");
+        const category = String(warehouse.category || "GENERAL");
+        return {
+          id: warehouseId,
+          name: warehouse.name,
+          lat: Number(warehouse.location?.latitude),
+          lng: Number(warehouse.location?.longitude),
+          category,
+          color: CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL,
+          storageRatePerUnit: warehouse.storageRatePerUnit,
+          unit: warehouse.unit,
+          isBooked: bookedWarehouseIdSet.booked.has(warehouseId),
+          isQuoteRequested: bookedWarehouseIdSet.pending.has(warehouseId),
+          isActionDisabled:
+            bookedWarehouseIdSet.booked.has(warehouseId) ||
+            (needsCompanySelect && !selectedCompanyId) ||
+            bookMutation.isPending,
+          source: warehouse,
+        };
+      }),
+    [bookMutation.isPending, bookedWarehouseIdSet, filteredWarehouses, needsCompanySelect, selectedCompanyId]
+  );
 
   const openBookModal = (warehouse: Warehouse) => {
     setSelectedWarehouse(warehouse);

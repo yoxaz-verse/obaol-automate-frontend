@@ -16,6 +16,7 @@ export default function Product() {
 
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
+  const isAdminUser = roleLower === "admin";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAssociate = user?.role === "Associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
@@ -41,13 +42,17 @@ export default function Product() {
     }
   }, [isOperatorUser, operatorScopedCompanyIds, selectedCompanyId]);
 
-  const operatorProductParams = isOperatorUser
-    ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds }
-    : { selected: true };
+  const defaultProductParams = isAdminUser
+    ? (selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {})
+    : isOperatorUser
+      ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds }
+      : {};
 
-  const operatorLiveProductParams = isOperatorUser
-    ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds, isLive: true }
-    : { isLive: true };
+  const defaultLiveProductParams = isAdminUser
+    ? { ...(selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {}), isLive: true }
+    : isOperatorUser
+      ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds, isLive: true }
+      : { isLive: true };
 
   useEffect(() => {
     if (isNoCompanyAssociate && currentTable !== "catalog") {
@@ -118,18 +123,18 @@ export default function Product() {
               ) : (
                 <>
                   <Tab key={"selected"} title="Products">
-                    <VariantRate
+                      <VariantRate
                       rate="variantRate"
-                      additionalParams={operatorProductParams}
+                      additionalParams={defaultProductParams}
                       showAssociateColumn={isOperatorUser}
                       showInventoryStatus={inventoryStatusEnabled}
                       inventoryCompanyId={selectedCompanyId}
                     />
                   </Tab>
                   <Tab key={"live"} title="Live Products">
-                    <VariantRate
+                      <VariantRate
                       rate="variantRate"
-                      additionalParams={operatorLiveProductParams}
+                      additionalParams={defaultLiveProductParams}
                       showAssociateColumn={isOperatorUser}
                       showInventoryStatus={inventoryStatusEnabled}
                       inventoryCompanyId={selectedCompanyId}

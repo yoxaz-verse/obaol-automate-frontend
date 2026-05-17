@@ -15,12 +15,12 @@ import { BsGlobeCentralSouthAsia } from "react-icons/bs";
 import { SiGoogleforms } from "react-icons/si";
 import { LuWarehouse, LuShip } from "react-icons/lu";
 import { FiShoppingBag, FiPackage } from "react-icons/fi";
-import { TbContainer, TbBuildingWarehouse } from "react-icons/tb";
+import { TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
 import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
-import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage } from "react-icons/lu";
+import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage, LuFlaskConical } from "react-icons/lu";
 
 
 export const validateEmail = (value: string): boolean => emailRegex.test(value);
@@ -103,6 +103,11 @@ export const sidebarOptions = [
     name: "Warehouse Booking",
     icon: <TbBuildingWarehouse />,
     link: "/dashboard/warehouse-rent",
+  },
+  {
+    name: "Quality Labs",
+    icon: <LuFlaskConical />,
+    link: "/dashboard/quality-labs",
   },
   {
     name: "My Company",

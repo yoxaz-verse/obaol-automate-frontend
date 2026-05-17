@@ -252,7 +252,6 @@ export default function CatalogPage() {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [search, setSearch] = useState("");
   const [classificationTab, setClassificationTab] = useState<"all" | "conventional" | "natural" | "organic" | "gi-tag">("all");
-  const [classificationFilters, setClassificationFilters] = useState<string[]>([]);
 
   // Management State
   const [editItem, setEditItem] = useState<any | null>(null);
@@ -262,16 +261,10 @@ export default function CatalogPage() {
   const currentLevel = navigation.length - 1;
   const currentNav = navigation[currentLevel];
   const isSearching = search.trim().length > 0;
-  const effectiveClassifications = classificationTab === "all"
-    ? classificationFilters
-    : Array.from(new Set([classificationTab, ...classificationFilters]));
+  const effectiveClassifications = classificationTab === "all" ? [] : [classificationTab];
   const activeTheme = resolveActiveClassificationTheme(effectiveClassifications);
-
-  const toggleClassificationFilter = (value: string) => {
-    setClassificationFilters((prev) =>
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
-    );
-  };
+  const showWatermark = classificationTab !== "all";
+  const WatermarkIcon = activeTheme.icon;
 
   const handleSelect = (item: any) => {
     if (currentLevel < 2) {
@@ -329,9 +322,28 @@ export default function CatalogPage() {
 
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-64px)] w-full py-8 relative">
-      {/* Background Ambient Effects */}
-      <div className={`absolute top-0 right-0 w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowA}`} />
-      <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowB}`} />
+      {/* Background Classification Watermark */}
+      <AnimatePresence mode="wait">
+        {showWatermark && (
+          <motion.div
+            key={activeTheme.key}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.04 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
+            aria-hidden="true"
+          >
+            <div className={`absolute inset-0 ${activeTheme.pageWashClass}`} />
+            <div className={`absolute inset-0 ${activeTheme.pageWashOverlayClass}`} />
+            <div className={`absolute ${activeTheme.watermarkPositionClass}`}>
+              <WatermarkIcon
+                className={`${activeTheme.watermarkIconClass} ${activeTheme.watermarkOpacityClass} ${activeTheme.watermarkSizeClass} ${activeTheme.watermarkBlurClass}`}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="w-full max-w-[1400px] px-6 relative z-10 flex flex-col h-full">
         {/* Header & Search */}
@@ -373,24 +385,22 @@ export default function CatalogPage() {
             </div>
 
             {isAdmin && !selectedProduct && !isSearching && (
-              <div className="shadow-xl rounded-xl overflow-hidden">
-                <AddModal
-                  name={config.label}
-                  currentTable={config.table}
-                  formFields={tableConfig[config.table].filter((f: any) =>
-                    currentLevel === 0 ? true :
-                      currentLevel === 1 ? f.key !== "category" :
-                        f.key !== "subCategory"
-                  )}
-                  apiEndpoint={apiRoutesByRole[config.type]}
-                  additionalVariable={
-                    currentLevel === 1 ? { category: currentNav.id } :
-                      currentLevel === 2 ? { subCategory: currentNav.id } :
-                        {}
-                  }
-                  refetchData={refetchData}
-                />
-              </div>
+              <AddModal
+                name={config.label}
+                currentTable={config.table}
+                formFields={tableConfig[config.table].filter((f: any) =>
+                  currentLevel === 0 ? true :
+                    currentLevel === 1 ? f.key !== "category" :
+                      f.key !== "subCategory"
+                )}
+                apiEndpoint={apiRoutesByRole[config.type]}
+                additionalVariable={
+                  currentLevel === 1 ? { category: currentNav.id } :
+                    currentLevel === 2 ? { subCategory: currentNav.id } :
+                      {}
+                }
+                refetchData={refetchData}
+              />
             )}
           </div>
         </div>
@@ -402,29 +412,38 @@ export default function CatalogPage() {
             variant="underlined"
             color="warning"
             classNames={{
-              tabList: "gap-6 relative rounded-none p-0 border-b border-divider/30",
-              cursor: "bg-warning-500 w-full h-[2px] rounded-t-full",
-              tab: "max-w-fit px-2 h-11",
-              tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-400 transition-all group-data-[selected=true]:text-warning-500"
+              tabList: "gap-3 relative rounded-none p-0 border-b border-divider/30",
+              cursor: "bg-transparent h-0",
+              tab: "max-w-fit px-0 h-11 data-[hover-unselected=true]:opacity-100",
+              tabContent: "p-0"
             }}
           >
             <Tab
               key="all"
               title={(
-                <span className="inline-flex items-center gap-1.5">
-                  <FiGrid size={13} />
+                <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 transition-all ${
+                  classificationTab === "all"
+                    ? "bg-warning-500/15 border-warning-400/45 text-warning-600 shadow-sm font-bold"
+                    : "bg-transparent border-transparent text-default-400 hover:bg-default-500/10 font-semibold"
+                }`}>
+                  <FiGrid size={14} className={classificationTab === "all" ? "text-warning-500" : "text-default-400"} />
                   <span>All</span>
                 </span>
               )}
             />
             {getClassificationOptions().map((item) => {
               const theme = getClassificationTheme(item.key);
+              const isSelected = classificationTab === item.key;
               return (
                 <Tab
                   key={item.key}
                   title={(
-                    <span className={`inline-flex items-center gap-1.5 transition-colors ${classificationTab === item.key ? theme.tabActiveClass : theme.tabIdleClass}`}>
-                      <item.icon size={13} className={theme.iconClass} />
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 transition-all ${
+                        isSelected ? `${theme.tabPillActiveClass} ${theme.tabActiveClass} font-bold` : `${theme.tabPillIdleClass} ${theme.tabIdleClass} font-semibold`
+                      }`}
+                    >
+                      <item.icon size={14} className={isSelected ? theme.tabIconActiveClass : theme.tabIconIdleClass} />
                       <span>{item.label}</span>
                     </span>
                   )}
@@ -432,26 +451,6 @@ export default function CatalogPage() {
               );
             })}
           </Tabs>
-          <div className="flex flex-wrap gap-2">
-            {getClassificationOptions().map((option) => {
-              const selected = classificationFilters.includes(option.key);
-              const optionTheme = getClassificationTheme(option.key);
-              return (
-                <Chip
-                  key={option.key}
-                  variant={selected ? "solid" : "flat"}
-                  color={selected ? "warning" : "default"}
-                  className={`cursor-pointer border transition-all duration-300 ${selected ? activeTheme.chipActiveClass : optionTheme.chipIdleClass}`}
-                  onClick={() => toggleClassificationFilter(option.key)}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <option.icon size={13} className={optionTheme.iconClass} />
-                    <span>{option.label}</span>
-                  </span>
-                </Chip>
-              );
-            })}
-          </div>
         </div>
 
         {/* Navigation Breadcrumbs */}

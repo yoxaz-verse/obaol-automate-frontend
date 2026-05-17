@@ -1,5 +1,4 @@
 import React from "react";
-import { Tooltip } from "@heroui/react";
 
 interface EnquiryStatusProps {
     status: string; // e.g., "New", "In Progress", "Quoted", "Completed", "Rejected"
@@ -10,16 +9,16 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({ status }) => {
     const getStatusConfig = (s: string) => {
         const normalize = s?.toLowerCase() || "unknown";
         if (normalize.includes("new") || normalize.includes("pending"))
-            return { color: "#06b6d4", bg: "rgba(6, 182, 212, 0.1)", step: 1, label: "New / Pending" };
+            return { color: "#06b6d4", step: 1, label: "New / Pending" };
         if (normalize.includes("quot") || normalize.includes("progress") || normalize.includes("process"))
-            return { color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)", step: 1, label: s.includes("quot") ? "Quoted" : "Processing" };
+            return { color: "#8b5cf6", step: 1, label: s.includes("quot") ? "Quoted" : "Processing" };
         if (normalize.includes("convert"))
-            return { color: "#6366f1", bg: "rgba(99, 102, 241, 0.1)", step: 2, label: "Converted" };
+            return { color: "#6366f1", step: 2, label: "Converted" };
         if (normalize.includes("complete") || normalize.includes("order"))
-            return { color: "#22c55e", bg: "rgba(34, 197, 94, 0.1)", step: 3, label: "Completed" };
+            return { color: "#22c55e", step: 3, label: "Completed" };
         if (normalize.includes("reject") || normalize.includes("cancel"))
-            return { color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)", step: 0, label: "Cancelled" };
-        return { color: "#64748b", bg: "rgba(100, 116, 139, 0.1)", step: 0, label: s || "Unknown" };
+            return { color: "#ef4444", step: 0, label: "Cancelled" };
+        return { color: "#64748b", step: 0, label: s || "Unknown" };
     };
 
     const config = getStatusConfig(status);
@@ -48,7 +47,7 @@ const EnquiryStatus: React.FC<EnquiryStatusProps> = ({ status }) => {
                             className="h-1 rounded-full transition-all duration-700 ease-in-out"
                             style={{
                                 flex: step <= config.step ? 2 : 1,
-                                backgroundColor: step <= config.step ? config.color : "rgba(0,0,0,0.05)",
+                                backgroundColor: step <= config.step ? config.color : "rgba(148,163,184,0.35)",
                                 opacity: step <= config.step ? 1 : 0.3
                             }}
                         />

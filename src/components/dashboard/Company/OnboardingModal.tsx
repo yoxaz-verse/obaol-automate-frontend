@@ -72,15 +72,37 @@ interface OnboardingFlowProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  mode?: "default" | "quality_labs_associate_add";
+  initialServiceCapabilities?: string[];
+  initialWorkspaceMode?: "combined" | "company" | "associate";
+  allowedWorkspaceModes?: Array<"combined" | "company" | "associate">;
+  hideCombinedFlow?: boolean;
+  companyAllocationFilter?: "quality_testing" | "none";
+  allowSelfCompanyFallback?: boolean;
+  hidePathwaysUI?: boolean;
+  requireCompanySelectionForAdmin?: boolean;
 }
 
-export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: OnboardingFlowProps) {
+export default function OnboardingModal({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+  mode = "default",
+  initialServiceCapabilities,
+  initialWorkspaceMode = "combined",
+  allowedWorkspaceModes = ["combined", "company", "associate"],
+  hideCombinedFlow = false,
+  companyAllocationFilter = "none",
+  allowSelfCompanyFallback = false,
+  hidePathwaysUI = false,
+  requireCompanySelectionForAdmin = false,
+}: OnboardingFlowProps) {
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const [combinedStep, setCombinedStep] = useState<1 | 2 | 3 | 4>(1);
-  const [operatorWorkspaceMode, setOperatorWorkspaceMode] = useState<"combined" | "company" | "associate">("combined");
+  const [operatorWorkspaceMode, setOperatorWorkspaceMode] = useState<"combined" | "company" | "associate">(initialWorkspaceMode);
   const [combinedAssociateForm, setCombinedAssociateForm] = useState(EMPTY_COMBINED_ASSOCIATE_FORM);
   const [operatorCompanyForm, setOperatorCompanyForm] = useState(EMPTY_OPERATOR_COMPANY_FORM);
   const [operatorAssociateForm, setOperatorAssociateForm] = useState(EMPTY_OPERATOR_ASSOCIATE_FORM);
@@ -89,6 +111,12 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
     email: string;
     password: string;
   } | null>(null);
+  const [presetCapabilitiesApplied, setPresetCapabilitiesApplied] = useState(false);
+  const allowCompanyMode = allowedWorkspaceModes.includes("company");
+  const allowAssociateMode = allowedWorkspaceModes.includes("associate");
+  const isQualityLabsAssociateAdd = mode === "quality_labs_associate_add";
+  const shouldHideCombinedFlow = hideCombinedFlow || isQualityLabsAssociateAdd;
+  const shouldHidePathwaysUI = hidePathwaysUI || isQualityLabsAssociateAdd;
 
   // Queries for forms
   const companyTypesQuery = useQuery({
@@ -202,12 +230,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
   );
   const isFunctionStepValid = selectedFunctionIds.length >= 1 && selectedFunctionPriorities.length >= 1;
 
-  const isAssociateOnlyFormValid = Boolean(
-    operatorAssociateForm.name &&
-    operatorAssociateForm.email &&
-    operatorAssociateForm.phone &&
-    operatorAssociateForm.associateCompany
-  );
+  const isQualityTestingAllocation = companyAllocationFilter === "quality_testing";
 
   const availableCompanyFunctions = useMemo(
     () =>
@@ -244,6 +267,48 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
       .filter((id) => selectedFunctionIds.includes(id))
       .slice(0, 3);
   }, [selectedFunctionIds, selectedFunctionPriorities]);
+
+  const presetCapabilitySlugs = useMemo(
+    () => (Array.isArray(initialServiceCapabilities) ? initialServiceCapabilities : []).map((cap) => String(cap || "").trim().toUpperCase()).filter(Boolean),
+    [initialServiceCapabilities]
+  );
+
+  const presetFunctionIds = useMemo(() => {
+    if (!presetCapabilitySlugs.length) return [];
+    const presetSlugSet = new Set(presetCapabilitySlugs);
+    return availableCompanyFunctions
+      .filter((fn: any) => presetSlugSet.has(String(fn?.slug || "").trim().toUpperCase()))
+      .map((fn: any) => String(fn?._id || fn?.id || ""))
+      .filter(Boolean);
+  }, [availableCompanyFunctions, presetCapabilitySlugs]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPresetCapabilitiesApplied(false);
+      return;
+    }
+    if (presetCapabilitiesApplied || presetFunctionIds.length === 0) return;
+    setOperatorCompanyForm((prev) => {
+      const currentCapabilities = Array.isArray(prev.serviceCapabilities) ? prev.serviceCapabilities : [];
+      const mergedCapabilities = Array.from(new Set([...currentCapabilities, ...presetFunctionIds])).slice(0, 6);
+      const currentPriorities = Array.isArray(prev.companyFunctionPriorities) ? prev.companyFunctionPriorities : [];
+      const mergedPriorities = Array.from(new Set([...presetFunctionIds, ...currentPriorities])).filter((id) => mergedCapabilities.includes(id)).slice(0, 3);
+      return {
+        ...prev,
+        serviceCapabilities: mergedCapabilities,
+        companyFunctionPriorities: mergedPriorities,
+      };
+    });
+    setPresetCapabilitiesApplied(true);
+  }, [isOpen, presetCapabilitiesApplied, presetFunctionIds]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const preferredMode = allowedWorkspaceModes.includes(initialWorkspaceMode)
+      ? initialWorkspaceMode
+      : allowedWorkspaceModes[0] || "combined";
+    setOperatorWorkspaceMode(preferredMode);
+  }, [isOpen, initialWorkspaceMode, allowedWorkspaceModes]);
 
   const updateCompanyFunctionSelection = (functionId: string) => {
     setOperatorCompanyForm((prev) => {
@@ -350,8 +415,11 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
   const operatorCreateAssociateMutation = useMutation({
     mutationFn: async () => {
       const tempPass = buildTemporaryPassword();
+      const associateCompany = String(effectiveAssociateCompanyId || "").trim();
+      if (!associateCompany) throw new Error("Associate company is required.");
       const res = await postData(apiRoutes.associate.getAll, {
         ...operatorAssociateForm,
+        associateCompany,
         password: tempPass,
       });
       return { payload: res?.data?.data, tempPass };
@@ -376,7 +444,37 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
   const locationCountries = countriesQuery.data || [];
   const locationStates = statesQuery.data || [];
   const locationDistricts = districtsQuery.data || [];
-  const operatorAssignedCompanies = assignedCompaniesQuery.data || [];
+  const assignableCompanies = useMemo(() => {
+    const rawAssignedCompanies = assignedCompaniesQuery.data;
+    const rows = Array.isArray(rawAssignedCompanies) ? rawAssignedCompanies : [];
+    if (!isQualityTestingAllocation) return rows;
+    return rows.filter((company: any) => {
+      const caps = Array.isArray(company?.serviceCapabilities)
+        ? company.serviceCapabilities.map((value: any) => String(value || "").toUpperCase())
+        : [];
+      return caps.includes("QUALITY_TESTING");
+    });
+  }, [assignedCompaniesQuery.data, isQualityTestingAllocation]);
+
+  const selfCompanyId = String(user?.associateCompanyId || "").trim();
+  const selectedAssociateCompanyId = String(operatorAssociateForm.associateCompany || "").trim();
+  const isAdmin = roleLower === "admin";
+  const effectiveAssociateCompanyId = isQualityLabsAssociateAdd
+    ? (isAdmin ? selectedAssociateCompanyId : selfCompanyId)
+    : (selectedAssociateCompanyId || (allowSelfCompanyFallback ? selfCompanyId : ""));
+  const canSelfLink = allowSelfCompanyFallback && Boolean(selfCompanyId);
+  const hasAssignableCompany = assignableCompanies.length > 0;
+
+  const showAllocationBlockingError = isQualityLabsAssociateAdd
+    ? (isAdmin ? !hasAssignableCompany : !Boolean(selfCompanyId))
+    : (isQualityTestingAllocation && !hasAssignableCompany && !canSelfLink);
+
+  const isAssociateOnlyFormValid = Boolean(
+    operatorAssociateForm.name &&
+    operatorAssociateForm.email &&
+    operatorAssociateForm.phone &&
+    effectiveAssociateCompanyId
+  );
 
   return (
     <Modal 
@@ -406,45 +504,47 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
               </div>
             </ModalHeader>
             <ModalBody className="space-y-8 overflow-y-auto">
-              <div className="rounded-[2.5rem] border border-primary-500/20 bg-primary-500/5 p-8 space-y-8 shadow-inner relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -z-10" />
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div>
-                    <h3 className="text-xl font-black italic uppercase tracking-tighter">Onboard Associate + Company</h3>
-                    <p className="text-[10px] text-default-500 font-bold tracking-widest uppercase mt-1">Primary combined onboarding flow</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2 w-full md:w-48">
-                    <div className="flex items-center justify-between w-full px-1">
-                       <span className="text-[9px] font-black uppercase text-primary-500 tracking-[0.2em] italic">Flow status</span>
-                       <span className="text-[9px] font-black uppercase text-primary-500 tracking-widest italic">{combinedStep}/4</span>
+              {!shouldHideCombinedFlow ? (
+                <div className="rounded-[2.5rem] border border-primary-500/20 bg-primary-500/5 p-8 space-y-8 shadow-inner relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -z-10" />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <h3 className="text-xl font-black italic uppercase tracking-tighter">Onboard Associate + Company</h3>
+                      <p className="text-[10px] text-default-500 font-bold tracking-widest uppercase mt-1">Primary combined onboarding flow</p>
                     </div>
-                    <Progress value={(combinedStep / 4) * 100} size="sm" color="primary" className="h-1.5 bg-primary-500/10" classNames={{ indicator: "shadow-[0_0_10px_rgba(0,111,238,0.5)]" }} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {["Associate", "Company", "Functions", "Review"].map((label, index) => (
-                    <div
-                      key={label}
-                      className={`rounded-2xl border px-5 py-4 text-[11px] font-black uppercase tracking-widest transition-all duration-500 ${
-                        combinedStep === index + 1
-                          ? "border-primary-500/50 bg-primary-500/20 text-primary-500 shadow-[0_10px_30px_rgba(0,111,238,0.15)] scale-[1.02]"
-                          : combinedStep > index + 1
-                          ? "border-success-500/30 bg-success-500/10 text-success-500 opacity-60"
-                          : "border-divider/50 bg-content2/30 text-default-400 opacity-30"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                         <span>{index + 1}. {label}</span>
-                         {combinedStep > index + 1 && <div className="w-1.5 h-1.5 rounded-full bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />}
+                    <div className="flex flex-col items-end gap-2 w-full md:w-48">
+                      <div className="flex items-center justify-between w-full px-1">
+                         <span className="text-[9px] font-black uppercase text-primary-500 tracking-[0.2em] italic">Flow status</span>
+                         <span className="text-[9px] font-black uppercase text-primary-500 tracking-widest italic">{combinedStep}/4</span>
                       </div>
+                      <Progress value={(combinedStep / 4) * 100} size="sm" color="primary" className="h-1.5 bg-primary-500/10" classNames={{ indicator: "shadow-[0_0_10px_rgba(0,111,238,0.5)]" }} />
                     </div>
-                  ))}
-                </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {["Associate", "Company", "Functions", "Review"].map((label, index) => (
+                      <div
+                        key={label}
+                        className={`rounded-2xl border px-5 py-4 text-[11px] font-black uppercase tracking-widest transition-all duration-500 ${
+                          combinedStep === index + 1
+                            ? "border-primary-500/50 bg-primary-500/20 text-primary-500 shadow-[0_10px_30px_rgba(0,111,238,0.15)] scale-[1.02]"
+                            : combinedStep > index + 1
+                            ? "border-success-500/30 bg-success-500/10 text-success-500 opacity-60"
+                            : "border-divider/50 bg-content2/30 text-default-400 opacity-30"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                           <span>{index + 1}. {label}</span>
+                           {combinedStep > index + 1 && <div className="w-1.5 h-1.5 rounded-full bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
                 {!createdAssociateCredential ? (
                   <>
-                    <div className="rounded-[2rem] border border-divider/50 bg-content1/70 p-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.2)] backdrop-blur-md">
+                    {!shouldHideCombinedFlow ? (
+                      <div className="rounded-[2rem] border border-divider/50 bg-content1/70 p-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.2)] backdrop-blur-md">
                       {combinedStep === 1 && (
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                           <Input label="Associate Name" labelPlacement="outside" placeholder="Legal full name" variant="bordered" radius="lg" size="lg" value={combinedAssociateForm.name} onValueChange={(value) => setCombinedAssociateForm((current) => ({ ...current, name: value }))} isRequired classNames={{ label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-500 ml-1 mb-2", inputWrapper: "h-14 bg-default-100/50 border-divider shadow-inner" }} />
@@ -624,18 +724,21 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
                           </div>
                         </div>
                       )}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4">
-                      <Button variant="light" isDisabled={combinedStep === 1} onPress={() => setCombinedStep((prev) => (prev > 1 ? (prev - 1) as 1 | 2 | 3 | 4 : prev))} className="font-black uppercase text-[10px] tracking-widest italic h-12 px-10 rounded-2xl">Previous Step</Button>
-                      <div className="flex gap-4">
-                        {combinedStep < 4 ? (
-                          <Button color="primary" isDisabled={(combinedStep === 1 && !isCombinedAssociateStepValid) || (combinedStep === 2 && !isCompanyFormValid) || (combinedStep === 3 && !isFunctionStepValid)} onPress={() => setCombinedStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)} className="font-black uppercase text-[10px] tracking-widest h-12 px-12 rounded-2xl shadow-[0_10px_40px_-5px_rgba(0,111,238,0.3)] bg-gradient-to-tr from-primary-600 to-primary-400">Continue Discovery</Button>
-                        ) : (
-                          <Button color="primary" isLoading={combinedOnboardingMutation.isPending} isDisabled={!isCombinedAssociateStepValid || !isCompanyFormValid || !isFunctionStepValid} onPress={() => combinedOnboardingMutation.mutate()} className="font-black uppercase text-[11px] tracking-widest italic h-12 px-14 rounded-2xl bg-primary-600 shadow-[0_20px_50px_-5px_rgba(0,111,238,0.4)]">Activate Protocol Deployment</Button>
-                        )}
                       </div>
-                    </div>
+                    ) : null}
+
+                    {!shouldHideCombinedFlow ? (
+                      <div className="flex items-center justify-between pt-4">
+                        <Button variant="light" isDisabled={combinedStep === 1} onPress={() => setCombinedStep((prev) => (prev > 1 ? (prev - 1) as 1 | 2 | 3 | 4 : prev))} className="font-black uppercase text-[10px] tracking-widest italic h-12 px-10 rounded-2xl">Previous Step</Button>
+                        <div className="flex gap-4">
+                          {combinedStep < 4 ? (
+                            <Button color="primary" isDisabled={(combinedStep === 1 && !isCombinedAssociateStepValid) || (combinedStep === 2 && !isCompanyFormValid) || (combinedStep === 3 && !isFunctionStepValid)} onPress={() => setCombinedStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)} className="font-black uppercase text-[10px] tracking-widest h-12 px-12 rounded-2xl shadow-[0_10px_40px_-5px_rgba(0,111,238,0.3)] bg-gradient-to-tr from-primary-600 to-primary-400">Continue Discovery</Button>
+                          ) : (
+                            <Button color="primary" isLoading={combinedOnboardingMutation.isPending} isDisabled={!isCombinedAssociateStepValid || !isCompanyFormValid || !isFunctionStepValid} onPress={() => combinedOnboardingMutation.mutate()} className="font-black uppercase text-[11px] tracking-widest italic h-12 px-14 rounded-2xl bg-primary-600 shadow-[0_20px_50px_-5px_rgba(0,111,238,0.4)]">Activate Protocol Deployment</Button>
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
                   </>
                 ) : (
                   <div className="p-12 rounded-[3.5rem] border border-success-500/30 bg-success-500/5 flex flex-col items-center text-center space-y-8 relative overflow-hidden">
@@ -691,22 +794,31 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
+              ) : null}
 
               {/* Standalone protocols - Hidden on success */}
-              {!createdAssociateCredential && (
+              {!createdAssociateCredential && !shouldHidePathwaysUI && (
                 <div className="space-y-6">
+                {(allowCompanyMode || allowAssociateMode) ? (
                 <div className="flex items-center gap-6">
                    <h3 className="text-sm font-black uppercase italic tracking-[0.25em] text-default-400">Alternative Protocol Pathways</h3>
                    <div className="flex-1 h-px bg-gradient-to-r from-divider via-divider/20 to-transparent" />
                 </div>
+                ) : null}
                 
-                <div className="flex flex-wrap gap-3">
-                   <Button variant={operatorWorkspaceMode === "company" ? "solid" : "flat"} color={operatorWorkspaceMode === "company" ? "primary" : "default"} onPress={() => setOperatorWorkspaceMode(m => m === "company" ? "combined" : "company")} className={`font-black uppercase text-[10px] tracking-widest px-8 h-10 rounded-2xl transition-all ${operatorWorkspaceMode === "company" ? "shadow-lg shadow-primary-500/30" : "opacity-60"}`}>Isolated Company</Button>
-                   <Button variant={operatorWorkspaceMode === "associate" ? "solid" : "flat"} color={operatorWorkspaceMode === "associate" ? "secondary" : "default"} onPress={() => setOperatorWorkspaceMode(m => m === "associate" ? "combined" : "associate")} className={`font-black uppercase text-[10px] tracking-widest px-8 h-10 rounded-2xl transition-all ${operatorWorkspaceMode === "associate" ? "shadow-lg shadow-secondary-500/30" : "opacity-60"}`}>Isolated Associate</Button>
-                </div>
+                {(allowCompanyMode || allowAssociateMode) ? (
+                  <div className="flex flex-wrap gap-3">
+                    {allowCompanyMode ? (
+                      <Button variant={operatorWorkspaceMode === "company" ? "solid" : "flat"} color={operatorWorkspaceMode === "company" ? "primary" : "default"} onPress={() => setOperatorWorkspaceMode("company")} className={`font-black uppercase text-[10px] tracking-widest px-8 h-10 rounded-2xl transition-all ${operatorWorkspaceMode === "company" ? "shadow-lg shadow-primary-500/30" : "opacity-60"}`}>Isolated Company</Button>
+                    ) : null}
+                    {allowAssociateMode ? (
+                      <Button variant={operatorWorkspaceMode === "associate" ? "solid" : "flat"} color={operatorWorkspaceMode === "associate" ? "secondary" : "default"} onPress={() => setOperatorWorkspaceMode("associate")} className={`font-black uppercase text-[10px] tracking-widest px-8 h-10 rounded-2xl transition-all ${operatorWorkspaceMode === "associate" ? "shadow-lg shadow-secondary-500/30" : "opacity-60"}`}>Isolated Associate</Button>
+                    ) : null}
+                  </div>
+                ) : null}
 
-                {operatorWorkspaceMode === "company" && (
+                {allowCompanyMode && operatorWorkspaceMode === "company" && (
                   <div className="p-8 rounded-[2rem] border border-divider/50 bg-content2/30 space-y-6 shadow-inner">
                     <div className="flex items-center gap-3">
                        <div className="w-1.5 h-4 bg-primary-500 rounded-full" />
@@ -784,7 +896,7 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
                   </div>
                 )}
 
-                {operatorWorkspaceMode === "associate" && (
+                {allowAssociateMode && operatorWorkspaceMode === "associate" && (
                   <div className="p-8 rounded-[2rem] border border-divider/50 bg-content2/30 space-y-6 shadow-inner">
                     <div className="flex items-center gap-3">
                        <div className="w-1.5 h-4 bg-secondary-500 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />
@@ -794,14 +906,63 @@ export default function OnboardingModal({ isOpen, onOpenChange, onSuccess }: Onb
                        <Input label="Associate Name" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.name} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, name: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
                        <Input label="Associate Email" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.email} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, email: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
                        <Select label="Entity Allocation" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorAssociateForm.associateCompany ? new Set([operatorAssociateForm.associateCompany]) : new Set()} onSelectionChange={(keys) => setOperatorAssociateForm(c => ({...c, associateCompany: String(Array.from(keys as Set<string>)[0] || "")}))} className="md:col-span-2" classNames={{ trigger: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }}>
-                          {operatorAssignedCompanies.map((c: any) => (<SelectItem key={c._id || c.id} textValue={c.name}>{c.name}</SelectItem>))}
+                          {assignableCompanies.map((c: any) => (<SelectItem key={c._id || c.id} textValue={c.name}>{c.name}</SelectItem>))}
                        </Select>
                     </div>
+                    {canSelfLink && !selectedAssociateCompanyId ? (
+                      <p className="text-[11px] text-default-400">
+                        No company selected. This associate will be linked to your company automatically.
+                      </p>
+                    ) : null}
+                    {showAllocationBlockingError ? (
+                      <p className="text-[11px] text-danger-400">
+                        No quality testing lab company is linked. Add or link a quality testing lab company first.
+                      </p>
+                    ) : null}
                     <div className="flex justify-end pt-4">
                       <Button color="secondary" isLoading={operatorCreateAssociateMutation.isPending} isDisabled={!isAssociateOnlyFormValid} onPress={() => operatorCreateAssociateMutation.mutate()} className="font-black uppercase text-[10px] tracking-widest px-12 h-12 rounded-2xl shadow-xl shadow-secondary-500/20">Authorize Associate</Button>
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {!createdAssociateCredential && isQualityLabsAssociateAdd && (
+              <div className="p-8 rounded-[2rem] border border-divider/50 bg-content2/30 space-y-6 shadow-inner">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-4 bg-success-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                  <h4 className="text-xs font-black uppercase italic text-foreground tracking-widest">Lab Management Setup</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Input label="Associate Name" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.name} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, name: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
+                  <Input label="Associate Email" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.email} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, email: v}))} isRequired classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
+                  <Input label="Phone" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={operatorAssociateForm.phone} onValueChange={(v) => setOperatorAssociateForm(c => ({...c, phone: v}))} isRequired className="md:col-span-2" classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }} />
+                  {isAdmin ? (
+                    <Select label="Management Entity" labelPlacement="outside" variant="bordered" radius="lg" size="lg" selectedKeys={operatorAssociateForm.associateCompany ? new Set([operatorAssociateForm.associateCompany]) : new Set()} onSelectionChange={(keys) => setOperatorAssociateForm(c => ({...c, associateCompany: String(Array.from(keys as Set<string>)[0] || "")}))} className="md:col-span-2" classNames={{ trigger: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2" }}>
+                      {assignableCompanies.map((c: any) => (<SelectItem key={c._id || c.id} textValue={c.name}>{c.name}</SelectItem>))}
+                    </Select>
+                  ) : (
+                    <Input label="Management Entity" labelPlacement="outside" variant="bordered" radius="lg" size="lg" value={selfCompanyId ? "Linked company (auto)" : "No linked company"} isReadOnly className="md:col-span-2" classNames={{ inputWrapper: "h-14 bg-content1/50 border-divider shadow-inner", label: "text-[9px] font-black uppercase text-default-500 tracking-widest ml-1 mb-2", input: "text-default-400" }} />
+                  )}
+                </div>
+                {showAllocationBlockingError ? (
+                  <p className="text-[11px] text-danger-400">
+                    {isAdmin
+                      ? "No quality testing lab company is available. Add/link one first."
+                      : "Your account is not linked to a company. Link your company to continue."}
+                  </p>
+                ) : null}
+                <div className="flex justify-end pt-4">
+                  <Button
+                    color="success"
+                    isLoading={operatorCreateAssociateMutation.isPending}
+                    isDisabled={!isAssociateOnlyFormValid || (requireCompanySelectionForAdmin && isAdmin && !selectedAssociateCompanyId)}
+                    onPress={() => operatorCreateAssociateMutation.mutate()}
+                    className="font-black uppercase text-[10px] tracking-widest px-12 h-12 rounded-2xl shadow-xl shadow-success-500/20"
+                  >
+                    Add Quality Lab
+                  </Button>
+                </div>
               </div>
             )}
           </ModalBody>

@@ -33,8 +33,8 @@ const TrendChart: React.FC<TrendChartProps> = ({
     height = 300
 }) => {
     return (
-        <Card className="border-none shadow-sm bg-content1/50 backdrop-blur-lg h-full">
-            <CardHeader className="px-6 py-4 border-b border-default-100">
+        <Card className="border db-border-subtle shadow-sm db-subtle backdrop-blur-lg h-full">
+            <CardHeader className="px-6 py-4 border-b db-border-subtle">
                 <h4 className="font-semibold text-foreground/90">{title}</h4>
             </CardHeader>
             <CardBody className="p-4">
@@ -58,9 +58,9 @@ const TrendChart: React.FC<TrendChartProps> = ({
                                 <Tooltip
                                     contentStyle={{
                                         borderRadius: '12px',
-                                        border: 'none',
+                                        border: '1px solid var(--db-border-subtle)',
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                                        backgroundColor: 'hsl(var(--nextui-content1))'
+                                        backgroundColor: 'var(--db-panel)'
                                     }}
                                 />
                                 <Line
@@ -96,9 +96,9 @@ const TrendChart: React.FC<TrendChartProps> = ({
                                 <Tooltip
                                     contentStyle={{
                                         borderRadius: '12px',
-                                        border: 'none',
+                                        border: '1px solid var(--db-border-subtle)',
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                                        backgroundColor: 'hsl(var(--nextui-content1))'
+                                        backgroundColor: 'var(--db-panel)'
                                     }}
                                 />
                                 <Area

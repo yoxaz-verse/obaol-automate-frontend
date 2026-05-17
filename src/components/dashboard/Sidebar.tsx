@@ -64,6 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                "/dashboard/external-orders",
                "/dashboard/execution-enquiries",
                "/dashboard/warehouse-rent",
+               "/dashboard/quality-labs",
             ],
         },
         {
@@ -157,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     return (
         <div
             data-sidebar
-            className={`fixed left-0 top-0 h-full z-50 transition-all duration-500 ease-in-out bg-content1/90 dark:bg-[#0B0F14] border-r border-default-200/50 dark:border-white/5 hidden md:flex flex-col ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
+            className={`fixed left-0 top-0 h-full z-50 transition-all duration-500 ease-in-out db-shell border-r db-border-subtle hidden md:flex flex-col backdrop-blur-[22px] ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
         >
             {/* Structural Accents */}
             <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-warning-500/10 to-transparent opacity-30" />
@@ -165,7 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             {/* Toggle System */}
             <button
                 onClick={() => { play("toggle"); setIsCollapsed(!isCollapsed); }}
-                className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl bg-background dark:bg-[#1A1F26] border border-default-200 dark:border-white/10 flex items-center justify-center text-default-400 hover:text-warning-600 hover:border-warning-500/50 transition-all shadow-lg z-50 group dark:shadow-black/40"
+                className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl db-panel border db-border-strong flex items-center justify-center text-default-400 hover:text-warning-600 hover:border-warning-500/50 transition-all shadow-lg z-50 group"
             >
                 {isCollapsed ? <FiChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" /> : <FiChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />}
             </button>
@@ -227,7 +228,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                             className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
                                                 isActive 
                                                 ? "bg-warning-500/10 text-warning-700 dark:text-white font-bold shadow-sm" 
-                                                : "text-default-500 hover:text-foreground hover:bg-default-100"
+                                                : "text-default-500 hover:text-foreground hover:db-inset"
                                             } ${isCollapsed ? "justify-center" : "px-3 gap-3"} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
                                             aria-disabled={isOnboardingLocked}
                                         >
@@ -263,7 +264,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             </div>
 
             {/* System Identity Footer */}
-            <div className="px-6 py-8 border-t border-default-200">
+            <div className="px-6 py-8 border-t db-border-subtle">
                 {!isCollapsed ? (
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between">

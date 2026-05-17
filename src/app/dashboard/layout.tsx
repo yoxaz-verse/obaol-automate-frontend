@@ -165,14 +165,14 @@ export default function DashboardLayout({
 
   if (!isMounted) {
     return (
-      <section className="bg-content1 min-h-screen">
+      <section className="db-bg min-h-screen">
         <BrandedLoader fullScreen message="ESTABLISHING COMMAND LINK" variant="compact" />
       </section>
     );
   }
 
   return (
-    <section className="w-full min-w-0 h-full flex overflow-hidden bg-content1 relative lg:h-screen">
+    <section className="w-full min-w-0 h-full flex overflow-hidden db-bg relative lg:h-screen">
       <PrivateRoute allowedRoles={allowedRoles}>
         {!isOnboardingLocked && !isApprovalPending && (
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} isOnboardingLocked={isOnboardingLocked} />

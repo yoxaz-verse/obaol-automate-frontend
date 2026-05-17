@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -39,6 +39,7 @@ function ClickHandler({ onPick }: { onPick: (value: WarehouseLocationValue) => v
 
 function SyncView({ value }: { value: WarehouseLocationValue | null }) {
   const map = useMap();
+  const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (value) {
@@ -46,7 +47,22 @@ function SyncView({ value }: { value: WarehouseLocationValue | null }) {
         animate: true,
       });
     }
-    setTimeout(() => map.invalidateSize(), 0);
+
+    if (invalidateTimerRef.current) {
+      clearTimeout(invalidateTimerRef.current);
+    }
+    invalidateTimerRef.current = setTimeout(() => {
+      if (map.getContainer()) {
+        map.invalidateSize();
+      }
+    }, 0);
+
+    return () => {
+      if (invalidateTimerRef.current) {
+        clearTimeout(invalidateTimerRef.current);
+        invalidateTimerRef.current = null;
+      }
+    };
   }, [map, value]);
 
   return null;
@@ -57,6 +73,8 @@ export default function WarehouseLocationPicker({
   onChange,
   height = 320,
 }: WarehouseLocationPickerProps) {
+  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
   const center: [number, number] = value
     ? [value.latitude, value.longitude]
     : [20.5937, 78.9629];
@@ -68,13 +86,14 @@ export default function WarehouseLocationPicker({
         center={center}
         zoom={zoom}
         scrollWheelZoom
+        attributionControl={false}
         style={{ height: "100%", width: "100%" }}
       >
         <SyncView value={value} />
         <ClickHandler onPick={onChange} />
-        <TileLayer 
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        <TileLayer
+          url={tileUrl}
+          attribution={tileAttribution}
         />
         {value && (
           <Marker position={[value.latitude, value.longitude]} icon={markerIcon} />
@@ -84,6 +103,9 @@ export default function WarehouseLocationPicker({
         .warehouse-pin {
           background: transparent;
           border: none;
+        }
+        .warehouse-location-picker :global(.leaflet-tile-pane) {
+          filter: brightness(1.08) contrast(1.12) saturate(1.02);
         }
         .warehouse-pin__core {
           position: relative;

@@ -103,6 +103,7 @@ export default function ImportsPage() {
   const [selectedListing, setSelectedListing] = useState<any>(null);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
   const [pendingReservationId, setPendingReservationId] = useState<string | null>(null);
+  const [closingListingId, setClosingListingId] = useState<string | null>(null);
   const [lockErrorById, setLockErrorById] = useState<Record<string, string>>({});
   const [actionErrorById, setActionErrorById] = useState<Record<string, string>>({});
   const [redirectingEnquiryId, setRedirectingEnquiryId] = useState<string | null>(null);
@@ -176,6 +177,7 @@ export default function ImportsPage() {
     String(reservation?.reservationStatus || reservation?.status || "PENDING").toUpperCase();
   const resolveImportStatus = (listing: any) =>
     String(listing?.importStatus || "LISTED").toUpperCase();
+  const isTerminalListing = (listing: any) => String(listing?.status || "").toUpperCase() === "CLOSED";
   const importFlowLabels: Record<string, string> = {
     DRAFT: "Draft",
     LISTED: "Listed",
@@ -265,9 +267,17 @@ export default function ImportsPage() {
 
   const reserveMutation = useMutation({
     mutationFn: (payload: any) => postData(apiRoutes.imports.reserve(payload.id), payload.data),
-    onSuccess: () => {
-      showToastMessage({ type: "success", message: "Quantity reserved. Waiting for buyer approval." });
-      setReserveFeedback("Your quantity is being reserved. The buyer will approve your request.");
+    onSuccess: (response: any) => {
+      const updatedExisting = Boolean(response?.data?.meta?.updatedExisting);
+      const message = updatedExisting
+        ? "Reservation updated. Waiting for buyer approval."
+        : "Quantity reserved. Waiting for buyer approval.";
+      showToastMessage({ type: "success", message });
+      setReserveFeedback(
+        updatedExisting
+          ? "Your existing reservation has been updated. The buyer will review your updated request."
+          : "Your quantity is being reserved. The buyer will approve your request."
+      );
       setReserveStatus("success");
       setReserveQty("");
       setReserveCompanyId("");
@@ -427,15 +437,36 @@ export default function ImportsPage() {
 
   const closeMutation = useMutation({
     mutationFn: (id: string) => patchData(apiRoutes.imports.close(id), {}),
-    onSuccess: () => {
-      showToastMessage({ type: "success", message: "Listing closed." });
+    onSuccess: (_response: any, id: string) => {
+      queryClient.setQueriesData({ queryKey: ["imports"] }, (old: any) => {
+        if (!old) return old;
+        const nextList = extractList(old).filter((item: any) => String(item?._id || "") !== String(id));
+        if (Array.isArray(old)) return nextList;
+        if (old?.list && Array.isArray(old.list)) return { ...old, list: nextList };
+        if (Array.isArray(old?.data?.data?.data)) {
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              data: {
+                ...old.data.data,
+                data: nextList,
+              },
+            },
+          };
+        }
+        return old;
+      });
+      showToastMessage({ type: "success", message: "Listing terminated and removed from active listings." });
       queryClient.invalidateQueries({ queryKey: ["imports"] });
+      setClosingListingId(null);
     },
     onError: (error: any) => {
       showToastMessage({
         type: "error",
-        message: error?.response?.data?.message || "Failed to close listing.",
+        message: error?.response?.data?.message || "Failed to terminate listing.",
       });
+      setClosingListingId(null);
     },
   });
 
@@ -689,6 +720,7 @@ export default function ImportsPage() {
                             {activeTab === "all" && canReserve && (
                                <Button
                                  fullWidth
+                                 isDisabled={isTerminalListing(listing)}
                                  className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background shadow-md hover:scale-[1.02] active:scale-95 transition-all"
                                  onClick={() => {
                                    setSelectedListing(listing);
@@ -703,6 +735,7 @@ export default function ImportsPage() {
                                </Button>
                             )}
                             
+                            {!isTerminalListing(listing) && (
                             <div className="grid grid-cols-2 gap-2.5 w-full">
                               {canEditListing(listing) && (
                                  <Button
@@ -750,15 +783,19 @@ export default function ImportsPage() {
                                 </Button>
                               )}
                             </div>
+                            )}
 
-                            {canEditListing(listing) && (
+                            {canEditListing(listing) && !isTerminalListing(listing) && (
                                <Button
-                                   fullWidth
+                                   size="sm"
                                    color="danger"
-                                   variant="flat"
-                                   className="h-10 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-danger-500/20"
+                                   variant="bordered"
+                                   isLoading={closeMutation.isPending && closingListingId === listing._id}
+                                   isDisabled={closeMutation.isPending}
+                                   className="h-8 px-3 rounded-lg font-semibold uppercase tracking-wider text-[9px] border-danger-500/30 text-danger-400 bg-transparent hover:bg-danger-500/10"
                                    onClick={() => {
                                      if (confirm("Are you sure you want to close this listing?")) {
+                                       setClosingListingId(listing._id);
                                        closeMutation.mutate(listing._id);
                                      }
                                    }}

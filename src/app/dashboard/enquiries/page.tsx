@@ -2,11 +2,11 @@
 
 import React, { useContext, useEffect } from "react";
 import { Button } from "@heroui/react";
-import { Tabs, Tab, Tooltip, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Input, Chip } from "@nextui-org/react";
+import { Tabs, Tab, Tooltip } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import Title from "@/components/titles";
 import QueryComponent from "@/components/queryComponent";
@@ -17,13 +17,10 @@ import {
   initialTableConfig,
 } from "@/utils/tableValues";
 import AuthContext from "@/context/AuthContext";
-import useFilteredStatusOptions from "@/utils/roleActivityStatus";
 import StatsHeader from "@/components/dashboard/enquiries/StatsHeader";
-import EnquiryStatus from "@/components/dashboard/enquiries/EnquiryStatus";
 import EnquiryCard from "@/components/dashboard/enquiries/EnquiryCard";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import { getData, patchData } from "@/core/api/apiHandler";
-import { showToastMessage } from "@/utils/utils";
+import { patchData } from "@/core/api/apiHandler";
 import { useSoundEffect } from "@/context/SoundContext";
 
 /**
@@ -37,7 +34,6 @@ export default function EnquiryPage() {
   const [navigatingId, setNavigatingId] = React.useState<string | null>(null);
   const router = useRouter();
   const tableConfig = { ...initialTableConfig };
-  const filteredStatusOptions = useFilteredStatusOptions();
 
   useEffect(() => {
     setNavigatingId(null);
@@ -54,22 +50,20 @@ export default function EnquiryPage() {
   const roleLower = String(user?.role || "").toLowerCase();
   const isSystemAdmin = roleLower === "admin";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const isAssociate = roleLower === "associate";
-  const associateCompanyId = (user as any)?.associateCompanyId || null;
 
 
   return (
-    <section className="">
+    <section className="text-foreground">
       <Title title="Enquiry" />
 
 
 
-      <div className="mx-2 md:mx-6 mb-8 rounded-[2rem] border border-default-300 dark:border-white/20 bg-white dark:bg-[#04070f] px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
+      <div className="mx-2 md:mx-6 mb-8 rounded-[2rem] border db-panel px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center">
                 <FiArrowRight size={20} className="text-warning-600 rotate-180" />
             </div>
-            <p className="text-[11px] font-black uppercase tracking-widest text-default-500">
+            <p className="text-[11px] font-black uppercase tracking-widest db-muted">
                 Execute new enquiries from the <span className="text-warning-500">Marketplace Terminal</span>
             </p>
         </div>
@@ -286,10 +280,10 @@ export default function EnquiryPage() {
                     color="primary"
                     className="w-fit"
                     classNames={{
-                      tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                      tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
                       cursor: "bg-warning-500 w-full h-[3px] rounded-t-full",
                       tab: "max-w-fit px-2 h-12 transition-all duration-300",
-                      tabContent: "font-black uppercase tracking-[0.15em] text-[10px] text-default-400 group-data-[selected=true]:text-warning-500"
+                      tabContent: "font-black uppercase tracking-[0.15em] text-[10px] db-muted group-data-[selected=true]:text-warning-500"
                     }}
                   >
                     <Tab key="All" title="Global Pipeline" />
@@ -311,10 +305,10 @@ export default function EnquiryPage() {
                     }}
                     className="w-fit"
                     classNames={{
-                      tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                      tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
                       cursor: "bg-warning-500/60 w-full h-[2px] rounded-t-full",
                       tab: "max-w-fit px-2 h-10 transition-all duration-300",
-                      tabContent: "font-black uppercase tracking-[0.12em] text-[9px] text-default-500 group-data-[selected=true]:text-warning-500"
+                      tabContent: "font-black uppercase tracking-[0.12em] text-[9px] db-muted group-data-[selected=true]:text-warning-500"
                     }}
                   >
                     <Tab key="All" title="Full Stack" />
@@ -333,7 +327,7 @@ export default function EnquiryPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/20 backdrop-blur-[2px] rounded-2xl"
+                        className="absolute inset-0 z-10 flex flex-col items-center justify-center db-overlay-soft backdrop-blur-[2px] rounded-2xl"
                       >
                         <div className="flex flex-col items-center gap-4">
                           <div className="w-10 h-10 border-2 border-warning-500/20 border-t-warning-500 rounded-full animate-spin" />
@@ -373,7 +367,7 @@ export default function EnquiryPage() {
                                 <Tooltip
                                   content="View Details"
                                   classNames={{
-                                    content: "bg-content1 text-foreground border border-default-200 shadow-none"
+                                    content: "db-panel text-foreground border db-border-subtle shadow-none"
                                   }}
                                 >
                                   <Button
@@ -388,7 +382,7 @@ export default function EnquiryPage() {
                                       setNavigatingId(targetId);
                                       router.push(`/dashboard/enquiries/${targetId}`);
                                     }}
-                                    className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 bg-default-100 rounded-xl p-0 min-w-10"
+                                    className="text-lg db-muted cursor-pointer active:opacity-50 hover:text-primary transition-colors flex items-center justify-center w-10 h-10 db-subtle rounded-xl p-0 min-w-10"
                                   >
                                     {!navigatingId || navigatingId !== String(item?._id || item?.id || "") ? <FiArrowRight size={20} /> : null}
                                   </Button>
@@ -427,7 +421,7 @@ export default function EnquiryPage() {
                               ? `No ${selectedType.toLowerCase()} enquiries in this stage`
                               : "No enquiries in this stage"}
                           </h3>
-                          <p className="text-[11px] text-default-400 font-medium leading-relaxed mt-1">
+                          <p className="text-[11px] db-muted font-medium leading-relaxed mt-1">
                             Browse the marketplace to discover available commodities and initiate a new trade enquiry.
                           </p>
                         </div>
@@ -459,12 +453,12 @@ export default function EnquiryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] flex items-center justify-center bg-background/60 backdrop-blur-md"
+            className="fixed inset-0 z-[999] flex items-center justify-center db-overlay backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              className="flex flex-col items-center gap-8 p-12 rounded-[2rem] bg-background/80 border border-divider shadow-2xl relative overflow-hidden"
+              className="flex flex-col items-center gap-8 p-12 rounded-[2rem] db-panel border db-border-subtle shadow-2xl relative overflow-hidden"
             >
               <div className="relative">
                 <div className="absolute inset-[-12px] rounded-full border border-primary/20 animate-ping opacity-50" />
@@ -492,7 +486,7 @@ export default function EnquiryPage() {
                 <h3 className="text-sm font-bold uppercase tracking-widest text-primary animate-pulse">
                   Opening Enquiry
                 </h3>
-                <p className="text-[10px] font-semibold text-default-500 uppercase tracking-widest opacity-80 leading-relaxed">
+                <p className="text-[10px] font-semibold db-muted uppercase tracking-widest opacity-80 leading-relaxed">
                   Navigating to secure trade stream...
                 </p>
               </div>

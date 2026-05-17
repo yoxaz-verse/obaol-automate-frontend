@@ -23,6 +23,8 @@ import { useRouter } from "next/navigation";
 interface Warehouse {
     _id: string;
     name: string;
+    contactPhone?: string;
+    contactPhoneSecondary?: string;
     address?: string;
     category?: string;
     allowedCategoryIds?: string[];
@@ -44,6 +46,8 @@ interface Warehouse {
 
 const EMPTY_WAREHOUSE = {
     name: "",
+    contactPhone: "",
+    contactPhoneSecondary: "",
     address: "",
     category: "GENERAL",
     allowedCategoryIds: [] as string[],
@@ -222,6 +226,8 @@ export default function WarehousesPage() {
         setEditingWarehouse(wh);
         setWarehouseForm({
             name: wh.name,
+            contactPhone: wh.contactPhone || "",
+            contactPhoneSecondary: wh.contactPhoneSecondary || "",
             address: wh.address || "",
             category: wh.category || "GENERAL",
             allowedCategoryIds: Array.isArray(wh.allowedCategoryIds) ? wh.allowedCategoryIds : [],
@@ -542,6 +548,26 @@ export default function WarehousesPage() {
                                 </SelectItem>
                             </Select>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold text-foreground pl-0.5">Primary Contact <span className="text-danger-500">*</span></label>
+                                <Input
+                                    placeholder="e.g. +919876543210"
+                                    value={warehouseForm.contactPhone}
+                                    onValueChange={(v) => setWarehouseForm(f => ({ ...f, contactPhone: v }))}
+                                    classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold text-foreground pl-0.5">Secondary Contact</label>
+                                <Input
+                                    placeholder="Optional"
+                                    value={warehouseForm.contactPhoneSecondary}
+                                    onValueChange={(v) => setWarehouseForm(f => ({ ...f, contactPhoneSecondary: v }))}
+                                    classNames={{ inputWrapper: "bg-default-100/60 border-default-200" }}
+                                />
+                            </div>
+                        </div>
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-bold text-foreground pl-0.5">Address</label>
                             <Textarea
@@ -596,7 +622,7 @@ export default function WarehousesPage() {
                         <Button
                             color="primary"
                             isLoading={updateMutation.isPending}
-                            isDisabled={!warehouseForm.name.trim()}
+                            isDisabled={!warehouseForm.name.trim() || !warehouseForm.contactPhone.trim()}
                             onPress={() => updateMutation.mutate(warehouseForm)}
                             className="font-bold"
                         >

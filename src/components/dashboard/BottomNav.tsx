@@ -56,7 +56,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     return (
         <div
             data-bottomnav
-            className="fixed bottom-3 left-4 right-4 z-[100] h-16 bg-white/80 dark:bg-[#0B0F14]/80 backdrop-blur-2xl border border-default-200 dark:border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] md:hidden overflow-hidden"
+            className="fixed bottom-3 left-4 right-4 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden"
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent" />

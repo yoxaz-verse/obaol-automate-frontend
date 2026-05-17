@@ -1,4 +1,4 @@
-import "../styles/global.css";
+import "./globals.css";
 import type { Metadata } from "next";
 import { Providers } from "./provider";
 import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";

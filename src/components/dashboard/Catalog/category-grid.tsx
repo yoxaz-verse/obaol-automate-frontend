@@ -48,21 +48,27 @@ export default function CategoryGrid({
     const Icon = type === "product" ? FiPackage : FiFolder;
     const colorClass = "text-warning-600";
     const bgClass = "bg-warning-500/10";
+    const itemTransition = {
+        type: "spring" as const,
+        stiffness: 240,
+        damping: 24,
+        mass: 0.7,
+    };
 
     return (
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
-            <AnimatePresence mode="popLayout">
-                {items.map((item, index) => {
+        <motion.div layout="position" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+            <AnimatePresence mode="sync" initial={false}>
+                {items.map((item) => {
                     const count = counts ? counts[item._id] || 0 : 0;
 
                     return (
                         <motion.div
-                            layout
+                            layout="position"
                             key={item._id}
-                            initial={{ opacity: 0, scale: 0.95 }}
+                            initial={{ opacity: 0, scale: 0.985 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                            exit={{ opacity: 0, scale: 0.985 }}
+                            transition={itemTransition}
                             whileHover={{ y: -5 }}
                             className={`group border backdrop-blur-md hover:border-warning-500/30 transition-all shadow-lg hover:shadow-warning-500/5 rounded-2xl cursor-pointer relative ${cardThemeClass || "bg-gradient-to-br from-white/[0.03] to-transparent"} ${cardBorderClass || "border-foreground/10"}`}
                             onClick={() => onSelect(item)}

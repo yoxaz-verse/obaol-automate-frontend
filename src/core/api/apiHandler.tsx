@@ -5,7 +5,14 @@ import instance from "@/core/api/axiosInstance";
 // GET request to the API
 export const getData = async (url: string, params: any = {}) => {
   try {
-    return await instance.get(url, { params });
+    return await instance.get(url, {
+      params,
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error in getData:", error);
     throw error;

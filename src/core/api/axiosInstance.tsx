@@ -25,6 +25,18 @@ const toAbsoluteBaseUrl = () => {
 
 export const baseUrl = toAbsoluteBaseUrl();
 
+if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
+  const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN || "";
+  const expectsLocalBackend = backendOrigin.includes("localhost") || backendOrigin.includes("127.0.0.1");
+  const pointsToRemoteApi = /^https?:\/\//i.test(baseUrl) && !/localhost|127\.0\.0\.1/i.test(baseUrl);
+  if (expectsLocalBackend && pointsToRemoteApi) {
+    console.warn("[api] Environment mismatch: local backend is configured but API base points to remote.", {
+      baseUrl,
+      backendOrigin,
+    });
+  }
+}
+
 const instance = axios.create({
   baseURL: baseUrl,
   headers: {

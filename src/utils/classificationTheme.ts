@@ -9,6 +9,13 @@ export type ClassificationTheme = {
   priority: number;
   icon: IconType;
   iconClass: string;
+  watermarkIconClass: string;
+  watermarkOpacityClass: string;
+  watermarkSizeClass: string;
+  watermarkPositionClass: string;
+  watermarkBlurClass: string;
+  pageWashClass: string;
+  pageWashOverlayClass: string;
   pageGlowA: string;
   pageGlowB: string;
   shellClass: string;
@@ -18,6 +25,10 @@ export type ClassificationTheme = {
   chipIdleClass: string;
   tabActiveClass: string;
   tabIdleClass: string;
+  tabPillActiveClass: string;
+  tabPillIdleClass: string;
+  tabIconActiveClass: string;
+  tabIconIdleClass: string;
   headerStripeClass: string;
   cardOverlayClass: string;
   badgeClass: string;
@@ -30,6 +41,13 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     priority: 0,
     icon: FiPackage,
     iconClass: "text-default-300",
+    watermarkIconClass: "text-default-400/45",
+    watermarkOpacityClass: "opacity-[0.08]",
+    watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
+    watermarkPositionClass: "-top-28 -right-32 md:-top-36 md:-right-36 lg:-top-44 lg:-right-44",
+    watermarkBlurClass: "blur-[1px]",
+    pageWashClass: "bg-gradient-to-br from-default-500/14 via-default-400/8 to-warning-400/8",
+    pageWashOverlayClass: "bg-gradient-to-b from-content1/5 via-content1/22 to-content1/40",
     pageGlowA: "bg-default-400/10",
     pageGlowB: "bg-default-500/5",
     shellClass: "bg-content1/85",
@@ -39,6 +57,10 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     chipIdleClass: "border-default-300/25 bg-default-500/10 text-default-200",
     tabActiveClass: "text-warning-500",
     tabIdleClass: "text-default-400",
+    tabPillActiveClass: "bg-warning-500/15 border-warning-400/50 shadow-sm",
+    tabPillIdleClass: "bg-transparent border-transparent hover:bg-default-500/10",
+    tabIconActiveClass: "text-warning-500",
+    tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-default-400/50 via-warning-400/35 to-transparent",
     cardOverlayClass: "from-default-500/10 via-transparent to-transparent",
     badgeClass: "bg-default-500/15 text-default-300 border-default-300/30",
@@ -49,6 +71,13 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     priority: 1,
     icon: FiShield,
     iconClass: "text-amber-300",
+    watermarkIconClass: "text-amber-500/45",
+    watermarkOpacityClass: "opacity-[0.09]",
+    watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
+    watermarkPositionClass: "-top-28 -right-32 md:-top-36 md:-right-36 lg:-top-44 lg:-right-44",
+    watermarkBlurClass: "blur-[1px]",
+    pageWashClass: "bg-gradient-to-br from-amber-500/18 via-lime-500/10 to-content1/5",
+    pageWashOverlayClass: "bg-gradient-to-b from-content1/5 via-content1/20 to-content1/38",
     pageGlowA: "bg-amber-500/15",
     pageGlowB: "bg-lime-500/10",
     shellClass: "bg-gradient-to-br from-amber-500/5 via-content1/90 to-lime-500/5",
@@ -58,6 +87,10 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     chipIdleClass: "border-amber-500/30 bg-amber-500/10 text-amber-300",
     tabActiveClass: "text-amber-400",
     tabIdleClass: "text-default-400",
+    tabPillActiveClass: "bg-amber-500/16 border-amber-400/45 shadow-sm",
+    tabPillIdleClass: "bg-transparent border-transparent hover:bg-default-500/10",
+    tabIconActiveClass: "text-amber-500",
+    tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-amber-500/65 via-lime-400/35 to-transparent",
     cardOverlayClass: "from-amber-500/18 via-lime-500/10 to-transparent",
     badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/35",
@@ -68,6 +101,13 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     priority: 2,
     icon: FiDroplet,
     iconClass: "text-emerald-300",
+    watermarkIconClass: "text-emerald-500/45",
+    watermarkOpacityClass: "opacity-[0.1]",
+    watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
+    watermarkPositionClass: "-top-28 -right-32 md:-top-36 md:-right-36 lg:-top-44 lg:-right-44",
+    watermarkBlurClass: "blur-[1px]",
+    pageWashClass: "bg-gradient-to-br from-emerald-500/20 via-green-500/12 to-content1/6",
+    pageWashOverlayClass: "bg-gradient-to-b from-content1/5 via-content1/18 to-content1/36",
     pageGlowA: "bg-emerald-500/20",
     pageGlowB: "bg-green-500/12",
     shellClass: "bg-gradient-to-br from-emerald-500/10 via-content1/90 to-green-500/10",
@@ -77,6 +117,10 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     chipIdleClass: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
     tabActiveClass: "text-emerald-400",
     tabIdleClass: "text-default-400",
+    tabPillActiveClass: "bg-emerald-500/16 border-emerald-400/45 shadow-sm",
+    tabPillIdleClass: "bg-transparent border-transparent hover:bg-default-500/10",
+    tabIconActiveClass: "text-emerald-500",
+    tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-emerald-500/70 via-green-400/35 to-transparent",
     cardOverlayClass: "from-emerald-500/20 via-green-500/10 to-transparent",
     badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
@@ -87,6 +131,13 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     priority: 3,
     icon: FiAward,
     iconClass: "text-fuchsia-300",
+    watermarkIconClass: "text-fuchsia-500/45",
+    watermarkOpacityClass: "opacity-[0.1]",
+    watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
+    watermarkPositionClass: "-top-28 -right-32 md:-top-36 md:-right-36 lg:-top-44 lg:-right-44",
+    watermarkBlurClass: "blur-[1px]",
+    pageWashClass: "bg-gradient-to-br from-fuchsia-500/20 via-orange-500/12 to-content1/6",
+    pageWashOverlayClass: "bg-gradient-to-b from-content1/5 via-content1/18 to-content1/36",
     pageGlowA: "bg-fuchsia-500/15",
     pageGlowB: "bg-orange-500/15",
     shellClass: "bg-gradient-to-br from-fuchsia-500/10 via-content1/90 to-orange-500/10",
@@ -96,6 +147,10 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     chipIdleClass: "border-fuchsia-400/35 bg-fuchsia-500/10 text-fuchsia-300",
     tabActiveClass: "text-fuchsia-400",
     tabIdleClass: "text-default-400",
+    tabPillActiveClass: "bg-fuchsia-500/16 border-fuchsia-400/45 shadow-sm",
+    tabPillIdleClass: "bg-transparent border-transparent hover:bg-default-500/10",
+    tabIconActiveClass: "text-fuchsia-500",
+    tabIconIdleClass: "text-default-400",
     headerStripeClass: "from-fuchsia-500/70 via-orange-400/45 to-transparent",
     cardOverlayClass: "from-fuchsia-500/18 via-orange-500/12 to-transparent",
     badgeClass: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/35",

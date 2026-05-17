@@ -10,7 +10,6 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { countryCentroids } from "@/data/countryCentroids";
-import { useTheme } from "next-themes";
 
 type NewsItem = {
   title: string;
@@ -29,22 +28,6 @@ type NewsMapProps = {
   loadedCount?: number;
 };
 
-const getMarkerStyle = (tone: "light" | "dark") => {
-  const ring = tone === "dark" ? "rgba(255,160,70,0.3)" : "rgba(255,140,30,0.25)";
-  const core = tone === "dark" ? "#FF9F3A" : "#FF8A1E";
-  return {
-    color: core,
-    fillColor: core,
-    fillOpacity: 0.9,
-    weight: 2,
-    opacity: 0.9,
-    className: "news-map-marker",
-    dashArray: "",
-    lineCap: "round",
-    lineJoin: "round",
-  } as const;
-};
-
 const byCountry = (items: NewsItem[]) => {
   const map = new Map<string, NewsItem[]>();
   items.forEach((item) => {
@@ -56,14 +39,7 @@ const byCountry = (items: NewsItem[]) => {
 };
 
 export default function NewsMap({ items, onSelectCountry, loading, loadedCount }: NewsMapProps) {
-  const { theme, systemTheme } = useTheme();
-  const resolvedTheme = (theme === "system" ? systemTheme : theme) || "dark";
-  const tone = resolvedTheme === "light" ? "light" : "dark";
-
-  const tileUrl =
-    tone === "light"
-      ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-      : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
   const grouped = useMemo(() => byCountry(items), [items]);
   const markers = Array.from(grouped.entries()).map(([country, rows]) => {
@@ -73,8 +49,6 @@ export default function NewsMap({ items, onSelectCountry, loading, loadedCount }
     const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
     return { country, rows, centroid, hasCoords };
   }).filter((row) => row.hasCoords);
-
-  const markerStyle = useMemo(() => getMarkerStyle(tone), [tone]);
 
   // Create standard DivIcon for stable pulsing
   const createPulseIcon = () => {
@@ -99,7 +73,10 @@ export default function NewsMap({ items, onSelectCountry, loading, loadedCount }
         style={{ height: "100%", width: "100%", cursor: "pointer" }}
         attributionControl={false}
       >
-        <TileLayer url={tileUrl} />
+        <TileLayer
+          url={tileUrl}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
         {markers.map((marker) => (
           <Marker
             key={marker.country}

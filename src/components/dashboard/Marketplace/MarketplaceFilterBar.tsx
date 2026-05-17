@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Button, Chip, Input } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { FiSearch } from "react-icons/fi";
-import { ClassificationTheme, getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+import { ClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 
 type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
 
@@ -28,7 +28,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
   onStateChange,
   activeTheme,
 }) => {
-  const resolvedTheme = activeTheme || resolveActiveClassificationTheme(state?.filters?.classifications || []);
+  const resolvedTheme = activeTheme || resolveActiveClassificationTheme([]);
   const setSearch = (nextSearch: string) => {
     onStateChange({
       search: nextSearch,
@@ -50,27 +50,13 @@ const MarketplaceFilterBar: React.FC<Props> = ({
     onStateChange({ search: "", filters: {} });
   };
 
-  const classificationOptions = getClassificationOptions();
-
-  const toggleClassification = (key: string) => {
-    const prev = Array.isArray(state?.filters?.classifications) ? state.filters.classifications : [];
-    const next = prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key];
-    onStateChange({
-      search: state.search || "",
-      filters: {
-        ...(state.filters || {}),
-        classifications: next,
-      },
-    });
-  };
-
   return (
     <div className={`mb-4 rounded-2xl border p-3 md:p-4 shadow-sm ${resolvedTheme.shellClass} ${resolvedTheme.shellBorderClass}`}>
       <div className="flex flex-col gap-3">
         <div className="w-full">
           <Input
             size="sm"
-            placeholder={`Search ${activeTab === "marketplace-live" ? "live" : "offline"} marketplace...`}
+            placeholder={`Search ${activeTab === "marketplace-live" ? "current listings" : "past listings"}...`}
             startContent={<FiSearch className="text-default-400" />}
             value={state.search || ""}
             onValueChange={setSearch}
@@ -100,25 +86,6 @@ const MarketplaceFilterBar: React.FC<Props> = ({
             Clear
           </Button>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {classificationOptions.map((option) => {
-            const selected = (state?.filters?.classifications || []).includes(option.key);
-            return (
-              <Chip
-                key={option.key}
-                variant={selected ? "solid" : "flat"}
-                color={selected ? "warning" : "default"}
-                className={`cursor-pointer border transition-all duration-300 ${selected ? resolvedTheme.chipActiveClass : getClassificationTheme(option.key).chipIdleClass}`}
-                onClick={() => toggleClassification(option.key)}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <option.icon size={13} className={getClassificationTheme(option.key).iconClass} />
-                  <span>{option.label}</span>
-                </span>
-              </Chip>
-            );
-          })}
         </div>
       </div>
     </div>

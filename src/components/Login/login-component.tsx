@@ -971,7 +971,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         )}
 
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "login" && (
-          <div className="mt-4 flex flex-col items-center gap-2.5">
+          <div className="mt-3 flex flex-col items-center gap-2">
             <div className="relative flex items-center w-full px-1">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
               <span className="flex-shrink-0 mx-3 text-foreground/30 text-[8px] uppercase tracking-[0.2em] font-black italic">Or continue with</span>
@@ -980,10 +980,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
             <div className="w-full flex flex-col gap-1.5">
               <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
-                <div className="flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-foreground/50 mb-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                  Continue with Google
-                </div>
                 {googleClientId ? (
                   <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
@@ -1006,9 +1002,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[9px] font-semibold text-center text-foreground/40 italic opacity-60">
-                Use Google to sign in faster.
-              </p>
             </div>
           </div>
         )}
@@ -1016,7 +1009,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
 
         {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "signup" && (
-          <div className="mt-4 flex flex-col items-center gap-2.5">
+          <div className="mt-3 flex flex-col items-center gap-2">
             <div className="relative flex items-center w-full px-1">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>
               <span className="flex-shrink-0 mx-3 text-foreground/30 text-[8px] uppercase tracking-[0.2em] font-black italic">Sign up with</span>
@@ -1025,10 +1018,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
             <div className="w-full flex flex-col gap-1.5">
               <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
-                <div className="flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-foreground/50 mb-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse ring-4 ring-success-500/20 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                  Continue with Google
-                </div>
                 {googleClientId ? (
                   <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(245,165,36,0.12)]">
                     <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
@@ -1051,14 +1040,11 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   <p className="text-[10px] text-danger-500/70 font-bold uppercase tracking-widest text-center py-2">Google sign-in unavailable</p>
                 )}
               </div>
-              <p className="text-[9px] font-semibold text-center text-foreground/40 italic opacity-60">
-                Use Google to sign up faster.
-              </p>
             </div>
           </div>
         )}
 
-        <div className="mt-2 flex items-center justify-center">
+        <div className="mt-1.5 flex items-center justify-center">
           {authMode === "login" ? (
             <button
               type="button"
@@ -1081,14 +1067,14 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           )}
         </div>
 
-        <div className="mt-4 pt-2 w-full">
-          <div className="relative flex items-center mb-4">
+        <div className="mt-3 pt-1 w-full">
+          <div className="relative flex items-center mb-3">
             <div className="flex-grow border-t border-divider h-px"></div>
             <span className="flex-shrink-0 mx-3 text-default-400 text-[8px] font-black uppercase tracking-[0.25em] italic opacity-60">Switch Role</span>
             <div className="flex-grow border-t border-divider h-px"></div>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {role === "Associate" ? (
               <button
                 type="button"
@@ -1119,7 +1105,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               </button>
             ) : null}
 
-            <div className="mt-4 flex justify-center w-full">
+            <div className="mt-3 flex justify-center w-full">
               <button
                 type="button"
                 onClick={() => router.push("/roles")}

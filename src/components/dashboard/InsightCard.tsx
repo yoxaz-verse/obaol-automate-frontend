@@ -15,7 +15,7 @@ interface InsightCardProps {
 
 const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, footer }) => {
     return (
-        <Card className="border border-default-200/50 shadow-none bg-content1/50 backdrop-blur-lg hover:bg-content1 transition-colors">
+        <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-lg hover:db-panel transition-colors">
             <CardBody className="gap-4 p-5">
                 <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-1">
@@ -38,7 +38,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, f
                         </div>
                     </div>
                     {icon && (
-                        <div className="p-2 bg-default-100 rounded-lg text-default-500">
+                        <div className="p-2 db-inset rounded-lg text-default-500 border db-border-subtle">
                             {icon}
                         </div>
                     )}

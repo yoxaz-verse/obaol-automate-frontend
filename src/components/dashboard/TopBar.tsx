@@ -150,7 +150,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   return (
     <div
       data-topbar
-      className="relative z-50 flex text-foreground justify-between items-center px-6 py-3 my-2 mx-2 md:mx-4 rounded-2xl border border-default-200/50 bg-white/70 dark:bg-[#0B0F14]/80 backdrop-blur-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 overflow-visible"
+      className="relative z-50 flex text-foreground justify-between items-center px-6 py-3 my-2 mx-2 md:mx-4 rounded-2xl border db-shell db-border-subtle backdrop-blur-[24px] transition-all duration-500 overflow-visible"
     >
       {/* Structural Accents */}
       <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent opacity-40 dark:opacity-50" />
@@ -181,17 +181,17 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md"
+                      className="absolute inset-0 db-overlay backdrop-blur-md"
                     />
                     <motion.div
                       initial={{ x: "-100%" }}
                       animate={{ x: 0 }}
                       exit={{ x: "-100%" }}
                       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                      className="absolute top-0 left-0 bottom-0 w-[300px] bg-background border-r border-default-200 flex flex-col"
+                      className="absolute top-0 left-0 bottom-0 w-[300px] db-panel border-r db-border-subtle flex flex-col"
                     >
                       {/* Drawer content */}
-                      <div className="p-8 border-b border-default-100 flex items-center justify-between">
+                      <div className="p-8 border-b db-border-subtle flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Image src="/logo.png" width={28} height={28} alt="Logo" />
                           <div>
@@ -212,7 +212,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                  <button
                                    key={opt.name}
                                    onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:bg-default-50"}`}
+                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>
@@ -280,20 +280,20 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           </div>
         ) : (
           <>
-            <div className="flex items-center bg-default-100/50 dark:bg-black/20 border border-default-200/50 dark:border-white/5 rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
+            <div className="flex items-center db-subtle border db-border-subtle rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
               <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
               
               <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-500 ${
-                    unreadCount > 0 ? "bg-warning-500/15 text-warning-600" : "text-default-500 hover:bg-white/5 hover:text-foreground"
+                    unreadCount > 0 ? "bg-warning-500/15 text-warning-600" : "text-default-500 hover:db-inset hover:text-foreground"
                   }`}
                 >
                   <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
                   {unreadCount > 0 && (
                     <>
-                      <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-white dark:border-[#0B0F14] shadow-[0_4px_12px_rgba(239,68,68,0.35)]">
+                      <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-[var(--db-panel)] shadow-[0_4px_12px_rgba(239,68,68,0.35)]">
                         {unreadBadge}
                       </span>
                       <span className="absolute -top-1.5 -right-1.5 z-0 h-5 w-5 rounded-full bg-danger-500/40 animate-ping" />
@@ -316,7 +316,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               {...({ placement: "bottom-end", className: "p-0" } as any)}
             >
               <DropdownTrigger>
-                <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-warning-500/10 to-default-100 dark:to-white/5 border border-warning-500/20 hover:border-warning-500/40 transition-all outline-none">
+                <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-warning-500/10 to-black/[0.02] dark:to-white/5 border border-warning-500/20 hover:border-warning-500/40 transition-all outline-none">
                   <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-warning-500/20 group-hover:scale-105 transition-transform">
                     {username?.slice(0, 1).toUpperCase()}
                   </div>
@@ -329,7 +329,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               <DropdownMenu 
                 {...({ 
                   "aria-label": "Tactical Profile Options", 
-                  className: "w-80 p-2 bg-white/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-black/5 dark:border-white/5 shadow-2xl rounded-[1.5rem]", 
+                  className: "w-80 p-2 db-panel backdrop-blur-2xl border db-border-subtle shadow-2xl rounded-[1.5rem]", 
                   itemClasses: { 
                     base: "rounded-xl py-3 px-4 transition-all duration-300",
                     title: "text-sm font-bold text-default-700 dark:text-default-200",

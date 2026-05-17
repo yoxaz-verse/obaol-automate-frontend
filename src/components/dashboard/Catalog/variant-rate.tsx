@@ -418,6 +418,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
       additionalParams={{
         ...(effectiveFilters || {}),
         ...(additionalParams || {}),
+        ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
         ...(displayOnly && { selected: "true" }),
         // ...(!user?.id && { isLive: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),

@@ -12,6 +12,8 @@ export type WarehouseMapItem = {
   category?: "GENERAL" | "COLD_STORAGE" | "BONDED" | "AGRO";
   storageRatePerUnit?: number;
   unit?: "KG" | "MT";
+  contactPhone?: string;
+  contactPhoneSecondary?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -22,23 +24,43 @@ type SearchPoint = { latitude: number; longitude: number; label: string };
 
 type Props = {
   warehouses: WarehouseMapItem[];
-  bookedWarehouseIdSet: Set<string>;
-  needsCompanySelect: boolean;
-  selectedCompanyId: string;
-  bookMutationPending: boolean;
-  onBook: (warehouse: WarehouseMapItem) => void;
   searchPoint: SearchPoint | null;
-  defaultCenter: [number, number];
-  defaultZoom: number;
-  categoryColor: Record<string, string>;
+  center: [number, number];
+  zoom: number;
+  onContact: (warehouse: WarehouseMapItem) => void;
+  showBookNow?: boolean;
 };
 
-const mkDotIcon = (color: string) =>
+const CATEGORY_COLOR: Record<string, string> = {
+  GENERAL: "#f59e0b",
+  COLD_STORAGE: "#06b6d4",
+  BONDED: "#8b5cf6",
+  AGRO: "#22c55e",
+};
+
+const mkWarehouseIcon = (color: string) =>
   L.divIcon({
-    className: "warehouse-dot-icon",
-    html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;background:${color};border:2px solid rgba(255,255,255,0.95);box-shadow:0 0 0 3px ${color}33, 0 4px 12px rgba(0,0,0,0.45);"></span>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    className: "warehouse-node-icon",
+    html: `
+      <span style="
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        width:28px;
+        height:28px;
+        border-radius:9999px;
+        border:2px solid rgba(255,255,255,0.95);
+        background:linear-gradient(180deg, ${color}44 0%, ${color}26 100%);
+        box-shadow:0 0 0 3px ${color}33, 0 6px 14px rgba(0,0,0,0.45);
+      ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="${color}" stroke="rgba(255,255,255,0.92)" stroke-width="1.2" />
+          <path d="M3 10.5h18" stroke="rgba(255,255,255,0.82)" stroke-width="1" />
+        </svg>
+      </span>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 
 function MapAutoCenter({ point }: { point: SearchPoint | null }) {
@@ -50,93 +72,85 @@ function MapAutoCenter({ point }: { point: SearchPoint | null }) {
   return null;
 }
 
-export default function WarehouseRentMap({
-  warehouses,
-  bookedWarehouseIdSet,
-  needsCompanySelect,
-  selectedCompanyId,
-  bookMutationPending,
-  onBook,
-  searchPoint,
-  defaultCenter,
-  defaultZoom,
-  categoryColor,
-}: Props) {
+export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom, onContact, showBookNow = false }: Props) {
+  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
   const safeWarehouses = warehouses.filter((warehouse) => {
     const lat = Number(warehouse.location?.latitude);
     const lng = Number(warehouse.location?.longitude);
-    return (
-      Number.isFinite(lat) &&
-      Number.isFinite(lng) &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lng >= -180 &&
-      lng <= 180
-    );
+    return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
   });
 
   return (
-    <MapContainer
-      center={defaultCenter}
-      zoom={defaultZoom}
-      scrollWheelZoom
-      style={{ height: "100%", width: "100%" }}
-    >
-      <MapAutoCenter point={searchPoint} />
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      />
-      {safeWarehouses.map((warehouse) => {
-        const lat = Number(warehouse.location?.latitude);
-        const lng = Number(warehouse.location?.longitude);
-        const category = String(warehouse.category || "GENERAL");
-        const color = categoryColor[category] || categoryColor.GENERAL;
-        const isBooked = bookedWarehouseIdSet.has(String(warehouse._id || ""));
-        const bookingDisabled =
-          isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutationPending;
+    <>
+      <MapContainer
+        className="warehouse-rent-map"
+        center={center}
+        zoom={zoom}
+        scrollWheelZoom
+        attributionControl={false}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <MapAutoCenter point={searchPoint} />
+        <TileLayer
+          url={tileUrl}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {safeWarehouses.map((warehouse) => {
+          const lat = Number(warehouse.location?.latitude);
+          const lng = Number(warehouse.location?.longitude);
+          const color = CATEGORY_COLOR[String(warehouse.category || "GENERAL")] || CATEGORY_COLOR.GENERAL;
 
-        return (
-          <Marker key={warehouse._id} position={[lat, lng]} icon={mkDotIcon(color)}>
-            <Popup className="tactical-popup">
-              <div className="min-w-[200px] p-2 space-y-3 bg-[#0A0A0A] text-foreground">
-                <div className="space-y-1">
-                  <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
-                    W_Node_{warehouse._id.slice(-4)}
+          return (
+            <Marker key={warehouse._id} position={[lat, lng]} icon={mkWarehouseIcon(color)}>
+              <Popup className="tactical-popup">
+                <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-content1 border-default-200">
+                  <div className="space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
+                      W_Node_{warehouse._id.slice(-4)}
+                    </div>
+                    <div className="text-sm font-black">{warehouse.name}</div>
                   </div>
-                  <div className="text-sm font-black">{warehouse.name}</div>
+                  <div className="text-[11px] font-semibold text-default-300">
+                    {warehouse.contactPhone || "Contact unavailable"}
+                  </div>
+                  {warehouse.contactPhoneSecondary ? (
+                    <div className="text-[10px] text-default-500">Alt: {warehouse.contactPhoneSecondary}</div>
+                  ) : null}
+                  <Button
+                    color="warning"
+                    variant="solid"
+                    size="sm"
+                    fullWidth
+                    isDisabled={!warehouse.contactPhone}
+                    onPress={() => onContact(warehouse)}
+                    className="font-black uppercase tracking-wider text-[10px]"
+                  >
+                    Contact
+                  </Button>
+                  {showBookNow ? (
+                    <Button
+                      color="default"
+                      variant="bordered"
+                      size="sm"
+                      fullWidth
+                      isDisabled
+                      className="font-black uppercase tracking-wider text-[10px]"
+                    >
+                      Book Now (Coming Soon)
+                    </Button>
+                  ) : null}
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-                  <div className="text-[10px] font-bold uppercase text-default-400">
-                    {warehouse.category || "GENERAL"}
-                  </div>
-                </div>
-                <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
-                  <div className="text-[10px] text-default-500 uppercase tracking-tight">
-                    Storage Rate
-                  </div>
-                  <div className="text-sm font-mono font-bold text-orange-400">
-                    {warehouse.storageRatePerUnit ?? "—"} {warehouse.unit || "MT"}{" "}
-                    <span className="text-[9px] text-default-600">/ unit</span>
-                  </div>
-                </div>
-                <Button
-                  color={isBooked ? "success" : "warning"}
-                  variant={isBooked ? "flat" : "solid"}
-                  size="sm"
-                  fullWidth
-                  isDisabled={bookingDisabled}
-                  onPress={() => onBook(warehouse)}
-                  className="font-black uppercase tracking-wider text-[10px]"
-                >
-                  {isBooked ? "Access Confirmed" : "Secure Capacity"}
-                </Button>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+      <style jsx global>{`
+        .warehouse-rent-map .leaflet-control-attribution {
+          display: none !important;
+        }
+      `}</style>
+    </>
   );
 }

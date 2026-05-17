@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Input,
@@ -14,7 +15,7 @@ import {
   Switch,
 } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiCheckCircle, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiCheckCircle, FiGlobe, FiMapPin, FiPackage, FiTruck, FiZap } from "react-icons/fi";
 import { getData, postData } from "@/core/api/apiHandler";
 import { patchData } from "@/core/api/apiHandler";
 import { useMutation } from "@tanstack/react-query";
@@ -72,6 +73,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   productVariantValue,
   user,
 }) => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [isLive, setIsLive] = useState(true);
   const [submitPhase, setSubmitPhase] = useState<"idle" | "saving-product" | "launching-rate">("idle");
@@ -837,6 +839,24 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         Variant preselected for this listing.
                       </div>
                     )}
+                    <div className="col-span-2 rounded-2xl border border-warning-500/30 bg-warning-500/10 px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-start gap-2">
+                          <FiGlobe size={16} className="text-warning-400 mt-0.5" />
+                          <p className="text-xs text-default-200">
+                            Can&apos;t find your product or variant? Go to Global Catalog and add it.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/dashboard/product")}
+                          className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-warning-300 hover:text-warning-200 underline underline-offset-4 transition-colors"
+                        >
+                          Go to Global Catalog
+                          <FiArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
                     <div className="col-span-2 rounded-2xl border border-default-200 bg-content2 p-4">
                       <div className="mb-3">
                         <p className="text-xs font-black uppercase tracking-[0.2em] text-default-400">Product Type & GI Signal</p>

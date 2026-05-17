@@ -22,12 +22,13 @@ import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
 import { WarehouseLocationValue } from "@/components/Warehouse/WarehouseLocationPicker";
-import { FiMapPin, FiLoader } from "react-icons/fi";
-import { LuWarehouse } from "react-icons/lu";
+import { FiLoader } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 
 type WarehouseForm = {
   name: string;
+  contactPhone: string;
+  contactPhoneSecondary: string;
   address: string;
   pincode: string;
   totalCapacity: number;
@@ -52,6 +53,8 @@ type WarehouseForm = {
 
 const EMPTY_FORM: WarehouseForm = {
   name: "",
+  contactPhone: "",
+  contactPhoneSecondary: "",
   address: "",
   pincode: "",
   totalCapacity: 0,
@@ -293,14 +296,22 @@ export default function WarehouseLocationPage() {
     return form.location.label || "Selected location";
   }, [form.location]);
 
+  const fieldBaseClass =
+    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle h-14 rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-warning-400/70 focus-within:ring-2 focus-within:ring-warning-500/30 transition-all";
+  const textareaBaseClass =
+    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-warning-400/70 focus-within:ring-2 focus-within:ring-warning-500/30 transition-all p-4";
+  const fieldLabelClass = "text-default-500 dark:text-white/70 font-semibold";
+  const fieldInputClass = "text-foreground font-bold uppercase text-sm placeholder:text-default-400 dark:placeholder:text-white/35";
+  const selectPopoverClass = "db-panel border db-border-subtle rounded-2xl";
+
   return (
     <>
-      <section className="w-full min-h-screen p-6 md:p-10 bg-[#04070f] text-white dark">
+      <section className="w-full min-h-screen p-6 md:p-10 text-foreground">
       <div className="flex items-center justify-between mb-10 gap-4 flex-wrap">
         <Title title="Warehouse Location" />
         <Button 
           variant="flat" 
-          className="bg-white/5 text-white font-bold uppercase tracking-widest text-[10px] rounded-xl px-6 h-10 border border-white/10"
+          className="db-subtle text-foreground font-bold uppercase tracking-widest text-[10px] rounded-xl px-6 h-10 border db-border-subtle"
           onPress={() => router.push("/dashboard/warehouses")}
         >
           Back to Asset Registry
@@ -308,12 +319,12 @@ export default function WarehouseLocationPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
-        <Card className="border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden">
-          <CardHeader className="p-8 border-b border-white/5">
+        <Card className="border db-panel rounded-[2.5rem] overflow-hidden">
+          <CardHeader className="p-8 border-b db-border-subtle">
             <div className="flex items-center gap-4">
               <div className="w-1 h-3 bg-warning-500 rounded-full" />
               <div>
-                <h2 className="text-xl font-bold text-white uppercase tracking-tight">Pin Warehouse Location</h2>
+                <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Pin Warehouse Location</h2>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">
                   Global Coordinate Synchronization
                 </p>
@@ -322,15 +333,15 @@ export default function WarehouseLocationPage() {
           </CardHeader>
           <CardBody className="px-6 pb-6 space-y-4">
             {form.location && (
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 flex flex-wrap gap-x-2 gap-y-1">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-default-500 dark:text-white/50 flex flex-wrap gap-x-2 gap-y-1">
                 <span className="text-warning-500">Detected Node:</span> {locationLabel}
-                {form.location.district && <><span className="text-white/10">•</span> {form.location.district}</>}
-                {form.location.pincode && <><span className="text-white/10">•</span> {form.location.pincode}</>}
-                {form.location.city && <><span className="text-white/10">•</span> {form.location.city}</>}
-                {form.location.state && <><span className="text-white/10">•</span> {form.location.state}</>}
+                {form.location.district && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.district}</>}
+                {form.location.pincode && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.pincode}</>}
+                {form.location.city && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.city}</>}
+                {form.location.state && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.state}</>}
               </div>
             )}
-            <div className="rounded-[2rem] overflow-hidden border border-white/10 shadow-lg shadow-warning-500/5 warehouse-location-map">
+            <div className="rounded-[2rem] overflow-hidden border db-border-strong shadow-lg shadow-warning-500/10 warehouse-location-map">
               <WarehouseLocationPicker value={pendingLocation} onChange={setPendingLocation} height={460} />
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -347,12 +358,12 @@ export default function WarehouseLocationPage() {
           </CardBody>
         </Card>
 
-        <Card className="border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden">
-          <CardHeader className="p-8 border-b border-white/5">
+        <Card className="border db-panel rounded-[2.5rem] overflow-hidden">
+          <CardHeader className="p-8 border-b db-border-subtle">
             <div className="flex items-center gap-4">
               <div className="w-1 h-3 bg-primary-500 rounded-full" />
               <div>
-                <h2 className="text-xl font-bold text-white uppercase tracking-tight">Warehouse Parameters</h2>
+                <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Warehouse Parameters</h2>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">Entity Asset Configuration</p>
               </div>
             </div>
@@ -367,9 +378,36 @@ export default function WarehouseLocationPage() {
                 value={form.name}
                 onValueChange={(v) => setForm((f) => ({ ...f, name: v }))}
                 classNames={{
-                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                  label: "text-default-400 font-medium",
-                  input: "text-white font-bold uppercase text-sm"
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: fieldInputClass
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Input
+                label="Primary Contact Number"
+                variant="flat"
+                placeholder="e.g. +919876543210"
+                value={form.contactPhone}
+                onValueChange={(v) => setForm((f) => ({ ...f, contactPhone: v }))}
+                isRequired
+                classNames={{
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: "text-white font-bold text-sm placeholder:text-white/35"
+                }}
+              />
+              <Input
+                label="Secondary Contact (Optional)"
+                variant="flat"
+                placeholder="e.g. +919900112233"
+                value={form.contactPhoneSecondary}
+                onValueChange={(v) => setForm((f) => ({ ...f, contactPhoneSecondary: v }))}
+                classNames={{
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: "text-white font-bold text-sm placeholder:text-white/35"
                 }}
               />
             </div>
@@ -381,17 +419,17 @@ export default function WarehouseLocationPage() {
                 selectedKeys={[form.category]}
                 onSelectionChange={(keys) => setForm((f) => ({ ...f, category: Array.from(keys)[0] as any }))}
                 classNames={{
-                  trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                  label: "text-default-400 font-medium",
-                  value: "text-white font-bold uppercase text-xs",
-                  popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                  trigger: fieldBaseClass,
+                  label: fieldLabelClass,
+                  value: "text-foreground font-bold uppercase text-xs",
+                  popoverMain: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
               >
-                <SelectItem key="GENERAL" className="text-white">General Logistic Node</SelectItem>
-                <SelectItem key="COLD_STORAGE" className="text-white">Cold Chain Facility</SelectItem>
-                <SelectItem key="BONDED" className="text-white">Bonded Secure Node</SelectItem>
-                <SelectItem key="AGRO" className="text-white">Agricultural Asset</SelectItem>
+                <SelectItem key="GENERAL" className="text-foreground">General Logistic Node</SelectItem>
+                <SelectItem key="COLD_STORAGE" className="text-foreground">Cold Chain Facility</SelectItem>
+                <SelectItem key="BONDED" className="text-foreground">Bonded Secure Node</SelectItem>
+                <SelectItem key="AGRO" className="text-foreground">Agricultural Asset</SelectItem>
               </Select>
             </div>
             {isAdmin && (
@@ -405,16 +443,16 @@ export default function WarehouseLocationPage() {
                     setForm((f) => ({ ...f, ownerCompanyId: String(Array.from(keys)[0] || "") }))
                   }
                   classNames={{
-                    trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                    label: "text-default-400 font-medium",
-                    value: "text-white font-bold uppercase text-xs",
-                    popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                    trigger: fieldBaseClass,
+                    label: fieldLabelClass,
+                    value: "text-foreground font-bold uppercase text-xs",
+                    popoverMain: selectPopoverClass,
                   }}
                   popoverProps={{ shouldCloseOnBlur: false }}
                   placeholder={associateCompanies.length ? "Select associate company" : "No companies available"}
                 >
                   {associateCompanies.map((company: any) => (
-                    <SelectItem key={company._id} className="text-white">
+                    <SelectItem key={company._id} className="text-foreground">
                       {company.name || company.companyName || "Company"}
                     </SelectItem>
                   ))}
@@ -430,16 +468,16 @@ export default function WarehouseLocationPage() {
                 selectedKeys={form.allowedCategoryIds}
                 onSelectionChange={(keys) => setForm((f) => ({ ...f, allowedCategoryIds: Array.from(keys) as string[] }))}
                 classNames={{
-                  trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                  label: "text-default-400 font-medium",
-                  value: "text-white font-bold uppercase text-xs",
-                  popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                  trigger: fieldBaseClass,
+                  label: fieldLabelClass,
+                  value: "text-foreground font-bold uppercase text-xs",
+                  popoverMain: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
                 placeholder={categories.length ? "Select categories" : "No categories available"}
               >
                 {categories.map((cat: any) => (
-                  <SelectItem key={cat._id} className="text-white">{cat.name}</SelectItem>
+                  <SelectItem key={cat._id} className="text-foreground">{cat.name}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -456,9 +494,9 @@ export default function WarehouseLocationPage() {
                 }}
                 minRows={3}
                 classNames={{
-                  inputWrapper: "bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors p-4",
-                  label: "text-default-400 font-medium",
-                  input: "text-white font-bold uppercase text-sm"
+                  inputWrapper: textareaBaseClass,
+                  label: fieldLabelClass,
+                  input: fieldInputClass
                 }}
               />
             </div>
@@ -473,17 +511,17 @@ export default function WarehouseLocationPage() {
                   setForm((f) => ({ ...f, pincode: v }));
                 }}
                 classNames={{
-                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                  label: "text-default-400 font-medium",
-                  input: "text-white font-bold uppercase text-sm"
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: fieldInputClass
                 }}
               />
             </div>
             {form.location && (
               <div className="flex flex-wrap gap-2 px-1">
-                {form.location.city && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.city}</Chip>}
-                {form.location.district && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.district}</Chip>}
-                {form.location.state && <Chip size="sm" variant="flat" className="bg-white/5 text-white/60 font-bold uppercase text-[9px] border border-white/10">{form.location.state}</Chip>}
+                {form.location.city && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.city}</Chip>}
+                {form.location.district && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.district}</Chip>}
+                {form.location.state && <Chip size="sm" variant="flat" className="bg-black/[0.04] dark:bg-white/[0.06] text-default-600 dark:text-white/65 font-bold uppercase text-[9px] border db-border-subtle">{form.location.state}</Chip>}
               </div>
             )}
             <div className="flex flex-col gap-1.5">
@@ -496,15 +534,15 @@ export default function WarehouseLocationPage() {
                 value={String(form.totalCapacity)}
                 onValueChange={(v) => setForm((f) => ({ ...f, totalCapacity: Number(v) }))}
                 classNames={{
-                  inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
-                  label: "text-default-400 font-medium",
-                  input: "text-white font-bold uppercase text-sm"
+                  inputWrapper: fieldBaseClass,
+                  label: fieldLabelClass,
+                  input: fieldInputClass
                 }}
               />
             </div>
-            <div className="flex items-center justify-between px-2 py-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className="flex items-center justify-between px-2 py-4 rounded-2xl db-subtle border db-border-subtle">
               <div>
-                <p className="text-xs font-bold text-white uppercase tracking-wider">List for Rental</p>
+                <p className="text-xs font-bold text-foreground uppercase tracking-wider">List for Rental</p>
                 <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Open node to associate network</p>
               </div>
               <Switch
@@ -519,9 +557,9 @@ export default function WarehouseLocationPage() {
                 color="warning"
               />
             </div>
-            <div className="flex items-center justify-between px-2 py-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className="flex items-center justify-between px-2 py-4 rounded-2xl db-subtle border db-border-subtle">
               <div>
-                <p className="text-xs font-bold text-white uppercase tracking-wider">Active Status</p>
+                <p className="text-xs font-bold text-foreground uppercase tracking-wider">Active Status</p>
                 <p className="text-[10px] text-default-400 uppercase tracking-widest mt-1">Ready for operational deployment</p>
               </div>
               <Switch
@@ -539,7 +577,7 @@ export default function WarehouseLocationPage() {
               <Button
                 color="warning"
                 className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
-                isDisabled={!form.name.trim() || !form.location}
+                isDisabled={!form.name.trim() || !form.contactPhone.trim() || !form.location}
                 isLoading={createMutation.isPending}
                 onPress={() => createMutation.mutate(form)}
               >
@@ -554,8 +592,19 @@ export default function WarehouseLocationPage() {
         .warehouse-location-map .leaflet-control-attribution {
           display: none !important;
         }
-        .warehouse-location-map .leaflet-tile {
-          filter: brightness(1.1) contrast(1.15) saturate(1.05);
+        .warehouse-location-map .leaflet-control-zoom a {
+          background: var(--db-panel) !important;
+          color: rgb(var(--foreground-rgb)) !important;
+          border-color: var(--db-border-strong) !important;
+        }
+        .warehouse-location-map .leaflet-control-zoom a:hover {
+          background: var(--db-subtle) !important;
+        }
+        .dark .warehouse-location-map .leaflet-tile {
+          filter: brightness(0.9) contrast(1.15) saturate(0.95);
+        }
+        :not(.dark) .warehouse-location-map .leaflet-tile {
+          filter: brightness(1.05) contrast(1.02) saturate(1.03);
         }
       `}</style>
     </>

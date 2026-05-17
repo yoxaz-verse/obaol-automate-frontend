@@ -2,32 +2,17 @@
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Divider,
-  Input,
-  Textarea,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Select,
-  SelectItem,
-} from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, CardBody, Chip, Input, Select, SelectItem } from "@heroui/react";
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";
-import { getData, postData } from "@/core/api/apiHandler";
+import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { FiLoader, FiMapPin, FiSearch } from "react-icons/fi";
+import { FiLoader, FiMapPin, FiPhoneCall, FiSearch } from "react-icons/fi";
+import { LuPlus } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCalculationConfig } from "@/hooks/useCalculationConfig";
 import type { WarehouseMapItem } from "@/components/Warehouse/WarehouseRentMap";
 
 const WarehouseRentMap = dynamic(() => import("@/components/Warehouse/WarehouseRentMap"), {
@@ -44,6 +29,8 @@ type Warehouse = {
   listingType?: "PRIVATE" | "RENTAL";
   isRentalActive?: boolean;
   isActive?: boolean;
+  contactPhone?: string;
+  contactPhoneSecondary?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -55,14 +42,6 @@ type Warehouse = {
 type AssociateCompany = {
   _id: string;
   name: string;
-};
-
-type WarehouseAssignment = {
-  _id: string;
-  warehouseId?: string | { _id?: string };
-  companyId?: string | { _id?: string };
-  status?: "ACTIVE" | "INACTIVE";
-  bookingStatus?: "PENDING_QUOTE" | "BOOKED" | "REJECTED" | "CANCELLED";
 };
 
 type ApiListResponse<T> = {
@@ -97,10 +76,7 @@ const haversineKm = (aLat: number, aLng: number, bLat: number, bLng: number) => 
   const dLng = toRad(bLng - aLng);
   const aa =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(aLat)) *
-      Math.cos(toRad(bLat)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
   return 6371 * (2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa)));
 };
 
@@ -116,21 +92,18 @@ const toErrorStatus = (error: unknown) => {
   return Number(status || 0);
 };
 
+const normalizeDialPhone = (value: string) => String(value || "").trim().replace(/[\s()-]/g, "");
+
 export default function WarehouseRentPage() {
-  const queryClient = useQueryClient();
+  const router = useRouter();
   const { user } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
-  const isAssociate = roleLower === "associate";
+  const isAdmin = roleLower === "admin";
+  const isOperatorFamily = roleLower === "operator" || roleLower === "team";
+  const canAdd = isAdmin || isOperatorFamily;
   const needsCompanySelect = roleLower === "admin" || roleLower === "operator" || roleLower === "team";
-  const userAssociateCompanyId = String(user?.associateCompanyId || "");
 
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
-  const [requiredMT, setRequiredMT] = useState("1");
-  const [durationMonths, setDurationMonths] = useState("1");
-  const [requirementNotes, setRequirementNotes] = useState("");
-  const [expectedStartDate, setExpectedStartDate] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [searchPoint, setSearchPoint] = useState<SearchPoint | null>(null);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
@@ -147,7 +120,6 @@ export default function WarehouseRentPage() {
       return toArrayData(res);
     },
   });
-  const { data: calculationConfig } = useCalculationConfig(true);
 
   const { data: companiesData } = useQuery({
     queryKey: ["warehouse-rent-companies", roleLower, user?.id],
@@ -158,33 +130,13 @@ export default function WarehouseRentPage() {
     enabled: needsCompanySelect,
   });
 
-  const resolvedCompanyIdForAssignments = isAssociate ? userAssociateCompanyId : selectedCompanyId;
-  const { data: assignmentsData } = useQuery({
-    queryKey: ["warehouse-assignments", roleLower, user?.id, resolvedCompanyIdForAssignments],
-    queryFn: async () => {
-      const params: any = { status: "ACTIVE" };
-      if (resolvedCompanyIdForAssignments) params.companyId = resolvedCompanyIdForAssignments;
-      const res: any = await getData(apiRoutes.warehouses.assignments, params);
-      return toArrayData(res);
-    },
-    enabled: isAssociate ? Boolean(userAssociateCompanyId) : Boolean(selectedCompanyId),
-  });
+  const companies: AssociateCompany[] = useMemo(() => (Array.isArray(companiesData) ? companiesData : []), [companiesData]);
 
-  const companies: AssociateCompany[] = useMemo(
-    () => (Array.isArray(companiesData) ? companiesData : []),
-    [companiesData]
-  );
   useEffect(() => {
-    if (isAssociate) {
-      if (userAssociateCompanyId && selectedCompanyId !== userAssociateCompanyId) {
-        setSelectedCompanyId(userAssociateCompanyId);
-      }
-      return;
-    }
     if (needsCompanySelect && !selectedCompanyId && companies.length > 0) {
       setSelectedCompanyId(String(companies[0]?._id || ""));
     }
-  }, [isAssociate, needsCompanySelect, userAssociateCompanyId, selectedCompanyId, companies]);
+  }, [needsCompanySelect, selectedCompanyId, companies]);
 
   const rentalWarehouses = useMemo(() => {
     const list: Warehouse[] = Array.isArray(warehousesData) ? warehousesData : [];
@@ -195,14 +147,7 @@ export default function WarehouseRentPage() {
     return rentalWarehouses.filter((warehouse) => {
       const lat = Number(warehouse?.location?.latitude);
       const lng = Number(warehouse?.location?.longitude);
-      return (
-        Number.isFinite(lat) &&
-        Number.isFinite(lng) &&
-        lat >= -90 &&
-        lat <= 90 &&
-        lng >= -180 &&
-        lng <= 180
-      );
+      return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
     });
   }, [rentalWarehouses]);
 
@@ -216,85 +161,20 @@ export default function WarehouseRentPage() {
     });
   }, [mappableWarehouses, searchPoint]);
 
-  const activeAssignments: WarehouseAssignment[] = useMemo(
-    () => (Array.isArray(assignmentsData) ? assignmentsData : []),
-    [assignmentsData]
-  );
-  const bookedWarehouseIdSet = useMemo(() => {
-    const ids = new Set<string>();
-    const pendingIds = new Set<string>();
-    activeAssignments.forEach((assignment) => {
-      const value = assignment?.warehouseId;
-      const warehouseId = typeof value === "string" ? value : String(value?._id || "");
-      if (!warehouseId) return;
-      if (assignment?.bookingStatus === "PENDING_QUOTE") pendingIds.add(warehouseId);
-      if ((assignment?.bookingStatus || "BOOKED") === "BOOKED") ids.add(warehouseId);
-    });
-    return { booked: ids, pending: pendingIds };
-  }, [activeAssignments]);
-
-  const bookMutation = useMutation({
-    mutationFn: (payload: {
-      warehouseId: string;
-      companyId?: string;
-      requestType: "QUOTE_REQUEST" | "DIRECT_BOOKING";
-      requiredMT: number;
-      durationMonths: number;
-      requirementNotes?: string;
-      expectedStartDate?: string;
-      taxPercent: number;
-      handlingPercent: number;
-      estimateCurrency: string;
-    }) =>
-      postData(apiRoutes.warehouses.assignments, payload),
-    onSuccess: () => {
-      showToastMessage({ type: "success", message: "Warehouse booking request submitted successfully." });
-      queryClient.invalidateQueries({ queryKey: ["warehouse-assignments"] });
-      setIsBookModalOpen(false);
-      setSelectedWarehouse(null);
-    },
-    onError: (error: unknown) => {
-      showToastMessage({
-        type: "error",
-        message: toErrorMessage(error, "Failed to submit warehouse booking request."),
-      });
-    },
-  });
-
   const mapWarehouses: WarehouseMapItem[] = useMemo(
     () =>
-      filteredWarehouses.map((warehouse) => {
-        const warehouseId = String(warehouse._id || "");
-        const category = String(warehouse.category || "GENERAL");
-        return {
-          id: warehouseId,
-          name: warehouse.name,
-          lat: Number(warehouse.location?.latitude),
-          lng: Number(warehouse.location?.longitude),
-          category,
-          color: CATEGORY_COLOR[category] || CATEGORY_COLOR.GENERAL,
-          storageRatePerUnit: warehouse.storageRatePerUnit,
-          unit: warehouse.unit,
-          isBooked: bookedWarehouseIdSet.booked.has(warehouseId),
-          isQuoteRequested: bookedWarehouseIdSet.pending.has(warehouseId),
-          isActionDisabled:
-            bookedWarehouseIdSet.booked.has(warehouseId) ||
-            (needsCompanySelect && !selectedCompanyId) ||
-            bookMutation.isPending,
-          source: warehouse,
-        };
-      }),
-    [bookMutation.isPending, bookedWarehouseIdSet, filteredWarehouses, needsCompanySelect, selectedCompanyId]
+      filteredWarehouses.map((warehouse) => ({
+        _id: String(warehouse._id || ""),
+        name: warehouse.name,
+        category: warehouse.category,
+        storageRatePerUnit: warehouse.storageRatePerUnit,
+        unit: warehouse.unit,
+        contactPhone: warehouse.contactPhone,
+        contactPhoneSecondary: warehouse.contactPhoneSecondary,
+        location: warehouse.location,
+      })),
+    [filteredWarehouses]
   );
-
-  const openBookModal = (warehouse: Warehouse) => {
-    setSelectedWarehouse(warehouse);
-    setRequiredMT("1");
-    setDurationMonths("1");
-    setRequirementNotes("");
-    setExpectedStartDate("");
-    setIsBookModalOpen(true);
-  };
 
   const geocodeLocation = async (query: string): Promise<SearchPoint | null> => {
     const q = String(query || "").trim();
@@ -337,106 +217,73 @@ export default function WarehouseRentPage() {
     }
   };
 
-  const taxPercent = Number(calculationConfig?.warehouseTaxPercent ?? calculationConfig?.gstPercent ?? 0);
-  const handlingPercent = Number(
-    calculationConfig?.warehouseHandlingPercent ?? calculationConfig?.importAdminCommissionDefault ?? 0
-  );
-  const parsedRequiredMT = Math.max(0, Number(requiredMT || 0));
-  const parsedMonths = Math.max(1, Math.floor(Number(durationMonths || 1)));
-  const ratePerUnit = Number(selectedWarehouse?.storageRatePerUnit ?? 0);
-  const estimateBase = Number((parsedRequiredMT * ratePerUnit * parsedMonths).toFixed(2));
-  const estimateTax = Number(((estimateBase * taxPercent) / 100).toFixed(2));
-  const estimateHandling = Number(((estimateBase * handlingPercent) / 100).toFixed(2));
-  const estimateTotal = Number((estimateBase + estimateTax + estimateHandling).toFixed(2));
-
-  const submitBooking = (requestType: "QUOTE_REQUEST" | "DIRECT_BOOKING") => {
-    if (!selectedWarehouse?._id) return;
-    if (!isAssociate && !selectedCompanyId) {
-      showToastMessage({ type: "warning", message: "Select an associate company first." });
+  const handleContact = (warehouse: { name: string; contactPhone?: string }) => {
+    const phone = String(warehouse.contactPhone || "").trim();
+    if (!phone) {
+      showToastMessage({ type: "warning", message: "Contact number is not available for this warehouse yet." });
       return;
     }
-    if (!Number.isFinite(parsedRequiredMT) || parsedRequiredMT <= 0) {
-      showToastMessage({ type: "warning", message: "Enter a valid required quantity in MT." });
-      return;
+    const dialPhone = normalizeDialPhone(phone);
+    if (typeof window !== "undefined") {
+      window.location.href = `tel:${dialPhone}`;
     }
-    if (!Number.isFinite(parsedMonths) || parsedMonths <= 0) {
-      showToastMessage({ type: "warning", message: "Enter a valid duration in months." });
-      return;
-    }
-
-    bookMutation.mutate({
-      warehouseId: selectedWarehouse._id,
-      ...(isAssociate ? {} : { companyId: selectedCompanyId }),
-      requestType,
-      requiredMT: Number(parsedRequiredMT.toFixed(3)),
-      durationMonths: parsedMonths,
-      requirementNotes: requirementNotes.trim(),
-      ...(expectedStartDate ? { expectedStartDate } : {}),
-      taxPercent,
-      handlingPercent,
-      estimateCurrency: "INR",
-    });
+    showToastMessage({ type: "success", message: `Calling ${warehouse.name}: ${phone}` });
   };
 
   const warehousesErrorStatus = toErrorStatus(warehousesError);
   const warehousesErrorMessage =
     warehousesErrorStatus === 403
       ? "Access denied for your role."
-      : toErrorMessage(warehousesError, "Unable to load warehouse booking right now.");
+      : toErrorMessage(warehousesError, "Unable to load warehouse contact listings right now.");
 
   return (
-    <section className="w-full min-h-screen p-4 md:p-8 bg-[#030303] text-foreground">
+    <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground">
       <div className="max-w-[1400px] mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2 text-orange-500 mb-2"
-            >
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-orange-500 mb-2">
               <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Operations_Terminal</span>
             </motion.div>
-            <Title title="Warehouse Booking" />
+            <Title title="Warehouse Contact Directory" />
             <p className="text-sm text-default-400 max-w-xl">
-              Centralized warehouse booking management. Capture requirement in MT and get an approximate quotation before final allocation.
+              Contact warehouse operators directly for rental coordination. Booking automation remains visible as coming soon.
             </p>
           </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end gap-1 font-mono text-[9px] text-default-400 uppercase tracking-tighter">
-              <span>Link_Status: Encrypted</span>
-              <span>Hub_Location: Asia-South</span>
-            </div>
-          </div>
+          {canAdd ? (
+            <Button
+              color="warning"
+              className="h-11 px-6 font-black uppercase tracking-widest text-[11px] rounded-xl"
+              startContent={<LuPlus size={16} />}
+              onPress={() => router.push("/dashboard/warehouses/location")}
+            >
+              Add Warehouse
+            </Button>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          {/* LEFT COLUMN: CONTROLS & MAP */}
           <div className="xl:col-span-8 space-y-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl overflow-hidden"
+              className="relative overflow-hidden rounded-3xl border border-default-200/70 bg-content1/90 p-6 backdrop-blur-xl dark:border-default-100/20 dark:bg-content1/40"
             >
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <FiMapPin size={120} />
               </div>
-              
+
               <div className="relative z-10 space-y-6">
                 <div className="flex flex-col md:flex-row gap-4">
-                  {needsCompanySelect && (
+                  {needsCompanySelect ? (
                     <div className="flex-1">
-                      <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">
-                        Trade Entity
-                      </div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">Trade Entity</div>
                       <Select
                         variant="bordered"
                         classNames={{
                           base: "max-w-md",
-                          trigger: "bg-white/[0.03] border-white/10 hover:border-orange-500/50 transition-colors h-12",
+                          trigger: "bg-default-100/60 border-default-200 hover:border-orange-500/50 transition-colors h-12",
                           value: "text-sm font-bold truncate",
-                          popoverContent: "bg-[#0A0A0A] border border-white/10 rounded-xl",
                         }}
                         selectedKeys={selectedCompanyId ? [selectedCompanyId] : []}
                         onSelectionChange={(keys) => {
@@ -452,18 +299,16 @@ export default function WarehouseRentPage() {
                         ))}
                       </Select>
                     </div>
-                  )}
-                  
+                  ) : null}
+
                   <div className="flex-1">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">
-                      Strategic Location
-                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">Strategic Location</div>
                     <Input
                       placeholder="Search city, district, or state"
                       variant="bordered"
                       classNames={{
                         base: "w-full",
-                        inputWrapper: "bg-white/[0.03] border-white/10 hover:border-orange-500/50 transition-colors h-12",
+                        inputWrapper: "bg-default-100/60 border-default-200 hover:border-orange-500/50 transition-colors h-12",
                         input: "text-sm",
                       }}
                       value={locationQuery}
@@ -477,19 +322,14 @@ export default function WarehouseRentPage() {
                       }}
                     />
                   </div>
-                  
+
                   <div className="flex items-end gap-2 pb-[1px]">
-                    <Button
-                      color="warning"
-                      className="h-12 px-8 font-black uppercase tracking-widest text-xs rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.2)]"
-                      isLoading={isSearchingLocation}
-                      onPress={handleLocationSearch}
-                    >
+                    <Button color="warning" className="h-12 px-8 font-black uppercase tracking-widest text-xs rounded-xl" isLoading={isSearchingLocation} onPress={handleLocationSearch}>
                       Search
                     </Button>
                     <Button
                       variant="bordered"
-                      className="h-12 px-6 border-white/10 hover:bg-white/5 font-black uppercase tracking-widest text-xs rounded-xl"
+                      className="h-12 px-6 border-default-300 hover:bg-default-100 font-black uppercase tracking-widest text-xs rounded-xl"
                       onPress={() => {
                         setLocationQuery("");
                         setSearchPoint(null);
@@ -500,28 +340,20 @@ export default function WarehouseRentPage() {
                   </div>
                 </div>
 
-                <div className="relative group">
-                  {/* Corner Accents */}
-                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-orange-500/40 rounded-tl z-20" />
-                  <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-orange-500/40 rounded-tr z-20" />
-                  <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-orange-500/40 rounded-bl z-20" />
-                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-orange-500/40 rounded-br z-20" />
-                  
-                  <div className="h-[450px] w-full overflow-hidden rounded-2xl border border-white/10 relative shadow-inner">
-                    <WarehouseRentMap
-                      center={DEFAULT_CENTER}
-                      zoom={DEFAULT_ZOOM}
-                      searchPoint={searchPoint}
-                      warehouses={mapWarehouses}
-                      onBook={(item) => openBookModal(item.source as Warehouse)}
-                    />
-                  </div>
+                <div className="relative h-[450px] w-full overflow-hidden rounded-2xl border border-default-200 bg-content1 shadow-inner">
+                  <WarehouseRentMap
+                    center={DEFAULT_CENTER}
+                    zoom={DEFAULT_ZOOM}
+                    searchPoint={searchPoint}
+                    warehouses={mapWarehouses}
+                    onContact={(item) => handleContact(item)}
+                    showBookNow={isAdmin}
+                  />
                 </div>
               </div>
             </motion.div>
           </div>
 
-          {/* RIGHT COLUMN: LIST VIEW */}
           <div className="xl:col-span-4 space-y-6 h-full flex flex-col">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-black uppercase tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
@@ -531,93 +363,79 @@ export default function WarehouseRentPage() {
             <div className="flex-1 space-y-4 max-h-[680px] overflow-y-auto pr-2 custom-scrollbar">
               <AnimatePresence mode="popLayout">
                 {isLoadingWarehouses ? (
-                  <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-20 border border-dashed border-white/10 rounded-3xl"
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
                     <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
                   </motion.div>
+                ) : isWarehousesError ? (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
+                  </motion.div>
                 ) : filteredWarehouses.length === 0 ? (
-                  <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-20 border border-dashed border-white/10 rounded-3xl text-center px-6"
-                  >
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl text-center px-6">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
                   </motion.div>
                 ) : (
                   filteredWarehouses.map((warehouse, idx) => {
-                    const warehouseId = String(warehouse._id || "");
-                    const isBooked = bookedWarehouseIdSet.booked.has(warehouseId);
-                    const isQuoteRequested = bookedWarehouseIdSet.pending.has(warehouseId);
-                    const bookingDisabled = isBooked || (needsCompanySelect && !selectedCompanyId) || bookMutation.isPending;
                     const color = CATEGORY_COLOR[warehouse.category || "GENERAL"];
 
                     return (
-                      <motion.div
-                        key={warehouse._id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.04, duration: 0.22 }}
-                        whileHover={{ y: -1 }}
-                      >
-                        <Card className="border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/20 transition-all rounded-2xl overflow-hidden shadow-[0_10px_28px_rgba(0,0,0,0.2)] group">
+                      <motion.div key={warehouse._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04, duration: 0.22 }} whileHover={{ y: -1 }}>
+                        <Card className="group overflow-hidden rounded-2xl border border-default-200/70 bg-content1/90 shadow-sm transition-all hover:bg-content2/70 hover:border-default-300 dark:border-default-100/20 dark:bg-content1/40">
                           <CardBody className="p-6">
                             <div className="flex justify-between items-start gap-4">
                               <div className="flex items-start gap-3 min-w-0 flex-1">
-                                <div
-                                  className="w-2.5 h-2.5 rounded-full mt-2 shrink-0"
-                                  style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }}
-                                />
+                                <div className="w-2.5 h-2.5 rounded-full mt-2 shrink-0" style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }} />
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">
-                                    {warehouse.name}
-                                  </h3>
+                                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">{warehouse.name}</h3>
                                   <div className="mt-2 flex items-center gap-2 text-default-400 min-w-0">
                                     <FiMapPin size={13} className="text-default-500 shrink-0" />
                                     <span className="text-sm truncate">{warehouse.address || "Location not specified"}</span>
                                   </div>
                                 </div>
                               </div>
-                              <Chip 
-                                size="sm" 
-                                variant="flat" 
-                                className="font-bold uppercase tracking-wide text-[10px] bg-white/5 border border-white/15 px-2"
-                                color={isBooked ? "success" : isQuoteRequested ? "secondary" : "warning"}
-                              >
-                                {isBooked ? "Booked" : isQuoteRequested ? "Quote Requested" : "Available"}
+                              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color="warning">
+                                Available
                               </Chip>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mt-5 mb-6">
-                              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                            <div className="grid grid-cols-2 gap-3 mt-5 mb-4">
+                              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
                                 <div className="text-[11px] font-semibold text-default-400 mb-1">Category</div>
-                                <div className="text-sm font-semibold text-foreground">
-                                  {(warehouse.category || "GENERAL").replace("_", " ")}
-                                </div>
+                                <div className="text-sm font-semibold text-foreground">{(warehouse.category || "GENERAL").replace("_", " ")}</div>
                               </div>
-                              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
                                 <div className="text-[11px] font-semibold text-default-400 mb-1">Rate</div>
                                 <div className="text-sm font-semibold text-warning-400">
-                                  {warehouse.storageRatePerUnit ?? "0"}{" "}
-                                  <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
+                                  {warehouse.storageRatePerUnit ?? "0"} <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
                                 </div>
                               </div>
                             </div>
 
-                            <Button
-                              color={isBooked ? "success" : "warning"}
-                              variant={isBooked ? "flat" : "solid"}
-                              size="md"
-                              fullWidth
-                              isDisabled={bookingDisabled}
-                              onPress={() => openBookModal(warehouse)}
-                              className="font-bold tracking-wide text-sm rounded-xl h-11"
-                            >
-                              {isBooked ? "Already Booked" : isQuoteRequested ? "Quote Requested" : "Book Warehouse"}
-                            </Button>
+                            <div className="mb-4 rounded-xl border border-default-200/70 bg-content2/60 p-3">
+                              <div className="text-[11px] font-semibold text-default-400 mb-1">Contact</div>
+                              <div className="text-sm font-semibold text-foreground">{warehouse.contactPhone || "Not available yet"}</div>
+                              {warehouse.contactPhoneSecondary ? <div className="text-xs text-default-500 mt-1">Alt: {warehouse.contactPhoneSecondary}</div> : null}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <Button
+                                color="warning"
+                                size="md"
+                                fullWidth
+                                isDisabled={!warehouse.contactPhone}
+                                onPress={() => handleContact(warehouse)}
+                                className="font-bold tracking-wide text-sm rounded-xl h-11"
+                                startContent={<FiPhoneCall />}
+                              >
+                                Contact
+                              </Button>
+                              {isAdmin ? (
+                                <Button color="default" variant="bordered" size="md" fullWidth isDisabled className="font-bold tracking-wide text-sm rounded-xl h-11">
+                                  Book Now (Coming Soon)
+                                </Button>
+                              ) : null}
+                            </div>
                           </CardBody>
                         </Card>
                       </motion.div>
@@ -629,127 +447,6 @@ export default function WarehouseRentPage() {
           </div>
         </div>
       </div>
-
-      <Modal 
-        isOpen={isBookModalOpen} 
-        onOpenChange={setIsBookModalOpen}
-        classNames={{
-          backdrop: "bg-black/80 backdrop-blur-sm",
-          base: "bg-[#0A0A0A] border border-white/10 rounded-[2.5rem]",
-          header: "border-b border-white/5 px-8 py-6",
-          footer: "border-t border-white/5 px-8 py-6",
-          body: "px-8 py-6",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <div className="space-y-1">
-                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 font-mono">Allocation_Protocol</div>
-                  <h3 className="text-xl font-black">Warehouse Booking & Quotation</h3>
-                </div>
-              </ModalHeader>
-              <ModalBody>
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-default-500">Target Module</span>
-                    <span className="font-bold text-foreground">{selectedWarehouse?.name || "Unspecified Node"}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-default-500">Assigned Entity</span>
-                    <span className="font-bold text-orange-500">
-                      {companies.find((company) => String(company._id) === String(selectedCompanyId))?.name || "System Authorization"}
-                    </span>
-                  </div>
-                  <Divider className="bg-white/5" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.001}
-                      label="Required Quantity (MT)"
-                      value={requiredMT}
-                      onValueChange={setRequiredMT}
-                      variant="bordered"
-                    />
-                    <Input
-                      type="number"
-                      min={1}
-                      step={1}
-                      label="Duration (Months)"
-                      value={durationMonths}
-                      onValueChange={setDurationMonths}
-                      variant="bordered"
-                    />
-                    <Input
-                      type="date"
-                      label="Expected Start Date (Optional)"
-                      value={expectedStartDate}
-                      onValueChange={setExpectedStartDate}
-                      variant="bordered"
-                    />
-                  </div>
-                  <Textarea
-                    label="Requirement Notes"
-                    placeholder="Share storage requirement details for quotation."
-                    value={requirementNotes}
-                    onValueChange={setRequirementNotes}
-                    variant="bordered"
-                    minRows={3}
-                  />
-                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-default-400">Approximate Quote (INR)</div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-default-400">Base ({parsedRequiredMT || 0} MT × {ratePerUnit} × {parsedMonths} months)</span>
-                      <span className="font-semibold">{estimateBase.toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-default-400">Tax ({taxPercent}%)</span>
-                      <span className="font-semibold">{estimateTax.toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-default-400">Handling ({handlingPercent}%)</span>
-                      <span className="font-semibold">{estimateHandling.toFixed(2)}</span>
-                    </div>
-                    <Divider className="bg-white/10 my-2" />
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-bold">Estimated Total</span>
-                      <span className="font-black text-orange-400">{estimateTotal.toFixed(2)}</span>
-                    </div>
-                    <p className="text-[11px] text-default-500 italic">This is an approximate quotation; final charges may vary by warehouse policy and operational conditions.</p>
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button 
-                  variant="light" 
-                  onPress={onClose}
-                  className="font-black uppercase tracking-widest text-[10px]"
-                >
-                  Abort
-                </Button>
-                <Button 
-                  color="secondary" 
-                  isLoading={bookMutation.isPending} 
-                  onPress={() => submitBooking("QUOTE_REQUEST")}
-                  className="font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.3)]"
-                >
-                  Request Quote
-                </Button>
-                <Button 
-                  color="warning" 
-                  isLoading={bookMutation.isPending} 
-                  onPress={() => submitBooking("DIRECT_BOOKING")}
-                  className="font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.3)]"
-                >
-                  Book Now
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
     </section>
   );
 }

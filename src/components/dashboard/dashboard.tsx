@@ -407,7 +407,7 @@ const Dashboard: NextPage = () => {
         : false;
 
   const renderActionCenter = () => (
-    <Card className="lg:col-span-2 border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem]">
+    <Card className="lg:col-span-2 border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem]">
       <CardHeader className="px-8 pt-8">
         <div className="flex flex-col gap-1">
           <h4 className="font-bold text-foreground">Task Overview</h4>
@@ -417,11 +417,11 @@ const Dashboard: NextPage = () => {
       <Divider className="my-4 mx-8 w-auto opacity-50" />
       <CardBody className="px-8 pb-8 space-y-4">
         {actionCenterItems.map((item) => (
-           <div key={item.label} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-foreground/5 rounded-2xl p-4 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-all">
+           <div key={item.label} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border db-border-subtle rounded-2xl p-4 db-inset hover:db-subtle transition-all">
              <div className="min-w-0">
                <div className="flex items-center gap-3">
                  <span className="text-sm font-black text-foreground uppercase tracking-tight">{item.label}</span>
-                 <Chip size="sm" variant="flat" color={item.color} className="font-bold border-none h-6 bg-foreground/5">
+                 <Chip size="sm" variant="flat" color={item.color} className="font-bold border-none h-6 db-inset">
                    {item.value}
                  </Chip>
                </div>
@@ -431,7 +431,7 @@ const Dashboard: NextPage = () => {
                size="sm"
                variant="flat"
                color={item.color}
-               className="h-9 min-w-24 rounded-xl font-bold uppercase tracking-wider text-[10px] border border-foreground/5 shadow-sm"
+               className="h-9 min-w-24 rounded-xl font-bold uppercase tracking-wider text-[10px] border db-border-subtle shadow-sm"
                endContent={<LuChevronRight className="w-3.5 h-3.5" />}
                onPress={() => router.push(item.route)}
              >
@@ -456,7 +456,7 @@ const Dashboard: NextPage = () => {
             </div>
          )}
 
-         <div className="border border-foreground/[0.05] rounded-2xl p-4 bg-foreground/[0.01]">
+         <div className="border db-border-subtle rounded-2xl p-4 db-inset">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-foreground">Pending Actions</span>
             <Button
@@ -499,7 +499,7 @@ const Dashboard: NextPage = () => {
   );
 
   const renderRecentActivity = () => (
-    <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem]">
+    <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem]">
       <CardHeader className="px-8 pt-8">
         <h4 className="font-bold text-foreground">Recent Activity</h4>
       </CardHeader>
@@ -514,14 +514,14 @@ const Dashboard: NextPage = () => {
           ))
         ) : activityFeed.length > 0 ? (
           activityFeed.map((item) => (
-            <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-4 p-2 rounded-xl border border-transparent hover:border-foreground/5 hover:bg-foreground/[0.01] transition-all group">
+            <div key={`${item.type}-${item.id}`} className="text-sm flex items-center justify-between gap-4 p-2 rounded-xl border border-transparent hover:db-border-subtle hover:db-inset transition-all group">
               <div className="min-w-0">
                 <div className="font-bold text-foreground uppercase tracking-tight group-hover:text-primary transition-colors">
                   {item.type} <span className="text-[10px] text-default-400 ml-1 font-medium">{String(item.id || "").slice(-6).toUpperCase()}</span>
                 </div>
                 <div className="text-[10px] text-default-500 uppercase tracking-widest font-bold opacity-60">{dashboardCopy(item.status || "")}</div>
               </div>
-              <span className="text-[9px] font-bold text-default-400 bg-foreground/5 px-2 py-1 rounded-md uppercase tracking-widest whitespace-nowrap">
+              <span className="text-[9px] font-bold text-default-400 db-inset px-2 py-1 rounded-md uppercase tracking-widest whitespace-nowrap">
                 {new Date(item.at).toLocaleDateString()}
               </span>
             </div>
@@ -619,20 +619,20 @@ const Dashboard: NextPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 h-[350px]">
           {trendQuery.isLoading ? (
-            <Card className="h-full border border-default-100 bg-content1/70">
+            <Card className="h-full border db-border-subtle db-panel">
               <CardBody className="p-5 space-y-4">
                 <Skeleton className="h-5 w-1/3 rounded-lg" />
                 <Skeleton className="h-full w-full rounded-lg" />
               </CardBody>
             </Card>
           ) : trendQuery.isError ? (
-            <Card className="h-full border border-danger-200 bg-danger-50/40 dark:bg-danger-500/10">
-              <CardBody className="flex items-center justify-center text-sm text-danger-700 dark:text-danger-300">
+            <Card className="h-full border border-danger-500/25 bg-danger-500/10">
+              <CardBody className="flex items-center justify-center text-sm text-danger-600 dark:text-danger-300">
                 Unable to load enquiry trend chart.
               </CardBody>
             </Card>
           ) : (
-            <Card className="h-full border border-default-100 bg-content1/70">
+            <Card className="h-full border db-border-subtle db-panel">
               <CardHeader className="flex items-center justify-between">
                 <h4 className="font-semibold text-foreground">Enquiry Trends (Last 30 Days)</h4>
                 <Button
@@ -660,7 +660,7 @@ const Dashboard: NextPage = () => {
           )}
         </div>
 
-        <Card className="bg-content1/70 border border-default-100 shadow-sm">
+        <Card className="db-panel border db-border-subtle shadow-sm">
           <CardHeader className="pb-2">
             <h4 className="font-semibold text-foreground">Top Performing Products</h4>
           </CardHeader>
@@ -694,10 +694,10 @@ const Dashboard: NextPage = () => {
         <Card className="border border-warning-500/30 bg-warning-500/10">
           <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <h4 className="font-semibold text-warning-700 dark:text-warning-300">
+              <h4 className="font-semibold text-warning-600 dark:text-warning-300">
                 Configure your company responsibilities to unlock full panels.
               </h4>
-              <p className="text-xs text-warning-600/80 dark:text-warning-200/70 mt-1">
+              <p className="text-xs text-warning-600/80 dark:text-warning-200/80 mt-1">
                 Add your company functions so the dashboard can tailor execution and routing.
               </p>
             </div>
@@ -750,7 +750,7 @@ const Dashboard: NextPage = () => {
         {companyFunctionDashboard.isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, idx) => (
-              <Card key={idx} className="border border-default-200/60 bg-content1/70">
+              <Card key={idx} className="border db-border-subtle db-panel">
                 <CardBody className="space-y-3">
                   <Skeleton className="h-5 w-1/3 rounded-lg" />
                   <Skeleton className="h-4 w-2/3 rounded-lg" />
@@ -802,7 +802,7 @@ const Dashboard: NextPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-6">
-           <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem] overflow-hidden">
+           <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem] overflow-hidden">
               <CardHeader className="px-8 pt-8">
                  <div className="flex items-center gap-2">
                     <LuRadioIcon className="text-primary animate-pulse" size={18} />
@@ -831,13 +831,13 @@ const Dashboard: NextPage = () => {
               </CardBody>
            </Card>
 
-           <Card className="border border-foreground/5 shadow-none bg-foreground/10 backdrop-blur-3xl rounded-[2rem] overflow-hidden group cursor-pointer hover:bg-foreground/20 transition-all border-dashed">
+           <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem] overflow-hidden group cursor-pointer hover:db-inset transition-all border-dashed">
               <CardBody className="p-8 flex items-center justify-between">
                  <div className="flex flex-col gap-1">
                     <h4 className="font-black text-foreground uppercase tracking-widest text-[10px]">History</h4>
                     <p className="text-xs text-default-500 font-medium">Review your recent activity.</p>
                  </div>
-                 <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground opacity-50 group-hover:opacity-100 transition-opacity">
+                 <div className="w-10 h-10 rounded-full db-inset flex items-center justify-center text-foreground opacity-50 group-hover:opacity-100 transition-opacity">
                     <LuHistory size={20} />
                  </div>
               </CardBody>
@@ -922,7 +922,7 @@ const Dashboard: NextPage = () => {
           {renderRecentActivity()}
         </div>
 
-        <Card className="border border-foreground/5 shadow-none bg-foreground/[0.02] backdrop-blur-3xl rounded-[2rem] overflow-hidden">
+        <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem] overflow-hidden">
            <CardHeader className="px-8 pt-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
@@ -937,7 +937,7 @@ const Dashboard: NextPage = () => {
               {ongoingEnquiries.length > 0 ? (
                  <div className="space-y-4">
                     {ongoingEnquiries.map((item: any) => (
-                       <div key={item._id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border border-foreground/5 bg-foreground/[0.01] hover:bg-foreground/[0.03] transition-all group">
+                       <div key={item._id} className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border db-border-subtle db-inset hover:db-subtle transition-all group">
                           <div className="flex items-center gap-4">
                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
                                 {String(item._id).slice(-2).toUpperCase()}
@@ -961,7 +961,7 @@ const Dashboard: NextPage = () => {
                              <Button 
                                 size="sm" 
                                 variant="flat" 
-                                className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border border-foreground/5"
+                                className="h-9 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px] border db-border-subtle"
                                 onPress={() => {
                                   const targetId = String(item?._id || item?.id || "").trim();
                                   if (!isValidObjectId(targetId)) return;
@@ -980,7 +980,7 @@ const Dashboard: NextPage = () => {
            </CardBody>
         </Card>
 
-        <Card className="border border-default-100 shadow-sm bg-content1/70 rounded-3xl overflow-hidden">
+        <Card className="border db-border-subtle shadow-sm db-panel rounded-3xl overflow-hidden">
           <CardHeader className="px-6 pt-6">
             <h4 className="font-semibold text-foreground">My Assigned Company Worklist</h4>
           </CardHeader>
@@ -990,7 +990,7 @@ const Dashboard: NextPage = () => {
           </CardBody>
         </Card>
 
-        <Card className="border border-default-100 shadow-sm bg-content1/70 rounded-3xl overflow-hidden">
+        <Card className="border db-border-subtle shadow-sm db-panel rounded-3xl overflow-hidden">
           <CardHeader className="flex flex-col gap-1 px-6 pt-6">
             <h4 className="font-semibold text-foreground">Directory Lookup</h4>
             <p className="text-xs text-default-500">Check whether a company or associate already exists in the system.</p>
@@ -1006,13 +1006,13 @@ const Dashboard: NextPage = () => {
                 value={companyLookup}
                 onChange={(event) => setCompanyLookup(event.target.value)}
                 placeholder="Search company name"
-                className="w-full rounded-2xl border border-default-200 bg-content2 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
+                className="w-full rounded-2xl border db-border-subtle db-subtle px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
               />
               <div className="space-y-2">
                 {companyNeedle ? (
                   matchedCompanies.length ? (
                     matchedCompanies.slice(0, 6).map((item: any) => (
-                      <div key={item?._id} className="flex items-center justify-between rounded-xl border border-default-200/50 bg-content1 px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
+                      <div key={item?._id} className="flex items-center justify-between rounded-xl border db-border-subtle db-panel px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
                         <span className="font-bold text-foreground">{item?.name}</span>
                         <span className="text-[10px] uppercase font-black text-default-400">ID: {String(item?._id || "").slice(-6)}</span>
                       </div>
@@ -1034,13 +1034,13 @@ const Dashboard: NextPage = () => {
                 value={associateLookup}
                 onChange={(event) => setAssociateLookup(event.target.value)}
                 placeholder="Search associate name"
-                className="w-full rounded-2xl border border-default-200 bg-content2 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
+                className="w-full rounded-2xl border db-border-subtle db-subtle px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none transition-all"
               />
               <div className="space-y-2">
                 {associateNeedle ? (
                   matchedAssociates.length ? (
                     matchedAssociates.slice(0, 6).map((item: any) => (
-                      <div key={item?._id} className="flex items-center justify-between rounded-xl border border-default-200/50 bg-content1 px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
+                      <div key={item?._id} className="flex items-center justify-between rounded-xl border db-border-subtle db-panel px-3 py-2.5 text-xs text-default-600 hover:border-primary/30 transition-colors">
                         <span className="font-bold text-foreground">{item?.name}</span>
                         <span className="text-[10px] font-bold text-default-400">{item?.email || "No email"}</span>
                       </div>
@@ -1062,7 +1062,7 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-8">
-      <Card className="border border-foreground/5 shadow-none bg-foreground/[0.04] backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
+      <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
         <CardBody className="p-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="space-y-4 flex-1">
@@ -1082,9 +1082,9 @@ const Dashboard: NextPage = () => {
               <div className="w-full md:w-auto md:min-w-[320px]">
                 <GlobalSearch />
               </div>
-              <div className="hidden md:block h-6 w-px bg-foreground/5" />
+              <div className="hidden md:block h-6 w-px db-border-subtle border-l" />
               <div className="flex items-center gap-2.5">
-                <Chip variant="flat" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 bg-foreground/5 border border-foreground/5">
+                <Chip variant="flat" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 db-inset border db-border-subtle">
                   {role || "User"}
                 </Chip>
                 <Chip variant="flat" color="primary" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 border border-primary/20">
@@ -1099,7 +1099,7 @@ const Dashboard: NextPage = () => {
       {executiveLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, idx) => (
-            <Card key={idx} className="border border-default-200/60 bg-content1/60">
+            <Card key={idx} className="border db-border-subtle db-panel">
               <CardBody className="p-5 space-y-3">
                 <Skeleton className="h-4 w-2/3 rounded-lg" />
                 <Skeleton className="h-8 w-1/2 rounded-lg" />
@@ -1111,8 +1111,8 @@ const Dashboard: NextPage = () => {
       ) : null}
 
       {executiveError ? (
-        <Card className="border border-danger-200 bg-danger-50/40 dark:bg-danger-500/10">
-          <CardBody className="text-sm text-danger-700 dark:text-danger-300">
+        <Card className="border border-danger-500/25 bg-danger-500/10">
+          <CardBody className="text-sm text-danger-600 dark:text-danger-300">
             Unable to load role metrics right now. Core dashboard actions are still available below.
           </CardBody>
         </Card>

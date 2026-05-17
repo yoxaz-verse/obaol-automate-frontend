@@ -106,6 +106,12 @@ const associateFeatureSections = [
         what: "Find and reserve storage capacity for shipments.",
         actions: "Search availability, request slots, manage bookings.",
       },
+      {
+        name: "Quality Testing Labs",
+        route: "/dashboard/quality-labs",
+        what: "Discover quality testing labs and review certifications/services.",
+        actions: "Search labs on map, open contacts, and call directly.",
+      },
     ],
   },
   {
@@ -266,6 +272,12 @@ const operatorFeatureSections = [
         route: "/dashboard/warehouse-rent",
         what: "Coordinate storage capacity for active orders.",
         actions: "Check availability, reserve slots, log updates.",
+      },
+      {
+        name: "Quality Testing Labs",
+        route: "/dashboard/quality-labs",
+        what: "Locate quality testing labs for execution support.",
+        actions: "Search nearby labs, review service details, and contact directly.",
       },
     ],
   },

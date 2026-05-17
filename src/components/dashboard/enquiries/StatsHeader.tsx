@@ -23,11 +23,18 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
     // Conversion Rate: Completed / Total
     const conversionRate = total > 0 ? ((completed / total) * 100).toFixed(1) : "0.0";
 
+    const toneByKey: Record<string, string> = {
+        primary: "bg-primary-500/10 text-primary-500",
+        warning: "bg-warning-500/10 text-warning-500",
+        success: "bg-success-500/10 text-success-500",
+        secondary: "bg-secondary-500/10 text-secondary-500",
+    };
+
     const StatCard = ({ title, value, icon, color, subtext }: any) => (
-        <Card className="border border-default-100 bg-content1 shadow-none rounded-xl">
+        <Card className="border db-panel rounded-xl shadow-none">
             <CardBody className="flex flex-row items-center justify-between p-3 sm:p-4 px-3 sm:px-5">
                 <div className="min-w-0 flex-1">
-                    <p className="text-default-500 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1 truncate">
+                    <p className="db-muted text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1 truncate">
                         {title}
                     </p>
                     <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
@@ -35,7 +42,7 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
                         {subtext && <span className="text-[10px] sm:text-xs text-success-500 font-medium truncate">{subtext}</span>}
                     </div>
                 </div>
-                <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-${color}-500/10 text-${color}-500 flex-shrink-0 ml-2`}>
+                <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0 ml-2 ${toneByKey[color] || toneByKey.primary}`}>
                     {icon}
                 </div>
             </CardBody>

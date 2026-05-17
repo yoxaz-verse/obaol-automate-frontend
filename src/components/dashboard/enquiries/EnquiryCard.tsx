@@ -1,10 +1,9 @@
 import React from "react";
-import { Card, CardBody, CardFooter, CardHeader, Button, Divider } from "@heroui/react";
-import { FiPhone, FiArrowRight, FiPackage, FiUser, FiClock, FiShield, FiBriefcase, FiMapPin, FiActivity } from "react-icons/fi";
+import { Card, CardBody, CardFooter, CardHeader, Button } from "@heroui/react";
+import { FiUser, FiClock, FiBriefcase, FiMapPin, FiActivity } from "react-icons/fi";
 import EnquiryStatus from "./EnquiryStatus";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/context/CurrencyContext";
-import AuthContext from "@/context/AuthContext";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges } from "@/utils/classificationTheme";
 
 interface EnquiryCardProps {
@@ -14,8 +13,7 @@ interface EnquiryCardProps {
 }
 
 const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) => {
-    const { user } = React.useContext(AuthContext);
-    const { convertRate, formatRate } = useCurrency();
+    const { formatRate } = useCurrency();
     // Extract data safely
     const productName = data.product || 'Unknown Product';
     const clientName = data.counterparty;
@@ -23,7 +21,6 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
     const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "Recent";
     const status = data.status || "New";
     const quantity = data.quantity ? `${data.quantity} Ton` : null;
-    const isImportEnquiry = String(data?.sourceType || "").toUpperCase() === "IMPORT" || Boolean(data?.importListingId);
     // Filter out 'N/A' variant as it is meaningless
     const variantName = (data.productVariant && data.productVariant !== "N/A") ? data.productVariant : "";
     const classificationBadges = getClassificationBadges(data.classificationProduct || data.productObj || null);
@@ -43,7 +40,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                 }
             }}
         >
-            <Card className="h-full bg-white dark:bg-[#04070f] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group rounded-[2rem] transition-all duration-500 hover:dark:border-warning-500/30">
+            <Card className="h-full db-panel border db-border-subtle shadow-none overflow-hidden group rounded-[2rem] transition-all duration-500 hover:border-warning-500/30">
                 <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
                     <div className="flex flex-row justify-between w-full items-center gap-4">
                         <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full ${
@@ -53,7 +50,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         }`}>
                             {data.type === "Buying" ? "PURCHASE" : data.type === "Selling" ? "SALE" : "MEDIATED"}
                         </span>
-                        <div className="flex items-center gap-2 text-default-400">
+                        <div className="flex items-center gap-2 db-muted">
                            <FiClock size={11} className="opacity-50" />
                            <span className="text-[10px] font-black tracking-widest uppercase">{date}</span>
                         </div>
@@ -63,7 +60,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                             {productName}
                         </h4>
                         {variantName && (
-                            <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest mt-1 block opacity-70">
+                            <span className="text-[10px] font-bold db-muted uppercase tracking-widest mt-1 block opacity-70">
                                 {variantName}
                             </span>
                         )}
@@ -91,26 +88,26 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                             <h5 className="text-[10px] font-black text-foreground uppercase tracking-wider truncate">
                                 {clientName || "Unknown Client"}
                             </h5>
-                            <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest truncate mt-0.5">
+                            <p className="text-[9px] font-bold db-muted uppercase tracking-widest truncate mt-0.5">
                                 {companyName || "Verified Associate"}
                             </p>
                         </div>
                     </div>
 
                     {/* Financial Data Block - High Density */}
-                    <div className="bg-foreground/[0.03] dark:bg-white/[0.03] border border-divider/40 rounded-2xl p-4 space-y-4">
+                    <div className="db-inset border db-border-subtle rounded-2xl p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-default-400">Target Rate</span>
+                                <span className="text-[8px] font-black uppercase tracking-widest db-muted">Target Rate</span>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-lg font-black text-foreground tracking-tighter">
                                         {formatRate(data.rate || 0)}
                                     </span>
-                                    <span className="text-[8px] font-black text-default-400">/KG</span>
+                                    <span className="text-[8px] font-black db-muted">/KG</span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-0.5 items-end text-right">
-                                 <span className="text-[8px] font-black uppercase tracking-widest text-default-400">Mission Volume</span>
+                                 <span className="text-[8px] font-black uppercase tracking-widest db-muted">Mission Volume</span>
                                  <span className="text-xs font-black text-foreground uppercase tracking-tight">
                                     {quantity || "TBD"}
                                  </span>
@@ -118,7 +115,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         </div>
 
                         {data.isAdmin && (data.adminCommission !== undefined || (data.mediatorCommission !== undefined && data.type === "Mediated")) && (
-                            <div className="flex flex-wrap gap-2 pt-3 border-t border-divider/50">
+                            <div className="flex flex-wrap gap-2 pt-3 border-t db-border-subtle">
                                 {data.adminCommission !== undefined && (
                                     <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-warning-500/10 border border-warning-500/20">
                                         <span className="text-[7px] font-black text-warning-600 uppercase">OBAOL</span>
@@ -135,7 +132,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between text-[9px] font-black text-default-400 uppercase tracking-[0.15em] px-1">
+                    <div className="flex items-center justify-between text-[9px] font-black db-muted uppercase tracking-[0.15em] px-1">
                         <div className="flex items-center gap-2.5">
                              <FiMapPin size={12} className="text-warning-500/60" />
                              <span>{data.portName || "Pending Port"}</span>
@@ -154,14 +151,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                 <>
                                     <Button
                                         variant="flat"
-                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl bg-default-100 hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 border border-transparent transition-all uppercase"
+                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 border border-transparent transition-all uppercase"
                                         onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.supplierPhone}`; }}
                                     >
                                         Supplier
                                     </Button>
                                     <Button
                                         variant="flat"
-                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl bg-default-100 hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
+                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
                                         onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.buyerPhone}`; }}
                                     >
                                         Buyer
@@ -170,7 +167,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                             ) : (
                                 <Button
                                     variant="flat"
-                                    className="w-full font-black text-[9px] tracking-widest h-10 rounded-xl bg-default-100 hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
+                                    className="w-full font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
                                     onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
                                 >
                                     View Enquiry Details
@@ -179,7 +176,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         </div>
                         <div onClick={(e) => e.stopPropagation()} className="shrink-0">{action}</div>
                     </div>
-                    <div className="flex justify-start items-center gap-4 px-4 py-2.5 bg-foreground/[0.03] dark:bg-white/[0.03] rounded-2xl border border-divider/20 transition-all group-hover:border-warning-500/20">
+                    <div className="flex justify-start items-center gap-4 px-4 py-2.5 db-inset rounded-2xl border db-border-subtle transition-all group-hover:border-warning-500/20">
                         <EnquiryStatus status={status} />
                         <FiActivity className="text-default-200 group-hover:text-warning-500 transition-colors ml-auto opacity-30 group-hover:opacity-100" size={12} />
                     </div>

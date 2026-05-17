@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -13,12 +13,14 @@ import {
   LuSettings, LuPhone, LuTag, LuPackage, LuHistory, LuClock, LuMail, LuLock 
 } from "react-icons/lu";
 import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
+import CompanyInterestsModal from "@/components/Login/company-interests-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import { extractList } from "@/core/data/queryUtils";
+import { extractCount, extractList, extractPagedPayload } from "@/core/data/queryUtils";
+import { baseUrl } from "@/core/api/axiosInstance";
 import { showToastMessage } from "@/utils/utils";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import OrderCard from "@/components/dashboard/orders/OrderCard";
@@ -43,6 +45,7 @@ export default function CompanyProductPage() {
   const [activeDetailTab, setActiveDetailTab] = useState("catalog");
   const [isConfigExpanded, setIsConfigExpanded] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [operatorSearchText, setOperatorSearchText] = useState("");
   const [assignmentFilter, setAssignmentFilter] = useState<"all" | "assigned" | "unassigned">("all");
@@ -65,6 +68,36 @@ export default function CompanyProductPage() {
   }, [search]);
 
   const DIRECTORY_PAGE_SIZE = 24;
+  const normalizedAssignmentFilter: "all" | "assigned" | "unassigned" = isOperatorFamily ? "assigned" : assignmentFilter;
+  const shouldClientFilterAssignment = isAdmin;
+
+  const buildCompanyQueryParams = useCallback(({
+    page,
+    limit,
+    includeSort = true,
+    searchValue,
+    assignmentStatus = "all",
+    liveStatus = "all",
+  }: {
+    page?: number;
+    limit?: number;
+    includeSort?: boolean;
+    searchValue?: string;
+    assignmentStatus?: "all" | "assigned" | "unassigned";
+    liveStatus?: "all" | "live" | "not_live";
+  }) => {
+    const params: Record<string, any> = {
+      _ts: Date.now(),
+      ...(typeof page === "number" ? { page } : {}),
+      ...(typeof limit === "number" ? { limit } : {}),
+      ...(includeSort ? { sort: "name:asc" } : {}),
+      ...(searchValue ? { search: searchValue } : {}),
+      ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
+      ...(isAdmin && !shouldClientFilterAssignment && assignmentStatus !== "all" ? { assignmentStatus } : {}),
+      ...(liveStatus !== "all" ? { liveProductStatus: liveStatus } : {}),
+    };
+    return params;
+  }, [isOperatorFamily, user?.id, isAdmin, shouldClientFilterAssignment]);
 
   const companiesQuery = useQuery({
     queryKey: [
@@ -73,19 +106,20 @@ export default function CompanyProductPage() {
       user?.id,
       directoryPage,
       debouncedSearch,
-      assignmentFilter,
+      normalizedAssignmentFilter,
       liveProductFilter,
     ],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: directoryPage,
-        limit: DIRECTORY_PAGE_SIZE,
-        sort: "name:asc",
-        ...(debouncedSearch ? { search: debouncedSearch } : {}),
-        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-        ...(isAdmin && assignmentFilter !== "all" ? { assignmentStatus: assignmentFilter } : {}),
-        ...(liveProductFilter !== "all" ? { liveProductStatus: liveProductFilter } : {}),
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: shouldClientFilterAssignment ? 1 : directoryPage,
+          limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
+          searchValue: debouncedSearch,
+          assignmentStatus: normalizedAssignmentFilter,
+          liveStatus: liveProductFilter,
+        })
+      ),
     enabled: canAccessCompaniesWorkspace,
     placeholderData: (previousData) => previousData,
   });
@@ -93,95 +127,96 @@ export default function CompanyProductPage() {
   const configCompaniesQuery = useQuery({
     queryKey: ["company-config-selector-list", isAdmin],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: 1,
-        limit: 200,
-        sort: "name:asc",
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 200,
+        })
+      ),
     enabled: isAdmin && isConfigExpanded,
   });
 
   const totalCompaniesQuery = useQuery({
     queryKey: ["company-metrics-total", roleLower, user?.id],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: 1,
-        limit: 1,
-        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 1,
+        })
+      ),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const liveCompaniesQuery = useQuery({
     queryKey: ["company-metrics-live", roleLower, user?.id],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: 1,
-        limit: 1,
-        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-        liveProductStatus: "live",
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 1,
+          liveStatus: "live",
+        })
+      ),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const assignedCompaniesQuery = useQuery({
     queryKey: ["company-metrics-assigned", roleLower, user?.id],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: 1,
-        limit: 1,
-        assignmentStatus: "assigned",
-        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 1,
+          assignmentStatus: "assigned",
+        })
+      ),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const unassignedCompaniesQuery = useQuery({
     queryKey: ["company-metrics-unassigned", roleLower, user?.id],
     queryFn: () =>
-      getData(apiRoutes.associateCompany.getAll, {
-        page: 1,
-        limit: 1,
-        assignmentStatus: "unassigned",
-        ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-      }),
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 1,
+          assignmentStatus: "unassigned",
+        })
+      ),
+    enabled: canAccessCompaniesWorkspace,
+  });
+
+  const assignmentMetricsSnapshotQuery = useQuery({
+    queryKey: ["company-metrics-assignment-snapshot", roleLower, user?.id],
+    queryFn: () =>
+      getData(
+        apiRoutes.associateCompany.getAll,
+        buildCompanyQueryParams({
+          page: 1,
+          limit: 1000,
+          assignmentStatus: "all",
+        })
+      ),
     enabled: canAccessCompaniesWorkspace,
   });
 
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
-  const companiesPayload = companiesQuery.data?.data;
+  const companiesPayload = extractPagedPayload(companiesQuery.data);
   const companies = useMemo(() => extractList(companiesPayload), [companiesPayload]);
   const configCompanies = useMemo(
     () => extractList(configCompaniesQuery.data?.data),
     [configCompaniesQuery.data]
   );
 
-  const getTotalCount = (payload: any): number => {
-    const raw =
-      payload?.totalCount ??
-      payload?.data?.totalCount ??
-      payload?.data?.data?.totalCount ??
-      0;
-    return Number(raw || 0);
-  };
-
-  const directoryTotalCount = getTotalCount(companiesPayload);
-  const directoryCurrentPage = Number(
-    companiesPayload?.currentPage ??
-      companiesPayload?.data?.currentPage ??
-      directoryPage
-  );
-  const directoryTotalPages = Math.max(
-    Number(
-      companiesPayload?.totalPages ??
-        companiesPayload?.data?.totalPages ??
-        Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE) ??
-        1
-    ) || 1,
-    1
-  );
+  const getTotalCount = (payload: any, rows: any[]): number => Number(extractCount(payload, rows) || 0);
 
   const toText = (value: any, fallback = ""): string => {
     if (value === null || value === undefined) return fallback;
@@ -209,20 +244,20 @@ export default function CompanyProductPage() {
 
   const toName = (value: any, fallback = "") => toText(value?.name ?? value, fallback);
 
-  const toIdValue = (value: any): string => {
+  const toIdValue = useCallback((value: any): string => {
     if (value === null || value === undefined) return "";
     if (typeof value === "string" || typeof value === "number") return String(value);
     if (typeof value === "object") return String(value?._id || value?.id || "");
     return "";
-  };
+  }, []);
 
-  const hasAssignment = (company: any): boolean => {
+  const hasAssignment = useCallback((company: any): boolean => {
     const assigned = company?.assignedOperator;
     if (assigned === null || assigned === undefined) return false;
     if (typeof assigned === "string") return assigned.trim().length > 0;
     const assignedId = toIdValue(assigned);
     return assignedId.trim().length > 0;
-  };
+  }, [toIdValue]);
 
   const hasLiveProducts = (company: any): boolean => {
     const rawLiveProducts =
@@ -232,6 +267,43 @@ export default function CompanyProductPage() {
       0;
     return Number(rawLiveProducts || 0) > 0;
   };
+
+  const assignmentFilteredCompanies = useMemo(() => {
+    if (!shouldClientFilterAssignment) return companies;
+    if (normalizedAssignmentFilter === "all") return companies;
+    return companies.filter((company: any) => {
+      const isAssigned = hasAssignment(company);
+      return normalizedAssignmentFilter === "assigned" ? isAssigned : !isAssigned;
+    });
+  }, [shouldClientFilterAssignment, normalizedAssignmentFilter, companies, hasAssignment]);
+
+  const directoryRows = useMemo(() => {
+    if (!shouldClientFilterAssignment) return companies;
+    const start = (directoryPage - 1) * DIRECTORY_PAGE_SIZE;
+    return assignmentFilteredCompanies.slice(start, start + DIRECTORY_PAGE_SIZE);
+  }, [shouldClientFilterAssignment, companies, assignmentFilteredCompanies, directoryPage]);
+
+  const directoryTotalCount = shouldClientFilterAssignment
+    ? assignmentFilteredCompanies.length
+    : getTotalCount(companiesPayload, companies);
+  const directoryCurrentPage = shouldClientFilterAssignment
+    ? directoryPage
+    : Number(
+        companiesPayload?.currentPage ??
+          companiesPayload?.data?.currentPage ??
+          directoryPage
+      );
+  const directoryTotalPages = Math.max(
+    Number(
+      shouldClientFilterAssignment
+        ? Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE)
+        : companiesPayload?.totalPages ??
+          companiesPayload?.data?.totalPages ??
+          Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE) ??
+          1
+    ) || 1,
+    1
+  );
 
   const normalizeInterestList = (raw: any) => {
     if (!Array.isArray(raw)) return [];
@@ -295,35 +367,118 @@ export default function CompanyProductPage() {
     },
   });
 
-  const totalCompaniesCount = getTotalCount(totalCompaniesQuery.data?.data);
-  const scopedLiveCompaniesCount = getTotalCount(liveCompaniesQuery.data?.data);
-  const scopedAssignedCompaniesCount = getTotalCount(assignedCompaniesQuery.data?.data);
-  const scopedUnassignedCompaniesCount = getTotalCount(unassignedCompaniesQuery.data?.data);
+  const totalCompaniesCount = getTotalCount(extractPagedPayload(totalCompaniesQuery.data), []);
+  const scopedLiveCompaniesCount = getTotalCount(extractPagedPayload(liveCompaniesQuery.data), []);
+  const scopedAssignedCompaniesCount = getTotalCount(extractPagedPayload(assignedCompaniesQuery.data), []);
+  const scopedUnassignedCompaniesCount = getTotalCount(extractPagedPayload(unassignedCompaniesQuery.data), []);
+  const metricQueries = [totalCompaniesQuery, liveCompaniesQuery, assignmentMetricsSnapshotQuery];
+  const hasMetricsError = metricQueries.some((query) => query.isError);
 
-  const assignedCount = scopedAssignedCompaniesCount;
-  const unassignedCount = scopedUnassignedCompaniesCount;
+  const assignmentSnapshotRows = extractList(extractPagedPayload(assignmentMetricsSnapshotQuery.data));
+  const snapshotAssignedCount = assignmentSnapshotRows.filter((row: any) => hasAssignment(row)).length;
+  const snapshotUnassignedCount = assignmentSnapshotRows.length - snapshotAssignedCount;
+  const assignedCount = isAdmin && assignmentSnapshotRows.length > 0 ? snapshotAssignedCount : scopedAssignedCompaniesCount;
+  const unassignedCount = isAdmin && assignmentSnapshotRows.length > 0 ? snapshotUnassignedCount : scopedUnassignedCompaniesCount;
   const liveCount = Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
   const notLiveCount = Math.max(totalCompaniesCount - liveCount, 0);
+  const directoryErrorMessage = (() => {
+    const error: any = companiesQuery.error;
+    return (
+      error?.response?.data?.message ||
+      error?.message ||
+      "Could not load companies. Please retry."
+    );
+  })();
+  const retryCompanyQueries = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) =>
+        Array.isArray(query.queryKey) &&
+        ["company-directory", "company-metrics-total", "company-metrics-live", "company-metrics-assigned", "company-metrics-unassigned", "company-metrics-assignment-snapshot"].includes(String(query.queryKey[0] || "")),
+    });
+  };
+
+  const companyEmptyStateMessage = (() => {
+    const assignmentLabel =
+      normalizedAssignmentFilter === "assigned" ? "Assigned" :
+      normalizedAssignmentFilter === "unassigned" ? "Unassigned" : "All";
+    const liveLabel =
+      liveProductFilter === "live" ? "Live Products" :
+      liveProductFilter === "not_live" ? "No Live Products" : "All";
+
+    if (normalizedAssignmentFilter !== "all" && liveProductFilter !== "all") {
+      return `No companies found for ${assignmentLabel} + ${liveLabel}.`;
+    }
+    if (normalizedAssignmentFilter === "assigned") return "No assigned companies found.";
+    if (normalizedAssignmentFilter === "unassigned") return "No unassigned companies found.";
+    if (liveProductFilter === "live") return "No companies with live products found.";
+    if (liveProductFilter === "not_live") return "No companies without live products found.";
+    return "No companies found.";
+  })();
+
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
+    const directoryParams = buildCompanyQueryParams({
+      page: shouldClientFilterAssignment ? 1 : directoryPage,
+      limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
+      searchValue: debouncedSearch,
+      assignmentStatus: normalizedAssignmentFilter,
+      liveStatus: liveProductFilter,
+    });
     console.debug("[companies] directory filters", {
+      baseUrl,
       roleLower,
-      assignmentFilter,
+      params: directoryParams,
+      assignmentFilter: normalizedAssignmentFilter,
       liveProductFilter,
       totalCount: totalCompaniesCount,
       liveCount,
       notLiveCount,
-      listCount: companies.length,
+      listTotalCount: directoryTotalCount,
+      listCount: directoryRows.length,
     });
   }, [
     roleLower,
-    assignmentFilter,
+    directoryPage,
+    debouncedSearch,
+    normalizedAssignmentFilter,
     liveProductFilter,
     totalCompaniesCount,
     liveCount,
     notLiveCount,
-    companies.length,
+    directoryTotalCount,
+    directoryRows.length,
+    shouldClientFilterAssignment,
+    buildCompanyQueryParams,
+  ]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    if (!companiesQuery.isError) return;
+    const error: any = companiesQuery.error;
+    console.error("[companies] directory request failed", {
+      status: error?.response?.status || null,
+      message: error?.response?.data?.message || error?.message || "Unknown error",
+      params: buildCompanyQueryParams({
+        page: shouldClientFilterAssignment ? 1 : directoryPage,
+        limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
+        searchValue: debouncedSearch,
+        assignmentStatus: normalizedAssignmentFilter,
+        liveStatus: liveProductFilter,
+      }),
+      roleLower,
+      apiBase: baseUrl,
+    });
+  }, [
+    companiesQuery.isError,
+    companiesQuery.error,
+    directoryPage,
+    debouncedSearch,
+    normalizedAssignmentFilter,
+    liveProductFilter,
+    roleLower,
+    shouldClientFilterAssignment,
+    buildCompanyQueryParams,
   ]);
 
   const PALETTE = [
@@ -409,6 +564,9 @@ export default function CompanyProductPage() {
 
   const selectedCompany = selectedCompanyQuery.data?.data?.data || null;
   const selectedCompanyAssignedOperatorId = toIdValue(selectedCompany?.assignedOperator);
+  const currentUserId = String(user?.id || "");
+  const canManageSelectedCompanyInterests =
+    isAdmin || (isOperatorFamily && Boolean(selectedCompanyAssignedOperatorId) && selectedCompanyAssignedOperatorId === currentUserId);
   const selectedCompanyName = toName(selectedCompany, "Target Entity");
   const selectedCompanyEmail = toText(selectedCompany?.email, "Not available");
   const selectedCompanyPhone = toText(selectedCompany?.phone, "Not available");
@@ -437,6 +595,10 @@ export default function CompanyProductPage() {
       ? selectedCompany.serviceCapabilities
       : [];
   const companyInterests = normalizeInterestList(companyInterestsSource);
+  const companyInterestKeys = useMemo(
+    () => companyInterests.map((interest: { key: string }) => String(interest.key)),
+    [companyInterests]
+  );
   const enquiries = useMemo(
     () =>
       Array.isArray(selectedCompanyEnquiriesQuery.data?.data?.data)
@@ -467,7 +629,7 @@ export default function CompanyProductPage() {
         email: String(row?.email || ""),
       }))
       .filter((row: { id: string }) => Boolean(row.id));
-  }, [operatorsQuery.data]);
+  }, [operatorsQuery.data, toIdValue]);
 
   const filteredOperatorOptions = useMemo(() => {
     const needle = operatorSearchText.trim().toLowerCase();
@@ -727,6 +889,16 @@ export default function CompanyProductPage() {
 
       {/* Directory Section */}
       <div className="relative space-y-8">
+        {hasMetricsError ? (
+          <div className="rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-danger-600">
+              Some summary metrics could not be loaded.
+            </p>
+            <Button size="sm" radius="full" color="danger" variant="flat" onPress={retryCompanyQueries} className="font-black uppercase tracking-wider text-[10px]">
+              Retry Metrics
+            </Button>
+          </div>
+        ) : null}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <Card className="border border-divider bg-content1/50 rounded-[1.75rem] p-4 md:p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
@@ -875,10 +1047,19 @@ export default function CompanyProductPage() {
                   <div className="w-12 h-12 border-2 border-warning-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(245,158,11,0.2)]" />
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-500/60 animate-pulse">Loading companies...</p>
                 </div>
+              ) : companiesQuery.isError ? (
+                <div className="py-16 px-6 text-center bg-danger-500/5 rounded-[2.5rem] border border-danger-500/30 space-y-4">
+                  <LuSearch className="mx-auto text-danger-400 mb-1" size={32} />
+                  <p className="text-danger-600 text-sm font-black uppercase tracking-widest">Could not load companies</p>
+                  <p className="text-default-500 text-xs font-semibold">{directoryErrorMessage}</p>
+                  <Button size="sm" radius="full" color="danger" onPress={retryCompanyQueries} className="font-black uppercase tracking-wider text-[10px]">
+                    Retry
+                  </Button>
+                </div>
               ) : companies.length === 0 ? (
                 <div className="py-24 text-center bg-content1/20 rounded-[2.5rem] border border-dashed border-divider">
                   <LuSearch className="mx-auto text-default-300 mb-4" size={32} />
-                  <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">No companies found.</p>
+                  <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">{companyEmptyStateMessage}</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -895,7 +1076,7 @@ export default function CompanyProductPage() {
                     <div className="flex-1 h-px bg-gradient-to-r from-divider to-transparent" />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {companies.map((company: any, idx: number) => {
+                    {directoryRows.map((company: any, idx: number) => {
                       const name = String(company?.name || "Unnamed Company");
                       const companyIsAssigned = hasAssignment(company);
                       const companyIsLive = hasLiveProducts(company);
@@ -1124,9 +1305,21 @@ export default function CompanyProductPage() {
 
                     <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
                       <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <LuTag className="text-secondary-500" size={16} />
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <LuTag className="text-secondary-500" size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Sector Affiliations</span>
+                          </div>
+                          {canManageSelectedCompanyInterests ? (
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="secondary"
+                              onPress={() => setIsInterestsModalOpen(true)}
+                            >
+                              {companyInterests.length > 0 ? "Edit Interests" : "Add Interests"}
+                            </Button>
+                          ) : null}
                         </div>
                         {companyInterests.length ? (
                           <div className="flex flex-wrap gap-2">
@@ -1142,6 +1335,20 @@ export default function CompanyProductPage() {
                       </div>
                     </Card>
                   </div>
+
+                  <CompanyInterestsModal
+                    open={isInterestsModalOpen}
+                    associateCompanyId={selectedCompanyId}
+                    initialInterests={companyInterestKeys}
+                    title={companyInterests.length > 0 ? "Edit Company Responsibilities" : "Set Company Responsibilities"}
+                    saveLabel={companyInterests.length > 0 ? "Save Changes" : "Save Interests"}
+                    onClose={() => setIsInterestsModalOpen(false)}
+                    onSaved={() => {
+                      setIsInterestsModalOpen(false);
+                      queryClient.invalidateQueries({ queryKey: ["company-interests", selectedCompanyId] });
+                      queryClient.invalidateQueries({ queryKey: ["company-detail", selectedCompanyId] });
+                    }}
+                  />
 
                   <div className="lg:col-span-8 space-y-6">
                     <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-6 shadow-sm backdrop-blur-xl">

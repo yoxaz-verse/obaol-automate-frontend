@@ -64,11 +64,10 @@ export default function MarketplacePage() {
         [currentTable, liveState, offlineState]
     );
 
-    const effectiveClassifications = useMemo(() => {
-        const selected = Array.isArray(activeState?.filters?.classifications) ? activeState.filters.classifications : [];
-        if (classificationTab === "all") return selected;
-        return Array.from(new Set([classificationTab, ...selected]));
-    }, [activeState, classificationTab]);
+    const effectiveClassifications = useMemo(
+        () => (classificationTab === "all" ? [] : [classificationTab]),
+        [classificationTab]
+    );
     const activeTheme = useMemo(
         () => resolveActiveClassificationTheme(effectiveClassifications),
         [effectiveClassifications]
@@ -186,7 +185,7 @@ export default function MarketplacePage() {
                             <div className="w-full min-w-0 pb-10 overflow-x-auto">
                                 <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
-                                        Marketplace Listings
+                                        Marketplace Offers
                                     </div>
                                     {canAddOwnRate && (
                                         <Button
@@ -218,7 +217,7 @@ export default function MarketplacePage() {
                                         tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
-                                    <Tab key={"marketplace-live"} title="Marketplace (Live)">
+                                    <Tab key={"marketplace-live"} title="Current Listings">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
                                         {loadedTabs["marketplace-live"] && (
@@ -233,7 +232,7 @@ export default function MarketplacePage() {
                                             />
                                         )}
                                     </Tab>
-                                    <Tab key={"marketplace-offline"} title="Marketplace (Offline)">
+                                    <Tab key={"marketplace-offline"} title="Past Listings">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
                                         {loadedTabs["marketplace-offline"] && (

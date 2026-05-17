@@ -2,10 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+.bg-pattern {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.2) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
+  --db-bg: #ffffff;
+  --db-shell: rgba(255, 255, 255, 0.97);
+  --db-panel: rgba(255, 255, 255, 0.99);
+  --db-subtle: rgba(255, 255, 255, 0.96);
+  --db-inset: rgba(248, 250, 252, 0.98);
+  --db-border-subtle: rgba(148, 163, 184, 0.2);
+  --db-border-strong: rgba(100, 116, 139, 0.32);
+  --db-muted: rgba(71, 85, 105, 0.78);
+  --db-muted-strong: rgba(51, 65, 85, 0.92);
+  --db-focus: rgba(245, 158, 11, 0.35);
+  --db-overlay: rgba(15, 23, 42, 0.12);
+  --db-overlay-soft: rgba(15, 23, 42, 0.06);
+  --db-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,6 +39,44 @@
   }
 }
 
+.light {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  --db-bg: #ffffff;
+  --db-shell: rgba(255, 255, 255, 0.97);
+  --db-panel: rgba(255, 255, 255, 0.99);
+  --db-subtle: rgba(255, 255, 255, 0.96);
+  --db-inset: rgba(248, 250, 252, 0.98);
+  --db-border-subtle: rgba(148, 163, 184, 0.2);
+  --db-border-strong: rgba(100, 116, 139, 0.32);
+  --db-muted: rgba(71, 85, 105, 0.78);
+  --db-muted-strong: rgba(51, 65, 85, 0.92);
+  --db-focus: rgba(245, 158, 11, 0.35);
+  --db-overlay: rgba(15, 23, 42, 0.12);
+  --db-overlay-soft: rgba(15, 23, 42, 0.06);
+  --db-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+  --db-bg: #030813;
+  --db-shell: rgba(11, 15, 20, 0.88);
+  --db-panel: rgba(8, 13, 24, 0.95);
+  --db-subtle: rgba(10, 17, 31, 0.82);
+  --db-inset: rgba(17, 25, 39, 0.72);
+  --db-border-subtle: rgba(255, 255, 255, 0.08);
+  --db-border-strong: rgba(255, 255, 255, 0.16);
+  --db-muted: rgba(226, 232, 240, 0.66);
+  --db-muted-strong: rgba(241, 245, 249, 0.9);
+  --db-focus: rgba(245, 158, 11, 0.42);
+  --db-overlay: rgba(2, 6, 23, 0.58);
+  --db-overlay-soft: rgba(2, 6, 23, 0.34);
+  --db-shadow: 0 16px 42px rgba(0, 0, 0, 0.38);
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom,
@@ -23,9 +84,87 @@ body {
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
 }
 
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video,
+svg,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+[data-slot="content"][role="dialog"] {
+  max-height: 90vh;
+}
+
+[data-slot="body"] {
+  overflow-y: auto;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer components {
+  .db-bg {
+    background: var(--db-bg);
+  }
+
+  .db-shell {
+    background: var(--db-shell);
+    border-color: var(--db-border-subtle);
+    box-shadow: var(--db-shadow);
+  }
+
+  .db-panel {
+    background: var(--db-panel);
+    border-color: var(--db-border-subtle);
+    box-shadow: var(--db-shadow);
+  }
+
+  .db-subtle {
+    background: var(--db-subtle);
+    border-color: var(--db-border-subtle);
+  }
+
+  .db-inset {
+    background: var(--db-inset);
+    border-color: var(--db-border-subtle);
+  }
+
+  .db-border-subtle {
+    border-color: var(--db-border-subtle);
+  }
+
+  .db-border-strong {
+    border-color: var(--db-border-strong);
+  }
+
+  .db-muted {
+    color: var(--db-muted);
+  }
+
+  .db-muted-strong {
+    color: var(--db-muted-strong);
+  }
+
+  .db-overlay {
+    background: var(--db-overlay);
+  }
+
+  .db-overlay-soft {
+    background: var(--db-overlay-soft);
+  }
+
+  .db-focus {
+    box-shadow: 0 0 0 2px var(--db-focus);
   }
 }
 
@@ -51,6 +190,10 @@ h6 {
 /* Optional: strong headings */
 h1 {
   letter-spacing: -0.03em;
+}
+
+a {
+  text-decoration: none !important;
 }
 
 .scrollbar-gutter-stable {

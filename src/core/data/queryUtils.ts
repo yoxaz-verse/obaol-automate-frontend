@@ -2,7 +2,18 @@
 
 export const DEFAULT_STALE_TIME = 45 * 1000;
 
+export const extractPagedPayload = (raw: any) => {
+  if (!raw) return {};
+  if (raw?.data?.data && typeof raw.data.data === "object") return raw.data.data;
+  if (raw?.data && typeof raw.data === "object") return raw.data;
+  if (typeof raw === "object") return raw;
+  return {};
+};
+
 export const extractList = (raw: any): any[] => {
+  const normalized = extractPagedPayload(raw);
+  if (Array.isArray(normalized)) return normalized;
+  if (Array.isArray(normalized?.data)) return normalized.data;
   if (Array.isArray(raw)) return raw;
   if (Array.isArray(raw?.data)) return raw.data;
   if (Array.isArray(raw?.data?.data)) return raw.data.data;
@@ -11,7 +22,10 @@ export const extractList = (raw: any): any[] => {
 };
 
 export const extractCount = (raw: any, list: any[]) => {
+  const normalized = extractPagedPayload(raw);
   return (
+    normalized?.totalCount ||
+    normalized?.data?.totalCount ||
     raw?.totalCount ||
     raw?.data?.totalCount ||
     raw?.data?.data?.totalCount ||

@@ -103,7 +103,7 @@ export default function OrdersPage() {
 
                     return (
                         <div className="flex flex-col items-center w-full">
-                            <div className="w-full px-2 sm:px-4 md:px-0 md:w-[95%]">
+                            <div className="w-full px-1.5 sm:px-4 md:px-0 md:w-[95%]">
                                 {canUseDemo && (
                                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-default-200/40 bg-content1 px-4 py-3">
                                         <div>
@@ -172,8 +172,8 @@ export default function OrdersPage() {
                                     </div>
                                 )}
                                 {/* Status Tabs */}
-                                <div className="flex justify-between items-center mb-6 overflow-x-auto no-scrollbar touch-pan-x pb-2">
-                                    <div className="w-full flex flex-col gap-3">
+                                <div className="flex justify-between items-center mb-4 sm:mb-6 overflow-x-auto no-scrollbar touch-pan-x pb-1 sm:pb-2">
+                                    <div className="w-full flex flex-col gap-2 sm:gap-3">
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <Tabs
                                                 aria-label="Order Scope"
@@ -182,9 +182,9 @@ export default function OrdersPage() {
                                                 selectedKey="internal"
                                                 onSelectionChange={() => setSelectedTab("All")}
                                                 classNames={{
-                                                    tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
+                                                    tabList: "gap-5 sm:gap-8 relative rounded-none p-0 border-b border-divider/40",
                                                     cursor: "bg-warning w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(255,193,7,0.2)]",
-                                                    tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
+                                                    tab: "max-w-fit px-2.5 sm:px-4 h-11 sm:h-14 transition-all duration-300 hover:opacity-100",
                                                     tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning group-data-[selected=true]:scale-105 transition-transform"
                                                 }}
                                             >
@@ -194,7 +194,7 @@ export default function OrdersPage() {
                                                 {canCreateInternal && (
                                                     <Button
                                                         size="sm"
-                                                        className="bg-primary text-white font-bold px-4 shadow-md shadow-primary/20 h-9 rounded-xl"
+                                                        className="bg-primary text-white font-bold px-3 sm:px-4 shadow-md shadow-primary/20 h-8 sm:h-9 rounded-lg sm:rounded-xl"
                                                         startContent={<LuPlus size={18} />}
                                                         onPress={() => setCreateOrderOpen(true)}
                                                     >
@@ -210,9 +210,9 @@ export default function OrdersPage() {
                                             selectedKey={selectedTab}
                                             onSelectionChange={(key) => setSelectedTab(key as string)}
                                             classNames={{
-                                                tabList: "gap-6 relative rounded-none p-0 border-b border-divider/40",
+                                                tabList: "gap-4 sm:gap-6 relative rounded-none p-0 border-b border-divider/40",
                                                 cursor: "bg-warning w-full h-[2.5px] rounded-t-full",
-                                                tab: "max-w-fit px-4 h-10 transition-all duration-300",
+                                                tab: "max-w-fit px-2.5 sm:px-4 h-8 sm:h-10 transition-all duration-300",
                                                 tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-500 group-data-[selected=true]:text-warning"
                                             }}
                                         >
@@ -226,8 +226,8 @@ export default function OrdersPage() {
                                     </div>
                                 </div>
 
-                                <section className="py-2 w-full">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                <section className="py-1.5 sm:py-2 w-full">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
                                         {scopedFiltered
                                             .filter((item: any) => selectedTab === "All" || (String(item?.status || "") === selectedTab))
                                             .map((item: any) => (
@@ -245,7 +245,7 @@ export default function OrdersPage() {
                                                             }}
                                                             action={
                                                                 <Button
-                                                                    className="bg-warning text-white font-semibold shadow-md h-9 min-w-[96px] px-4 rounded-xl"
+                                                                    className="bg-warning text-white font-semibold shadow-md h-8 sm:h-9 min-w-[88px] sm:min-w-[96px] px-3 sm:px-4 rounded-lg sm:rounded-xl"
                                                                     size="sm"
                                                                     isLoading={navigatingId === String(orderId)}
                                                                     onPress={() => {

@@ -135,6 +135,7 @@ export interface QueryComponentProps<T> {
   loadingVariant?: "inline" | "skeleton" | "branded";
   loadingMessage?: string;
   emptyState?: React.ReactNode;
+  onMetaChange?: (meta?: QueryComponentMeta) => void;
 }
 
 export interface StatusUpdateProps {

@@ -53,9 +53,9 @@ const mkWarehouseIcon = (color: string) =>
         background:linear-gradient(180deg, ${color}44 0%, ${color}26 100%);
         box-shadow:0 0 0 3px ${color}33, 0 6px 14px rgba(0,0,0,0.45);
       ">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="${color}" stroke="rgba(255,255,255,0.92)" stroke-width="1.2" />
-          <path d="M3 10.5h18" stroke="rgba(255,255,255,0.82)" stroke-width="1" />
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="${color}" stroke="rgba(255,255,255,0.96)" stroke-width="1.45" />
+          <path d="M3 10.5h18" stroke="rgba(255,255,255,0.9)" stroke-width="1.15" />
         </svg>
       </span>
     `,
@@ -104,18 +104,18 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
           return (
             <Marker key={warehouse._id} position={[lat, lng]} icon={mkWarehouseIcon(color)}>
               <Popup className="tactical-popup">
-                <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-content1 border-default-200">
+                <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
                   <div className="space-y-1">
                     <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
                       W_Node_{warehouse._id.slice(-4)}
                     </div>
                     <div className="text-sm font-black">{warehouse.name}</div>
                   </div>
-                  <div className="text-[11px] font-semibold text-default-300">
+                  <div className="text-[11px] font-semibold text-slate-700">
                     {warehouse.contactPhone || "Contact unavailable"}
                   </div>
                   {warehouse.contactPhoneSecondary ? (
-                    <div className="text-[10px] text-default-500">Alt: {warehouse.contactPhoneSecondary}</div>
+                    <div className="text-[10px] text-slate-500">Alt: {warehouse.contactPhoneSecondary}</div>
                   ) : null}
                   <Button
                     color="warning"
@@ -149,6 +149,23 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
       <style jsx global>{`
         .warehouse-rent-map .leaflet-control-attribution {
           display: none !important;
+        }
+
+        .warehouse-rent-map .tactical-popup .leaflet-popup-content-wrapper {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        .warehouse-rent-map .tactical-popup .leaflet-popup-content {
+          margin: 8px;
+        }
+
+        .warehouse-rent-map .tactical-popup .leaflet-popup-tip {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          box-shadow: none;
         }
       `}</style>
     </>

@@ -31,6 +31,7 @@ export interface DynamicFilterProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
+  actionElement?: React.ReactNode;
 }
 
 // Logical grouping for variantRate and similar product tables
@@ -62,6 +63,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   searchValue,
   onSearchChange,
   searchPlaceholder = "Search records...",
+  actionElement,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -294,21 +296,28 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             }}
           />
         )}
-        <Button
-          onPress={onOpen}
-          variant="flat"
-          size="md"
-          color="warning"
-          className="bg-warning-500/10 dark:bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-bold hover:bg-warning-500/20 transition-all shadow-sm"
-          startContent={<IoFilterOutline className="text-lg" />}
-        >
-          Filters
-          {activeFiltersCount > 0 && (
-            <span className="ml-1 bg-warning-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black">
-              {activeFiltersCount}
-            </span>
+        <div className="flex items-center gap-2 sm:gap-4 w-full justify-between sm:justify-end sm:w-auto">
+          <Button
+            onPress={onOpen}
+            variant="flat"
+            size="md"
+            color="warning"
+            className="sm:flex-none bg-warning-500/10 dark:bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-bold hover:bg-warning-500/20 transition-all shadow-sm"
+            startContent={<IoFilterOutline className="text-lg" />}
+          >
+            Filters
+            {activeFiltersCount > 0 && (
+              <span className="ml-1 bg-warning-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
+          {actionElement && (
+            <div className="sm:flex-none">
+              {actionElement}
+            </div>
           )}
-        </Button>
+        </div>
       </div>
 
       <Modal

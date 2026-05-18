@@ -183,7 +183,7 @@ export default function NewsPageContent({ variant = "public" }: NewsPageContentP
           )}
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
           {loading ? (
             <div className="h-[520px] rounded-xl border border-default-200/70 bg-content1/95 flex items-center justify-center">
               <div className="text-default-500 text-sm">
@@ -198,12 +198,14 @@ export default function NewsPageContent({ variant = "public" }: NewsPageContentP
               </div>
             </div>
           ) : (
-            <NewsMap
-              items={filtered}
-              onSelectCountry={(value) => setSelectedCountry(value)}
-              loading={loading}
-              loadedCount={filtered.length}
-            />
+            <div className="h-[460px] md:h-auto">
+              <NewsMap
+                items={filtered}
+                onSelectCountry={(value) => setSelectedCountry(value)}
+                loading={loading}
+                loadedCount={filtered.length}
+              />
+            </div>
           )}
           <div className="rounded-xl border border-default-200/70 bg-content1/95 p-4 h-[520px] overflow-auto">
             <div className="text-sm text-default-500 mb-2">Country details</div>

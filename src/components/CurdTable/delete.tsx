@@ -11,7 +11,7 @@ import {
   useDisclosure,
   Tooltip,
 } from "@nextui-org/react";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiAlertTriangle } from "react-icons/fi";
 import { useMutation } from "@tanstack/react-query";
 import { deleteData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
@@ -90,25 +90,54 @@ export default function DeleteModal({
           )}
         </div>
       )}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="sm"
+        placement="center"
+        backdrop="blur"
+        classNames={{
+          wrapper: "z-[1200]",
+          backdrop: "z-[1190] bg-background/80 backdrop-blur-md",
+          base: "mx-4 mb-24 sm:mb-0 bg-background/90 border border-danger-500/20 backdrop-blur-3xl shadow-2xl rounded-2xl",
+          header: "border-b border-danger-500/10 py-4 px-6",
+          body: "py-6 px-6",
+          footer: "border-t border-danger-500/10 py-4 px-6 bg-danger-500/5",
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Delete Confirmation{/* Translate */}
+              <ModalHeader className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2 text-danger-500">
+                  <FiAlertTriangle size={24} className="animate-pulse" />
+                  <span className="text-lg font-black uppercase tracking-wider">Confirm Deletion</span>
+                </div>
               </ModalHeader>
-              <ModalBody>Are you sure you want to delete {name}?</ModalBody>
-              {/* Translate */}
-              <ModalFooter>
+              <ModalBody>
+                <p className="text-sm text-default-500 font-medium leading-relaxed">
+                  Are you absolutely sure you want to delete <span className="text-foreground font-bold">{name}</span>?
+                </p>
+                <p className="text-[11px] text-danger-400 mt-1 uppercase tracking-wider font-semibold">
+                  This action cannot be undone.
+                </p>
+              </ModalBody>
+              <ModalFooter className="flex flex-col-reverse sm:flex-row gap-2">
+                <Button 
+                  className="w-full sm:w-auto font-bold tracking-wider" 
+                  variant="flat" 
+                  onPress={onClose}
+                >
+                  Cancel
+                </Button>
                 <Button
+                  className="w-full sm:w-auto font-black tracking-widest uppercase text-[11px] shadow-lg shadow-danger-500/30"
                   color="danger"
                   onPress={handleDelete}
                   isLoading={loading}
+                  startContent={!loading && <FiTrash2 size={16} />}
                 >
-                  Delete{/* Translate */}
-                </Button>
-                <Button color="primary" variant="light" onPress={onClose}>
-                  Cancel {/* Translate */}
+                  Delete
                 </Button>
               </ModalFooter>
             </>

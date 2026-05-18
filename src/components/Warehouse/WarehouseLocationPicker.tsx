@@ -21,7 +21,10 @@ const markerIcon = L.divIcon({
   html: `
     <div class="warehouse-pin__core">
       <div class="warehouse-pin__ring"></div>
-      <div class="warehouse-pin__dot"></div>
+      <svg class="warehouse-pin__glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 10.5L12 4l9 6.5V20a1 1 0 0 1-1 1h-3v-6h-4v6H4a1 1 0 0 1-1-1v-9.5Z" fill="#f59e0b" stroke="rgba(255,255,255,0.96)" stroke-width="1.45" />
+        <path d="M3 10.5h18" stroke="rgba(255,255,255,0.9)" stroke-width="1.15" />
+      </svg>
     </div>
   `,
   iconSize: [28, 28],
@@ -120,16 +123,14 @@ export default function WarehouseLocationPicker({
           background: rgba(245, 165, 36, 0.15);
           box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12), 0 10px 22px rgba(0, 0, 0, 0.35);
         }
-        .warehouse-pin__dot {
+        .warehouse-pin__glyph {
           position: absolute;
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
+          width: 19px;
+          height: 19px;
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          background: #f59e0b;
-          border: 2px solid #111827;
+          pointer-events: none;
         }
       `}</style>
     </div>

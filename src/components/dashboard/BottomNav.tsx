@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { MdDashboard } from "react-icons/md";
@@ -14,6 +14,37 @@ import { routeRoles } from "@/utils/roleHelpers";
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
     const pathname = usePathname();
     const { user } = useContext(AuthContext);
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        let lastScrollY = window.scrollY;
+        const deltaThreshold = 8;
+        const topSafeThreshold = 24;
+
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            const delta = currentScrollY - lastScrollY;
+
+            if (currentScrollY <= topSafeThreshold) {
+                setIsVisible(true);
+                lastScrollY = currentScrollY;
+                return;
+            }
+
+            if (delta > deltaThreshold) {
+                setIsVisible(false);
+            } else if (delta < -deltaThreshold) {
+                setIsVisible(true);
+            }
+
+            lastScrollY = currentScrollY;
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     const navItems = [
         {
@@ -56,7 +87,9 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     return (
         <div
             data-bottomnav
-            className="fixed bottom-3 left-4 right-4 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden"
+            className={`fixed bottom-3 left-4 right-4 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden transition-all duration-300 ease-out ${
+                isVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-[calc(100%+1.5rem)] opacity-0 pointer-events-none"
+            }`}
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent" />

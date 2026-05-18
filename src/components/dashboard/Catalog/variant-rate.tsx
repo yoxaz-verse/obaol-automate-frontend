@@ -52,6 +52,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
+import type { QueryComponentMeta } from "@/data/interface-data";
 
 const round2 = (value: number) => Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
 const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
@@ -253,6 +254,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [publicDisplayMeta, setPublicDisplayMeta] = useState<QueryComponentMeta | undefined>(undefined);
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const serverSearch = effectiveSearch;
@@ -312,6 +314,77 @@ const VariantRate: React.FC<VariantRateProps> = ({
     : (catalogItemsResponse?.data?.data?.data || []);
 
   const addedRateIds = new Set(catalogItems.map((item: any) => item.baseRateId?._id || item.baseRateId));
+
+  useEffect(() => {
+    const shouldPrefetchPublicPages = Boolean(displayOnly && !user?.id && publicDisplayMeta?.totalPages && publicDisplayMeta.totalPages > 1);
+    if (!shouldPrefetchPublicPages) return;
+
+    let cancelled = false;
+    const totalPages = Number(publicDisplayMeta?.totalPages || 1);
+    const prefetchRemaining = async () => {
+      for (let targetPage = 2; targetPage <= totalPages; targetPage += 1) {
+        if (cancelled) break;
+        try {
+          await queryClient.prefetchQuery({
+            queryKey: [
+              rate,
+              apiRoutesByRole[rate],
+              productVariantValue?._id,
+              stableAdditionalParams,
+              stableEffectiveFilters,
+              serverSearch,
+              addedRateIds.size,
+              targetPage,
+              limit,
+              serverSearch,
+              {
+                ...(effectiveFilters || {}),
+                ...(additionalParams || {}),
+                ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
+                ...(displayOnly && { selected: "true" }),
+                ...(productVariantValue && { productVariant: productVariantValue._id }),
+              },
+            ],
+            queryFn: () =>
+              getData(apiRoutesByRole[rate], {
+                page: targetPage,
+                limit,
+                ...(serverSearch && { search: serverSearch }),
+                ...(effectiveFilters || {}),
+                ...(additionalParams || {}),
+                ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
+                ...(displayOnly && { selected: "true" }),
+                ...(productVariantValue && { productVariant: productVariantValue._id }),
+              }),
+            staleTime: 30_000,
+          });
+        } catch (prefetchError) {
+          console.error(`[VariantRate] Public prefetch failed for page ${targetPage}:`, prefetchError);
+          break;
+        }
+      }
+    };
+
+    prefetchRemaining();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    displayOnly,
+    user?.id,
+    publicDisplayMeta?.totalPages,
+    queryClient,
+    rate,
+    productVariantValue?._id,
+    stableAdditionalParams,
+    stableEffectiveFilters,
+    serverSearch,
+    addedRateIds.size,
+    limit,
+    effectiveFilters,
+    additionalParams,
+    isMarketplaceView,
+  ]);
 
   const { data: inventoryResponse } = useQuery({
     queryKey: ["inventory-status", inventoryCompanyId, user?.id],
@@ -423,6 +496,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         // ...(!user?.id && { isLive: "true" }),
         ...(productVariantValue && { productVariant: productVariantValue._id }),
       }}
+      onMetaChange={displayOnly && !user?.id ? setPublicDisplayMeta : undefined}
     >
       {(variantRateData: any, refetch, meta) => {
         // If we have associates, populate the "associate" field values for AddModal
@@ -810,7 +884,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         return (
           <div className="w-full max-w-full min-w-0">
             {(!hideBuiltInFilters || (!displayOnly && rate === "variantRate" && canAddOwnRate)) && (
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-foreground/[0.03] p-4 rounded-[2rem] border border-foreground/5 backdrop-blur-md shadow-inner">
+              <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-8 bg-foreground/[0.03] p-4 rounded-[2rem] border border-foreground/5 backdrop-blur-md shadow-inner">
                 {!hideBuiltInFilters && (
                   <div className="w-full sm:flex-1">
                     <DynamicFilter
@@ -820,11 +894,41 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       searchValue={search}
                       onSearchChange={setSearch}
                       searchPlaceholder="Search marketplace rates..."
+                      actionElement={
+                        !displayOnly && rate === "variantRate" && canAddOwnRate && showCreateButton ? (
+                          <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
+                            <Button
+                              size="sm"
+                              onPress={() => setWizardOpen(true)}
+                              variant="shadow"
+                              color="warning"
+                              className="font-black tracking-widest px-3 sm:px-5 h-10 rounded-xl uppercase text-[9px] sm:text-[11px] shadow-warning-500/30"
+                              startContent={<FiPlus size={14} className="sm:w-4 sm:h-4" />}
+                            >
+                              List your product
+                            </Button>
+                            <VariantRateWizardModal
+                              isOpen={wizardOpen}
+                              onClose={() => setWizardOpen(false)}
+                              apiEndpoint={apiRoutesByRole[rate]}
+                              productVariantValue={productVariantValue}
+                              user={user}
+                              additionalVariable={{
+                                ...(productVariantValue && { productVariant: productVariantValue._id }),
+                                ...(user?.role === "Associate" && { associate: user?.id }),
+                              }}
+                              onSuccess={() => {
+                                refetchData();
+                              }}
+                            />
+                          </div>
+                        ) : null
+                      }
                     />
                   </div>
                 )}
-                {!displayOnly && rate === "variantRate" && canAddOwnRate && showCreateButton && (
-                  <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
+                {hideBuiltInFilters && !displayOnly && rate === "variantRate" && canAddOwnRate && showCreateButton && (
+                  <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden ml-auto">
                     <Button
                       size="sm"
                       onPress={() => setWizardOpen(true)}

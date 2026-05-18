@@ -20,30 +20,82 @@ type ProductRow = {
 };
 
 export default function ProductPage() {
+    const INITIAL_CHUNK_SIZE = 16;
     const [products, setProducts] = useState<ProductRow[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState("All");
 
     useEffect(() => {
+        let cancelled = false;
+
+        const parseRows = (payload: any): ProductRow[] => {
+            const rows = payload?.data;
+            if (Array.isArray(rows?.data)) return rows.data;
+            if (Array.isArray(rows)) return rows;
+            return [];
+        };
+
+        const parseMeta = (payload: any) => {
+            const meta = payload?.data;
+            return {
+                currentPage: Number(meta?.currentPage || meta?.page || 1),
+                totalPages: Number(meta?.totalPages || meta?.pages || 1),
+            };
+        };
+
         async function fetchProducts() {
             try {
-                const res = await fetch("/api/products?limit=300");
-                const data = await res.json();
-                const payload = data?.data;
-                const rows = Array.isArray(payload?.data)
-                    ? payload.data
-                    : Array.isArray(payload)
-                        ? payload
-                        : [];
-                setProducts(rows);
+                const initialRes = await fetch(`/api/products?page=1&limit=${INITIAL_CHUNK_SIZE}`);
+                const initialData = await initialRes.json();
+                const firstRows = parseRows(initialData);
+                const { currentPage, totalPages } = parseMeta(initialData);
+
+                if (cancelled) return;
+                setProducts(firstRows);
+                setLoading(false);
+
+                if (totalPages <= currentPage) return;
+
+                setLoadingMore(true);
+                const seenIds = new Set(firstRows.map((item) => item._id));
+
+                for (let page = currentPage + 1; page <= totalPages; page += 1) {
+                    if (cancelled) break;
+                    try {
+                        const res = await fetch(`/api/products?page=${page}&limit=${INITIAL_CHUNK_SIZE}`);
+                        const data = await res.json();
+                        const rows = parseRows(data);
+                        if (!rows.length) break;
+
+                        setProducts((prev) => {
+                            const next = [...prev];
+                            for (const item of rows) {
+                                if (!item?._id || seenIds.has(item._id)) continue;
+                                seenIds.add(item._id);
+                                next.push(item);
+                            }
+                            return next;
+                        });
+                    } catch (pageError) {
+                        console.error(`Error fetching product page ${page}:`, pageError);
+                        break;
+                    }
+                }
             } catch (error) {
                 console.error("Error fetching products:", error);
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                    setLoadingMore(false);
+                }
             }
         }
         fetchProducts();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const categories = useMemo(() => {
@@ -174,54 +226,63 @@ export default function ProductPage() {
                             ))}
                         </div>
                     ) : filteredProducts.length > 0 ? (
-                        <motion.div
-                            layout
-                            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
-                        >
-                            <AnimatePresence mode="popLayout">
-                                {filteredProducts.map((product) => (
-                                    <motion.div
-                                        key={product._id}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <Link
-                                            href={product.slug ? `/product/${product.slug}` : "#"}
-                                            className={!product.slug ? "pointer-events-none" : "block h-full group"}
+                        <>
+                            <motion.div
+                                layout
+                                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+                            >
+                                <AnimatePresence mode="popLayout">
+                                    {filteredProducts.map((product) => (
+                                        <motion.div
+                                            key={product._id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            transition={{ duration: 0.3 }}
                                         >
-                                            <Card className="h-full border border-default-200/50 bg-content1/50 backdrop-blur-md overflow-hidden hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 rounded-[2rem]">
-                                                <div className="p-8 pb-0">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/70">
-                                                            {product.subCategory?.name || "Commodity"}
-                                                        </p>
-                                                        <h3 className="text-2xl font-bold text-foreground tracking-tight group-hover:text-orange-500 transition-colors line-clamp-2">
-                                                            {product.name}
-                                                        </h3>
-                                                    </div>
-                                                </div>
-
-                                                <CardBody className="p-8 pt-6">
-                                                    <p className="text-default-500 text-base leading-relaxed line-clamp-3">
-                                                        {product.description || "Premium agricultural commodity sourced with excellence and verified for global trade execution."}
-                                                    </p>
-
-                                                    <div className="mt-8 pt-6 border-t border-default-100 flex items-center justify-between">
-                                                        <span className="text-xs font-bold text-default-400 uppercase tracking-widest">Details</span>
-                                                        <div className="w-8 h-8 rounded-full bg-default-100 text-default-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
-                                                            <FiArrowRight />
+                                            <Link
+                                                href={product.slug ? `/product/${product.slug}` : "#"}
+                                                className={!product.slug ? "pointer-events-none" : "block h-full group"}
+                                            >
+                                                <Card className="h-full border border-default-200/50 bg-content1/50 backdrop-blur-md overflow-hidden hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 rounded-[2rem]">
+                                                    <div className="p-8 pb-0">
+                                                        <div className="space-y-1">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/70">
+                                                                {product.subCategory?.name || "Commodity"}
+                                                            </p>
+                                                            <h3 className="text-2xl font-bold text-foreground tracking-tight group-hover:text-orange-500 transition-colors line-clamp-2">
+                                                                {product.name}
+                                                            </h3>
                                                         </div>
                                                     </div>
-                                                </CardBody>
-                                            </Card>
-                                        </Link>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
+
+                                                    <CardBody className="p-8 pt-6">
+                                                        <p className="text-default-500 text-base leading-relaxed line-clamp-3">
+                                                            {product.description || "Premium agricultural commodity sourced with excellence and verified for global trade execution."}
+                                                        </p>
+
+                                                        <div className="mt-8 pt-6 border-t border-default-100 flex items-center justify-between">
+                                                            <span className="text-xs font-bold text-default-400 uppercase tracking-widest">Details</span>
+                                                            <div className="w-8 h-8 rounded-full bg-default-100 text-default-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                                                                <FiArrowRight />
+                                                            </div>
+                                                        </div>
+                                                    </CardBody>
+                                                </Card>
+                                            </Link>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </motion.div>
+                            {loadingMore ? (
+                                <div className="mt-8 text-center">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-default-500">
+                                        Loading more products in background...
+                                    </span>
+                                </div>
+                            ) : null}
+                        </>
                     ) : (
                         <div className="text-center py-40 bg-content1/30 rounded-[3rem] border-2 border-dashed border-default-200">
                             <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-6 text-default-300">

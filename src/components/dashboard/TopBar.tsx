@@ -19,8 +19,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
-import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
+import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 import Image from "next/image";
 import { FiBell, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut, FiMoon, FiSun } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
@@ -49,7 +49,6 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     return () => clearInterval(timer);
   }, []);
   const normalizedRole = String(role || "").toLowerCase();
-  const isOperatorFamily = normalizedRole === "operator" || normalizedRole === "team";
   const displayRole = (normalizedRole === "operator" || normalizedRole === "team")
     ? "Operator"
     : (role?.charAt(0).toUpperCase() + role.slice(1));
@@ -130,22 +129,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   }, [isMobileMenuOpen]);
 
   // Filter options based on the user's role
-  const filteredOptions = sidebarOptions.filter((option) => {
-    const allowedRoles = routeRoles[option.link] || [];
-    return allowedRoles.includes(role);
-  });
+  const filteredOptions = getRoleFilteredSidebarOptions(sidebarOptions as any[], String(role || ""));
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
-  const manageCompanyLink = isOperatorFamily || normalizedRole === "admin" ? "/dashboard/companies" : "/dashboard/company";
-  const mobileSections = [
-    { label: "", links: ["/dashboard"] },
-    { label: "Product", links: ["/dashboard/product", "/dashboard/catalog", "/dashboard/marketplace", "/dashboard/imports"] },
-    { label: "Execution", links: ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/external-orders", "/dashboard/sample-requests", "/dashboard/execution-enquiries", "/dashboard/documents"] },
-    { label: "News", links: ["/dashboard/news"] },
-    { label: "Manage", links: ["/dashboard/inventory", "/dashboard/warehouses", manageCompanyLink, "/dashboard/notifications", "/dashboard/approvals", "/dashboard/reports", "/dashboard/profile"] },
-    { label: "Operator", links: ["/dashboard/operator/hierarchy", "/dashboard/operator/team", "/dashboard/operator/earnings"] },
-    { label: "Admin Tools", links: ["/dashboard/documentation-rules", "/dashboard/documentation-preview", "/dashboard/documentation-templates", "/dashboard/flow-rules", "/dashboard/users", "/dashboard/calculations", "/dashboard/function-preview", "/dashboard/shortcuts", "/dashboard/essentials", "/dashboard/geosphere"] },
-  ];
+  const mobileSections = getDashboardSidebarSections(filteredOptions as any[]);
 
   return (
     <div
@@ -212,7 +199,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                  <button
                                    key={opt.name}
                                    onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:db-inset"}`}
+                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>

@@ -90,14 +90,14 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
         {safeLabs.map((lab) => (
           <Marker key={lab._id} position={[Number(lab.location?.latitude), Number(lab.location?.longitude)]} icon={markerIcon}>
             <Popup className="tactical-popup">
-              <div className="min-w-[240px] p-2 space-y-3 rounded-lg border bg-content1 border-default-200">
+              <div className="min-w-[240px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
                 <div className="space-y-1">
                   <div className="text-[9px] font-black uppercase tracking-widest text-success-500 font-mono">Q_Lab_{lab._id.slice(-4)}</div>
                   <div className="text-sm font-black">{lab.name}</div>
                 </div>
-                {lab.contactPhone ? <div className="text-[11px] font-semibold text-default-300">{lab.contactPhone}</div> : null}
-                {lab.contactPhoneSecondary ? <div className="text-[10px] text-default-500">Alt: {lab.contactPhoneSecondary}</div> : null}
-                {lab.certificatesSummary ? <div className="text-[10px] text-default-500 line-clamp-3">{lab.certificatesSummary}</div> : null}
+                {lab.contactPhone ? <div className="text-[11px] font-semibold text-slate-700">{lab.contactPhone}</div> : null}
+                {lab.contactPhoneSecondary ? <div className="text-[10px] text-slate-500">Alt: {lab.contactPhoneSecondary}</div> : null}
+                {lab.certificatesSummary ? <div className="text-[10px] text-slate-500 line-clamp-3">{lab.certificatesSummary}</div> : null}
                 <Button
                   color="success"
                   variant="solid"
@@ -117,6 +117,23 @@ export default function QualityLabsMap({ labs, searchPoint, center, zoom, onCont
       <style jsx global>{`
         .quality-labs-map .leaflet-control-attribution {
           display: none !important;
+        }
+
+        .quality-labs-map .tactical-popup .leaflet-popup-content-wrapper {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        .quality-labs-map .tactical-popup .leaflet-popup-content {
+          margin: 8px;
+        }
+
+        .quality-labs-map .tactical-popup .leaflet-popup-tip {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          box-shadow: none;
         }
       `}</style>
     </>

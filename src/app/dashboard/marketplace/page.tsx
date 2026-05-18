@@ -32,9 +32,9 @@ const StatCard = ({
     themeClass: string;
     borderClass: string;
 }) => (
-    <div className={`rounded-2xl border p-4 shadow-sm ${themeClass} ${borderClass}`}>
+    <div className={`rounded-2xl border p-3 sm:p-4 shadow-sm ${themeClass} ${borderClass}`}>
         <p className="text-[10px] font-bold uppercase tracking-widest text-default-400">{label}</p>
-        <p className="mt-1 text-2xl font-black tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-foreground">{value}</p>
     </div>
 );
 
@@ -53,7 +53,6 @@ export default function MarketplacePage() {
     const [classificationTab, setClassificationTab] = useState<ClassificationTabKey>("all");
     const [liveState, setLiveState] = useState<MarketplaceFilterState>(emptyState);
     const [offlineState, setOfflineState] = useState<MarketplaceFilterState>(emptyState);
-    const [openCreateModalSignal, setOpenCreateModalSignal] = useState(0);
     const [loadedTabs, setLoadedTabs] = useState<Record<MarketplaceTabKey, boolean>>({
         "marketplace-live": true,
         "marketplace-offline": false,
@@ -111,38 +110,41 @@ export default function MarketplacePage() {
             <div className={`absolute bottom-0 left-0 w-[520px] h-[520px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowB}`} />
             <div className="w-full max-w-[1400px]">
                 {/* Page Header */}
-                <header className={`mb-8 flex flex-col gap-2 rounded-3xl border px-5 py-6 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
+                <header className={`mb-4 md:mb-8 flex flex-col gap-2 rounded-3xl border px-4 md:px-5 py-4 md:py-6 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-warning-100 rounded-2xl text-warning-600">
-                            <LuWarehouse size={28} />
+                        <div className="p-2.5 md:p-3 bg-warning-100 rounded-2xl text-warning-600">
+                            <LuWarehouse size={22} className="md:hidden" />
+                            <LuWarehouse size={28} className="hidden md:block" />
                         </div>
                         <div>
-                            <h1 className={`text-3xl font-bold tracking-tight text-foreground`}>
-                                Marketplace
+                            <h1 className={`text-2xl md:text-3xl font-bold tracking-tight text-foreground`}>
+                                Product Discovery
                             </h1>
-                            <p className="text-default-500 text-medium">
-                                Browse and manage live products and inactive rates from across the network.
+                            <p className="text-default-500 text-sm md:text-medium">
+                                Discover products, compare live rates, and find the best listings faster.
                             </p>
                         </div>
                     </div>
                 </header>
                 {isAdmin && (
-                        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                         <StatCard label="Total Products" value={displayCount(totalCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
                         <StatCard label="Live Products" value={displayCount(liveCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
-                        <StatCard label="Offline Products" value={displayCount(offlineCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                        <div className="hidden sm:block">
+                            <StatCard label="Offline Products" value={displayCount(offlineCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                        </div>
                     </div>
                 )}
 
                 <div className={`rounded-3xl border shadow-sm overflow-hidden ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
-                    <div className="p-6">
+                    <div className="p-4 md:p-6">
                         <MarketplaceFilterBar
                             activeTab={currentTable}
                             state={activeState}
                             onStateChange={setActiveState}
                             activeTheme={activeTheme}
                         />
-                        <div className="mb-4">
+                        <div className="mb-4 overflow-x-auto">
                             <Tabs
                                 aria-label="Marketplace Classification Tabs"
                                 selectedKey={classificationTab}
@@ -150,10 +152,10 @@ export default function MarketplacePage() {
                                 variant="underlined"
                                 color="warning"
                                 classNames={{
-                                    tabList: "gap-6 relative rounded-none p-0 border-b border-divider/30",
+                                    tabList: "gap-2 md:gap-6 relative rounded-none p-0 border-b border-divider/30 min-w-max",
                                     cursor: "bg-warning-500 w-full h-[2px] rounded-t-full",
-                                    tab: "max-w-fit px-2 h-11",
-                                    tabContent: "font-semibold uppercase tracking-wider text-[10px] text-default-400 transition-all group-data-[selected=true]:text-warning-500"
+                                    tab: "max-w-fit px-2 md:px-2 h-10 md:h-11",
+                                    tabContent: "font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-warning-500"
                                 }}
                             >
                                 <Tab
@@ -185,15 +187,15 @@ export default function MarketplacePage() {
                             <div className="w-full min-w-0 pb-10 overflow-x-auto">
                                 <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
-                                        Marketplace Offers
+                                        Discovery Listings
                                     </div>
                                     {canAddOwnRate && (
                                         <Button
                                             size="sm"
                                             onPress={() => router.push("/dashboard/product")}
-                                            variant="shadow"
+                                            variant="flat"
                                             color="warning"
-                                            className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
+                                            className="font-black tracking-widest px-4 md:px-5 h-9 md:h-10 rounded-xl uppercase text-[10px] md:text-[11px]"
                                             startContent={<FiPlus size={16} />}
                                         >
                                             List your product
@@ -211,9 +213,9 @@ export default function MarketplacePage() {
                                     variant="underlined"
                                     color="primary"
                                     classNames={{
-                                        tabList: "gap-10 relative rounded-none p-0 border-b border-divider/40",
-                                        cursor: "bg-primary w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.2)]",
-                                        tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
+                                        tabList: "gap-4 md:gap-10 relative rounded-none p-0 border-b border-divider/40",
+                                        cursor: "bg-primary w-full h-[2px] md:h-[3px] rounded-t-full md:shadow-[0_-1px_10px_rgba(var(--heroui-primary-rgb),0.2)]",
+                                        tab: "max-w-fit px-3 md:px-4 h-11 md:h-14 transition-all duration-300 hover:opacity-100",
                                         tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
@@ -228,7 +230,7 @@ export default function MarketplacePage() {
                                                 externalSearch={liveState.search}
                                                 externalFilters={liveState.filters}
                                                 showCreateButton={false}
-                                                openCreateModalSignal={currentTable === "marketplace-live" ? openCreateModalSignal : 0}
+                                                openCreateModalSignal={0}
                                             />
                                         )}
                                     </Tab>
@@ -243,7 +245,7 @@ export default function MarketplacePage() {
                                                 externalSearch={offlineState.search}
                                                 externalFilters={offlineState.filters}
                                                 showCreateButton={false}
-                                                openCreateModalSignal={currentTable === "marketplace-offline" ? openCreateModalSignal : 0}
+                                                openCreateModalSignal={0}
                                             />
                                         )}
                                     </Tab>

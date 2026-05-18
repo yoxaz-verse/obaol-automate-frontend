@@ -87,7 +87,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       animate={panelMotion.animate}
       exit={panelMotion.exit}
       transition={panelMotion.transition}
-      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/10 bg-white/95 dark:bg-[#0B0F14]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
+      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/20 ring-1 ring-black/5 dark:ring-white/10 bg-white/95 dark:bg-[#0B0F14]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-default-200/50 dark:border-white/5 bg-default-50/50 dark:bg-white/5">
         <div className="flex items-center gap-3">

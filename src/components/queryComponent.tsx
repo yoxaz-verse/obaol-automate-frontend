@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { getData } from "@/core/api/apiHandler";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { loadingFacts } from "@/data/loading-facts";
@@ -20,6 +20,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     loadingVariant = "skeleton",
     loadingMessage = "Loading",
     emptyState,
+    onMetaChange,
   } = props;
   const randomFact = useMemo(() => {
     return loadingFacts[Math.floor(Math.random() * loadingFacts.length)];
@@ -61,13 +62,22 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
           ? rawResult
           : []
       : rawResult;
-  const responseMeta = page !== undefined && rawResult && !Array.isArray(rawResult)
-    ? {
-      totalCount: rawResult?.totalCount,
-      currentPage: rawResult?.currentPage,
-      totalPages: rawResult?.totalPages,
-    }
-    : undefined;
+  const responseMeta = useMemo(
+    () =>
+      page !== undefined && rawResult && !Array.isArray(rawResult)
+        ? {
+            totalCount: rawResult?.totalCount,
+            currentPage: rawResult?.currentPage,
+            totalPages: rawResult?.totalPages,
+          }
+        : undefined,
+    [page, rawResult]
+  );
+
+  useEffect(() => {
+    if (!onMetaChange) return;
+    onMetaChange(responseMeta);
+  }, [onMetaChange, responseMeta]);
 
   const renderLoading = () => {
     if (loadingVariant === "inline") {

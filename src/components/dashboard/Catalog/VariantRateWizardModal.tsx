@@ -594,14 +594,14 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const themeField = {
     base: "text-foreground",
-    label: "font-black uppercase text-[10px] tracking-[0.2em] text-default-400 mb-2 ml-1",
-    trigger: "rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-14",
-    inputWrapper: "rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-14",
+    label: "font-black uppercase text-[9px] sm:text-[10px] tracking-[0.14em] sm:tracking-[0.2em] text-default-400 mb-1.5 sm:mb-2 ml-1",
+    trigger: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
+    inputWrapper: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
     innerWrapper: "text-foreground",
-    value: "text-foreground font-black uppercase text-[11px] tracking-widest !text-foreground",
-    input: "text-foreground placeholder:text-default-300 font-bold text-sm !text-foreground",
+    value: "text-foreground font-black uppercase text-[10px] sm:text-[11px] tracking-[0.08em] sm:tracking-widest !text-foreground",
+    input: "text-foreground placeholder:text-default-300 font-bold text-xs sm:text-sm !text-foreground",
     selectorIcon: "text-default-500",
-    popoverContent: "bg-background border border-default-200 shadow-2xl rounded-3xl p-2 backdrop-blur-3xl !text-foreground",
+    popoverContent: "bg-background border border-default-200 shadow-2xl rounded-2xl sm:rounded-3xl p-2 backdrop-blur-3xl !text-foreground",
     listbox: "bg-transparent !text-foreground",
     errorMessage: "text-danger-400 text-xs",
     description: "text-default-400 text-xs",
@@ -728,43 +728,43 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size="5xl"
+      size="full"
       scrollBehavior="inside"
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       backdrop="blur"
       classNames={{
-        base: "bg-background border border-default-200 max-h-[92vh] backdrop-blur-3xl shadow-2xl",
-        header: "border-b border-default-100",
-        footer: "border-t border-default-100",
-        body: "overflow-y-auto",
+        base: "bg-background border border-default-200 w-screen h-[100dvh] max-h-[100dvh] rounded-none sm:w-[94vw] sm:h-auto sm:max-h-[92vh] sm:rounded-2xl lg:max-w-[1100px] backdrop-blur-3xl shadow-2xl",
+        header: "border-b border-default-100 px-4 py-3 sm:px-6 sm:py-4",
+        footer: "border-t border-default-100 px-4 pt-3 pb-24 sm:px-6 sm:py-4 bg-background/95 backdrop-blur-md sticky bottom-0 z-20",
+        body: "overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 pb-28 sm:pb-8",
       }}
     >
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-warning-400">
+        <ModalHeader className="flex flex-col gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.4em] text-warning-400">
             Trade Mission • Step {step} of 4
           </div>
-          <div className="flex items-center gap-3">
-            {stepLabel?.icon && <stepLabel.icon size={28} className="text-warning-400" />}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {stepLabel?.icon && <stepLabel.icon size={22} className="text-warning-400 sm:w-7 sm:h-7" />}
             <div>
-              <h3 className="text-2xl font-black text-foreground">{stepLabel?.title}</h3>
-              <p className="text-sm text-default-500">{stepLabel?.subtitle}</p>
+              <h3 className="text-xl sm:text-2xl font-black text-foreground leading-tight">{stepLabel?.title}</h3>
+              <p className="text-xs sm:text-sm text-default-500">{stepLabel?.subtitle}</p>
             </div>
           </div>
         </ModalHeader>
         <ModalBody className="pb-8">
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
             {stepMeta.map((item) => (
               <div key={item.key} className={`flex-1 h-1 rounded-full ${item.key <= step ? "bg-warning-400" : "bg-default-200"}`} />
             ))}
           </div>
           <AnimatePresence mode="wait">
             {successData ? (
-              <motion.div key="success" {...motionVariants} className="rounded-3xl border border-success-500/30 bg-success-500/10 p-8 text-center">
-                <FiCheckCircle size={42} className="mx-auto text-success-400 mb-4" />
-                <h4 className="text-xl font-black text-foreground mb-2">Mission complete</h4>
-                <p className="text-sm text-default-500 mb-6">Your product is now live in the trade network.</p>
+              <motion.div key="success" {...motionVariants} className="rounded-2xl sm:rounded-3xl border border-success-500/30 bg-success-500/10 p-4 sm:p-8 text-center">
+                <FiCheckCircle size={36} className="mx-auto text-success-400 mb-3 sm:mb-4" />
+                <h4 className="text-lg sm:text-xl font-black text-foreground mb-2">Mission complete</h4>
+                <p className="text-xs sm:text-sm text-default-500 mb-4 sm:mb-6">Your product is now live in the trade network.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-content2 border border-default-200 rounded-2xl p-4 text-left">
                   <div>
                     <p className="text-xs uppercase text-default-400">Rate</p>
@@ -785,9 +785,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 </div>
               </motion.div>
             ) : (
-              <motion.div key={step} {...motionVariants} className="space-y-6">
+              <motion.div key={step} {...motionVariants} className="space-y-4 sm:space-y-6">
                 {step === 1 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {!fixedVariantId && (
                       <>
                         <Select variant="bordered" label="Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
@@ -835,31 +835,31 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       </>
                     )}
                     {fixedVariantId && (
-                      <div className="col-span-2 p-6 rounded-2xl border border-warning-500/30 bg-warning-500/10 text-white">
+                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-warning-500/30 bg-warning-500/10 text-white text-sm sm:text-base">
                         Variant preselected for this listing.
                       </div>
                     )}
-                    <div className="col-span-2 rounded-2xl border border-warning-500/30 bg-warning-500/10 px-4 py-3">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-warning-500/30 bg-warning-500/10 px-3 sm:px-4 py-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-start gap-2">
                           <FiGlobe size={16} className="text-warning-400 mt-0.5" />
-                          <p className="text-xs text-default-200">
+                          <p className="text-[11px] sm:text-xs text-warning-700 dark:text-warning-300 leading-relaxed font-medium">
                             Can&apos;t find your product or variant? Go to Global Catalog and add it.
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => router.push("/dashboard/product")}
-                          className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-warning-300 hover:text-warning-200 underline underline-offset-4 transition-colors"
+                          className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider text-warning-300 hover:text-warning-200 underline underline-offset-4 transition-colors"
                         >
                           Go to Global Catalog
                           <FiArrowRight size={14} />
                         </button>
                       </div>
                     </div>
-                    <div className="col-span-2 rounded-2xl border border-default-200 bg-content2 p-4">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-3 sm:p-4">
                       <div className="mb-3">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-default-400">Product Type & GI Signal</p>
+                        <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">Product Type & GI Signal</p>
                         <p className="text-[11px] text-default-500 mt-1">
                           Natural and Organic are type signals. GI Tag is an additional independent signal and can be combined.
                         </p>
@@ -871,16 +871,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
+                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">Natural</span>
                               <Switch isSelected={isNatural} onValueChange={(v) => setValue("isNatural", v)} color="warning" />
                             </div>
-                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">Organic</span>
                               <Switch isSelected={isOrganic} onValueChange={(v) => setValue("isOrganic", v)} color="warning" />
                             </div>
-                            <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 flex items-center justify-between">
+                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
                               <Switch isSelected={isGiTagged} onValueChange={(v) => setValue("isGiTagged", v)} color="warning" />
                             </div>
@@ -914,7 +914,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300 mb-2">
                                 Organic Certification (India Focus)
                               </p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                                 <Select
                                   variant="bordered"
                                   label="Certification Body"
@@ -1023,7 +1023,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           )}
 
                           {isGiTagged && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
                               <Input
                                 variant="bordered"
                                 label="GI Name"
@@ -1057,7 +1057,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   </div>
                 )}
                 {step === 2 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <Input variant="bordered" label="Price (per KG)" type="number" classNames={themeField} value={formData.rate || ""} onChange={(e) => setValue("rate", e.target.value)} isInvalid={!!errors.rate} errorMessage={errors.rate} />
                     <Select variant="bordered" label="Unit" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.unit ? [formData.unit] : []} onSelectionChange={(keys) => setValue("unit", Array.from(keys)[0])} isInvalid={!!errors.unit} errorMessage={errors.unit}>
                       <SelectItem key="KG" className="font-black">KG</SelectItem>
@@ -1073,7 +1073,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         ))}
                       </Select>
                     )}
-                    <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between text-sm text-white/70">
                           <span>Commission ({commissionPercent}%)</span>
@@ -1089,7 +1089,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                   </div>
                 )}
                 {step === 3 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <Select
                       variant="bordered"
                       label="Location Source"
@@ -1121,7 +1121,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           </SelectItem>
                         ))}
                       </Select>
-                    ) : (
+                    ) : formData.locationSource === "OFFICE_ADDRESS" ? (
                       <Input
                         variant="bordered"
                         label="Office Address"
@@ -1131,8 +1131,17 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         isInvalid={!!errors.officeAddress}
                         errorMessage={errors.officeAddress}
                       />
+                    ) : (
+                      <Input
+                        variant="bordered"
+                        label="Location Detail"
+                        classNames={themeField}
+                        value=""
+                        placeholder="Select location source first"
+                        isDisabled
+                      />
                     )}
-                    <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 text-sm text-white/70 break-words">
                       Location: {formData.locationSource === "WAREHOUSE"
                         ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "—")
                         : (formData.officeAddress || "—")}
@@ -1141,7 +1150,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                 )}
                 {step === 4 && (
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="rounded-2xl border border-default-200 bg-content2 p-5 text-sm text-foreground">
+                    <div className="rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-4 sm:p-5 text-sm text-foreground">
                       Review your trade mission before launch.
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -1198,7 +1207,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between rounded-2xl border border-default-200 bg-content2 p-5">
+                    <div className="flex items-center justify-between gap-3 rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-4 sm:p-5">
                       <div>
                         <div className="text-sm text-foreground font-semibold">Launch listing live</div>
                         <div className="text-xs text-default-500">Toggle if you want to keep it as draft.</div>
@@ -1211,15 +1220,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
             )}
           </AnimatePresence>
         </ModalBody>
-        <ModalFooter className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <ModalFooter className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+          <div className="flex w-full sm:w-auto items-center gap-2">
             {successData ? (
               <>
-                <Button variant="flat" onPress={handleAddAnother}>Add Another</Button>
-                <Button color="warning" onPress={onClose}>View Products</Button>
+                <Button className="w-full sm:w-auto" variant="flat" onPress={handleAddAnother}>Add Another</Button>
+                <Button className="w-full sm:w-auto" color="warning" onPress={onClose}>View Products</Button>
               </>
             ) : (
-              <Button variant="light" onPress={step === 1 ? onClose : handleBack} isDisabled={isSubmitting}>Back</Button>
+              <Button className="w-full sm:w-auto" variant="light" onPress={step === 1 ? onClose : handleBack} isDisabled={isSubmitting}>Back</Button>
             )}
           </div>
           {!successData && (
@@ -1229,7 +1238,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
               onPress={step < 4 ? handleNext : handleSubmit}
               isLoading={isSubmitting}
               isDisabled={isSubmitting}
-              className="font-bold"
+              className="w-full sm:w-auto font-bold"
             >
               {isSubmitting
                 ? (submitPhase === "saving-product" ? "Saving product certification..." : "Launching listing...")

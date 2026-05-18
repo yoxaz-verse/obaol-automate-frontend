@@ -319,7 +319,7 @@ export default function ProfilePage() {
   const config = roleConfigs[roleKey] || { groups: [] };
 
   return (
-    <div className="p-8 md:p-14 w-full min-h-screen">
+    <div className="p-3 sm:p-8 md:p-14 w-full min-h-screen">
       <QueryComponent
         api={`${apiRoutesByRole[roleKey]}/${user?.id}`}
         queryKey={[roleKey, user?.id]}
@@ -329,56 +329,56 @@ export default function ProfilePage() {
           const formFields = initialTableConfig[roleKey]?.filter((field: any) => field.key !== "password") || [];
 
           return (
-            <div className="max-w-[1400px] mx-auto flex flex-col gap-14">
-              <div className="flex flex-col xl:flex-row gap-12 w-full">
+            <div className="max-w-[1400px] mx-auto flex flex-col gap-6 sm:gap-14">
+              <div className="flex flex-col xl:flex-row gap-5 sm:gap-12 w-full">
                 {/* Left Node: Tactical Identity */}
-                <div className="xl:w-[420px] flex flex-col gap-8 shrink-0">
-                  <Card className="border border-foreground/5 bg-foreground/[0.02] backdrop-blur-3xl shadow-2xl rounded-[3rem] overflow-hidden">
-                    <div className="h-44 bg-gradient-to-br from-warning-500/20 via-orange-500/10 to-transparent relative overflow-hidden">
-                      <div className="absolute top-6 right-6">
+                <div className="xl:w-[420px] flex flex-col gap-4 sm:gap-8 shrink-0">
+                  <Card className="border border-foreground/5 bg-foreground/[0.02] backdrop-blur-3xl shadow-xl sm:shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-hidden">
+                    <div className="h-28 sm:h-44 bg-gradient-to-br from-warning-500/15 via-orange-500/5 to-transparent relative overflow-hidden">
+                      <div className="absolute top-3 right-3 sm:top-6 sm:right-6">
                         <Chip
                           color="warning"
                           variant="shadow"
-                          className="font-black uppercase text-[10px] tracking-[0.3em] h-8 px-4 bg-warning-500 text-black border-none"
+                          className="font-black uppercase text-[8px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.3em] h-6 sm:h-8 px-2.5 sm:px-4 bg-warning-500/90 sm:bg-warning-500 text-black border-none"
                         >
                           {displayRole}
                         </Chip>
                       </div>
-                      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-warning-500/5 blur-3xl rounded-full" />
+                      <div className="absolute -bottom-7 -right-7 sm:-bottom-10 sm:-right-10 w-24 h-24 sm:w-40 sm:h-40 bg-warning-500/5 sm:bg-warning-500/10 blur-2xl sm:blur-3xl rounded-full" />
                     </div>
 
-                    <CardBody className="relative flex flex-col items-center -mt-24 pb-12 px-10">
-                      <div className="relative p-2 bg-background/50 backdrop-blur-sm rounded-[3rem] shadow-2xl border border-foreground/10 mb-8">
+                    <CardBody className="relative flex flex-col items-center -mt-14 sm:-mt-24 pb-5 sm:pb-12 px-4 sm:px-10">
+                      <div className="relative p-1 sm:p-2 bg-background/50 backdrop-blur-sm rounded-[1.5rem] sm:rounded-[3rem] shadow-xl sm:shadow-2xl border border-foreground/10 mb-4 sm:mb-8">
                         <Avatar
-                          className="w-36 h-36 text-3xl border-2 border-foreground/5 rounded-[2.5rem]"
+                          className="w-20 h-20 sm:w-36 sm:h-36 text-xl sm:text-3xl border-2 border-foreground/5 rounded-[1.25rem] sm:rounded-[2.5rem]"
                           showFallback
                           name={profile.name}
                           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "User")}&background=18181b&color=eab308&size=256&bold=true&font-size=0.35`}
                         />
                       </div>
 
-                      <div className="text-center mb-10">
-                        <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-[0.8] mb-4">
+                      <div className="text-center mb-4 sm:mb-10">
+                        <h2 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase leading-[0.9] sm:leading-[0.8] mb-2 sm:mb-4">
                           {profile.name}
                         </h2>
-                        <div className="flex items-center justify-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                          <p className="text-xs font-bold text-default-400 uppercase tracking-[0.2em]">{profile.email}</p>
+                        <div className="flex items-center justify-center gap-1.5 sm:gap-3">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)] sm:shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                          <p className="text-[9px] sm:text-xs font-bold text-default-400 uppercase tracking-[0.1em] sm:tracking-[0.2em]">{profile.email}</p>
                         </div>
                       </div>
 
-                      <div className="w-full grid grid-cols-2 gap-4">
-                        <div className="bg-foreground/[0.04] p-5 rounded-[2rem] border border-foreground/5 text-center">
-                          <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1.5 opacity-60 italic">Node Status</p>
-                          <p className="text-xs font-black text-success-500 uppercase tracking-tighter">Verified Active</p>
+                      <div className="w-full grid grid-cols-2 gap-2.5 sm:gap-4">
+                        <div className="bg-foreground/[0.03] sm:bg-foreground/[0.04] p-3 sm:p-5 rounded-[1rem] sm:rounded-[2rem] border border-foreground/5 text-center">
+                          <p className="text-[8px] sm:text-[10px] font-black text-default-400 uppercase tracking-[0.1em] sm:tracking-widest mb-1 sm:mb-1.5 opacity-60 italic">Node Status</p>
+                          <p className="text-[10px] sm:text-xs font-black text-success-500 uppercase tracking-tight sm:tracking-tighter">Verified Active</p>
                         </div>
-                        <div className="bg-foreground/[0.04] p-5 rounded-[2rem] border border-foreground/5 text-center">
-                          <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1.5 opacity-60 italic">System Rank</p>
-                          <p className="text-xs font-black text-warning-500 uppercase tracking-tighter">Alpha Class</p>
+                        <div className="bg-foreground/[0.03] sm:bg-foreground/[0.04] p-3 sm:p-5 rounded-[1rem] sm:rounded-[2rem] border border-foreground/5 text-center">
+                          <p className="text-[8px] sm:text-[10px] font-black text-default-400 uppercase tracking-[0.1em] sm:tracking-widest mb-1 sm:mb-1.5 opacity-60 italic">System Rank</p>
+                          <p className="text-[10px] sm:text-xs font-black text-warning-500 uppercase tracking-tight sm:tracking-tighter">Alpha Class</p>
                         </div>
                       </div>
 
-                      <div className="w-full mt-12">
+                      <div className="w-full mt-5 sm:mt-12">
                         <EditModal
                           _id={profile._id}
                           initialData={profile}
@@ -391,36 +391,38 @@ export default function ProfilePage() {
                     </CardBody>
                   </Card>
 
-                  <Card className="border border-warning-500/10 bg-warning-500/[0.03] backdrop-blur-3xl shadow-xl rounded-[2.5rem] p-7 group cursor-pointer hover:bg-warning-500/[0.06] transition-all">
-                    <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 bg-warning-500/10 rounded-2xl flex items-center justify-center text-warning-500 border border-warning-500/20 group-hover:scale-105 transition-transform">
-                        <FiInfo size={28} />
+                  <Card className="border border-warning-500/10 bg-warning-500/[0.02] sm:bg-warning-500/[0.03] backdrop-blur-3xl shadow-lg sm:shadow-xl rounded-[1.2rem] sm:rounded-[2.5rem] p-3.5 sm:p-7 group cursor-pointer hover:bg-warning-500/[0.05] sm:hover:bg-warning-500/[0.06] transition-all">
+                    <div className="flex items-center gap-3 sm:gap-6">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-warning-500/8 sm:bg-warning-500/10 rounded-lg sm:rounded-2xl flex items-center justify-center text-warning-500 border border-warning-500/15 sm:border-warning-500/20 group-hover:scale-105 transition-transform">
+                        <FiInfo size={22} className="sm:hidden" />
+                        <FiInfo size={28} className="hidden sm:block" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-lg font-black text-foreground uppercase tracking-tight italic">System Support</h4>
-                        <p className="text-[11px] text-default-400 font-bold uppercase tracking-widest mt-1">Direct Node Comms</p>
+                        <h4 className="text-[15px] sm:text-lg font-black text-foreground uppercase tracking-tight italic">System Support</h4>
+                        <p className="text-[9px] sm:text-[11px] text-default-400 font-bold uppercase tracking-[0.16em] sm:tracking-widest mt-0.5 sm:mt-1">Direct Node Comms</p>
                       </div>
-                      <FiArrowRight size={20} className="text-default-300 group-hover:translate-x-1 transition-transform" />
+                      <FiArrowRight size={18} className="text-default-300 group-hover:translate-x-1 transition-transform sm:hidden" />
+                      <FiArrowRight size={20} className="text-default-300 group-hover:translate-x-1 transition-transform hidden sm:block" />
                     </div>
                   </Card>
                 </div>
 
                 {/* Right Matrix: Informative Hub */}
-                <div className="flex-1 flex flex-col gap-12">
+                <div className="flex-1 flex flex-col gap-5 sm:gap-12">
                   {roleKey === "associate" && !profile?.associateCompany && (
-                    <Card className="border-2 border-dashed border-warning-500/30 bg-warning-500/[0.03] shadow-2xl rounded-[3.5rem] animate-in fade-in slide-in-from-top-6 duration-1000">
-                      <CardBody className="p-16 flex flex-col items-center text-center gap-12">
+                    <Card className="border-2 border-dashed border-warning-500/25 sm:border-warning-500/30 bg-warning-500/[0.02] sm:bg-warning-500/[0.03] shadow-xl sm:shadow-2xl rounded-[1.5rem] sm:rounded-[3.5rem] animate-in fade-in slide-in-from-top-6 duration-1000">
+                      <CardBody className="p-5 sm:p-16 flex flex-col items-center text-center gap-5 sm:gap-12">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-warning-500/20 blur-[50px] rounded-full scale-150 animate-pulse" />
-                          <div className="relative w-28 h-28 bg-warning-500/10 rounded-[2.5rem] flex items-center justify-center border border-warning-500/20 shadow-2xl">
-                            <FiBriefcase className="text-warning-500 w-12 h-12" />
+                          <div className="absolute inset-0 bg-warning-500/15 sm:bg-warning-500/20 blur-[36px] sm:blur-[50px] rounded-full scale-150 animate-pulse" />
+                          <div className="relative w-16 h-16 sm:w-28 sm:h-28 bg-warning-500/8 sm:bg-warning-500/10 rounded-[1.1rem] sm:rounded-[2.5rem] flex items-center justify-center border border-warning-500/15 sm:border-warning-500/20 shadow-xl sm:shadow-2xl">
+                            <FiBriefcase className="text-warning-500 w-7 h-7 sm:w-12 sm:h-12" />
                           </div>
                         </div>
-                        <div className="flex flex-col gap-5">
-                          <h3 className="text-4xl font-black text-foreground tracking-tighter uppercase italic leading-[0.85]">
+                        <div className="flex flex-col gap-2.5 sm:gap-5">
+                          <h3 className="text-xl sm:text-4xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase italic leading-[0.95] sm:leading-[0.85]">
                             Corporate Activation Required
                           </h3>
-                          <p className="text-default-400 max-w-xl text-base leading-relaxed font-medium">
+                          <p className="text-default-400 max-w-xl text-[13px] sm:text-base leading-relaxed font-medium">
                             To unlock elite marketplace trading, verified logistics clearance, and algorithmic rate optimization, you must initialize your corporate entity profile.
                           </p>
                         </div>
@@ -443,7 +445,7 @@ export default function ProfilePage() {
                     </Card>
                   )}
 
-                  <div className="grid grid-cols-1 gap-10">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-10">
                     {config.groups
                       .filter((group: any) => {
                         if (roleKey === "associate" && !profile?.associateCompany) {
@@ -454,31 +456,32 @@ export default function ProfilePage() {
                       .map((group: any, idx: number) => (
                         <Card
                           key={idx}
-                          className="border border-foreground/5 bg-foreground/[0.01] backdrop-blur-2xl shadow-2xl rounded-[3rem] overflow-hidden"
+                          className="border border-foreground/5 bg-foreground/[0.01] backdrop-blur-2xl shadow-xl sm:shadow-2xl rounded-[1.25rem] sm:rounded-[3rem] overflow-hidden"
                         >
-                          <CardHeader className="px-12 pt-12 flex items-center justify-between">
-                            <div className="flex items-center gap-5">
-                              <div className="w-2 h-10 bg-warning-500 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)]" />
-                              <h3 className="text-3xl font-black text-foreground tracking-tighter uppercase italic leading-[0.8] pr-4">
+                          <CardHeader className="px-4 sm:px-12 pt-4 sm:pt-12 flex items-center justify-between gap-2.5 sm:gap-3">
+                            <div className="flex items-center gap-2.5 sm:gap-5">
+                              <div className="w-1 sm:w-2 h-6 sm:h-10 bg-warning-500/80 sm:bg-warning-500 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.25)] sm:shadow-[0_0_15px_rgba(234,179,8,0.4)]" />
+                              <h3 className="text-lg sm:text-3xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase italic leading-[0.9] sm:leading-[0.8] pr-1 sm:pr-4">
                                 {group.title}
                               </h3>
                             </div>
-                            <div className="w-12 h-12 rounded-full bg-foreground/5 flex items-center justify-center opacity-20 border border-foreground/10">
-                              <FiMoreVertical size={20} />
+                            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-foreground/5 flex items-center justify-center opacity-15 sm:opacity-20 border border-foreground/10 shrink-0">
+                              <FiMoreVertical size={16} className="sm:hidden" />
+                              <FiMoreVertical size={20} className="hidden sm:block" />
                             </div>
                           </CardHeader>
-                          <CardBody className="px-12 pb-12 pt-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-12">
+                          <CardBody className="px-4 sm:px-12 pb-5 sm:pb-12 pt-3 sm:pt-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 sm:gap-x-20 gap-y-5 sm:gap-y-12">
                               {group.fields.map(({ key, label, format }: any) => {
                                 const value = getValue(profile, key);
                                 return (
-                                  <div key={key} className="flex flex-col gap-3 relative group/field">
-                                    <div className="absolute -left-6 top-0 bottom-0 w-1 bg-warning-500/0 group-hover/field:bg-warning-500/50 transition-all rounded-full" />
-                                    <span className="text-[11px] font-black uppercase tracking-[0.4em] text-default-400 group-hover/field:translate-x-1 transition-transform inline-block">
+                                  <div key={key} className="flex flex-col gap-1 sm:gap-3 relative group/field">
+                                    <div className="absolute -left-2.5 sm:-left-6 top-0 bottom-0 w-1 bg-warning-500/0 group-hover/field:bg-warning-500/35 sm:group-hover/field:bg-warning-500/50 transition-all rounded-full" />
+                                    <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.14em] sm:tracking-[0.4em] text-default-400 group-hover/field:translate-x-1 transition-transform inline-block">
                                       {label}
                                     </span>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xl font-black text-foreground tracking-tight group-hover/field:text-warning-500 transition-colors uppercase">
+                                    <div className="flex items-center gap-1.5 sm:gap-3">
+                                      <span className="text-[15px] sm:text-xl font-black text-foreground tracking-tight group-hover/field:text-warning-500 transition-colors uppercase">
                                         {format ? format(value, profile) : value ?? "NODE_NUL"}
                                       </span>
                                     </div>
@@ -499,19 +502,19 @@ export default function ProfilePage() {
                 {roleKey === "operator" && <OperatorDashboardPanel userId={user?.id} />}
               </div>
 
-              <div className="rounded-[2.5rem] border border-default-200/60 bg-content1/70 backdrop-blur-2xl p-8 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+              <div className="rounded-[1.2rem] sm:rounded-[2.5rem] border border-default-200/60 bg-content1/70 backdrop-blur-2xl p-3.5 sm:p-8 space-y-3.5 sm:space-y-6">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                     <FiInfo size={20} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-wide">Keyboard Shortcuts</h3>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-default-400">Open the shortcuts manager</p>
+                    <h3 className="text-base sm:text-xl font-black uppercase tracking-wide">Keyboard Shortcuts</h3>
+                    <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.3em] text-default-400">Open the shortcuts manager</p>
                   </div>
                 </div>
                 <Link
                   href="/dashboard/shortcuts"
-                  className="inline-flex items-center justify-between rounded-2xl border border-default-200/60 bg-content2/30 px-6 py-4 text-xs font-black uppercase tracking-[0.3em] text-foreground hover:bg-content2/50 transition"
+                  className="inline-flex items-center justify-between rounded-lg sm:rounded-2xl border border-default-200/60 bg-content2/30 px-3.5 sm:px-6 py-2.5 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.3em] text-foreground hover:bg-content2/50 transition"
                 >
                   Manage Shortcuts
                   <FiArrowRight />

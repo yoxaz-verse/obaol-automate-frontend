@@ -4,8 +4,8 @@ import React, { useContext, useState, useTransition } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
-import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
+import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 import Image from "next/image";
 import { Button, Tooltip } from "@heroui/react";
 import { useSoundEffect } from "@/context/SoundContext";
@@ -27,95 +27,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const [, startTransition] = useTransition();
     const [pendingLink, setPendingLink] = useState<string | null>(null);
 
-    const filteredOptions = sidebarOptions.filter((option) => {
-        const allowedRoles = (routeRoles[option.link] || []).map((role) => String(role).toLowerCase());
-        const userRole = String(user?.role || "").toLowerCase();
-        if (!userRole) return false;
-        if ((userRole === "admin" || userRole === "operator" || userRole === "team") && option.link === "/dashboard/company") return false;
-        return allowedRoles.includes(userRole);
-    });
+    const filteredOptions = getRoleFilteredSidebarOptions(sidebarOptions as any[], String(user?.role || ""));
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
-    const sidebarSections = [
-        {
-            label: "",
-            links: ["/dashboard"],
-        },
-        {
-            label: "Product",
-            links: [
-                "/dashboard/product",
-                "/dashboard/catalog",
-                "/dashboard/marketplace",
-            ],
-        },
-        {
-            label: "Execution",
-            links: [
-                "/dashboard/enquiries",
-                "/dashboard/sample-requests",
-                "/dashboard/orders",
-                "/dashboard/documents",
-            ],
-        },
-        {
-            label: "Services",
-            links: [
-               "/dashboard/imports",
-               "/dashboard/external-orders",
-               "/dashboard/execution-enquiries",
-               "/dashboard/warehouse-rent",
-               "/dashboard/quality-labs",
-            ],
-        },
-        {
-            label: "News",
-            links: ["/dashboard/news"],
-        },
-        {
-            label: "Manage",
-            links: [
-                "/dashboard/inventory",
-                "/dashboard/warehouses",
-                "/dashboard/company",
-                "/dashboard/companies",
-                "/dashboard/notifications",
-                "/dashboard/guidance",
-                "/dashboard/approvals",
-                "/dashboard/reports",
-                "/dashboard/profile",
-            ],
-        },
-        {
-            label: "Payments",
-            links: [
-                "/dashboard/payments",
-            ],
-        },
-        {
-            label: "Operator",
-            links: [
-                "/dashboard/operator/hierarchy",
-                "/dashboard/operator/team",
-                "/dashboard/operator/earnings",
-            ],
-        },
-        {
-            label: "Admin Tools",
-            links: [
-                "/dashboard/documentation-rules",
-                "/dashboard/documentation-preview",
-                "/dashboard/documentation-templates",
-                "/dashboard/flow-rules",
-                "/dashboard/operators/overview",
-                "/dashboard/users",
-                "/dashboard/calculations",
-                "/dashboard/function-preview",
-                "/dashboard/shortcuts",
-                "/dashboard/essentials",
-                "/dashboard/geosphere",
-            ],
-        },
-    ];
+    const sidebarSections = getDashboardSidebarSections(filteredOptions as any[]);
 
     const { play } = useSoundEffect();
 

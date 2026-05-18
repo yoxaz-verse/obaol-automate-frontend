@@ -321,7 +321,7 @@ export default function CatalogPage() {
   const config = getLevelConfig();
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-64px)] w-full py-8 relative">
+    <div className="flex flex-col items-center min-h-[calc(100vh-64px)] w-full py-6 md:py-7 relative">
       {/* Background Classification Watermark */}
       <AnimatePresence mode="wait">
         {showWatermark && (
@@ -345,9 +345,9 @@ export default function CatalogPage() {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-[1400px] px-6 relative z-10 flex flex-col h-full">
+      <div className="w-full max-w-[1400px] px-4 sm:px-5 lg:px-6 relative z-10 flex flex-col h-full">
         {/* Header & Search */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-foreground/5 pb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-6 border-b border-foreground/5 pb-6">
           <div className="flex flex-col">
             <h1 className="text-4xl font-bold tracking-tight text-foreground mb-1 uppercase">
               Global <span className="text-warning-500">Catalog</span>
@@ -404,7 +404,7 @@ export default function CatalogPage() {
             )}
           </div>
         </div>
-        <div className={`mb-6 flex flex-col gap-3 rounded-2xl border p-3 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
+        <div className={`mb-5 flex flex-col gap-2.5 rounded-2xl border p-2.5 sm:p-3 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
           <Tabs
             aria-label="Catalog Classification Tabs"
             selectedKey={classificationTab}
@@ -463,7 +463,7 @@ export default function CatalogPage() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-3 mb-5"
             >
               <FiSearch className="text-warning-500" size={16} />
               <span className="text-sm font-semibold text-default-500">
@@ -571,7 +571,7 @@ export default function CatalogPage() {
                           });
 
                           return (
-                            <div className="flex flex-col gap-8">
+                            <div className="flex flex-col gap-6">
                               {items.length > 0 ? (
                                 <CategoryGrid
                                   items={items}

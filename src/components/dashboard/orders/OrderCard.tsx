@@ -94,7 +94,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
             }}
         >
             <Card
-                className={`h-full bg-content1/80 backdrop-blur-3xl overflow-hidden group rounded-[2rem] border transition-all duration-500 hover:shadow-2xl ${isTransit ? "hover:shadow-warning-500/10 hover:border-warning-500/50" : "hover:border-default-400"
+                className={`h-full bg-content1/80 backdrop-blur-3xl overflow-hidden group rounded-[1.4rem] sm:rounded-[2rem] border transition-all duration-500 hover:shadow-2xl ${isTransit ? "hover:shadow-warning-500/10 hover:border-warning-500/50" : "hover:border-default-400"
                     } ${getStatusGradients().split(" ")[3]}`}
             >
                 {/* Visual Accent Glow (Background) */}
@@ -110,22 +110,22 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                     </div>
                 )}
 
-                <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
-                    <div className="flex flex-row justify-between w-full items-start gap-4">
+                <CardHeader className="flex flex-col items-start px-4 sm:px-6 pt-4 sm:pt-6 pb-1.5 sm:pb-2 gap-2 sm:gap-3">
+                    <div className="flex flex-row justify-between w-full items-start gap-2.5 sm:gap-4">
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate tracking-tight">
+                            <h4 className="text-base sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate tracking-tight leading-tight">
                                 {product}
                             </h4>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest bg-foreground/[0.03] px-3 py-1 rounded-lg border border-foreground/5">
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
+                                <span className="text-[9px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest bg-foreground/[0.03] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-foreground/5 leading-none">
                                     {variant}
                                 </span>
                             </div>
-                            <div className="mt-2 flex flex-wrap gap-1.5">
+                            <div className="mt-1.5 sm:mt-2 flex flex-wrap gap-1 sm:gap-1.5">
                                 {classificationBadges.map((badge) => (
                                     <span
                                         key={badge.key}
-                                        className={`px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 ${classificationBadgeClass(badge.key)}`}
+                                        className={`px-1.5 sm:px-2 py-0.5 rounded-full border text-[8px] sm:text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1 leading-none ${classificationBadgeClass(badge.key)}`}
                                     >
                                         {React.createElement(classificationIcon(badge.key), { size: 10 })}
                                         {badge.label}
@@ -133,71 +133,71 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1.5 self-start shrink-0">
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-foreground/5 bg-foreground/[0.02] shadow-sm transition-all hover:bg-primary hover:text-white group/date">
-                                <LuCalendar size={12} className="text-primary group-hover/date:text-white" />
-                                <span className="text-[10px] font-bold tracking-wider">{date}</span>
+                        <div className="flex flex-col items-end gap-1 self-start shrink-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl border border-foreground/5 bg-foreground/[0.02] shadow-sm transition-all hover:bg-primary hover:text-white group/date">
+                                <LuCalendar size={11} className="text-primary group-hover/date:text-white" />
+                                <span className="text-[9px] sm:text-[10px] font-bold tracking-wider leading-none">{date}</span>
                             </div>
                         </div>
                     </div>
                 </CardHeader>
 
-                <CardBody className="px-6 py-4 space-y-5">
+                <CardBody className="px-4 sm:px-6 py-3 sm:py-4 space-y-3.5 sm:space-y-5">
                     {/* Integrated Identity Profile */}
-                    <div className="relative p-4 rounded-2xl bg-foreground/[0.01] border border-foreground/5 overflow-hidden">
-                        <div className="absolute top-0 right-0 p-3 opacity-[0.03]">
-                            <LuUser size={40} />
+                    <div className="relative p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-foreground/[0.01] border border-foreground/5 overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2.5 sm:p-3 opacity-[0.03]">
+                            <LuUser size={32} />
                         </div>
  
                         {isOperator ? (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+                            <div className="space-y-2.5 sm:space-y-3">
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
                                         <span className="text-[10px] font-bold font-mono">B</span>
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0.5 opacity-60">Buyer Assignment</p>
-                                        <p className="text-xs font-bold text-foreground truncate">{buyerName}</p>
+                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0 opacity-60 leading-tight">Buyer Assignment</p>
+                                        <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{buyerName}</p>
                                     </div>
                                 </div>
                                 <div className="h-px bg-foreground/5 w-full" />
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/20 shrink-0">
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/20 shrink-0">
                                         <span className="text-[10px] font-bold font-mono">S</span>
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0.5 opacity-60">Seller Assignment</p>
-                                        <p className="text-xs font-bold text-foreground truncate">{sellerName}</p>
+                                        <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0 opacity-60 leading-tight">Seller Assignment</p>
+                                        <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{sellerName}</p>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2.5 sm:gap-3">
                                 <Avatar radius="lg" size="md" name={isBuying ? sellerName[0] : buyerName[0]} className={`${isBuying ? "bg-warning-500/10 text-warning-600" : "bg-primary/10 text-primary"} font-bold border border-foreground/5 shadow-sm rounded-xl`} />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-1 opacity-60">Counterparty Node</p>
-                                    <p className="text-xs font-bold text-foreground truncate leading-tight">{isBuying ? sellerName : buyerName}</p>
-                                    <p className="text-[9px] font-semibold text-default-400 truncate mt-1 opacity-80">{isBuying ? sellerCompany : buyerCompany}</p>
+                                    <p className="text-[8px] font-bold text-default-400 uppercase tracking-widest mb-0.5 sm:mb-1 opacity-60 leading-tight">Counterparty Node</p>
+                                    <p className="text-[11px] sm:text-xs font-bold text-foreground truncate leading-tight">{isBuying ? sellerName : buyerName}</p>
+                                    <p className="text-[8px] sm:text-[9px] font-semibold text-default-400 truncate mt-0.5 sm:mt-1 opacity-80 leading-tight">{isBuying ? sellerCompany : buyerCompany}</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Operational Node Grid */}
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5 sm:gap-3">
                         <div className="flex items-center justify-between px-1">
-                            <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 rounded bg-foreground text-background flex items-center justify-center">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <div className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded bg-foreground text-background flex items-center justify-center">
                                     <LuBriefcase size={10} />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground">Execution Streams</span>
+                                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-foreground leading-none">Execution Streams</span>
                             </div>
-                            <span className="text-[8px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20">
+                            <span className="text-[8px] font-bold text-primary px-1.5 sm:px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20 leading-none">
                                 {respCount}/4 Operational
                             </span>
                         </div>
  
-                        <div className="grid grid-cols-1 gap-2 px-1">
+                        <div className="grid grid-cols-1 gap-1.5 sm:gap-2 px-1">
                             {[
                                 { key: "procurementBy", label: "Procure", icon: <LuShield size={12} /> },
                                 { key: "certificateBy", label: "Certify", icon: <LuAward size={12} /> },
@@ -206,16 +206,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                             ].map((task) => {
                                 const owner = data.responsibilities?.[task.key];
                                 return (
-                                    <div key={task.key} className="flex items-center justify-between py-2 group/task transition-all border-b border-foreground/5 last:border-0 hover:px-2 hover:bg-foreground/[0.02] rounded-xl px-1">
-                                        <div className="flex items-center gap-3">
+                                    <div key={task.key} className="flex items-center justify-between py-1.5 sm:py-2 group/task transition-all border-b border-foreground/5 last:border-0 hover:px-2 hover:bg-foreground/[0.02] rounded-lg sm:rounded-xl px-1">
+                                        <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="text-default-400 group-hover/task:text-primary transition-colors">
                                                 {task.icon}
                                             </div>
-                                            <span className="text-[9px] font-bold uppercase tracking-widest text-default-400 opacity-80 min-w-[50px]">{task.label}</span>
+                                            <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-default-400 opacity-80 min-w-[44px] sm:min-w-[50px] leading-none">{task.label}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 sm:gap-2">
                                             {owner && <div className="w-1 h-1 rounded-full bg-success-500 animate-pulse" />}
-                                            <span className={`text-[9px] font-bold uppercase tracking-wide ${owner ? "text-foreground" : "text-default-300 italic"}`}>
+                                            <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wide leading-none ${owner ? "text-foreground" : "text-default-300 italic"}`}>
                                                 {owner ? (ownerLabelMap[owner] || owner) : "Scheduled"}
                                             </span>
                                         </div>
@@ -226,25 +226,25 @@ const OrderCard: React.FC<OrderCardProps> = ({ data, action, onCardClick }) => {
                     </div>
                 </CardBody>
 
-                <CardFooter className="px-6 py-5 flex flex-col bg-foreground/[0.04] border-t border-foreground/5 gap-5">
+                <CardFooter className="px-4 sm:px-6 py-3.5 sm:py-5 flex flex-col bg-foreground/[0.04] border-t border-foreground/5 gap-3.5 sm:gap-5">
                     {/* Visual Status Progress */}
                     <div className="w-full">
                         <OrderStatus status={status} />
                     </div>
  
                     {/* Actions Row */}
-                    <div className="flex items-center justify-between w-full h-11 gap-4">
+                    <div className="flex items-center justify-between w-full h-9 sm:h-11 gap-2.5 sm:gap-4">
                         {isOperator && (
                             <Button
                                 isIconOnly
                                 variant="bordered"
                                 color="default"
-                                className="rounded-xl w-14 h-11 border-foreground/10 hover:bg-primary hover:text-white transition-all text-default-400 hover:border-primary shrink-0"
+                                className="rounded-lg sm:rounded-xl w-11 sm:w-14 h-9 sm:h-11 border-foreground/10 hover:bg-primary hover:text-white transition-all text-default-400 hover:border-primary shrink-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                 }}
                             >
-                                <LuPhone size={18} />
+                                <LuPhone size={16} />
                             </Button>
                         )}
                         <div className="flex-1 flex justify-end" onClick={(e) => e.stopPropagation()}>

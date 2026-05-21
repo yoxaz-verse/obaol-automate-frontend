@@ -106,15 +106,6 @@ export const setLanguageCookies = (langCode: string): boolean => {
   }
   const persisted = Cookies.get(LANGUAGE_COOKIE) === normalized;
 
-  if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
-    // eslint-disable-next-line no-console
-    console.debug("[LanguageCookie] set", {
-      lang: normalized,
-      domain: options.domain || "(host-only)",
-      persisted,
-    });
-  }
-
   return persisted;
 };
 
@@ -148,10 +139,4 @@ export const clearLanguageCookies = () => {
     }
   }
 
-  if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
-    // eslint-disable-next-line no-console
-    console.debug("[LanguageCookie] cleared", {
-      scopes: scopes.map((s) => s.domain || "(host-only)"),
-    });
-  }
 };

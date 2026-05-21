@@ -1,8 +1,5 @@
 // src/core/api/apiRoutes.ts
 
-// Remove unnecessary imports
-// import { count } from "console"; // Removed as it's not used
-
 // Define base paths as constants for clarity and reusability
 const BASE_PATHS = {
   USER: "/user",
@@ -211,14 +208,7 @@ export const projectRoutes = addCustomRoutes(
   }
 );
 
-// Define activity routes with additional custom endpoints
-export const activityRoutes =
-  // addCustomRoutes(
-  createCRUDRoutes(BASE_PATHS.ACTIVITY);
-// {
-//   getByProject: `${BASE_PATHS.ACTIVITY}/projects`,
-// }
-// );
+export const activityRoutes = createCRUDRoutes(BASE_PATHS.ACTIVITY);
 
 export const associateRoutes = createCRUDRoutes(BASE_PATHS.ASSOCIATE);
 export const associateCompanyRoutes = createCRUDRoutes(
@@ -288,16 +278,10 @@ export const researchedCompanyRoutes = createCRUDRoutes(
   BASE_PATHS.RESEARCHED_COMPANY
 );
 
-// Analytics Routes
-export const analyticsRoutes = {
-  enquiryTrends: `${BASE_PATHS.ACTIVITY}/analytics/trends/enquiries`, // Note: prefix logic handled in backend, here we map to full path relative to base API
-  // Correction: The backend mounts at /api/v1/web/analytics
-  // Let's define a new base for analytics
-};
-
 const ANALYTICS_BASE = "/analytics";
 
 export const dashboardRoutes = {
+  dashboardSummary: `${ANALYTICS_BASE}/summary/dashboard`,
   enquiryTrends: `${ANALYTICS_BASE}/trends/enquiries`,
   productPerformance: `${ANALYTICS_BASE}/performance/products`,
   systemMetrics: `${ANALYTICS_BASE}/metrics/system`,

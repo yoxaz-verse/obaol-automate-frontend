@@ -48,28 +48,56 @@ export default function CategoryGrid({
     const Icon = type === "product" ? FiPackage : FiFolder;
     const colorClass = "text-warning-600";
     const bgClass = "bg-warning-500/10";
-    const itemTransition = {
-        type: "spring" as const,
-        stiffness: 240,
-        damping: 24,
-        mass: 0.7,
+    const listAnimationKey = `${type}-${items.map((item) => item._id).join("|")}`;
+
+    const gridVariants = {
+        hidden: {},
+        visible: {
+            transition: {
+                delayChildren: 0.02,
+                staggerChildren: 0.055,
+            },
+        },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 8 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.26,
+                ease: [0.22, 1, 0.36, 1] as const,
+            },
+        },
+        exit: {
+            opacity: 0,
+            y: 6,
+            transition: {
+                duration: 0.18,
+                ease: [0.22, 1, 0.36, 1] as const,
+            },
+        },
     };
 
     return (
-        <motion.div layout="position" className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full">
-            <AnimatePresence mode="sync" initial={false}>
+        <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+                key={listAnimationKey}
+                variants={gridVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full"
+            >
                 {items.map((item) => {
                     const count = counts ? counts[item._id] || 0 : 0;
 
                     return (
                         <motion.div
-                            layout="position"
                             key={item._id}
-                            initial={{ opacity: 0, scale: 0.985 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.985 }}
-                            transition={itemTransition}
-                            whileHover={{ y: -5 }}
+                            variants={itemVariants}
+                            whileHover={{ y: -2 }}
                             className={`group border backdrop-blur-md hover:border-warning-500/30 transition-all shadow-lg hover:shadow-warning-500/5 rounded-xl sm:rounded-2xl cursor-pointer relative ${cardThemeClass || "bg-gradient-to-br from-white/[0.03] to-transparent"} ${cardBorderClass || "border-foreground/10"}`}
                             onClick={() => onSelect(item)}
                         >
@@ -143,7 +171,7 @@ export default function CategoryGrid({
                         </motion.div>
                     );
                 })}
-            </AnimatePresence>
-        </motion.div>
+            </motion.div>
+        </AnimatePresence>
     );
 }

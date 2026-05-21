@@ -164,8 +164,6 @@ const EssentialTabContent = ({
 
                 return rest;
               });
-              console.log(tableData);
-
               return (
                 tableData.length > 0 && (
                   <>

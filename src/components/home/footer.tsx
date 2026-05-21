@@ -35,10 +35,7 @@ export default function Footer() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none z-0" />
 
-      {/* GIANT BACKGROUND TEXT */}
-      <div className="absolute -bottom-20 -left-10 text-[20vw] font-black text-white/[0.02] select-none pointer-events-none tracking-tighter z-0">
-        OBAOL
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
@@ -154,6 +151,18 @@ export default function Footer() {
               </ul>
             </motion.div>
           </div>
+        </motion.div>
+
+        {/* GIANT FOREGROUND TEXT */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="mt-24 w-full flex justify-center items-center overflow-hidden"
+        >
+          <h1 className="text-[clamp(2.5rem,11vw,140px)] leading-none font-black text-foreground tracking-tighter whitespace-nowrap">
+            OBAOL Supreme
+          </h1>
         </motion.div>
 
         {/* BOTTOM SECTION */}

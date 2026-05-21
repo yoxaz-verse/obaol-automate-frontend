@@ -126,9 +126,6 @@ export default function ReportsPage() {
   );
   const isCompanyInterestReport = (row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE";
   const companyInterestRows = useMemo(() => rows.filter(isCompanyInterestReport), [rows]);
-  if (process.env.NODE_ENV !== "production") {
-    console.debug("[reports] company-interest rows", companyInterestRows.length);
-  }
   const companyInterestStats = useMemo(() => {
     const stats = {
       pending: 0,

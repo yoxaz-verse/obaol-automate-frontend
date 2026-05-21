@@ -267,7 +267,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           </div>
         ) : (
           <>
-            <div className="flex items-center db-subtle border db-border-subtle rounded-2xl p-1 gap-1 shadow-sm dark:shadow-none">
+            <div className="flex items-center db-subtle border db-border-subtle rounded-2xl p-1 gap-1">
               <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
               
               <div className="relative" ref={notificationRef}>
@@ -280,7 +280,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
                   {unreadCount > 0 && (
                     <>
-                      <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-[var(--db-panel)] shadow-[0_4px_12px_rgba(239,68,68,0.35)]">
+                      <span className="absolute -top-1.5 -right-1.5 z-10 h-5 min-w-[20px] px-1.5 rounded-full bg-danger-500 text-white text-[10px] font-black leading-5 text-center border-2 border-[var(--db-panel)]">
                         {unreadBadge}
                       </span>
                       <span className="absolute -top-1.5 -right-1.5 z-0 h-5 w-5 rounded-full bg-danger-500/40 animate-ping" />
@@ -304,7 +304,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
             >
               <DropdownTrigger>
                 <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-warning-500/10 to-black/[0.02] dark:to-white/5 border border-warning-500/20 hover:border-warning-500/40 transition-all outline-none">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-warning-500/20 group-hover:scale-105 transition-transform">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-xs font-black group-hover:scale-105 transition-transform">
                     {username?.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start sr-only sm:not-sr-only">
@@ -316,7 +316,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               <DropdownMenu 
                 {...({ 
                   "aria-label": "Tactical Profile Options", 
-                  className: "w-80 p-2 db-panel backdrop-blur-2xl border db-border-subtle shadow-2xl rounded-[1.5rem]", 
+                  className: "w-80 p-2 db-panel backdrop-blur-2xl border db-border-subtle rounded-[1.5rem]", 
                   itemClasses: { 
                     base: "rounded-xl py-3 px-4 transition-all duration-300",
                     title: "text-sm font-bold text-default-700 dark:text-default-200",
@@ -331,7 +331,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   textValue="User Profile Header"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-lg font-black shadow-[0_8px_20px_rgba(245,165,36,0.3)]">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-lg font-black">
                       {username?.slice(0, 1).toUpperCase()}
                     </div>
                     <div className="flex flex-col">

@@ -1,6 +1,7 @@
 "use client";
 
 export const DEFAULT_STALE_TIME = 45 * 1000;
+export const DASHBOARD_STALE_TIME = 5 * 60 * 1000;
 
 export const extractPagedPayload = (raw: any) => {
   if (!raw) return {};
@@ -37,5 +38,17 @@ export const extractCount = (raw: any, list: any[]) => {
 
 export const normalizeQueryKey = (prefix: string, params?: Record<string, any>) => {
   if (!params) return [prefix];
-  return [prefix, JSON.stringify(params)];
+  const sortObject = (value: any): any => {
+    if (Array.isArray(value)) return value.map(sortObject);
+    if (value && typeof value === "object") {
+      return Object.keys(value)
+        .sort()
+        .reduce((acc: Record<string, any>, key) => {
+          acc[key] = sortObject(value[key]);
+          return acc;
+        }, {});
+    }
+    return value;
+  };
+  return [prefix, sortObject(params)];
 };

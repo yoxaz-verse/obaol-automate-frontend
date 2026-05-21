@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutes } from "@/core/api/apiRoutes";
+import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiUser, FiMoreVertical } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -39,10 +40,10 @@ function AdminDashboardPanel() {
         getData(apiRoutes.product.getAll, { limit: 1 }),
       ]);
       return {
-        enquiries: enquiries?.data?.total || 124,
-        companies: companies?.data?.total || 45,
-        users: users?.data?.total || 89,
-        products: products?.data?.total || 2560,
+        enquiries: extractCount(enquiries, extractList(enquiries)),
+        companies: extractCount(companies, extractList(companies)),
+        users: extractCount(users, extractList(users)),
+        products: extractCount(products, extractList(products)),
       };
     },
   });
@@ -91,8 +92,8 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
         getData(apiRoutes.enquiry.getAll, { limit: 1 }),
       ]);
       return {
-        catalogItems: catalog?.data?.total || 0,
-        activeLeads: enquiries?.data?.total || 0,
+        catalogItems: extractCount(catalog, extractList(catalog)),
+        activeLeads: extractCount(enquiries, extractList(enquiries)),
       };
     },
     enabled: !!userId,
@@ -120,7 +121,7 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
         />
         <InsightCard
           title="Business Integrity"
-          metric="98%"
+          metric="N/A"
           icon={<FiCheckCircle size={20} className="text-orange-500" />}
         />
       </div>
@@ -140,13 +141,6 @@ function OperatorDashboardPanel({ userId }: { userId: string }) {
     queryFn: () => getData(apiRoutes.researchedCompany.getAll, { submittedByOperator: userId, limit: 200 }),
     enabled: !!userId,
   });
-
-  const extractList = (raw: any): any[] => {
-    if (Array.isArray(raw)) return raw;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (Array.isArray(raw?.data?.data)) return raw.data.data;
-    return [];
-  };
 
   const enquiries = extractList(enquiryResponse).filter((item: any) => {
     const supplierOperatorId = (item?.supplierOperatorId?._id || item?.supplierOperatorId || "").toString();

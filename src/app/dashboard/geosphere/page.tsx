@@ -16,7 +16,6 @@ export default function UnLoCodeMapPage() {
       >
         {(response: any) => {
           const docs: any[] = response?.data || [];
-          console.log(docs);
 
           const markers: MarkerData[] = docs.flatMap((u) => {
             const lat = u.coordinates?.latitude;

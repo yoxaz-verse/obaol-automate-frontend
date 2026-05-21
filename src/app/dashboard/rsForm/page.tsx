@@ -16,9 +16,7 @@ export default function RSForm() {
     role && (
       <div className="flex flex-col my-10 px-4 w-full">
         {/* 🔍 Company Search */}
-        <CompanySearch
-          onSelect={(id) => console.log("Selected company:", id)}
-        />
+        <CompanySearch onSelect={() => {}} />
 
         {/* 📝 Form */}
         <AddForm

@@ -18,12 +18,6 @@ export const LanguageSwitcher = () => {
   const translationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
-      console.debug(`[LanguageSwitcher] ${checkpoint}`, payload || {});
-    }
-  };
 
   useEffect(() => {
     isSwitchingRef.current = isSwitching;
@@ -51,7 +45,6 @@ export const LanguageSwitcher = () => {
           position: "top-right",
         });
       }
-      debugLog("fallback", { reason: "translation-unavailable-event", preferred });
       window.dispatchEvent(new Event("translation-end"));
     };
 
@@ -109,7 +102,6 @@ export const LanguageSwitcher = () => {
     }, 2500);
 
     reloadTriggeredRef.current = true;
-    debugLog("reload", { language: normalized });
     setTimeout(() => {
       window.location.reload();
     }, 120);
@@ -172,4 +164,3 @@ export const LanguageSwitcher = () => {
     </div>
   );
 };
-

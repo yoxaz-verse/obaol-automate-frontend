@@ -23,6 +23,17 @@ import {
   FiAperture,
   FiNavigation,
 } from "react-icons/fi";
+import {
+  FaWarehouse,
+  FaShip,
+  FaBoxOpen,
+  FaUserTie,
+  FaTruckFast,
+  FaClipboardCheck,
+  FaEarthAsia,
+  FaStore
+} from "react-icons/fa6";
+import { GiWheat } from "react-icons/gi";
 
 type RoleModuleId =
   | "procurement"
@@ -776,18 +787,18 @@ export default function HeroSection() {
                 <div className="relative z-30 w-full grid grid-cols-2 gap-x-14 sm:gap-x-24 md:gap-x-36 lg:gap-x-56 gap-y-7 sm:gap-y-9 lg:gap-y-12">
                   {/* LEFT COLUMN */}
                   <div className="space-y-10 lg:space-y-12 flex flex-col items-start">
-                    <RoleCard icon={<FiShoppingBag size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" />
-                    <RoleCard icon={<FiTruck size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" />
-                    <RoleCard icon={<FiCheckCircle size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" />
-                    <RoleCard icon={<FiUser size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" />
+                    <RoleCard icon={<GiWheat size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" />
+                    <RoleCard icon={<FaTruckFast size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" />
+                    <RoleCard icon={<FaClipboardCheck size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" />
+                    <RoleCard icon={<FaUserTie size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" />
                   </div>
 
                   {/* RIGHT COLUMN */}
                   <div className="space-y-10 lg:space-y-12 flex flex-col items-end">
-                    <RoleCard icon={<FiBox size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} anchorId="warehouse" />
-                    <RoleCard icon={<FiArchive size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} anchorId="packaging" />
-                    <RoleCard icon={<FiLayers size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} anchorId="supplier" />
-                    <RoleCard icon={<FiNavigation size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} anchorId="freight" />
+                    <RoleCard icon={<FaWarehouse size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} anchorId="warehouse" />
+                    <RoleCard icon={<FaBoxOpen size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} anchorId="packaging" />
+                    <RoleCard icon={<FaStore size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} anchorId="supplier" />
+                    <RoleCard icon={<FaShip size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} anchorId="freight" />
                   </div>
                 </div>
                 )}
@@ -795,28 +806,28 @@ export default function HeroSection() {
                 {isCompactNetwork && (
                   <div className="relative z-30 w-full pt-[170px] sm:pt-[190px] flex flex-col items-center gap-4 sm:gap-5">
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
-                      <RoleCard icon={<FiShoppingBag size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" compact />
+                      <RoleCard icon={<GiWheat size={18} />} label="Procurement" color="text-orange-500" custom={0} onHover={(active) => handleRoleHover("procurement", active)} isActive={activeRoleKey === ROLE_CONTENT.procurement.roleKey} align="right" anchorId="procurement" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
-                      <RoleCard icon={<FiBox size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} align="left" anchorId="warehouse" compact />
+                      <RoleCard icon={<FaWarehouse size={18} />} label="Warehouse" color="text-orange-500" custom={1} onHover={(active) => handleRoleHover("warehouse", active)} isActive={activeRoleKey === ROLE_CONTENT.warehouse.roleKey} align="left" anchorId="warehouse" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
-                      <RoleCard icon={<FiTruck size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" compact />
+                      <RoleCard icon={<FaTruckFast size={18} />} label="Logistics" color="text-blue-500" custom={2} onHover={(active) => handleRoleHover("logistics", active)} isActive={activeRoleKey === ROLE_CONTENT.logistics.roleKey} align="right" anchorId="logistics" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
-                      <RoleCard icon={<FiArchive size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} align="left" anchorId="packaging" compact />
+                      <RoleCard icon={<FaBoxOpen size={18} />} label="Packaging" color="text-pink-500" custom={3} onHover={(active) => handleRoleHover("packaging", active)} isActive={activeRoleKey === ROLE_CONTENT.packaging.roleKey} align="left" anchorId="packaging" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
-                      <RoleCard icon={<FiCheckCircle size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" compact />
+                      <RoleCard icon={<FaClipboardCheck size={18} />} label="Verification" color="text-emerald-500" custom={4} onHover={(active) => handleRoleHover("verification", active)} isActive={activeRoleKey === ROLE_CONTENT.verification.roleKey} align="right" anchorId="verification" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
-                      <RoleCard icon={<FiLayers size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} align="left" anchorId="supplier" compact />
+                      <RoleCard icon={<FaStore size={18} />} label="Supplier" color="text-blue-500" custom={5} onHover={(active) => handleRoleHover("supplier", active)} isActive={activeRoleKey === ROLE_CONTENT.supplier.roleKey} align="left" anchorId="supplier" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.right}`}>
-                      <RoleCard icon={<FiUser size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" compact />
+                      <RoleCard icon={<FaUserTie size={18} />} label="Buyer" color="text-purple-500" custom={6} onHover={(active) => handleRoleHover("buyer", active)} isActive={activeRoleKey === ROLE_CONTENT.buyer.roleKey} align="right" anchorId="buyer" compact />
                     </div>
                     <div className={`w-full flex justify-center ${COMPACT_ROW_OFFSET.left}`}>
-                      <RoleCard icon={<FiNavigation size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} align="left" anchorId="freight" compact />
+                      <RoleCard icon={<FaShip size={18} />} label="Freight" color="text-lime-500" custom={7} onHover={(active) => handleRoleHover("freight", active)} isActive={activeRoleKey === ROLE_CONTENT.freight.roleKey} align="left" anchorId="freight" compact />
                     </div>
                   </div>
                 )}

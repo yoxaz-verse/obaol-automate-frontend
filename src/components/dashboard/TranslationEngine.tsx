@@ -35,19 +35,11 @@ export const TranslationEngine = () => {
     const APPLY_RETRY_MS = 180;
     const MAX_APPLY_ATTEMPTS = 40;
 
-    const debugLog = (checkpoint: string, payload?: Record<string, unknown>) => {
-      if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.debug(`[TranslationEngine] ${checkpoint}`, payload || {});
-      }
-    };
-
     const readPreferredLanguage = () => normalizeLanguageCode(getLanguageCookie());
 
     const emitUnavailable = (reason: string) => {
       const preferred = readPreferredLanguage();
       setIsSwitching(false);
-      debugLog("fallback", { reason, preferred });
       if (preferred !== "en" && !unavailableToastShown) {
         unavailableToastShown = true;
         showToastMessage({
@@ -78,7 +70,6 @@ export const TranslationEngine = () => {
         (option) => String(option.value || "").toLowerCase() === normalized
       );
       if (!hasLanguage) {
-        debugLog("language-not-in-widget", { langCode: normalized });
         return false;
       }
 
@@ -107,8 +98,6 @@ export const TranslationEngine = () => {
 
           attempts += 1;
           const applied = applyLanguageToWidget(normalized);
-          debugLog("apply-retry", { langCode: normalized, attempts, applied });
-
           if (applied) {
             resolve(true);
             return;
@@ -139,13 +128,11 @@ export const TranslationEngine = () => {
         );
         isScriptReady = true;
         isScriptLoading = false;
-        debugLog("widget-ready");
 
         if (pendingLanguageToApply) {
           const pending = pendingLanguageToApply;
           pendingLanguageToApply = "";
           applyLanguageWithRetries(pending).then((applied) => {
-            debugLog("apply-pending-language", { langCode: pending, applied });
             if (!applied) {
               emitUnavailable("widget-missing-pending-language");
             } else {
@@ -172,14 +159,12 @@ export const TranslationEngine = () => {
       }
 
       isScriptLoading = true;
-      debugLog("script-load-start");
       const addScript = document.createElement("script");
       addScript.id = "google-translate-script";
       addScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       addScript.async = true;
       addScript.onerror = () => {
         isScriptLoading = false;
-        debugLog("script-load-error");
         window.dispatchEvent(new Event("translation-engine-error"));
         emitUnavailable("script-load-error");
       };
@@ -205,14 +190,12 @@ export const TranslationEngine = () => {
 
       if (isScriptReady) {
         applyLanguageWithRetries(preferredLang).then((applied) => {
-          debugLog("apply-saved-ready", { langCode: preferredLang, applied });
           if (!applied) {
             emitUnavailable("saved-apply-failed-after-ready");
           }
         });
       } else {
         pendingLanguageToApply = preferredLang;
-        debugLog("apply-saved-pending", { langCode: preferredLang });
         ensureTranslateScript();
       }
 

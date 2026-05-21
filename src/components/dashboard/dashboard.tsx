@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -75,6 +75,7 @@ const Dashboard: NextPage = () => {
   const [associateLookup, setAssociateLookup] = useState("");
 
   const {
+    dashboardSummaryQuery,
     enquiriesQuery,
     ordersQuery,
     trendQuery,
@@ -84,6 +85,7 @@ const Dashboard: NextPage = () => {
     operatorMetricsQuery,
     approvalsAssociatesQuery,
     approvalsCompaniesQuery,
+    summary,
     enquiries,
     orders,
     trendList,
@@ -121,21 +123,11 @@ const Dashboard: NextPage = () => {
 
   const directoryCompanies = extractList(companyDirectoryQuery.data);
   const directoryAssociates = extractList(associateDirectoryQuery.data);
-  const pendingEnquiries = enquiries.filter((item: any) => {
-    const s = String(item?.status || "").toUpperCase();
-    return !["COMPLETED", "CLOSED", "CANCELLED", "CONVERTED"].includes(s);
-  }).length;
-  const convertedEnquiries = enquiries.filter(
-    (item: any) => String(item?.status || "").toUpperCase() === "CONVERTED"
-  ).length;
-  const activeOrders = orders.filter((item: any) => {
-    const s = String(item?.status || "").toUpperCase();
-    return !["COMPLETED", "CANCELLED"].includes(s);
-  }).length;
-  const completedOrders = orders.filter(
-    (item: any) => String(item?.status || "").toUpperCase() === "COMPLETED"
-  ).length;
-  const orderCompletionPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+  const pendingEnquiries = Number(summary?.pendingEnquiries || 0);
+  const convertedEnquiries = Number(summary?.convertedEnquiries || 0);
+  const activeOrders = Number(summary?.activeOrders || 0);
+  const completedOrders = Number(summary?.completedOrders || 0);
+  const orderCompletionPct = Number(summary?.orderCompletionPct || (totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0));
 
   const systemMetrics = systemMetricsQuery.data?.data?.data || {};
   const associateMetrics = associateMetricsQuery.data?.data?.data || {};
@@ -144,24 +136,10 @@ const Dashboard: NextPage = () => {
   const pendingCompanyApprovals = Number(approvalsCompaniesQuery.data?.data?.meta?.total || 0);
   const pendingApprovalsTotal = pendingAssociateApprovals + pendingCompanyApprovals;
 
-  const associateBuyingCount = enquiries.filter(
-    (item: any) => (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId
-  ).length;
-  const associateSellingCount = enquiries.filter(
-    (item: any) => (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId
-  ).length;
-  const associateActionRequired = enquiries.filter((item: any) => {
-    const isBuying = (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId;
-    const isSelling = (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId;
-    const sellerPending = isSelling && !item?.sellerAcceptedAt;
-    const buyerPending = isBuying && item?.sellerAcceptedAt && !item?.buyerConfirmedAt;
-    return sellerPending || buyerPending;
-  }).length;
-
-  const adminActionRequired = enquiries.filter((item: any) => {
-    const isConverted = String(item?.status || "").toUpperCase() === "CONVERTED";
-    return !item?.sellerAcceptedAt || !item?.buyerConfirmedAt || !isConverted;
-  }).length;
+  const associateBuyingCount = Number(summary?.associateBuyingCount || 0);
+  const associateSellingCount = Number(summary?.associateSellingCount || 0);
+  const associateActionRequired = Number(summary?.associateActionRequired || 0);
+  const adminActionRequired = Number(summary?.adminActionRequired || 0);
 
   const filteredOptions = sidebarOptions.filter((option) => {
     const allowedRoles = routeRoles[option.link] || [];
@@ -183,68 +161,30 @@ const Dashboard: NextPage = () => {
       .filter(Boolean) as typeof sidebarOptions;
   }, [filteredOptions, isAdmin, isAssociate, isOperatorUser]);
 
-  const isEnquiryRelevantForRole = useCallback((item: any) => {
-    if (isAdmin) return true;
-    if (isAssociate) {
-      return (
-        (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId ||
-        (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId ||
-        (item?.mediatorAssociateId?._id || item?.mediatorAssociateId)?.toString() === userId
-      );
-    }
-    if (isOperatorUser) {
-      return (
-        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
-        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
-        (item?.createdBy?._id || item?.createdBy)?.toString() === userId
-      );
-    }
-    return true;
-  }, [isAdmin, isAssociate, isOperatorUser, userId]);
-
-  const isOrderRelevantForRole = useCallback((item: any) => {
-    if (isAdmin) return true;
-    if (isOperatorUser) {
-      return (
-        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
-        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
-        (item?.createdBy?._id || item?.createdBy)?.toString() === userId
-      );
-    }
-    if (isAssociate) {
-      return (
-        (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId ||
-        (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId ||
-        (item?.mediatorAssociateId?._id || item?.mediatorAssociateId)?.toString() === userId
-      );
-    }
-    return true;
-  }, [isAdmin, isAssociate, isOperatorUser, userId]);
-
   const activityFeed = useMemo(() => {
-    const enquiryFeed = enquiries
-      .filter(isEnquiryRelevantForRole)
-      .slice(0, 4)
-      .map((item: any) => ({
-        type: "Enquiry",
-        id: item?._id,
-        status: item?.status || "Pending",
-        at: item?.updatedAt || item?.createdAt,
-      }));
-    const orderFeed = orders
-      .filter(isOrderRelevantForRole)
-      .slice(0, 4)
-      .map((item: any) => ({
-        type: "Order",
-        id: item?._id,
-        status: item?.status || "Procuring",
-        at: item?.updatedAt || item?.createdAt,
-      }));
+    const summaryFeed = Array.isArray(summary?.recentActivity) ? summary.recentActivity : [];
+    if (summaryFeed.length > 0) {
+      return summaryFeed
+        .filter((item: any) => item?.id && item?.at)
+        .slice(0, 6);
+    }
+    const enquiryFeed = enquiries.slice(0, 4).map((item: any) => ({
+      type: "Enquiry",
+      id: item?._id,
+      status: item?.status || "Pending",
+      at: item?.updatedAt || item?.createdAt,
+    }));
+    const orderFeed = orders.slice(0, 4).map((item: any) => ({
+      type: "Order",
+      id: item?._id,
+      status: item?.status || "Procuring",
+      at: item?.updatedAt || item?.createdAt,
+    }));
     return [...enquiryFeed, ...orderFeed]
       .filter((item) => item.id && item.at)
       .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
       .slice(0, 6);
-  }, [enquiries, orders, isEnquiryRelevantForRole, isOrderRelevantForRole]);
+  }, [enquiries, orders, summary]);
 
   const actionCenterItems = useMemo(() => {
     if (isAdmin) {
@@ -390,13 +330,13 @@ const Dashboard: NextPage = () => {
     ? associateMetrics.associateName || user?.email
     : user?.name || user?.email || "User";
 
-  const executiveLoading = isAdmin
+  const executiveLoading = dashboardSummaryQuery.isLoading || (isAdmin
     ? systemMetricsQuery.isLoading
     : isAssociate
       ? associateMetricsQuery.isLoading
       : isOperatorUser
         ? operatorMetricsQuery.isLoading
-        : enquiriesQuery.isLoading;
+        : enquiriesQuery.isLoading);
 
   const executiveError = isAdmin
     ? systemMetricsQuery.isError
@@ -505,7 +445,7 @@ const Dashboard: NextPage = () => {
       </CardHeader>
       <Divider className="my-4 mx-8 w-auto opacity-50" />
       <CardBody className="px-8 pb-8 space-y-4">
-        {enquiriesQuery.isLoading || ordersQuery.isLoading ? (
+        {dashboardSummaryQuery.isLoading || enquiriesQuery.isLoading || ordersQuery.isLoading ? (
           Array.from({ length: 4 }).map((_, idx) => (
             <div key={idx} className="space-y-3">
               <Skeleton className="h-4 w-2/3 rounded-lg" />

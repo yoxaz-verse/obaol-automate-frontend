@@ -486,18 +486,20 @@ export default function CatalogPage() {
             {isSearching ? (
               <motion.div
                 key="search"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                exit={{ opacity: 0, y: -2 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <DeepSearchPanel search={search} classifications={effectiveClassifications} onNavigate={handleSearchNavigate} />
               </motion.div>
             ) : (
               <motion.div
                 key="browse"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                exit={{ opacity: 0, y: -2 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <QueryComponent
                   api={apiRoutesByRole["catalogItem"]}

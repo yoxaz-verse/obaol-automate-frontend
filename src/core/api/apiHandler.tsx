@@ -2,17 +2,34 @@
 
 import instance from "@/core/api/axiosInstance";
 
+type GetDataOptions = {
+  cacheMode?: "default" | "bypass";
+};
+
 // GET request to the API
-export const getData = async (url: string, params: any = {}) => {
+export const getData = async (
+  url: string,
+  params: any = {},
+  options: GetDataOptions = {}
+) => {
   try {
-    return await instance.get(url, {
+    const startedAt = Date.now();
+    const useBypassCache = options.cacheMode === "bypass";
+    const response = await instance.get(url, {
       params,
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
+      headers: useBypassCache
+        ? {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        }
+        : undefined,
     });
+    if (process.env.NODE_ENV !== "production") {
+      const elapsedMs = Date.now() - startedAt;
+      console.debug(`[api][get] ${url} completed in ${elapsedMs}ms`);
+    }
+    return response;
   } catch (error) {
     console.error("Error in getData:", error);
     throw error;

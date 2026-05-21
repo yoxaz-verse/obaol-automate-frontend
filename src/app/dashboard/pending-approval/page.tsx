@@ -5,6 +5,7 @@ import AuthContext from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Button } from "@nextui-org/react";
 import GuidanceContent from "@/components/guidance/GuidanceContent";
+import PendingEngagementActions from "@/components/dashboard/PendingEngagementActions";
 import { 
   LuShieldCheck, 
   LuActivity, 
@@ -344,6 +345,7 @@ export default function PendingApprovalPage() {
           </Button>
         )}
       </div>
+      <PendingEngagementActions user={user} />
       <div className="mt-16">
         <GuidanceContent roleView={guidanceRole} showToggle={false} />
       </div>

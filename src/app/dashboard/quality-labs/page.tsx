@@ -45,6 +45,7 @@ type AssociateCompany = {
   labSpecifications?: string[];
   labAcceptedItems?: string[];
   labNotes?: string;
+  labListingState?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -106,7 +107,10 @@ const getLabCoords = (lab: AssociateCompany) => {
   return { latitude: lat, longitude: lng };
 };
 
-const isListedLab = (row: AssociateCompany) => row?.isQualityLabListed === true && Boolean(getLabCoords(row));
+const isListedLab = (row: AssociateCompany) =>
+  row?.isQualityLabListed === true &&
+  String(row?.labListingState || "LIVE").toUpperCase() === "LIVE" &&
+  Boolean(getLabCoords(row));
 
 const getCertificatesSummary = (company: AssociateCompany) => {
   const certs = Array.isArray(company?.labCertifications) ? company.labCertifications.map((v) => String(v || "").trim()).filter(Boolean) : [];

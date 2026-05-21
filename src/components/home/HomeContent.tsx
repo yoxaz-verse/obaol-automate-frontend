@@ -2,7 +2,8 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { FiShield, FiZap, FiGlobe, FiArrowRight } from "react-icons/fi";
+import { FiArrowRight } from "react-icons/fi";
+import { FaShieldHalved, FaTruckFront, FaEarthAsia, FaGlobe } from "react-icons/fa6";
 import Link from "next/link";
 import Header from "@/components/home/header";
 import HeroSection from "@/components/home/herosection";
@@ -231,19 +232,19 @@ export default function HomeContent() {
                             {
                                 title: "Verified Network",
                                 desc: "Every supplier, buyer, and operator undergoes a rigorous multi-stage verification process to ensure trade reputability.",
-                                icon: <FiShield size={22} />,
+                                icon: <FaShieldHalved size={22} />,
                                 color: "text-blue-500"
                             },
                             {
                                 title: "Unified Execution",
                                 desc: "Integrated procurement, documentation, and logistics in one cohesive system. No more fragmented email chains.",
-                                icon: <FiZap size={22} />,
+                                icon: <FaTruckFront size={22} />,
                                 color: "text-orange-500"
                             },
                             {
                                 title: "Global Compliance",
                                 desc: "Built to handle cross-border trade complexities, from domestic logistics to international customs standards.",
-                                icon: <FiGlobe size={22} />,
+                                icon: <FaEarthAsia size={22} />,
                                 color: "text-emerald-500"
                             }
                         ].map((feature, i) => (
@@ -294,7 +295,7 @@ export default function HomeContent() {
 
                                     {/* Background accent */}
                                     <div className="absolute top-0 right-0 p-4 md:p-8 text-foreground/[0.03] group-hover:text-orange-500/[0.05] transition-colors pointer-events-none">
-                                        <FiGlobe size={100} className="md:size-[200px]" />
+                                        <FaGlobe size={100} className="md:size-[200px]" />
                                     </div>
                                 </div>
                             </motion.article>

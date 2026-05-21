@@ -69,7 +69,6 @@ export default function CompanyProductPage() {
 
   const DIRECTORY_PAGE_SIZE = 24;
   const normalizedAssignmentFilter: "all" | "assigned" | "unassigned" = isOperatorFamily ? "assigned" : assignmentFilter;
-  const shouldClientFilterAssignment = isAdmin;
 
   const buildCompanyQueryParams = useCallback(({
     page,
@@ -93,11 +92,11 @@ export default function CompanyProductPage() {
       ...(includeSort ? { sort: "name:asc" } : {}),
       ...(searchValue ? { search: searchValue } : {}),
       ...(isOperatorFamily && user?.id ? { assignedOperator: user.id } : {}),
-      ...(isAdmin && !shouldClientFilterAssignment && assignmentStatus !== "all" ? { assignmentStatus } : {}),
+      ...(assignmentStatus !== "all" ? { assignmentStatus } : {}),
       ...(liveStatus !== "all" ? { liveProductStatus: liveStatus } : {}),
     };
     return params;
-  }, [isOperatorFamily, user?.id, isAdmin, shouldClientFilterAssignment]);
+  }, [isOperatorFamily, user?.id]);
 
   const companiesQuery = useQuery({
     queryKey: [
@@ -113,8 +112,8 @@ export default function CompanyProductPage() {
       getData(
         apiRoutes.associateCompany.getAll,
         buildCompanyQueryParams({
-          page: shouldClientFilterAssignment ? 1 : directoryPage,
-          limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
+          page: directoryPage,
+          limit: DIRECTORY_PAGE_SIZE,
           searchValue: debouncedSearch,
           assignmentStatus: normalizedAssignmentFilter,
           liveStatus: liveProductFilter,
@@ -192,20 +191,6 @@ export default function CompanyProductPage() {
     enabled: canAccessCompaniesWorkspace,
   });
 
-  const assignmentMetricsSnapshotQuery = useQuery({
-    queryKey: ["company-metrics-assignment-snapshot", roleLower, user?.id],
-    queryFn: () =>
-      getData(
-        apiRoutes.associateCompany.getAll,
-        buildCompanyQueryParams({
-          page: 1,
-          limit: 1000,
-          assignmentStatus: "all",
-        })
-      ),
-    enabled: canAccessCompaniesWorkspace,
-  });
-
   const obaolConfig = obaolConfigQuery.data;
   const obaolCompanyId = String(obaolConfig?.companyId || "");
   const obaolCompany = obaolConfig?.company || null;
@@ -268,39 +253,19 @@ export default function CompanyProductPage() {
     return Number(rawLiveProducts || 0) > 0;
   };
 
-  const assignmentFilteredCompanies = useMemo(() => {
-    if (!shouldClientFilterAssignment) return companies;
-    if (normalizedAssignmentFilter === "all") return companies;
-    return companies.filter((company: any) => {
-      const isAssigned = hasAssignment(company);
-      return normalizedAssignmentFilter === "assigned" ? isAssigned : !isAssigned;
-    });
-  }, [shouldClientFilterAssignment, normalizedAssignmentFilter, companies, hasAssignment]);
-
-  const directoryRows = useMemo(() => {
-    if (!shouldClientFilterAssignment) return companies;
-    const start = (directoryPage - 1) * DIRECTORY_PAGE_SIZE;
-    return assignmentFilteredCompanies.slice(start, start + DIRECTORY_PAGE_SIZE);
-  }, [shouldClientFilterAssignment, companies, assignmentFilteredCompanies, directoryPage]);
-
-  const directoryTotalCount = shouldClientFilterAssignment
-    ? assignmentFilteredCompanies.length
-    : getTotalCount(companiesPayload, companies);
-  const directoryCurrentPage = shouldClientFilterAssignment
-    ? directoryPage
-    : Number(
-        companiesPayload?.currentPage ??
-          companiesPayload?.data?.currentPage ??
-          directoryPage
-      );
+  const directoryRows = companies;
+  const directoryTotalCount = getTotalCount(companiesPayload, directoryRows);
+  const directoryCurrentPage = Number(
+    companiesPayload?.currentPage ??
+      companiesPayload?.data?.currentPage ??
+      directoryPage
+  );
   const directoryTotalPages = Math.max(
     Number(
-      shouldClientFilterAssignment
-        ? Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE)
-        : companiesPayload?.totalPages ??
-          companiesPayload?.data?.totalPages ??
-          Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE) ??
-          1
+      companiesPayload?.totalPages ??
+        companiesPayload?.data?.totalPages ??
+        Math.ceil(directoryTotalCount / DIRECTORY_PAGE_SIZE) ??
+        1
     ) || 1,
     1
   );
@@ -371,14 +336,11 @@ export default function CompanyProductPage() {
   const scopedLiveCompaniesCount = getTotalCount(extractPagedPayload(liveCompaniesQuery.data), []);
   const scopedAssignedCompaniesCount = getTotalCount(extractPagedPayload(assignedCompaniesQuery.data), []);
   const scopedUnassignedCompaniesCount = getTotalCount(extractPagedPayload(unassignedCompaniesQuery.data), []);
-  const metricQueries = [totalCompaniesQuery, liveCompaniesQuery, assignmentMetricsSnapshotQuery];
+  const metricQueries = [totalCompaniesQuery, liveCompaniesQuery, assignedCompaniesQuery, unassignedCompaniesQuery];
   const hasMetricsError = metricQueries.some((query) => query.isError);
 
-  const assignmentSnapshotRows = extractList(extractPagedPayload(assignmentMetricsSnapshotQuery.data));
-  const snapshotAssignedCount = assignmentSnapshotRows.filter((row: any) => hasAssignment(row)).length;
-  const snapshotUnassignedCount = assignmentSnapshotRows.length - snapshotAssignedCount;
-  const assignedCount = isAdmin && assignmentSnapshotRows.length > 0 ? snapshotAssignedCount : scopedAssignedCompaniesCount;
-  const unassignedCount = isAdmin && assignmentSnapshotRows.length > 0 ? snapshotUnassignedCount : scopedUnassignedCompaniesCount;
+  const assignedCount = scopedAssignedCompaniesCount;
+  const unassignedCount = scopedUnassignedCompaniesCount;
   const liveCount = Math.min(scopedLiveCompaniesCount, totalCompaniesCount);
   const notLiveCount = Math.max(totalCompaniesCount - liveCount, 0);
   const directoryErrorMessage = (() => {
@@ -393,7 +355,7 @@ export default function CompanyProductPage() {
     queryClient.invalidateQueries({
       predicate: (query) =>
         Array.isArray(query.queryKey) &&
-        ["company-directory", "company-metrics-total", "company-metrics-live", "company-metrics-assigned", "company-metrics-unassigned", "company-metrics-assignment-snapshot"].includes(String(query.queryKey[0] || "")),
+        ["company-directory", "company-metrics-total", "company-metrics-live", "company-metrics-assigned", "company-metrics-unassigned"].includes(String(query.queryKey[0] || "")),
     });
   };
 
@@ -418,50 +380,14 @@ export default function CompanyProductPage() {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
-    const directoryParams = buildCompanyQueryParams({
-      page: shouldClientFilterAssignment ? 1 : directoryPage,
-      limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
-      searchValue: debouncedSearch,
-      assignmentStatus: normalizedAssignmentFilter,
-      liveStatus: liveProductFilter,
-    });
-    console.debug("[companies] directory filters", {
-      baseUrl,
-      roleLower,
-      params: directoryParams,
-      assignmentFilter: normalizedAssignmentFilter,
-      liveProductFilter,
-      totalCount: totalCompaniesCount,
-      liveCount,
-      notLiveCount,
-      listTotalCount: directoryTotalCount,
-      listCount: directoryRows.length,
-    });
-  }, [
-    roleLower,
-    directoryPage,
-    debouncedSearch,
-    normalizedAssignmentFilter,
-    liveProductFilter,
-    totalCompaniesCount,
-    liveCount,
-    notLiveCount,
-    directoryTotalCount,
-    directoryRows.length,
-    shouldClientFilterAssignment,
-    buildCompanyQueryParams,
-  ]);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") return;
     if (!companiesQuery.isError) return;
     const error: any = companiesQuery.error;
     console.error("[companies] directory request failed", {
       status: error?.response?.status || null,
       message: error?.response?.data?.message || error?.message || "Unknown error",
       params: buildCompanyQueryParams({
-        page: shouldClientFilterAssignment ? 1 : directoryPage,
-        limit: shouldClientFilterAssignment ? 1000 : DIRECTORY_PAGE_SIZE,
+        page: directoryPage,
+        limit: DIRECTORY_PAGE_SIZE,
         searchValue: debouncedSearch,
         assignmentStatus: normalizedAssignmentFilter,
         liveStatus: liveProductFilter,
@@ -477,7 +403,6 @@ export default function CompanyProductPage() {
     normalizedAssignmentFilter,
     liveProductFilter,
     roleLower,
-    shouldClientFilterAssignment,
     buildCompanyQueryParams,
   ]);
 
@@ -1056,7 +981,7 @@ export default function CompanyProductPage() {
                     Retry
                   </Button>
                 </div>
-              ) : companies.length === 0 ? (
+              ) : directoryRows.length === 0 ? (
                 <div className="py-24 text-center bg-content1/20 rounded-[2.5rem] border border-dashed border-divider">
                   <LuSearch className="mx-auto text-default-300 mb-4" size={32} />
                   <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">{companyEmptyStateMessage}</p>

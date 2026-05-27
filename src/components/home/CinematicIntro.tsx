@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-const SESSION_KEY = "obaol:cinematic-intro:v1";
-
 export default function CinematicIntro() {
   const [visible, setVisible] = useState(false);
 
@@ -11,13 +9,10 @@ export default function CinematicIntro() {
     if (typeof window === "undefined") return;
 
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const seen = sessionStorage.getItem(SESSION_KEY) === "1";
-
-    if (prefersReduced || seen) return;
+    if (prefersReduced) return;
 
     setVisible(true);
     const t = window.setTimeout(() => {
-      sessionStorage.setItem(SESSION_KEY, "1");
       setVisible(false);
     }, 1600);
 

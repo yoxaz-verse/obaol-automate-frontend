@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import { FaShieldHalved, FaTruckFront, FaEarthAsia, FaGlobe } from "react-icons/fa6";
 import Link from "next/link";
-import Header from "@/components/home/header";
+import HomeLegacyHeader from "@/components/home/HomeLegacyHeader";
 import HeroSection from "@/components/home/herosection";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
+import CinematicIntro from "@/components/home/CinematicIntro";
+import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 
 const intentCards = [
     {
@@ -29,17 +31,18 @@ const intentCards = [
 export default function HomeContent() {
     return (
         <>
-            <Header />
+            <CinematicIntro />
+            <HomeLegacyHeader />
             <HeroSection />
             <section className="relative py-12 md:py-16">
                 <div className="container mx-auto max-w-7xl px-4 md:px-6">
                     <div className="flex flex-col gap-10 md:gap-16">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
                             <div className="lg:col-span-5 space-y-5 md:space-y-6">
-                                <p className="inline-flex items-center gap-2 rounded-full border border-warning-500/20 bg-warning-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 shadow-sm">
+                                <p className={homeTitleStyles.sectionKicker}>
                                     Industry Workspace
                                 </p>
-                                <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground italic">
+                                <h2 className={homeTitleStyles.sectionTitle}>
                                     What This Panel Does
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
@@ -95,7 +98,7 @@ export default function HomeContent() {
                                     key={feature.title}
                                     className="group relative p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md hover:border-warning-500/40 hover:bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-default-200 dark:hover:shadow-none cursor-default"
                                 >
-                                    <h3 className="text-lg md:text-xl font-black tracking-tight text-foreground flex items-center gap-3">
+                                    <h3 className={`${homeTitleStyles.cardTitle} flex items-center gap-3`}>
                                         <div className="w-2 h-4 rounded-full bg-warning-500/30 group-hover:bg-warning-500 transition-colors duration-300" />
                                         {feature.title}
                                     </h3>
@@ -108,10 +111,10 @@ export default function HomeContent() {
                     <div className="mt-20 rounded-[3rem] border border-warning-500/20 bg-gradient-to-b from-content1/60 to-background/40 backdrop-blur-3xl px-6 py-10 md:px-14 md:py-14 shadow-lg shadow-default-200/50 dark:shadow-none relative overflow-hidden group/panel border-b-warning-500/40">
                         <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-warning-500/5 blur-[120px] pointer-events-none group-hover/panel:bg-warning-500/10 transition-colors duration-1000" />
                         <div className="max-w-3xl space-y-4 relative z-10">
-                            <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20 text-[10px] font-black uppercase tracking-[0.3em] text-warning-500 shadow-sm">
+                            <p className={homeTitleStyles.sectionKicker}>
                                 Deal Walkthrough
                             </p>
-                            <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground italic">
+                            <h3 className={homeTitleStyles.sectionTitle}>
                                 Example: Black Pepper export from India to GCC
                             </h3>
                             <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed max-w-xl">
@@ -200,7 +203,7 @@ export default function HomeContent() {
                                         <span className="text-lg font-black leading-none">{String(idx + 1).padStart(2, '0')}</span>
                                     </div>
                                     <div className="flex flex-col gap-1.5 pr-2">
-                                        <h4 className="text-sm md:text-base font-black text-foreground tracking-tight">{step.title}</h4>
+                                        <h4 className={homeTitleStyles.stepTitle}>{step.title}</h4>
                                         <p className="text-xs md:text-sm text-foreground/60 font-medium leading-relaxed group-hover:text-foreground/80 transition-colors">{step.desc}</p>
                                     </div>
                                 </motion.div>
@@ -219,8 +222,8 @@ export default function HomeContent() {
 
                 <div className="container mx-auto max-w-7xl px-4 md:px-6">
                     <div className="max-w-3xl mb-12 md:mb-16 space-y-4">
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground">
-                            Built for <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">Serious Trade.</span>
+                        <h2 className={homeTitleStyles.sectionTitle}>
+                            Built for <span className={homeTitleStyles.sectionTitleAccent}>Serious Trade.</span>
                         </h2>
                         <p className="text-base md:text-xl text-default-500 font-medium leading-relaxed">
                             OBAOL moves trades from conversation to closure with verified counterparties and execution support across every milestone.
@@ -259,7 +262,7 @@ export default function HomeContent() {
                                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl ${feature.color.replace('text-', 'bg-')}/10 ${feature.color} flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500`}>
                                     {feature.icon}
                                 </div>
-                                <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 tracking-tight">{feature.title}</h3>
+                                <h3 className={`${homeTitleStyles.cardTitle} mb-3 md:mb-4`}>{feature.title}</h3>
                                 <p className="text-default-500 text-sm md:text-base leading-relaxed">{feature.desc}</p>
                             </motion.div>
                         ))}
@@ -281,7 +284,7 @@ export default function HomeContent() {
                             >
                                 <div className="relative p-6 md:p-12 rounded-[1.4rem] md:rounded-[2.8rem] bg-white dark:bg-[#0A0A0A] h-full flex flex-col justify-between items-start gap-6 md:gap-12">
                                     <div className="space-y-3 md:space-y-6">
-                                        <h3 className="text-xl md:text-3xl font-black tracking-tight">{card.title}</h3>
+                                        <h3 className={homeTitleStyles.cardTitleLarge}>{card.title}</h3>
                                         <p className="text-sm md:text-lg text-default-500 leading-relaxed font-medium">{card.description}</p>
                                     </div>
 
@@ -310,7 +313,7 @@ export default function HomeContent() {
 
                 <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
                     <div className="max-w-3xl space-y-8">
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
+                        <h2 className={`${homeTitleStyles.sectionTitle} leading-tight md:text-6xl`}>
                             India-first execution <br />
                             <span className="text-orange-500">from India to anywhere.</span>
                         </h2>

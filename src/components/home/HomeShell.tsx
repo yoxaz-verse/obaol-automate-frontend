@@ -4,6 +4,7 @@ import HeroLite from "@/components/home/HeroLite";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import CinematicIntro from "@/components/home/CinematicIntro";
 import DeferredHomeSections from "@/components/home/DeferredHomeSections";
+import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 
 export default function HomeShell() {
   return (
@@ -17,10 +18,10 @@ export default function HomeShell() {
           <div className="flex flex-col gap-10 md:gap-16">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
               <div className="lg:col-span-5 space-y-5 md:space-y-6">
-                <p className="inline-flex items-center gap-2 rounded-full border border-warning-500/20 bg-warning-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-warning-500 shadow-sm">
+                <p className={homeTitleStyles.sectionKicker}>
                   Industry Workspace
                 </p>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground italic">What This Panel Does</h2>
+                <h2 className={homeTitleStyles.sectionTitle}>What This Panel Does</h2>
                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
                   OBAOL is a commodity execution platform and execution ecosystem for agro trade workflows, not a marketplace.
                 </p>
@@ -47,7 +48,7 @@ export default function HomeShell() {
                 "Orders and External Orders",
               ].map((title) => (
                 <article key={title} className="p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md">
-                  <h3 className="text-lg md:text-xl font-black tracking-tight text-foreground">{title}</h3>
+                  <h3 className={homeTitleStyles.cardTitle}>{title}</h3>
                 </article>
               ))}
             </div>

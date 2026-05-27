@@ -362,31 +362,84 @@ const roles: AssociateRoleDefinition[] = [
     relatedRoles: ["importers", "exporters", "freight-forwarders"],
   },
   {
-    slug: "finance-insurance-partners",
-    displayName: "Finance & Insurance Partners",
-    shortDescription: "Provide financial and risk support services for smoother trade execution.",
+    slug: "finance-partners",
+    displayName: "Finance Partners",
+    shortDescription: "Support trade-level funding continuity across active commodity execution flows.",
     longDescription:
-      "Finance and insurance partners can participate in OBAOL Supreme by supporting trade continuity through risk management and financial service alignment.",
-    roleScope: ["Trade risk support", "Finance coordination touchpoints", "Execution continuity services"],
-    supportPoints: ["Risk-aware ecosystem collaboration", "Structured participation in execution lifecycle", "Alignment with trade completion outcomes"],
+      "Finance partners can participate in OBAOL Supreme by enabling trade-level funding support for active executions, including one-off trades and recurring contract cycles.",
+    roleScope: [
+      "Trade-level funding participation",
+      "Contract-cycle funding continuity",
+      "Execution-linked finance coordination",
+    ],
+    supportPoints: [
+      "Structured participation across active trade milestones",
+      "Alignment with procurement-to-settlement execution flow",
+      "Funding continuity support for genuine trade movement",
+    ],
     iconKey: "finance",
     seo: {
-      title: "Finance & Insurance Partners on OBAOL | Associate Role",
+      title: "Finance Partners on OBAOL | Associate Role",
       description:
-        "Finance and insurance service providers can join OBAOL Supreme as associates to support risk-aware commodity trade execution.",
-      keywords: ["trade finance", "commodity insurance", "risk management partners", "trade support services"],
+        "Finance partners can join OBAOL Supreme to support trade-level and contract-cycle commodity funding with execution-linked coordination.",
+      keywords: [
+        "trade finance partners",
+        "commodity funding partners",
+        "contract cycle finance",
+        "trade-level investment support",
+      ],
     },
     faqs: [
       {
-        question: "Can non-trading finance service providers join as associates?",
-        answer: "Yes. OBAOL supports partner roles that improve execution reliability and risk handling.",
+        question: "Can finance partners support individual trades instead of long-term commitments?",
+        answer: "Yes. Finance participation can be aligned to specific active trades as well as recurring contract cycles.",
       },
       {
-        question: "How do finance and insurance partners add value on OBAOL?",
-        answer: "They support resilient execution by enabling risk and continuity support across trade workflows.",
+        question: "How do finance partners contribute on OBAOL?",
+        answer: "They support execution continuity by aligning funding participation to real trade milestones and contract structures.",
       },
     ],
     relatedRoles: ["traders", "importers", "exporters"],
+  },
+  {
+    slug: "insurance-partners",
+    displayName: "Insurance Partners",
+    shortDescription: "Provide risk protection support for resilient commodity trade execution.",
+    longDescription:
+      "Insurance partners can join OBAOL Supreme to strengthen execution continuity by supporting commodity and cargo risk coverage alignment across trade workflows.",
+    roleScope: [
+      "Cargo and commodity risk cover alignment",
+      "Claims-readiness documentation support",
+      "Risk protection continuity across execution stages",
+    ],
+    supportPoints: [
+      "Risk-aware coordination with execution participants",
+      "Support for trade documentation and compliance readiness",
+      "Improved resilience during movement and settlement phases",
+    ],
+    iconKey: "customs",
+    seo: {
+      title: "Insurance Partners on OBAOL | Associate Role",
+      description:
+        "Insurance partners can onboard to OBAOL Supreme to support commodity and cargo risk protection with execution-linked documentation readiness.",
+      keywords: [
+        "commodity insurance partners",
+        "cargo risk coverage",
+        "trade insurance support",
+        "claims readiness in commodity trade",
+      ],
+    },
+    faqs: [
+      {
+        question: "Can insurance providers join without acting as traders?",
+        answer: "Yes. Insurance partners can participate as dedicated risk-protection associates within the execution ecosystem.",
+      },
+      {
+        question: "Where do insurance partners add value in OBAOL workflows?",
+        answer: "They support risk cover alignment and claims-readiness coordination across documentation, movement, and settlement stages.",
+      },
+    ],
+    relatedRoles: ["freight-forwarders", "customs-clearance-agencies", "exporters"],
   },
   {
     slug: "procurement-partners",

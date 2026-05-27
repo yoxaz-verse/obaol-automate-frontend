@@ -2,6 +2,12 @@
 
 export const DEFAULT_STALE_TIME = 45 * 1000;
 export const DASHBOARD_STALE_TIME = 5 * 60 * 1000;
+export const SESSION_STALE_TIME = 30 * 1000;
+export const STATIC_OPTIONS_STALE_TIME = 10 * 60 * 1000;
+
+export const QUERY_KEYS = {
+  session: ["session"] as const,
+};
 
 export const extractPagedPayload = (raw: any) => {
   if (!raw) return {};

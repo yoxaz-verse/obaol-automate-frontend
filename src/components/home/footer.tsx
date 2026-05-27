@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MdEmail, MdPhone } from "react-icons/md";
+import { MdEmail } from "react-icons/md";
 import { FaWhatsapp, FaLinkedin, FaArrowRight } from "react-icons/fa";
 import { FiArrowUp } from "react-icons/fi";
+import { BUSINESS_IDENTITY } from "@/utils/businessIdentity";
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -62,15 +63,27 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Email Us</span>
-                  <a href="mailto:info@support.obaol.com" className="text-foreground font-medium hover:text-orange-500 transition-colors">
-                    info@support.obaol.com
+                  <a href={`mailto:${BUSINESS_IDENTITY.email}`} className="text-foreground font-medium hover:text-orange-500 transition-colors">
+                    {BUSINESS_IDENTITY.email}
                   </a>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:bg-orange-500/10 group-hover:border-orange-500/20 transition-all duration-300">
+                  <span className="text-xl text-orange-500">✓</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Verified Identity</span>
+                  <Link href="/trust" className="text-foreground font-medium hover:text-orange-500 transition-colors">
+                    View trust profile
+                  </Link>
                 </div>
               </div>
 
               <div className="flex items-center gap-6">
                 <a
-                  href="https://wa.me/919019351483"
+                  href={BUSINESS_IDENTITY.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-green-500/10 hover:border-green-500/20 hover:scale-110 transition-all duration-300 text-green-500"
@@ -78,7 +91,7 @@ export default function Footer() {
                   <FaWhatsapp className="text-xl" />
                 </a>
                 <a
-                  href="https://www.linkedin.com/company/obaol"
+                  href={BUSINESS_IDENTITY.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-blue-500/10 hover:border-blue-500/20 hover:scale-110 transition-all duration-300 text-blue-500"
@@ -119,6 +132,7 @@ export default function Footer() {
                 {[
                   { name: "FAQs", href: "/faq" },
                   { name: "Export Resources", href: "/export-resources" },
+                  { name: "Trade Finance", href: "/trade-finance" },
                   { name: "Global Marketplace", href: "/product" },
                   { name: "Sign In", href: "/auth" },
                 ].map((link) => (
@@ -140,6 +154,7 @@ export default function Footer() {
                   { name: "Privacy Policy", href: "/privacy-policy" },
                   { name: "Terms & Conditions", href: "/terms-and-conditions" },
                   { name: "Disclaimer", href: "/disclaimer" },
+                  { name: "Trust & Verification", href: "/trust" },
                 ].map((link) => (
                   <li key={link.name}>
                     <Link href={link.href} className="text-default-500 hover:text-foreground hover:translate-x-1 transition-all inline-flex items-center gap-2 group">

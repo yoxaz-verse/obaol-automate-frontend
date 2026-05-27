@@ -137,6 +137,7 @@ export const useDashboardData = ({
   const topProducts = extractList(topProductsQuery.data);
 
   return {
+    hasPrimarySummary,
     dashboardSummaryQuery,
     enquiriesQuery,
     ordersQuery,

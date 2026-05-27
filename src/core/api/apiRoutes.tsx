@@ -132,7 +132,9 @@ export const letterheadPresetRoutes = createCRUDRoutes(BASE_PATHS.LETTERHEAD_PRE
 export const documentRuleRoutes = createCRUDRoutes(BASE_PATHS.DOCUMENT_RULE);
 export const flowRuleRoutes = createCRUDRoutes(BASE_PATHS.FLOW_RULE);
 export const demoRoutes = createCRUDRoutes(BASE_PATHS.DEMO);
-export const warehouseRoutes = createCRUDRoutes(BASE_PATHS.WAREHOUSES);
+export const warehouseRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.WAREHOUSES), {
+  directory: `${BASE_PATHS.WAREHOUSES}/directory`,
+});
 
 export const pincodeEntryRoutes = addCustomRoutes(
   createCRUDRoutes(BASE_PATHS.PINCODE_ENTRY),
@@ -211,9 +213,11 @@ export const projectRoutes = addCustomRoutes(
 export const activityRoutes = createCRUDRoutes(BASE_PATHS.ACTIVITY);
 
 export const associateRoutes = createCRUDRoutes(BASE_PATHS.ASSOCIATE);
-export const associateCompanyRoutes = createCRUDRoutes(
+export const associateCompanyRoutes = addCustomRoutes(createCRUDRoutes(
   BASE_PATHS.ASSOCIATE_COMPANY
-);
+), {
+  labsDirectory: `${BASE_PATHS.ASSOCIATE_COMPANY}/labs-directory`,
+});
 export const companyTypeRoutes = createCRUDRoutes(BASE_PATHS.COMPANY_TYPE);
 export const designationRoutes = createCRUDRoutes(BASE_PATHS.DESIGNATION);
 export const enquiryProcessStatusRoutes = createCRUDRoutes(

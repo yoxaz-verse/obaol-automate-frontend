@@ -17,6 +17,7 @@ import type { WarehouseMapItem } from "@/components/Warehouse/WarehouseRentMap";
 
 const WarehouseRentMap = dynamic(() => import("@/components/Warehouse/WarehouseRentMap"), {
   ssr: false,
+  loading: () => <div className="h-[520px] w-full animate-pulse rounded-xl bg-default-100" />,
 });
 
 type Warehouse = {
@@ -113,12 +114,17 @@ export default function WarehouseRentPage() {
     isLoading: isLoadingWarehouses,
     isError: isWarehousesError,
     error: warehousesError,
+    refetch: refetchWarehouses,
   } = useQuery({
-    queryKey: ["warehouse-rentals"],
+    queryKey: ["warehouse-rentals-directory", roleLower, user?.id],
     queryFn: async () => {
-      const res: any = await getData(apiRoutes.warehouses.list, { scope: "available" });
+      const res: any = await getData(apiRoutes.warehouses.directory, { page: 1, limit: 1000 });
       return toArrayData(res);
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const { data: companiesData } = useQuery({
@@ -235,6 +241,16 @@ export default function WarehouseRentPage() {
     warehousesErrorStatus === 403
       ? "Access denied for your role."
       : toErrorMessage(warehousesError, "Unable to load warehouse contact listings right now.");
+  const [isWarehouseLoadSlow, setIsWarehouseLoadSlow] = useState(false);
+
+  useEffect(() => {
+    if (!isLoadingWarehouses) {
+      setIsWarehouseLoadSlow(false);
+      return;
+    }
+    const t = window.setTimeout(() => setIsWarehouseLoadSlow(true), 3500);
+    return () => window.clearTimeout(t);
+  }, [isLoadingWarehouses]);
 
   return (
     <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground">
@@ -366,6 +382,14 @@ export default function WarehouseRentPage() {
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
                     <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
+                    {isWarehouseLoadSlow ? (
+                      <div className="mt-4 flex flex-col items-center gap-3">
+                        <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
+                        <Button size="sm" color="warning" variant="flat" onPress={() => refetchWarehouses()}>
+                          Retry
+                        </Button>
+                      </div>
+                    ) : null}
                   </motion.div>
                 ) : isWarehousesError ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">

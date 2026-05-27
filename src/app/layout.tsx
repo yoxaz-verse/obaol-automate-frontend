@@ -3,13 +3,11 @@ import type { Metadata } from "next";
 import { Providers } from "./provider";
 import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import Script from "next/script";
-import TranslationEngine from "@/components/dashboard/TranslationEngine";
 import TopLoader from "@/components/ui/TopLoader";
-import SoundInitializer from "@/components/ui/SoundInitializer";
 import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
 import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
 import { Suspense } from "react";
+import { BUSINESS_IDENTITY, ORGANIZATION_SAME_AS } from "@/utils/businessIdentity";
 
 // If loading a variable font, you don't need to specify the font weight
 const font = IBM_Plex_Sans({
@@ -179,16 +177,12 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
-        <AuthProvider>
-          {/* <VerificationProvider> */}
-          <Providers>
-            <SoundInitializer />
+        <Providers>
+          <AuthProvider>
             <TopLoader />
-            <TranslationEngine />
             {children}
-          </Providers>
-          {/* </VerificationProvider> */}
-        </AuthProvider>
+          </AuthProvider>
+        </Providers>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -214,10 +208,27 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "OBAOL",
+              name: BUSINESS_IDENTITY.legalName,
               url: BASE_URL,
               logo: `${BASE_URL}/logo.png`,
               description: DEFAULT_DESCRIPTION,
+              foundingDate: BUSINESS_IDENTITY.foundingDate,
+              email: BUSINESS_IDENTITY.email,
+              telephone: BUSINESS_IDENTITY.phoneE164,
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  contactType: "customer support",
+                  email: BUSINESS_IDENTITY.email,
+                  telephone: BUSINESS_IDENTITY.phoneE164,
+                  areaServed: "IN",
+                  availableLanguage: ["en"],
+                },
+              ],
+              address: {
+                "@type": "PostalAddress",
+                ...BUSINESS_IDENTITY.address,
+              },
               areaServed: [
                 { "@type": "Country", name: "India" },
                 { "@type": "Country", name: "United Arab Emirates" },
@@ -226,7 +237,7 @@ export default function RootLayout({
                 { "@type": "Country", name: "United States" },
               ],
               serviceArea: `Primary market: ${PRIMARY_MARKET}. Expanding globally.`,
-              sameAs: [],
+              sameAs: ORGANIZATION_SAME_AS,
             }),
           }}
         />

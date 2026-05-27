@@ -145,17 +145,20 @@ export default function QualityLabsPage() {
     isLoading: isLoadingLabs,
     isError: isLabsError,
     error: labsError,
+    refetch: refetchLabs,
   } = useQuery({
     queryKey: ["quality-labs-directory", roleLower],
     queryFn: async () => {
-      const res: any = await getData(apiRoutes.associateCompany.getAll, {
+      const res: any = await getData(apiRoutes.associateCompany.labsDirectory, {
         page: 1,
         limit: 1000,
-        sort: "name:asc",
       });
       return toArrayData<AssociateCompany>(res);
     },
-    refetchOnMount: "always",
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
   const labs = useMemo(() => {
     const rows = Array.isArray(labsData) ? labsData : [];
@@ -281,6 +284,17 @@ export default function QualityLabsPage() {
   };
 
   const labsErrorMessage = toErrorMessage(labsError, "Unable to load quality labs directory right now.");
+  const [isLabsLoadSlow, setIsLabsLoadSlow] = useState(false);
+
+  useEffect(() => {
+    if (!isLoadingLabs) {
+      setIsLabsLoadSlow(false);
+      return;
+    }
+    const t = window.setTimeout(() => setIsLabsLoadSlow(true), 3500);
+    return () => window.clearTimeout(t);
+  }, [isLoadingLabs]);
+
   return (
     <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground">
       <div className="max-w-[1400px] mx-auto space-y-8">
@@ -379,6 +393,14 @@ export default function QualityLabsPage() {
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
                     <FiLoader className="animate-spin text-success-500 mb-4" size={24} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Labs...</span>
+                    {isLabsLoadSlow ? (
+                      <div className="mt-4 flex flex-col items-center gap-3">
+                        <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
+                        <Button size="sm" color="success" variant="flat" onPress={() => refetchLabs()}>
+                          Retry
+                        </Button>
+                      </div>
+                    ) : null}
                   </motion.div>
                 ) : isLabsError ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">

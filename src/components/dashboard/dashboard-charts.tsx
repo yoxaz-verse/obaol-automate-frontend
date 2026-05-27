@@ -1,7 +1,16 @@
 import React from "react";
-import { MultiTypeChart } from "./Charts/multitype-chart";
-import { GrowthTypeChart } from "./Charts/growth-type-chart";
+import dynamic from "next/dynamic";
 import { Card } from "@nextui-org/react";
+
+const GrowthTypeChart = dynamic(
+  () => import("./Charts/growth-type-chart").then((m) => m.GrowthTypeChart),
+  { ssr: false, loading: () => <div className="h-[320px] animate-pulse rounded-lg bg-default-100" /> }
+);
+
+const MultiTypeChart = dynamic(
+  () => import("./Charts/multitype-chart").then((m) => m.MultiTypeChart),
+  { ssr: false, loading: () => <div className="h-[320px] animate-pulse rounded-lg bg-default-100" /> }
+);
 
 const DashboardCharts = () => {
   return (

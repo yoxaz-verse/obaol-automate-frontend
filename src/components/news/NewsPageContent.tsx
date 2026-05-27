@@ -2,8 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Input, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
-import NewsMap from "@/components/news/NewsMap";
+import dynamic from "next/dynamic";
 import { newsFeeds } from "@/data/newsFeeds";
+
+const NewsMap = dynamic(() => import("@/components/news/NewsMap"), {
+  ssr: false,
+  loading: () => <div className="h-[520px] rounded-xl border border-default-200/70 bg-content1/95 animate-pulse" />,
+});
 
 type NewsItem = {
   title: string;

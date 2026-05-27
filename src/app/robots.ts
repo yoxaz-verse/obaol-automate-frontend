@@ -27,6 +27,7 @@ export default function robots(): MetadataRoute.Robots {
           "/privacy-policy",
           "/terms-and-conditions",
           "/disclaimer",
+          "/trust",
         ],
         disallow: [
           "/auth",

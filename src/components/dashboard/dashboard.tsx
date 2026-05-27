@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -73,8 +73,11 @@ const Dashboard: NextPage = () => {
 
   const [companyLookup, setCompanyLookup] = useState("");
   const [associateLookup, setAssociateLookup] = useState("");
+  const [debouncedCompanyLookup, setDebouncedCompanyLookup] = useState("");
+  const [debouncedAssociateLookup, setDebouncedAssociateLookup] = useState("");
 
   const {
+    hasPrimarySummary,
     dashboardSummaryQuery,
     enquiriesQuery,
     ordersQuery,
@@ -100,6 +103,16 @@ const Dashboard: NextPage = () => {
     isOperatorUser,
   });
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedCompanyLookup(companyLookup.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [companyLookup]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedAssociateLookup(associateLookup.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [associateLookup]);
+
   const companyFunctionDashboard = useCompanyFunctionDashboard({
     companyId: associateCompanyId,
     isAdmin: false,
@@ -107,17 +120,17 @@ const Dashboard: NextPage = () => {
 
   const companyDirectoryQuery = useQuery({
     queryKey: ["operatorCompanyDirectory", userId],
-    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 200, sortBy: "name", sortOrder: "asc" }),
-    enabled: !!userId && isOperatorUser,
-    staleTime: DEFAULT_STALE_TIME,
+    queryFn: () => getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 80, sortBy: "name", sortOrder: "asc" }),
+    enabled: !!userId && isOperatorUser && hasPrimarySummary && debouncedCompanyLookup.length >= 2,
+    staleTime: DEFAULT_STALE_TIME * 2,
     refetchOnWindowFocus: false,
   });
 
   const associateDirectoryQuery = useQuery({
     queryKey: ["operatorAssociateDirectory", userId],
-    queryFn: () => getData(apiRoutes.associate.getAll, { page: 1, limit: 200, sortBy: "name", sortOrder: "asc" }),
-    enabled: !!userId && isOperatorUser,
-    staleTime: DEFAULT_STALE_TIME,
+    queryFn: () => getData(apiRoutes.associate.getAll, { page: 1, limit: 80, sortBy: "name", sortOrder: "asc" }),
+    enabled: !!userId && isOperatorUser && hasPrimarySummary && debouncedAssociateLookup.length >= 2,
+    staleTime: DEFAULT_STALE_TIME * 2,
     refetchOnWindowFocus: false,
   });
 
@@ -330,13 +343,7 @@ const Dashboard: NextPage = () => {
     ? associateMetrics.associateName || user?.email
     : user?.name || user?.email || "User";
 
-  const executiveLoading = dashboardSummaryQuery.isLoading || (isAdmin
-    ? systemMetricsQuery.isLoading
-    : isAssociate
-      ? associateMetricsQuery.isLoading
-      : isOperatorUser
-        ? operatorMetricsQuery.isLoading
-        : enquiriesQuery.isLoading);
+  const executiveLoading = dashboardSummaryQuery.isLoading;
 
   const executiveError = isAdmin
     ? systemMetricsQuery.isError

@@ -12,6 +12,11 @@ import BrandedLoader from "@/components/ui/BrandedLoader";
 import { postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { ACTION_ROUTES, loadShortcuts, ShortcutAction } from "@/utils/shortcutConfig";
+import dynamic from "next/dynamic";
+
+const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
+  ssr: false,
+});
 
 // export const routeRoles: { [key: string]: string[] } = {
 //   "/dashboard": [
@@ -174,12 +179,13 @@ export default function DashboardLayout({
   return (
     <section className="w-full min-w-0 h-full flex overflow-hidden db-bg relative lg:h-screen">
       <PrivateRoute allowedRoles={allowedRoles}>
+        <DashboardEnhancements />
         {!isOnboardingLocked && !isApprovalPending && (
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} isOnboardingLocked={isOnboardingLocked} />
         )}
 
-        <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${!isOnboardingLocked && !isApprovalPending ? (isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]") : "md:ml-0"}`}>
-          <div className="w-full lg:h-screen overflow-hidden flex flex-col relative">
+        <div className={`flex-1 min-w-0 min-h-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${!isOnboardingLocked && !isApprovalPending ? (isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]") : "md:ml-0"}`}>
+          <div className="w-full lg:h-screen min-h-0 overflow-hidden flex flex-col relative">
             {/* Check if user data is available before rendering TopBar */}
             {user && !isApprovalPending && (
               <TopBar
@@ -190,7 +196,7 @@ export default function DashboardLayout({
             )}
 
             <div
-              className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden px-1 md:px-0"
+              className="flex-1 min-h-0 w-full min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain px-1 md:px-0"
               style={{
                 paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))"
               }}

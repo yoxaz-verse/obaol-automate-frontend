@@ -1,4 +1,4 @@
-import HomeContent from "@/components/home/HomeContent";
+import HomeShell from "@/components/home/HomeShell";
 import { buildMetadata, buildWebPageJsonLd, buildWebSiteJsonLd } from "@/utils/seo";
 
 export const metadata = buildMetadata({
@@ -37,7 +37,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
 
-      <HomeContent />
+      <HomeShell />
     </main>
   );
 }

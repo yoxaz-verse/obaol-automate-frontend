@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     return (
         <div
             data-sidebar
-            className={`fixed left-0 top-0 h-full z-50 transition-all duration-500 ease-in-out db-shell border-r db-border-subtle hidden md:flex flex-col backdrop-blur-[22px] ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
+            className={`fixed left-0 top-0 h-full min-h-0 z-50 transition-all duration-500 ease-in-out db-shell border-r db-border-subtle hidden md:flex flex-col backdrop-blur-[22px] ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
         >
             {/* Structural Accents */}
             <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-warning-500/10 to-transparent opacity-30" />
@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             </div>
 
             {/* Navigation Array */}
-            <div className="flex-1 px-4 space-y-6 overflow-y-auto no-scrollbar pb-10">
+            <div className="flex-1 min-h-0 px-4 space-y-6 overflow-y-auto overscroll-contain no-scrollbar pb-10">
                 {isOnboardingLocked && !isCollapsed && (
                     <div className="mx-2 mb-2 rounded-xl border border-warning-500/20 bg-warning-500/10 px-3 py-2">
                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">

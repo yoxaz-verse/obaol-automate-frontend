@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -31,6 +31,12 @@ type Props = {
   showBookNow?: boolean;
 };
 
+type RenderWarehouse = WarehouseMapItem & {
+  lat: number;
+  lng: number;
+  color: string;
+};
+
 const CATEGORY_COLOR: Record<string, string> = {
   GENERAL: "#f59e0b",
   COLD_STORAGE: "#06b6d4",
@@ -38,10 +44,14 @@ const CATEGORY_COLOR: Record<string, string> = {
   AGRO: "#22c55e",
 };
 
+const iconCache = new Map<string, L.DivIcon>();
+
 const mkWarehouseIcon = (color: string) =>
-  L.divIcon({
-    className: "warehouse-node-icon",
-    html: `
+  iconCache.get(color) ||
+  (() => {
+    const icon = L.divIcon({
+      className: "warehouse-node-icon",
+      html: `
       <span style="
         display:flex;
         align-items:center;
@@ -59,9 +69,12 @@ const mkWarehouseIcon = (color: string) =>
         </svg>
       </span>
     `,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    });
+    iconCache.set(color, icon);
+    return icon;
+  })();
 
 function MapAutoCenter({ point }: { point: SearchPoint | null }) {
   const map = useMap();
@@ -72,14 +85,91 @@ function MapAutoCenter({ point }: { point: SearchPoint | null }) {
   return null;
 }
 
+const WarehouseMarkers = React.memo(function WarehouseMarkers({
+  warehouses,
+  onContact,
+  showBookNow,
+}: {
+  warehouses: RenderWarehouse[];
+  onContact: (warehouse: WarehouseMapItem) => void;
+  showBookNow: boolean;
+}) {
+  return (
+    <>
+      {warehouses.map((warehouse) => (
+        <Marker key={warehouse._id} position={[warehouse.lat, warehouse.lng]} icon={mkWarehouseIcon(warehouse.color)}>
+          <Popup className="tactical-popup">
+            <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
+              <div className="space-y-1">
+                <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
+                  W_Node_{warehouse._id.slice(-4)}
+                </div>
+                <div className="text-sm font-black">{warehouse.name}</div>
+              </div>
+              <div className="text-[11px] font-semibold text-slate-700">
+                {warehouse.contactPhone || "Contact unavailable"}
+              </div>
+              {warehouse.contactPhoneSecondary ? (
+                <div className="text-[10px] text-slate-500">Alt: {warehouse.contactPhoneSecondary}</div>
+              ) : null}
+              <Button
+                color="warning"
+                variant="solid"
+                size="sm"
+                fullWidth
+                isDisabled={!warehouse.contactPhone}
+                onPress={() => onContact(warehouse)}
+                className="font-black uppercase tracking-wider text-[10px]"
+              >
+                Contact
+              </Button>
+              {showBookNow ? (
+                <Button
+                  color="default"
+                  variant="bordered"
+                  size="sm"
+                  fullWidth
+                  isDisabled
+                  className="font-black uppercase tracking-wider text-[10px]"
+                >
+                  Book Now (Coming Soon)
+                </Button>
+              ) : null}
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
+});
+
 export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom, onContact, showBookNow = false }: Props) {
+  const renderStart = React.useRef(typeof performance !== "undefined" ? performance.now() : 0);
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-  const safeWarehouses = warehouses.filter((warehouse) => {
-    const lat = Number(warehouse.location?.latitude);
-    const lng = Number(warehouse.location?.longitude);
-    return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
-  });
+  const safeWarehouses = useMemo<RenderWarehouse[]>(
+    () =>
+      warehouses
+        .map((warehouse) => {
+          const lat = Number(warehouse.location?.latitude);
+          const lng = Number(warehouse.location?.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            return null;
+          }
+
+          const color = CATEGORY_COLOR[String(warehouse.category || "GENERAL")] || CATEGORY_COLOR.GENERAL;
+          return { ...warehouse, lat, lng, color };
+        })
+        .filter((warehouse): warehouse is RenderWarehouse => Boolean(warehouse)),
+    [warehouses]
+  );
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    if (safeWarehouses.length < 50) return;
+    const elapsed = Math.round(performance.now() - renderStart.current);
+    console.info(`[perf][WarehouseRentMap] render=${elapsed}ms markers=${safeWarehouses.length}`);
+  }, [safeWarehouses.length]);
 
   return (
     <>
@@ -96,55 +186,7 @@ export default function WarehouseRentMap({ warehouses, searchPoint, center, zoom
           url={tileUrl}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {safeWarehouses.map((warehouse) => {
-          const lat = Number(warehouse.location?.latitude);
-          const lng = Number(warehouse.location?.longitude);
-          const color = CATEGORY_COLOR[String(warehouse.category || "GENERAL")] || CATEGORY_COLOR.GENERAL;
-
-          return (
-            <Marker key={warehouse._id} position={[lat, lng]} icon={mkWarehouseIcon(color)}>
-              <Popup className="tactical-popup">
-                <div className="min-w-[220px] p-2 space-y-3 rounded-lg border bg-white border-slate-200 text-slate-900">
-                  <div className="space-y-1">
-                    <div className="text-[9px] font-black uppercase tracking-widest text-orange-500 font-mono">
-                      W_Node_{warehouse._id.slice(-4)}
-                    </div>
-                    <div className="text-sm font-black">{warehouse.name}</div>
-                  </div>
-                  <div className="text-[11px] font-semibold text-slate-700">
-                    {warehouse.contactPhone || "Contact unavailable"}
-                  </div>
-                  {warehouse.contactPhoneSecondary ? (
-                    <div className="text-[10px] text-slate-500">Alt: {warehouse.contactPhoneSecondary}</div>
-                  ) : null}
-                  <Button
-                    color="warning"
-                    variant="solid"
-                    size="sm"
-                    fullWidth
-                    isDisabled={!warehouse.contactPhone}
-                    onPress={() => onContact(warehouse)}
-                    className="font-black uppercase tracking-wider text-[10px]"
-                  >
-                    Contact
-                  </Button>
-                  {showBookNow ? (
-                    <Button
-                      color="default"
-                      variant="bordered"
-                      size="sm"
-                      fullWidth
-                      isDisabled
-                      className="font-black uppercase tracking-wider text-[10px]"
-                    >
-                      Book Now (Coming Soon)
-                    </Button>
-                  ) : null}
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+        <WarehouseMarkers warehouses={safeWarehouses} onContact={onContact} showBookNow={showBookNow} />
       </MapContainer>
       <style jsx global>{`
         .warehouse-rent-map .leaflet-control-attribution {

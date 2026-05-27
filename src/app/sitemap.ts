@@ -23,9 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/obaol`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/product`, priority: 0.8, changeFrequency: "daily", lastModified },
     { url: `${baseUrl}/faq`, priority: 0.7, changeFrequency: "monthly", lastModified },
+    { url: `${baseUrl}/trade-finance`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/privacy-policy`, priority: 0.5, changeFrequency: "yearly", lastModified },
     { url: `${baseUrl}/terms-and-conditions`, priority: 0.5, changeFrequency: "yearly", lastModified },
     { url: `${baseUrl}/disclaimer`, priority: 0.4, changeFrequency: "yearly", lastModified },
+    { url: `${baseUrl}/trust`, priority: 0.6, changeFrequency: "monthly", lastModified },
   ];
 
   const associateRoleEntries: MetadataRoute.Sitemap = associateRoleSlugs.map((slug) => ({

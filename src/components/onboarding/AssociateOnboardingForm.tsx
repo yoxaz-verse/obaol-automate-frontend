@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useContext, useEffect, useRef } from "react";
+import React, { useMemo, useState, useContext, useEffect, useRef, useCallback } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -23,7 +23,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { showToastMessage } from "@/utils/utils";
 import AuthLayout from "@/components/Auth/AuthLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import PhoneField from "@/components/form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
@@ -31,6 +31,9 @@ import { useSoundEffect } from "@/context/SoundContext";
 import AuthContext from "@/context/AuthContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
+import { useOnboardingDraftPersistence } from "@/hooks/useOnboardingDraftPersistence";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { fetchRegisterOptions, resolveApiRoot } from "@/utils/registerOptions";
 
 type StepKey = 1 | 2 | 3 | 4;
 const EMPTY_LIST: any[] = [];
@@ -59,6 +62,7 @@ const decodeJwt = (token: string): any => {
 
 export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "auth" | "onboarding" }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const AutocompleteAny = Autocomplete as any;
   const { user, refreshUser } = useContext(AuthContext);
@@ -79,6 +83,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "available" | "exists" | "error">("idle");
   const [emailCheckMessage, setEmailCheckMessage] = useState("");
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const debouncedEmail = useDebouncedValue(formData.email, 350);
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   const [optionsDebug, setOptionsDebug] = useState<{
     resolvedEndpoint: string;
@@ -137,55 +142,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     referralCode: "",
   });
 
-  const draftLoadedRef = useRef(false);
-  const DRAFT_KEY = `onboarding_draft_associate_${user?.id || "anonymous"}`;
+  const hydrateDraft = useCallback((parsed: any) => {
+    if (parsed?.formData) setFormData((prev) => ({ ...prev, ...parsed.formData }));
+    if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
+    if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
+  }, []);
 
-  useEffect(() => {
-    if (!isOnboarding) return;
-    if (typeof window === "undefined") return;
-    if (!user?.id) return;
-    try {
-      const raw = window.localStorage.getItem(DRAFT_KEY);
-      if (!raw) {
-        draftLoadedRef.current = true;
-        return;
-      }
-      const parsed = JSON.parse(raw);
-      if (parsed?.formData) setFormData((prev) => ({ ...prev, ...parsed.formData }));
-      if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
-      if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
-    } catch {
-      // ignore draft load errors
-    } finally {
-      draftLoadedRef.current = true;
-    }
-  }, [isOnboarding, user?.id]);
-
-  useEffect(() => {
-    if (!isOnboarding) return;
-    if (!draftLoadedRef.current) return;
-    if (typeof window === "undefined") return;
-    if (!user?.id) return;
-    const timer = setTimeout(() => {
-      const payload = {
-        formData,
-        currentStep,
-        completedStep,
-        updatedAt: Date.now(),
-      };
-      try {
-        window.localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-        window.dispatchEvent(
-          new CustomEvent("onboardingDraftUpdated", {
-            detail: { role: "associate", completedStep, currentStep },
-          })
-        );
-      } catch {
-        // ignore draft save errors
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [formData, currentStep, completedStep, isOnboarding, user?.id]);
+  useOnboardingDraftPersistence({
+    enabled: isOnboarding,
+    userId: user?.id,
+    roleKey: "associate",
+    formData,
+    currentStep,
+    completedStep,
+    onLoad: hydrateDraft,
+  });
 
   React.useEffect(() => {
     if (!isOnboarding || !user) return;
@@ -206,123 +177,42 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const { data: registerOptions, isLoading: optionsLoading, isError: optionsError, refetch: refetchOptions } = useQuery({
     queryKey: ["register-options"],
     queryFn: async () => {
-      const envBaseRaw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "";
-      const envBase = String(envBaseRaw).trim().replace(/\/+$/, "");
-      const normalizedEnvRoot = envBase
-        .replace(/\/auth$/i, "")
-        .replace(/\/login$/i, "")
-        .replace(/\/auth\/.*$/i, "")
-        .replace(/\/login\/.*$/i, "");
-
-      const baseCandidates = Array.from(new Set([
-        normalizedEnvRoot,
-        envBase,
-        "/api/v1/web",
-        "http://localhost:5001/api/v1/web",
-        "http://localhost:5000/api/v1/web",
-      ].filter(Boolean)));
-
-      let lastError: any = null;
-      let fallbackOutput: any = {
-        existingCompanies: [],
-        companyTypes: [],
-        states: [],
-        districts: [],
-        divisions: [],
-        pincodeEntries: [],
-        countries: [],
-        companyFunctions: [],
-        companySubFunctions: [],
-      };
-
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
-      const normalizedApiRoot = String(apiRoot).trim().replace(/\/+$/, "");
-      for (const base of baseCandidates) {
-        try {
-          const routeRoots = Array.from(new Set([
-            `${base}/auth`,
-            `${base}/login`,
-          ]));
-
-          for (const routeRoot of routeRoots) {
-            try {
-              const res = await axios.get(`${routeRoot}/register/options`, {
-                timeout: 8000,
-                withCredentials: false,
-              });
-              const payload = res.data?.data || res.data?.data?.data || {};
-              const output: any = {
-                existingCompanies: Array.isArray(payload?.existingCompanies) ? payload.existingCompanies : [],
-                companyTypes: Array.isArray(payload?.companyTypes) ? payload.companyTypes : [],
-                states: Array.isArray(payload?.states) ? payload.states : [],
-                districts: Array.isArray(payload?.districts) ? payload.districts : [],
-                divisions: Array.isArray(payload?.divisions) ? payload.divisions : [],
-                pincodeEntries: Array.isArray(payload?.pincodeEntries) ? payload.pincodeEntries : [],
-                countries: Array.isArray(payload?.countries) ? payload.countries : [],
-                companyFunctions: Array.isArray(payload?.companyFunctions) ? payload.companyFunctions : [],
-                companySubFunctions: Array.isArray(payload?.companySubFunctions) ? payload.companySubFunctions : [],
-              };
-
-              if (!output.existingCompanies.length || !output.countries.length) {
-                const [companiesRes, countriesRes] = await Promise.allSettled([
-                  axios.get(`${routeRoot}/register/companies`, { timeout: 8000, withCredentials: false }),
-                  axios.get(`${routeRoot}/register/countries`, { timeout: 8000, withCredentials: false }),
-                ]);
-
-                if (companiesRes.status === "fulfilled") {
-                  const companiesPayload = companiesRes.value?.data?.data || companiesRes.value?.data?.data?.data || [];
-                  if (Array.isArray(companiesPayload)) {
-                    output.existingCompanies = companiesPayload;
-                  }
-                }
-
-                if (countriesRes.status === "fulfilled") {
-                  const countriesPayload = countriesRes.value?.data?.data || countriesRes.value?.data?.data?.data || [];
-                  if (Array.isArray(countriesPayload)) {
-                    output.countries = countriesPayload;
-                  }
-                }
-              }
-
-              fallbackOutput = output;
-              setOptionsDebug({
-                resolvedEndpoint: `${routeRoot}/register/options`,
-                counts: {
-                  designations: 0,
-                  existingCompanies: output.existingCompanies.length,
-                  companyTypes: output.companyTypes.length,
-                  countries: output.countries.length,
-                },
-                lastError: "",
-              });
-              if (output.existingCompanies.length || output.companyTypes.length) {
-                return output;
-              }
-            } catch (nestedErr) {
-              lastError = nestedErr;
-            }
-          }
-        } catch (err) {
-          lastError = err;
-        }
-      }
-      if (fallbackOutput) {
-        setOptionsDebug((prev) => ({
-          ...prev,
-          counts: {
-            designations: 0,
-            existingCompanies: Array.isArray(fallbackOutput.existingCompanies) ? fallbackOutput.existingCompanies.length : 0,
-            companyTypes: Array.isArray(fallbackOutput.companyTypes) ? fallbackOutput.companyTypes.length : 0,
-            countries: Array.isArray(fallbackOutput.countries) ? fallbackOutput.countries.length : 0,
-          },
-          lastError: lastError?.message || "No options endpoint returned data.",
-        }));
-        return fallbackOutput;
-      }
-      throw lastError || new Error("Unable to load registration options");
+      const output = await fetchRegisterOptions();
+      setOptionsDebug({
+        resolvedEndpoint: output.resolvedEndpoint,
+        counts: {
+          designations: 0,
+          existingCompanies: output.existingCompanies.length,
+          companyTypes: output.companyTypes.length,
+          countries: output.countries.length,
+        },
+        lastError: "",
+      });
+      return output;
     },
+    staleTime: 15 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: 1,
   });
+
+  useEffect(() => {
+    if (!isOnboarding || currentStep !== 1) return;
+    queryClient.prefetchQuery({
+      queryKey: ["register-options"],
+      queryFn: fetchRegisterOptions,
+      staleTime: 15 * 60 * 1000,
+    });
+  }, [currentStep, isOnboarding, queryClient]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    const start = performance.now();
+    return () => {
+      const elapsed = Math.round(performance.now() - start);
+      console.info(`[perf][AssociateOnboardingForm] step=${currentStep} transition=${elapsed}ms`);
+    };
+  }, [currentStep]);
 
   React.useEffect(() => {
     if (isOnboarding) return;
@@ -330,7 +220,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     loadGoogleGsi()
       .then(() => setGoogleReady(true))
       .catch(() => setGoogleRenderError("Google sign-up is temporarily unavailable."));
-  }, [googleClientId]);
+  }, [googleClientId, isOnboarding]);
 
   React.useEffect(() => {
     if (isOnboarding) return;
@@ -429,7 +319,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     }
     setIsPincodesLoading(true);
     try {
-      const apiRoot = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1/web";
+      const apiRoot = resolveApiRoot();
       const res = await axios.get(`${apiRoot}/auth/register/pincodes?divisionId=${divisionId}`);
       setDynamicPincodes(res.data?.data || []);
     } catch (err) {
@@ -453,7 +343,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     } else if (!formData.companyDivision) {
       setDynamicPincodes([]);
     }
-  }, [formData.associateDivision]);
+  }, [formData.associateDivision, formData.companyDivision]);
   const selectedCompanyLabel =
     existingCompanies.find((item: any) => String(item?._id) === String(formData.associateCompanyId))?.name || "Not selected";
   const selectedCompanyTypeLabel =
@@ -489,8 +379,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const selectedAssociateDistrictName =
     districts.find((d: any) => String(d?._id || "") === String(formData.associateDistrict || ""))?.name || "";
 
-  const normalizeName = (value: any) => String(value || "").trim().toLowerCase();
-  const getDistrictStateId = (item: any) =>
+  const normalizeName = useCallback((value: any) => String(value || "").trim().toLowerCase(), []);
+  const getDistrictStateId = useCallback((item: any) =>
     String(
       item?.state ||
         item?.stateId ||
@@ -498,10 +388,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         item?.state?._id ||
         item?.state?.id ||
         ""
-    );
-  const getDistrictStateName = (item: any) =>
-    normalizeName(item?.stateName || item?.state_name || item?.state?.name || "");
-  const getDivisionDistrictId = (item: any) =>
+    ), []);
+  const getDistrictStateName = useCallback((item: any) =>
+    normalizeName(item?.stateName || item?.state_name || item?.state?.name || ""), [normalizeName]);
+  const getDivisionDistrictId = useCallback((item: any) =>
     String(
       item?.district ||
         item?.districtId ||
@@ -509,9 +399,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         item?.district?._id ||
         item?.district?.id ||
         ""
-    );
-  const getDivisionDistrictName = (item: any) =>
-    normalizeName(item?.districtName || item?.district_name || item?.district?.name || "");
+    ), []);
+  const getDivisionDistrictName = useCallback((item: any) =>
+    normalizeName(item?.districtName || item?.district_name || item?.district?.name || ""), [normalizeName]);
 
   const filteredCompanyDistricts = useMemo(() => {
     const stateId = String(formData.companyState || "");
@@ -521,7 +411,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       const matchName = stateName && getDistrictStateName(item) === stateName;
       return matchId || matchName;
     });
-  }, [districts, formData.companyState, selectedCompanyStateName]);
+  }, [districts, formData.companyState, getDistrictStateId, getDistrictStateName, normalizeName, selectedCompanyStateName]);
 
   const filteredCompanyDivisions = useMemo(() => {
     const districtId = String(formData.companyDistrict || "");
@@ -531,7 +421,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       const matchName = districtName && getDivisionDistrictName(item) === districtName;
       return matchId || matchName;
     });
-  }, [divisions, formData.companyDistrict, selectedCompanyDistrictName]);
+  }, [divisions, formData.companyDistrict, getDivisionDistrictId, getDivisionDistrictName, normalizeName, selectedCompanyDistrictName]);
 
   const filteredAssociateDistricts = useMemo(() => {
     const stateId = String(formData.associateState || "");
@@ -541,7 +431,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       const matchName = stateName && getDistrictStateName(item) === stateName;
       return matchId || matchName;
     });
-  }, [districts, formData.associateState, selectedAssociateStateName]);
+  }, [districts, formData.associateState, getDistrictStateId, getDistrictStateName, normalizeName, selectedAssociateStateName]);
 
   const filteredAssociateDivisions = useMemo(() => {
     const districtId = String(formData.associateDistrict || "");
@@ -551,7 +441,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       const matchName = districtName && getDivisionDistrictName(item) === districtName;
       return matchId || matchName;
     });
-  }, [divisions, formData.associateDistrict, selectedAssociateDistrictName]);
+  }, [divisions, formData.associateDistrict, getDivisionDistrictId, getDivisionDistrictName, normalizeName, selectedAssociateDistrictName]);
 
   const filteredPincodes = dynamicPincodes;
   const groupedCompanyFunctions = useMemo(() => {
@@ -857,17 +747,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [isSubmittingSuccess, setIsSubmittingSuccess] = useState(false);
 
   const handleEmailVerify = async () => {
+    const email = String(debouncedEmail || "").trim();
     if (isOnboarding) {
       setEmailCheckStatus("available");
       setEmailCheckMessage("Email linked to your account.");
       return;
     }
-    if (!formData.email.trim()) {
+    if (!email) {
       setEmailCheckStatus("error");
       setEmailCheckMessage("Please enter an email first.");
       return;
     }
-    if (!emailRegex.test(formData.email)) {
+    if (!emailRegex.test(email)) {
       setEmailCheckStatus("error");
       setEmailCheckMessage("Invalid email format.");
       return;
@@ -876,7 +767,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     setEmailCheckStatus("idle");
     setEmailCheckMessage("");
     try {
-      const res = await getData("/auth/email-status", { email: formData.email.trim() });
+      const res = await getData("/auth/email-status", { email });
       if (res.data?.exists) {
         setEmailCheckStatus("exists");
         setEmailCheckMessage("This email is already registered — please sign in.");

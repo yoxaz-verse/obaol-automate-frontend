@@ -30,6 +30,41 @@ const isLocalOrigin = (value) => {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
+  async headers() {
+    const isProd = process.env.NODE_ENV === "production";
+    const connectSrc = isProd
+      ? "connect-src 'self' https: wss:"
+      : "connect-src 'self' https: http://localhost:5001 http://127.0.0.1:5001 ws: wss:";
+
+    const csp = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      connectSrc,
+      "frame-src 'self' https:",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Content-Security-Policy", value: csp },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     const isProd = process.env.NODE_ENV === "production";
     const configuredOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
@@ -42,6 +77,15 @@ const nextConfig = {
       {
         source: "/api/:path*",
         destination: `${backendOrigin}/api/:path*`,
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/roles/associate/finance-insurance-partners",
+        destination: "/roles/associate/finance-partners",
+        permanent: true,
       },
     ];
   },

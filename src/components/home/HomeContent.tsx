@@ -28,14 +28,66 @@ const intentCards = [
     },
 ];
 
+const panelFeatures = [
+    {
+        title: "Verified Ecosystem",
+        desc: "Approval checks, role‑based access, and verified participants.",
+    },
+    {
+        title: "Enquiry Hub",
+        desc: "Manage enquiries and keep every function in sync.",
+    },
+    {
+        title: "Execution Panels",
+        desc: "Role‑based execution queues per function/person in real time.",
+    },
+    {
+        title: "Product & Marketplace",
+        desc: "My Product, Global Catalog, and Marketplace discovery in one view.",
+    },
+    {
+        title: "Samples & Documents",
+        desc: "Sample Requests and compliance documents stay tied to every order.",
+    },
+    {
+        title: "Importer Service",
+        desc: "Imports workflow covering customs, ports, and distribution steps.",
+    },
+    {
+        title: "Warehouse Rent Management",
+        desc: "Warehouse booking services with capacity planning and reservations.",
+    },
+    {
+        title: "Orders & External Orders",
+        desc: "Track internal and external orders with live status updates.",
+    },
+] as const;
+
 export default function HomeContent() {
+    const scrollToDealWalkthrough = () => {
+        if (typeof window === "undefined") {
+            return;
+        }
+
+        const target = document.getElementById("deal-walkthrough");
+        if (!target) {
+            return;
+        }
+
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start",
+        });
+    };
+
     return (
         <>
             <CinematicIntro />
             <HomeLegacyHeader />
             <HeroSection />
             <section className="relative py-12 md:py-16">
-                <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="flex flex-col gap-10 md:gap-16">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
                             <div className="lg:col-span-5 space-y-5 md:space-y-6">
@@ -43,7 +95,7 @@ export default function HomeContent() {
                                     Industry Workspace
                                 </p>
                                 <h2 className={homeTitleStyles.sectionTitle}>
-                                    What This Panel Does
+                                    What We Do
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
                                     OBAOL is a commodity execution platform — the execution ecosystem for agro trade workflows, not a marketplace.
@@ -60,55 +112,26 @@ export default function HomeContent() {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                            {[
-                                {
-                                    title: "Verified Ecosystem",
-                                    desc: "Approval checks, role‑based access, and verified participants.",
-                                },
-                                {
-                                    title: "Enquiry Hub",
-                                    desc: "Manage enquiries and keep every function in sync.",
-                                },
-                                {
-                                    title: "Execution Panels",
-                                    desc: "Role‑based execution queues per function/person in real time.",
-                                },
-                                {
-                                    title: "Product & Marketplace",
-                                    desc: "My Product, Global Catalog, and Marketplace discovery in one view.",
-                                },
-                                {
-                                    title: "Samples & Documents",
-                                    desc: "Sample Requests and compliance documents stay tied to every order.",
-                                },
-                                {
-                                    title: "Importer Service",
-                                    desc: "Imports workflow covering customs, ports, and distribution steps.",
-                                },
-                                {
-                                    title: "Warehouse Rent Management",
-                                    desc: "Warehouse booking services with capacity planning and reservations.",
-                                },
-                                {
-                                    title: "Orders & External Orders",
-                                    desc: "Track internal and external orders with live status updates.",
-                                },
-                            ].map((feature) => (
-                                <div
+                            {panelFeatures.map((feature) => (
+                                <button
                                     key={feature.title}
-                                    className="group relative p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md hover:border-warning-500/40 hover:bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-default-200 dark:hover:shadow-none cursor-default"
+                                    type="button"
+                                    onClick={scrollToDealWalkthrough}
+                                    aria-label={`Go to deal walkthrough from ${feature.title}`}
+                                    className="group relative p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md hover:border-warning-500/50 hover:bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-warning-500/10 active:scale-[0.99] cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                 >
                                     <h3 className={`${homeTitleStyles.cardTitle} flex items-center gap-3`}>
                                         <div className="w-2 h-4 rounded-full bg-warning-500/30 group-hover:bg-warning-500 transition-colors duration-300" />
                                         {feature.title}
                                     </h3>
                                     <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed mt-3 ml-5 group-hover:text-foreground/80 transition-colors">{feature.desc}</p>
-                                </div>
+                                </button>
                             ))}
                         </div>
+
                     </div>
 
-                    <div className="mt-20 rounded-[3rem] border border-warning-500/20 bg-gradient-to-b from-content1/60 to-background/40 backdrop-blur-3xl px-6 py-10 md:px-14 md:py-14 shadow-lg shadow-default-200/50 dark:shadow-none relative overflow-hidden group/panel border-b-warning-500/40">
+                    <div id="deal-walkthrough" className="mt-20 scroll-mt-28 md:scroll-mt-36 rounded-[3rem] border border-warning-500/20 bg-gradient-to-b from-content1/60 to-background/40 backdrop-blur-3xl px-6 py-10 md:px-14 md:py-14 shadow-lg shadow-default-200/50 dark:shadow-none relative overflow-hidden group/panel border-b-warning-500/40">
                         <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-warning-500/5 blur-[120px] pointer-events-none group-hover/panel:bg-warning-500/10 transition-colors duration-1000" />
                         <div className="max-w-3xl space-y-4 relative z-10">
                             <p className={homeTitleStyles.sectionKicker}>
@@ -212,7 +235,7 @@ export default function HomeContent() {
                     </div>
                 </div>
             </section>
-            <section className="container mx-auto max-w-7xl px-4 md:px-6 mb-10">
+            <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 mb-10">
                 <IndiaFirstNote />
             </section>
 
@@ -220,7 +243,7 @@ export default function HomeContent() {
             <section className="relative py-16 md:py-24 bg-background overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-default-200 to-transparent opacity-50" />
 
-                <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="max-w-3xl mb-12 md:mb-16 space-y-4">
                         <h2 className={homeTitleStyles.sectionTitle}>
                             Built for <span className={homeTitleStyles.sectionTitleAccent}>Serious Trade.</span>
@@ -272,7 +295,7 @@ export default function HomeContent() {
 
             {/* ── INTENT CARDS ── */}
             <section className="py-10 md:py-24 bg-default-50/50 border-y border-default-100">
-                <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                         {intentCards.map((card, i) => (
                             <motion.article
@@ -311,7 +334,7 @@ export default function HomeContent() {
             <section className="relative py-32 overflow-hidden bg-black text-white">
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
 
-                <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 relative z-10">
                     <div className="max-w-3xl space-y-8">
                         <h2 className={`${homeTitleStyles.sectionTitle} leading-tight md:text-6xl`}>
                             India-first execution <br />

@@ -5,10 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { SoundProvider } from "@/context/SoundContext";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-
-import { ReactLenis } from "lenis/react";
 
 const ReactQueryDevtools = dynamic(
   () => import("@tanstack/react-query-devtools").then((m) => m.ReactQueryDevtools),
@@ -31,36 +28,23 @@ export const queryClient = new QueryClient({
   },
 });
 
-function LenisRouteScope({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname() || "";
-  const isDashboardRoute = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
-
-  if (isDashboardRoute) {
-    return <>{children}</>;
-  }
-
-  return <ReactLenis root>{children}</ReactLenis>;
-}
-
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <LenisRouteScope>
-      <QueryClientProvider client={queryClient}>
-        <HeroUIProvider>
-          <NextThemesProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem={true}
-          >
-            <SoundProvider>
-              <CurrencyProvider>{children}</CurrencyProvider>
-            </SoundProvider>
-          </NextThemesProvider>
-        </HeroUIProvider>
-        {process.env.NODE_ENV === "development" && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
-      </QueryClientProvider>
-    </LenisRouteScope>
+    <QueryClientProvider client={queryClient}>
+      <HeroUIProvider>
+        <NextThemesProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+        >
+          <SoundProvider>
+            <CurrencyProvider>{children}</CurrencyProvider>
+          </SoundProvider>
+        </NextThemesProvider>
+      </HeroUIProvider>
+      {process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </QueryClientProvider>
   );
 }

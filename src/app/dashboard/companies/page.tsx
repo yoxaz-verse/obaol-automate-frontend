@@ -86,7 +86,6 @@ export default function CompanyProductPage() {
     liveStatus?: "all" | "live" | "not_live";
   }) => {
     const params: Record<string, any> = {
-      _ts: Date.now(),
       ...(typeof page === "number" ? { page } : {}),
       ...(typeof limit === "number" ? { limit } : {}),
       ...(includeSort ? { sort: "name:asc" } : {}),

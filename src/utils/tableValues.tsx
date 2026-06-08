@@ -2080,6 +2080,15 @@ export const initialTableConfig: Record<
       inTable: false,
     },
     {
+      label: "IPM Quality",
+      type: "boolean",
+      filterType: "select",
+      key: "isIpmQuality",
+      inForm: true,
+      inEdit: true,
+      inTable: false,
+    },
+    {
       label: "Organic Certification Body",
       type: "select",
       key: "organicCertificationBody",

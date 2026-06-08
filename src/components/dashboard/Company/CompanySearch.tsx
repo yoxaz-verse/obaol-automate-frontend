@@ -1,11 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Avatar, Spinner } from "@heroui/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
-import InlineLoader from "@/components/ui/InlineLoader";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // 🔎 same icon you had
 const SearchIcon = ({
@@ -62,6 +61,7 @@ export default function CompanySearch({
   itemsFilter,
   onSearchChange,
   isDisabled,
+  queryParams,
 }: {
   onSelect?: (id: string | null) => void;
   onSelectCompany?: (company: Company | null) => void;
@@ -69,31 +69,50 @@ export default function CompanySearch({
   itemsFilter?: (companies: Company[]) => Company[]; // allow filtering (e.g. onlyWithProducts)
   onSearchChange?: (value: string) => void;
   isDisabled?: boolean;
+  queryParams?: Record<string, any>;
 }) {
   const [inputValue, setInputValue] = useState("");
+  const [debouncedInputValue, setDebouncedInputValue] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(
     defaultSelected ?? null
   );
   const userSelectedKeyRef = useRef<string | null>(null);
 
-  const { data: companyData, isLoading } = useQuery({
-    queryKey: ["companies"],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { page: 1, limit: 500 }),
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedInputValue(inputValue.trim());
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+  const querySearch = debouncedInputValue;
+
+  const requestParams = {
+    page: 1,
+    limit: 50,
+    view: "picker",
+    ...(queryParams || {}),
+    ...(querySearch ? { search: querySearch } : {}),
+  };
+
+  const { data: companyData, isLoading, isFetching } = useQuery({
+    queryKey: ["companies", requestParams],
+    queryFn: () => getData(associateCompanyRoutes.getAll, requestParams),
   });
 
-  const rawCompanies = Array.isArray(companyData?.data?.data?.data)
-    ? companyData?.data?.data?.data
-    : Array.isArray(companyData?.data?.data?.data?.data)
-      ? companyData?.data?.data?.data?.data
-      : Array.isArray(companyData?.data?.data)
-        ? companyData?.data?.data
-        : Array.isArray(companyData?.data)
-          ? companyData?.data
-          : [];
-  let companies: Company[] = rawCompanies || [];
-  if (itemsFilter) {
-    companies = itemsFilter(companies);
-  }
+  const companies = useMemo(() => {
+    const rawCompanies = Array.isArray(companyData?.data?.data?.data)
+      ? companyData?.data?.data?.data
+      : Array.isArray(companyData?.data?.data?.data?.data)
+        ? companyData?.data?.data?.data?.data
+        : Array.isArray(companyData?.data?.data)
+          ? companyData?.data?.data
+          : Array.isArray(companyData?.data)
+            ? companyData?.data
+            : [];
+    const nextCompanies: Company[] = rawCompanies || [];
+    return itemsFilter ? itemsFilter(nextCompanies) : nextCompanies;
+  }, [companyData, itemsFilter]);
 
   useEffect(() => {
     if (defaultSelected === undefined) return;
@@ -110,130 +129,126 @@ export default function CompanySearch({
       setInputValue(match.name || "");
       if (onSelectCompany) onSelectCompany(match);
     }
-  }, [defaultSelected]);
-
-  if (isLoading) {
-    return (
-      <div className="px-1 py-2">
-        <InlineLoader message="Loading companies" />
-      </div>
-    );
-  }
+  }, [companies, defaultSelected, onSelectCompany]);
 
   const AutocompleteAny = Autocomplete as any;
+  const isBusy = isLoading || isFetching;
 
   return (
-    <AutocompleteAny
-      aria-label="Select a company"
-      items={companies}
-      maxListboxHeight={400}
-      itemHeight={60}
-      placeholder="Search by company name"
-      variant="bordered"
-      radius="full"
-      selectedKey={selectedKey || undefined}
-      isClearable
-      isDisabled={isDisabled}
-      className="text-warning-400 w-full max-w-md mb-6"
-      classNames={{
-        base: "max-w-full",
-        listboxWrapper: "max-h-[320px]",
-        selectorButton: "text-warning-500",
-      }}
-      startContent={
-        <SearchIcon className="text-default-400" size={20} strokeWidth={2.5} />
-      }
-      inputProps={{
-        classNames: {
-          input: "ml-1",
-          inputWrapper: "h-[48px]",
-        },
-      }}
-      inputValue={inputValue}
-      onInputChange={(value: string) => {
-        const nextValue = String(value || "");
-        const trimmed = nextValue.trim();
-        setInputValue(value);
-        if (onSearchChange) onSearchChange(value);
-
-        // If the user clears the input completely, reset the selection.
-        if (!trimmed) {
-          setSelectedKey(null);
-          userSelectedKeyRef.current = null;
-          if (onSelect) onSelect(null);
-          if (onSelectCompany) onSelectCompany(null);
-          return;
+    <div className="w-full max-w-md mb-6">
+      <AutocompleteAny
+        aria-label="Select a company"
+        items={companies}
+        maxListboxHeight={400}
+        itemHeight={60}
+        placeholder={isBusy ? "Loading company options..." : "Search by company name"}
+        variant="bordered"
+        radius="full"
+        selectedKey={selectedKey || undefined}
+        isClearable
+        isDisabled={isDisabled || (isLoading && companies.length === 0)}
+        className="text-warning-400 w-full"
+        classNames={{
+          base: "max-w-full",
+          listboxWrapper: "max-h-[320px]",
+          selectorButton: "text-warning-500",
+        }}
+        startContent={
+          <SearchIcon className="text-default-400" size={20} strokeWidth={2.5} />
         }
+        endContent={isBusy ? <Spinner {...({ size: "sm", color: "warning" } as any)} /> : null}
+        inputProps={{
+          classNames: {
+            input: "ml-1",
+            inputWrapper: "h-[48px]",
+          },
+        }}
+        inputValue={inputValue}
+        onInputChange={(value: string) => {
+          const nextValue = String(value || "");
+          const trimmed = nextValue.trim();
+          setInputValue(value);
+          if (onSearchChange) onSearchChange(value);
 
-        // If currently selected name doesn't match the input, clear the key.
-        // This ensures a new selection MUST be selected from the list.
-        if (selectedKey) {
-          const selected = companies.find((c) => String(c._id) === String(selectedKey));
-          if (selected && trimmed.toLowerCase() !== (selected.name || "").toLowerCase()) {
+          if (!trimmed) {
             setSelectedKey(null);
             userSelectedKeyRef.current = null;
             if (onSelect) onSelect(null);
             if (onSelectCompany) onSelectCompany(null);
+            return;
           }
-        }
-      }}
-      onClear={() => {
-        setInputValue("");
-        setSelectedKey(null);
-        userSelectedKeyRef.current = null;
-        if (onSearchChange) onSearchChange("");
-        if (onSelect) onSelect(null);
-        if (onSelectCompany) onSelectCompany(null);
-      }}
-      onSelectionChange={(key: any) => {
-        if (!key) {
-           setSelectedKey(null);
-           userSelectedKeyRef.current = null;
-           if (onSelect) onSelect(null);
-           if (onSelectCompany) onSelectCompany(null);
-           return;
-        }
 
-        const nextKey = String(key);
-        setSelectedKey(nextKey);
-        userSelectedKeyRef.current = nextKey;
-        
-        const match = companies.find((c) => String(c._id) === nextKey);
-        if (match) {
-          setInputValue(match.name || "");
-          if (onSearchChange) onSearchChange(match.name || "");
-          if (onSelectCompany) onSelectCompany(match);
-        }
-        if (onSelect) onSelect(nextKey);
-      }}
-      popoverProps={{
-        offset: 10,
-        classNames: {
-          base: "rounded-large",
-          content:
-            "p-1 flex flex-col gap-2 border-small border-default-100 bg-background",
-        },
-      }}
-      allowsCustomValue={true}
-    >
-      {(item: any) => (
-        <AutocompleteItem
-          key={item._id}
-          textValue={item.name}
-          className="flex items-center gap-2 py-2"
-        >
-          <div className="flex items-center gap-2 py-2">
-            <Avatar
-              className="flex-shrink-0"
-              size="sm"
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                item.name
-              )}&background=random`}
-            />
-            <div className="text-small">{item.name}</div>
-          </div>
-        </AutocompleteItem>
-      )}
-    </AutocompleteAny>
+          if (selectedKey) {
+            const selected = companies.find((c) => String(c._id) === String(selectedKey));
+            if (selected && trimmed.toLowerCase() !== (selected.name || "").toLowerCase()) {
+              setSelectedKey(null);
+              userSelectedKeyRef.current = null;
+              if (onSelect) onSelect(null);
+              if (onSelectCompany) onSelectCompany(null);
+            }
+          }
+        }}
+        onClear={() => {
+          setInputValue("");
+          setSelectedKey(null);
+          userSelectedKeyRef.current = null;
+          if (onSearchChange) onSearchChange("");
+          if (onSelect) onSelect(null);
+          if (onSelectCompany) onSelectCompany(null);
+        }}
+        onSelectionChange={(key: any) => {
+          if (!key) {
+             setSelectedKey(null);
+             userSelectedKeyRef.current = null;
+             if (onSelect) onSelect(null);
+             if (onSelectCompany) onSelectCompany(null);
+             return;
+          }
+
+          const nextKey = String(key);
+          setSelectedKey(nextKey);
+          userSelectedKeyRef.current = nextKey;
+
+          const match = companies.find((c) => String(c._id) === nextKey);
+          if (match) {
+            setInputValue(match.name || "");
+            if (onSearchChange) onSearchChange(match.name || "");
+            if (onSelectCompany) onSelectCompany(match);
+          }
+          if (onSelect) onSelect(nextKey);
+        }}
+        popoverProps={{
+          offset: 10,
+          classNames: {
+            base: "rounded-large",
+            content:
+              "p-1 flex flex-col gap-2 border-small border-default-100 bg-background",
+          },
+        }}
+        allowsCustomValue={true}
+      >
+        {(item: any) => (
+          <AutocompleteItem
+            key={item._id}
+            textValue={item.name}
+            className="flex items-center gap-2 py-2"
+          >
+            <div className="flex items-center gap-2 py-2">
+              <Avatar
+                className="flex-shrink-0"
+                size="sm"
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  item.name
+                )}&background=random`}
+              />
+              <div className="text-small">{item.name}</div>
+            </div>
+          </AutocompleteItem>
+        )}
+      </AutocompleteAny>
+      <div className="mt-2 px-2 text-[11px] text-default-400">
+        {isBusy ? "Updating company options..." : `${companies.length} company option${companies.length === 1 ? "" : "s"} available`}
+      </div>
+    </div>
   );
 }

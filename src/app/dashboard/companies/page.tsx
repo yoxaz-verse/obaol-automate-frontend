@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
-import { extractCount, extractList, extractPagedPayload } from "@/core/data/queryUtils";
+import { DASHBOARD_STALE_TIME, extractCount, extractList, extractPagedPayload, normalizeQueryKey } from "@/core/data/queryUtils";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { showToastMessage } from "@/utils/utils";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
@@ -427,6 +427,13 @@ export default function CompanyProductPage() {
     enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId),
   });
 
+  const selectedCompanyStatsQuery = useQuery({
+    queryKey: normalizeQueryKey("company-detail-stats", { selectedCompanyId }),
+    queryFn: () => getData(`/api/v1/web/associate-companies/${selectedCompanyId}/stats`),
+    enabled: canAccessCompaniesWorkspace && Boolean(selectedCompanyId),
+    staleTime: DASHBOARD_STALE_TIME,
+  });
+
   const operatorsQuery = useQuery({
     queryKey: ["admin-operator-list-for-company-assignment"],
     queryFn: () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000, sort: "name:asc" }),
@@ -487,6 +494,7 @@ export default function CompanyProductPage() {
   });
 
   const selectedCompany = selectedCompanyQuery.data?.data?.data || null;
+  const selectedCompanyStatsMeta = selectedCompanyStatsQuery.data?.data?.meta?.company || null;
   const selectedCompanyAssignedOperatorId = toIdValue(selectedCompany?.assignedOperator);
   const currentUserId = String(user?.id || "");
   const canManageSelectedCompanyInterests =
@@ -504,6 +512,17 @@ export default function CompanyProductPage() {
   const selectedCompanyBanner = toText(selectedCompany?.banner, "");
   const selectedCompanyLogo = toText(selectedCompany?.logo, "");
   const selectedCompanyAssignedOperatorName = toName(selectedCompany?.assignedOperator, "Unassigned");
+  const selectedCompanyJoinedOnValue = selectedCompany?.createdAt || selectedCompanyStatsMeta?.createdAt || null;
+  const selectedCompanyLastLiveAtValue = selectedCompanyStatsMeta?.lastLiveAt || null;
+  const selectedCompanyJoinedOn = selectedCompanyJoinedOnValue
+    ? dayjs(selectedCompanyJoinedOnValue).format("DD MMM YYYY")
+    : "Not available";
+  const selectedCompanyLastLiveAt = selectedCompanyLastLiveAtValue
+    ? dayjs(selectedCompanyLastLiveAtValue).format("DD MMM YYYY, hh:mm A")
+    : selectedCompanyStatsQuery.isLoading
+      ? "Syncing live activity..."
+      : "Not live yet";
+  const selectedCompanyLiveProductCount = Number(selectedCompanyStatsMeta?.liveProductCount || 0);
   const associates = useMemo(
     () => extractList(selectedCompanyAssociatesQuery.data?.data),
     [selectedCompanyAssociatesQuery.data]
@@ -906,7 +925,17 @@ export default function CompanyProductPage() {
         <div className="rounded-2xl border border-divider bg-content1/40 backdrop-blur-xl p-4 md:p-5 space-y-4">
           {isAdmin ? (
             <div className="space-y-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Assignment Filter</p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Assignment Filter</p>
+                {companiesQuery.isFetching ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-warning-500/20 bg-warning-500/10 px-3 py-1">
+                    <Spinner size="sm" color="warning" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">
+                      Refreshing directory
+                    </span>
+                  </div>
+                ) : null}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {[
                   { key: "all", label: "All" },
@@ -920,6 +949,7 @@ export default function CompanyProductPage() {
                     variant={assignmentFilter === item.key ? "solid" : "flat"}
                     color={assignmentFilter === item.key ? "primary" : "default"}
                     className="font-black uppercase tracking-wider text-[10px]"
+                    isDisabled={companiesQuery.isFetching}
                     onPress={() => {
                       setAssignmentFilter(item.key as "all" | "assigned" | "unassigned");
                       setDirectoryPage(1);
@@ -932,7 +962,14 @@ export default function CompanyProductPage() {
             </div>
           ) : null}
           <div className="space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Live Product Filter</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Live Product Filter</p>
+              {companiesQuery.isFetching ? (
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500/80">
+                  Applying filters...
+                </p>
+              ) : null}
+            </div>
             <div className="flex flex-wrap gap-2">
               {[
                 { key: "all", label: "All" },
@@ -946,6 +983,7 @@ export default function CompanyProductPage() {
                   variant={liveProductFilter === item.key ? "solid" : "flat"}
                   color={liveProductFilter === item.key ? "secondary" : "default"}
                   className="font-black uppercase tracking-wider text-[10px]"
+                  isDisabled={companiesQuery.isFetching}
                   onPress={() => {
                     setLiveProductFilter(item.key as "all" | "live" | "not_live");
                     setDirectoryPage(1);
@@ -986,7 +1024,8 @@ export default function CompanyProductPage() {
                   <p className="text-default-500 text-sm font-black uppercase tracking-widest opacity-60">{companyEmptyStateMessage}</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="relative">
+                  <div className={`space-y-6 transition-opacity duration-200 ${companiesQuery.isFetching ? "opacity-45 pointer-events-none select-none" : ""}`}>
                   <div className="flex items-center gap-4 px-2">
                     <LuUsers className="text-warning-500/50" size={14} />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">
@@ -1010,7 +1049,10 @@ export default function CompanyProductPage() {
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: (idx % 20) * 0.03 }}
-                          onClick={() => setSelectedCompanyId(company?._id || null)}
+                          onClick={() => {
+                            if (companiesQuery.isFetching) return;
+                            setSelectedCompanyId(company?._id || null);
+                          }}
                           className="group relative text-left flex flex-col gap-6 rounded-[2.5rem] border border-divider bg-content1/30 p-6 hover:border-warning-500/40 hover:bg-content1 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-warning-500/[0.05] backdrop-blur-xl"
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -1095,6 +1137,20 @@ export default function CompanyProductPage() {
                       </Button>
                     </div>
                   </div>
+                </div>
+                  {companiesQuery.isFetching ? (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2.5rem] bg-background/40 backdrop-blur-[2px]">
+                      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-warning-500/20 bg-content1/90 px-6 py-5 shadow-2xl">
+                        <div className="w-10 h-10 border-2 border-warning-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(245,158,11,0.15)]" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-600">
+                          Updating company directory
+                        </p>
+                        <p className="text-[10px] font-bold text-default-500 text-center">
+                          Keeping current results visible while the new filter loads.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -1200,6 +1256,24 @@ export default function CompanyProductPage() {
                         <div className="space-y-2">
                           <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Assigned Operator</p>
                           <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyAssignedOperatorName}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Joined On</p>
+                          <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyJoinedOn}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Last Live Date</p>
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              color={selectedCompanyStatsQuery.isLoading ? "warning" : selectedCompanyLiveProductCount > 0 ? "success" : "default"}
+                              className="text-[8px] font-black uppercase tracking-wider"
+                            >
+                              {selectedCompanyStatsQuery.isLoading ? "Syncing" : `${selectedCompanyLiveProductCount} Live`}
+                            </Chip>
+                          </div>
+                          <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyLastLiveAt}</p>
                         </div>
                         <div className="space-y-2">
                           <p className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] opacity-60">Mission Profile</p>

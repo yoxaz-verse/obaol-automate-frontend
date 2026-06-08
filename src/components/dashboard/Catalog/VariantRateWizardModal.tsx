@@ -188,6 +188,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         ...prev,
         isNatural: false,
         isOrganic: false,
+        isIpmQuality: false,
         isOrganicCertified: false,
         organicCertificationBody: "",
         organicCertificationBodyOther: "",
@@ -213,6 +214,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           ...prev,
           isNatural: Boolean(row?.isNatural),
           isOrganic: Boolean(row?.isOrganic),
+          isIpmQuality: Boolean(row?.isIpmQuality),
           isOrganicCertified: Boolean(row?.isOrganicCertified),
           organicCertificationBody: String(row?.organicCertificationBody || ""),
           organicCertificationBodyOther: String(row?.organicCertificationBodyOther || ""),
@@ -249,22 +251,23 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         }));
       } catch {
         setFormData((prev) => ({
-        ...prev,
-        isNatural: false,
-        isOrganic: false,
-        isOrganicCertified: false,
-        organicCertificationBody: "",
-        organicCertificationBodyOther: "",
-        organicCertificateNumber: "",
-        organicCertificateValidFrom: "",
-        organicCertificateValidTo: "",
-        organicCertifiedQuantity: "",
-        organicCertifiedQuantityUnit: "KG",
-        organicCertificationScope: "NPOP",
-        organicCertificateDocumentUrl: "",
-        isGiTagged: false,
-        giName: "",
-        giCertificateNumber: "",
+          ...prev,
+          isNatural: false,
+          isOrganic: false,
+          isIpmQuality: false,
+          isOrganicCertified: false,
+          organicCertificationBody: "",
+          organicCertificationBodyOther: "",
+          organicCertificateNumber: "",
+          organicCertificateValidFrom: "",
+          organicCertificateValidTo: "",
+          organicCertifiedQuantity: "",
+          organicCertifiedQuantityUnit: "KG",
+          organicCertificationScope: "NPOP",
+          organicCertificateDocumentUrl: "",
+          isGiTagged: false,
+          giName: "",
+          giCertificateNumber: "",
           giDocumentUrl: "",
         }));
       }
@@ -614,6 +617,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   };
   const isNatural = Boolean(formData.isNatural);
   const isOrganic = Boolean(formData.isOrganic);
+  const isIpmQuality = Boolean(formData.isIpmQuality);
   const isGiTagged = Boolean(formData.isGiTagged);
   const isConventional = !(isNatural || isOrganic || isGiTagged);
   const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
@@ -685,6 +689,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const normalizeClassificationPayload = () => ({
     isNatural: isNatural,
     isOrganic: isOrganic,
+    isIpmQuality: isIpmQuality,
     isOrganicCertified: isOrganic,
     organicCertificationBody: isOrganic ? String(formData.organicCertificationBody || "").trim() : "",
     organicCertificationBodyOther: isOrganic ? String(formData.organicCertificationBodyOther || "").trim() : "",
@@ -861,7 +866,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <div className="mb-3">
                         <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">Product Type & GI Signal</p>
                         <p className="text-[11px] text-default-500 mt-1">
-                          Natural and Organic are type signals. GI Tag is an additional independent signal and can be combined.
+                          Natural and Organic are type signals. IPM Quality and GI Tag are additional independent signals and can be combined.
                         </p>
                       </div>
 
@@ -871,7 +876,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3">
                             <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">Natural</span>
                               <Switch isSelected={isNatural} onValueChange={(v) => setValue("isNatural", v)} color="warning" />
@@ -879,6 +884,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">Organic</span>
                               <Switch isSelected={isOrganic} onValueChange={(v) => setValue("isOrganic", v)} color="warning" />
+                            </div>
+                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">IPM Quality</span>
+                              <Switch isSelected={isIpmQuality} onValueChange={(v) => setValue("isIpmQuality", v)} color="warning" />
                             </div>
                             <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
                               <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
@@ -902,11 +911,16 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                 Organic
                               </span>
                             )}
-                          {isGiTagged && (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
-                              GI Tag
-                            </span>
-                          )}
+                            {isIpmQuality && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
+                                IPM Quality
+                              </span>
+                            )}
+                            {isGiTagged && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
+                                GI Tag
+                              </span>
+                            )}
                           </div>
 
                           {isOrganic && (
@@ -1189,6 +1203,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             {isOrganic && (
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
                                 Organic
+                              </span>
+                            )}
+                            {isIpmQuality && (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
+                                IPM Quality
                               </span>
                             )}
                             {isGiTagged && (

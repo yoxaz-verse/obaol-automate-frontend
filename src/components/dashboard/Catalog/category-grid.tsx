@@ -11,6 +11,7 @@ interface Item {
     isConventional?: boolean;
     isNatural?: boolean;
     isOrganic?: boolean;
+    isIpmQuality?: boolean;
     isGiTagged?: boolean;
 }
 
@@ -41,6 +42,7 @@ export default function CategoryGrid({
         const labels: string[] = [];
         if (item.isNatural) labels.push("Natural");
         if (item.isOrganic) labels.push("Organic");
+        if (item.isIpmQuality) labels.push("IPM Quality");
         if (item.isGiTagged) labels.push("GI Tag");
         if (labels.length === 0 && type === "product") labels.push("Conventional");
         return labels;

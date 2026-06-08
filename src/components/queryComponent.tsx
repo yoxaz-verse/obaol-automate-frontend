@@ -43,7 +43,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     ];
   }, [queryKey, page, limit, search, additionalParams]);
 
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+  const { data, isLoading, isError, refetch, isFetching, isPlaceholderData } = useQuery({
     queryKey: effectiveQueryKey,
     queryFn: () => getData(api, params),
     staleTime: 30_000,
@@ -100,7 +100,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     );
   };
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return <div className="w-full">{renderLoading()}</div>;
   }
 
@@ -117,7 +117,14 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
   }
 
   return (
-    <div className={`w-full min-w-0 max-w-full transition-opacity duration-300 ${isFetching && !isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`relative w-full min-w-0 max-w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-90" : "opacity-100"}`}>
+      {isFetching && !isLoading && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-end px-2 pt-2">
+          <div className="rounded-full border border-warning-500/20 bg-background/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-warning-500 shadow-sm backdrop-blur-sm">
+            {isPlaceholderData ? "Refreshing view" : "Syncing"}
+          </div>
+        </div>
+      )}
       {children(responseData as T, refetch, responseMeta)}
     </div>
   );

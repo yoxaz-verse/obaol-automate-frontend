@@ -1,7 +1,7 @@
 import { IconType } from "react-icons";
-import { FiShield, FiDroplet, FiAward, FiPackage } from "react-icons/fi";
+import { FiShield, FiDroplet, FiAward, FiPackage, FiCheckSquare } from "react-icons/fi";
 
-export type ClassificationKey = "conventional" | "natural" | "organic" | "gi-tag";
+export type ClassificationKey = "conventional" | "natural" | "organic" | "ipm-quality" | "gi-tag";
 
 export type ClassificationTheme = {
   key: ClassificationKey;
@@ -125,6 +125,36 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     cardOverlayClass: "from-emerald-500/20 via-green-500/10 to-transparent",
     badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
   },
+  "ipm-quality": {
+    key: "ipm-quality",
+    label: "IPM Quality",
+    priority: 0,
+    icon: FiCheckSquare,
+    iconClass: "text-sky-300",
+    watermarkIconClass: "text-sky-500/45",
+    watermarkOpacityClass: "opacity-[0.08]",
+    watermarkSizeClass: "text-[36rem] md:text-[48rem] lg:text-[56rem]",
+    watermarkPositionClass: "-top-28 -right-32 md:-top-36 md:-right-36 lg:-top-44 lg:-right-44",
+    watermarkBlurClass: "blur-[1px]",
+    pageWashClass: "bg-gradient-to-br from-sky-500/18 via-cyan-500/10 to-content1/5",
+    pageWashOverlayClass: "bg-gradient-to-b from-content1/5 via-content1/20 to-content1/38",
+    pageGlowA: "bg-sky-500/15",
+    pageGlowB: "bg-cyan-500/10",
+    shellClass: "bg-gradient-to-br from-sky-500/8 via-content1/90 to-cyan-500/8",
+    shellBorderClass: "border-sky-500/30",
+    headingAccentClass: "text-sky-400",
+    chipActiveClass: "bg-sky-500/90 text-black border-sky-300",
+    chipIdleClass: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+    tabActiveClass: "text-sky-400",
+    tabIdleClass: "text-default-400",
+    tabPillActiveClass: "bg-sky-500/16 border-sky-400/45 shadow-sm",
+    tabPillIdleClass: "bg-transparent border-transparent hover:bg-default-500/10",
+    tabIconActiveClass: "text-sky-500",
+    tabIconIdleClass: "text-default-400",
+    headerStripeClass: "from-sky-500/70 via-cyan-400/35 to-transparent",
+    cardOverlayClass: "from-sky-500/18 via-cyan-500/10 to-transparent",
+    badgeClass: "bg-sky-500/15 text-sky-300 border-sky-400/35",
+  },
   "gi-tag": {
     key: "gi-tag",
     label: "GI Tag",
@@ -169,6 +199,7 @@ export const normalizeClassificationKey = (value: any): ClassificationKey | null
   if (key === "conventional") return "conventional";
   if (key === "natural") return "natural";
   if (key === "organic") return "organic";
+  if (key === "ipm-quality" || key === "ipm" || key === "ipm_quality" || key === "ipmquality") return "ipm-quality";
   if (key === "gi-tag" || key === "gi" || key === "gi_tag" || key === "gitag") return "gi-tag";
   return null;
 };
@@ -199,6 +230,7 @@ export const getClassificationBadges = (product: any): { key: ClassificationKey;
   const badges: { key: ClassificationKey; label: string }[] = [];
   if (product?.isNatural) badges.push({ key: "natural", label: "Natural" });
   if (product?.isOrganic) badges.push({ key: "organic", label: "Organic" });
+  if (product?.isIpmQuality) badges.push({ key: "ipm-quality", label: "IPM Quality" });
   if (product?.isGiTagged) badges.push({ key: "gi-tag", label: "GI Tag" });
   if (!badges.length) badges.push({ key: "conventional", label: "Conventional" });
   return badges;

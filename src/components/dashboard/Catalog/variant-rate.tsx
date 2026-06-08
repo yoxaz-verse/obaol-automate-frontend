@@ -96,6 +96,7 @@ const extractClassifications = (product: any): string[] => {
   const labels: string[] = [];
   if (product.isNatural) labels.push("Natural");
   if (product.isOrganic) labels.push("Organic");
+  if (product.isIpmQuality) labels.push("IPM Quality");
   if (product.isGiTagged) labels.push("GI Tag");
   if (labels.length === 0) labels.push("Conventional");
   return labels;
@@ -236,14 +237,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
     return Boolean(item.isOwnerView || item.isCatalogView);
   };
 
-  // If we only fetch associates if "rate" is "variantRate"
-  const { data: associateByIdResponse } = useQuery({
-    queryKey: ["associate", user?.id],
-    queryFn: () => getData(`${associateRoutes.getAll}/${user?.id}`),
-    enabled: user?.role === "Associate",
-  });
-
-  const associateByIdValue = associateByIdResponse?.data;
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -258,6 +251,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const effectiveFilters = externalFilters ?? filters;
   const effectiveSearch = String(externalSearch ?? debouncedSearch ?? "").trim();
   const serverSearch = effectiveSearch;
+  const productVariantId = productVariantValue?._id;
   const stableAdditionalParams = useMemo(
     () => JSON.stringify(additionalParams || {}),
     [additionalParams]
@@ -279,12 +273,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
   useEffect(() => {
     setPage(1);
-  }, [
-    serverSearch,
-    productVariantValue?._id,
-    JSON.stringify(effectiveFilters || {}),
-    JSON.stringify(additionalParams || {}),
-  ]);
+  }, [serverSearch, productVariantId, stableEffectiveFilters, stableAdditionalParams]);
 
   useEffect(() => {
     if (!openCreateModalSignal) return;
@@ -306,14 +295,21 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const { data: catalogItemsResponse } = useQuery({
     queryKey: ["catalogItems", user?.id],
     queryFn: () => getData(catalogItemRoutes.getAll, { associateId: user?.id }),
-    enabled: !!user?.id && user?.role === "Associate",
+    enabled: !!user?.id && user?.role === "Associate" && isMarketplaceView,
   });
 
-  const catalogItems = Array.isArray(catalogItemsResponse?.data?.data)
-    ? catalogItemsResponse?.data?.data
-    : (catalogItemsResponse?.data?.data?.data || []);
+  const catalogItems = useMemo(
+    () =>
+      Array.isArray(catalogItemsResponse?.data?.data)
+        ? catalogItemsResponse?.data?.data
+        : (catalogItemsResponse?.data?.data?.data || []),
+    [catalogItemsResponse]
+  );
 
-  const addedRateIds = new Set(catalogItems.map((item: any) => item.baseRateId?._id || item.baseRateId));
+  const addedRateIds = useMemo(
+    () => new Set(catalogItems.map((item: any) => item.baseRateId?._id || item.baseRateId)),
+    [catalogItems]
+  );
 
   useEffect(() => {
     const shouldPrefetchPublicPages = Boolean(displayOnly && !user?.id && publicDisplayMeta?.totalPages && publicDisplayMeta.totalPages > 1);
@@ -329,7 +325,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
             queryKey: [
               rate,
               apiRoutesByRole[rate],
-              productVariantValue?._id,
+              productVariantId,
               stableAdditionalParams,
               stableEffectiveFilters,
               serverSearch,
@@ -342,7 +338,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...(additionalParams || {}),
                 ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
                 ...(displayOnly && { selected: "true" }),
-                ...(productVariantValue && { productVariant: productVariantValue._id }),
+                ...(productVariantId && { productVariant: productVariantId }),
               },
             ],
             queryFn: () =>
@@ -354,7 +350,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ...(additionalParams || {}),
                 ...(isMarketplaceView && { sort: "lastLiveDate:asc" }),
                 ...(displayOnly && { selected: "true" }),
-                ...(productVariantValue && { productVariant: productVariantValue._id }),
+                ...(productVariantId && { productVariant: productVariantId }),
               }),
             staleTime: 30_000,
           });
@@ -375,7 +371,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
     publicDisplayMeta?.totalPages,
     queryClient,
     rate,
-    productVariantValue?._id,
+    productVariantId,
     stableAdditionalParams,
     stableEffectiveFilters,
     serverSearch,
@@ -397,38 +393,30 @@ const VariantRate: React.FC<VariantRateProps> = ({
     enabled: showInventoryStatus && (Boolean(inventoryCompanyId) || isAssociateUser),
   });
 
-  const inventoryRows = Array.isArray(inventoryResponse?.data?.data?.data)
-    ? inventoryResponse?.data?.data?.data
-    : (inventoryResponse?.data?.data || []);
+  const inventoryRows = useMemo(
+    () =>
+      Array.isArray(inventoryResponse?.data?.data?.data)
+        ? inventoryResponse?.data?.data?.data
+        : (inventoryResponse?.data?.data || []),
+    [inventoryResponse]
+  );
 
-  const { data: statesResponse } = useQuery({
-    queryKey: ["sample-request-states"],
-    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 1000 }),
-  });
-  const { data: districtsResponse } = useQuery({
-    queryKey: ["sample-request-districts"],
-    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
-  });
-  const states = Array.isArray(statesResponse?.data?.data?.data)
-    ? statesResponse?.data?.data?.data
-    : (statesResponse?.data?.data || []);
-  const districts = Array.isArray(districtsResponse?.data?.data?.data)
-    ? districtsResponse?.data?.data?.data
-    : (districtsResponse?.data?.data || []);
-
-  const inventorySummaryMap = new Map<string, { totalQty: number; warehouses: Set<string> }>();
-  for (const inv of inventoryRows || []) {
-    const pvId = inv.productVariant?._id || inv.productVariant;
-    const compId = inv.associateCompany?._id || inv.associateCompany || "";
-    if (!pvId) continue;
-    const key = `${pvId}::${compId}`;
-    if (!inventorySummaryMap.has(key)) {
-      inventorySummaryMap.set(key, { totalQty: 0, warehouses: new Set<string>() });
+  const inventorySummaryMap = useMemo(() => {
+    const summaryMap = new Map<string, { totalQty: number; warehouses: Set<string> }>();
+    for (const inv of inventoryRows || []) {
+      const pvId = inv.productVariant?._id || inv.productVariant;
+      const compId = inv.associateCompany?._id || inv.associateCompany || "";
+      if (!pvId) continue;
+      const key = `${pvId}::${compId}`;
+      if (!summaryMap.has(key)) {
+        summaryMap.set(key, { totalQty: 0, warehouses: new Set<string>() });
+      }
+      const summary = summaryMap.get(key)!;
+      summary.totalQty += Number(inv.quantity || 0);
+      if (inv.warehouseName) summary.warehouses.add(String(inv.warehouseName));
     }
-    const summary = inventorySummaryMap.get(key)!;
-    summary.totalQty += Number(inv.quantity || 0);
-    if (inv.warehouseName) summary.warehouses.add(String(inv.warehouseName));
-  }
+    return summaryMap;
+  }, [inventoryRows]);
 
   // Build the columns from table config
   const currentTable = rate;
@@ -860,26 +848,25 @@ const VariantRate: React.FC<VariantRateProps> = ({
           });
 
         const searchText = effectiveSearch.toLowerCase();
+        const shouldApplyClientSearch = !serverSearch && !isMarketplaceView && Boolean(searchText);
         const finalTableData =
-          isMarketplaceView
-            ? tableData
-            : searchText
-              ? tableData.filter((row: any) => {
-                const haystack = [
-                  toDisplayText(row.product, ""),
-                  toDisplayText(row.productVariant, ""),
-                  toDisplayText(row.associate, ""),
-                  row.warehouseName,
-                  toDisplayText(row.rate, ""),
-                  toDisplayText(row.quantity, ""),
-                  toDisplayText(row.classificationText, ""),
-                ]
-                  .filter(Boolean)
-                  .join(" ")
-                  .toLowerCase();
-                return haystack.includes(searchText);
-              })
-              : tableData;
+          shouldApplyClientSearch
+            ? tableData.filter((row: any) => {
+              const haystack = [
+                toDisplayText(row.product, ""),
+                toDisplayText(row.productVariant, ""),
+                toDisplayText(row.associate, ""),
+                row.warehouseName,
+                toDisplayText(row.rate, ""),
+                toDisplayText(row.quantity, ""),
+                toDisplayText(row.classificationText, ""),
+              ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+              return haystack.includes(searchText);
+            })
+            : tableData;
 
         return (
           <div className="w-full max-w-full min-w-0">
@@ -1088,8 +1075,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           )}
                           <RequestSampleButton
                             variantRate={rowItem}
-                            states={states}
-                            districts={districts}
                           />
                           {canAddInventory && (
                             <Button
@@ -1158,8 +1143,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 )}
                                 <RequestSampleButton
                                   variantRate={rowItem}
-                                  states={states}
-                                  districts={districts}
                                 />
                                 {canAddInventory && (
                                   <Button
@@ -1192,8 +1175,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     />
                                     <RequestSampleButton
                                       variantRate={rowItem}
-                                      states={states}
-                                      districts={districts}
                                     />
                                   </div>
                                 )}
@@ -1366,8 +1347,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             )}
                             <RequestSampleButton
                               variantRate={item}
-                              states={states}
-                              districts={districts}
                             />
                           </>
                         ) : (
@@ -1381,8 +1360,6 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             {(isAdminUser || (isLive && !item.isCatalogView)) && (
                               <RequestSampleButton
                                 variantRate={item}
-                                states={states}
-                                districts={districts}
                               />
                             )}
                           </div>
@@ -1676,14 +1653,10 @@ interface CreateEnquiryButtonProps {
 
 interface RequestSampleButtonProps {
   variantRate: any;
-  states: any[];
-  districts: any[];
 }
 
 const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
   variantRate,
-  states,
-  districts,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { user } = useContext(AuthContext);
@@ -1719,6 +1692,31 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
       setBuyerAssociateName("");
     }
   }, [isOpen]);
+
+  const { data: statesResponse } = useQuery({
+    queryKey: ["sample-request-states"],
+    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 1000 }),
+    enabled: isOpen,
+  });
+  const { data: districtsResponse } = useQuery({
+    queryKey: ["sample-request-districts"],
+    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
+    enabled: isOpen,
+  });
+  const states = useMemo(
+    () =>
+      Array.isArray(statesResponse?.data?.data?.data)
+        ? statesResponse?.data?.data?.data
+        : (statesResponse?.data?.data || []),
+    [statesResponse]
+  );
+  const districts = useMemo(
+    () =>
+      Array.isArray(districtsResponse?.data?.data?.data)
+        ? districtsResponse?.data?.data?.data
+        : (districtsResponse?.data?.data || []),
+    [districtsResponse]
+  );
 
   // Dynamic Divisions Fetching
   const { data: divisionResponse, isLoading: divisionsLoading } = useQuery({

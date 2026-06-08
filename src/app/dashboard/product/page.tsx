@@ -1,7 +1,7 @@
 // pages/Catalog.tsx
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Spacer } from "@heroui/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
@@ -24,17 +24,29 @@ export default function Product() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const inventoryStatusEnabled = isAssociate ? true : Boolean(selectedCompanyId);
 
+  const companyPickerParams = useMemo(
+    () =>
+      isOperatorUser
+        ? { limit: 100, view: "picker", assignedOperator: user?.id, sort: "name:asc" }
+        : { limit: 50, view: "picker", sort: "name:asc" },
+    [isOperatorUser, user?.id]
+  );
+
   const { data: companyData } = useQuery({
     queryKey: ["product-page-assigned-companies", associateCompanyRoutes.getAll, user?.id, roleLower],
-    queryFn: () => getData(associateCompanyRoutes.getAll, { limit: 300 }),
+    queryFn: () => getData(associateCompanyRoutes.getAll, companyPickerParams),
     enabled: isOperatorUser,
   });
 
-  const operatorScopedCompanyIds: string[] = isOperatorUser
-    ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
-        .map((company) => company?._id)
-        .filter((id): id is string => Boolean(id))
-    : [];
+  const operatorScopedCompanyIds: string[] = useMemo(
+    () =>
+      isOperatorUser
+        ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
+            .map((company) => company?._id)
+            .filter((id): id is string => Boolean(id))
+        : [],
+    [companyData?.data?.data?.data, isOperatorUser]
+  );
 
   useEffect(() => {
     if (isOperatorUser && !selectedCompanyId && operatorScopedCompanyIds.length === 1) {
@@ -42,17 +54,25 @@ export default function Product() {
     }
   }, [isOperatorUser, operatorScopedCompanyIds, selectedCompanyId]);
 
-  const defaultProductParams = isAdminUser
-    ? (selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {})
-    : isOperatorUser
-      ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds }
-      : {};
+  const defaultProductParams = useMemo(
+    () =>
+      isAdminUser
+        ? { view: "product-table", ...(selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {}) }
+        : isOperatorUser
+          ? { view: "product-table", associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds }
+          : { view: "product-table" },
+    [isAdminUser, isOperatorUser, operatorScopedCompanyIds, selectedCompanyId]
+  );
 
-  const defaultLiveProductParams = isAdminUser
-    ? { ...(selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {}), isLive: true }
-    : isOperatorUser
-      ? { associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds, isLive: true }
-      : { isLive: true };
+  const defaultLiveProductParams = useMemo(
+    () =>
+      isAdminUser
+        ? { view: "product-table", ...(selectedCompanyId ? { associateCompany: [selectedCompanyId] } : {}), isLive: true }
+        : isOperatorUser
+          ? { view: "product-table", associateCompany: selectedCompanyId ? [selectedCompanyId] : operatorScopedCompanyIds, isLive: true }
+          : { view: "product-table", isLive: true },
+    [isAdminUser, isOperatorUser, operatorScopedCompanyIds, selectedCompanyId]
+  );
 
   useEffect(() => {
     if (isNoCompanyAssociate && currentTable !== "catalog") {
@@ -76,11 +96,7 @@ export default function Product() {
               <CompanySearch
                 defaultSelected={selectedCompanyId}
                 onSelect={(id) => setSelectedCompanyId(id)}
-                itemsFilter={
-                  isOperatorUser
-                    ? (companies) => companies.filter((c) => operatorScopedCompanyIds.includes(c._id))
-                    : undefined
-                }
+                queryParams={companyPickerParams}
               />
             </div>
           )}
@@ -107,7 +123,7 @@ export default function Product() {
                     <Tab key={"mine"} title="My Products">
                       <VariantRate
                         rate="variantRate"
-                        additionalParams={{ associate: user?.id }}
+                        additionalParams={{ associate: user?.id, view: "product-table" }}
                         showInventoryStatus={inventoryStatusEnabled}
                         inventoryCompanyId={(user as any)?.associateCompanyId || null}
                       />

@@ -5,7 +5,6 @@ import {
   FiActivity,
   FiAlertTriangle,
   FiCheckCircle,
-  FiDownload,
   FiFileText,
   FiLayers,
   FiRepeat,
@@ -174,20 +173,49 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-primary/20 bg-primary/5 p-10 text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Investor Deck</h2>
-          <p className="text-foreground/70 max-w-2xl mx-auto mb-8">
-            Download the trade finance investor brief for a structured overview of participation models,
-            process flow, and engagement framework.
-          </p>
-          <a
-            href="/deck/obaol-trade-finance-investor-deck.pdf"
-            download
-            className="inline-flex items-center gap-3 rounded-xl bg-primary px-6 py-3 text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
-          >
-            <FiDownload className="w-5 h-5" />
-            Download Investor Deck (PDF)
-          </a>
+        <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 md:p-10 mb-8">
+          <div className="max-w-4xl mx-auto text-center mb-10">
+            <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/60 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary mb-5">
+              Trade Finance Explained
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Financing Structured Around Real Trade Requirements
+            </h2>
+            <p className="text-foreground/70 text-base md:text-lg leading-relaxed">
+              Trade finance on OBAOL is positioned as a flexible portion of the underlying trade
+              value. The exact coverage depends on trade structure, stage, documentation, and
+              execution requirements rather than a one-size-fits-all number.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-divider bg-background/70 p-6">
+              <h3 className="text-xl font-bold mb-3">How Much Can Be Covered</h3>
+              <p className="text-foreground/70 leading-relaxed">
+                Funding can support a meaningful share of the trade where genuine execution gaps
+                exist. Coverage is shaped by the commercial structure of the trade and the level of
+                readiness already in place.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-divider bg-background/70 p-6">
+              <h3 className="text-xl font-bold mb-3">Why Trade Financing Matters</h3>
+              <p className="text-foreground/70 leading-relaxed">
+                Capital is often needed before buyer settlement to secure procurement, prepare
+                stock, coordinate packaging, and keep logistics moving without interrupting a valid
+                commodity transaction.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-divider bg-background/70 p-6">
+              <h3 className="text-xl font-bold mb-3">How OBAOL Helps</h3>
+              <p className="text-foreground/70 leading-relaxed">
+                OBAOL acts as the structured stepping stone between opportunity and execution by
+                helping surface genuine trade context, align participation to real requirements,
+                and maintain visibility as the trade progresses toward settlement.
+              </p>
+            </div>
+          </div>
         </div>
 
         <p className="text-xs md:text-sm text-foreground/55 text-center max-w-4xl mx-auto leading-relaxed">

@@ -1048,6 +1048,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       item &&
                       !item.hasInventory &&
                       (roleLower === "admin" || isOperatorUser || isAssociateUser);
+                    const isSameCompany = Boolean(
+                      (user as any)?.associateCompanyId && 
+                      item.companyId && 
+                      String((user as any)?.associateCompanyId) === String(item.companyId)
+                    );
+                    const shouldShowAssociateDetails = roleLower === "admin" || isSameCompany;
                     return (
                       <motion.div
                         key={item._id || index}
@@ -1091,15 +1097,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             >
                               {toDisplayText(item.productVariant, "Variant")}
                             </h4>
-                            <div className="flex items-center gap-1.5 mt-2 overflow-hidden">
-                              <FiUser size={12} className="text-default-400 shrink-0" />
-                              <div 
-                                className="truncate text-xs sm:text-sm text-default-600"
-                                title={toDisplayText(item.associate, "N/A")}
-                              >
-                                {item.associate}
+                            {shouldShowAssociateDetails && (
+                              <div className="flex items-center gap-1.5 mt-2 overflow-hidden">
+                                <FiUser size={12} className="text-default-400 shrink-0" />
+                                <div 
+                                  className="truncate text-xs sm:text-sm text-default-600"
+                                  title={toDisplayText(item.associate, "N/A")}
+                                >
+                                  {item.associate}
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
 
                           <Divider className="my-1 bg-white/5" />

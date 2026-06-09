@@ -251,7 +251,7 @@ export default function CatalogPage() {
   ]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [search, setSearch] = useState("");
-  const [classificationTab, setClassificationTab] = useState<"all" | "conventional" | "natural" | "organic" | "gi-tag">("all");
+  const [classificationTab, setClassificationTab] = useState<"all" | "conventional" | "natural" | "organic" | "ipm" | "gi-tag">("all");
 
   // Management State
   const [editItem, setEditItem] = useState<any | null>(null);

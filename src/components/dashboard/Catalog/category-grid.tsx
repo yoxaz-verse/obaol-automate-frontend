@@ -40,11 +40,12 @@ export default function CategoryGrid({
 }: CategoryGridProps) {
     const getClassification = (item: Item) => {
         const labels: string[] = [];
+        const hasPrimary = Boolean(item.isNatural || item.isOrganic || item.isIpmQuality);
+        if (!hasPrimary && type === "product") labels.push("Conventional");
         if (item.isNatural) labels.push("Natural");
         if (item.isOrganic) labels.push("Organic");
-        if (item.isIpmQuality) labels.push("IPM Quality");
+        if (item.isIpmQuality) labels.push("IPM");
         if (item.isGiTagged) labels.push("GI Tag");
-        if (labels.length === 0 && type === "product") labels.push("Conventional");
         return labels;
     };
     const Icon = type === "product" ? FiPackage : FiFolder;

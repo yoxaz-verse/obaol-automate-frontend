@@ -619,7 +619,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const isOrganic = Boolean(formData.isOrganic);
   const isIpmQuality = Boolean(formData.isIpmQuality);
   const isGiTagged = Boolean(formData.isGiTagged);
-  const isConventional = !(isNatural || isOrganic || isGiTagged);
+  const isConventional = !(isNatural || isOrganic || isIpmQuality);
   const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
 
   const getStepForErrors = (keys: string[]): number => {
@@ -768,7 +768,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
             {successData ? (
               <motion.div key="success" {...motionVariants} className="rounded-2xl sm:rounded-3xl border border-success-500/30 bg-success-500/10 p-4 sm:p-8 text-center">
                 <FiCheckCircle size={36} className="mx-auto text-success-400 mb-3 sm:mb-4" />
-                <h4 className="text-lg sm:text-xl font-black text-foreground mb-2">Mission complete</h4>
+                <h4 className="text-lg sm:text-xl font-black text-foreground mb-2">Product listed successfully</h4>
                 <p className="text-xs sm:text-sm text-default-500 mb-4 sm:mb-6">Your product is now live in the trade network.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-content2 border border-default-200 rounded-2xl p-4 text-left">
                   <div>
@@ -864,9 +864,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     </div>
                     <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-3 sm:p-4">
                       <div className="mb-3">
-                        <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">Product Type & GI Signal</p>
+                        <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">Product Type & GI Tag</p>
                         <p className="text-[11px] text-default-500 mt-1">
-                          Natural and Organic are type signals. IPM Quality and GI Tag are additional independent signals and can be combined.
+                          Natural, Organic, and IPM are primary categories. GI Tag is an additional independent signal and can be combined.
                         </p>
                       </div>
 
@@ -886,7 +886,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                               <Switch isSelected={isOrganic} onValueChange={(v) => setValue("isOrganic", v)} color="warning" />
                             </div>
                             <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">IPM Quality</span>
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">IPM</span>
                               <Switch isSelected={isIpmQuality} onValueChange={(v) => setValue("isIpmQuality", v)} color="warning" />
                             </div>
                             <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
@@ -913,7 +913,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             )}
                             {isIpmQuality && (
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
-                                IPM Quality
+                                IPM
                               </span>
                             )}
                             {isGiTagged && (
@@ -1207,7 +1207,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                             )}
                             {isIpmQuality && (
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
-                                IPM Quality
+                                IPM
                               </span>
                             )}
                             {isGiTagged && (

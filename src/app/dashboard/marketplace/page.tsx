@@ -17,7 +17,7 @@ import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 
 type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
-type ClassificationTabKey = "all" | "conventional" | "natural" | "organic" | "gi-tag";
+type ClassificationTabKey = "all" | "conventional" | "natural" | "organic" | "ipm" | "gi-tag";
 
 const emptyState: MarketplaceFilterState = { search: "", filters: {} };
 
@@ -105,7 +105,7 @@ export default function MarketplacePage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 relative overflow-hidden">
+        <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 relative overflow-x-hidden">
             <div className={`absolute top-0 right-0 w-[560px] h-[560px] blur-[140px] rounded-full pointer-events-none ${activeTheme.pageGlowA}`} />
             <div className={`absolute bottom-0 left-0 w-[520px] h-[520px] blur-[150px] rounded-full pointer-events-none ${activeTheme.pageGlowB}`} />
             <div className="w-full max-w-[1400px]">
@@ -184,7 +184,7 @@ export default function MarketplacePage() {
                             </Tabs>
                         </div>
                         <div className="flex w-full gap-4">
-                            <div className="w-full min-w-0 pb-10 overflow-x-auto">
+                            <div className="w-full min-w-0 pb-10">
                                 <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
                                         Discovery Listings

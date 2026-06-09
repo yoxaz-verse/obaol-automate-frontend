@@ -1,7 +1,7 @@
 import { IconType } from "react-icons";
 import { FiShield, FiDroplet, FiAward, FiPackage, FiCheckSquare } from "react-icons/fi";
 
-export type ClassificationKey = "conventional" | "natural" | "organic" | "ipm-quality" | "gi-tag";
+export type ClassificationKey = "conventional" | "natural" | "organic" | "ipm" | "gi-tag";
 
 export type ClassificationTheme = {
   key: ClassificationKey;
@@ -125,10 +125,10 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
     cardOverlayClass: "from-emerald-500/20 via-green-500/10 to-transparent",
     badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/35",
   },
-  "ipm-quality": {
-    key: "ipm-quality",
-    label: "IPM Quality",
-    priority: 0,
+  ipm: {
+    key: "ipm",
+    label: "IPM",
+    priority: 3,
     icon: FiCheckSquare,
     iconClass: "text-sky-300",
     watermarkIconClass: "text-sky-500/45",
@@ -158,7 +158,7 @@ const THEME_MAP: Record<ClassificationKey, ClassificationTheme> = {
   "gi-tag": {
     key: "gi-tag",
     label: "GI Tag",
-    priority: 3,
+    priority: -1,
     icon: FiAward,
     iconClass: "text-fuchsia-300",
     watermarkIconClass: "text-fuchsia-500/45",
@@ -191,6 +191,7 @@ export const CLASSIFICATION_OPTIONS = [
   { key: "conventional", label: "Conventional" },
   { key: "natural", label: "Natural" },
   { key: "organic", label: "Organic" },
+  { key: "ipm", label: "IPM" },
   { key: "gi-tag", label: "GI Tag" },
 ] as const;
 
@@ -199,7 +200,7 @@ export const normalizeClassificationKey = (value: any): ClassificationKey | null
   if (key === "conventional") return "conventional";
   if (key === "natural") return "natural";
   if (key === "organic") return "organic";
-  if (key === "ipm-quality" || key === "ipm" || key === "ipm_quality" || key === "ipmquality") return "ipm-quality";
+  if (key === "ipm" || key === "ipm_quality" || key === "ipmquality" || key === "ipm-quality") return "ipm";
   if (key === "gi-tag" || key === "gi" || key === "gi_tag" || key === "gitag") return "gi-tag";
   return null;
 };
@@ -228,11 +229,12 @@ export const getClassificationOptions = (): { key: ClassificationKey; label: str
 
 export const getClassificationBadges = (product: any): { key: ClassificationKey; label: string }[] => {
   const badges: { key: ClassificationKey; label: string }[] = [];
+  const hasPrimary = Boolean(product?.isNatural || product?.isOrganic || product?.isIpmQuality);
+  if (!hasPrimary) badges.push({ key: "conventional", label: "Conventional" });
   if (product?.isNatural) badges.push({ key: "natural", label: "Natural" });
   if (product?.isOrganic) badges.push({ key: "organic", label: "Organic" });
-  if (product?.isIpmQuality) badges.push({ key: "ipm-quality", label: "IPM Quality" });
+  if (product?.isIpmQuality) badges.push({ key: "ipm", label: "IPM" });
   if (product?.isGiTagged) badges.push({ key: "gi-tag", label: "GI Tag" });
-  if (!badges.length) badges.push({ key: "conventional", label: "Conventional" });
   return badges;
 };
 

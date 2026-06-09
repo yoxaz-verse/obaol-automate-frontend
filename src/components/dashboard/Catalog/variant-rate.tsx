@@ -24,6 +24,7 @@ import {
   Spinner,
   Autocomplete,
   AutocompleteItem,
+  Pagination,
 } from "@nextui-org/react";
 import { FiMessageSquare, FiPlusCircle, FiCheckCircle, FiPhone, FiUser, FiPackage, FiInfo, FiArrowRight, FiList, FiX, FiShoppingBag, FiPlus } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
@@ -94,11 +95,12 @@ const toDisplayText = (value: any, fallback = "N/A"): string => {
 const extractClassifications = (product: any): string[] => {
   if (!product) return ["Conventional"];
   const labels: string[] = [];
+  const hasPrimary = Boolean(product.isNatural || product.isOrganic || product.isIpmQuality);
+  if (!hasPrimary) labels.push("Conventional");
   if (product.isNatural) labels.push("Natural");
   if (product.isOrganic) labels.push("Organic");
-  if (product.isIpmQuality) labels.push("IPM Quality");
+  if (product.isIpmQuality) labels.push("IPM");
   if (product.isGiTagged) labels.push("GI Tag");
-  if (labels.length === 0) labels.push("Conventional");
   return labels;
 };
 const classificationTone = (label: string): string => {
@@ -241,7 +243,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const limit = isMarketplaceView ? 10 : 25;
+  const limit = isMarketplaceView ? 24 : 24;
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
   const [inventoryQty, setInventoryQty] = useState("");
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
@@ -641,14 +643,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 ? supplierRate
                 : totalRate;
 
-              const productVariantLabel = truncateWithDots(
-                String(
-                  (
-                    (item.productVariant?.product?.name || "") +
-                    " " +
-                    (item.productVariant?.name || item.productVariantName || "")
-                  ).trim() || "N/A"
-                )
+              const productVariantLabel = String(
+                (
+                  (item.productVariant?.product?.name || "") +
+                  " " +
+                  (item.productVariant?.name || item.productVariantName || "")
+                ).trim() || "N/A"
               );
               const productClassifications = extractClassifications(item.productVariant?.product);
               const classificationText = productClassifications.join(" ");
@@ -673,7 +673,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associateId: item.associate?._id || item.associate,
                 companyId: item.associateCompany?._id || item.associateCompany || item.associate?.associateCompany,
                 productVariant: productVariantLabel,
-                product: truncateWithDots(toDisplayText(item.productVariant?.product?.name)),
+                product: toDisplayText(item.productVariant?.product?.name),
                 location: locationDisplay || "--",
                 productId: item.productVariant?.product?._id || item.productVariant?.product,
                 productVariantId: item.productVariant?._id || item.productVariant || item.productVariantId,
@@ -774,8 +774,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 associateId: item.associateId?._id || item.associateId,
                 originalOwnerId: baseRate?.associate?._id || baseRate?.associate,
                 companyId: item.associateCompanyId?._id || item.associateCompanyId,
-                productVariant: truncateWithDots(toDisplayText(item.productVariantId?.name)),
-                product: truncateWithDots(toDisplayText(item.productVariantId?.product?.name)),
+                productVariant: toDisplayText(item.productVariantId?.name),
+                product: toDisplayText(item.productVariantId?.product?.name),
                 productId: item.productVariantId?.product?._id || item.productVariantId?.product,
                 productVariantId: item.productVariantId?._id,
                 classification: (
@@ -821,8 +821,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 quantityRaw: quantityValue,
                 associateId: item.associate?._id,
                 companyId: item.associate?.associateCompany,
-                productVariant: truncateWithDots(toDisplayText(item.variantRate?.productVariant?.name)),
-                product: truncateWithDots(toDisplayText(item.variantRate?.productVariant?.product?.name)),
+                productVariant: toDisplayText(item.variantRate?.productVariant?.name),
+                product: toDisplayText(item.variantRate?.productVariant?.product?.name),
                 productId: item.variantRate?.productVariant?.product?._id || item.variantRate?.productVariant?.product,
                 productVariantId: item.variantRate?.productVariant?._id,
                 classification: (
@@ -970,430 +970,276 @@ const VariantRate: React.FC<VariantRateProps> = ({
               </Card>
             )}
             <div className="h-5" />
-            <section className="hidden md:block w-full min-w-0 max-w-full overflow-hidden">
-              <TableFrame>
-                <CommonTable
-                  TableData={finalTableData}
-                  columns={columns}
-                  isLoading={false}
-                  page={meta?.currentPage || page}
-                  totalPages={meta?.totalPages || 1}
-                  rowsPerPage={limit}
-                  onPageChange={(nextPage) => setPage(nextPage)}
-                  emptyContent={
-                    rate === "catalogItem" && isAssociateUser && finalTableData.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
-                            <FiShoppingBag size={48} strokeWidth={1.5} />
-                          </div>
-                          <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
-                            <FiPlus size={16} strokeWidth={3} />
-                          </div>
-                        </div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Your Catalog is Empty</h3>
-                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                          Personalize your catalog to share best rates with your buyers. Discover and add global products from the marketplace.
-                        </p>
-                        <Button
-                          color="warning"
-                          variant="shadow"
-                          size="lg"
-                          className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-warning-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
-                          onPress={() => router.push("/dashboard/marketplace")}
-                          startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
-                        >
-                          Explore Marketplace
-                        </Button>
-                      </div>
-                    ) : (isMarketplaceView && canAddOwnRate && finalTableData.length === 0) ? (
-                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-primary-500 shadow-xl">
-                            <FiPackage size={48} strokeWidth={1.5} />
-                          </div>
-                          <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
-                            <FiPlus size={16} strokeWidth={3} />
-                          </div>
-                        </div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Live Products Found</h3>
-                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                          Be the first to list your products in the live market. Redirect to your personal catalog to set live rates for the network.
-                        </p>
-                        <Button
-                          color="primary"
-                          variant="shadow"
-                          size="lg"
-                          className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-primary-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all"
-                          onPress={() => router.push("/dashboard/product")}
-                          startContent={<FiPlusCircle size={20} strokeWidth={2.5} />}
-                        >
-                          Add Products to Market
-                        </Button>
-                      </div>
-                    ) : (additionalParams?.isLive === true && finalTableData.length === 0) ? (
-                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                          <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
-                            <FiShoppingBag size={48} strokeWidth={1.5} />
-                          </div>
-                          <div className="absolute -bottom-2 -right-2 p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
-                            <FiInfo size={16} strokeWidth={3} />
-                          </div>
-                        </div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Products Live</h3>
-                        <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                          You haven&apos;t activated any products for the live market yet. Switch to your general product list and toggle them live to start trading.
-                        </p>
-                      </div>
-                    ) : null
-                  }
-                  otherModal={(rowItem: any) => {
-                    const canAddInventory =
-                      showInventoryStatus &&
-                      rowItem &&
-                      !rowItem.hasInventory &&
-                      (roleLower === "admin" || isOperatorUser || isAssociateUser);
-                    if (rowItem.isMarketplaceView) {
-                      return (
-                        <div className="flex items-center justify-center gap-3">
-                          {!isAdminUser && (
-                            <AddToCatalogButton
-                              rowItem={rowItem}
-                              isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
-                              onSuccess={() => refetchData()}
-                            />
-                          )}
-                          {(user?.role === "Associate" || isAdminUser) && (
-                            <CreateEnquiryButton
-                              productVariant={rowItem.productVariantId}
-                              variantRate={rowItem}
-                            />
-                          )}
-                          <RequestSampleButton
-                            variantRate={rowItem}
-                          />
-                          {canAddInventory && (
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="warning"
-                              onPress={() => {
-                                setSelectedInventoryRate(rowItem);
-                                setInventoryQty("");
-                                setInventoryModalOpen(true);
-                              }}
-                            >
-                              Add Inventory
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    }
-                    return (
-                      <div className="flex items-center justify-center gap-3">
-                        {/* LiveToggle or Live Chip */}
-                        {canManageRow(rowItem) ? (
-                          <div className="flex flex-col items-center gap-1">
-                            <LiveToggle
-                              variantRate={rowItem}
-                              refetchData={refetchData}
-                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
-                            />
-                            {rowItem.isCatalogView && !rowItem.supplierIsLive && (
-                              <Tooltip content="Supplier rate is currently not live. This item will not be visible to buyers.">
-                                {/* @ts-ignore */}
-                                <Chip size="sm" color="danger" variant="flat" className="h-5 text-[10px]">Supplier Offline</Chip>
-                              </Tooltip>
-                            )}
-                            {canAddInventory && (
-                              <Button
-                                size="sm"
-                                variant="flat"
-                                color="warning"
-                                onPress={() => {
-                                  setSelectedInventoryRate(rowItem);
-                                  setInventoryQty("");
-                                  setInventoryModalOpen(true);
-                                }}
-                              >
-                                Add Inventory
-                              </Button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-1">
-                            {rowItem.isLive ? (
-                              <div className="flex items-center gap-3">
-                                {/* @ts-ignore */}
-                                <Chip color={"success"} variant="dot" size="sm">
-                                  Live
-                                </Chip>
-                                {!rowItem.isCatalogView && (
-                                  <CreateEnquiryButton
-                                    productVariant={
-                                      rowItem.productVariantId ||
-                                      rowItem.variantRate?.productVariant?._id
-                                    }
-                                    variantRate={rowItem}
-                                  />
-                                )}
-                                <RequestSampleButton
-                                  variantRate={rowItem}
-                                />
-                                {canAddInventory && (
-                                  <Button
-                                    size="sm"
-                                    variant="flat"
-                                    color="warning"
-                                    onPress={() => {
-                                      setSelectedInventoryRate(rowItem);
-                                      setInventoryQty("");
-                                      setInventoryModalOpen(true);
-                                    }}
-                                  >
-                                    Add Inventory
-                                  </Button>
-                                )}
-                              </div>
-                            ) : (
-                              <>
-                                <span className="text-default-400 text-tiny italic whitespace-nowrap h-[20px] flex items-center">
-                                  Not Live
-                                </span>
-                                {isAdminUser && !rowItem.isCatalogView && (
-                                  <div className="flex items-center gap-3">
-                                    <CreateEnquiryButton
-                                      productVariant={
-                                        rowItem.productVariantId ||
-                                        rowItem.variantRate?.productVariant?._id
-                                      }
-                                      variantRate={rowItem}
-                                    />
-                                    <RequestSampleButton
-                                      variantRate={rowItem}
-                                    />
-                                  </div>
-                                )}
-                                {canAddInventory && (
-                                  <Button
-                                    size="sm"
-                                    variant="flat"
-                                    color="warning"
-                                    onPress={() => {
-                                      setSelectedInventoryRate(rowItem);
-                                      setInventoryQty("");
-                                      setInventoryModalOpen(true);
-                                    }}
-                                  >
-                                    Add Inventory
-                                  </Button>
-                                )}
-                              </>
-                            )}
-                            <div className="h-[10px]" /> {/* Spacer to align with Edit/Delete/LiveToggle layout */}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }}
-                  editModal={(item: any) => {
-                    if (!user) return null;
-                    if (canManageRow(item)) {
-                      const isCoolingTime = isCooling(item.coolingStartTime);
-                      const isDifferentAssociate = item.associateId !== user.id;
-
-                      if (roleLower === "admin" || isOperatorUser || (isDifferentAssociate && isCoolingTime)) {
-                        return (
-                          <EditModal
-                            _id={item._id}
-                            initialData={{
-                              ...item,
-                              quantity: item.quantityRaw
-                            }}
-                            currentTable={rate}
-                            formFields={tableConfig[rate]}
-                            apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
-                            refetchData={refetchData}
-                          />
-                        );
-                      }
-                    }
-                    return null;
-                  }}
-                  deleteModal={(item: any) => {
-                    if (!user) return null;
-                    if (canManageRow(item)) {
-                      return (
-                        <DeleteModal
-                          _id={item._id}
-                          name={item.name || item.customTitle || item.productVariant}
-                          deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                          refetchData={refetchData}
-                          useBody={true}
-                        />
-                      );
-                    }
-                    return null;
-                  }}
-                />
-              </TableFrame>
-            </section >
-            <section className="md:hidden space-y-2">
-              {finalTableData.length === 0 && rate === "catalogItem" && isAssociateUser && (
-                <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-content2/50 rounded-3xl border border-divider/50">
-                  <div className="p-5 bg-warning-500/10 rounded-2xl text-warning-500 mb-5">
-                    <FiShoppingBag size={40} />
+            <section className="w-full">
+              {finalTableData.length === 0 && rate === "catalogItem" && isAssociateUser ? (
+                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                      <FiShoppingBag size={48} strokeWidth={1.5} />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                      <FiPlus size={16} strokeWidth={3} />
+                    </div>
                   </div>
-                  <h3 className="text-lg font-black text-foreground uppercase tracking-tight">Your Catalog is Empty</h3>
-                  <p className="text-xs text-default-500 mt-2 mb-6 leading-relaxed">
-                    Personalize your catalog by adding products from the marketplace.
+                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Your Catalog is Empty</h3>
+                  <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                    Personalize your catalog to share best rates with your buyers. Discover and add global products from the marketplace.
                   </p>
                   <Button
                     color="warning"
                     variant="shadow"
-                    className="font-black px-8 rounded-xl h-12 text-xs uppercase tracking-widest text-black"
+                    size="lg"
+                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-warning-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
                     onPress={() => router.push("/dashboard/marketplace")}
+                    startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
                   >
                     Explore Marketplace
                   </Button>
                 </div>
-              )}
-              {finalTableData.map((item: any, index: number) => {
-                const isLive = item.isLive;
-                const canAddInventory =
-                  showInventoryStatus &&
-                  item &&
-                  !item.hasInventory &&
-                  (roleLower === "admin" || isOperatorUser || isAssociateUser);
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.04 }}
-                    className="rounded-2xl border border-foreground/[0.07] bg-foreground/[0.02] px-4 py-3"
+              ) : finalTableData.length === 0 && isMarketplaceView && canAddOwnRate ? (
+                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-primary-500 shadow-xl">
+                      <FiPackage size={48} strokeWidth={1.5} />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
+                      <FiPlus size={16} strokeWidth={3} />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Live Products Found</h3>
+                  <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                    Be the first to list your products in the live market. Redirect to your personal catalog to set live rates for the network.
+                  </p>
+                  <Button
+                    color="primary"
+                    variant="shadow"
+                    size="lg"
+                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-primary-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all"
+                    onPress={() => router.push("/dashboard/product")}
+                    startContent={<FiPlusCircle size={20} strokeWidth={2.5} />}
                   >
-                    {/* Top row: product info + live badge */}
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0 pr-2">
-                        <p className="text-[10px] font-semibold text-warning-500 uppercase tracking-widest truncate mb-0.5">
-                          {toDisplayText(item.product, "Product")}
-                        </p>
-                        <p className="text-sm font-bold text-foreground truncate">
-                          {toDisplayText(item.productVariant, "Variant")}
-                        </p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <FiUser size={10} className="shrink-0 text-default-400" />
-                          <span className="text-[10px] text-default-400 truncate">{toDisplayText(item.associate, "N/A")}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${isLive
-                          ? "text-success-600 bg-success-500/10"
-                          : "text-default-400 bg-foreground/5"
-                          }`}>
-                          {isLive ? "● Live" : "○ Off"}
-                        </span>
-                        {item.isAdded && !item.supplierIsLive && (
-                          <span className="text-[9px] text-danger-400 font-bold">Supplier Off</span>
-                        )}
-                      </div>
+                    Add Products to Market
+                  </Button>
+                </div>
+              ) : finalTableData.length === 0 && additionalParams?.isLive === true ? (
+                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                      <FiShoppingBag size={48} strokeWidth={1.5} />
                     </div>
-
-                    {/* Bottom row: rate + actions */}
-                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-foreground/[0.06]">
-                      <div>
-                        <p className="text-[10px] font-semibold text-default-400 uppercase tracking-widest">Rate</p>
-                        <p className="text-xl font-black text-foreground">{item.rate || ""}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {canManageRow(item) ? (
-                          <>
-                            <EditModal
-                              _id={item._id}
-                              initialData={{
-                                ...item,
-                                quantity: item.quantityRaw
-                              }}
-                              currentTable={rate}
-                              formFields={tableConfig[rate]}
-                              apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
-                              refetchData={refetchData}
-                            />
-                            <DeleteModal
-                              _id={item._id}
-                              name={item.name || item.customTitle || item.productVariant}
-                              deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
-                              refetchData={refetchData}
-                              useBody={true}
-                            />
-                          </>
-                        ) : item.isMarketplaceView ? (
-                          <>
-                            {!isAdminUser && (
-                              <AddToCatalogButton
-                                rowItem={item}
-                                isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
-                                onSuccess={() => refetchData()}
-                              />
-                            )}
-                            {(user?.role === "Associate" || isAdminUser) && (
-                              <CreateEnquiryButton productVariant={item.productVariantId} variantRate={item} />
-                            )}
-                            <RequestSampleButton
-                              variantRate={item}
-                            />
-                          </>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            {!item.isCatalogView && (isLive || isAdminUser) && (
-                              <CreateEnquiryButton
-                                productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
-                                variantRate={item}
-                              />
-                            )}
-                            {(isAdminUser || (isLive && !item.isCatalogView)) && (
-                              <RequestSampleButton
-                                variantRate={item}
-                              />
-                            )}
+                    <div className="absolute -bottom-2 -right-2 p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
+                      <FiInfo size={16} strokeWidth={3} />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-black text-foreground tracking-tight uppercase">No Products Live</h3>
+                  <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
+                    You haven't activated any products for the live market yet. Switch to your general product list and toggle them live to start trading.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+                  {finalTableData.map((item: any, index: number) => {
+                    const isLive = item.isLive;
+                    const canAddInventory =
+                      showInventoryStatus &&
+                      item &&
+                      !item.hasInventory &&
+                      (roleLower === "admin" || isOperatorUser || isAssociateUser);
+                    return (
+                      <motion.div
+                        key={item._id || index}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
+                        className="group relative flex flex-col justify-between bg-content1/60 backdrop-blur-2xl border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300"
+                      >
+                        {/* Top Accent Line */}
+                        <div className={`absolute top-0 inset-x-0 h-1 ${isLive ? 'bg-gradient-to-r from-success-500 to-success-300 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-default-200/50'}`} />
+                        
+                        <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3">
+                          {/* Header: Classifications & Status */}
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex-1 min-w-0">
+                              {item.classification}
+                            </div>
+                            <div className="shrink-0 flex flex-col items-end gap-1.5">
+                              {item.liveStatus ? item.liveStatus : (
+                                <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${isLive ? "text-success-600 bg-success-500/10" : "text-default-400 bg-foreground/5"}`}>
+                                  {isLive ? "● Live" : "○ Off"}
+                                </span>
+                              )}
+                              {item.isAdded && !item.supplierIsLive && (
+                                <span className="text-[9px] text-danger-400 font-bold bg-danger-500/10 px-1.5 py-0.5 rounded-md border border-danger-500/20">Supplier Off</span>
+                              )}
+                            </div>
                           </div>
-                        )}
-                        {canAddInventory && (
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            color="warning"
-                            onPress={() => {
-                              setSelectedInventoryRate(item);
-                              setInventoryQty("");
-                              setInventoryModalOpen(true);
-                            }}
-                          >
-                            Add Inventory
-                          </Button>
-                        )}
-                      </div>
-                    </div>
 
-                    {canManageRow(item) && (
-                      <div className="flex justify-between items-center mt-2 pt-2 border-t border-foreground/[0.05]">
-                        <span className="text-[10px] text-default-400">Visibility</span>
-                        <LiveToggle
-                          variantRate={item}
-                          refetchData={refetchData}
-                          apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
+                          {/* Product Details */}
+                          <div className="flex flex-col gap-1 mt-1">
+                            <p 
+                              className="text-[10px] sm:text-xs font-semibold text-warning-500 uppercase tracking-widest truncate"
+                              title={toDisplayText(item.product, "Product")}
+                            >
+                              {toDisplayText(item.product, "Product")}
+                            </p>
+                            <h4 
+                              className="text-sm sm:text-lg font-black text-foreground leading-tight line-clamp-2"
+                              title={toDisplayText(item.productVariant, "Variant")}
+                            >
+                              {toDisplayText(item.productVariant, "Variant")}
+                            </h4>
+                            <div className="flex items-center gap-1.5 mt-2 overflow-hidden">
+                              <FiUser size={12} className="text-default-400 shrink-0" />
+                              <div 
+                                className="truncate text-xs sm:text-sm text-default-600"
+                                title={toDisplayText(item.associate, "N/A")}
+                              >
+                                {item.associate}
+                              </div>
+                            </div>
+                          </div>
+
+                          <Divider className="my-1 bg-white/5" />
+
+                          {/* Price & Quantity Area */}
+                          <div className="flex justify-between items-end">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                Final Price
+                              </span>
+                              <div className="text-base sm:text-xl font-black text-warning-500 drop-shadow-md">
+                                {formatRate(item.rawBasePrice)}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
+                                Stock
+                              </span>
+                              <div className="flex flex-col items-end gap-1">
+                                {item.inventoryQty ? (
+                                  <div className="text-xs sm:text-sm">{item.inventoryQty}</div>
+                                ) : (
+                                  <div className="text-xs sm:text-sm font-bold text-foreground">{item.quantity}</div>
+                                )}
+                                {item.location && item.location !== "--" && (
+                                  <span className="text-[8px] sm:text-[10px] text-default-500 truncate max-w-[60px] sm:max-w-[100px]" title={item.location}>
+                                    📍 {item.location}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions Footer */}
+                        <div className="p-2 sm:p-3 bg-black/20 border-t border-white/5 flex flex-col gap-2 mt-auto">
+                           <div className="flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                              <div className="flex items-center gap-2">
+                                {canManageRow(item) ? (
+                                  <>
+                                    <EditModal
+                                      _id={item._id}
+                                      initialData={{
+                                        ...item,
+                                        quantity: item.quantityRaw
+                                      }}
+                                      currentTable={rate}
+                                      formFields={tableConfig[rate]}
+                                      apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : `${apiRoutesByRole[rate]}`}
+                                      refetchData={refetchData}
+                                    />
+                                    <DeleteModal
+                                      _id={item._id}
+                                      name={item.name || item.customTitle || item.productVariant}
+                                      deleteApiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.remove : apiRoutesByRole[rate]}
+                                      refetchData={refetchData}
+                                      useBody={true}
+                                    />
+                                  </>
+                                ) : item.isMarketplaceView ? (
+                                  <>
+                                    {!isAdminUser && typeof AddToCatalogButton !== 'undefined' && (
+                                      <AddToCatalogButton
+                                        rowItem={item}
+                                        isPersonalCatalogMode={isAssociateUser && !hasLinkedCompany}
+                                        onSuccess={() => refetchData()}
+                                      />
+                                    )}
+                                    {(user?.role === "Associate" || isAdminUser) && typeof CreateEnquiryButton !== 'undefined' && (
+                                      <CreateEnquiryButton productVariant={item.productVariantId} variantRate={item} />
+                                    )}
+                                    {typeof RequestSampleButton !== 'undefined' && <RequestSampleButton variantRate={item} />}
+                                  </>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    {!item.isCatalogView && (isLive || isAdminUser) && typeof CreateEnquiryButton !== 'undefined' && (
+                                      <CreateEnquiryButton
+                                        productVariant={item.productVariantId || item.variantRate?.productVariant?._id}
+                                        variantRate={item}
+                                      />
+                                    )}
+                                    {(isAdminUser || (isLive && !item.isCatalogView)) && typeof RequestSampleButton !== 'undefined' && (
+                                      <RequestSampleButton variantRate={item} />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {canAddInventory && (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="warning"
+                                    className="h-8 font-bold"
+                                    onPress={() => {
+                                      setSelectedInventoryRate(item);
+                                      setInventoryQty("");
+                                      setInventoryModalOpen(true);
+                                    }}
+                                  >
+                                    + Inventory
+                                  </Button>
+                                )}
+                                {canManageRow(item) && (
+                                  <LiveToggle
+                                    variantRate={item}
+                                    refetchData={refetchData}
+                                    apiEndpoint={rate === "catalogItem" ? apiRoutes.catalog.update : apiRoutesByRole[rate]}
+                                  />
+                                )}
+                              </div>
+                           </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Pagination Section */}
+              {finalTableData.length > 0 && (
+                <div className="flex w-full justify-center mt-10 mb-4">
+                  <Pagination
+                    isCompact
+                    showControls
+                    showShadow
+                    color="warning"
+                    page={meta?.currentPage || page}
+                    total={meta?.totalPages || 1}
+                    onChange={(newPage) => setPage(newPage)}
+                    classNames={{
+                      wrapper: "gap-2 overflow-visible h-10 rounded-2xl border border-white/5 bg-content1/50 backdrop-blur-md shadow-lg",
+                      item: "w-10 h-10 text-sm font-bold bg-transparent text-default-500 hover:bg-white/5",
+                      cursor: "bg-warning-500 font-black text-black shadow-[0_0_15px_rgba(245,165,36,0.4)]",
+                      prev: "bg-transparent text-default-500 hover:bg-white/5",
+                      next: "bg-transparent text-default-500 hover:bg-white/5"
+                    }}
+                  />
+                </div>
+              )}
             </section>
             <Modal
               isOpen={inventoryModalOpen}

@@ -177,15 +177,15 @@ export default function DashboardLayout({
   }
 
   return (
-    <section className="w-full min-w-0 h-full flex overflow-hidden db-bg relative lg:h-screen">
+    <section className="w-full min-w-0 h-[100dvh] flex overflow-hidden db-bg relative">
       <PrivateRoute allowedRoles={allowedRoles}>
         <DashboardEnhancements />
         {!isOnboardingLocked && !isApprovalPending && (
           <Sidebar isCollapsed={isCollapsed} setIsCollapsed={toggleSidebar} isOnboardingLocked={isOnboardingLocked} />
         )}
 
-        <div className={`flex-1 min-w-0 min-h-0 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${!isOnboardingLocked && !isApprovalPending ? (isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]") : "md:ml-0"}`}>
-          <div className="w-full lg:h-screen min-h-0 overflow-hidden flex flex-col relative">
+        <div className={`flex-1 min-w-0 min-h-0 flex flex-col transition-all duration-300 ease-in-out h-full ${!isOnboardingLocked && !isApprovalPending ? (isCollapsed ? "md:ml-[84px]" : "md:ml-[280px]") : "md:ml-0"}`}>
+          <div className="w-full h-full min-h-0 overflow-hidden flex flex-col relative">
             {/* Check if user data is available before rendering TopBar */}
             {user && !isApprovalPending && (
               <TopBar

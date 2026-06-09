@@ -1132,7 +1132,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 ) : (
                                   <div className="text-xs sm:text-sm font-bold text-foreground">{item.quantity}</div>
                                 )}
-                                {item.location && item.location !== "--" && (
+                                {shouldShowAssociateDetails && item.location && item.location !== "--" && (
                                   <span className="text-[8px] sm:text-[10px] text-default-500 truncate max-w-[60px] sm:max-w-[100px]" title={item.location}>
                                     📍 {item.location}
                                   </span>

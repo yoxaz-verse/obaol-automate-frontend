@@ -751,8 +751,7 @@ export default function OnboardingModal({
                     </div>
                     
                     <div className="relative z-10 max-w-lg">
-                      <h3 className="text-4xl font-black italic uppercase tracking-tighter text-success-500 leading-tight">Operation Successful</h3>
-                      <p className="text-[12px] text-default-500 font-bold uppercase tracking-[0.4em] mt-3 opacity-60">Identity & Entity protocols fully deployed to baseline</p>
+                      <h3 className="text-2xl sm:text-3xl font-black italic uppercase tracking-tighter text-success-500 leading-tight">The associate and the company added successfully</h3>
                     </div>
 
                     <div className="group relative z-10 max-w-md w-full p-10 rounded-[3rem] border border-success-500/20 bg-black/60 backdrop-blur-3xl shadow-2xl space-y-8 transition-all hover:border-success-500/40">
@@ -789,8 +788,8 @@ export default function OnboardingModal({
                     </div>
 
                     <div className="pt-4 relative z-10 flex flex-col items-center gap-6">
-                      <p className="text-[10px] text-default-500 font-black uppercase tracking-[0.5em] animate-pulse italic">Secure credentials and terminate modal</p>
-                      <Button color="success" onPress={onClose} className="font-black uppercase text-[11px] tracking-[0.3em] h-14 px-16 rounded-2xl bg-gradient-to-tr from-success-600 to-success-400 text-white shadow-[0_20px_50px_-10px_rgba(34,197,94,0.4)] hover:shadow-none transition-all italic">Return to Mission Control</Button>
+                      <p className="text-[10px] text-default-500 font-black uppercase tracking-[0.5em] animate-pulse italic">Please copy the token before closing</p>
+                      <Button color="success" onPress={onClose} className="font-black uppercase text-[11px] tracking-[0.3em] h-14 px-16 rounded-2xl bg-gradient-to-tr from-success-600 to-success-400 text-white shadow-[0_20px_50px_-10px_rgba(34,197,94,0.4)] hover:shadow-none transition-all italic">Close Window</Button>
                     </div>
                   </div>
                 )}

@@ -165,9 +165,11 @@ export default function CategoryGrid({
                                         <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.16em] text-default-400 line-clamp-1">
                                             Collection
                                         </span>
-                                        <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-warning-500/10 text-[9px] sm:text-[10px] font-bold text-warning-600 shrink-0">
-                                            {count} Items
-                                        </span>
+                                        {count > 0 && (
+                                            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-warning-500/10 text-[9px] sm:text-[10px] font-bold text-warning-600 shrink-0">
+                                                {count} {count === 1 ? 'Item' : 'Items'}
+                                            </span>
+                                        )}
                                     </div>
                                 )}
                             </div>

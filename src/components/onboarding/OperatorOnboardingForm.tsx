@@ -27,7 +27,7 @@ import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLef
 const EMPTY_LIST: any[] = [];
 declare global {
   interface Window {
-    google?: any;
+    google: any;
   }
 }
 const decodeJwt = (token: string): any => {

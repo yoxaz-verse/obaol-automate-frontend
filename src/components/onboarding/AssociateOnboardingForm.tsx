@@ -67,6 +67,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const AutocompleteAny = Autocomplete as any;
   const { user, refreshUser } = useContext(AuthContext);
   const isOnboarding = mode === "onboarding";
+  const DRAFT_KEY = `onboarding_draft_associate_${user?.id || "anonymous"}`;
   const [currentStep, setCurrentStep] = useState<StepKey>(1);
   const [completedStep, setCompletedStep] = useState<number>(0);
   const [showPassword, setShowPassword] = useState(false);
@@ -83,17 +84,6 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [emailCheckStatus, setEmailCheckStatus] = useState<"idle" | "available" | "exists" | "error">("idle");
   const [emailCheckMessage, setEmailCheckMessage] = useState("");
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
-  const debouncedEmail = useDebouncedValue(formData.email, 350);
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-  const [optionsDebug, setOptionsDebug] = useState<{
-    resolvedEndpoint: string;
-    counts: { designations: number; existingCompanies: number; companyTypes: number; countries: number };
-    lastError: string;
-  }>({
-    resolvedEndpoint: "",
-    counts: { designations: 0, existingCompanies: 0, companyTypes: 0, countries: 0 },
-    lastError: "",
-  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -147,6 +137,18 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     if (parsed?.currentStep) setCurrentStep(parsed.currentStep);
     if (parsed?.completedStep) setCompletedStep(parsed.completedStep);
   }, []);
+
+  const debouncedEmail = useDebouncedValue(formData.email, 350);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const [optionsDebug, setOptionsDebug] = useState<{
+    resolvedEndpoint: string;
+    counts: { designations: number; existingCompanies: number; companyTypes: number; countries: number };
+    lastError: string;
+  }>({
+    resolvedEndpoint: "",
+    counts: { designations: 0, existingCompanies: 0, companyTypes: 0, countries: 0 },
+    lastError: "",
+  });
 
   useOnboardingDraftPersistence({
     enabled: isOnboarding,

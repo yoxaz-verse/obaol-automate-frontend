@@ -41,6 +41,7 @@ import {
   FiX,
   FiShoppingBag,
   FiPlus,
+  FiMenu,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -299,7 +300,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  type ViewMode = "grid" | "list" | "table";
+  type ViewMode = "grid" | "list" | "table" | "compact";
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
   const limit = isMarketplaceView ? 24 : 24;
@@ -1065,7 +1066,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
         const searchText = effectiveSearch.toLowerCase();
         const shouldApplyClientSearch =
           !serverSearch && !isMarketplaceView && Boolean(searchText);
-        const finalTableData = shouldApplyClientSearch
+        let finalTableData = shouldApplyClientSearch
           ? tableData.filter((row: any) => {
               const haystack = [
                 toDisplayText(row.product, ""),
@@ -1082,6 +1083,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
               return haystack.includes(searchText);
             })
           : tableData;
+
+        finalTableData = finalTableData.map((row: any) => {
+          let vName = toDisplayText(row.productVariant, "");
+          let pName = toDisplayText(row.product, "");
+          if (vName && pName && vName.toLowerCase().startsWith(pName.toLowerCase())) {
+            vName = vName.slice(pName.length).trim();
+            vName = vName || "Base";
+          }
+          return { ...row, productVariant: vName };
+        });
 
         return (
           <div className="w-full max-w-full min-w-0">
@@ -1342,6 +1353,20 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         onPress={() => setViewMode("table")}
                       >
                         <FiLayout size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        isIconOnly
+                        variant={viewMode === "compact" ? "shadow" : "light"}
+                        color={viewMode === "compact" ? "warning" : "default"}
+                        className={
+                          viewMode === "compact"
+                            ? "text-black"
+                            : "text-default-400"
+                        }
+                        onPress={() => setViewMode("compact")}
+                      >
+                        <FiMenu size={16} />
                       </Button>
                     </div>
                   </div>
@@ -1859,6 +1884,47 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
                                   {actionButtons}
                                   {secondaryActions}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        }
+
+                        if (viewMode === "compact") {
+                          return (
+                            <motion.div
+                              key={`compact-${item._id || index}`}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{
+                                delay: index * 0.03,
+                                duration: 0.2,
+                              }}
+                              className="group flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 px-3 sm:px-4 bg-content1/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:border-white/10 hover:bg-content1/60 transition-all"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`shrink-0 w-2 h-2 rounded-full ${isLive ? "bg-success-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]" : "bg-default-300"}`} />
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
+                                  <span className="text-[10px] font-bold text-warning-500 uppercase tracking-widest truncate w-24 sm:w-auto">
+                                    {toDisplayText(item.product, "Product")}
+                                  </span>
+                                  <span className="hidden sm:inline text-default-500 text-xs">/</span>
+                                  <span className="text-xs sm:text-sm font-black text-foreground truncate max-w-[200px]">
+                                    {toDisplayText(item.productVariant, "Variant")}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4 shrink-0 mt-2 sm:mt-0">
+                                <div className="flex items-center gap-4">
+                                  <span className="text-[10px] text-default-400 w-12 text-right">
+                                    {item.inventoryQty || item.quantity || "-"}
+                                  </span>
+                                  <span className="text-sm font-bold text-warning-400 w-24 text-right tabular-nums">
+                                    {formatRate(item.rawBasePrice)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {actionButtons}
                                 </div>
                               </div>
                             </motion.div>

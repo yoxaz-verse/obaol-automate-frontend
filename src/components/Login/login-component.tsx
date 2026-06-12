@@ -592,7 +592,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       highlightClassName: "bg-gradient-to-r from-orange-400 to-amber-500",
       audienceLabels: ["Manufacturers", "Traders", "Logistics Partners", "Freight Forwarders", "Export/Import Teams"],
       infoStripTitle: "Associate Lane",
-      infoStripMessage: "Built for partner and logistics networks.",
+      infoStripMessage: "Built for exporters, importers, suppliers, and buyers.",
       infoStripIcon: FiUsers,
       switchLabel: "Go to Operator Console",
       switchSubLabel: "Switch Role",

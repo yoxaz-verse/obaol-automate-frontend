@@ -298,13 +298,29 @@ export default function CatalogPage() {
     setBrowsePage(1);
   }, [currentLevel, currentNav?.id, classificationTab, search]);
 
-  const handleSelect = (item: any) => {
-    if (currentLevel < 2) {
-      setNavigation(prev => [...prev, { id: item._id, name: item.name }]);
-    } else {
+  const handleSelect = (item: any, selectionType: "category" | "subcategory" | "product") => {
+    setNavigation(prev => {
+      const latestLevel = prev.length - 1;
+      const latestNav = prev[latestLevel];
+      const isSameSelection = latestNav?.id === item._id;
+      const expectedType =
+        latestLevel === 0 ? "category" :
+          latestLevel === 1 ? "subcategory" :
+            latestLevel === 2 ? "product" :
+              null;
+
+      if (!expectedType || isSameSelection || selectionType !== expectedType) return prev;
+
+      if (latestLevel < 2) {
+        setSelectedProduct(null);
+        return [...prev, { id: item._id, name: item.name }];
+      }
+
+      if (selectedProduct?._id === item._id) return prev;
+
       setSelectedProduct(item);
-      setNavigation(prev => [...prev, { id: item._id, name: item.name }]);
-    }
+      return [...prev, { id: item._id, name: item.name }];
+    });
   };
 
   // Navigate to a specific item from search
@@ -582,7 +598,7 @@ export default function CatalogPage() {
                             <>
                               <CategoryGrid
                                 items={items}
-                                onSelect={handleSelect}
+                                onSelect={(item) => handleSelect(item, config.type as "category" | "subcategory" | "product")}
                                 type={config.type as any}
                                 cardThemeClass={activeTheme.shellClass}
                                 cardBorderClass={activeTheme.shellBorderClass}

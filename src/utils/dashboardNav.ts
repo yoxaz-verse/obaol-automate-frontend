@@ -25,7 +25,6 @@ export const DASHBOARD_NAV_SECTIONS: DashboardNavSection[] = [
     label: "Services",
     links: ["/dashboard/imports", "/dashboard/external-orders", "/dashboard/execution-enquiries", "/dashboard/warehouse-rent", "/dashboard/quality-labs"],
   },
-  { label: "News", links: ["/dashboard/news"] },
   {
     label: "Manage",
     links: [
@@ -111,4 +110,3 @@ export const getDashboardSidebarSections = (
     return { ...section, links };
   }).filter((section) => section.links.length > 0);
 };
-

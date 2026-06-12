@@ -802,7 +802,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <span
                       className={`text-[10px] font-black uppercase tracking-widest ${item.isLive ? "text-success-400" : "text-default-400"}`}
                     >
-                      {item.isLive ? "LIVE_NODE" : "OFFLINE"}
+                      {item.isLive ? "LIVE" : "OFFLINE"}
                     </span>
                   </div>
                 ),

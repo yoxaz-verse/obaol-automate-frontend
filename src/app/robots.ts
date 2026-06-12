@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
           "/procurement",
           "/verification",
           "/export-resources",
-          "/news",
           "/roles",
           "/roles/associate",
           "/roles/associate/",

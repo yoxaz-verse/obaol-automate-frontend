@@ -13,7 +13,6 @@ const NAV = [
   { href: "/product", label: "Products" },
   { href: "/roles", label: "Roles" },
   { href: "/why-obaol", label: "Why OBAOL" },
-  { href: "/news", label: "News" },
   { href: "/faq", label: "FAQ" },
 ];
 

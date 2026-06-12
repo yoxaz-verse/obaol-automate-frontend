@@ -6,7 +6,6 @@ import Footer from "@/components/home/footer";
 import { buildPublicWebApiUrl } from "@/utils/publicApi";
 import { fetchCommodityFacts } from "@/utils/research";
 import ProductFacts from "@/components/product/ProductFacts";
-import ProductNews from "@/components/product/ProductNews";
 import { Spacer, Chip, Divider, Card, Image } from "@nextui-org/react";
 import { buildMetadata } from "@/utils/seo";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
@@ -244,17 +243,13 @@ export default async function ProductDetailPage({
       {/* Main Content Grid */}
       <div className="mx-auto w-[95%] max-w-6xl py-12">
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12">
-          {/* Left Column: Research & News */}
+          {/* Left Column: Research */}
           <div className="space-y-12">
             {facts && (
               <section>
                 <ProductFacts facts={facts} productionRegions={states} />
               </section>
             )}
-
-            <section>
-              <ProductNews query={product.name} />
-            </section>
           </div>
 
           {/* Right Column: Execution & Regions */}

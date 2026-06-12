@@ -67,6 +67,13 @@ export default function MarketplacePage() {
         () => (classificationTab === "all" ? [] : [classificationTab]),
         [classificationTab]
     );
+    const marketplaceListParams = useMemo(
+        () => ({
+            view: "marketplace",
+            ...(effectiveClassifications.length > 0 && { classifications: effectiveClassifications }),
+        }),
+        [effectiveClassifications]
+    );
     const activeTheme = useMemo(
         () => resolveActiveClassificationTheme(effectiveClassifications),
         [effectiveClassifications]
@@ -225,7 +232,7 @@ export default function MarketplacePage() {
                                         {loadedTabs["marketplace-live"] && (
                                             <VariantRate
                                                 rate="variantRate"
-                                                additionalParams={{ view: "marketplace", isLive: true, classifications: effectiveClassifications }}
+                                                additionalParams={{ ...marketplaceListParams, isLive: true }}
                                                 hideBuiltInFilters
                                                 externalSearch={liveState.search}
                                                 externalFilters={liveState.filters}
@@ -240,7 +247,7 @@ export default function MarketplacePage() {
                                         {loadedTabs["marketplace-offline"] && (
                                             <VariantRate
                                                 rate="variantRate"
-                                                additionalParams={{ view: "marketplace", isLive: false, classifications: effectiveClassifications }}
+                                                additionalParams={{ ...marketplaceListParams, isLive: false }}
                                                 hideBuiltInFilters
                                                 externalSearch={offlineState.search}
                                                 externalFilters={offlineState.filters}

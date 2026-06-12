@@ -19,7 +19,7 @@ import { TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
-import { FiBell, FiFlag, FiFileText, FiGlobe, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
+import { FiBell, FiFlag, FiFileText, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
 import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage, LuFlaskConical } from "react-icons/lu";
 
 
@@ -148,11 +148,6 @@ export const sidebarOptions = [
     name: "Documents",
     icon: <FiFileText />,
     link: "/dashboard/documents",
-  },
-  {
-    name: "News",
-    icon: <FiGlobe />,
-    link: "/dashboard/news",
   },
   {
     name: "Documentation Rules",

@@ -23,7 +23,6 @@ const PRIMARY_NAV = [
 
 const MORE_NAV = [
   { href: "/why-obaol", label: "Why OBAOL" },
-  { href: "/news", label: "News" },
   { href: "/faq", label: "FAQ" },
 ];
 
@@ -312,4 +311,3 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     </Link>
   );
 }
-

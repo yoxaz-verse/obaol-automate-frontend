@@ -49,7 +49,7 @@ export default function OperatorOverviewPage() {
 
   const operatorsQuery = useQuery({
     queryKey: ["operator-overview", "operators"],
-    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 200, sort: "name:asc" }),
     enabled: isAdmin,
     refetchOnWindowFocus: false,
   });

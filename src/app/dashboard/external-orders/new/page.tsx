@@ -234,9 +234,24 @@ export default function ExternalOrderCreatePage() {
     queryKey: ["states"],
     queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 500 }),
   });
+  const districtStateIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [executionContext.originState, executionContext.destinationState].filter(Boolean)
+        )
+      ),
+    [executionContext.originState, executionContext.destinationState]
+  );
   const { data: districtsResponse } = useQuery({
-    queryKey: ["districts"],
-    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
+    queryKey: ["districts", districtStateIds.join("|")],
+    queryFn: () =>
+      getData(apiRoutes.district.getAll, {
+        page: 1,
+        limit: 500,
+        state: districtStateIds,
+      }),
+    enabled: districtStateIds.length > 0,
   });
   const { data: countriesResponse } = useQuery({
     queryKey: ["countries"],

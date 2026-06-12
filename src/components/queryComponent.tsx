@@ -21,6 +21,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     loadingMessage = "Loading",
     emptyState,
     onMetaChange,
+    enabled = true,
   } = props;
   const randomFact = useMemo(() => {
     return loadingFacts[Math.floor(Math.random() * loadingFacts.length)];
@@ -51,6 +52,7 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     refetchOnWindowFocus: false,
     retry: 1,
     placeholderData: keepPreviousData,
+    enabled,
   });
 
   const rawResult = page !== undefined ? data?.data?.data : data?.data;
@@ -78,6 +80,10 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     if (!onMetaChange) return;
     onMetaChange(responseMeta);
   }, [onMetaChange, responseMeta]);
+
+  if (!enabled) {
+    return null;
+  }
 
   const renderLoading = () => {
     if (loadingVariant === "inline") {

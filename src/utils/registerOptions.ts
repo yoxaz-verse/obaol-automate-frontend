@@ -22,6 +22,7 @@ const normalizeArray = <T>(value: unknown): T[] => (Array.isArray(value) ? value
 
 export type RegisterOptionsPayload = {
   existingCompanies: any[];
+  designations: any[];
   companyTypes: any[];
   states: any[];
   districts: any[];
@@ -45,6 +46,7 @@ export async function fetchRegisterOptions(): Promise<RegisterOptionsPayload & {
   return {
     resolvedEndpoint: endpoint,
     existingCompanies: normalizeArray(payload?.existingCompanies),
+    designations: normalizeArray(payload?.designations),
     companyTypes: normalizeArray(payload?.companyTypes),
     states: normalizeArray(payload?.states),
     districts: normalizeArray(payload?.districts),

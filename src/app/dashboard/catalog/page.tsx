@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useContext } from "react";
-import { Input, Chip, Tab, Tabs } from "@heroui/react";
+import React, { useEffect, useMemo, useState, useContext } from "react";
+import { Input, Chip, Tab, Tabs, Pagination } from "@heroui/react";
+import { useQuery } from "@tanstack/react-query";
 import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight, FiGrid } from "react-icons/fi";
 import { ProductList } from "@/components/dashboard/Catalog/product-list";
 import QueryComponent from "@/components/queryComponent";
@@ -14,8 +15,18 @@ import EditModal from "@/components/CurdTable/edit-model";
 import UserDeleteModal from "@/components/CurdTable/delete";
 import { motion, AnimatePresence } from "framer-motion";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+import { getData } from "@/core/api/apiHandler";
 
-const CATALOG_FETCH_LIMIT = 5000;
+const CATALOG_PAGE_SIZE = 24;
+const CATALOG_SEARCH_PAGE_SIZE = 12;
+const CATALOG_ENRICHMENT_LIMIT = 250;
+
+const extractRows = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.data)) return value.data;
+  if (Array.isArray(value?.data?.data)) return value.data.data;
+  return [];
+};
 
 // ─── Deep Search Result Card ─────────────────────────────────────────────────
 function DeepSearchResult({
@@ -94,11 +105,11 @@ function DeepSearchPanel({
         api={apiRoutesByRole["category"]}
         queryKey={["search-category", search]}
         page={1}
-        limit={CATALOG_FETCH_LIMIT}
+        limit={CATALOG_SEARCH_PAGE_SIZE}
         additionalParams={{ search }}
       >
         {(data: any) => {
-          const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
+          const items: any[] = extractRows(data);
           if (!items.length) return null;
           return (
             <div>
@@ -120,11 +131,11 @@ function DeepSearchPanel({
         api={apiRoutesByRole["subCategory"]}
         queryKey={["search-subCategory", search]}
         page={1}
-        limit={CATALOG_FETCH_LIMIT}
+        limit={CATALOG_SEARCH_PAGE_SIZE}
         additionalParams={{ search }}
       >
         {(data: any) => {
-          const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
+          const items: any[] = extractRows(data);
           if (!items.length) return null;
           return (
             <div>
@@ -152,14 +163,14 @@ function DeepSearchPanel({
         api={apiRoutesByRole["product"]}
         queryKey={["search-product", search]}
         page={1}
-        limit={CATALOG_FETCH_LIMIT}
+        limit={CATALOG_SEARCH_PAGE_SIZE}
         additionalParams={{
           search,
           ...(classifications.length ? { classifications } : {}),
         }}
       >
         {(data: any) => {
-          const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
+          const items: any[] = extractRows(data);
           if (!items.length) return null;
           return (
             <div>
@@ -193,11 +204,11 @@ function DeepSearchPanel({
         api={apiRoutesByRole["associateCompany"]}
         queryKey={["search-company", search]}
         page={1}
-        limit={CATALOG_FETCH_LIMIT}
+        limit={CATALOG_SEARCH_PAGE_SIZE}
         additionalParams={{ search }}
       >
         {(data: any) => {
-          const items: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.data) ? data.data.data : [];
+          const items: any[] = extractRows(data);
           if (!items.length) return null;
           return (
             <div>
@@ -252,6 +263,8 @@ export default function CatalogPage() {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [search, setSearch] = useState("");
   const [classificationTab, setClassificationTab] = useState<"all" | "conventional" | "natural" | "organic" | "ipm" | "gi-tag">("all");
+  const [browsePage, setBrowsePage] = useState(1);
+  const [browseMeta, setBrowseMeta] = useState<{ totalPages?: number; currentPage?: number } | undefined>();
 
   // Management State
   const [editItem, setEditItem] = useState<any | null>(null);
@@ -265,6 +278,25 @@ export default function CatalogPage() {
   const activeTheme = resolveActiveClassificationTheme(effectiveClassifications);
   const showWatermark = classificationTab !== "all";
   const WatermarkIcon = activeTheme.icon;
+  const catalogItemsQuery = useQuery({
+    queryKey: ["my-catalog-items-enrichment", refreshKey, user?.id],
+    queryFn: () =>
+      getData(apiRoutesByRole["catalogItem"], {
+        page: 1,
+        limit: CATALOG_ENRICHMENT_LIMIT,
+      }),
+    enabled: !isSearching,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const myItems = useMemo(
+    () => extractRows(catalogItemsQuery.data?.data?.data ?? catalogItemsQuery.data?.data),
+    [catalogItemsQuery.data]
+  );
+
+  useEffect(() => {
+    setBrowsePage(1);
+  }, [currentLevel, currentNav?.id, classificationTab, search]);
 
   const handleSelect = (item: any) => {
     if (currentLevel < 2) {
@@ -501,109 +533,93 @@ export default function CatalogPage() {
                 exit={{ opacity: 0, y: -2 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <QueryComponent
-                  api={apiRoutesByRole["catalogItem"]}
-                  queryKey={["my-catalog-items", refreshKey]}
-                  page={1}
-                  limit={CATALOG_FETCH_LIMIT}
-                >
-                  {(catalogItemsData: any) => {
-                    const myItems = Array.isArray(catalogItemsData)
-                      ? catalogItemsData
-                      : (Array.isArray(catalogItemsData?.data)
-                        ? catalogItemsData.data
-                        : (Array.isArray(catalogItemsData?.data?.data)
-                          ? catalogItemsData.data.data
-                          : []));
-
-                    if (selectedProduct) {
-                      return (
-                        <div className={`rounded-[3rem] p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden border ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
-                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-warning-400 to-orange-500 opacity-50" />
-                          <ProductList
-                            product={selectedProduct}
-                            setProduct={setSelectedProduct}
-                            themeShellClass={activeTheme.shellClass}
-                            themeBorderClass={activeTheme.shellBorderClass}
-                            onProductDeleted={() => {
-                              setSelectedProduct(null);
-                              handleBreadcrumbNavigate(2);
-                              refetchData();
-                            }}
-                            myCatalogItems={myItems}
-                          />
-                        </div>
-                      );
-                    }
-
-                    const api = apiRoutesByRole[config.type];
-                    const queryKey = [config.type, currentNav.id || "root", refreshKey];
-                    const params = currentLevel === 1 ? { category: currentNav.id } : currentLevel === 2 ? { subCategory: currentNav.id } : {};
-                    const scopedParams = {
-                      ...params,
+                {selectedProduct ? (
+                  <div className={`rounded-[3rem] p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden border ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-warning-400 to-orange-500 opacity-50" />
+                    <ProductList
+                      product={selectedProduct}
+                      setProduct={setSelectedProduct}
+                      themeShellClass={activeTheme.shellClass}
+                      themeBorderClass={activeTheme.shellBorderClass}
+                      onProductDeleted={() => {
+                        setSelectedProduct(null);
+                        handleBreadcrumbNavigate(2);
+                        refetchData();
+                      }}
+                      myCatalogItems={myItems}
+                    />
+                  </div>
+                ) : (
+                  <QueryComponent
+                    api={apiRoutesByRole[config.type]}
+                    queryKey={[config.type, currentNav.id || "root", refreshKey, effectiveClassifications.join(",")]}
+                    page={browsePage}
+                    limit={CATALOG_PAGE_SIZE}
+                    additionalParams={{
+                      ...(currentLevel === 1 ? { category: currentNav.id } : {}),
+                      ...(currentLevel === 2 ? { subCategory: currentNav.id } : {}),
                       ...(config.type === "product" && effectiveClassifications.length
                         ? { classifications: effectiveClassifications }
                         : {}),
-                    };
+                    }}
+                    onMetaChange={setBrowseMeta}
+                  >
+                    {(data: any, _refetch, meta) => {
+                      const items = extractRows(data);
+                      const counts: Record<string, number> = {};
+                      myItems.forEach((item: any) => {
+                        let id = null;
+                        if (currentLevel === 0) id = item.productVariantId?.product?.category?._id || item.productVariantId?.product?.subCategory?.category?._id;
+                        else if (currentLevel === 1) id = item.productVariantId?.product?.subCategory?._id;
+                        else if (currentLevel === 2) id = item.productVariantId?.product?._id;
+                        if (id) counts[id] = (counts[id] || 0) + 1;
+                      });
+                      const pageCount = meta?.totalPages || browseMeta?.totalPages || 1;
 
-                    return (
-                      <QueryComponent
-                        api={api}
-                        queryKey={[...queryKey]}
-                        page={1}
-                        limit={CATALOG_FETCH_LIMIT}
-                        additionalParams={scopedParams}
-                      >
-                        {(data: any) => {
-                          const items = Array.isArray(data)
-                            ? data
-                            : (Array.isArray(data?.data)
-                              ? data.data
-                              : (Array.isArray(data?.data?.data)
-                                ? data.data.data
-                                : []));
-
-                          const counts: Record<string, number> = {};
-                          myItems.forEach((item: any) => {
-                            let id = null;
-                            if (currentLevel === 0) id = item.productVariantId?.product?.category?._id || item.productVariantId?.product?.subCategory?.category?._id;
-                            else if (currentLevel === 1) id = item.productVariantId?.product?.subCategory?._id;
-                            else if (currentLevel === 2) id = item.productVariantId?.product?._id;
-                            if (id) counts[id] = (counts[id] || 0) + 1;
-                          });
-
-                          return (
-                            <div className="flex flex-col gap-6">
-                              {items.length > 0 ? (
-                                <CategoryGrid
-                                  items={items}
-                                  onSelect={handleSelect}
-                                  type={config.type as any}
-                                  cardThemeClass={activeTheme.shellClass}
-                                  cardBorderClass={activeTheme.shellBorderClass}
-                                  counts={counts}
-                                  isAdmin={isAdmin}
-                                  onEdit={setEditItem}
-                                  onDelete={setDeleteItem}
-                                />
-                              ) : (
-                                <div className="h-[400px] flex flex-col items-center justify-center text-center gap-4 text-default-400">
-                                  <div className="w-24 h-24 rounded-[2rem] bg-foreground/5 flex items-center justify-center mb-4 border border-foreground/10 rotate-12">
-                                    <FiX size={40} className="opacity-20" />
-                                  </div>
-                                  <h3 className="text-2xl font-bold text-foreground">No Items Found</h3>
-                                  <p className="max-w-md mx-auto text-sm leading-relaxed">
-                                    We couldn&apos;t find any results here. Try searching or navigate back.
-                                  </p>
+                      return (
+                        <div className="flex flex-col gap-6">
+                          {items.length > 0 ? (
+                            <>
+                              <CategoryGrid
+                                items={items}
+                                onSelect={handleSelect}
+                                type={config.type as any}
+                                cardThemeClass={activeTheme.shellClass}
+                                cardBorderClass={activeTheme.shellBorderClass}
+                                counts={counts}
+                                isAdmin={isAdmin}
+                                onEdit={setEditItem}
+                                onDelete={setDeleteItem}
+                              />
+                              {pageCount > 1 && (
+                                <div className="flex justify-center pt-2">
+                                  <Pagination
+                                    isCompact
+                                    showControls
+                                    color="warning"
+                                    page={meta?.currentPage || browsePage}
+                                    total={pageCount}
+                                    onChange={setBrowsePage}
+                                  />
                                 </div>
                               )}
+                            </>
+                          ) : (
+                            <div className="h-[400px] flex flex-col items-center justify-center text-center gap-4 text-default-400">
+                              <div className="w-24 h-24 rounded-[2rem] bg-foreground/5 flex items-center justify-center mb-4 border border-foreground/10 rotate-12">
+                                <FiX size={40} className="opacity-20" />
+                              </div>
+                              <h3 className="text-2xl font-bold text-foreground">No Items Found</h3>
+                              <p className="max-w-md mx-auto text-sm leading-relaxed">
+                                We couldn&apos;t find any results here. Try searching or navigate back.
+                              </p>
                             </div>
-                          );
-                        }}
-                      </QueryComponent>
-                    );
-                  }}
-                </QueryComponent>
+                          )}
+                        </div>
+                      );
+                    }}
+                  </QueryComponent>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

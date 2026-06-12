@@ -136,6 +136,7 @@ export interface QueryComponentProps<T> {
   loadingMessage?: string;
   emptyState?: React.ReactNode;
   onMetaChange?: (meta?: QueryComponentMeta) => void;
+  enabled?: boolean;
 }
 
 export interface StatusUpdateProps {

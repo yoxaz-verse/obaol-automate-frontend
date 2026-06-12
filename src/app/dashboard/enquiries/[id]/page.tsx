@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -320,9 +320,24 @@ export default function EnquiryDetailsPage() {
         queryKey: ["states"],
         queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 500 }),
     });
+    const districtStateIds = useMemo(
+        () =>
+            Array.from(
+                new Set(
+                    [executionContext.originState, executionContext.destinationState].filter(Boolean)
+                )
+            ),
+        [executionContext.originState, executionContext.destinationState]
+    );
     const { data: districtsResponse } = useQuery({
-        queryKey: ["districts"],
-        queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
+        queryKey: ["districts", districtStateIds.join("|")],
+        queryFn: () =>
+            getData(apiRoutes.district.getAll, {
+                page: 1,
+                limit: 500,
+                state: districtStateIds,
+            }),
+        enabled: districtStateIds.length > 0,
     });
     const { data: countriesResponse } = useQuery({
         queryKey: ["countries"],

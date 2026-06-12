@@ -12,10 +12,14 @@ export default function UnLoCodeMapPage() {
         api={unLoCodeRoutes.getAll}
         queryKey={["unlocodes", unLoCodeRoutes.getAll]}
         page={1}
-        limit={200000}
+        limit={1000}
       >
         {(response: any) => {
-          const docs: any[] = response?.data || [];
+          const docs: any[] = Array.isArray(response)
+            ? response
+            : Array.isArray(response?.data)
+              ? response.data
+              : [];
 
           const markers: MarkerData[] = docs.flatMap((u) => {
             const lat = u.coordinates?.latitude;

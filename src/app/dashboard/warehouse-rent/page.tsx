@@ -118,7 +118,7 @@ export default function WarehouseRentPage() {
   } = useQuery({
     queryKey: ["warehouse-rentals-directory", roleLower, user?.id],
     queryFn: async () => {
-      const res: any = await getData(apiRoutes.warehouses.directory, { page: 1, limit: 1000 });
+      const res: any = await getData(apiRoutes.warehouses.directory, { page: 1, limit: 100 });
       return toArrayData(res);
     },
     staleTime: 5 * 60 * 1000,

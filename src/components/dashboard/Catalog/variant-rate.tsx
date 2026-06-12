@@ -309,6 +309,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [inventorySubmitting, setInventorySubmitting] = useState(false);
   const [selectedInventoryRate, setSelectedInventoryRate] = useState<any>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [inventoryStatusReady, setInventoryStatusReady] = useState(false);
   const [publicDisplayMeta, setPublicDisplayMeta] = useState<
     QueryComponentMeta | undefined
   >(undefined);
@@ -350,6 +351,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
     if (!openCreateModalSignal) return;
     setWizardOpen(true);
   }, [openCreateModalSignal]);
+
+  useEffect(() => {
+    if (!showInventoryStatus) {
+      setInventoryStatusReady(false);
+      return;
+    }
+    setInventoryStatusReady(false);
+    const timer = window.setTimeout(() => setInventoryStatusReady(true), 350);
+    return () => window.clearTimeout(timer);
+  }, [showInventoryStatus, inventoryCompanyId, user?.id]);
 
   const { data: variantResponse } = useQuery({
     queryKey: ["displayedRate", user?.id],
@@ -475,7 +486,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
         ...(isAssociateUser && !inventoryCompanyId && { associate: user?.id }),
       }),
     enabled:
-      showInventoryStatus && (Boolean(inventoryCompanyId) || isAssociateUser),
+      inventoryStatusReady &&
+      showInventoryStatus &&
+      (Boolean(inventoryCompanyId) || isAssociateUser),
   });
 
   const inventoryRows = useMemo(
@@ -1299,7 +1312,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     No Products Live
                   </h3>
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
-                    You haven't activated any products for the live market yet.
+                    You haven&apos;t activated any products for the live market yet.
                     Switch to your general product list and toggle them live to
                     start trading.
                   </p>
@@ -2457,13 +2470,18 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
 
   const { data: statesResponse } = useQuery({
     queryKey: ["sample-request-states"],
-    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 1000 }),
+    queryFn: () => getData(apiRoutes.state.getAll, { page: 1, limit: 500 }),
     enabled: isOpen,
   });
   const { data: districtsResponse } = useQuery({
-    queryKey: ["sample-request-districts"],
-    queryFn: () => getData(apiRoutes.district.getAll, { page: 1, limit: 2000 }),
-    enabled: isOpen,
+    queryKey: ["sample-request-districts", requestState],
+    queryFn: () =>
+      getData(apiRoutes.district.getAll, {
+        page: 1,
+        limit: 500,
+        state: requestState,
+      }),
+    enabled: isOpen && !!requestState,
   });
   const states = useMemo(
     () =>
@@ -2486,9 +2504,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
     queryFn: () =>
       getData(apiRoutes.division.getAll, {
         district: requestDistrict,
-        limit: 1000,
+        limit: 300,
       }),
-    enabled: !!requestDistrict,
+    enabled: isOpen && !!requestDistrict,
   });
 
   // Dynamic Pincodes Fetching
@@ -2500,7 +2518,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         ...(debouncedPincodeSearch ? { search: debouncedPincodeSearch } : {}),
         limit: 100,
       }),
-    enabled: !!requestDivision,
+    enabled: isOpen && !!requestDivision,
   });
 
   const divisionOptions = useMemo(() => {
@@ -2548,7 +2566,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
         variantRateId: variantRate?._id,
         ...(buyerIdForSample ? { buyerAssociateId: buyerIdForSample } : {}),
       }),
-    enabled: Boolean(variantRate?._id) && Boolean(buyerIdForSample),
+    enabled: isOpen && Boolean(variantRate?._id) && Boolean(buyerIdForSample),
   });
 
   const recentSampleRows = Array.isArray(recentSampleResponse?.data?.data?.data)
@@ -3365,7 +3383,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
   const { data: associatesResponse, isLoading: buyerOptionsLoading } = useQuery(
     {
       queryKey: ["enquiry-buyer-options"],
-      queryFn: () => getData(apiRoutes.enquiry.buyerOptions, { limit: 2000 }),
+      queryFn: () => getData(apiRoutes.enquiry.buyerOptions, { limit: 500 }),
       enabled: isAdminUser,
     },
   );

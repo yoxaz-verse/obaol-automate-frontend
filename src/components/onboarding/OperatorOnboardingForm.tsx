@@ -25,6 +25,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiMail, FiLock, FiMapPin, FiGlobe, FiChevronRight, FiChevronLeft, FiCheck } from "react-icons/fi";
 
 const EMPTY_LIST: any[] = [];
+const normalizeOnboardingError = (error: any) => {
+  const status = Number(error?.response?.status || 0);
+  const raw = String(error?.response?.data?.message || error?.message || "Registration failed. Please try again.");
+  if (status === 401) return "Your onboarding session expired. Please sign in again and continue onboarding.";
+  if (status === 429) return raw || "Too many attempts. Please wait and try again.";
+  if (/verify your email|verified email|otp/i.test(raw)) return raw;
+  if (/network error|err_network/i.test(raw)) return "Connection failed. Please check your internet and retry.";
+  if (/duplicate key|already registered/i.test(raw)) return "This email is already registered. Please sign in or use another email.";
+  if (/registry|entity 'api'|not found in registry/i.test(raw)) return "Service is still syncing. Please retry in a minute.";
+  return raw;
+};
 declare global {
   interface Window {
     google: any;
@@ -91,7 +102,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
   });
 
   const draftLoadedRef = useRef(false);
-  const DRAFT_KEY = `onboarding_draft_operator_${user?.id || "anonymous"}`;
+  const DRAFT_KEY = useMemo(() => `onboarding_draft_operator_${user?.id || "anonymous"}`, [user?.id]);
 
   useEffect(() => {
     if (!isOnboarding) return;
@@ -112,7 +123,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     } finally {
       draftLoadedRef.current = true;
     }
-  }, [isOnboarding, user?.id]);
+  }, [DRAFT_KEY, isOnboarding, user?.id]);
 
   useEffect(() => {
     if (!isOnboarding) return;
@@ -138,7 +149,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [form, currentStep, completedStep, isOnboarding, user?.id]);
+  }, [DRAFT_KEY, form, currentStep, completedStep, isOnboarding, user?.id]);
   const referralParam = String(searchParams?.get("ref") || "").trim();
 
   useEffect(() => {
@@ -193,7 +204,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
     return () => {
       if (script.parentNode) script.parentNode.removeChild(script);
     };
-  }, [googleClientId]);
+  }, [googleClientId, isOnboarding]);
 
   useEffect(() => {
     if (isOnboarding) return;
@@ -223,7 +234,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       text: "continue_with",
       shape: "pill",
     });
-  }, [googleReady, googleClientId]);
+  }, [googleReady, googleClientId, isOnboarding]);
 
   const languages = Array.isArray(optionsResponse?.languages) ? optionsResponse.languages : EMPTY_LIST;
   const countries = Array.isArray(optionsResponse?.countries) ? optionsResponse.countries : EMPTY_LIST;
@@ -429,10 +440,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       }
     } catch (error: any) {
       setIsLoading(false);
-      const rawMessage = error?.response?.data?.message || error?.message || "Registration failed. Please try again.";
-      const friendlyMessage = /registry|entity 'api'|not found in registry/i.test(String(rawMessage))
-        ? "Service is still syncing. Please retry in a minute."
-        : rawMessage;
+      const friendlyMessage = normalizeOnboardingError(error);
       setFormError(friendlyMessage);
       showToastMessage({ type: "error", message: friendlyMessage, position: "top-right" });
     }

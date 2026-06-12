@@ -151,7 +151,7 @@ export default function QualityLabsPage() {
     queryFn: async () => {
       const res: any = await getData(apiRoutes.associateCompany.labsDirectory, {
         page: 1,
-        limit: 1000,
+        limit: 100,
       });
       return toArrayData<AssociateCompany>(res);
     },

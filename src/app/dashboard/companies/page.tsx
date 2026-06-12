@@ -436,8 +436,8 @@ export default function CompanyProductPage() {
 
   const operatorsQuery = useQuery({
     queryKey: ["admin-operator-list-for-company-assignment"],
-    queryFn: () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000, sort: "name:asc" }),
-    enabled: isAdmin && Boolean(selectedCompanyId),
+    queryFn: () => getData(apiRoutes.operator.getAll, { page: 1, limit: 200, sort: "name:asc" }),
+    enabled: isAdmin && Boolean(selectedCompanyId) && isAssignModalOpen,
   });
 
   const [associateLimit, setAssociateLimit] = useState(50);

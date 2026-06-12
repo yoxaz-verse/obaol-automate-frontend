@@ -67,7 +67,7 @@ export default function OperatorTeamPage() {
 
   const operatorsQuery = useQuery({
     queryKey: ["operator-team", "operators", isAdmin],
-    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 200, sort: "name:asc" }),
     enabled: isAdmin,
     refetchOnWindowFocus: false,
   });
@@ -120,7 +120,7 @@ export default function OperatorTeamPage() {
 
   const operatorLookupQuery = useQuery({
     queryKey: ["operator-team", "lookup", teamIds.join("|")],
-    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 5000 }),
+    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 200 }),
     enabled: teamIds.length > 0,
     refetchOnWindowFocus: false,
   });

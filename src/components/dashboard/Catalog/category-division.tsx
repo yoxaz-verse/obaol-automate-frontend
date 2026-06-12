@@ -15,7 +15,7 @@ import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import EditModal from "@/components/CurdTable/edit-model";
 
-const CATALOG_FETCH_LIMIT = 5000;
+const CATALOG_FETCH_LIMIT = 24;
 
 // -- Adjust these interfaces to match your data shape --
 interface ICategory {

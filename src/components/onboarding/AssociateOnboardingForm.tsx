@@ -48,6 +48,16 @@ const MAIN_CATEGORY_SLUGS = new Set([
   "freight-forwarding",
   "inland-logistics",
 ]);
+const normalizeOnboardingError = (error: any) => {
+  const status = Number(error?.response?.status || 0);
+  const raw = String(error?.response?.data?.message || error?.message || "Registration failed.");
+  if (status === 401) return "Your onboarding session expired. Please sign in again and continue onboarding.";
+  if (status === 429) return raw || "Too many attempts. Please wait and try again.";
+  if (/verify your email|verified email|otp/i.test(raw)) return raw;
+  if (/network error|err_network/i.test(raw)) return "Connection failed. Please check your internet and retry.";
+  if (/duplicate key|already registered/i.test(raw)) return "This email or company is already registered. Please sign in or use another email.";
+  return raw;
+};
 // Global window extension handled by explicit casting to avoid declaration conflicts
 const decodeJwt = (token: string): any => {
   try {
@@ -183,7 +193,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       setOptionsDebug({
         resolvedEndpoint: output.resolvedEndpoint,
         counts: {
-          designations: 0,
+          designations: output.designations.length,
           existingCompanies: output.existingCompanies.length,
           companyTypes: output.companyTypes.length,
           countries: output.countries.length,
@@ -927,7 +937,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       }
     } catch (error: any) {
       setIsLoading(false);
-      const errorMessage = error?.response?.data?.message || "Registration failed.";
+      const errorMessage = normalizeOnboardingError(error);
       setErrors((prev) => ({ ...prev, general: errorMessage }));
       showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
       play("danger");

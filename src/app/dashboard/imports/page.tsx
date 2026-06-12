@@ -190,6 +190,7 @@ export default function ImportsPage() {
   const { data: countriesResponse } = useQuery({
     queryKey: ["countries"],
     queryFn: () => getData(apiRoutes.country.getAll, { limit: 200 }),
+    enabled: isFormOpen,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });
@@ -217,7 +218,7 @@ export default function ImportsPage() {
   const { data: companiesResponse } = useQuery({
     queryKey: ["associate-companies"],
     queryFn: () => getData(apiRoutes.associateCompany.getAll, { limit: 200 }),
-    enabled: isFormOpen || needsCompanySelect,
+    enabled: isFormOpen,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });
@@ -1390,7 +1391,7 @@ export default function ImportsPage() {
                     </div>
                     <h4 className="text-lg font-bold text-white uppercase tracking-tight">Reserve Request Initialized</h4>
                     <p className="text-xs text-default-400 max-w-[280px]">
-                      Your allocation request has been broadcasted. Tracking will be available in "My Reservations" once approved.
+                      Your allocation request has been broadcasted. Tracking will be available in &quot;My Reservations&quot; once approved.
                     </p>
                   </motion.div>
                 )}

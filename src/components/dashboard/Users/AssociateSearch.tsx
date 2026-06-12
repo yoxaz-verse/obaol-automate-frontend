@@ -70,8 +70,13 @@ export default function AssociateSearch({
   const userSelectedKeyRef = useRef<string | null>(null);
 
   const { data: associateData, isLoading } = useQuery({
-    queryKey: ["associates"],
-    queryFn: () => getData(associateRoutes.getAll, { page: 1, limit: 1000 }),
+    queryKey: ["associates", inputValue.trim()],
+    queryFn: () =>
+      getData(associateRoutes.getAll, {
+        page: 1,
+        limit: 50,
+        ...(inputValue.trim() ? { search: inputValue.trim() } : {}),
+      }),
   });
 
   const rawAssociates = Array.isArray(associateData?.data?.data?.data)

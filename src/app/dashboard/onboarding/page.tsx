@@ -15,7 +15,7 @@ export default function DashboardOnboardingPage() {
   useEffect(() => {
     if (!isAssociate && !isOperator) return;
     if (typeof window === "undefined") return;
-    const draftKey = isAssociate ? "onboarding_draft_associate" : "onboarding_draft_operator";
+    const draftKey = `${isAssociate ? "onboarding_draft_associate" : "onboarding_draft_operator"}_${user?.id || "anonymous"}`;
     const maxStepForSubmit = isAssociate ? 4 : 3;
     const readDraft = () => {
       try {
@@ -44,7 +44,7 @@ export default function DashboardOnboardingPage() {
     };
     window.addEventListener("onboardingDraftUpdated", handler);
     return () => window.removeEventListener("onboardingDraftUpdated", handler);
-  }, [isAssociate, isOperator]);
+  }, [isAssociate, isOperator, user?.id]);
 
   if (loading) return null;
 

@@ -46,6 +46,11 @@ type AssociateCompany = {
   labAcceptedItems?: string[];
   labNotes?: string;
   labListingState?: string;
+  isExternalDirectoryListing?: boolean;
+  externalListingSource?: "SPICES_BOARD_QEL" | "SPICES_BOARD_EMPANELLED" | "";
+  externalListingSourceUrl?: string;
+  externalListingReference?: string;
+  externalListingDate?: string;
   location?: {
     latitude?: number;
     longitude?: number;
@@ -122,6 +127,18 @@ const getCertificatesSummary = (company: AssociateCompany) => {
   const notes = String(company?.labNotes || "").trim();
   if (notes) return notes;
   return "";
+};
+
+const getSourceLabel = (lab: AssociateCompany) => {
+  if (lab.externalListingSource === "SPICES_BOARD_QEL") return "Spices Board QEL";
+  if (lab.externalListingSource === "SPICES_BOARD_EMPANELLED") return "Spices Board Empanelled";
+  return "Quality Lab";
+};
+
+const getSourceChipColor = (lab: AssociateCompany): "success" | "primary" | "default" => {
+  if (lab.externalListingSource === "SPICES_BOARD_QEL") return "primary";
+  if (lab.externalListingSource === "SPICES_BOARD_EMPANELLED") return "success";
+  return "default";
 };
 
 const toErrorMessage = (error: unknown, fallback: string) => {
@@ -419,6 +436,8 @@ export default function QualityLabsPage() {
                   filteredLabs.map((lab, idx) => {
                     const certificatesSummary = getCertificatesSummary(lab);
                     const hasCertificatesSummary = Boolean(String(certificatesSummary || "").trim());
+                    const labPhone = String(lab.labContactPhone || "").trim();
+                    const sourceLabel = getSourceLabel(lab);
                     return (
                       <motion.div key={lab._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04, duration: 0.22 }} whileHover={{ y: -1 }}>
                         <Card className="group overflow-hidden rounded-2xl border border-default-200/70 bg-content1/90 shadow-sm transition-all hover:bg-content2/70 hover:border-default-300 dark:border-default-100/20 dark:bg-content1/40">
@@ -436,8 +455,8 @@ export default function QualityLabsPage() {
                                   </div>
                                 </div>
                               </div>
-                              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color="success">
-                                Quality Lab
+                              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color={getSourceChipColor(lab)}>
+                                {sourceLabel}
                               </Chip>
                             </div>
 
@@ -450,8 +469,10 @@ export default function QualityLabsPage() {
 
                             <div className="mt-4 rounded-xl border border-default-200/70 bg-content2/60 p-3">
                               <div className="text-[11px] font-semibold text-default-400 mb-1">Contact</div>
-                              <div className="text-sm font-semibold text-foreground">{lab.labContactPhone || "Lab contact not available"}</div>
+                              <div className="text-sm font-semibold text-foreground">{labPhone || "Contact not available from source"}</div>
                               {lab.labContactPhoneSecondary ? <div className="text-xs text-default-500 mt-1">Alt: {lab.labContactPhoneSecondary}</div> : null}
+                              {lab.labContactEmail ? <div className="text-xs text-default-500 mt-1 break-all">{lab.labContactEmail}</div> : null}
+                              {lab.externalListingReference ? <div className="text-[10px] uppercase tracking-wider text-default-500 mt-2">{lab.externalListingReference}</div> : null}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
@@ -459,11 +480,11 @@ export default function QualityLabsPage() {
                                 color="success"
                                 size="md"
                                 fullWidth
-                                isDisabled={!lab.labContactPhone}
+                                isDisabled={!labPhone}
                                 onPress={() =>
                                   handleContact({
                                     name: String(lab.labDisplayName || "").trim() || "Lab",
-                                    contactPhone: lab.labContactPhone,
+                                    contactPhone: labPhone,
                                   })
                                 }
                                 className="font-bold tracking-wide text-sm rounded-xl h-11"

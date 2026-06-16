@@ -45,14 +45,11 @@ import {
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import AssociateSearch from "../Users/AssociateSearch";
 
-import VariantRateWizardModal from "@/components/dashboard/Catalog/VariantRateWizardModal";
-import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
-import SelectModal from "./select-modal"; // Commission logic
-import AddToCatalogModal from "./AddToCatalogModal";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import {
@@ -68,10 +65,6 @@ import {
   generateColumns,
   initialTableConfig,
 } from "@/utils/tableValues";
-import EditModal from "@/components/CurdTable/edit-model";
-import DeleteModal from "@/components/CurdTable/delete";
-import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
-import TableFrame from "@/components/CurdTable/table-frame";
 import { useCurrency } from "@/context/CurrencyContext";
 import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
@@ -80,6 +73,24 @@ import {
   DEFAULT_CALCULATION_CONFIG,
 } from "@/hooks/useCalculationConfig";
 import type { QueryComponentMeta } from "@/data/interface-data";
+
+const VariantRateWizardModal = dynamic(
+  () => import("@/components/dashboard/Catalog/VariantRateWizardModal"),
+  { ssr: false },
+);
+const AddToCatalogModal = dynamic(() => import("./AddToCatalogModal"), {
+  ssr: false,
+});
+const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), {
+  ssr: false,
+});
+const DeleteModal = dynamic(() => import("@/components/CurdTable/delete"), {
+  ssr: false,
+});
+const DynamicFilter = dynamic(
+  () => import("@/components/CurdTable/dynamic-filtering"),
+  { ssr: false },
+);
 
 const round2 = (value: number) =>
   Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;

@@ -81,7 +81,7 @@ export default function AboutSection() {
                             }}
                         >
                             <Image
-                                src="/images/Jacob-Alwin-Obaol.png"
+                                src="/images/Jacob-Alwin-Obaol.webp"
                                 alt="Jacob Alwin, CEO OBAOL Supreme"
                                 fill
                                 className="object-cover object-top scale-110 grayscale opacity-80 contrast-125 brightness-110 drop-shadow-[0_0_30px_rgba(245,165,36,0.3)] mix-blend-luminosity group-hover:mix-blend-normal group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 ease-out group-hover:scale-[1.12]"

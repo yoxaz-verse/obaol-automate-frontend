@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import VariantRate from "@/components/dashboard/Catalog/variant-rate";
-import { Spacer } from "@heroui/react";
 import Title from "@/components/titles";
+import PublicRateList from "@/components/public/PublicRateList";
 
 const AgroProductDisplay = () => {
     const AGRO_CATEGORY_ID = "683f2765462cb5a84b14cbb4";
@@ -15,7 +14,7 @@ const AgroProductDisplay = () => {
                 Verified agricultural commodities ready for trade execution.
             </p>
 
-            <VariantRate
+            <PublicRateList
                 rate="variantRate"
                 displayOnly
                 additionalParams={{ category: AGRO_CATEGORY_ID }}

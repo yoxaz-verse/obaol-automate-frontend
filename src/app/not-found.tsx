@@ -2,13 +2,13 @@
 
 "use client"; // Enables the component to use React hooks and client-side features
 
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation"; // For Next.js 13+
-import AuthContext from "@/context/AuthContext"; // Adjust the import path as necessary
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 const NotFound = () => {
-  const { isAuthenticated, loading } = useContext(AuthContext); // Access authentication state
+  const { isAuthenticated, loading } = usePublicAuthStatus(); // Access authentication state
   const router = useRouter(); // Initialize the router
 
   useEffect(() => {

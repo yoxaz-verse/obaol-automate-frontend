@@ -5,11 +5,11 @@ import { NextPage } from "next";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Spacer, Card, CardBody, User, Chip, Skeleton, Divider, Tooltip } from "@nextui-org/react";
-import { associateCompanyRoutes, apiRoutes } from "@/core/api/apiRoutes";
+import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
-import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import Title from "@/components/titles";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+import PublicRateList from "@/components/public/PublicRateList";
 
 const CompanyProfilePage: NextPage = () => {
     const params = useParams();
@@ -185,7 +185,7 @@ const CompanyProfilePage: NextPage = () => {
                 </div>
 
                 {/* Displayed Rates Table */}
-                <VariantRate
+                <PublicRateList
                     rate="displayedRate" // Use displayedRate to fetch products explicitly displayed by this company
                     displayOnly
                     additionalParams={{ associateCompany: companyId }}

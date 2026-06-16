@@ -2,8 +2,6 @@
 import { NextPage } from "next";
 import React from "react";
 import { Spacer } from "@heroui/react";
-import VariantRate from "@/components/dashboard/Catalog/variant-rate";
-import Title from "@/components/titles";
 import AgroProductDisplay from "@/components/products/AgroProductDisplay";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 

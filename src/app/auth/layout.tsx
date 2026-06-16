@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthenticatedProviders } from "@/app/authenticated-provider";
 
 export const metadata: Metadata = {
   robots: {
@@ -12,6 +13,5 @@ export default function AuthRouteLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return <AuthenticatedProviders>{children}</AuthenticatedProviders>;
 }
-

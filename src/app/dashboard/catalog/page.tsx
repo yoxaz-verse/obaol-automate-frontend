@@ -298,14 +298,14 @@ export default function CatalogPage() {
     setBrowsePage(1);
   }, [currentLevel, currentNav?.id, classificationTab, search]);
 
-  const handleSelect = (item: any, selectionType: "category" | "subcategory" | "product") => {
+  const handleSelect = (item: any, selectionType: "category" | "subCategory" | "product") => {
     setNavigation(prev => {
       const latestLevel = prev.length - 1;
       const latestNav = prev[latestLevel];
       const isSameSelection = latestNav?.id === item._id;
       const expectedType =
         latestLevel === 0 ? "category" :
-          latestLevel === 1 ? "subcategory" :
+          latestLevel === 1 ? "subCategory" :
             latestLevel === 2 ? "product" :
               null;
 
@@ -598,7 +598,7 @@ export default function CatalogPage() {
                             <>
                               <CategoryGrid
                                 items={items}
-                                onSelect={(item) => handleSelect(item, config.type as "category" | "subcategory" | "product")}
+                                onSelect={(item) => handleSelect(item, config.type as "category" | "subCategory" | "product")}
                                 type={config.type as any}
                                 cardThemeClass={activeTheme.shellClass}
                                 cardBorderClass={activeTheme.shellBorderClass}

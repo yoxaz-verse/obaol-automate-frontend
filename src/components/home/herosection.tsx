@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState, useContext, cloneElement, type ReactElement, type ReactNode } from "react";
+import { useEffect, useRef, useState, cloneElement, type ReactElement, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import AuthContext from "@/context/AuthContext";
+import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import {
   FiShield,
   FiTarget,
@@ -287,7 +287,7 @@ export default function HeroSection() {
   const networkRef = useRef<HTMLDivElement>(null);
   const hubRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const { isAuthenticated, loading } = usePublicAuthStatus();
   const [showDesktopVisuals, setShowDesktopVisuals] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);

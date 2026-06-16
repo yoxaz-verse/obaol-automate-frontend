@@ -1,0 +1,9 @@
+import { AuthenticatedProviders } from "@/app/authenticated-provider";
+
+export default function CompaniesLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AuthenticatedProviders>{children}</AuthenticatedProviders>;
+}

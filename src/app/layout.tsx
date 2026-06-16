@@ -1,8 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Providers } from "./provider";
+import { PublicProviders } from "./public-provider";
 import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext";
 import TopLoader from "@/components/ui/TopLoader";
 import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
 import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
@@ -177,12 +176,10 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
-        <Providers>
-          <AuthProvider>
-            <TopLoader />
-            {children}
-          </AuthProvider>
-        </Providers>
+        <PublicProviders>
+          <TopLoader />
+          {children}
+        </PublicProviders>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

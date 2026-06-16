@@ -10,7 +10,7 @@ import AuthContext from "@/context/AuthContext";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import { FiLoader, FiMapPin, FiPhoneCall, FiSearch } from "react-icons/fi";
+import { FiGrid, FiLoader, FiMap, FiMapPin, FiPhoneCall, FiSearch } from "react-icons/fi";
 import { LuPlus } from "react-icons/lu";
 import { motion, AnimatePresence } from "framer-motion";
 import type { WarehouseMapItem } from "@/components/Warehouse/WarehouseRentMap";
@@ -70,6 +70,7 @@ const CATEGORY_COLOR: Record<string, string> = {
 };
 
 type SearchPoint = { latitude: number; longitude: number; label: string };
+type ViewMode = "map" | "cards";
 
 const toRad = (deg: number) => (deg * Math.PI) / 180;
 const haversineKm = (aLat: number, aLng: number, bLat: number, bLng: number) => {
@@ -108,6 +109,7 @@ export default function WarehouseRentPage() {
   const [locationQuery, setLocationQuery] = useState("");
   const [searchPoint, setSearchPoint] = useState<SearchPoint | null>(null);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("map");
 
   const {
     data: warehousesData,
@@ -252,6 +254,109 @@ export default function WarehouseRentPage() {
     return () => window.clearTimeout(t);
   }, [isLoadingWarehouses]);
 
+  const renderDirectoryState = () => {
+    if (isLoadingWarehouses) {
+      return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
+          <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
+          {isWarehouseLoadSlow ? (
+            <div className="mt-4 flex flex-col items-center gap-3">
+              <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
+              <Button size="sm" color="warning" variant="flat" onPress={() => refetchWarehouses()}>
+                Retry
+              </Button>
+            </div>
+          ) : null}
+        </motion.div>
+      );
+    }
+
+    if (isWarehousesError) {
+      return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
+        </motion.div>
+      );
+    }
+
+    if (filteredWarehouses.length === 0) {
+      return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl text-center px-6">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
+        </motion.div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderWarehouseCard = (warehouse: Warehouse, idx: number) => {
+    const color = CATEGORY_COLOR[warehouse.category || "GENERAL"];
+
+    return (
+      <motion.div key={warehouse._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04, duration: 0.22 }} whileHover={{ y: -1 }}>
+        <Card className="group h-full overflow-hidden rounded-2xl border border-default-200/70 bg-content1/90 shadow-sm transition-all hover:bg-content2/70 hover:border-default-300 dark:border-default-100/20 dark:bg-content1/40">
+          <CardBody className="p-6">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="w-2.5 h-2.5 rounded-full mt-2 shrink-0" style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }} />
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">{warehouse.name}</h3>
+                  <div className="mt-2 flex items-center gap-2 text-default-400 min-w-0">
+                    <FiMapPin size={13} className="text-default-500 shrink-0" />
+                    <span className="text-sm truncate">{warehouse.address || "Location not specified"}</span>
+                  </div>
+                </div>
+              </div>
+              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color="warning">
+                Available
+              </Chip>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mt-5 mb-4">
+              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
+                <div className="text-[11px] font-semibold text-default-400 mb-1">Category</div>
+                <div className="text-sm font-semibold text-foreground">{(warehouse.category || "GENERAL").replace("_", " ")}</div>
+              </div>
+              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
+                <div className="text-[11px] font-semibold text-default-400 mb-1">Rate</div>
+                <div className="text-sm font-semibold text-warning-400">
+                  {warehouse.storageRatePerUnit ?? "0"} <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4 rounded-xl border border-default-200/70 bg-content2/60 p-3">
+              <div className="text-[11px] font-semibold text-default-400 mb-1">Contact</div>
+              <div className="text-sm font-semibold text-foreground">{warehouse.contactPhone || "Not available yet"}</div>
+              {warehouse.contactPhoneSecondary ? <div className="text-xs text-default-500 mt-1">Alt: {warehouse.contactPhoneSecondary}</div> : null}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Button
+                color="warning"
+                size="md"
+                fullWidth
+                isDisabled={!warehouse.contactPhone}
+                onPress={() => handleContact(warehouse)}
+                className="font-bold tracking-wide text-sm rounded-xl h-11"
+                startContent={<FiPhoneCall />}
+              >
+                Contact
+              </Button>
+              {isAdmin ? (
+                <Button color="default" variant="bordered" size="md" fullWidth isDisabled className="font-bold tracking-wide text-sm rounded-xl h-11">
+                  Book Now (Coming Soon)
+                </Button>
+              ) : null}
+            </div>
+          </CardBody>
+        </Card>
+      </motion.div>
+    );
+  };
+
   return (
     <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground">
       <div className="max-w-[1400px] mx-auto space-y-8">
@@ -278,19 +383,49 @@ export default function WarehouseRentPage() {
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          <div className="xl:col-span-8 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex w-full lg:w-auto overflow-x-auto rounded-xl border border-default-200/70 bg-content1/70 p-1">
+            {[
+              { key: "map" as const, label: "Map View", icon: <FiMap size={14} /> },
+              { key: "cards" as const, label: "Card View", icon: <FiGrid size={14} /> },
+            ].map((option) => {
+              const isSelected = viewMode === option.key;
+              return (
+                <Button
+                  key={option.key}
+                  size="sm"
+                  variant={isSelected ? "solid" : "light"}
+                  color={isSelected ? "warning" : "default"}
+                  className="h-10 px-4 rounded-lg font-black uppercase tracking-widest text-[10px] whitespace-nowrap"
+                  startContent={option.icon}
+                  onPress={() => setViewMode(option.key)}
+                >
+                  {option.label}
+                </Button>
+              );
+            })}
+          </div>
+          <div className="flex items-center justify-between lg:justify-end gap-4">
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
+            <span className="text-[10px] font-mono text-orange-500/60">{filteredWarehouses.length} Nodes Found</span>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {viewMode === "map" ? (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              key="map-view"
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl border border-default-200/70 bg-content1/90 p-6 backdrop-blur-xl dark:border-default-100/20 dark:bg-content1/40"
+              exit={{ opacity: 0, y: -8 }}
+              className="relative overflow-hidden rounded-3xl border border-default-200/70 bg-content1/90 p-4 md:p-6 backdrop-blur-xl dark:border-default-100/20 dark:bg-content1/40"
             >
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <FiMapPin size={120} />
               </div>
 
               <div className="relative z-10 space-y-6">
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col lg:flex-row gap-4">
                   {needsCompanySelect ? (
                     <div className="flex-1">
                       <div className="text-[10px] font-black uppercase tracking-widest text-default-400 mb-2 font-mono">Trade Entity</div>
@@ -356,7 +491,7 @@ export default function WarehouseRentPage() {
                   </div>
                 </div>
 
-                <div className="relative h-[450px] w-full overflow-hidden rounded-2xl border border-default-200 bg-content1 shadow-inner">
+                <div className="relative h-[min(68vh,620px)] min-h-[420px] w-full overflow-hidden rounded-2xl border border-default-200 bg-content1 shadow-inner">
                   <WarehouseRentMap
                     center={DEFAULT_CENTER}
                     zoom={DEFAULT_ZOOM}
@@ -366,110 +501,22 @@ export default function WarehouseRentPage() {
                     showBookNow={isAdmin}
                   />
                 </div>
+
+                {isLoadingWarehouses || isWarehousesError || filteredWarehouses.length === 0 ? <div>{renderDirectoryState()}</div> : null}
               </div>
             </motion.div>
-          </div>
-
-          <div className="xl:col-span-4 space-y-6 h-full flex flex-col">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-default-400 font-mono">Node_Catalog</h2>
-              <span className="text-[10px] font-mono text-orange-500/60">{filteredWarehouses.length} Nodes Found</span>
-            </div>
-
-            <div className="flex-1 space-y-4 max-h-[680px] overflow-y-auto pr-2 custom-scrollbar">
+          ) : (
+            <motion.div key="card-view" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="space-y-5">
               <AnimatePresence mode="popLayout">
-                {isLoadingWarehouses ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl">
-                    <FiLoader className="animate-spin text-orange-500 mb-4" size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">Initializing_Nodes...</span>
-                    {isWarehouseLoadSlow ? (
-                      <div className="mt-4 flex flex-col items-center gap-3">
-                        <span className="text-[11px] text-default-400">Still loading. You can retry now.</span>
-                        <Button size="sm" color="warning" variant="flat" onPress={() => refetchWarehouses()}>
-                          Retry
-                        </Button>
-                      </div>
-                    ) : null}
-                  </motion.div>
-                ) : isWarehousesError ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-danger-500/30 rounded-3xl text-center px-6">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-danger-300 font-mono">{warehousesErrorMessage}</span>
-                  </motion.div>
-                ) : filteredWarehouses.length === 0 ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 border border-dashed border-default-300 rounded-3xl text-center px-6">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-500 font-mono">No_Available_Capacity_Detected</span>
-                  </motion.div>
-                ) : (
-                  filteredWarehouses.map((warehouse, idx) => {
-                    const color = CATEGORY_COLOR[warehouse.category || "GENERAL"];
-
-                    return (
-                      <motion.div key={warehouse._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04, duration: 0.22 }} whileHover={{ y: -1 }}>
-                        <Card className="group overflow-hidden rounded-2xl border border-default-200/70 bg-content1/90 shadow-sm transition-all hover:bg-content2/70 hover:border-default-300 dark:border-default-100/20 dark:bg-content1/40">
-                          <CardBody className="p-6">
-                            <div className="flex justify-between items-start gap-4">
-                              <div className="flex items-start gap-3 min-w-0 flex-1">
-                                <div className="w-2.5 h-2.5 rounded-full mt-2 shrink-0" style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }} />
-                                <div className="min-w-0 flex-1">
-                                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">{warehouse.name}</h3>
-                                  <div className="mt-2 flex items-center gap-2 text-default-400 min-w-0">
-                                    <FiMapPin size={13} className="text-default-500 shrink-0" />
-                                    <span className="text-sm truncate">{warehouse.address || "Location not specified"}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <Chip size="sm" variant="flat" className="border border-default-200 bg-default-100 px-2 text-[10px] font-bold uppercase tracking-wide" color="warning">
-                                Available
-                              </Chip>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 mt-5 mb-4">
-                              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
-                                <div className="text-[11px] font-semibold text-default-400 mb-1">Category</div>
-                                <div className="text-sm font-semibold text-foreground">{(warehouse.category || "GENERAL").replace("_", " ")}</div>
-                              </div>
-                              <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
-                                <div className="text-[11px] font-semibold text-default-400 mb-1">Rate</div>
-                                <div className="text-sm font-semibold text-warning-400">
-                                  {warehouse.storageRatePerUnit ?? "0"} <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="mb-4 rounded-xl border border-default-200/70 bg-content2/60 p-3">
-                              <div className="text-[11px] font-semibold text-default-400 mb-1">Contact</div>
-                              <div className="text-sm font-semibold text-foreground">{warehouse.contactPhone || "Not available yet"}</div>
-                              {warehouse.contactPhoneSecondary ? <div className="text-xs text-default-500 mt-1">Alt: {warehouse.contactPhoneSecondary}</div> : null}
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              <Button
-                                color="warning"
-                                size="md"
-                                fullWidth
-                                isDisabled={!warehouse.contactPhone}
-                                onPress={() => handleContact(warehouse)}
-                                className="font-bold tracking-wide text-sm rounded-xl h-11"
-                                startContent={<FiPhoneCall />}
-                              >
-                                Contact
-                              </Button>
-                              {isAdmin ? (
-                                <Button color="default" variant="bordered" size="md" fullWidth isDisabled className="font-bold tracking-wide text-sm rounded-xl h-11">
-                                  Book Now (Coming Soon)
-                                </Button>
-                              ) : null}
-                            </div>
-                          </CardBody>
-                        </Card>
-                      </motion.div>
-                    );
-                  })
+                {renderDirectoryState() || (
+                  <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 md:gap-5">
+                    {filteredWarehouses.map((warehouse, idx) => renderWarehouseCard(warehouse, idx))}
+                  </div>
                 )}
               </AnimatePresence>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

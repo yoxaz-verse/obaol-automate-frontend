@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import AuthContext from "@/context/AuthContext";
+import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 const NAV = [
   { href: "/about", label: "About" },
@@ -20,7 +20,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const { isAuthenticated, loading } = usePublicAuthStatus();
   const router = useRouter();
 
   useEffect(() => {

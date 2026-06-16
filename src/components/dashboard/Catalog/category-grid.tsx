@@ -18,7 +18,7 @@ interface Item {
 interface CategoryGridProps {
     items: Item[];
     onSelect: (item: Item) => void;
-    type: "category" | "subcategory" | "product";
+    type: "category" | "subCategory" | "product";
     counts?: Record<string, number>;
     onEdit?: (item: Item) => void;
     onDelete?: (item: Item) => void;

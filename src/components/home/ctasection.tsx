@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import Link from "next/link";
-import AuthContext from "@/context/AuthContext";
+import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 export default function CTASection() {
-    const { isAuthenticated, loading } = useContext(AuthContext);
+    const { isAuthenticated, loading } = usePublicAuthStatus();
 
     return (
         <section className="py-24 px-6 border-t border-default-200 text-center">

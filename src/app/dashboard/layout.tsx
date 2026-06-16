@@ -13,6 +13,7 @@ import { postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { ACTION_ROUTES, loadShortcuts, ShortcutAction } from "@/utils/shortcutConfig";
 import dynamic from "next/dynamic";
+import { AuthenticatedProviders } from "@/app/authenticated-provider";
 
 const DashboardEnhancements = dynamic(() => import("@/components/dashboard/DashboardEnhancements"), {
   ssr: false,
@@ -37,7 +38,7 @@ const DashboardEnhancements = dynamic(() => import("@/components/dashboard/Dashb
 //   "/dashboard/activity": [],
 //   "/dashboard/users": ["Admin"],
 // };
-export default function DashboardLayout({
+function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -210,5 +211,17 @@ export default function DashboardLayout({
         {!isApprovalPending && <BottomNav isOnboardingLocked={isOnboardingLocked} />}
       </PrivateRoute>
     </section>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthenticatedProviders>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </AuthenticatedProviders>
   );
 }

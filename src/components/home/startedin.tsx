@@ -31,7 +31,7 @@ export default function StartedIn() {
                    hidden md:block pointer-events-none z-0"
       >
         <Image
-          src="/images/india_map.png"
+          src="/images/india_map.webp"
           alt="India commodity trade network"
           fill
           priority={false}

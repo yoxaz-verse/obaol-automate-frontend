@@ -79,18 +79,13 @@ const Dashboard: NextPage = () => {
   const {
     hasPrimarySummary,
     dashboardSummaryQuery,
-    enquiriesQuery,
-    ordersQuery,
     trendQuery,
     topProductsQuery,
-    systemMetricsQuery,
-    associateMetricsQuery,
-    operatorMetricsQuery,
     approvalsAssociatesQuery,
     approvalsCompaniesQuery,
     summary,
+    metrics,
     enquiries,
-    orders,
     trendList,
     topProducts,
     totalEnquiries,
@@ -142,9 +137,9 @@ const Dashboard: NextPage = () => {
   const completedOrders = Number(summary?.completedOrders || 0);
   const orderCompletionPct = Number(summary?.orderCompletionPct || (totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0));
 
-  const systemMetrics = systemMetricsQuery.data?.data?.data || {};
-  const associateMetrics = associateMetricsQuery.data?.data?.data || {};
-  const operatorMetrics = operatorMetricsQuery.data?.data?.data || {};
+  const systemMetrics = metrics || {};
+  const associateMetrics = metrics || {};
+  const operatorMetrics = metrics || {};
   const pendingAssociateApprovals = Number(approvalsAssociatesQuery.data?.data?.meta?.total || 0);
   const pendingCompanyApprovals = Number(approvalsCompaniesQuery.data?.data?.meta?.total || 0);
   const pendingApprovalsTotal = pendingAssociateApprovals + pendingCompanyApprovals;
@@ -176,28 +171,10 @@ const Dashboard: NextPage = () => {
 
   const activityFeed = useMemo(() => {
     const summaryFeed = Array.isArray(summary?.recentActivity) ? summary.recentActivity : [];
-    if (summaryFeed.length > 0) {
-      return summaryFeed
-        .filter((item: any) => item?.id && item?.at)
-        .slice(0, 6);
-    }
-    const enquiryFeed = enquiries.slice(0, 4).map((item: any) => ({
-      type: "Enquiry",
-      id: item?._id,
-      status: item?.status || "Pending",
-      at: item?.updatedAt || item?.createdAt,
-    }));
-    const orderFeed = orders.slice(0, 4).map((item: any) => ({
-      type: "Order",
-      id: item?._id,
-      status: item?.status || "Procuring",
-      at: item?.updatedAt || item?.createdAt,
-    }));
-    return [...enquiryFeed, ...orderFeed]
-      .filter((item) => item.id && item.at)
-      .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    return summaryFeed
+      .filter((item: any) => item?.id && item?.at)
       .slice(0, 6);
-  }, [enquiries, orders, summary]);
+  }, [summary]);
 
   const actionCenterItems = useMemo(() => {
     if (isAdmin) {
@@ -306,38 +283,12 @@ const Dashboard: NextPage = () => {
       return "Awaiting conversion";
     };
 
-    const baseList = enquiries.filter((item: any) => {
-      if (isAdmin) {
-        const isConverted = String(item?.status || "").toUpperCase() === "CONVERTED";
-        return !item?.sellerAcceptedAt || !item?.buyerConfirmedAt || !isConverted;
-      }
-
-      if (isAssociate) {
-        const isBuying = (item?.buyerAssociateId?._id || item?.buyerAssociateId)?.toString() === userId;
-        const isSelling = (item?.sellerAssociateId?._id || item?.sellerAssociateId)?.toString() === userId;
-        const sellerPending = isSelling && !item?.sellerAcceptedAt;
-        const buyerPending = isBuying && item?.sellerAcceptedAt && !item?.buyerConfirmedAt;
-        return sellerPending || buyerPending;
-      }
-
-      if (isOperatorUser) {
-        const assigned =
-          (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
-          (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
-          (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
-        if (!assigned) return false;
-        const status = String(item?.status || "").toUpperCase();
-        return !["COMPLETED", "CLOSED", "CANCELLED", "CONVERTED"].includes(status);
-      }
-
-      return false;
-    });
-
-    return baseList.slice(0, 10).map((item: any) => ({
-      id: item?._id,
-      missingStep: missingLabel(item),
+    const summaryActions = Array.isArray(summary?.pendingActions) ? summary.pendingActions : enquiries;
+    return summaryActions.slice(0, 10).map((item: any) => ({
+      id: item?._id || item?.id,
+      missingStep: item?.missingStep || missingLabel(item),
     }));
-  }, [enquiries, isAdmin, isAssociate, isOperatorUser, userId]);
+  }, [enquiries, summary]);
 
   const welcomeName = isAssociate
     ? associateMetrics.associateName || user?.email
@@ -345,13 +296,7 @@ const Dashboard: NextPage = () => {
 
   const executiveLoading = dashboardSummaryQuery.isLoading;
 
-  const executiveError = isAdmin
-    ? systemMetricsQuery.isError
-    : isAssociate
-      ? associateMetricsQuery.isError
-      : isOperatorUser
-        ? operatorMetricsQuery.isError
-        : false;
+  const executiveError = dashboardSummaryQuery.isError;
 
   const renderActionCenter = () => (
     <Card className="lg:col-span-2 border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem]">
@@ -452,7 +397,7 @@ const Dashboard: NextPage = () => {
       </CardHeader>
       <Divider className="my-4 mx-8 w-auto opacity-50" />
       <CardBody className="px-8 pb-8 space-y-4">
-        {dashboardSummaryQuery.isLoading || enquiriesQuery.isLoading || ordersQuery.isLoading ? (
+        {dashboardSummaryQuery.isLoading ? (
           Array.from({ length: 4 }).map((_, idx) => (
             <div key={idx} className="space-y-3">
               <Skeleton className="h-4 w-2/3 rounded-lg" />
@@ -819,15 +764,9 @@ const Dashboard: NextPage = () => {
             .includes(associateNeedle)
         )
       : [];
-    const ongoingEnquiries = enquiries.filter((item: any) => {
-      const assigned =
-        (item?.supplierOperatorId?._id || item?.supplierOperatorId)?.toString() === userId ||
-        (item?.dealCloserOperatorId?._id || item?.dealCloserOperatorId)?.toString() === userId ||
-        (item?.createdBy?._id || item?.createdBy)?.toString() === userId;
-      if (!assigned) return false;
-      const status = String(item?.status || "").toUpperCase();
-      return !["COMPLETED", "CLOSED", "CANCELLED"].includes(status);
-    }).slice(0, 5);
+    const ongoingEnquiries = Array.isArray(summary?.ongoingEnquiries)
+      ? summary.ongoingEnquiries.slice(0, 5)
+      : [];
 
     return (
       <>

@@ -1,0 +1,281 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FiArrowRight,
+  FiBox,
+  FiCheckCircle,
+  FiPackage,
+  FiShoppingBag,
+  FiTruck,
+  FiTarget,
+  FiFileText,
+} from "react-icons/fi";
+import { FaShip, FaWarehouse } from "react-icons/fa6";
+import { homeTitleStyles } from "@/components/home/homeTitleStyles";
+
+const services = [
+  {
+    id: "sourcing",
+    title: "Sourcing",
+    eyebrow: "Find",
+    description:
+      "Find the exact product specifications and identify the best origins that match the buyer's unique requirements.",
+    metric: "Requirement to origin",
+    image: "/images/sourcing.png",
+    icon: FiTarget,
+    accent: "from-purple-400 to-violet-500",
+  },
+  {
+    id: "documentation",
+    title: "Documentation & Planning",
+    eyebrow: "Plan",
+    description:
+      "Prepare compliance documents, manage export paperwork, and systematically plan the execution logistics.",
+    metric: "Origin to readiness",
+    image: "/images/documentation.png",
+    icon: FiFileText,
+    accent: "from-blue-400 to-indigo-500",
+  },
+  {
+    id: "procurement",
+    title: "Procurement",
+    eyebrow: "Source",
+    description:
+      "On-ground procurement partners inspect availability, negotiate readiness, and prepare confirmed lots for execution.",
+    metric: "Supplier to stock",
+    image: "/images/procurement.png",
+    icon: FiShoppingBag,
+    accent: "from-orange-400 to-amber-500",
+  },
+  {
+    id: "quality",
+    title: "Quality Testing",
+    eyebrow: "Verify",
+    description:
+      "Quality labs and verification operators test samples, validate specifications, and reduce uncertainty before shipment.",
+    metric: "Sample to approval",
+    image: "/images/quality.png",
+    icon: FiCheckCircle,
+    accent: "from-emerald-400 to-teal-500",
+  },
+  {
+    id: "packaging",
+    title: "Packaging",
+    eyebrow: "Pack",
+    description:
+      "Packaging teams handle bags, cartons, labeling, and export-ready preparation based on buyer and commodity needs.",
+    metric: "Lot to load-ready",
+    image: "/images/packaging.png",
+    icon: FiPackage,
+    accent: "from-pink-400 to-rose-500",
+  },
+  {
+    id: "logistics",
+    title: "Logistics",
+    eyebrow: "Move",
+    description:
+      "Truck operators, dispatch teams, and route handlers coordinate pickup, inland movement, and live shipment handoffs.",
+    metric: "Pickup to port",
+    image: "/images/logistics.png",
+    icon: FiTruck,
+    accent: "from-sky-400 to-blue-500",
+  },
+  {
+    id: "warehouse",
+    title: "Warehouse",
+    eyebrow: "Store",
+    description:
+      "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.",
+    metric: "Stock to dispatch",
+    image: "/images/warehouse.png",
+    icon: FaWarehouse,
+    accent: "from-amber-400 to-orange-600",
+  },
+  {
+    id: "freight",
+    title: "Freight Forwarding",
+    eyebrow: "Forward",
+    description:
+      "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.",
+    metric: "Port to buyer",
+    image: "/images/freight.png",
+    icon: FaShip,
+    accent: "from-lime-300 to-green-500",
+  },
+] as const;
+
+const particleSeeds = Array.from({ length: 42 }, (_, index) => ({
+  id: index,
+  left: `${(index * 29) % 100}%`,
+  top: `${(index * 47) % 100}%`,
+  size: 2 + (index % 4),
+  delay: (index % 9) * 0.18,
+  duration: 3.4 + (index % 6) * 0.36,
+}));
+
+export default function ServiceShowcase() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeService = services[activeIndex];
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % services.length);
+    }, 4200);
+
+    return () => window.clearInterval(interval);
+  }, [activeIndex]);
+
+  const Icon = activeService.icon;
+
+  const supportingServices = useMemo(
+    () =>
+      services.map((service, index) => ({
+        ...service,
+        isActive: index === activeIndex,
+      })),
+    [activeIndex],
+  );
+
+  return (
+    <section className="relative overflow-hidden bg-background py-16 md:py-24">
+      <div className="absolute inset-0 pointer-events-none opacity-60">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(249,115,22,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(249,115,22,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]" />
+        {particleSeeds.map((particle) => (
+          <motion.span
+            key={particle.id}
+            className="absolute rounded-full bg-orange-300/70 shadow-[0_0_14px_rgba(251,146,60,0.55)]"
+            style={{
+              left: particle.left,
+              top: particle.top,
+              width: particle.size,
+              height: particle.size,
+            }}
+            animate={{
+              opacity: [0.08, 0.75, 0.08],
+              y: [-8, 10, -8],
+              scale: [0.8, 1.25, 0.8],
+            }}
+            transition={{
+              duration: particle.duration,
+              delay: particle.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="container relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
+          <div className="lg:col-span-4 flex flex-col justify-between gap-8">
+            <div className="space-y-5">
+              <p className={homeTitleStyles.sectionKicker}>Execution Services</p>
+              <h2 className={homeTitleStyles.sectionTitle}>
+                Every role becomes visible.
+              </h2>
+              <p className="max-w-xl text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
+                A timed operations view shows the people and partners behind procurement, logistics, testing, packaging, warehousing, and freight forwarding.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+              {supportingServices.map((service, index) => {
+                const ServiceIcon = service.icon;
+                return (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => setActiveIndex(index)}
+                    className={`group flex min-h-[76px] flex-col justify-between rounded-2xl border px-3.5 py-3 text-left transition-all duration-500 ${
+                      service.isActive
+                        ? "border-orange-400/70 bg-orange-500/10 shadow-[0_0_26px_rgba(249,115,22,0.16)]"
+                        : "border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.06]"
+                    }`}
+                    aria-pressed={service.isActive}
+                  >
+                    <div className="flex w-full items-start justify-between gap-2">
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${service.accent} text-black shadow-lg shadow-black/20`}>
+                        <ServiceIcon size={15} />
+                      </span>
+                      {service.isActive && (
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.9)]" />
+                      )}
+                    </div>
+                    <p className="mt-2.5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] text-foreground/80 leading-tight">
+                      {service.title}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-2xl shadow-orange-950/20 md:min-h-[620px]">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeService.id}
+                  src={activeService.image}
+                  alt={`${activeService.title} execution service`}
+                  className="absolute inset-0 !h-full !w-full !max-w-none object-cover brightness-125 contrast-110 saturate-125"
+                  initial={{ opacity: 0, scale: 1.08, filter: "blur(18px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 1.04, filter: "blur(14px)" }}
+                  transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </AnimatePresence>
+
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(0,0,0,0.12)_34%,rgba(0,0,0,0.62)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.74),transparent_56%),linear-gradient(to_right,rgba(0,0,0,0.58),transparent_60%)]" />
+              <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[radial-gradient(circle,rgba(255,255,255,0.42)_0.8px,transparent_1.4px)] bg-[size:7px_7px]" />
+
+
+              <div className="absolute inset-x-5 bottom-5 md:inset-x-8 md:bottom-8">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeService.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -18 }}
+                    transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                    className="max-w-2xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${activeService.accent} text-black shadow-xl`}>
+                        <Icon size={22} />
+                      </span>
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-orange-300">
+                        {activeService.eyebrow} / {activeService.metric}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-black leading-none tracking-normal text-white">
+                      {activeService.title}
+                    </h3>
+                    <p className="mt-5 max-w-xl text-sm md:text-base font-medium leading-relaxed text-white/72">
+                      {activeService.description}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <div className="absolute bottom-8 right-8 hidden w-44 gap-2 md:flex">
+                {services.map((service, index) => (
+                  <span
+                    key={service.id}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
+                      index === activeIndex ? "bg-orange-400" : "bg-white/20"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <FiBox className="absolute right-8 top-1/2 hidden -translate-y-1/2 text-white/10 md:block" size={112} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -39,7 +39,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             const res: any = await getData(notificationRoutes.unreadSummary);
             return res?.data?.data || {};
         },
-        refetchInterval: 25000,
+        enabled: Boolean(user?.id),
+        staleTime: 60 * 1000,
+        refetchInterval: 60 * 1000,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     });
     const unreadSummary = unreadSummaryData || {};
     const dotMap: Record<string, number> = {

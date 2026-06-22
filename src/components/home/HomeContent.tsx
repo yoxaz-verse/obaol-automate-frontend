@@ -7,6 +7,7 @@ import { FaShieldHalved, FaTruckFront, FaEarthAsia, FaGlobe } from "react-icons/
 import Link from "next/link";
 import HomeLegacyHeader from "@/components/home/HomeLegacyHeader";
 import HeroSection from "@/components/home/herosection";
+import ServiceShowcase from "@/components/home/ServiceShowcase";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
@@ -86,6 +87,7 @@ export default function HomeContent() {
             <CinematicIntro />
             <HomeLegacyHeader />
             <HeroSection />
+            <ServiceShowcase />
             <section className="relative py-12 md:py-16">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="flex flex-col gap-10 md:gap-16">

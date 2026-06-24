@@ -3,7 +3,7 @@
 import { useContext, useEffect, useMemo } from "react";
 import AuthContext from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import GuidanceContent from "@/components/guidance/GuidanceContent";
 import PendingEngagementActions from "@/components/dashboard/PendingEngagementActions";
 import { 
@@ -257,8 +257,11 @@ const OperatorPanel = () => (
   </div>
 );
 
+import { useRouter } from "next/navigation";
+
 export default function PendingApprovalPage() {
   const { user, loading, logout, refreshUser } = useContext(AuthContext);
+  const router = useRouter();
   const roleLower = String(user?.role || "").toLowerCase();
   const guidanceRole = roleLower === "operator" || roleLower === "team" ? "operator" : "associate";
   const registrationStatus = String(user?.registrationStatus || "").toUpperCase();
@@ -320,7 +323,7 @@ export default function PendingApprovalPage() {
           radius="full"
           variant="bordered"
           className="border-default-200 text-default-500"
-          onPress={() => logout()}
+          onPress={async () => { await logout(); router.push("/auth"); }}
         >
           Sign Out
         </Button>

@@ -13,7 +13,7 @@ export default function HeroLite() {
 
         <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">
           From Enquiry To Delivery, One
-          <span className="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent"> Execution Workspace</span>
+          <span className="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent"> Agro Execution System</span>
         </h1>
 
         <p className="mt-6 max-w-2xl text-base text-white/75 md:text-lg">

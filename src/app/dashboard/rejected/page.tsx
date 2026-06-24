@@ -2,13 +2,16 @@
 
 import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import { LuShieldOff, LuMail, LuPhone } from "react-icons/lu";
 import { FiAlertTriangle as LuAlertTriangle } from "react-icons/fi";
 
+import { useRouter } from "next/navigation";
+
 export default function RejectedPage() {
   const { user, logout } = useContext(AuthContext);
+  const router = useRouter();
   const roleLabel = String(user?.role || "User").toUpperCase();
   const rejectionReason = (user as any)?.rejectionReason || "";
 
@@ -21,7 +24,7 @@ export default function RejectedPage() {
             radius="full"
             variant="bordered"
             className="border-default-200 text-default-500"
-            onPress={() => logout()}
+            onPress={async () => { await logout(); router.push("/auth"); }}
           >
             Sign Out
           </Button>

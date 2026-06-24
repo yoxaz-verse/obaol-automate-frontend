@@ -108,7 +108,7 @@ export default function HomeContent() {
                                     Build products, run enquiries, move orders, and manage documents with execution panels for each function. Importer Service and Warehouse Rent Management are built in, so logistics and storage stay connected end‑to‑end.
                                 </p>
                                 <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed">
-                                    All of this runs in one execution workspace. Built for India-first operations, supporting global trade from India to international markets seamlessly.
+                                    All of this runs in one agro execution system. Built for India-first operations, supporting global trade from India to international markets seamlessly.
                                 </p>
                             </div>
                         </div>

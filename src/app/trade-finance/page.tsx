@@ -72,8 +72,8 @@ export default function TradeFinancePage() {
       />
       <Header />
 
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
-        <div className="max-w-4xl mx-auto text-center mb-20">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
+        <div className="max-w-4xl mx-auto text-center mb-16">
           <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary mb-6">
             Trade-Level Finance Opportunity
           </p>
@@ -86,7 +86,7 @@ export default function TradeFinancePage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="rounded-3xl border border-warning/20 bg-warning/5 p-8">
             <div className="flex items-center gap-3 mb-4">
               <FiAlertTriangle className="w-6 h-6 text-warning" />
@@ -112,7 +112,7 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="mb-20">
+        <div className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Participation Models</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {models.map((model) => {
@@ -130,7 +130,7 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="mb-20 rounded-3xl border border-divider bg-content1/60 p-8 md:p-10">
+        <div className="mb-16 rounded-3xl border border-divider bg-content1/60 p-8 md:p-10">
           <h2 className="text-3xl font-bold mb-8 text-center">How It Works</h2>
           <div className="grid md:grid-cols-5 gap-4">
             {flow.map((step, index) => (
@@ -144,7 +144,7 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="rounded-3xl border border-divider p-8 bg-content1">
             <div className="flex items-center gap-3 mb-4">
               <FiShield className="w-6 h-6 text-primary" />

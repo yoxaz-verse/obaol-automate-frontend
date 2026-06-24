@@ -66,7 +66,7 @@ export default function AssociateRolePage() {
       />
       <Header />
       <ThemedContentWrapper>
-        <div className="relative min-h-[80vh] flex items-center pt-32 pb-20 overflow-hidden">
+        <div className="relative min-h-[80vh] flex items-center pt-24 pb-12 overflow-hidden">
           <motion.div
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.15 }}
@@ -138,7 +138,7 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div id="directory" className="py-24 border-y border-default-100/50 bg-content1/30">
+        <div id="directory" className="py-16 border-y border-default-100/50 bg-content1/30">
           <div className="container mx-auto max-w-7xl px-4">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Associate Role Directory</h2>
@@ -176,7 +176,7 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div className="py-24 bg-foreground/[0.02] border-t border-default-100">
+        <div className="py-16 bg-foreground/[0.02] border-t border-default-100">
           <div className="container mx-auto max-w-7xl px-4">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">How Associates Work on OBAOL</h2>
@@ -204,7 +204,7 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div className="py-28 flex flex-col items-center justify-center text-center px-4">
+        <div className="py-16 md:py-20 flex flex-col items-center justify-center text-center px-4">
           <div className="space-y-8 max-w-3xl">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-xs">
               Expand With The Ecosystem

@@ -72,7 +72,7 @@ export default function CompaniesPage() {
             <Header />
 
             {/* ── Hero ── */}
-            <section className="relative overflow-hidden py-20 px-6 text-center">
+            <section className="relative overflow-hidden py-12 md:py-16 px-6 text-center">
                 {/* ambient glow */}
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="w-[600px] h-[600px] rounded-full bg-warning-500/5 blur-[120px]" />

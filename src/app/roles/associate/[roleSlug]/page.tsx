@@ -124,11 +124,11 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
       
       <Header />
       
-      <main className="relative pt-32 pb-24">
+      <main className="relative pt-24 pb-16">
         {/* Background glow effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-orange-500/5 blur-[120px] rounded-full pointer-events-none" />
         
-        <div className="container mx-auto max-w-6xl px-6 relative z-10 space-y-20">
+        <div className="container mx-auto max-w-6xl px-6 relative z-10 space-y-12 md:space-y-16">
           
           {/* Header Section */}
           <div className="space-y-8">

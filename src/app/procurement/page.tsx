@@ -42,10 +42,10 @@ export default function ProcurementPage() {
       />
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
         {/* Hero Section */}
         <FadeIn>
-          <div className="max-w-4xl mx-auto text-center mb-24">
+          <div className="max-w-4xl mx-auto text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               Procurement Support
             </h1>
@@ -66,7 +66,7 @@ export default function ProcurementPage() {
         </FadeIn>
 
         {/* The Reality of Commodity Procurement */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-24 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-16 max-w-6xl mx-auto">
           <FadeIn>
             <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider">
               <div className="flex items-center gap-4">
@@ -113,7 +113,7 @@ export default function ProcurementPage() {
 
         {/* Process Section embedded cleanly */}
         <FadeIn>
-          <div className="mb-32">
+          <div className="mb-20">
             <ProcurementSpecialistSection key="procurement-specialist-section" />
           </div>
         </FadeIn>
@@ -125,7 +125,7 @@ export default function ProcurementPage() {
             <p className="text-foreground/60 text-xl max-w-3xl mx-auto leading-relaxed">OBAOL does not replace your procurement team. We work <strong className="text-foreground">alongside it</strong> to strengthen execution.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-32 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-20 max-w-7xl mx-auto">
             {[
               {
                 icon: <FiTarget className="w-6 h-6" />,
@@ -174,7 +174,7 @@ export default function ProcurementPage() {
 
 
         {/* For Whom vs Not For Whom */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-32 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
             <div className="bg-success/5 border border-success/20 p-8 md:p-10 rounded-[2.5rem] h-full transition-shadow hover:shadow-lg">
               <h3 className="text-3xl font-bold mb-6 flex items-center gap-4 tracking-tight">
@@ -232,7 +232,7 @@ export default function ProcurementPage() {
 
 
         {/* New Entrants & Engagement Discipline */}
-        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 mb-12 max-w-6xl mx-auto">
           <FadeIn>
             <div className="bg-content1 border border-divider p-8 md:p-10 rounded-[2.5rem] h-full">
               <h3 className="text-3xl font-bold mb-6 flex items-center gap-4 tracking-tight">
@@ -289,7 +289,7 @@ export default function ProcurementPage() {
 
         {/* Global Expansion Banner & Summary */}
         <FadeIn>
-          <div className="rounded-[3rem] border border-primary/20 bg-gradient-to-br from-primary/10 to-transparent p-8 md:p-12 mb-20 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-2xl">
+          <div className="rounded-[3rem] border border-primary/20 bg-gradient-to-br from-primary/10 to-transparent p-8 md:p-12 mb-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-2xl">
             <FiGlobe className="absolute -right-16 -bottom-16 w-64 h-64 text-primary/5 rotate-[-15deg] pointer-events-none" />
             <div className="flex-grow relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">

@@ -44,7 +44,7 @@ export default function VerificationPage() {
       />
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
         <FadeIn>
           <div className="mb-8 flex justify-center">
             <IndiaFirstNote />
@@ -53,7 +53,7 @@ export default function VerificationPage() {
 
         {/* Hero Section */}
         <FadeIn>
-          <div className="max-w-4xl mx-auto text-center mb-24">
+          <div className="max-w-4xl mx-auto text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               Verification Framework
             </h1>
@@ -71,7 +71,7 @@ export default function VerificationPage() {
         </FadeIn>
 
         {/* Why Verification Matters & Approach Grid */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-32 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
             <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider">
               <div className="flex items-center gap-4">
@@ -157,7 +157,7 @@ export default function VerificationPage() {
             <p className="text-foreground/60 text-xl max-w-3xl mx-auto leading-relaxed">Depending on the specific engagement, our verification spans across four core areas to separate genuine intent from mere capability.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mb-32 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mb-20 max-w-7xl mx-auto">
             {[
               {
                 icon: <LuSearch className="w-8 h-8" />,
@@ -207,7 +207,7 @@ export default function VerificationPage() {
         </FadeIn>
 
         {/* Continuous vs One Time & What it's not */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-32 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
             <div className="p-8 md:p-10 rounded-[2.5rem] bg-warning/5 border border-warning/20 h-full flex flex-col transition-shadow hover:shadow-lg">
               <div className="w-16 h-16 rounded-2xl bg-warning/20 text-warning-600 flex items-center justify-center mb-8">
@@ -247,7 +247,7 @@ export default function VerificationPage() {
         </div>
 
         {/* Protection & New Entrants */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-32 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
             <div className="bg-content1 border border-divider p-8 md:p-10 rounded-[2.5rem] h-full">
               <h3 className="text-3xl font-bold mb-6 flex items-center gap-4 tracking-tight">

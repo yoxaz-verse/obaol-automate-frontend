@@ -100,7 +100,7 @@ export default function CommissionStructurePage() {
     <section className="min-h-screen bg-background text-foreground selection:bg-warning-500/30 overflow-x-hidden">
       <Header />
       <ThemedContentWrapper>
-        <div className="mx-auto max-w-[1280px] px-6 pt-32 md:pt-40 pb-20 relative">
+        <div className="mx-auto max-w-[1280px] px-6 pt-24 md:pt-32 pb-12 md:pb-20 relative">
           
           <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-warning-500/5 blur-[100px] rounded-full pointer-events-none" />
           <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] bg-primary-500/5 blur-[80px] rounded-full pointer-events-none" />
@@ -124,7 +124,7 @@ export default function CommissionStructurePage() {
           </motion.div>
 
           {/* 01. Layering Structure Hub */}
-          <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
+          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden group border-r-4 border-r-warning-500/20">
               <CardBody className="p-0">
                 <div className="flex flex-col lg:flex-row">
@@ -172,7 +172,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 02. How The Commission Works */}
-          <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
               <CardBody className="p-8 md:p-12">
                 <div className="flex items-center gap-4 mb-12">
@@ -217,7 +217,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 03. Glossary */}
-          <div className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
               <CardBody className="p-8 md:p-12">
                 <div className="flex items-center gap-4 mb-12">
@@ -274,7 +274,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 04. Allocation Matrix */}
-          <div className="mb-20 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
+          <div className="mb-12 md:mb-16 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
               {[
                 { label: "Core Pool", share: "30%", icon: LuCpu, color: "text-primary-500", tone: "bg-primary-500/5", border: "border-primary-500/20" },
                 { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-warning-500", tone: "bg-warning-500/5", border: "border-warning-500/20" },
@@ -300,7 +300,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 05. Commission Simulator */}
-          <div className="mb-32 relative z-10 w-full">
+          <div className="mb-16 md:mb-24 relative z-10 w-full">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-5xl font-black leading-tight uppercase tracking-tighter italic text-foreground block">
                 Commission <span className="text-foreground/70">Simulator</span>
@@ -395,7 +395,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 06. Handler Star Dependency */}
-          <div className="mb-24 relative z-10">
+          <div className="mb-12 md:mb-16 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">
                 Handler <span className="text-warning-500">Star Dependency</span>
@@ -420,7 +420,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 07. How You Become a Leader */}
-          <div className="mb-32 relative z-10">
+          <div className="mb-16 md:mb-24 relative z-10">
             <div className="text-center mb-16">
                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">How You Become a <span className="text-warning-500">Leader</span></h2>
                <div className="h-1 w-20 bg-warning-500 mx-auto rounded-full mb-6" />
@@ -453,7 +453,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 07. Leadership Levels */}
-          <div className="mb-24 relative z-10 w-full text-white">
+          <div className="mb-16 md:mb-24 relative z-10 w-full text-white">
              <div className="text-center mb-16 px-4">
                 <span className="text-[11px] font-black uppercase tracking-[0.6em] text-primary-500 block mb-6 px-4">Leadership Levels</span>
                 <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic text-foreground mb-4">Leadership <span className="text-primary-500">Shares</span></h2>

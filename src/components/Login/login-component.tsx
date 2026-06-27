@@ -7,7 +7,7 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiUsers } from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMonitor, FiShield, FiSmartphone, FiTablet, FiUsers } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -23,6 +23,25 @@ interface ILoginProps {
   role: string;
   mode?: "login" | "signup";
 }
+
+const getPasskeyStorageKey = (identity: string) =>
+  `obaol-passkey-setup:${String(identity || "guest").toLowerCase()}`;
+
+const toBase64Url = (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+};
+
+const getUserHandle = (identity: string) => {
+  const source = String(identity || "obaol-user");
+  const bytes = new TextEncoder().encode(source);
+  if (bytes.length <= 64) return bytes;
+  return bytes.slice(0, 64);
+};
 
 const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const BLOCKED_ACCOUNT_COPY = "This account is banned/blocked from OBAOL backend. Access is disabled.";
@@ -49,6 +68,11 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
   const [resendAvailableAt, setResendAvailableAt] = useState<number | null>(null);
   const [nowTs, setNowTs] = useState(Date.now());
+  const [passkeySupport, setPasskeySupport] = useState<"checking" | "supported" | "unsupported">("checking");
+  const [showPasskeySetup, setShowPasskeySetup] = useState(false);
+  const [passkeySetupStatus, setPasskeySetupStatus] = useState<"idle" | "creating" | "success" | "error">("idle");
+  const [passkeySetupMessage, setPasskeySetupMessage] = useState("");
+  const [postLoginRoute, setPostLoginRoute] = useState("/dashboard");
 
   const normalizeSignupError = (message: string) => {
     const raw = String(message || "");
@@ -106,6 +130,23 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     if (!prefill) return;
     setEmail((prev) => (prev ? prev : prefill));
   }, [authMode, searchParams]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || authMode !== "login") return;
+    const checkPasskeySupport = async () => {
+      if (!("PublicKeyCredential" in window) || !navigator.credentials) {
+        setPasskeySupport("unsupported");
+        return;
+      }
+      try {
+        const supported = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        setPasskeySupport(supported ? "supported" : "unsupported");
+      } catch {
+        setPasskeySupport("unsupported");
+      }
+    };
+    checkPasskeySupport();
+  }, [authMode]);
 
   useEffect(() => {
     if (!otpSent || otpVerified) return;
@@ -167,8 +208,11 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     if (authMode === "signup") {
       return;
     }
-    if (!loading && isAuthenticated) {
-      setIsRedirecting(true);
+    if (!loading && isAuthenticated && !showPasskeySetup) {
+      if (passkeySupport === "checking") {
+        setIsRedirecting(true);
+        return;
+      }
       const authRoleLower = String(user?.role || "").toLowerCase();
       const registrationStatus = String(user?.registrationStatus || "APPROVED").toUpperCase();
       const isOperatorFamily = authRoleLower === "operator" || authRoleLower === "team";
@@ -193,9 +237,19 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           position: "top-right",
         });
       }
+      const passkeyKey = getPasskeyStorageKey(user?.id || user?.email || email || role);
+      const passkeyWasHandled = typeof window !== "undefined"
+        && Boolean(localStorage.getItem(passkeyKey));
+      if (passkeySupport === "supported" && !passkeyWasHandled) {
+        setPostLoginRoute(targetRoute);
+        setIsRedirecting(false);
+        setShowPasskeySetup(true);
+        return;
+      }
+      setIsRedirecting(true);
       router.push(targetRoute);
     }
-  }, [authMode, isAuthenticated, loading, router, user]);
+  }, [authMode, email, isAuthenticated, loading, passkeySupport, role, router, showPasskeySetup, user]);
 
   useEffect(() => {
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
@@ -260,10 +314,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       setGoogleRenderError("Google sign-in failed to load. Please try again.");
     }
   };
-
-  if (isRedirecting) {
-    return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
-  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -356,6 +406,87 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       ? "/auth/operator/register"
       : "/auth/register";
     router.push(target);
+  };
+
+  const completePasskeyStep = (markHandled = true) => {
+    if (markHandled && typeof window !== "undefined") {
+      const passkeyKey = getPasskeyStorageKey(user?.id || user?.email || email || role);
+      localStorage.setItem(passkeyKey, String(Date.now()));
+    }
+    setShowPasskeySetup(false);
+    setIsRedirecting(true);
+    router.push(postLoginRoute);
+  };
+
+  const handleCreatePasskey = async () => {
+    if (passkeySetupStatus === "creating") return;
+    if (typeof window === "undefined" || !navigator.credentials || !("PublicKeyCredential" in window)) {
+      setPasskeySetupStatus("error");
+      setPasskeySetupMessage("Passkeys are not available on this browser.");
+      return;
+    }
+
+    setPasskeySetupStatus("creating");
+    setPasskeySetupMessage("");
+
+    try {
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const identity = user?.id || user?.email || email || "obaol-user";
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: {
+            name: "OBAOL",
+          },
+          user: {
+            id: getUserHandle(identity),
+            name: user?.email || email || "obaol-user",
+            displayName: user?.name || user?.email || email || "OBAOL User",
+          },
+          pubKeyCredParams: [
+            { type: "public-key", alg: -7 },
+            { type: "public-key", alg: -257 },
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            residentKey: "preferred",
+            userVerification: "required",
+          },
+          timeout: 60000,
+          attestation: "none",
+        },
+      }) as PublicKeyCredential | null;
+
+      if (!credential) {
+        throw new Error("Passkey setup was cancelled.");
+      }
+
+      if (typeof window !== "undefined") {
+        const passkeyKey = getPasskeyStorageKey(identity);
+        localStorage.setItem(passkeyKey, JSON.stringify({
+          credentialId: toBase64Url(credential.rawId),
+          createdAt: new Date().toISOString(),
+          device: navigator.userAgent,
+        }));
+      }
+
+      setPasskeySetupStatus("success");
+      setPasskeySetupMessage("Passkey created on this device.");
+      play("success");
+      showToastMessage({
+        type: "success",
+        message: "Passkey created on this device.",
+        position: "top-right",
+      });
+      window.setTimeout(() => completePasskeyStep(false), 700);
+    } catch (error: any) {
+      const message = error?.name === "NotAllowedError"
+        ? "Passkey setup was cancelled or timed out."
+        : error?.message || "Passkey setup failed. You can continue without it.";
+      setPasskeySetupStatus("error");
+      setPasskeySetupMessage(message);
+      showToastMessage({ type: "error", message, position: "top-right" });
+    }
   };
 
   const handleSendOtp = async () => {
@@ -598,6 +729,108 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       switchSubLabel: "Switch Role",
     })
     : null;
+
+  if (showPasskeySetup) {
+    const deviceOptions = [
+      { label: "iMac", icon: FiMonitor },
+      { label: "MacBook", icon: FiMonitor },
+      { label: "iPhone", icon: FiSmartphone },
+      { label: "iPad / Tablet", icon: FiTablet },
+    ];
+
+    return (
+      <AuthLayout
+        title="OBAOL"
+        subtitle="Passkey setup"
+        leftPanel={currentRoleContent}
+        roleIdentity={roleIdentity || undefined}
+      >
+        <div className="w-full flex flex-col items-center gap-5">
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="w-full rounded-2xl border border-default-200/70 dark:border-white/10 bg-content1/95 dark:bg-white/[0.03] p-5 shadow-xl"
+          >
+            <div className="mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-warning-500/20 bg-warning-500/10">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-background shadow-inner">
+                <FiKey className="text-4xl text-warning-500" />
+                <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-success-500 text-white shadow-lg shadow-success-500/20">
+                  <FiCheck size={16} strokeWidth={4} />
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-center">
+              <h2 className="text-2xl font-black tracking-tight text-foreground">
+                Sign in faster on this device
+              </h2>
+              <p className="mx-auto max-w-sm text-sm font-medium leading-relaxed text-foreground/65">
+                Create a passkey to use Face ID, Touch ID, fingerprint, or your screen lock on supported Apple and tablet devices.
+              </p>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              {deviceOptions.map((device) => (
+                <div
+                  key={device.label}
+                  className="flex items-center gap-2 rounded-xl border border-default-200/70 dark:border-white/10 bg-default-100/50 dark:bg-white/[0.03] px-3 py-2"
+                >
+                  <device.icon className="shrink-0 text-warning-500" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground/65">
+                    {device.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 rounded-xl border border-primary-500/15 bg-primary-500/10 px-3 py-3">
+              <div className="flex gap-2">
+                <FiInfo className="mt-0.5 shrink-0 text-primary-500" />
+                <p className="text-xs font-semibold leading-relaxed text-foreground/65">
+                  Passkeys are device-bound and require a supported browser with a secure screen lock or biometric unlock.
+                </p>
+              </div>
+            </div>
+
+            {passkeySetupMessage && (
+              <div className={`mt-4 rounded-xl border px-3 py-2 text-center text-xs font-bold ${
+                passkeySetupStatus === "error"
+                  ? "border-danger-500/30 bg-danger-500/10 text-danger-500"
+                  : "border-success-500/30 bg-success-500/10 text-success-500"
+              }`}>
+                {passkeySetupMessage}
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3">
+              <Button
+                className="h-14 w-full rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.18em] text-black shadow-xl shadow-warning-500/10"
+                color="warning"
+                size="lg"
+                radius="lg"
+                startContent={passkeySetupStatus === "creating" ? null : <FiShield />}
+                isLoading={passkeySetupStatus === "creating"}
+                onPress={handleCreatePasskey}
+              >
+                {passkeySetupStatus === "creating" ? "Creating passkey..." : "Continue with passkey"}
+              </Button>
+              <button
+                type="button"
+                onClick={() => completePasskeyStep(true)}
+                className="h-11 text-sm font-black text-warning-500 transition-colors hover:text-warning-400"
+              >
+                Not now
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (isRedirecting) {
+    return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
+  }
 
   if (loading) {
     return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;

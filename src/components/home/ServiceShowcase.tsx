@@ -3,8 +3,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import {
-  FiArrowRight,
-  FiBox,
   FiCheckCircle,
   FiPackage,
   FiShoppingBag,
@@ -23,9 +21,11 @@ const services = [
     description:
       "Find the exact product specifications and identify the best origins that match the buyer's unique requirements.",
     metric: "Requirement to origin",
-    image: "/images/sourcing.png",
+    image: "/images/services/sourcing-india.webp",
+    imagePosition: "center",
     icon: FiTarget,
     accent: "from-purple-400 to-violet-500",
+    color: "#a78bfa",
   },
   {
     id: "documentation",
@@ -34,9 +34,11 @@ const services = [
     description:
       "Prepare compliance documents, manage export paperwork, and systematically plan the execution logistics.",
     metric: "Origin to readiness",
-    image: "/images/documentation.png",
+    image: "/images/services/documentation-india.webp",
+    imagePosition: "center",
     icon: FiFileText,
     accent: "from-blue-400 to-indigo-500",
+    color: "#60a5fa",
   },
   {
     id: "procurement",
@@ -45,9 +47,11 @@ const services = [
     description:
       "On-ground procurement partners inspect availability, negotiate readiness, and prepare confirmed lots for execution.",
     metric: "Supplier to stock",
-    image: "/images/procurement.png",
+    image: "/images/services/procurement-india.webp",
+    imagePosition: "center",
     icon: FiShoppingBag,
     accent: "from-orange-400 to-amber-500",
+    color: "#fb923c",
   },
   {
     id: "quality",
@@ -56,9 +60,11 @@ const services = [
     description:
       "Quality labs and verification operators test samples, validate specifications, and reduce uncertainty before shipment.",
     metric: "Sample to approval",
-    image: "/images/quality.png",
+    image: "/images/services/quality-india.webp",
+    imagePosition: "center",
     icon: FiCheckCircle,
     accent: "from-emerald-400 to-teal-500",
+    color: "#34d399",
   },
   {
     id: "packaging",
@@ -67,9 +73,11 @@ const services = [
     description:
       "Packaging teams handle bags, cartons, labeling, and export-ready preparation based on buyer and commodity needs.",
     metric: "Lot to load-ready",
-    image: "/images/packaging.png",
+    image: "/images/services/packaging-india.webp",
+    imagePosition: "center",
     icon: FiPackage,
     accent: "from-pink-400 to-rose-500",
+    color: "#fb7185",
   },
   {
     id: "logistics",
@@ -78,9 +86,11 @@ const services = [
     description:
       "Truck operators, dispatch teams, and route handlers coordinate pickup, inland movement, and live shipment handoffs.",
     metric: "Pickup to port",
-    image: "/images/logistics.png",
+    image: "/images/services/logistics-india.webp",
+    imagePosition: "center",
     icon: FiTruck,
     accent: "from-sky-400 to-blue-500",
+    color: "#38bdf8",
   },
   {
     id: "warehouse",
@@ -89,9 +99,11 @@ const services = [
     description:
       "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.",
     metric: "Stock to dispatch",
-    image: "/images/warehouse.png",
+    image: "/images/services/warehouse-india.webp",
+    imagePosition: "center",
     icon: FaWarehouse,
     accent: "from-amber-400 to-orange-600",
+    color: "#f59e0b",
   },
   {
     id: "freight",
@@ -100,11 +112,72 @@ const services = [
     description:
       "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.",
     metric: "Port to buyer",
-    image: "/images/freight.png",
+    image: "/images/services/freight-india.webp",
+    imagePosition: "center",
     icon: FaShip,
     accent: "from-lime-300 to-green-500",
+    color: "#84cc16",
   },
 ] as const;
+
+type Service = (typeof services)[number];
+
+function RealisticServiceVisual({ service }: { service: Service }) {
+  const Icon = service.icon;
+
+  return (
+    <motion.div
+      key={service.id}
+      className="absolute inset-0 overflow-hidden bg-black"
+      initial={{ opacity: 0, scale: 1.06, filter: "blur(16px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, scale: 1.035, filter: "blur(12px)" }}
+      transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <motion.img
+        key={service.image}
+        src={service.image}
+        alt={`${service.title} in Indian agro trade operations`}
+        className="absolute inset-0 !h-full !w-full !max-w-none object-cover brightness-110 contrast-110 saturate-110"
+        style={{ objectPosition: service.imagePosition }}
+        initial={{ scale: 1.04 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 5.2, ease: "easeOut" }}
+      />
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_22%,rgba(249,115,22,0.12),transparent_35%),linear-gradient(to_top,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.55)_48%,rgba(0,0,0,0.2)_100%),linear-gradient(to_right,rgba(0,0,0,0.68),transparent_66%)]" />
+      <div className="absolute inset-0 opacity-22 mix-blend-screen bg-[radial-gradient(circle,rgba(255,255,255,0.45)_0.8px,transparent_1.45px)] bg-[size:7px_7px]" />
+      <div className="absolute inset-0 opacity-25 bg-[linear-gradient(to_right,rgba(249,115,22,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(249,115,22,0.12)_1px,transparent_1px)] bg-[size:4.2rem_4.2rem]" />
+
+      <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/35 text-white/36 shadow-[0_0_34px_rgba(0,0,0,0.42)] backdrop-blur-md md:flex">
+        <Icon size={58} />
+      </div>
+
+      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/42 px-4 py-2 font-mono text-[10px] font-black uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-md md:left-8 md:top-8">
+        <span className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.9)]" />
+        Indian Origin Operations
+      </div>
+
+      {service.id === "documentation" && (
+        <div className="absolute right-7 top-28 hidden max-w-[210px] rounded-2xl border border-blue-300/35 bg-black/45 p-4 text-white/72 shadow-xl shadow-black/30 backdrop-blur-md md:block">
+          <div className="flex items-center gap-3">
+            <FiFileText size={24} className="text-blue-300" />
+            <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em]">Trade File</span>
+          </div>
+          <div className="mt-4 space-y-2">
+            {["PO", "PI", "COO"].map((item) => (
+              <div key={item} className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
+                <span className="h-1.5 flex-1 rounded-full bg-white/18" />
+                <span className="font-mono text-[8px] font-black text-white/45">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
 
 const particleSeeds = Array.from({ length: 42 }, (_, index) => ({
   id: index,
@@ -215,22 +288,11 @@ export default function ServiceShowcase() {
           <div className="lg:col-span-8">
             <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-2xl shadow-orange-950/20 md:min-h-[620px]">
               <AnimatePresence mode="wait">
-                <motion.img
+                <RealisticServiceVisual
                   key={activeService.id}
-                  src={activeService.image}
-                  alt={`${activeService.title} execution service`}
-                  className="absolute inset-0 !h-full !w-full !max-w-none object-cover brightness-125 contrast-110 saturate-125"
-                  initial={{ opacity: 0, scale: 1.08, filter: "blur(18px)" }}
-                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, scale: 1.04, filter: "blur(14px)" }}
-                  transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+                  service={activeService}
                 />
               </AnimatePresence>
-
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_35%,transparent_0%,rgba(0,0,0,0.12)_34%,rgba(0,0,0,0.62)_100%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.74),transparent_56%),linear-gradient(to_right,rgba(0,0,0,0.58),transparent_60%)]" />
-              <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[radial-gradient(circle,rgba(255,255,255,0.42)_0.8px,transparent_1.4px)] bg-[size:7px_7px]" />
-
 
               <div className="absolute inset-x-5 bottom-5 md:inset-x-8 md:bottom-8">
                 <AnimatePresence mode="wait">
@@ -270,8 +332,6 @@ export default function ServiceShowcase() {
                   />
                 ))}
               </div>
-
-              <FiBox className="absolute right-8 top-1/2 hidden -translate-y-1/2 text-white/10 md:block" size={112} />
             </div>
           </div>
         </div>

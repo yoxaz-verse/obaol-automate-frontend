@@ -2,7 +2,7 @@
 
 import React, { useContext, useState } from "react";
 import AuthContext from "@/context/AuthContext";
-import { Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 import { FiInfo } from "react-icons/fi";
 import { ACTION_LABELS, DEFAULT_SHORTCUTS, loadShortcuts, saveShortcuts } from "@/utils/shortcutConfig";
 

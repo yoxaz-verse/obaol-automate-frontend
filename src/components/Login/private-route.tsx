@@ -2,25 +2,28 @@ import AuthContext from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import BrandedLoader from "@/components/ui/BrandedLoader";
+import { canAccessDashboardRoute } from "@/utils/dashboardAccess";
 
 const PrivateRoute = ({
   children,
-  allowedRoles = [], // Specify roles that can access this route
+  pathname,
 }: {
   children: React.ReactNode;
-  allowedRoles?: string[]; // Array of allowed roles
+  pathname: string;
 }) => {
   const { isAuthenticated, loading, user } = useContext(AuthContext);
   const router = useRouter();
 
-  const normalizedAllowedRoles = allowedRoles.map((role) => String(role).toLowerCase());
-  const userRole = String(user?.role || "").toLowerCase();
-  const isAllowed = normalizedAllowedRoles.length === 0 || normalizedAllowedRoles.includes(userRole);
+  const isAllowed = Boolean(user) && canAccessDashboardRoute({
+    path: pathname,
+    role: user?.role,
+    tradeMode: user?.tradeMode,
+  });
 
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
-        router.replace("/auth"); // Redirect if not authenticated
+        router.replace("/auth?view=signin");
       } else if (!isAllowed) {
         router.replace("/403"); // Redirect to a "Forbidden" page if the role is unauthorized
       }

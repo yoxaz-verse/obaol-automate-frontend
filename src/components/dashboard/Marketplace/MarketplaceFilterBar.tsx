@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@heroui/react";
+import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, useDisclosure } from "@nextui-org/react";
 import { FiSearch, FiSliders } from "react-icons/fi";
 import { ClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { Tabs, Tab } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";

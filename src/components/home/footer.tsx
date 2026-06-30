@@ -133,7 +133,7 @@ export default function Footer() {
                   { name: "FAQs", href: "/faq" },
                   { name: "Export Resources", href: "/export-resources" },
                   { name: "Trade Finance", href: "/trade-finance" },
-                  { name: "Global Marketplace", href: "/product" },
+                  { name: "Marketplace", href: "/product" },
                   { name: "Sign In", href: "/auth" },
                 ].map((link) => (
                   <li key={link.name}>
@@ -175,9 +175,9 @@ export default function Footer() {
           transition={{ delay: 0.3, duration: 0.8 }}
           className="mt-24 w-full flex justify-center items-center overflow-hidden"
         >
-          <h1 className="text-[clamp(2.5rem,11vw,140px)] leading-none font-black text-foreground tracking-tighter whitespace-nowrap">
+          <p aria-hidden="true" className="text-[clamp(2.5rem,11vw,140px)] leading-none font-black text-foreground tracking-tighter whitespace-nowrap">
             OBAOL Supreme
-          </h1>
+          </p>
         </motion.div>
 
         {/* BOTTOM SECTION */}

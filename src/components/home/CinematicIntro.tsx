@@ -9,16 +9,14 @@ export default function CinematicIntro() {
 
   useEffect(() => {
     const texts = [
-      "SYS_LINK: ESTABLISHED",
-      "ENCRYPTION: AES-256",
-      "CORE_LATENCY: 4ms",
-      "NODE_SYNC: ACTIVE",
-      "PROTOCOL: SECURE",
-      "DATA_STREAM: INCOMING",
-      "ROUTING: OPTIMIZED",
-      "AUTH: VERIFIED",
-      "HANDSHAKE: COMPLETE",
-      "INITIALIZING...",
+      "DISCOVER PRODUCTS",
+      "CREATE AN ENQUIRY",
+      "VERIFY QUALITY",
+      "COORDINATE LOGISTICS",
+      "REQUEST A SAMPLE",
+      "TRACK AN ORDER",
+      "MANAGE DOCUMENTS",
+      "COMPLETE EXECUTION",
     ];
 
     const generatedTexts = Array.from({ length: 12 }).map((_, i) => ({
@@ -100,14 +98,14 @@ export default function CinematicIntro() {
             </motion.p>
             
             <div className="overflow-hidden py-2">
-              <motion.h1
+              <motion.p
                 initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
                 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/50 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] pb-2"
               >
                 OBAOL Supreme
-              </motion.h1>
+              </motion.p>
             </div>
             
             <motion.div

@@ -10,7 +10,7 @@ import {
   Divider,
   Spacer as HeroSpacer,
   Chip as HeroChip,
-} from "@heroui/react";
+} from "@nextui-org/react";
 
 const Avatar = HeroAvatar as any;
 const Chip = HeroChip as any;
@@ -308,8 +308,16 @@ export default function ProfilePage() {
 
   if (!roleKeyRaw) return null;
 
-  const roleKey = roleKeyRaw === "operator" || roleKeyRaw === "team" ? "operator" : roleKeyRaw;
-  const displayRole = roleKeyRaw === "operator" || roleKeyRaw === "team" ? "OPERATOR" : String(user?.role || "").toUpperCase();
+  const roleKey = roleKeyRaw === "operator" || roleKeyRaw === "team"
+    ? "operator"
+    : roleKeyRaw === "customer"
+      ? "associate"
+      : roleKeyRaw;
+  const displayRole = roleKeyRaw === "operator" || roleKeyRaw === "team"
+    ? "OPERATOR"
+    : roleKeyRaw === "customer"
+      ? "BUYING ASSOCIATE"
+      : String(user?.role || "").toUpperCase();
   const config = roleConfigs[roleKey] || { groups: [] };
 
   return (
@@ -491,9 +499,6 @@ export default function ProfilePage() {
               </div>
 
               <div className="animate-in fade-in slide-in-from-bottom-12 duration-[1500ms]">
-                {roleKey === "admin" && <AdminDashboardPanel />}
-                {roleKey === "associate" && <AssociateDashboardPanel userId={user?.id} />}
-                {roleKey === "operator" && <OperatorDashboardPanel userId={user?.id} />}
               </div>
 
               <div className="rounded-[1.2rem] sm:rounded-[2.5rem] border border-default-200/60 bg-content1/70 backdrop-blur-2xl p-3.5 sm:p-8 space-y-3.5 sm:space-y-6">

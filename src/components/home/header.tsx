@@ -3,25 +3,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 const NAV = [
-  { href: "/about", label: "About" },
+  { href: "/about", label: "Platform" },
   { href: "/how-it-works", label: "How it Works" },
-  { href: "/product", label: "Products" },
-  { href: "/roles", label: "Roles" },
-  { href: "/why-obaol", label: "Why OBAOL" },
-  { href: "/faq", label: "FAQ" },
+  { href: "/product", label: "Marketplace" },
+  { href: "/procurement", label: "Services" },
+  { href: "/trust", label: "Trust" },
+  { href: "/faq", label: "Resources" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const { isAuthenticated, loading } = usePublicAuthStatus();
-  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -54,26 +51,16 @@ export default function Header() {
             </nav>
 
             <div className="flex items-center gap-2 md:gap-4">
-              <div className="hidden lg:flex items-center gap-1.5 px-1.5 py-1 rounded-xl border border-foreground/10 bg-foreground/[0.03]">
+              <div className="hidden xl:flex items-center gap-1.5 px-1.5 py-1 rounded-xl border border-foreground/10 bg-foreground/[0.03]">
                 <ThemeSwitcher />
-                <Link href="/developer" className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground hover:bg-foreground/[0.08] transition-colors" aria-label="Developer Mode" title="Developer Mode">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
-                  </svg>
-                </Link>
               </div>
 
-              <button
-                onClick={() => {
-                  if (loading) return;
-                  setIsNavigating(true);
-                  router.push(isAuthenticated ? "/dashboard" : "/auth");
-                }}
-                disabled={isNavigating || loading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors disabled:opacity-80"
-              >
-                {isNavigating ? "Opening..." : !loading && isAuthenticated ? "Go to Dashboard" : "Sign In"}
-              </button>
+              <Link href={isAuthenticated ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-10 items-center px-2 text-sm font-semibold text-foreground/70 hover:text-foreground">
+                {!loading && isAuthenticated ? "Dashboard" : "Sign In"}
+              </Link>
+              <Link href={isAuthenticated ? "/dashboard" : "/auth"} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-orange-600 md:px-4 md:py-2 md:text-sm">
+                {!loading && isAuthenticated ? "Open workspace" : "Get Started"}
+              </Link>
 
               <button
                 onClick={() => setMobileOpen((v) => !v)}
@@ -102,9 +89,10 @@ export default function Header() {
             </Link>
           ))}
 
-          <Link href="/developer" onClick={() => setMobileOpen(false)} className="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-foreground/[0.06]">
-            <span>Developer Mode</span>
-          </Link>
+          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-foreground/10 pt-3">
+            <Link href="/auth?view=signin" onClick={() => setMobileOpen(false)} className="rounded-xl border border-foreground/10 px-4 py-3 text-center text-sm font-semibold">Sign In</Link>
+            <Link href="/auth" onClick={() => setMobileOpen(false)} className="rounded-xl bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white">Get Started</Link>
+          </div>
 
           <div className="mt-3 pt-3 border-t border-foreground/10 flex justify-center">
             <ThemeSwitcher />

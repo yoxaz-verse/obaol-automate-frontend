@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useContext } from "react";
-import { Input, Chip, Tab, Tabs, Pagination } from "@heroui/react";
+import { Input, Chip, Tab, Tabs, Pagination } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight, FiGrid } from "react-icons/fi";
 import { ProductList } from "@/components/dashboard/Catalog/product-list";

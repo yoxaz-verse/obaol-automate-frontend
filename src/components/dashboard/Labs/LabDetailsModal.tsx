@@ -14,7 +14,7 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData, postData } from "@/core/api/apiHandler";
 import { extractList } from "@/core/data/queryUtils";

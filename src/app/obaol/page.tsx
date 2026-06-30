@@ -1,7 +1,7 @@
 "use client";
 import { NextPage } from "next";
 import React from "react";
-import { Spacer } from "@heroui/react";
+import { Spacer } from "@nextui-org/react";
 import AgroProductDisplay from "@/components/products/AgroProductDisplay";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 

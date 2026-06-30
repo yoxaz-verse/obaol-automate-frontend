@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, CardFooter, CardHeader, Button } from "@heroui/react";
+import { Card, CardBody, CardFooter, CardHeader, Button } from "@nextui-org/react";
 import { FiUser, FiClock, FiBriefcase, FiMapPin, FiActivity } from "react-icons/fi";
 import EnquiryStatus from "./EnquiryStatus";
 import { motion } from "framer-motion";

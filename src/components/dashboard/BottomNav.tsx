@@ -9,7 +9,7 @@ import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
 import { LuWarehouse } from "react-icons/lu";
 import { FiShoppingBag } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
-import { routeRoles } from "@/utils/roleHelpers";
+import { getAccessibleDashboardRoutes } from "@/utils/dashboardAccess";
 
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
     const pathname = usePathname();
@@ -19,12 +19,14 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     useEffect(() => {
         if (typeof window === "undefined") return;
 
-        let lastScrollY = window.scrollY;
+        const scrollContainer = document.querySelector<HTMLElement>("[data-dashboard-scroll]");
+        if (!scrollContainer) return;
+        let lastScrollY = scrollContainer.scrollTop;
         const deltaThreshold = 8;
         const topSafeThreshold = 24;
 
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
+            const currentScrollY = scrollContainer.scrollTop;
             const delta = currentScrollY - lastScrollY;
 
             if (currentScrollY <= topSafeThreshold) {
@@ -42,8 +44,8 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
             lastScrollY = currentScrollY;
         };
 
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        return () => window.removeEventListener("scroll", handleScroll);
+        scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+        return () => scrollContainer.removeEventListener("scroll", handleScroll);
     }, []);
 
     const navItems = [
@@ -79,10 +81,16 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
         },
     ];
 
-    const filteredNavItems = navItems.filter((item) => {
-        const allowedRoles = routeRoles[item.link] || [];
-        return user?.role ? allowedRoles.includes(user.role) : false;
-    });
+    const mobileRoutes = getAccessibleDashboardRoutes({
+        role: user?.role,
+        tradeMode: user?.tradeMode,
+        companyInterests: user?.companyInterests || [],
+    })
+        .filter((route) => route.mobilePriority)
+        .sort((a, b) => Number(a.mobilePriority) - Number(b.mobilePriority))
+        .slice(0, 5);
+    const allowedMobileLinks = new Set(mobileRoutes.map((route) => route.path));
+    const filteredNavItems = navItems.filter((item) => allowedMobileLinks.has(item.link));
 
     return (
         <div
@@ -93,7 +101,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent" />
-            <div className="flex justify-between items-center h-full px-4 max-w-lg mx-auto">
+            <div className="flex justify-around items-center h-full px-2 max-w-lg mx-auto">
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
                     const isDisabled = isOnboardingLocked;

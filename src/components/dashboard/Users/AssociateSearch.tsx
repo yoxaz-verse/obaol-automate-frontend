@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteItem, Avatar } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Avatar } from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateRoutes } from "@/core/api/apiRoutes";
 import InlineLoader from "@/components/ui/InlineLoader";

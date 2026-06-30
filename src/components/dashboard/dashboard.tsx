@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { NextPage } from "next";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
@@ -37,20 +38,27 @@ import {
   LuHistory,
   LuAirplay as LuRadioIcon
 } from "react-icons/lu";
-import GlobalSearch from "./GlobalSearch";
-import DashboardTile from "./dashboard-tile";
 import InsightCard from "./InsightCard";
-import TrendChart from "./TrendChart";
-import EssentialTabContent from "./Essentials/essential-tab-content";
-import CompanyFunctionComponent from "./CompanyFunctionComponent";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
 import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
-import { routeRoles } from "@/utils/roleHelpers";
 import { sidebarOptions } from "@/utils/utils";
 import { dashboardCopy } from "@/utils/dashboardCopy";
+import { normalizeTradeMode } from "@/utils/dashboardAccess";
+import { getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+
+const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
+const TrendChart = dynamic(() => import("./TrendChart"), {
+  loading: () => <Skeleton className="h-64 w-full rounded-2xl" />,
+});
+const EssentialTabContent = dynamic(() => import("./Essentials/essential-tab-content"), {
+  loading: () => <Skeleton className="h-72 w-full rounded-2xl" />,
+});
+const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
+  loading: () => <Skeleton className="h-48 w-full rounded-2xl" />,
+});
 
 const Dashboard: NextPage = () => {
   const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
@@ -62,14 +70,31 @@ const Dashboard: NextPage = () => {
   const associateCompanyId = String(user?.associateCompanyId || "");
 
   const isAdmin = roleLower === "admin";
-  const isAssociate = roleLower === "associate";
+  const isAssociate = roleLower === "associate" || roleLower === "customer";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const hubTitle = isAdmin ? "Admin Dashboard" : isOperatorUser ? "Operator Dashboard" : "Associate Dashboard";
+  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
+  const [workspaceFocus, setWorkspaceFocus] = useState<"BUY" | "SELL" | "BOTH">("BOTH");
+  const effectiveTradeMode = tradeMode === "BOTH" ? workspaceFocus : tradeMode;
+  const isBuyingMode = isAssociate && (effectiveTradeMode === "BUY" || effectiveTradeMode === "BOTH");
+  const isSellingMode = isAssociate && (effectiveTradeMode === "SELL" || effectiveTradeMode === "BOTH");
+  const hubTitle = isAdmin
+    ? "Admin Dashboard"
+    : isOperatorUser
+      ? "Operator Dashboard"
+      : tradeMode === "BUY"
+        ? "Buying Workspace"
+        : tradeMode === "SELL"
+          ? "Selling Workspace"
+          : "Trading Workspace";
   const hubSubtitle = isAdmin
     ? "System overview is ready."
     : isOperatorUser
       ? "Operator overview is ready."
-      : "Account overview is ready.";
+      : tradeMode === "BUY"
+        ? "Your buying pipeline and next actions are ready."
+        : tradeMode === "SELL"
+          ? "Your selling pipeline and next actions are ready."
+          : "Your buying and selling pipelines are ready.";
 
   const [companyLookup, setCompanyLookup] = useState("");
   const [associateLookup, setAssociateLookup] = useState("");
@@ -149,17 +174,20 @@ const Dashboard: NextPage = () => {
   const associateActionRequired = Number(summary?.associateActionRequired || 0);
   const adminActionRequired = Number(summary?.adminActionRequired || 0);
 
-  const filteredOptions = sidebarOptions.filter((option) => {
-    const allowedRoles = routeRoles[option.link] || [];
-    const normalizedAllowed = allowedRoles.map((allowed) => String(allowed).toLowerCase());
-    return normalizedAllowed.includes(roleLower);
-  });
+  const filteredOptions = getRoleFilteredSidebarOptions(
+    sidebarOptions as any[],
+    role,
+    tradeMode,
+    user?.companyInterests || []
+  );
 
   const prioritizedLinks = useMemo(() => {
     const priorityMap = isAdmin
       ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/operator/team"]
       : isAssociate
-        ? ["/dashboard/marketplace", "/dashboard/catalog", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"]
+        ? isBuyingMode && !isSellingMode
+          ? ["/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/profile"]
+          : ["/dashboard/product", "/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/company", "/dashboard/profile"]
         : isOperatorUser
           ? ["/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/operator/hierarchy"]
           : ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"];
@@ -167,7 +195,7 @@ const Dashboard: NextPage = () => {
     return priorityMap
       .map((link) => filteredOptions.find((option) => option.link === link))
       .filter(Boolean) as typeof sidebarOptions;
-  }, [filteredOptions, isAdmin, isAssociate, isOperatorUser]);
+  }, [filteredOptions, isAdmin, isAssociate, isBuyingMode, isOperatorUser, isSellingMode]);
 
   const activityFeed = useMemo(() => {
     const summaryFeed = Array.isArray(summary?.recentActivity) ? summary.recentActivity : [];
@@ -211,7 +239,7 @@ const Dashboard: NextPage = () => {
     }
 
     if (isAssociate) {
-      return [
+      const items = [
         {
           label: "Action required enquiries",
           value: associateActionRequired,
@@ -219,21 +247,22 @@ const Dashboard: NextPage = () => {
           route: "/dashboard/enquiries",
           color: "warning" as const,
         },
-        {
+        ...(isBuyingMode ? [{
           label: "Catalog opportunities",
           value: Number(associateMetrics.obaolCatalogCount || 0),
-          detail: "Products available in OBAOL catalog",
+          detail: "Discover products and create a buying enquiry",
           route: "/dashboard/marketplace",
           color: "primary" as const,
-        },
-        {
+        }] : []),
+        ...(isSellingMode ? [{
           label: "Live catalog products",
           value: Number(associateMetrics.liveProducts || 0),
           detail: "Your live listed products",
           route: "/dashboard/product",
           color: "success" as const,
-        },
+        }] : []),
       ];
+      return items;
     }
 
     if (isOperatorUser) {
@@ -269,7 +298,9 @@ const Dashboard: NextPage = () => {
     operatorMetrics.totalAssignedProducts,
     isAdmin,
     isAssociate,
+    isBuyingMode,
     isOperatorUser,
+    isSellingMode,
     pendingApprovalsTotal,
     pendingAssociateApprovals,
     pendingCompanyApprovals,
@@ -611,18 +642,18 @@ const Dashboard: NextPage = () => {
           icon={<LuClock size={18} />}
           footer={<span className="text-xs text-default-500">Pending your accept/confirm actions</span>}
         />
-        <InsightCard
+        {isBuyingMode && <InsightCard
           title="Buying Enquiries"
           metric={(Number(associateMetrics.totalInquiries || associateBuyingCount) || 0).toLocaleString()}
           icon={<LuShoppingBag size={18} />}
           footer={<span className="text-xs text-default-500">Enquiries where you are buyer-side</span>}
-        />
-        <InsightCard
+        />}
+        {isSellingMode && <InsightCard
           title="Selling Enquiries"
           metric={associateSellingCount.toLocaleString()}
           icon={<LuPackage size={18} />}
           footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
-        />
+        />}
         <InsightCard
           title="Active Orders"
           metric={activeOrders.toLocaleString()}
@@ -631,7 +662,19 @@ const Dashboard: NextPage = () => {
         />
       </div>
 
-      <div className="space-y-4">
+      {isBuyingMode && !isSellingMode && (
+        <Card className="border border-primary-500/20 bg-primary-500/5">
+          <CardBody className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="font-bold text-foreground">Next best action: discover a verified product</h3>
+              <p className="mt-1 text-xs text-default-500">Compare live listings, open a product, and create your buying enquiry.</p>
+            </div>
+            <Button color="primary" onPress={() => router.push("/dashboard/marketplace")}>Browse Marketplace</Button>
+          </CardBody>
+        </Card>
+      )}
+
+      {isSellingMode && <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black uppercase tracking-[0.2em] text-default-400">Company Functions</h3>
@@ -690,7 +733,7 @@ const Dashboard: NextPage = () => {
             ))}
           </div>
         )}
-      </div>
+      </div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-6">
@@ -954,7 +997,7 @@ const Dashboard: NextPage = () => {
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                 <span className="text-[10px] font-black tracking-widest uppercase text-primary">System Online</span>
+                 <span className="text-[10px] font-black tracking-widest uppercase text-primary">Workspace ready</span>
               </div>
               <div className="space-y-1">
                 <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic">{hubTitle}</h1>
@@ -968,10 +1011,19 @@ const Dashboard: NextPage = () => {
               <div className="w-full md:w-auto md:min-w-[320px]">
                 <GlobalSearch />
               </div>
+              {isAssociate && tradeMode === "BOTH" && (
+                <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1">
+                  {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
+                    <button key={focus} type="button" onClick={() => setWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-9 rounded-lg px-3 text-xs font-bold ${workspaceFocus === focus ? "bg-warning-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
+                      {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="hidden md:block h-6 w-px db-border-subtle border-l" />
               <div className="flex items-center gap-2.5">
                 <Chip variant="flat" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 db-inset border db-border-subtle">
-                  {role || "User"}
+                  {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
                 </Chip>
                 <Chip variant="flat" color="primary" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 border border-primary/20">
                   {activeOrders} Active Orders

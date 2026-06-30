@@ -88,7 +88,7 @@ export default function MethodsPage() {
       >
         <h3>Operator Mindset Protocol</h3>
         <blockquote>
-          "You are not an operator; you are a <span>Sync Team Member</span>. You do not just manage data—you take 100% ownership of the <span>companies success</span> under your management."
+          &ldquo;You are not an operator; you are a <span>Sync Team Member</span>. You do not just manage data—you take 100% ownership of the <span>companies success</span> under your management.&rdquo;
         </blockquote>
         
         <div className="manifesto-footer">

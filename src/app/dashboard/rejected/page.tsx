@@ -2,9 +2,9 @@
 
 import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { motion } from "framer-motion";
-import { LuShieldOff, LuMail, LuPhone } from "react-icons/lu";
+import { LuShieldOff, LuMail } from "react-icons/lu";
 import { FiAlertTriangle as LuAlertTriangle } from "react-icons/fi";
 
 import { useRouter } from "next/navigation";
@@ -24,7 +24,7 @@ export default function RejectedPage() {
             radius="full"
             variant="bordered"
             className="border-default-200 text-default-500"
-            onPress={async () => { await logout(); router.push("/auth"); }}
+            onPress={async () => { await logout(); router.push("/auth?view=signin"); }}
           >
             Sign Out
           </Button>
@@ -40,8 +40,8 @@ export default function RejectedPage() {
               <LuShieldOff size={22} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-danger-400">Account Rejected</p>
-              <h1 className="text-3xl md:text-4xl font-black text-foreground mt-2">{roleLabel} Access Denied</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-danger-400">Account review complete</p>
+              <h1 className="text-3xl md:text-4xl font-black text-foreground mt-2">Your account needs attention</h1>
             </div>
           </div>
 
@@ -62,18 +62,15 @@ export default function RejectedPage() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-300">Account type</span>
+              <p className="mt-2 text-xs text-default-400">{roleLabel}</p>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
               <div className="flex items-center gap-3 text-default-300">
                 <LuMail size={16} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Support Email</span>
               </div>
               <p className="mt-2 text-xs text-default-400">info@support.obaol.com</p>
-            </div>
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-              <div className="flex items-center gap-3 text-default-300">
-                <LuPhone size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Support Phone</span>
-              </div>
-              <p className="mt-2 text-xs text-default-400">+91 00000 00000</p>
             </div>
           </div>
         </motion.div>

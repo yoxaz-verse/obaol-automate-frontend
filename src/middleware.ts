@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { resolveRequestHost } from "@/utils/hostResolution";
 
 export function middleware(request: NextRequest) {
     // NOTE: Language selection is client-driven via cookies (language/googtrans).
     // Middleware should not mutate language cookies during rewrites.
     const url = request.nextUrl;
-    const hostname = request.headers.get("host") || "";
-
-    // Define allowed domains (main platform domains)
-    const mainDomains = [
-        "obaol.com",
-        "www.obaol.com",
-        "localhost:3000",
-        "obaol-automate-frontend.vercel.app",
-        "automate-frontend.infra.obaol.com", // Backend infra domain if applicable
-    ];
+    const hostResolution = resolveRequestHost(request.headers.get("x-forwarded-host") || request.headers.get("host"));
 
     // Skip middleware for internal Next.js paths and API routes
     if (
@@ -30,27 +22,16 @@ export function middleware(request: NextRequest) {
     const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password"];
     const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));
 
-    // If it's a main domain, handle subdomains
-    if (mainDomains.some(domain => hostname.includes(domain))) {
-        const parts = hostname.split(".");
-        // pattern: slug.obaol.com (3 parts) or slug.company.obaol.com (4 parts)
-        if (parts.length >= 3 && parts[0] !== "www" && !isSharedRoute) {
-            const slug = parts[0];
-            return NextResponse.rewrite(
-                new URL(`/brand/${slug}${url.pathname}`, request.url)
-            );
-        }
-        return NextResponse.next();
-    }
-
-    // If we reach here and it's not a localhost/internal domain, 
-    // treat it as a custom domain rewrite (unless it's a shared route)
-    if (!hostname.includes("localhost") && !hostname.includes(".local") && !isSharedRoute) {
+    if (
+        !isSharedRoute
+        && (hostResolution.kind === "subdomain-brand" || hostResolution.kind === "custom-domain-brand")
+    ) {
         return NextResponse.rewrite(
-            new URL(`/brand/${hostname}${url.pathname}`, request.url)
+            new URL(`/brand/${encodeURIComponent(hostResolution.slug)}${url.pathname}`, request.url)
         );
     }
 
+    // Invalid and unknown local hosts safely fall back to the main platform.
     return NextResponse.next();
 }
 

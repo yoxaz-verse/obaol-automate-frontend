@@ -511,9 +511,9 @@ export default function HeroSection() {
               className="absolute left-0 right-0 h-[1px] bg-orange-500/50 shadow-[0_0_15px_rgba(234,88,12,0.8)] z-20"
             />
             <div className="absolute top-10 right-10 flex flex-col items-end gap-1 font-mono text-[9px] text-orange-500/40 uppercase tracking-tighter">
-              <span>Core_Status: Active</span>
-              <span>Nodes_In_Sync: 8/8</span>
-              <span>Execution_Engine: v2.0.4-Stable</span>
+              <span>Plan the requirement</span>
+              <span>Verify each milestone</span>
+              <span>Coordinate execution</span>
             </div>
           </motion.div>
         )}
@@ -526,10 +526,10 @@ export default function HeroSection() {
             className="absolute inset-0 z-12 pointer-events-none overflow-hidden"
           >
             <div className="absolute top-10 left-10 flex flex-col items-start gap-1 font-mono text-[9px] text-emerald-500/40 uppercase tracking-tighter">
-              <span className="text-emerald-500/60 font-black">Trade_Intelligence_Active</span>
-              <span>Global_Routes: 4,821 Active</span>
-              <span>Market_Volatility: 0.12% Low</span>
-              <span>Aggregate_Volume: 2.4M MT</span>
+              <span className="text-emerald-500/60 font-black">Trade workflow</span>
+              <span>Discover products</span>
+              <span>Create an enquiry</span>
+              <span>Track the order</span>
             </div>
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03]">
               {/* Globe logo removed as per request */}
@@ -643,24 +643,26 @@ export default function HeroSection() {
                       onMouseEnter={() => setIsSystemActive(true)}
                       onMouseLeave={() => setIsSystemActive(false)}
                       onClick={() => {
-                        if (loading) return;
                         setIsNavigating(true);
-                        router.push(isAuthenticated ? "/dashboard" : "/auth");
+                        router.push(!loading && isAuthenticated ? "/dashboard" : "/auth");
                       }}
                       className="group relative px-6 py-3 md:px-9 md:py-4 rounded-[2rem] bg-orange-600 hover:bg-orange-700 text-white font-black text-base md:text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] transition-all hover:scale-105 active:scale-95 flex items-center gap-2.5 md:gap-3 border border-orange-400/20"
                     >
-                      {isNavigating ? "Establishing..." : (isAuthenticated ? "Access Workspace" : "Sign In to Access")}
+                      {isNavigating ? "Opening..." : (isAuthenticated ? "Open workspace" : "Get started")}
                       <FiArrowRight size={20} className="md:size-6 group-hover:translate-x-2 transition-transform" />
                       <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
 
                     {!loading && !isAuthenticated && (
                       <div className="flex flex-wrap items-center gap-6 md:gap-10">
-                        <Link href="/auth/register" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
-                          Join as Associate
+                        <Link href="/auth/register?intent=BUY" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
+                          Start buying
+                        </Link>
+                        <Link href="/auth/register?intent=SELL" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
+                          Start selling
                         </Link>
                         <Link href="/auth/operator/register" className="text-[10px] sm:text-[12px] font-black text-foreground/50 hover:text-orange-500 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
-                          Join as Operator
+                          Work in operations
                         </Link>
                       </div>
                     )}
@@ -835,9 +837,9 @@ export default function HeroSection() {
                 {/* HUD HUD Technical Details Overlay */}
                 <div className="absolute top-0 right-0 p-4 border-r border-t border-white/5 rounded-tr-3xl pointer-events-none opacity-20">
                   <div className="text-[7px] font-mono flex flex-col gap-1 tracking-tighter">
-                    <span>SYS_LINK: ESTABLISHED</span>
-                    <span>ENCRYPTION: AES-256</span>
-                    <span>CORE_LATENCY: 4ms</span>
+                    <span>DISCOVER PRODUCTS</span>
+                    <span>VERIFY MILESTONES</span>
+                    <span>TRACK EXECUTION</span>
                   </div>
                 </div>
               </motion.div>

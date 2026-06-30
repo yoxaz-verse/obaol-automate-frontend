@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, CardBody, Chip, Input } from "@heroui/react";
+import { Button, Card, CardBody, Chip, Input } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
 import AuthContext from "@/context/AuthContext";

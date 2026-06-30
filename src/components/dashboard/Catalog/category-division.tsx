@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Accordion, AccordionItem, Button, Divider, Chip } from "@heroui/react";
+import { Accordion, AccordionItem, Button, Divider, Chip } from "@nextui-org/react";
 // ^ Adjust if you're using a different UI library for your accordions
 import { getData } from "@/core/api/apiHandler";
 import { inventoryManagerRoutes } from "@/core/api/apiRoutes";

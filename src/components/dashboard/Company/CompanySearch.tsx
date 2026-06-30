@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteItem, Avatar, Spinner } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Avatar, Spinner } from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { associateCompanyRoutes } from "@/core/api/apiRoutes";
 import { useEffect, useMemo, useRef, useState } from "react";

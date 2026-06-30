@@ -51,6 +51,7 @@ import AssociateSearch from "../Users/AssociateSearch";
 
 import QueryComponent from "@/components/queryComponent";
 import AuthContext from "@/context/AuthContext";
+import { normalizeTradeMode } from "@/utils/dashboardAccess";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import {
   associateRoutes,
@@ -291,9 +292,12 @@ const VariantRate: React.FC<VariantRateProps> = ({
     DEFAULT_CALCULATION_CONFIG.variantRateCommissionPercent;
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const isAdminUser = roleLower === "admin" || isOperatorUser;
-  const isAssociateUser = roleLower === "associate";
+  const isAssociateUser = roleLower === "associate" || roleLower === "customer";
+  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
+  const isBuyingMode = isAssociateUser && (tradeMode === "BUY" || tradeMode === "BOTH");
+  const isSellingMode = isAssociateUser && (tradeMode === "SELL" || tradeMode === "BOTH");
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
-  const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
+  const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
   const isMarketplaceView = additionalParams?.view === "marketplace";
   const canManageRow = (item: any) => {
     if (!item) return false;
@@ -305,7 +309,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
       Boolean(item.companyId)
     )
       return true;
-    return Boolean(item.isOwnerView || item.isCatalogView);
+    return Boolean(isSellingMode && (item.isOwnerView || item.isCatalogView));
   };
 
   const [filters, setFilters] = useState<Record<string, any>>({}); // Dynamic filters
@@ -1416,7 +1420,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               !item.hasInventory &&
                               (roleLower === "admin" ||
                                 isOperatorUser ||
-                                isAssociateUser);
+                                isSellingMode);
                             const isSameCompany = Boolean(
                               (user as any)?.associateCompanyId &&
                               item.companyId &&
@@ -1463,7 +1467,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   </>
                                 ) : item.isMarketplaceView ? (
                                   <>
-                                    {!isAdminUser &&
+                                    {!isAdminUser && isSellingMode &&
                                       typeof AddToCatalogButton !==
                                         "undefined" && (
                                         <AddToCatalogButton
@@ -1474,7 +1478,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                           onSuccess={() => refetchData()}
                                         />
                                       )}
-                                    {(user?.role === "Associate" ||
+                                    {(isBuyingMode ||
                                       isAdminUser) &&
                                       typeof CreateEnquiryButton !==
                                         "undefined" && (
@@ -1483,7 +1487,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                           variantRate={item}
                                         />
                                       )}
-                                    {typeof RequestSampleButton !==
+                                    {(isBuyingMode || isAdminUser) && typeof RequestSampleButton !==
                                       "undefined" && (
                                       <RequestSampleButton variantRate={item} />
                                     )}
@@ -1504,7 +1508,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         />
                                       )}
                                     {(isAdminUser ||
-                                      (isLive && !item.isCatalogView)) &&
+                                      (isBuyingMode && isLive && !item.isCatalogView)) &&
                                       typeof RequestSampleButton !==
                                         "undefined" && (
                                         <RequestSampleButton
@@ -1664,7 +1668,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           !item.hasInventory &&
                           (roleLower === "admin" ||
                             isOperatorUser ||
-                            isAssociateUser);
+                            isSellingMode);
                         const isSameCompany = Boolean(
                           (user as any)?.associateCompanyId &&
                           item.companyId &&
@@ -1711,7 +1715,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               </>
                             ) : item.isMarketplaceView ? (
                               <>
-                                {!isAdminUser &&
+                                {!isAdminUser && isSellingMode &&
                                   typeof AddToCatalogButton !== "undefined" && (
                                     <AddToCatalogButton
                                       rowItem={item}
@@ -1721,7 +1725,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       onSuccess={() => refetchData()}
                                     />
                                   )}
-                                {(user?.role === "Associate" || isAdminUser) &&
+                                {(isBuyingMode || isAdminUser) &&
                                   typeof CreateEnquiryButton !==
                                     "undefined" && (
                                     <CreateEnquiryButton
@@ -1729,7 +1733,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       variantRate={item}
                                     />
                                   )}
-                                {typeof RequestSampleButton !== "undefined" && (
+                                {(isBuyingMode || isAdminUser) && typeof RequestSampleButton !== "undefined" && (
                                   <RequestSampleButton variantRate={item} />
                                 )}
                               </>
@@ -1748,7 +1752,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     />
                                   )}
                                 {(isAdminUser ||
-                                  (isLive && !item.isCatalogView)) &&
+                                  (isBuyingMode && isLive && !item.isCatalogView)) &&
                                   typeof RequestSampleButton !==
                                     "undefined" && (
                                     <RequestSampleButton variantRate={item} />

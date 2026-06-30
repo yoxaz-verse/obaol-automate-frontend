@@ -1,128 +1,34 @@
-export const routeRoles: { [key: string]: string[] } = {
-  "/dashboard": [
-    "Admin",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-    "Operator",
-  ],
-  "/dashboard/onboarding": ["Associate", "Operator", "team"],
-  "/dashboard/essentials": ["Admin"],
-  "/dashboard/users": ["Admin"],
-  // "/dashboard/bulk": ["Admin","Operator"],
+import {
+  DASHBOARD_ROUTE_MANIFEST,
+  canAccessDashboardRoute,
+  getDashboardRoute,
+  normalizeDashboardRole,
+  type TradeMode,
+} from "@/utils/dashboardAccess";
 
-  "/dashboard/product": [
-    "Admin",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-    "Operator",
-  ],
-  "/dashboard/company": ["Associate", "Admin", "Operator", "team"],
-  "/dashboard/companies": ["Admin", "Operator", "team"],
-  "/dashboard/operator/hierarchy": ["Admin", "Operator", "team"],
-  "/dashboard/operator/team": ["Admin", "Operator", "team"],
-  "/dashboard/operator/earnings": ["Admin", "Operator", "team"],
-  "/dashboard/operators/overview": ["Admin"],
-  "/dashboard/catalog": ["Admin", "Associate", "Operator"],
-  "/dashboard/inventory": ["Admin", "Associate", "Operator"],
-  "/dashboard/warehouses": ["Admin", "Associate", "Operator"],
-  "/dashboard/warehouses/location": ["Admin", "Associate", "Operator"],
-  "/dashboard/warehouse-rent": ["Admin", "Associate", "Operator"],
-  "/dashboard/quality-labs": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/map": ["Admin", "Associate"],
-  "/dashboard/geosphere": ["Admin"],
-  "/dashboard/enquiries": ["Admin", "Associate", "Operator", "ProjectManager", "Worker", "Customer"],
-  "/dashboard/sample-requests": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/orders": ["Admin", "Associate", "Operator", "ProjectManager", "Worker", "Customer"],
-  "/dashboard/external-orders": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/external-orders/new": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/orders/:id": ["Admin", "Associate", "Operator", "ProjectManager", "Worker", "Customer"],
-  "/dashboard/documents": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/documents/:id": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/documentation-rules": ["Admin"],
-  "/dashboard/documentation-preview": ["Admin"],
-  "/dashboard/documentation-templates": ["Admin"],
-  "/dashboard/payments": ["Admin"],
-  "/dashboard/flow-rules": ["Admin"],
-  "/dashboard/order-rules": ["Admin"],
-  "/dashboard/enquiry-rules": ["Admin"],
-  "/dashboard/function-preview": ["Admin"],
-  "/dashboard/calculations": ["Admin"],
-  "/dashboard/email-templates": ["Admin"],
-  "/dashboard/shortcuts": ["Admin", "Associate", "Operator", "team", "Customer", "ProjectManager", "Worker"],
-  "/dashboard/execution-enquiries": ["Admin", "Associate", "Operator", "team"],
-  "/dashboard/notifications": ["Admin", "Associate", "Operator", "Customer", "ProjectManager", "Worker"],
-  "/dashboard/approvals": ["Admin"],
-  "/dashboard/reports": ["Admin"],
-  "/export-resources": [
-    "Admin",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-    "Operator",
-  ],
-  "/dashboard/rates": ["Admin"],
-  "/dashboard/profile": [
-    "Admin",
-    "Operator",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-  ],
-  "/dashboard/guidance": [
-    "Admin",
-    "Operator",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-    "team",
-  ],
-  // "/dashboard/rsForm": ["Associate"],
-  "/dashboard/marketplace": [
-    "Admin",
-    "Customer",
-    "Associate",
-    "ProjectManager",
-    "Worker",
-    "Operator",
-  ],
-  "/dashboard/imports": [
-    "Admin",
-    "Associate",
-    "Operator",
-    "team",
-  ],
-  "/dashboard/rejected": [
-    "Admin",
-    "Associate",
-    "Operator",
-    "team",
-  ],
+const displayRole = (role: string) => {
+  if (role === "admin") return "Admin";
+  if (role === "associate") return "Associate";
+  if (role === "operator") return "Operator";
+  return "team";
 };
 
-export const getAllowedRoles = (pathname: string): string[] => {
-  const normalizedPath = pathname.endsWith("/") && pathname.length > 1
-    ? pathname.slice(0, -1)
-    : pathname;
+// Compatibility export for older table/form components. New dashboard access
+// decisions must use canAccessDashboardRoute so unknown routes remain denied.
+export const routeRoles: Record<string, string[]> = Object.fromEntries(
+  DASHBOARD_ROUTE_MANIFEST.map((route) => [
+    route.path,
+    route.roles.map(displayRole),
+  ])
+);
 
-  if (normalizedPath.startsWith("/dashboard/orders/")) {
-    return routeRoles["/dashboard/orders/:id"] || routeRoles["/dashboard/orders"] || [];
-  }
-  if (normalizedPath.startsWith("/dashboard/enquiries/")) {
-    return routeRoles["/dashboard/enquiries"] || [];
-  }
+export const getAllowedRoles = (pathname: string): string[] =>
+  (getDashboardRoute(pathname)?.roles || []).map(displayRole);
 
-  const dynamicRoute = Object.keys(routeRoles).find((route) => {
-    const dynamicPattern = new RegExp(
-      `^${route.replace(/:\w+/g, "[^/]+")}$` // Replace ":param" with dynamic segments
-    );
-    return dynamicPattern.test(normalizedPath);
-  });
-  return routeRoles[dynamicRoute || ""] || [];
-};
+export const isDashboardRouteAllowed = (
+  pathname: string,
+  role: unknown,
+  tradeMode?: TradeMode | string | null
+) => canAccessDashboardRoute({ path: pathname, role, tradeMode });
+
+export { getDashboardRoute, normalizeDashboardRole };

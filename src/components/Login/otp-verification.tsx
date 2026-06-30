@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, InputOtp, Card, CardBody } from "@heroui/react";
+import { Button, InputOtp, Card, CardBody } from "@nextui-org/react";
 import { User } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";

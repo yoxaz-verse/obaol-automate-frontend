@@ -508,7 +508,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] font-black text-success-600 dark:text-success-400 uppercase tracking-[0.2em] leading-none mb-1">Identity Verified</span>
-                    <p className="text-[12px] font-bold text-foreground opacity-70 leading-none">GOOGLE PROTOCOL ACTIVE</p>
+                    <p className="text-[12px] font-bold text-foreground opacity-70 leading-none">Google account connected</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success-500/20 border border-success-500/30">

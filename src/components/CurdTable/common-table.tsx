@@ -12,7 +12,7 @@ import {
   Tooltip,
   Pagination,
   Spinner,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Image from "next/image";
 import EmptyState from "../ui/EmptyState";

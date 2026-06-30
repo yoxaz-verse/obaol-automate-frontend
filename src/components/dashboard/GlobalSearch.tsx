@@ -1,18 +1,28 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Input, Listbox, ListboxItem, Kbd } from "@heroui/react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { Input, Listbox, ListboxItem, Kbd } from "@nextui-org/react";
 import { LuSearch, LuArrowRight, LuLayers } from "react-icons/lu";
 import { useRouter } from "next/navigation";
 import { sidebarOptions } from "@/utils/utils";
+import AuthContext from "@/context/AuthContext";
+import { getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { user } = useContext(AuthContext);
 
-  const filteredOptions = sidebarOptions.filter((option) =>
+  const accessibleOptions = getRoleFilteredSidebarOptions(
+    sidebarOptions as any[],
+    String(user?.role || ""),
+    user?.tradeMode,
+    user?.companyInterests || []
+  );
+  const filteredOptions = accessibleOptions.filter((option) =>
     option.name.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -26,6 +36,17 @@ export default function GlobalSearch() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleQuickOpen = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      event.preventDefault();
+      inputRef.current?.focus();
+      setIsOpen(true);
+    };
+    window.addEventListener("keydown", handleQuickOpen);
+    return () => window.removeEventListener("keydown", handleQuickOpen);
+  }, []);
+
   const handleSelect = (link: string) => {
     router.push(link);
     setIsOpen(false);
@@ -35,6 +56,7 @@ export default function GlobalSearch() {
   return (
     <div className="relative w-full max-w-md" ref={containerRef}>
       <Input
+        ref={inputRef}
         value={query}
         onValueChange={(val) => {
           setQuery(val);
@@ -85,7 +107,7 @@ export default function GlobalSearch() {
                  <LuLayers size={32} />
                </div>
                <p className="text-xs text-default-400 font-medium tracking-tight">
-                 No protocol found for <span className="text-foreground font-bold">"{query}"</span>
+                 No destination found for <span className="text-foreground font-bold">&ldquo;{query}&rdquo;</span>
                </p>
             </div>
           )}

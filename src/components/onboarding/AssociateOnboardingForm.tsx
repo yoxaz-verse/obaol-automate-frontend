@@ -140,6 +140,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     associateDivision: "",
     associatePincodeEntry: "",
     referralCode: "",
+    tradeMode: "BOTH" as "BUY" | "SELL" | "BOTH",
   });
 
   const hydrateDraft = useCallback((parsed: any) => {
@@ -180,10 +181,13 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   }, [isOnboarding, user]);
 
   React.useEffect(() => {
-    if (isOnboarding) return;
     const prefill = String(searchParams?.get("prefill") || "").trim();
-    if (!prefill) return;
-    setFormData((prev) => (prev.email ? prev : { ...prev, email: prefill }));
+    const intent = String(searchParams?.get("intent") || "").toUpperCase();
+    setFormData((prev) => ({
+      ...prev,
+      email: prev.email || (isOnboarding ? "" : prefill),
+      tradeMode: (["BUY", "SELL", "BOTH"].includes(intent) ? intent : prev.tradeMode) as "BUY" | "SELL" | "BOTH",
+    }));
   }, [isOnboarding, searchParams]);
 
   const { data: registerOptions, isLoading: optionsLoading, isError: optionsError, refetch: refetchOptions } = useQuery({
@@ -625,6 +629,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const stepErrors: Record<string, string> = {};
 
     if (step === 1) {
+      if (!["BUY", "SELL", "BOTH"].includes(formData.tradeMode)) stepErrors.tradeMode = "Choose how you will trade";
       if (!formData.name.trim()) stepErrors.name = "Name is required";
       if (!formData.email.trim()) stepErrors.email = "Email is required";
       if (formData.email && !emailRegex.test(formData.email)) stepErrors.email = "Invalid email format";
@@ -844,6 +849,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         associateDivision: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? formData.associateDivision : undefined,
         associatePincodeEntry: !isCompanyFlow && formData.associateGeoType === "INDIAN" ? (formData.associatePincodeEntry || undefined) : undefined,
         referralCode: formData.referralCode.trim() || undefined,
+        tradeMode: formData.tradeMode,
       };
 
       if (isNewCompany) {
@@ -951,9 +957,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[620px]"}
       embedded={isOnboarding}
       leftPanel={{
-        headline: "OBAOL",
-        highlight: "ASSOCIATE NETWORK",
-        description: "Empowering manufacturers, traders, and logistics providers with a unified platform for global agro-trade automation.",
+        headline: "Start trading with OBAOL",
+        highlight: formData.tradeMode === "BUY" ? "BUYING WORKSPACE" : formData.tradeMode === "SELL" ? "SELLING WORKSPACE" : "BUYING AND SELLING",
+        description: "Create one verified profile for marketplace discovery, enquiries, samples, orders, and trade execution.",
         tags: [
           "Manufacturers",
           "Traders",
@@ -963,7 +969,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           "Warehouse Managers",
           "Company Registration Mandatory"
         ],
-        footer: "Associate_Hub_Online",
+        footer: "Your progress is saved during onboarding",
         knowMoreLink: "/roles/associate"
       }}
     >
@@ -1016,7 +1022,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-success-600 dark:text-success-400 uppercase tracking-[0.2em] leading-none mb-1">Identity Verified</span>
-                      <p className="text-[12px] font-bold text-foreground opacity-70 leading-none">GOOGLE PROTOCOL ACTIVE</p>
+                      <p className="text-[12px] font-bold text-foreground opacity-70 leading-none">Google account connected</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success-500/20 border border-success-500/30">
@@ -1189,6 +1195,22 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                       />
                     </div>
                   )}
+
+                  <div className="md:col-span-2 pt-3">
+                    <RadioGroup
+                      label="How will you use OBAOL?"
+                      orientation="horizontal"
+                      value={formData.tradeMode}
+                      onValueChange={(value) => setField("tradeMode", value)}
+                      isInvalid={Boolean(errors.tradeMode)}
+                      errorMessage={errors.tradeMode}
+                      classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-500" }}
+                    >
+                      <Radio value="BUY" description="Discover products and create enquiries">Buy</Radio>
+                      <Radio value="SELL" description="List products and respond to buyers">Sell</Radio>
+                      <Radio value="BOTH" description="Use both buying and selling workflows">Both</Radio>
+                    </RadioGroup>
+                  </div>
 
                   <div className="md:col-span-2 pt-4">
                     <div className="p-4 rounded-2xl bg-warning-500/5 border border-dashed border-warning-500/30 flex flex-col gap-3">

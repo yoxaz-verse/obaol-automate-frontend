@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useMemo, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { Chip, Input, Card, CardBody, Divider } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

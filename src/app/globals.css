@@ -84,6 +84,42 @@ body {
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
 }
 
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 10000;
+  transform: translateY(-200%);
+  border-radius: 0.75rem;
+  background: #f59e0b;
+  color: #111827;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  transition: transform 150ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid rgba(245, 158, 11, 0.4);
+  outline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .dark body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
   background-attachment: fixed;
@@ -177,7 +213,7 @@ canvas {
 
 /* Default body text */
 body {
-  font-family: var(--font-body), var(--font-devanagari), system-ui, sans-serif;
+  font-family: var(--font-body, ui-sans-serif), var(--font-devanagari, sans-serif), system-ui, sans-serif;
   line-height: 1.6;
 }
 
@@ -226,5 +262,3 @@ a {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-

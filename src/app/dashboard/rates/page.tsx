@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Tabs, Tab, Spacer, Accordion, AccordionItem } from "@heroui/react";
+import { Tabs, Tab, Spacer, Accordion, AccordionItem } from "@nextui-org/react";
 import Title from "@/components/titles";
 import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
 import BulkAdd from "@/components/CurdTable/bulk-add";

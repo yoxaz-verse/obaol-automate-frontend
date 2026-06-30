@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { Tabs, Tab, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import Title from "@/components/titles";
@@ -270,7 +270,7 @@ export default function OrdersPage() {
                                             </div>
                                             <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 text-center">Start Your First Trade</h3>
                                             <p className="text-default-500 text-sm max-w-md text-center mb-10 font-medium">
-                                                You don't have any orders here yet. Follow our simple verified trade process to get started.
+                                                You do not have any orders here yet. Follow our simple verified trade process to get started.
                                             </p>
 
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 w-full mb-12 relative">

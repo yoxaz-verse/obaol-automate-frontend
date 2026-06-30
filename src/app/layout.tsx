@@ -1,27 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { PublicProviders } from "./public-provider";
-import { IBM_Plex_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import TopLoader from "@/components/ui/TopLoader";
 import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_MARKET, SITE_NAME } from "@/utils/seo";
 import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
 import { Suspense } from "react";
 import { BUSINESS_IDENTITY, ORGANIZATION_SAME_AS } from "@/utils/businessIdentity";
 
-// If loading a variable font, you don't need to specify the font weight
-const font = IBM_Plex_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const devanagariFont = Noto_Sans_Devanagari({
-  subsets: ["devanagari"],
-  weight: ["400", "500", "600"],
-  variable: "--font-devanagari",
-  display: "swap",
-});
 // app/layout.tsx
 
 
@@ -108,8 +93,6 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: "#ffffff",
 };
@@ -124,7 +107,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${font.variable} ${devanagariFont.variable} text-foreground`}
+      className="text-foreground"
     >
 
       <head>
@@ -176,9 +159,10 @@ export default function RootLayout({
           `}} />
       </head>
       <body style={{ overflowX: "hidden" }}>
+        <a className="skip-link" href="#main-content">Skip to main content</a>
         <PublicProviders>
           <TopLoader />
-          {children}
+          <div id="main-content" tabIndex={-1}>{children}</div>
         </PublicProviders>
         <script
           type="application/ld+json"

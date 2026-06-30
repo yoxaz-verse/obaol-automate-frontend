@@ -6,7 +6,7 @@ import { IoArrowBack, IoMail, IoLockClosed, IoCheckmarkCircle } from "react-icon
 import { postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import { useRouter } from "next/navigation";
-import { InputOtp } from "@heroui/react";
+import { InputOtp } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ForgotPasswordStep = "REQUEST" | "VERIFY" | "RESET" | "SUCCESS";

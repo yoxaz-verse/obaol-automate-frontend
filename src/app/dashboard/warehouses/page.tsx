@@ -14,7 +14,7 @@ import {
     Card, CardBody, CardHeader, Chip, Tab, Tabs, Divider,
     Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
     Button, Input, Select, SelectItem, Switch, Textarea
-} from "@heroui/react";
+} from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useRouter } from "next/navigation";

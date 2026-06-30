@@ -2,7 +2,7 @@
 import AddModal from "@/components/CurdTable/add-model";
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
-import { Accordion, AccordionItem } from "@heroui/react";
+import { Accordion, AccordionItem } from "@nextui-org/react";
 import React, { useState, useContext } from "react";
 import VariantRate from "./variant-rate";
 import UserDeleteModal from "@/components/CurdTable/delete";

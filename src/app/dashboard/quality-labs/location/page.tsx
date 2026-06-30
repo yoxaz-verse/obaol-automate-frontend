@@ -4,7 +4,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import dynamic from "next/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, CardHeader, Chip, Input, Select, SelectItem, Textarea } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader, Chip, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { FiLoader, FiMapPin } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes";

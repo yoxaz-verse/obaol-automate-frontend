@@ -3,7 +3,7 @@
 import React, { useContext, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import {
   Card,
   CardBody,

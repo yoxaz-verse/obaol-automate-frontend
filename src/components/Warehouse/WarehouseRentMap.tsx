@@ -4,7 +4,7 @@ import React, { useEffect, useMemo } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 
 export type WarehouseMapItem = {
   _id: string;

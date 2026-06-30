@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Spacer } from "@heroui/react";
+import { Spacer } from "@nextui-org/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import AuthContext from "@/context/AuthContext";
@@ -18,7 +18,7 @@ export default function Product() {
   const roleLower = String(user?.role || "").toLowerCase();
   const isAdminUser = roleLower === "admin";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
-  const isAssociate = user?.role === "Associate";
+  const isAssociate = roleLower === "associate";
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
   const isNoCompanyAssociate = isAssociate && !hasLinkedCompany;
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);

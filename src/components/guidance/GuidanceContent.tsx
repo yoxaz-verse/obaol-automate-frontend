@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LuBookOpen,
@@ -19,6 +19,8 @@ import {
   LuTruck,
   LuRefreshCw,
 } from "react-icons/lu";
+import AuthContext from "@/context/AuthContext";
+import { normalizeTradeMode } from "@/utils/dashboardAccess";
 
 const associateFeatureSections = [
   {
@@ -451,7 +453,7 @@ const SectionDecoration = () => (
   <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/5 blur-[80px] rounded-full -mr-16 -mt-16 pointer-events-none" />
 );
 
-type RoleView = "associate" | "operator";
+type RoleView = "associate" | "buyer" | "seller" | "both" | "operator";
 
 type GuidanceContentProps = {
   roleView?: RoleView;
@@ -459,11 +461,38 @@ type GuidanceContentProps = {
 };
 
 export default function GuidanceContent({ roleView, showToggle = true }: GuidanceContentProps) {
-  const [localRoleView, setLocalRoleView] = useState<RoleView>("associate");
-  const activeRole = (roleView || localRoleView) as RoleView;
+  const { user } = useContext(AuthContext);
+  const roleLower = String(user?.role || "").toLowerCase();
+  const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
+  const inferredRole: RoleView = roleLower === "operator" || roleLower === "team"
+    ? "operator"
+    : tradeMode === "BUY"
+      ? "buyer"
+      : tradeMode === "SELL"
+        ? "seller"
+        : "both";
+  const activeRole = roleView === "associate" ? inferredRole : (roleView || inferredRole);
   const isOperator = activeRole === "operator";
-  const featureSections = isOperator ? operatorFeatureSections : associateFeatureSections;
+  const featureSections = isOperator
+    ? operatorFeatureSections
+    : activeRole === "buyer"
+      ? associateFeatureSections
+          .map((section) => ({
+            ...section,
+            items: section.title === "Product"
+              ? section.items.filter((item) => item.route === "/dashboard/marketplace" || item.route === "/dashboard/catalog")
+              : section.items.filter((item) => item.route !== "/dashboard/product"),
+          }))
+          .filter((section) => section.items.length > 0)
+      : associateFeatureSections;
   const videoOutline = isOperator ? operatorVideoOutline : associateVideoOutline;
+  const guidanceLabel = isOperator
+    ? "Operator"
+    : activeRole === "buyer"
+      ? "Buying Associate"
+      : activeRole === "seller"
+        ? "Selling Associate"
+        : "Buying & Selling Associate";
 
   return (
     <div className="min-h-screen px-6 py-12 md:px-12 lg:px-20 bg-background text-foreground transition-colors duration-500">
@@ -497,24 +526,9 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
             </p>
 
             {showToggle && (
-              <div className="mt-10 inline-flex p-1.5 rounded-2xl bg-content3/50 dark:bg-[#0a0f1d] border border-divider shadow-inner">
-                {[
-                  { id: "associate", label: "Associate", icon: LuLayers },
-                  { id: "operator", label: "Operator", icon: LuTerminal },
-                ].map((role) => (
-                  <button
-                    key={role.id}
-                    onClick={() => setLocalRoleView(role.id as RoleView)}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
-                      activeRole === role.id
-                        ? "bg-warning-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                        : "text-default-500 dark:text-default-400 hover:text-foreground"
-                    }`}
-                  >
-                    <role.icon size={14} />
-                    {role.label}
-                  </button>
-                ))}
+              <div className="mt-10 inline-flex items-center gap-2 rounded-2xl border border-warning-500/20 bg-warning-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-warning-600">
+                {isOperator ? <LuTerminal size={14} /> : <LuLayers size={14} />}
+                {guidanceLabel}
               </div>
             )}
           </div>

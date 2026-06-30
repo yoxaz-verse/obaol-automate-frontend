@@ -3,17 +3,20 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FiInbox } from "react-icons/fi";
+import Link from "next/link";
 
 interface EmptyStateProps {
     title?: string;
     message?: string;
     icon?: React.ReactNode;
+    action?: { label: string; href: string };
 }
 
 export default function EmptyState({
     title = "No Data Found",
     message = "There are no records to display at the moment.",
     icon = <FiInbox className="text-default-300" size={48} />,
+    action,
 }: EmptyStateProps) {
     return (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center w-full">
@@ -59,6 +62,11 @@ export default function EmptyState({
             >
                 {message}
             </motion.p>
+            {action && (
+                <Link href={action.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-warning-500 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-warning-400">
+                    {action.label}
+                </Link>
+            )}
         </div>
     );
 }

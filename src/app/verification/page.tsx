@@ -144,7 +144,7 @@ export default function VerificationPage() {
               </div>
 
                <div className="p-6 rounded-2xl bg-foreground text-background mt-4 shadow-lg">
-                <p className="text-lg font-medium text-center">"Verification adapts to the trade — not the other way around."</p>
+                <p className="text-lg font-medium text-center">&ldquo;Verification adapts to the trade — not the other way around.&rdquo;</p>
               </div>
             </div>
           </FadeIn>

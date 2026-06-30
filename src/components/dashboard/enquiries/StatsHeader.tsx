@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@nextui-org/react";
 import { FiInbox, FiActivity, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 interface StatsHeaderProps {

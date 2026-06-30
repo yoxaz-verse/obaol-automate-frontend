@@ -7,7 +7,7 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 import Image from "next/image";
-import { Button, Tooltip } from "@heroui/react";
+import { Button, Tooltip } from "@nextui-org/react";
 import { useSoundEffect } from "@/context/SoundContext";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +27,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const [, startTransition] = useTransition();
     const [pendingLink, setPendingLink] = useState<string | null>(null);
 
-    const filteredOptions = getRoleFilteredSidebarOptions(sidebarOptions as any[], String(user?.role || ""));
+    const filteredOptions = getRoleFilteredSidebarOptions(
+        sidebarOptions as any[],
+        String(user?.role || ""),
+        user?.tradeMode,
+        user?.companyInterests || []
+    );
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = getDashboardSidebarSections(filteredOptions as any[]);
 
@@ -83,6 +88,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             
             {/* Toggle System */}
             <button
+                type="button"
+                aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
                 onClick={() => { play("toggle"); setIsCollapsed(!isCollapsed); }}
                 className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl db-panel border db-border-strong flex items-center justify-center text-default-400 hover:text-warning-600 hover:border-warning-500/50 transition-all shadow-lg z-50 group"
             >
@@ -107,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 {!isCollapsed && (
                     <div className="flex flex-col">
                         <span className="font-black text-lg tracking-[0.25em] text-foreground leading-none">OBAOL</span>
-                        <span className="text-[8px] font-black text-warning-600 dark:text-warning-500/60 tracking-[0.4em] uppercase mt-2">Supreme Execution</span>
+                        <span className="text-[8px] font-black text-warning-600 dark:text-warning-500/60 tracking-[0.3em] uppercase mt-2">Trade workspace</span>
                     </div>
                 )}
             </div>
@@ -186,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 {!isCollapsed ? (
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between">
-                           <span className="text-[8px] font-black text-default-400 uppercase tracking-widest leading-none">Global Status</span>
+                           <span className="text-[8px] font-black text-default-400 uppercase tracking-widest leading-none">Workspace available</span>
                            <div className="flex gap-1">
                               <div className="w-1 h-3 bg-success-500/40 rounded-full" />
                               <div className="w-1 h-3 bg-success-500/40 rounded-full" />
@@ -194,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                            </div>
                         </div>
                         <p className="text-[9px] text-default-400 font-bold uppercase tracking-[0.2em] italic opacity-60">
-                             &copy; {new Date().getFullYear()} OBAOL ARMS &bull; V4.2
+                             &copy; {new Date().getFullYear()} OBAOL
                         </p>
                     </div>
                 ) : (

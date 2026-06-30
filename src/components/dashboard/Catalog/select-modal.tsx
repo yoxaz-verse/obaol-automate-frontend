@@ -13,7 +13,7 @@ import {
   Switch,
   Tooltip,
   Divider,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import AuthContext from "@/context/AuthContext";

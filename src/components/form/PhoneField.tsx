@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Autocomplete, AutocompleteItem, Input } from "@heroui/react";
+import { Autocomplete, AutocompleteItem, Input } from "@nextui-org/react";
 import { COMMON_DIAL_CODES, parsePhoneValue, normalizeDialCode } from "@/utils/phone";
 
 type PhoneFieldProps = {

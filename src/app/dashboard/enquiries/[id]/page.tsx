@@ -2313,6 +2313,26 @@ export default function EnquiryDetailsPage() {
     };
     const getOwnerOptions = (allowedKeys: string[]) =>
         allowedKeys.map((key) => ({ key, label: ownerLabelByKey[key] || key }));
+    const transactionRole = isSystemAdmin ? "administrator"
+        : isAssignedOperator ? "operator"
+            : isBuyer ? "buyer"
+                : isSeller ? "seller"
+                    : isMediator ? "mediator"
+                        : "participant";
+    const nextActionSummary = isCancelled || isCompletedFlow
+        ? "No action is required because this enquiry is closed."
+        : !hasSellerAccepted
+            ? "The seller needs to review and accept the enquiry."
+            : !hasBuyerConfirmed
+                ? "The buyer needs to confirm the accepted terms."
+                : !hasResponsibilitiesFinalized
+                    ? "The assigned operator needs to finalize execution responsibilities."
+                    : "Review the current milestone and complete the available action.";
+    const nextResponsibleParty = isCancelled || isCompletedFlow ? "No participant"
+        : !hasSellerAccepted ? "Seller"
+            : !hasBuyerConfirmed ? "Buyer"
+                : !hasResponsibilitiesFinalized ? "Assigned operator"
+                    : "Participant assigned to the current milestone";
 
     return (
         <div className="w-full p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 max-w-none mx-0 text-left">
@@ -2326,6 +2346,11 @@ export default function EnquiryDetailsPage() {
                     <BreadcrumbItem isCurrent>#{enquiryId.slice(-6).toUpperCase()}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
+            <section aria-label="Your role and next action" className="rounded-2xl border border-warning-500/25 bg-warning-500/5 p-4">
+                <p className="text-sm font-bold text-foreground">You are the {transactionRole} in this transaction.</p>
+                <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextActionSummary}</p>
+                <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
+            </section>
             {isReadOnlyAfterConversion && (
                 <div className="w-full rounded-3xl border border-success-500/20 bg-success-500/5 px-6 py-4 text-success-600 text-xs font-black uppercase tracking-widest">
                     Enquiry is converted and locked. All responsibility and execution details are read-only.
@@ -2397,8 +2422,8 @@ export default function EnquiryDetailsPage() {
                                             <LuAnchor size={20} className="group-hover:rotate-12 transition-transform duration-500" />
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600/70">Import Protocol Active</span>
-                                            <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation is bypassed. Secure your logistics framework by choosing <span className="text-warning-600">Port Pickup</span> or <span className="text-warning-600">OBAOL Service</span> to proceed.</p>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600/70">Import workflow</span>
+                                            <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation does not apply to this import enquiry. Choose <span className="text-warning-600">Port Pickup</span> or <span className="text-warning-600">OBAOL Service</span> to continue.</p>
                                         </div>
                                     </div>
                                 )}

@@ -58,6 +58,8 @@ type TreeNode = {
 const toId = (value: unknown) => String(value || "").trim();
 const toName = (value: unknown) => String(value || "").trim() || "Unknown";
 const toNumber = (value: unknown) => Number(value || 0);
+const formatCommission = (value: number) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value || 0);
 
 const extractList = (response: any): any[] => {
   const payload = response?.data;
@@ -276,7 +278,7 @@ function HierarchyBranch({
                 {node.__meta.totalCommission > 0 && (
                   <div className="flex items-center gap-1.5 text-primary-500">
                     <FiZap size={11} />
-                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">{formatRate(Number(node.__meta.totalCommission || 0))}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest leading-none">{formatCommission(Number(node.__meta.totalCommission || 0))}</span>
                   </div>
                 )}
               </div>

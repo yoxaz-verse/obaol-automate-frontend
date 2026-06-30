@@ -17,7 +17,7 @@ export interface TopbarProps {
 }
 export interface DashboardTileProps {
   heading?: string;
-  data?: unknown;
+  data?: any;
   type: string;
   stats?: string;
 }

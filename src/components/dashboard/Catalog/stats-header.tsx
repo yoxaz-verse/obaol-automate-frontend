@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardBody, Chip } from "@heroui/react";
+import { Card, CardBody, Chip } from "@nextui-org/react";
 import { FiShoppingBag, FiGlobe, FiCheckCircle } from "react-icons/fi";
 import { motion } from "framer-motion";
 

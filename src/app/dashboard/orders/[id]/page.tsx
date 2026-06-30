@@ -50,6 +50,7 @@ import AuthContext from "@/context/AuthContext";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import DocumentTemplatePreview from "@/components/dashboard/Documents/DocumentTemplatePreview";
 import { classificationBadgeClass, classificationIcon, getClassificationBadges, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 
 dayjs.extend(relativeTime);
 
@@ -939,9 +940,25 @@ export default function OrderDetailsPage() {
         null;
     const classificationBadges = getClassificationBadges(classificationProductObj);
     const classificationTheme = resolveActiveClassificationTheme(classificationBadges.map((item) => item.key));
+    const transactionBuyerId = String((linkedEnquiry as any)?.buyerAssociateId?._id || (linkedEnquiry as any)?.buyerAssociateId || "");
+    const transactionSellerId = String((linkedEnquiry as any)?.sellerAssociateId?._id || (linkedEnquiry as any)?.sellerAssociateId || "");
+    const currentUserId = String(user?.id || "");
+    const transactionRole = roleLower === "admin" ? "administrator"
+        : roleLower === "operator" || roleLower === "team" ? "operator"
+            : currentUserId === transactionBuyerId ? "buyer"
+                : currentUserId === transactionSellerId ? "seller"
+                    : "participant";
+    const nextResponsibleParty = String((order as any)?.nextResponsibleParty || (order as any)?.responsibleParty || "The participant assigned to the current milestone");
+    const nextOrderAction = String((order as any)?.nextAction || "Review the current milestone and complete any available action.");
 
     return (
         <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-warning-500/30">
+            <DashboardBreadcrumb parentLabel="Orders" parentPath="/dashboard/orders" currentLabel={`Order ${String(order?._id || "").slice(-6).toUpperCase()}`} />
+            <section aria-label="Your role and next action" className="rounded-2xl border border-warning-500/25 bg-warning-500/5 p-4">
+                <p className="text-sm font-bold text-foreground">You are the {transactionRole} in this transaction.</p>
+                <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextOrderAction}</p>
+                <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
+            </section>
             <div className={`w-full rounded-3xl border px-5 py-4 ${classificationTheme.shellClass} ${classificationTheme.shellBorderClass}`}>
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-black uppercase tracking-widest text-default-500">Classification Signal</span>
@@ -967,10 +984,10 @@ export default function OrderDetailsPage() {
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">ORDER: {orderId?.slice(-8).toUpperCase()}</h1>
-                            <div className="px-2 py-0.5 rounded bg-warning-500 text-xs font-black text-black uppercase tracking-widest">LIVE EXECUTION</div>
+                            <div className="px-2 py-0.5 rounded bg-warning-500 text-xs font-black text-black uppercase tracking-widest">In progress</div>
                         </div>
                         <p className="text-sm font-bold text-default-500 mt-2 uppercase tracking-wider opacity-80">
-                            {isExternal ? "External Logistics Terminal" : `ENQUIRY REF: ${(order.enquiry?._id || order.enquiry)?.slice(-8).toUpperCase()}`}
+                            {isExternal ? "External logistics order" : `ENQUIRY REF: ${(order.enquiry?._id || order.enquiry)?.slice(-8).toUpperCase()}`}
                         </p>
                     </div>
                 </div>
@@ -1011,7 +1028,7 @@ export default function OrderDetailsPage() {
                         )}
                     </div>
                     <div className="text-right hidden sm:block">
-                        <div className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">Terminal Synced</div>
+                        <div className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">Last updated</div>
                         <div className="text-sm font-black text-foreground/60 uppercase">
                             {order.updatedAt ? (
                                 typeof (dayjs(order.updatedAt) as any).fromNow === 'function' ?

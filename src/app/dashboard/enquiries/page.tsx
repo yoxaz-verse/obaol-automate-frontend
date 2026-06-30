@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { Tabs, Tab, Tooltip } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";

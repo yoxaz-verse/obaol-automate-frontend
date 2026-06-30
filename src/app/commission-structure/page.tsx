@@ -24,7 +24,7 @@ import {
   LuTarget,
   LuBookOpen
 } from "react-icons/lu";
-import { Card, CardBody, Button, Slider, Tabs, Tab } from "@heroui/react";
+import { Card, CardBody, Button, Slider, Tabs, Tab } from "@nextui-org/react";
 import { useCurrency } from "@/context/CurrencyContext";
 
 const DecorativeNode = ({ className = "" }: { className?: string }) => (

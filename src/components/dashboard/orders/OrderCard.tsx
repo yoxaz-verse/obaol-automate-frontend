@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardBody, CardFooter, CardHeader, Avatar, Button } from "@heroui/react";
+import { Card, CardBody, CardFooter, CardHeader, Avatar, Button } from "@nextui-org/react";
 import { LuTruck, LuCalendar, LuBox, LuPhone, LuUser, LuShield, LuBriefcase, LuFileText, LuCheck, LuAward } from "react-icons/lu";
 import OrderStatus from "./OrderStatus";
 import { motion } from "framer-motion";

@@ -21,8 +21,11 @@ const services = [
     description:
       "Find the exact product specifications and identify the best origins that match the buyer's unique requirements.",
     metric: "Requirement to origin",
-    image: "/images/services/sourcing-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/35855061/pexels-photo-35855061.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 42%",
+    imageAlt:
+      "Agricultural specialist inspecting a crop in the field before sourcing",
     icon: FiTarget,
     accent: "from-purple-400 to-violet-500",
     color: "#a78bfa",
@@ -34,8 +37,11 @@ const services = [
     description:
       "Prepare compliance documents, manage export paperwork, and systematically plan the execution logistics.",
     metric: "Origin to readiness",
-    image: "/images/services/documentation-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/8297652/pexels-photo-8297652.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 38%",
+    imageAlt:
+      "Trade professionals reviewing shipment documents and export paperwork",
     icon: FiFileText,
     accent: "from-blue-400 to-indigo-500",
     color: "#60a5fa",
@@ -47,8 +53,11 @@ const services = [
     description:
       "On-ground procurement partners inspect availability, negotiate readiness, and prepare confirmed lots for execution.",
     metric: "Supplier to stock",
-    image: "/images/services/procurement-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/12833512/pexels-photo-12833512.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 44%",
+    imageAlt:
+      "Agricultural supplier weighing a sack of produce for procurement",
     icon: FiShoppingBag,
     accent: "from-orange-400 to-amber-500",
     color: "#fb923c",
@@ -60,8 +69,11 @@ const services = [
     description:
       "Quality labs and verification operators test samples, validate specifications, and reduce uncertainty before shipment.",
     metric: "Sample to approval",
-    image: "/images/services/quality-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/8940363/pexels-photo-8940363.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 42%",
+    imageAlt:
+      "Laboratory technician testing a grain sample with food-quality equipment",
     icon: FiCheckCircle,
     accent: "from-emerald-400 to-teal-500",
     color: "#34d399",
@@ -73,8 +85,11 @@ const services = [
     description:
       "Packaging teams handle bags, cartons, labeling, and export-ready preparation based on buyer and commodity needs.",
     metric: "Lot to load-ready",
-    image: "/images/services/packaging-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/13795516/pexels-photo-13795516.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 46%",
+    imageAlt:
+      "Worker sealing a filled agricultural commodity sack for dispatch",
     icon: FiPackage,
     accent: "from-pink-400 to-rose-500",
     color: "#fb7185",
@@ -86,8 +101,11 @@ const services = [
     description:
       "Truck operators, dispatch teams, and route handlers coordinate pickup, inland movement, and live shipment handoffs.",
     metric: "Pickup to port",
-    image: "/images/services/logistics-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/29948458/pexels-photo-29948458.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 40%",
+    imageAlt:
+      "Workers loading agricultural sacks onto an inland transport truck",
     icon: FiTruck,
     accent: "from-sky-400 to-blue-500",
     color: "#38bdf8",
@@ -99,8 +117,11 @@ const services = [
     description:
       "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.",
     metric: "Stock to dispatch",
-    image: "/images/services/warehouse-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/4483942/pexels-photo-4483942.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 42%",
+    imageAlt:
+      "Warehouse operator scanning stored inventory for stock control",
     icon: FaWarehouse,
     accent: "from-amber-400 to-orange-600",
     color: "#f59e0b",
@@ -112,8 +133,11 @@ const services = [
     description:
       "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.",
     metric: "Port to buyer",
-    image: "/images/services/freight-india.webp",
-    imagePosition: "center",
+    image:
+      "https://images.pexels.com/photos/28438329/pexels-photo-28438329.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    imagePosition: "center 42%",
+    imageAlt:
+      "Port crane transferring shipping containers onto a cargo vessel",
     icon: FaShip,
     accent: "from-lime-300 to-green-500",
     color: "#84cc16",
@@ -137,17 +161,15 @@ function RealisticServiceVisual({ service }: { service: Service }) {
       <motion.img
         key={service.image}
         src={service.image}
-        alt={`${service.title} in Indian agro trade operations`}
-        className="absolute inset-0 !h-full !w-full !max-w-none object-cover brightness-110 contrast-110 saturate-110"
+        alt={service.imageAlt}
+        className="absolute inset-0 !h-full !w-full !max-w-none object-cover"
         style={{ objectPosition: service.imagePosition }}
         initial={{ scale: 1.04 }}
         animate={{ scale: 1 }}
         transition={{ duration: 5.2, ease: "easeOut" }}
       />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_22%,rgba(249,115,22,0.12),transparent_35%),linear-gradient(to_top,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.55)_48%,rgba(0,0,0,0.2)_100%),linear-gradient(to_right,rgba(0,0,0,0.68),transparent_66%)]" />
-      <div className="absolute inset-0 opacity-22 mix-blend-screen bg-[radial-gradient(circle,rgba(255,255,255,0.45)_0.8px,transparent_1.45px)] bg-[size:7px_7px]" />
-      <div className="absolute inset-0 opacity-25 bg-[linear-gradient(to_right,rgba(249,115,22,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(249,115,22,0.12)_1px,transparent_1px)] bg-[size:4.2rem_4.2rem]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.48)_43%,rgba(0,0,0,0.1)_76%),linear-gradient(to_right,rgba(0,0,0,0.42),transparent_64%)]" />
 
       <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/35 text-white/36 shadow-[0_0_34px_rgba(0,0,0,0.42)] backdrop-blur-md md:flex">
         <Icon size={58} />

@@ -2,7 +2,7 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Spacer, Tab, Tabs } from "@heroui/react";
+import { Button, Spacer, Tab, Tabs } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
 import { LuWarehouse } from "react-icons/lu";
@@ -12,9 +12,13 @@ import MarketplaceFilterBar, {
   MarketplaceFilterState,
 } from "@/components/dashboard/Marketplace/MarketplaceFilterBar";
 import AuthContext from "@/context/AuthContext";
+import { normalizeTradeMode } from "@/utils/dashboardAccess";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
+
+const TabsAny = Tabs as any;
+const TabAny = Tab as any;
 
 type MarketplaceTabKey = "marketplace-live" | "marketplace-offline";
 type ClassificationTabKey = "all" | "conventional" | "natural" | "organic" | "ipm" | "gi-tag";
@@ -45,9 +49,11 @@ export default function MarketplacePage() {
     const isAdmin = roleLower === "admin";
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const isAdminUser = roleLower === "admin" || isOperatorUser;
-    const isAssociateUser = roleLower === "associate";
+    const isAssociateUser = roleLower === "associate" || roleLower === "customer";
+    const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
+    const isSellingMode = isAssociateUser && (tradeMode === "SELL" || tradeMode === "BOTH");
     const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
-    const canAddOwnRate = isAdminUser || (isAssociateUser && hasLinkedCompany);
+    const canAddOwnRate = isAdminUser || (isSellingMode && hasLinkedCompany);
 
     const [currentTable, setCurrentTable] = useState<MarketplaceTabKey>("marketplace-live");
     const [classificationTab, setClassificationTab] = useState<ClassificationTabKey>("all");
@@ -152,7 +158,7 @@ export default function MarketplacePage() {
                             activeTheme={activeTheme}
                         />
                         <div className="mb-4 overflow-x-auto">
-                            <Tabs
+                            <TabsAny
                                 aria-label="Marketplace Classification Tabs"
                                 selectedKey={classificationTab}
                                 onSelectionChange={(key) => setClassificationTab(key as ClassificationTabKey)}
@@ -165,7 +171,7 @@ export default function MarketplacePage() {
                                     tabContent: "font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-warning-500"
                                 }}
                             >
-                                <Tab
+                                <TabAny
                                     key={"all"}
                                     title={(
                                         <span className="inline-flex items-center gap-1.5">
@@ -177,7 +183,7 @@ export default function MarketplacePage() {
                                 {getClassificationOptions().map((item) => {
                                     const theme = getClassificationTheme(item.key);
                                     return (
-                                        <Tab
+                                        <TabAny
                                             key={item.key}
                                             title={(
                                                 <span className={`inline-flex items-center gap-1.5 transition-colors ${classificationTab === item.key ? theme.tabActiveClass : theme.tabIdleClass}`}>
@@ -188,7 +194,7 @@ export default function MarketplacePage() {
                                         />
                                     );
                                 })}
-                            </Tabs>
+                            </TabsAny>
                         </div>
                         <div className="flex w-full gap-4">
                             <div className="w-full min-w-0 pb-10">
@@ -209,7 +215,7 @@ export default function MarketplacePage() {
                                         </Button>
                                     )}
                                 </div>
-                                <Tabs
+                                <TabsAny
                                     aria-label="Marketplace Tabs"
                                     selectedKey={currentTable}
                                     onSelectionChange={(key) => {
@@ -226,7 +232,7 @@ export default function MarketplacePage() {
                                         tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
-                                    <Tab key={"marketplace-live"} title="Current Listings">
+                                    <TabAny key={"marketplace-live"} title="Current Listings">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
                                         {loadedTabs["marketplace-live"] && (
@@ -240,8 +246,8 @@ export default function MarketplacePage() {
                                                 openCreateModalSignal={0}
                                             />
                                         )}
-                                    </Tab>
-                                    <Tab key={"marketplace-offline"} title="Past Listings">
+                                    </TabAny>
+                                    <TabAny key={"marketplace-offline"} title="Past Listings">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
                                         {loadedTabs["marketplace-offline"] && (
@@ -255,8 +261,8 @@ export default function MarketplacePage() {
                                                 openCreateModalSignal={0}
                                             />
                                         )}
-                                    </Tab>
-                                </Tabs>
+                                    </TabAny>
+                                </TabsAny>
                             </div>
                         </div>
                     </div>

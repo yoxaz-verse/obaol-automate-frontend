@@ -121,7 +121,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 <div className={`w-full ${cardMaxWidthClass} mx-auto`}>
                     <div className="rounded-[2.5rem] border border-divider bg-content1/80 p-8 shadow-2xl backdrop-blur-3xl">
                         <div className="mb-8 items-center flex flex-col text-center">
-                            <h2 className="text-3xl font-black italic tracking-tighter text-foreground mb-2 uppercase">
+                            <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">
                                 {title}
                             </h2>
                             {subtitle && (
@@ -141,7 +141,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
     return (
         <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#04070f] dark:text-foreground relative font-sans selection:bg-warning-500/30">
-            {/* Mission Control Background Layer */}
+            {/* Branded background layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.03)_0%,_transparent_50%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -175,7 +175,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xl font-black italic tracking-tighter leading-none">OBAOL <span className="text-warning-500">SUPREME</span></span>
-                                <span className="text-[9px] font-black tracking-[0.4em] text-slate-500 dark:text-default-400">GO-TO PLATFORM FOR AGRO TRADE ECOSYSTEM</span>
+                                <span className="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-default-400">AGRO TRADE EXECUTION PLATFORM</span>
                             </div>
                         </Link>
 
@@ -194,12 +194,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                             </span>
                                         </div>
                                     )}
-                                    <h1 className="text-4xl xl:text-5xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-2 leading-[0.92] uppercase italic">
+                                    <p className="text-4xl xl:text-5xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-2 leading-[0.92]">
                                         {leftPanel.headline} <br />
                                         <span className={`text-transparent bg-clip-text ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-warning-500 to-amber-600"}`}>
-                                            {leftPanel.highlight || "CORE_NETWORK"}
+                                            {leftPanel.highlight || "TRADE WORKSPACE"}
                                         </span>
-                                    </h1>
+                                    </p>
                                 </motion.div>
 
                                 <motion.div
@@ -247,7 +247,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                                 href={leftPanel.knowMoreLink}
                                                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-slate-200 text-[9px] font-black uppercase tracking-[0.18em] hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/30 transition-all group shadow-sm justify-center dark:bg-white/[0.03] dark:border-white/10 dark:hover:text-warning-500 dark:hover:border-warning-500/20"
                                             >
-                                                Access Specifications
+                                                Learn about this role
                                                 <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                                             </Link>
                                         )}
@@ -256,14 +256,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             </div>
                         ) : (
                             <div className="space-y-8">
-                                <h1 className="text-5xl xl:text-7xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-4 leading-[0.85] uppercase italic">
+                                <p className="text-5xl xl:text-7xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-4 leading-[0.85] uppercase italic">
                                     OBAOL <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-500 to-amber-600 min-h-[1.2em] block leading-tight">
-                                        <TypewriterEffect words={["AUTOMATION", "LOGISTICS", "CHAIN_CORE", "INVENTORY", "TRADE_FLOW"]} />
+                                        <TypewriterEffect words={["BUYING", "SELLING", "LOGISTICS", "INVENTORY", "TRADE EXECUTION"]} />
                                     </span>
-                                </h1>
+                                </p>
                                 <p className="text-xl text-slate-600 dark:text-foreground/60 pl-6 border-l-2 border-warning-500/40 leading-relaxed font-medium italic max-w-sm">
-                                    Executing the future of Global Agro-Trade via autonomous protocol synchronization.
+                                    Bring product discovery, verification, logistics, documents, and orders into one guided workflow.
                                 </p>
                             </div>
                         )}
@@ -272,7 +272,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     
                 </motion.div>
 
-                {/* Right Side: Operative Terminal */}
+                {/* Right side: account form */}
                 <div className="w-full lg:w-7/12 flex flex-col h-full bg-transparent overflow-y-auto custom-scrollbar relative">
                     <div className="flex-grow flex items-center justify-center p-4 lg:p-8 xl:p-10 relative z-10">
                         <motion.div
@@ -309,9 +309,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     <div className="absolute top-0 right-0 w-40 h-40 bg-warning-500/10 blur-[80px] rounded-full -mr-20 -mt-20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
                                     <div className="mb-4 relative">
-                                        <h2 className="text-2xl lg:text-3xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase leading-none">
+                                        <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-foreground leading-none">
                                             {title}
-                                        </h2>
+                                        </h1>
                                         {subtitle && (
                                             <p className="text-slate-500 dark:text-default-400 text-[10px] font-bold uppercase tracking-[0.18em] mt-2 opacity-60">
                                                 {subtitle}
@@ -322,7 +322,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     {children}
                                 </motion.div>
 
-                                {/* Terminal Footer Decor */}
+                                {/* Account security note */}
                                 <div className="mt-4 flex items-center justify-center gap-3 opacity-35 dark:opacity-20">
                                     <div className="h-px flex-grow bg-gradient-to-r from-transparent to-divider" />
                                     <div className="text-[7px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-default-400 whitespace-nowrap">

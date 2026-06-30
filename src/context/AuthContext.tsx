@@ -24,6 +24,8 @@ export interface User {
   associateCompanyId?: string | null;
   companyInterestsConfigured?: boolean;
   companyInterests?: string[];
+  assignments?: string[];
+  tradeMode?: "BUY" | "SELL" | "BOTH";
   onboardingComplete?: boolean;
   registrationStatus?: string | null;
   rejectionReason?: string | null;

@@ -175,7 +175,10 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         }
         setLoginStatus("success");
         setIsRedirecting(true);
-        router.push("/dashboard/onboarding?auth=google");
+        const tradeIntent = String(searchParams?.get("intent") || "").toUpperCase();
+        const onboardingQuery = new URLSearchParams({ auth: "google" });
+        if (["BUY", "SELL", "BOTH"].includes(tradeIntent)) onboardingQuery.set("intent", tradeIntent);
+        router.push(`/dashboard/onboarding?${onboardingQuery.toString()}`);
       } else {
         await loginWithGoogle({
           idToken: resp.credential,
@@ -202,7 +205,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [authMode, loginWithGoogle, rememberMe, refreshUser, roleLower, router]);
+  }, [authMode, loginWithGoogle, rememberMe, refreshUser, roleLower, router, searchParams]);
 
   useEffect(() => {
     if (authMode === "signup") {
@@ -405,7 +408,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     const target = roleLower === "operator" || roleLower === "team"
       ? "/auth/operator/register"
       : "/auth/register";
-    router.push(target);
+    const intent = String(searchParams?.get("intent") || "").toUpperCase();
+    router.push(intent && target === "/auth/register" ? `${target}?intent=${encodeURIComponent(intent)}` : target);
   };
 
   const completePasskeyStep = (markHandled = true) => {

@@ -516,7 +516,7 @@ export default function ReportsPage() {
                 </Button>
               </>
             ) : (
-              <Button color="warning" isLoading={actionMutation.isPending} onPress={() => actionMutation.mutate()}>
+              <Button color="warning" isLoading={actionMutation.isPending} onPress={() => actionMutation.mutate(undefined)}>
                 Apply
               </Button>
             )}

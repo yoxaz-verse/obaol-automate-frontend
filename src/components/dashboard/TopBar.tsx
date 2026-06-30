@@ -9,7 +9,7 @@ import {
   User,
   Button,
   Divider
-} from "@heroui/react";
+} from "@nextui-org/react";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CiMenuBurger } from "react-icons/ci";
@@ -31,7 +31,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSoundEffect } from "@/context/SoundContext";
 
 const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => {
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,7 +129,12 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   }, [isMobileMenuOpen]);
 
   // Filter options based on the user's role
-  const filteredOptions = getRoleFilteredSidebarOptions(sidebarOptions as any[], String(role || ""));
+  const filteredOptions = getRoleFilteredSidebarOptions(
+    sidebarOptions as any[],
+    String(role || ""),
+    user?.tradeMode,
+    user?.companyInterests || []
+  );
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
   const mobileSections = getDashboardSidebarSections(filteredOptions as any[]);

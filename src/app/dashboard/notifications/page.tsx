@@ -446,7 +446,7 @@ const NotificationsPage = () => {
                 <div className="flex flex-col overflow-hidden">
                     <span className="text-[10px] font-black uppercase tracking-widest text-default-400 leading-none">Cluster Density</span>
                     <span className="text-sm font-black text-foreground leading-none mt-1.5 uppercase tracking-tighter">
-                        {meta.total} Nodes Sync'd
+                        {meta.total} Nodes Synced
                     </span>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button } from "@heroui/react";
+import { Button } from "@nextui-org/react";
 import { LuFlaskConical } from "react-icons/lu";
 import { renderToStaticMarkup } from "react-dom/server";
 

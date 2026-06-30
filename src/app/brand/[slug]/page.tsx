@@ -11,7 +11,7 @@ import {
     Chip as HeroChip,
     Skeleton,
     Divider as HeroDivider,
-} from "@heroui/react";
+} from "@nextui-org/react";
 
 const Button = HeroButton as any;
 const Card = HeroCard as any;

@@ -12,7 +12,7 @@ import {
     Chip,
     Divider,
     Spacer
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { getData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import Link from "next/link";

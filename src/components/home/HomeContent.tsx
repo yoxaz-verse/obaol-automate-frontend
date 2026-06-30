@@ -5,14 +5,14 @@ import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import { FaShieldHalved, FaTruckFront, FaEarthAsia, FaGlobe } from "react-icons/fa6";
 import Link from "next/link";
-import HomeLegacyHeader from "@/components/home/HomeLegacyHeader";
+import Header from "@/components/home/header";
 import HeroSection from "@/components/home/herosection";
 import ServiceShowcase from "@/components/home/ServiceShowcase";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
-import CinematicIntro from "@/components/home/CinematicIntro";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
+import PersonaChooser from "@/components/home/PersonaChooser";
 
 const intentCards = [
     {
@@ -84,9 +84,9 @@ export default function HomeContent() {
 
     return (
         <>
-            <CinematicIntro />
-            <HomeLegacyHeader />
+            <Header />
             <HeroSection />
+            <PersonaChooser />
             <ServiceShowcase />
             <section className="relative py-12 md:py-16">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
@@ -100,7 +100,7 @@ export default function HomeContent() {
                                     What We Do
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                                    OBAOL is a commodity execution platform — the execution ecosystem for agro trade workflows, not a marketplace.
+                                    OBAOL is an agro trade execution platform. Its marketplace helps buyers discover products before enquiries, verification, logistics, and orders move through one connected workflow.
                                 </p>
                             </div>
                             <div className="lg:col-span-7 space-y-4 lg:pt-14">

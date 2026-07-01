@@ -279,7 +279,7 @@ export default function DetailsModal({
                   );
                 })}
                 <StatusHistoryTabContent
-                  entityId={data._id}
+                  entityId={String(data._id || "")}
                   entityType="Location"
                 />{" "}
               </ModalBody>

@@ -226,7 +226,7 @@ function CategoryList({
                 <p>{cat.name} Actions</p>
                 <EditModal
                   _id={cat._id}
-                  initialData={cat}
+                  initialData={cat as unknown as Record<string, unknown>}
                   currentTable="Category"
                   formFields={tableConfig["category"]}
                   apiEndpoint={apiRoutesByRole["category"]}
@@ -337,7 +337,7 @@ function SubCategoryList({
                 <p>{sub.name} Actions</p>
                 <EditModal
                   _id={sub._id}
-                  initialData={sub}
+                  initialData={sub as unknown as Record<string, unknown>}
                   currentTable="Sub Category"
                   formFields={tableConfig["subCategory"].filter(
                     (f: any) => f.key !== "category"

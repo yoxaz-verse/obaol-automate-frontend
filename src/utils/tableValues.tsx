@@ -201,6 +201,7 @@ export const initialTableConfig: Record<
     | "email"
     | "date"
     | "number"
+    | "currency"
     | "time"
     | "multiTime"
     | "multiTimeRange"

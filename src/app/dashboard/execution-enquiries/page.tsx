@@ -714,8 +714,7 @@ export default function ExecutionEnquiriesPage() {
                                           }}
                                           classNames={{ 
                                             listbox: "bg-transparent", 
-                                            trigger: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50",
-                                            input: "text-xs font-black uppercase tracking-tight"
+                                            selectorButton: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50"
                                           }}
                                           items={bidCompanyOptions}
                                         >
@@ -835,8 +834,7 @@ export default function ExecutionEnquiriesPage() {
                                           }}
                                           classNames={{ 
                                             listbox: "bg-transparent", 
-                                            trigger: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50",
-                                            input: "text-xs font-black uppercase tracking-tight"
+                                            selectorButton: "h-11 min-h-[44px] text-xs bg-content2/50 hover:bg-content2 transition-all px-4 border border-divider/50"
                                           }}
                                           items={commitOptions}
                                         >

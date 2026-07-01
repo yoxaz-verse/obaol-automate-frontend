@@ -4,7 +4,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Spacer } from "@nextui-org/react";
 import VariantRate from "@/components/dashboard/Catalog/variant-rate";
-import { Tab, Tabs } from "@nextui-org/tabs";
+import { Tab, Tabs } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";

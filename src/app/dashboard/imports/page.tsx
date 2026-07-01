@@ -18,7 +18,7 @@ import {
   SelectItem,
   Chip,
 } from "@nextui-org/react";
-import { Tabs, Tab } from "@nextui-org/tabs";
+import { Tabs, Tab } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { getData, patchData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
@@ -1015,7 +1015,7 @@ export default function ImportsPage() {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold uppercase text-xs",
-                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1040,7 +1040,7 @@ export default function ImportsPage() {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold uppercase text-xs",
-                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1063,7 +1063,7 @@ export default function ImportsPage() {
                             trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors disabled:opacity-30",
                             label: "text-default-400 font-medium",
                             value: "text-white font-bold uppercase text-xs",
-                            popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                            popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                           }}
                           popoverProps={{ shouldCloseOnBlur: false }}
                         >
@@ -1217,7 +1217,7 @@ export default function ImportsPage() {
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
                           value: "text-white font-bold uppercase text-xs",
-                          popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
                       >
@@ -1334,7 +1334,7 @@ export default function ImportsPage() {
                               trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                               label: "text-default-400 font-medium",
                               value: "text-white font-bold uppercase text-xs",
-                              popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                              popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                             }}
                             popoverProps={{ shouldCloseOnBlur: false }}
                           >
@@ -1906,7 +1906,7 @@ export default function ImportsPage() {
                           trigger: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors",
                           label: "text-default-400 font-medium",
                           value: "text-white font-bold uppercase text-xs",
-                          popoverMain: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
+                          popoverContent: "bg-[#0a0f1d] border border-white/10 rounded-2xl",
                         }}
                         popoverProps={{ shouldCloseOnBlur: false }}
                       >

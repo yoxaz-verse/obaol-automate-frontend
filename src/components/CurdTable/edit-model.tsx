@@ -1,7 +1,7 @@
 // components/EditModal.tsx
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Button,
   Modal,
@@ -26,9 +26,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getData, patchData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 import { toast } from "react-toastify";
-import Uppy from "@uppy/core";
-import XHRUpload from "@uppy/xhr-upload";
-import { Dashboard } from "@uppy/react";
 import Image from "next/image";
 import { parseDate, parseTime, Time, CalendarDate } from "@internationalized/date";
 import { EditModalProps, FormField } from "@/data/interface-data";
@@ -36,6 +33,7 @@ import { toTitleCase } from "../titles";
 import { Key } from "@react-types/shared";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
+import { uploadFormFile } from "@/utils/uploadFormFile";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -102,7 +100,7 @@ export default function EditModal({
 
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
-  const uppyRef = useRef<Uppy | null>(null);
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
     {}
   );
@@ -116,25 +114,6 @@ export default function EditModal({
     refetchOnWindowFocus: false,
   });
 
-  // 2) Init Uppy once
-  useEffect(() => {
-    const uppy = new Uppy({
-      restrictions: {
-        maxNumberOfFiles: 1,
-        allowedFileTypes: ["image/*", "application/pdf"],
-      },
-      autoProceed: false,
-    }).use(XHRUpload, {
-      endpoint: `${process.env.NEXT_PUBLIC_BASE_URL}/upload`,
-      fieldName: "file",
-      formData: true,
-    });
-    uppyRef.current = uppy;
-    return () => {
-      uppy.destroy();
-      uppyRef.current = null;
-    };
-  }, []);
   useEffect(() => {
     const preloadDynamicSelectOptions = async () => {
       const fetchOptionsPromises = formFields
@@ -251,7 +230,7 @@ export default function EditModal({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const associateCompanyField = formFields.find((field) => field.key === "associateCompany");
     if (associateCompanyField && formData.associateCompany) {
@@ -278,6 +257,17 @@ export default function EditModal({
     setLoading(true);
     const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
     const payload = { ...basePayload };
+    if (selectedUploadFile) {
+      try {
+        const uploadedFile = await uploadFormFile(selectedUploadFile, formData);
+        payload.fileId = uploadedFile.fileId;
+        payload.fileURL = uploadedFile.fileURL;
+      } catch (error: any) {
+        toast.error(error?.message || "File upload failed");
+        setLoading(false);
+        return;
+      }
+    }
     if (currentTable === "inventories" && !basePayload.storageLocation) {
       delete payload.storageLocation;
       delete payload.warehouseId;
@@ -821,14 +811,14 @@ export default function EditModal({
         return (
           <div>
             <label>{f.label}</label>
-            {uppyRef.current && (
-              <Dashboard
-                uppy={uppyRef.current}
-                hideUploadButton
-                proudlyDisplayPoweredByUppy={false}
-                note="Only images & PDFs"
-              />
-            )}
+            <input
+              type="file"
+              accept={f.accept || "image/*,application/pdf"}
+              disabled={disabled}
+              onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-warning-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+            />
+            <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose a new file only if you want to replace the existing one."}</p>
             {formData[f.key] && (
               <div className="mt-2 text-foreground">
                 {/\.(pdf|PDF)$/.test(formData[f.key]) ? (

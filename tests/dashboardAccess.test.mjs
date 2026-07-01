@@ -68,3 +68,13 @@ test("every dashboard page has an explicit access policy", () => {
     .filter((route) => !getDashboardRoute(route.replace(/:\w+/g, "test-id")));
   assert.deepEqual(unmapped, []);
 });
+
+test("every dashboard route exposes complete experience metadata", () => {
+  const routes = getAccessibleDashboardRoutes({ role: "Admin", tradeMode: "BOTH" });
+  for (const route of routes) {
+    assert.ok(route.description, `${route.path} needs a description`);
+    assert.ok(route.journeyStage, `${route.path} needs a journey stage`);
+    assert.ok(route.helpId, `${route.path} needs a help id`);
+    assert.ok(route.requiredApprovalStates.length > 0, `${route.path} needs approval policy`);
+  }
+});

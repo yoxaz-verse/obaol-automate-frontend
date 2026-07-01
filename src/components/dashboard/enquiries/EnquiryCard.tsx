@@ -152,14 +152,14 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                     <Button
                                         variant="flat"
                                         className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 border border-transparent transition-all uppercase"
-                                        onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.supplierPhone}`; }}
+                                        onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.supplierPhone}`; }}
                                     >
                                         Supplier
                                     </Button>
                                     <Button
                                         variant="flat"
                                         className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
-                                        onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.buyerPhone}`; }}
+                                        onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.buyerPhone}`; }}
                                     >
                                         Buyer
                                     </Button>
@@ -168,7 +168,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                 <Button
                                     variant="flat"
                                     className="w-full font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
-                                    onPress={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
+                                    onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
                                 >
                                     View Enquiry Details
                                 </Button>

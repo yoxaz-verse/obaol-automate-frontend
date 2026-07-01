@@ -22,21 +22,16 @@ import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler";
 import { queryClient } from "@/app/provider";
 // import { Key } from "react";
-import Uppy from "@uppy/core";
-import XHRUpload from "@uppy/xhr-upload";
-import { Dashboard } from "@uppy/react";
 import { Key } from "@react-types/shared";
 import { motion } from "framer-motion";
 
-import "@uppy/core/dist/style.css";
-import "@uppy/dashboard/dist/style.css";
-import { baseUrl } from "@/core/api/axiosInstance";
 import { AddFormProps, AddModalProps, FormField } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { showToastMessage } from "@/utils/utils";
 import { toTitleCase } from "../titles";
 import PhoneField from "../form/PhoneField";
 import { parsePhoneValue } from "@/utils/phone";
+import { uploadFormFile } from "@/utils/uploadFormFile";
 
 const PAYMENT_DOC_TYPES = [
   "PROFORMA_INVOICE",
@@ -93,7 +88,7 @@ const AddForm: React.FC<AddFormProps> = ({
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false); // 👈 success state
-  const [uppy, setUppy] = useState<Uppy | null>(null);
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, any[]>>(
     {}
   );
@@ -121,41 +116,11 @@ const AddForm: React.FC<AddFormProps> = ({
     return next;
   };
 
-  useEffect(() => {
-    const uppyInstance = new Uppy({
-      restrictions: {
-        maxNumberOfFiles: 1, // Adjust as needed
-        allowedFileTypes: ["image/*", "application/pdf"], // Example: images and PDFs
-      },
-      autoProceed: false,
-      allowMultipleUploads: false,
-      debug: true, // Enable for debugging
-    });
-
-    uppyInstance.use(XHRUpload, {
-      endpoint: `${baseUrl}/upload`, // Backend upload endpoint for single file
-      fieldName: "file", // Must match backend's expected field name
-      formData: true,
-      method: "POST",
-      bundle: false, // Send files individually
-      withCredentials: true,
-      headers: {
-        // Add any required headers here, e.g., authorization tokens
-        // Authorization: `Bearer ${yourToken}`,
-      },
-    });
-
-    setUppy(uppyInstance);
-
-    return () => {
-      uppyInstance.destroy(); // Properly clean up the Uppy instance
-    };
-  }, [apiEndpoint]);
   const openModal = () => setOpen(true);
   const closeModal = () => {
     setOpen(false);
     setFormData({});
-    uppy?.clear(); // Reset Uppy instance
+    setSelectedUploadFile(null);
   };
   useEffect(() => {
     const preloadDynamicSelectOptions = async () => {
@@ -237,7 +202,7 @@ const AddForm: React.FC<AddFormProps> = ({
       let fileId: string | null = null;
       let fileURL: string | null = null;
 
-      if (hasFileInput && uppy && uppy.getFiles().length > 0) {
+      if (hasFileInput && selectedUploadFile) {
         // Define the entities array based on the current form context
         const entities = [
           { entity: "projects", entityId: "projectId123" }, // Replace with actual IDs
@@ -245,45 +210,9 @@ const AddForm: React.FC<AddFormProps> = ({
           { entity: "timesheets", entityId: "timesheetId789" },
         ];
 
-        // Attach form data as meta data, including the entities array
-        uppy.setMeta({
-          ...formData,
-          entities: JSON.stringify(entities), // Serialize the array
-        });
-
-        // Initiate the upload
-        const uploadResult = await uppy.upload();
-        showToastMessage({
-          type: "error",
-          message: "File uploaded passing to formData",
-          position: "top-right",
-        });
-
-        if (uploadResult?.failed && uploadResult.failed.length > 0) {
-          // Handle upload failures
-          showToastMessage({
-            type: "error",
-            message: "File upload failed",
-            position: "top-right",
-          });
-
-          setLoading(false);
-          return;
-        }
-
-        // Extract the file ID and file URL from the response
-        const uploadedFile =
-          uploadResult?.successful && uploadResult.successful[0];
-
-        if (
-          uploadedFile &&
-          uploadedFile.response &&
-          uploadedFile.response.body
-        ) {
-          // Assuming only one file is uploaded
-          fileId = uploadedFile.response.body.fileIds[0];
-          fileURL = uploadedFile.response.body.fileURLs[0];
-        }
+        const uploadedFile = await uploadFormFile(selectedUploadFile, { ...formData, entities });
+        fileId = uploadedFile.fileId;
+        fileURL = uploadedFile.fileURL;
 
         if (!fileId || !fileURL) {
           // Handle missing fileId or fileURL
@@ -1056,14 +985,13 @@ const AddForm: React.FC<AddFormProps> = ({
         return (
           <div>
             <label className="block mb-2">{field.label}</label>
-            {uppy && (
-              <Dashboard
-                uppy={uppy}
-                hideUploadButton
-                proudlyDisplayPoweredByUppy={false}
-                note="Only image and document files are allowed."
-              />
-            )}
+            <input
+              type="file"
+              accept={field.accept || "image/*,application/pdf"}
+              onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-warning-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+            />
+            <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose one image or PDF."}</p>
           </div>
         );
 

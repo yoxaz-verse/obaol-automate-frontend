@@ -422,7 +422,7 @@ export default function WarehouseLocationPage() {
                   trigger: fieldBaseClass,
                   label: fieldLabelClass,
                   value: "text-foreground font-bold uppercase text-xs",
-                  popoverMain: selectPopoverClass,
+                  popoverContent: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
               >
@@ -446,7 +446,7 @@ export default function WarehouseLocationPage() {
                     trigger: fieldBaseClass,
                     label: fieldLabelClass,
                     value: "text-foreground font-bold uppercase text-xs",
-                    popoverMain: selectPopoverClass,
+                    popoverContent: selectPopoverClass,
                   }}
                   popoverProps={{ shouldCloseOnBlur: false }}
                   placeholder={associateCompanies.length ? "Select associate company" : "No companies available"}
@@ -471,7 +471,7 @@ export default function WarehouseLocationPage() {
                   trigger: fieldBaseClass,
                   label: fieldLabelClass,
                   value: "text-foreground font-bold uppercase text-xs",
-                  popoverMain: selectPopoverClass,
+                  popoverContent: selectPopoverClass,
                 }}
                 popoverProps={{ shouldCloseOnBlur: false }}
                 placeholder={categories.length ? "Select categories" : "No categories available"}

@@ -249,8 +249,8 @@ export default function DocumentationRulesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
-                          <Button size="sm" variant="flat" onPress={(e) => { e.stopPropagation(); openEdit(rule); }}>Edit</Button>
-                          <Button size="sm" color="danger" variant="flat" onPress={(e) => { e.stopPropagation(); deleteMutation.mutate(rule._id); }}>Delete</Button>
+                          <Button size="sm" variant="flat" onClick={(e) => { e.stopPropagation(); openEdit(rule); }}>Edit</Button>
+                          <Button size="sm" color="danger" variant="flat" onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(rule._id); }}>Delete</Button>
                         </div>
                       </td>
                     </tr>

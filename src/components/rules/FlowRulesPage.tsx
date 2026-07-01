@@ -893,11 +893,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                         isActive: isActive,
                                       });
                                     }}
-                                    items={orderStageOptions}
+                                    items={[{ key: "__NONE__", label: "None" }, ...orderStageOptions]}
                                   >
-                                    <SelectItem key="__NONE__" textValue="None">
-                                      <span className="text-[9px] font-bold uppercase">None</span>
-                                    </SelectItem>
                                     {(stage: any) => (
                                       <SelectItem key={stage.key} textValue={stage.label}>
                                         <span className="text-[9px] font-bold uppercase">{stage.label}</span>
@@ -928,11 +925,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                                         isActive: isActive,
                                       });
                                     }}
-                                    items={orderStageOptions}
+                                    items={[{ key: "__NONE__", label: "None" }, ...orderStageOptions]}
                                   >
-                                    <SelectItem key="__NONE__" textValue="None">
-                                      <span className="text-[9px] font-bold uppercase">None</span>
-                                    </SelectItem>
                                     {(stage: any) => (
                                       <SelectItem key={stage.key} textValue={stage.label}>
                                         <span className="text-[9px] font-bold uppercase">{stage.label}</span>

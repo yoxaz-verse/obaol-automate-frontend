@@ -108,7 +108,7 @@ const nextConfig = {
     domains: ["localhost"],
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
     ignoreDuringBuilds: false,

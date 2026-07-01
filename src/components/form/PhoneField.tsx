@@ -98,7 +98,7 @@ export default function PhoneField({
             name={name}
             size="md"
             type="tel"
-            variant="light"
+            variant="flat"
             isDisabled={disabled}
             isInvalid={isInvalid}
             placeholder="Phone number"

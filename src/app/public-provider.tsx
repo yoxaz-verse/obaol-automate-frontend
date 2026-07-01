@@ -1,11 +1,11 @@
 "use client";
 
-import { HeroUIProvider } from "@nextui-org/react";
+import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 export function PublicProviders({ children }: { children: React.ReactNode }) {
   return (
-    <HeroUIProvider>
+    <NextUIProvider>
       <NextThemesProvider
         attribute="class"
         defaultTheme="system"
@@ -13,6 +13,6 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
       >
         {children}
       </NextThemesProvider>
-    </HeroUIProvider>
+    </NextUIProvider>
   );
 }

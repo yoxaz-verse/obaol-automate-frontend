@@ -120,8 +120,8 @@ export default function WarehouseRentPage() {
   } = useQuery({
     queryKey: ["warehouse-rentals-directory", roleLower, user?.id],
     queryFn: async () => {
-      const res: any = await getData(apiRoutes.warehouses.directory, { page: 1, limit: 100 });
-      return toArrayData(res);
+      const res: any = await getData(apiRoutes.warehouses.list, { page: 1, limit: 100 });
+      return toArrayData<Warehouse>(res);
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -133,7 +133,7 @@ export default function WarehouseRentPage() {
     queryKey: ["warehouse-rent-companies", roleLower, user?.id],
     queryFn: async () => {
       const res: any = await getData(apiRoutes.associateCompany.getAll, { page: 1, limit: 500, sort: "name:asc" });
-      return toArrayData(res);
+      return toArrayData<AssociateCompany>(res);
     },
     enabled: needsCompanySelect,
   });

@@ -164,7 +164,7 @@ export default function EmailTemplatesPage() {
           <CardBody>
             <div className="flex flex-wrap gap-2 mb-3">
               {variableChips.map((token) => (
-                <Chip key={token} size="sm" variant="flat" onPress={() => insertToken(token)} className="cursor-pointer">
+                <Chip key={token} size="sm" variant="flat" onClick={() => insertToken(token)} className="cursor-pointer">
                   {token}
                 </Chip>
               ))}

@@ -41,7 +41,7 @@ export default function HomeShell() {
                 "Verified Ecosystem",
                 "Enquiry Hub",
                 "Execution Panels",
-                "Commodity Directory and Trade Listings",
+                "Commodity Catalog and Trade Listings",
                 "Samples and Documents",
                 "Importer Service",
                 "Warehouse Rent Management",

@@ -176,10 +176,10 @@ export default function ProductPage() {
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                             <div className="space-y-1 text-left max-w-2xl">
                                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
-                                    Commodities Traded by <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">OBAOL Associates</span>
+                                    Commodity <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">Catalog</span>
                                 </h1>
                                 <p className="text-base text-default-500 leading-relaxed">
-                                    Explore commodity categories currently supported by active listings from verified OBAOL Associates.
+                                    Explore commodities currently available through verified participants on OBAOL.
                                 </p>
                                 <div className="mt-4 max-w-2xl">
                                     <IndiaFirstNote />
@@ -192,8 +192,8 @@ export default function ProductPage() {
 
                             <div className="relative w-full md:w-80 group">
                                 <Input
-                                    placeholder="Search Associate-traded commodities"
-                                    aria-label="Search Associate-traded commodities"
+                                    placeholder="Search commodities"
+                                    aria-label="Search commodities"
                                     startContent={<FiSearch className="text-default-400" />}
                                     value={searchQuery}
                                     onValueChange={setSearchQuery}
@@ -274,12 +274,12 @@ export default function ProductPage() {
 
                                                     <CardBody className="p-8 pt-6">
                                                         <p className="text-default-500 text-base leading-relaxed line-clamp-3">
-                                                            {product.description || `${product.name} is currently covered by verified Associate trade listings on OBAOL.`}
+                                                            {product.description || `${product.name} is currently available through verified participants on OBAOL.`}
                                                         </p>
 
                                                         <div className="mt-8 pt-6 border-t border-default-100 flex items-center justify-between">
                                                             <span className="text-xs font-bold text-default-400 uppercase tracking-widest">
-                                                                {Number(product.coverage?.activeAssociateCount || 0)} verified {Number(product.coverage?.activeAssociateCount || 0) === 1 ? "Associate" : "Associates"}
+                                                                {Number(product.coverage?.activeAssociateCount || 0)} verified {Number(product.coverage?.activeAssociateCount || 0) === 1 ? "participant" : "participants"}
                                                             </span>
                                                             <div className="w-8 h-8 rounded-full bg-default-100 text-default-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
                                                                 <FiArrowRight />
@@ -295,7 +295,7 @@ export default function ProductPage() {
                             {loadingMore ? (
                                 <div className="mt-8 text-center">
                                     <span className="text-xs font-bold uppercase tracking-widest text-default-500">
-                                        Loading more Associate-backed commodities...
+                                        Loading more commodities...
                                     </span>
                                 </div>
                             ) : null}
@@ -305,8 +305,8 @@ export default function ProductPage() {
                             <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-6 text-default-300">
                                 <FiSearch size={40} />
                             </div>
-                            <h3 className="text-2xl font-bold text-foreground mb-2">No verified Associate coverage found</h3>
-                            <p className="text-default-500">Try adjusting your search or category filters. Only commodities with current verified Associate listings appear here.</p>
+                            <h3 className="text-2xl font-bold text-foreground mb-2">No commodities available</h3>
+                            <p className="text-default-500">No current commodity listings match your filters.</p>
                             <Button
                                 variant="light"
                                 className="mt-6 text-orange-500 font-bold"

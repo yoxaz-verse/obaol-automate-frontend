@@ -113,7 +113,7 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${product.name} | Associate Trade Directory - OBAOL Supreme`;
+  const title = `${product.name} | Commodity Catalog - OBAOL Supreme`;
   const description =
     product.description?.slice(0, 155) ||
     `Starting in India, explore ${product.name} on OBAOL with verified commodity context and execution support. We are expanding globally across key corridors.`;
@@ -175,18 +175,18 @@ export default async function ProductDetailPage({
         ],
     inDefinedTermSet: {
       "@type": "DefinedTermSet",
-      name: "OBAOL Associate Trade Directory",
+      name: "OBAOL Commodity Catalog",
       url: `${BASE_URL}/trade-directory`,
     },
     additionalProperty: [
       {
         "@type": "PropertyValue",
-        name: "Active Associate listings",
+        name: "Active commodity listings",
         value: activeListingCount,
       },
       {
         "@type": "PropertyValue",
-        name: "Verified Associates",
+        name: "Verified participants",
         value: activeAssociateCount,
       },
     ],
@@ -198,7 +198,7 @@ export default async function ProductDetailPage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${BASE_URL}/` },
-      { "@type": "ListItem", position: 2, name: "Associate Trade Directory", item: `${BASE_URL}/trade-directory` },
+      { "@type": "ListItem", position: 2, name: "Catalog", item: `${BASE_URL}/trade-directory` },
       { "@type": "ListItem", position: 3, name: product.name, item: canonical },
     ],
   };
@@ -221,7 +221,7 @@ export default async function ProductDetailPage({
             <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
               <Link href="/" className="hover:text-warning-500 transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/trade-directory" className="hover:text-warning-500 transition-colors">Associate Trade Directory</Link>
+              <Link href="/trade-directory" className="hover:text-warning-500 transition-colors">Catalog</Link>
             </nav>
 
             <p className="text-xs font-bold uppercase tracking-widest text-warning-600">
@@ -234,12 +234,12 @@ export default async function ProductDetailPage({
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg md:text-xl text-default-600 leading-relaxed font-medium">
-              {product.description || `${product.name} is currently supported by verified Associate trade listings and OBAOL execution workflows.`}
+              {product.description || `${product.name} is currently available through verified participants and OBAOL execution workflows.`}
             </p>
 
             <div className="mt-6 rounded-2xl border border-default-200 bg-content1/60 px-4 py-3 md:px-5 md:py-4">
               <p className="text-sm md:text-base font-semibold text-foreground">
-                {activeAssociateCount.toLocaleString()} verified {activeAssociateCount === 1 ? "Associate currently supports" : "Associates currently support"} {activeListingCount.toLocaleString()} active {activeListingCount === 1 ? "listing" : "listings"} for {product.name}.
+                {activeAssociateCount.toLocaleString()} verified {activeAssociateCount === 1 ? "participant currently supports" : "participants currently support"} {activeListingCount.toLocaleString()} active {activeListingCount === 1 ? "listing" : "listings"} for {product.name}.
               </p>
               <p className="text-xs md:text-sm text-default-500 mt-1">
                 OBAOL does not own or sell this commodity. Enquiries and execution are coordinated through verified participants.

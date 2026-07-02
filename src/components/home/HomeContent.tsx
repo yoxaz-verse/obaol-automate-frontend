@@ -12,7 +12,7 @@ import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
-import PersonaChooser from "@/components/home/PersonaChooser";
+import PerspectiveGateway from "@/components/home/PerspectiveGateway";
 
 const intentCards = [
     {
@@ -43,8 +43,8 @@ const panelFeatures = [
         desc: "Role‑based execution queues per function/person in real time.",
     },
     {
-        title: "Commodity Directory & Trade Listings",
-        desc: "Associate-backed commodity discovery and current trade listings in one connected view.",
+        title: "Commodity Catalog & Trade Listings",
+        desc: "Commodity discovery and current trade listings in one connected view.",
     },
     {
         title: "Samples & Documents",
@@ -86,7 +86,7 @@ export default function HomeContent() {
         <>
             <Header />
             <HeroSection />
-            <PersonaChooser />
+            <PerspectiveGateway />
             <ServiceShowcase />
             <section className="relative py-12 md:py-16">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
@@ -100,7 +100,7 @@ export default function HomeContent() {
                                     What We Do
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                                    OBAOL is an agro trade execution platform. Its Associate Trade Directory and Trade Listings help participants discover commodity coverage before enquiries, verification, logistics, and orders move through one connected workflow.
+                                    OBAOL is an agro trade execution platform. Its Commodity Catalog and Trade Listings help participants discover commodity coverage before enquiries, verification, logistics, and orders move through one connected workflow.
                                 </p>
                             </div>
                             <div className="lg:col-span-7 space-y-4 lg:pt-14">

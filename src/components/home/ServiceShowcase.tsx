@@ -117,11 +117,10 @@ const services = [
     description:
       "Warehouse operators manage capacity, stock visibility, staging, and release windows inside the execution flow.",
     metric: "Stock to dispatch",
-    image:
-      "https://images.pexels.com/photos/4483942/pexels-photo-4483942.jpeg?auto=compress&cs=tinysrgb&fit=crop&fm=webp&h=1280&w=1600",
+    image: "/images/services/warehouse-india-professional.webp",
     imagePosition: "center 42%",
     imageAlt:
-      "Warehouse operator scanning stored inventory for stock control",
+      "Advanced Indian commercial warehouse with organized inventory, forklift operations, and professional staff",
     icon: FaWarehouse,
     accent: "from-amber-400 to-orange-600",
     color: "#f59e0b",

@@ -87,7 +87,7 @@ export default function Product() {
           {isNoCompanyAssociate && (
             <div className="mb-4 rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-3">
               <p className="text-xs font-semibold text-warning-700 dark:text-warning-300">
-                Marketplace-to-Catalog mode active. Link company to publish own rates.
+                Trade-listing mode active. Link a company to publish your own commodity listings.
               </p>
             </div>
           )}
@@ -120,7 +120,7 @@ export default function Product() {
               {isAssociate ? (
                 <>
                   {!isNoCompanyAssociate && (
-                    <Tab key={"mine"} title="My Products">
+                    <Tab key={"mine"} title="My Trade Listings">
                       <VariantRate
                         rate="variantRate"
                         additionalParams={{ associate: user?.id, view: "product-table" }}

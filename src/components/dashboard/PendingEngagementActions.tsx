@@ -159,7 +159,7 @@ export default function PendingEngagementActions({ user }: Props) {
           <ModalHeader>List Your Products</ModalHeader>
           <ModalBody>
             <Select
-              label="Marketplace Product"
+              label="Commodity Listing"
               selectedKeys={selectedRateId ? [selectedRateId] : []}
               onSelectionChange={(keys) => {
                 if (keys === "all") return;

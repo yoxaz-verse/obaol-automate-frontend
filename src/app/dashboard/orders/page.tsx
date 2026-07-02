@@ -275,7 +275,7 @@ export default function OrdersPage() {
 
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 w-full mb-12 relative">
                                                 {[
-                                                    { icon: <FiSearch size={18} />, label: "Discover", sub: "Marketplace" },
+                                                    { icon: <FiSearch size={18} />, label: "Discover", sub: "Trade Listings" },
                                                     { icon: <FiMessageSquare size={18} />, label: "Enquiry", sub: "Price Quote" },
                                                     { icon: <FiPackage size={18} />, label: "Finalize", sub: "Trade Terms" },
                                                     { icon: <FiCheckCircle size={18} />, label: "Execute", sub: "Order Live" }
@@ -301,7 +301,7 @@ export default function OrdersPage() {
                                                 onPress={() => router.push("/dashboard/marketplace")}
                                                 endContent={<FiArrowRight className="ml-1" />}
                                             >
-                                                Explore Marketplace
+                                                Explore Trade Listings
                                             </Button>
                                         </div>
                                     )}
@@ -328,7 +328,7 @@ export default function OrdersPage() {
                                                         <LuShoppingBag size={24} />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="font-bold text-foreground">Marketplace</h4>
+                                                        <h4 className="font-bold text-foreground">Trade Listings</h4>
                                                         <p className="text-xs text-default-500">Browse all verified global products and suppliers</p>
                                                     </div>
                                                     <FiArrowRight size={18} className="text-default-300 group-hover:text-primary transition-colors" />

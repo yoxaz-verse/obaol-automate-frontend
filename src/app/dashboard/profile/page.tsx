@@ -69,7 +69,7 @@ function AdminDashboardPanel() {
           icon={<FiBriefcase size={20} className="text-warning-500" />}
         />
         <InsightCard
-          title="Marketplace Users"
+          title="Trade Listing Users"
           metric={globalStats?.users || 0}
           icon={<FiLayers size={20} className="text-warning-500" />}
         />
@@ -105,7 +105,7 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
         <div className="w-2 h-8 bg-orange-500 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]" />
         <div>
           <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">My Trading Ecosystem</h3>
-          <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">Commercial Performance & Marketplace Reach</p>
+          <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">Commercial Performance & Listing Reach</p>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                             Corporate Activation Required
                           </h3>
                           <p className="text-default-400 max-w-xl text-[13px] sm:text-base leading-relaxed font-medium">
-                            To unlock elite marketplace trading, verified logistics clearance, and algorithmic rate optimization, you must initialize your corporate entity profile.
+                            To publish trade listings, coordinate verified logistics, and manage rates, you must complete your company profile.
                           </p>
                         </div>
                         <div className="w-full max-w-sm">

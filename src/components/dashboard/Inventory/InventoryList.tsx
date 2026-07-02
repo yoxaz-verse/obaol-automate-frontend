@@ -491,7 +491,7 @@ const InventoryList: React.FC = () => {
                                 await patchData(`${variantRateRoutes.getAll}/${linkedRateId}`, { isLive: false });
                                 showToastMessage({
                                     type: "success",
-                                    message: "Rate unpublished (hidden from marketplace).",
+                                    message: "Trade listing unpublished.",
                                     position: "top-right",
                                 });
                                 refetch?.();
@@ -714,7 +714,7 @@ const InventoryList: React.FC = () => {
                                                             </Chip>
 
                                                             {!isPublished ? (
-                                                                <Tooltip content="Publish to Marketplace" placement="top" size="sm">
+                                                                <Tooltip content="Publish Trade Listing" placement="top" size="sm">
                                                                     <Button
                                                                         size="sm"
                                                                         color="warning"
@@ -741,7 +741,7 @@ const InventoryList: React.FC = () => {
                                                                         </Button>
                                                                     </Tooltip>
                                                                     <Tooltip
-                                                                        content={isLive ? "Hide from marketplace" : "Already paused"}
+                                                                        content={isLive ? "Unpublish trade listing" : "Already paused"}
                                                                         placement="top"
                                                                         size="sm"
                                                                     >
@@ -1056,7 +1056,7 @@ const InventoryList: React.FC = () => {
                                                     Quantity and location will stay synced with inventory.
                                                 </div>
                                                 <Switch isSelected={rateLive} onValueChange={setRateLive}>
-                                                    Publish to marketplace
+                                                    Publish trade listing
                                                 </Switch>
                                             </div>
                                         </ModalBody>

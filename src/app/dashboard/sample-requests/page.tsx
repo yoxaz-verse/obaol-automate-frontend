@@ -126,7 +126,7 @@ export default function SampleRequestsPage() {
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16 text-left">
                 {[
-                  { step: "01", title: "EXPLORE MARKET", desc: "Navigate to the Marketplace or Global Catalog to browse live cargo rates.", icon: LuSearch, color: "text-blue-500" },
+                  { step: "01", title: "EXPLORE LISTINGS", desc: "Open Trade Listings or the Commodity Directory to browse current cargo rates.", icon: LuSearch, color: "text-blue-500" },
                   { step: "02", title: "INITIATE PROTOCOL", desc: "Select the 'Request Sample' icon on any live product to start the dispatch sequence.", icon: LuBox, color: "text-warning-500" },
                   { step: "03", title: "TRACK DISPATCH", desc: "Monitor your sample's logistics lifecycle right here in the Sample Hub.", icon: LuActivity, color: "text-emerald-500" }
                 ].map((item, i) => (
@@ -146,7 +146,7 @@ export default function SampleRequestsPage() {
                    onPress={() => router.push("/dashboard/product")}
                    startContent={<LuBox size={20} />}
                 >
-                   INITIALIZE IN MARKETPLACE
+                   OPEN TRADE LISTINGS
                 </Button>
                 <Button 
                    variant="flat" 

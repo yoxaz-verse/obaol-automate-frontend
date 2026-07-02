@@ -70,12 +70,12 @@ export const sidebarOptions = [
     link: "/dashboard/sample-requests",
   },
   {
-    name: "My Product", //Translate
+    name: "My Trade Listings", //Translate
     icon: <AiOutlineProduct />,
     link: "/dashboard/product",
   },
   {
-    name: "Marketplace",
+    name: "Trade Listings",
     icon: <LuStore />,
     link: "/dashboard/marketplace",
   },
@@ -85,7 +85,7 @@ export const sidebarOptions = [
     link: "/dashboard/imports",
   },
   {
-    name: "Global Catalog", //Translate
+    name: "Commodity Directory", //Translate
     icon: <GiBookAura />,
     link: "/dashboard/catalog",
   },

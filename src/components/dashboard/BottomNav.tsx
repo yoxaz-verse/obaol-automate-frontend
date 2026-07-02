@@ -60,7 +60,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
             link: "/dashboard/product",
         },
         {
-            name: "Marketplace",
+            name: "Trade Listings",
             icon: <LuWarehouse size={24} />,
             link: "/dashboard/marketplace",
         },

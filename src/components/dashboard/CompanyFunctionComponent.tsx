@@ -67,8 +67,8 @@ type SectionProps = Props & {
 const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
   "sourcing": [
     { label: "Enquiries", href: "/dashboard/enquiries", description: "Capture buyer demand and request details." },
-    { label: "Marketplace", href: "/dashboard/marketplace", description: "Scan live listings and supply offers." },
-    { label: "My Product", href: "/dashboard/product", description: "Manage your active sourcing catalog." },
+    { label: "Trade Listings", href: "/dashboard/marketplace", description: "Scan current commodity listings and supply offers." },
+    { label: "My Trade Listings", href: "/dashboard/product", description: "Manage your company’s active commodity listings." },
   ],
   "packaging": [
     { label: "Execution Feed", href: "/dashboard/execution-enquiries", description: "Track packaging tasks in flight." },

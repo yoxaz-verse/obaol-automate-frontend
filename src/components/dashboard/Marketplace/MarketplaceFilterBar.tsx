@@ -57,7 +57,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
         <div className="w-full">
           <Input
             size="sm"
-            placeholder={`Search ${activeTab === "marketplace-live" ? "current listings" : "past listings"}...`}
+            placeholder={`Search ${activeTab === "marketplace-live" ? "current trade listings" : "past trade listings"}...`}
             startContent={<FiSearch className="text-default-400" />}
             value={state.search || ""}
             onValueChange={setSearch}
@@ -94,7 +94,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
           <div className="flex-1 min-w-0">
             <Input
               size="sm"
-              placeholder={`Search ${activeTab === "marketplace-live" ? "current listings" : "past listings"}...`}
+              placeholder={`Search ${activeTab === "marketplace-live" ? "current trade listings" : "past trade listings"}...`}
               startContent={<FiSearch className="text-default-400" />}
               value={state.search || ""}
               onValueChange={setSearch}

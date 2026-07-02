@@ -129,7 +129,7 @@ export function buildWebSiteJsonLd() {
     url: BASE_URL,
     potentialAction: {
       "@type": "SearchAction",
-      target: `${BASE_URL}/product?q={search_term_string}`,
+      target: `${BASE_URL}/trade-directory?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
     areaServed: [

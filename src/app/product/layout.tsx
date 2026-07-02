@@ -8,7 +8,7 @@ export const metadata = buildMetadata({
     "agro commodities",
     "commodity products",
     "india commodity trade",
-    "procurement marketplace",
+    "associate trade directory",
     "verified sourcing",
   ],
   path: "/product",

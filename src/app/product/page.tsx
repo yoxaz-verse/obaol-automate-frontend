@@ -17,6 +17,11 @@ type ProductRow = {
     name: string;
     description?: string;
     subCategory?: { name?: string } | null;
+    coverage?: {
+        activeListingCount?: number;
+        activeAssociateCount?: number;
+        lastPublishedAt?: string | null;
+    };
 };
 
 export default function ProductPage() {
@@ -26,6 +31,11 @@ export default function ProductPage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState("All");
+
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search).get("q");
+        if (query) setSearchQuery(query);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -38,7 +48,7 @@ export default function ProductPage() {
         };
 
         const parseMeta = (payload: any) => {
-            const meta = payload?.data;
+            const meta = payload?.meta || payload?.data;
             return {
                 currentPage: Number(meta?.currentPage || meta?.page || 1),
                 totalPages: Number(meta?.totalPages || meta?.pages || 1),
@@ -47,7 +57,7 @@ export default function ProductPage() {
 
         async function fetchProducts() {
             try {
-                const initialRes = await fetch(`/api/products?page=1&limit=${INITIAL_CHUNK_SIZE}`);
+                const initialRes = await fetch(`/api/trade-directory?page=1&limit=${INITIAL_CHUNK_SIZE}`);
                 const initialData = await initialRes.json();
                 const firstRows = parseRows(initialData);
                 const { currentPage, totalPages } = parseMeta(initialData);
@@ -64,7 +74,7 @@ export default function ProductPage() {
                 for (let page = currentPage + 1; page <= totalPages; page += 1) {
                     if (cancelled) break;
                     try {
-                        const res = await fetch(`/api/products?page=${page}&limit=${INITIAL_CHUNK_SIZE}`);
+                        const res = await fetch(`/api/trade-directory?page=${page}&limit=${INITIAL_CHUNK_SIZE}`);
                         const data = await res.json();
                         const rows = parseRows(data);
                         if (!rows.length) break;
@@ -166,19 +176,24 @@ export default function ProductPage() {
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                             <div className="space-y-1 text-left max-w-2xl">
                                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
-                                    Our <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">Catalog</span>
+                                    Commodities Traded by <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">OBAOL Associates</span>
                                 </h1>
                                 <p className="text-base text-default-500 leading-relaxed">
-                                    Premium commodities and raw materials, globally sourced and verified.
+                                    Explore commodity categories currently supported by active listings from verified OBAOL Associates.
                                 </p>
                                 <div className="mt-4 max-w-2xl">
                                     <IndiaFirstNote />
+                                </div>
+                                <div className="mt-4 max-w-2xl rounded-2xl border border-default-200 bg-content1/60 px-4 py-3 text-sm leading-6 text-default-600">
+                                    <strong className="text-foreground">OBAOL does not own or sell these commodities.</strong>{" "}
+                                    Trade enquiries and execution are coordinated through verified participants.
                                 </div>
                             </div>
 
                             <div className="relative w-full md:w-80 group">
                                 <Input
-                                    placeholder="Find a commodity..."
+                                    placeholder="Search Associate-traded commodities"
+                                    aria-label="Search Associate-traded commodities"
                                     startContent={<FiSearch className="text-default-400" />}
                                     value={searchQuery}
                                     onValueChange={setSearchQuery}
@@ -242,7 +257,7 @@ export default function ProductPage() {
                                             transition={{ duration: 0.3 }}
                                         >
                                             <Link
-                                                href={product.slug ? `/product/${product.slug}` : "#"}
+                                                href={product.slug ? `/trade-directory/${product.slug}` : "#"}
                                                 className={!product.slug ? "pointer-events-none" : "block h-full group"}
                                             >
                                                 <Card className="h-full border border-default-200/50 bg-content1/50 backdrop-blur-md overflow-hidden hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 rounded-[2rem]">
@@ -259,11 +274,13 @@ export default function ProductPage() {
 
                                                     <CardBody className="p-8 pt-6">
                                                         <p className="text-default-500 text-base leading-relaxed line-clamp-3">
-                                                            {product.description || "Premium agricultural commodity sourced with excellence and verified for global trade execution."}
+                                                            {product.description || `${product.name} is currently covered by verified Associate trade listings on OBAOL.`}
                                                         </p>
 
                                                         <div className="mt-8 pt-6 border-t border-default-100 flex items-center justify-between">
-                                                            <span className="text-xs font-bold text-default-400 uppercase tracking-widest">Details</span>
+                                                            <span className="text-xs font-bold text-default-400 uppercase tracking-widest">
+                                                                {Number(product.coverage?.activeAssociateCount || 0)} verified {Number(product.coverage?.activeAssociateCount || 0) === 1 ? "Associate" : "Associates"}
+                                                            </span>
                                                             <div className="w-8 h-8 rounded-full bg-default-100 text-default-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
                                                                 <FiArrowRight />
                                                             </div>
@@ -278,7 +295,7 @@ export default function ProductPage() {
                             {loadingMore ? (
                                 <div className="mt-8 text-center">
                                     <span className="text-xs font-bold uppercase tracking-widest text-default-500">
-                                        Loading more products in background...
+                                        Loading more Associate-backed commodities...
                                     </span>
                                 </div>
                             ) : null}
@@ -288,8 +305,8 @@ export default function ProductPage() {
                             <div className="w-20 h-20 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-6 text-default-300">
                                 <FiSearch size={40} />
                             </div>
-                            <h3 className="text-2xl font-bold text-foreground mb-2">No products found</h3>
-                            <p className="text-default-500">Try adjusting your search or category filters.</p>
+                            <h3 className="text-2xl font-bold text-foreground mb-2">No verified Associate coverage found</h3>
+                            <p className="text-default-500">Try adjusting your search or category filters. Only commodities with current verified Associate listings appear here.</p>
                             <Button
                                 variant="light"
                                 className="mt-6 text-orange-500 font-bold"

@@ -10,7 +10,7 @@ const NAV = [
   { href: "/about", label: "Platform" },
   { href: "/roles", label: "Roles" },
   { href: "/how-it-works", label: "How it Works" },
-  { href: "/product", label: "Marketplace" },
+  { href: "/trade-directory", label: "Associate Trade Directory" },
   { href: "/procurement", label: "Services" },
   { href: "/trust", label: "Trust" },
   { href: "/faq", label: "Resources" },

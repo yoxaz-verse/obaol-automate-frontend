@@ -134,7 +134,7 @@ export default function Footer() {
                   { name: "FAQs", href: "/faq" },
                   { name: "Export Resources", href: "/export-resources" },
                   { name: "Trade Finance", href: "/trade-finance" },
-                  { name: "Marketplace", href: "/product" },
+                  { name: "Associate Trade Directory", href: "/trade-directory" },
                   { name: "Sign In", href: "/auth" },
                 ].map((link) => (
                   <li key={link.name}>

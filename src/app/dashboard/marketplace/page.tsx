@@ -131,20 +131,20 @@ export default function MarketplacePage() {
                         </div>
                         <div>
                             <h1 className={`text-2xl md:text-3xl font-bold tracking-tight text-foreground`}>
-                                Product Discovery
+                                Trade Listing Discovery
                             </h1>
                             <p className="text-default-500 text-sm md:text-medium">
-                                Discover products, compare live rates, and find the best listings faster.
+                                Discover commodity listings, compare current rates, and start a structured trade enquiry.
                             </p>
                         </div>
                     </div>
                 </header>
                 {isAdmin && (
                         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        <StatCard label="Total Products" value={displayCount(totalCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
-                        <StatCard label="Live Products" value={displayCount(liveCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                        <StatCard label="Total Listings" value={displayCount(totalCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                        <StatCard label="Current Listings" value={displayCount(liveCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
                         <div className="hidden sm:block">
-                            <StatCard label="Offline Products" value={displayCount(offlineCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                            <StatCard label="Past Listings" value={displayCount(offlineCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
                         </div>
                     </div>
                 )}
@@ -159,7 +159,7 @@ export default function MarketplacePage() {
                         />
                         <div className="mb-4 overflow-x-auto">
                             <TabsAny
-                                aria-label="Marketplace Classification Tabs"
+                                aria-label="Trade listing classifications"
                                 selectedKey={classificationTab}
                                 onSelectionChange={(key) => setClassificationTab(key as ClassificationTabKey)}
                                 variant="underlined"
@@ -200,7 +200,7 @@ export default function MarketplacePage() {
                             <div className="w-full min-w-0 pb-10">
                                 <div className="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-default-500">
-                                        Discovery Listings
+                                        Trade Listings
                                     </div>
                                     {canAddOwnRate && (
                                         <Button
@@ -211,12 +211,12 @@ export default function MarketplacePage() {
                                             className="font-black tracking-widest px-4 md:px-5 h-9 md:h-10 rounded-xl uppercase text-[10px] md:text-[11px]"
                                             startContent={<FiPlus size={16} />}
                                         >
-                                            List your product
+                                            Create trade listing
                                         </Button>
                                     )}
                                 </div>
                                 <TabsAny
-                                    aria-label="Marketplace Tabs"
+                                    aria-label="Trade listing status"
                                     selectedKey={currentTable}
                                     onSelectionChange={(key) => {
                                         const nextKey = key as MarketplaceTabKey;

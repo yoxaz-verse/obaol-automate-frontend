@@ -18,6 +18,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    if (url.pathname === "/product" || url.pathname.startsWith("/product/")) {
+        const suffix = url.pathname.slice("/product".length);
+        const target = url.clone();
+        target.pathname = `/trade-directory${suffix}`;
+        return NextResponse.redirect(target, 308);
+    }
+
     // Exclude shared routes from subdomain rewrites
     const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password"];
     const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));

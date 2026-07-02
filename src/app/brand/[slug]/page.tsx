@@ -309,7 +309,7 @@ export default function BrandPage() {
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="space-y-4">
                             <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Products Covered</h2>
-                            <p className="text-default-400 max-w-xl">Product coverage shared by the company across marketplace and catalog listings. Pricing is not shown here.</p>
+                            <p className="text-default-400 max-w-xl">Commodity coverage shared by the company across trade listings and its catalog. Pricing is not shown here.</p>
                         </div>
                     </div>
 

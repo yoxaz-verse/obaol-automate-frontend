@@ -64,7 +64,7 @@ export default function EnquiryPage() {
                 <FiArrowRight size={20} className="text-warning-600 rotate-180" />
             </div>
             <p className="text-[11px] font-black uppercase tracking-widest db-muted">
-                Execute new enquiries from the <span className="text-warning-500">Marketplace Terminal</span>
+                Start new enquiries from <span className="text-warning-500">Trade Listings</span>
             </p>
         </div>
         <Button
@@ -72,7 +72,7 @@ export default function EnquiryPage() {
           onPress={() => router.push("/dashboard/marketplace")}
           className="w-full md:w-auto font-black uppercase text-[10px] tracking-widest rounded-xl bg-warning-500 text-black h-11 shadow-lg shadow-warning-500/10"
         >
-          Go to Marketplace
+          Go to Trade Listings
         </Button>
       </div>
 
@@ -422,7 +422,7 @@ export default function EnquiryPage() {
                               : "No enquiries in this stage"}
                           </h3>
                           <p className="text-[11px] db-muted font-medium leading-relaxed mt-1">
-                            Browse the marketplace to discover available commodities and initiate a new trade enquiry.
+                            Browse current trade listings to discover available commodities and initiate a new enquiry.
                           </p>
                         </div>
 
@@ -433,7 +433,7 @@ export default function EnquiryPage() {
                           className="font-black uppercase text-[10px] tracking-widest rounded-2xl bg-warning-500 text-black h-11 px-8 shadow-lg shadow-warning-500/20 hover:scale-[1.02] active:scale-95 transition-all"
                           endContent={<FiArrowRight size={14} />}
                         >
-                          Go to Marketplace
+                          Go to Trade Listings
                         </Button>
                       </div>
                     </motion.div>

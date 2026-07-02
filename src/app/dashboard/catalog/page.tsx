@@ -258,7 +258,7 @@ export default function CatalogPage() {
   const hasLinkedCompany = Boolean((user as any)?.associateCompanyId);
 
   const [navigation, setNavigation] = useState<{ id: string | null; name: string }[]>([
-    { id: null, name: "Global Catalog" }
+    { id: null, name: "Commodity Directory" }
   ]);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [search, setSearch] = useState("");
@@ -327,11 +327,11 @@ export default function CatalogPage() {
   const handleSearchNavigate = (item: any, type: string) => {
     setSearch(""); // Clear search
     if (type === "category") {
-      setNavigation([{ id: null, name: "Global Catalog" }, { id: item._id, name: item.name }]);
+      setNavigation([{ id: null, name: "Commodity Directory" }, { id: item._id, name: item.name }]);
     } else if (type === "subCategory") {
       const catName = item.category?.name ?? "Category";
       setNavigation([
-        { id: null, name: "Global Catalog" },
+        { id: null, name: "Commodity Directory" },
         { id: item.category?._id ?? null, name: catName },
         { id: item._id, name: item.name },
       ]);
@@ -339,7 +339,7 @@ export default function CatalogPage() {
       const catName = item.subCategory?.category?.name ?? "Category";
       const subName = item.subCategory?.name ?? "Sub Category";
       setNavigation([
-        { id: null, name: "Global Catalog" },
+        { id: null, name: "Commodity Directory" },
         { id: item.subCategory?.category?._id ?? null, name: catName },
         { id: item.subCategory?._id ?? null, name: subName },
       ]);

@@ -23,7 +23,7 @@ export default function HomeShell() {
                 </p>
                 <h2 className={homeTitleStyles.sectionTitle}>What This Panel Does</h2>
                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                  OBAOL is a commodity execution platform and execution ecosystem for agro trade workflows, not a marketplace.
+                  OBAOL is a commodity execution platform connecting verified participants across discovery, coordination, and completion.
                 </p>
               </div>
               <div className="lg:col-span-7 space-y-4 lg:pt-14">
@@ -41,7 +41,7 @@ export default function HomeShell() {
                 "Verified Ecosystem",
                 "Enquiry Hub",
                 "Execution Panels",
-                "Product and Marketplace",
+                "Commodity Directory and Trade Listings",
                 "Samples and Documents",
                 "Importer Service",
                 "Warehouse Rent Management",

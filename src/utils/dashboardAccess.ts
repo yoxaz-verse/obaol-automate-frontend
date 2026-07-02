@@ -39,9 +39,9 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/pending-approval", label: "Pending approval", section: "Overview", roles: ["associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
   { path: "/dashboard/rejected", label: "Access status", section: "Overview", roles: ["associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
 
-  { path: "/dashboard/product", label: "My Products", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES, nav: true, searchable: true, mobilePriority: 4, primaryAction: { label: "Add product", href: "/dashboard/product" } },
-  { path: "/dashboard/catalog", label: "Global Catalog", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
-  { path: "/dashboard/marketplace", label: "Marketplace", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, mobilePriority: 2, journeyStage: "discover" },
+  { path: "/dashboard/product", label: "My Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES, nav: true, searchable: true, mobilePriority: 4, primaryAction: { label: "Create trade listing", href: "/dashboard/product" } },
+  { path: "/dashboard/catalog", label: "Commodity Directory", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/marketplace", label: "Trade Listings", section: "Products", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, mobilePriority: 2, journeyStage: "discover" },
 
   { path: "/dashboard/enquiries", label: "Enquiries", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, mobilePriority: 3, journeyStage: "negotiate" },
   { path: "/dashboard/enquiries/:id", label: "Enquiry details", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/enquiries", journeyStage: "negotiate" },

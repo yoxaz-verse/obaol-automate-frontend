@@ -27,8 +27,8 @@ type Props = {
 const ACTIONS_BY_SLUG: Record<string, ActionLink[]> = {
   "sourcing": [
     { label: "Enquiries", href: "/dashboard/enquiries" },
-    { label: "Marketplace", href: "/dashboard/marketplace" },
-    { label: "My Product", href: "/dashboard/product" },
+    { label: "Trade Listings", href: "/dashboard/marketplace" },
+    { label: "My Trade Listings", href: "/dashboard/product" },
   ],
   "packaging": [
     { label: "Execution", href: "/dashboard/execution-enquiries" },

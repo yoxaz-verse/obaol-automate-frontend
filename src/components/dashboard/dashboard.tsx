@@ -673,7 +673,7 @@ const Dashboard: NextPage = () => {
               <h3 className="font-bold text-foreground">Next best action: discover a verified product</h3>
               <p className="mt-1 text-xs text-default-500">Compare live listings, open a product, and create your buying enquiry.</p>
             </div>
-            <Button color="primary" onPress={() => router.push("/dashboard/marketplace")}>Browse Marketplace</Button>
+            <Button color="primary" onPress={() => router.push("/dashboard/marketplace")}>Browse Trade Listings</Button>
           </CardBody>
         </Card>
       )}
@@ -753,7 +753,7 @@ const Dashboard: NextPage = () => {
                  <div className="space-y-4">
                     <div className="flex flex-col gap-1">
                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">System Update</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">Marketplace update released successfully.</p>
+                       <p className="text-xs font-bold text-foreground leading-snug">Trade listing update released successfully.</p>
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">2h ago</span>
                     </div>
                     <div className="flex flex-col gap-1">

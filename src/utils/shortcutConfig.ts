@@ -28,7 +28,7 @@ export const DEFAULT_SHORTCUTS: ShortcutConfig = {
 };
 
 export const ACTION_LABELS: Record<ShortcutAction, string> = {
-  marketplace: "Marketplace",
+  marketplace: "Trade Listings",
   enquiries: "Enquiries",
   sampleRequests: "Sample Requests",
   orders: "Orders",

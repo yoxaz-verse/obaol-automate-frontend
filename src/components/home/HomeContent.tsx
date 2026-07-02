@@ -43,8 +43,8 @@ const panelFeatures = [
         desc: "Role‑based execution queues per function/person in real time.",
     },
     {
-        title: "Product & Marketplace",
-        desc: "My Product, Global Catalog, and Marketplace discovery in one view.",
+        title: "Commodity Directory & Trade Listings",
+        desc: "Associate-backed commodity discovery and current trade listings in one connected view.",
     },
     {
         title: "Samples & Documents",
@@ -100,7 +100,7 @@ export default function HomeContent() {
                                     What We Do
                                 </h2>
                                 <p className="text-base md:text-xl text-foreground/80 font-medium leading-relaxed">
-                                    OBAOL is an agro trade execution platform. Its marketplace helps buyers discover products before enquiries, verification, logistics, and orders move through one connected workflow.
+                                    OBAOL is an agro trade execution platform. Its Associate Trade Directory and Trade Listings help participants discover commodity coverage before enquiries, verification, logistics, and orders move through one connected workflow.
                                 </p>
                             </div>
                             <div className="lg:col-span-7 space-y-4 lg:pt-14">
@@ -205,7 +205,7 @@ export default function HomeContent() {
 
                         <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 relative z-10">
                             {[
-                                { title: "Enquiry", desc: "Marketplace enquiry routed to trusted, verified suppliers for action." },
+                                { title: "Enquiry", desc: "Trade-listing enquiry routed to trusted, verified suppliers for action." },
                                 { title: "Documentation", desc: "Trade docs are created step‑by‑step: PO, quotation, proforma invoice, and compliance files." },
                                 { title: "Order Confirmed", desc: "Order is confirmed only after roles are finalized (buyer/seller/OBAOL responsibility)." },
                                 { title: "Tested", desc: "Laboratory testing and quality analysis executed when the execution panel requires it." },

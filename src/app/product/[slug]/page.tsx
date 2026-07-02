@@ -23,6 +23,12 @@ type ProductDetails = {
     category?: { name?: string } | null;
   } | null;
   state?: Array<{ _id?: string; name?: string }>;
+  coverage?: {
+    activeListingCount?: number;
+    activeAssociateCount?: number;
+    lastPublishedAt?: string | null;
+  };
+  related?: ProductDetails[];
 };
 
 type ApiResponse = {
@@ -39,7 +45,7 @@ type ProductSummary = {
 async function getProductDetails(slug: string): Promise<ProductDetails | null> {
   const nextPort = process.env.PORT || 3000;
   const origin = process.env.NEXTAUTH_URL || `http://localhost:${nextPort}`;
-  const requestUrl = `${origin}/api/products?slug=${encodeURIComponent(slug)}`;
+  const requestUrl = `${origin}/api/trade-directory?slug=${encodeURIComponent(slug)}`;
 
   try {
     const res = await fetch(requestUrl, {
@@ -102,16 +108,16 @@ export async function generateMetadata({
   const product = await getProductDetails(slug);
   if (!product) {
     return {
-      title: "Product Not Found | OBAOL Supreme",
+      title: "Commodity Coverage Not Found | OBAOL Supreme",
       robots: { index: false, follow: false },
     };
   }
 
-  const title = `${product.name} | Verified Commodity - OBAOL Supreme`;
+  const title = `${product.name} | Associate Trade Directory - OBAOL Supreme`;
   const description =
     product.description?.slice(0, 155) ||
     `Starting in India, explore ${product.name} on OBAOL with verified commodity context and execution support. We are expanding globally across key corridors.`;
-  const canonical = `${BASE_URL}/product/${product.slug}`;
+  const canonical = `${BASE_URL}/trade-directory/${product.slug}`;
 
   return buildMetadata({
     title,
@@ -125,7 +131,7 @@ export async function generateMetadata({
       "export import",
       "sourcing",
     ],
-    path: `/product/${product.slug}`,
+    path: `/trade-directory/${product.slug}`,
     type: "article",
   }) as Metadata;
 }
@@ -138,8 +144,8 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await getProductDetails(slug);
   if (!product) notFound();
-  const summary = await getProductSummary(slug);
-  const supplyLineCount = Number(summary?.supplyLineCount || 0);
+  const activeListingCount = Number(product.coverage?.activeListingCount || 0);
+  const activeAssociateCount = Number(product.coverage?.activeAssociateCount || 0);
 
   // Fetch research-based facts
   const facts = await fetchCommodityFacts(product.name);
@@ -147,13 +153,13 @@ export default async function ProductDetailPage({
   const states = Array.isArray(product.state)
     ? product.state.map((s) => String(s?.name || "").trim()).filter(Boolean)
     : [];
-  const related = await getRelatedProducts(product.subCategory?._id, product.slug);
-  const canonical = `${BASE_URL}/product/${product.slug}`;
+  const related = Array.isArray(product.related) ? product.related : [];
+  const canonical = `${BASE_URL}/trade-directory/${product.slug}`;
   const productImage = (product as any)?.imageUrl || (product as any)?.image || (product as any)?.thumbnail || "";
 
   const productJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "DefinedTerm",
     name: product.name,
     description: product.description || `${product.name} listed on OBAOL.`,
     category: product.subCategory?.category?.name || product.subCategory?.name || "Commodity",
@@ -167,19 +173,24 @@ export default async function ProductDetailPage({
           { "@type": "Place", name: "European Union" },
           { "@type": "Country", name: "United States" },
         ],
-    brand: {
-      "@type": "Organization",
-      name: "OBAOL Supreme",
+    inDefinedTermSet: {
+      "@type": "DefinedTermSet",
+      name: "OBAOL Associate Trade Directory",
+      url: `${BASE_URL}/trade-directory`,
     },
-    material: product.name,
     additionalProperty: [
       {
         "@type": "PropertyValue",
-        name: "Supply lines",
-        value: supplyLineCount,
+        name: "Active Associate listings",
+        value: activeListingCount,
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Verified Associates",
+        value: activeAssociateCount,
       },
     ],
-    isRelatedTo: related.map(r => ({ "@type": "Product", name: r.name, url: `${BASE_URL}/product/${r.slug}` }))
+    isRelatedTo: related.map(r => ({ "@type": "DefinedTerm", name: r.name, url: `${BASE_URL}/trade-directory/${r.slug}` }))
   };
 
   const breadcrumbJsonLd = {
@@ -187,7 +198,7 @@ export default async function ProductDetailPage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${BASE_URL}/` },
-      { "@type": "ListItem", position: 2, name: "Products", item: `${BASE_URL}/product` },
+      { "@type": "ListItem", position: 2, name: "Associate Trade Directory", item: `${BASE_URL}/trade-directory` },
       { "@type": "ListItem", position: 3, name: product.name, item: canonical },
     ],
   };
@@ -210,10 +221,11 @@ export default async function ProductDetailPage({
             <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
               <Link href="/" className="hover:text-warning-500 transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/product" className="hover:text-warning-500 transition-colors">Products</Link>
+              <Link href="/trade-directory" className="hover:text-warning-500 transition-colors">Associate Trade Directory</Link>
             </nav>
 
             <p className="text-xs font-bold uppercase tracking-widest text-warning-600">
+              Commodity Profile · {" "}
               {product.subCategory?.category?.name || "Commodity"} / {product.subCategory?.name || "General"}
             </p>
 
@@ -222,15 +234,15 @@ export default async function ProductDetailPage({
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg md:text-xl text-default-600 leading-relaxed font-medium">
-              {product.description || `High-quality ${product.name} trade facilitation with verified supply chains and execution support.`}
+              {product.description || `${product.name} is currently supported by verified Associate trade listings and OBAOL execution workflows.`}
             </p>
 
             <div className="mt-6 rounded-2xl border border-default-200 bg-content1/60 px-4 py-3 md:px-5 md:py-4">
               <p className="text-sm md:text-base font-semibold text-foreground">
-                OBAOL tracks {supplyLineCount.toLocaleString()} supply lines for {product.name}.
+                {activeAssociateCount.toLocaleString()} verified {activeAssociateCount === 1 ? "Associate currently supports" : "Associates currently support"} {activeListingCount.toLocaleString()} active {activeListingCount === 1 ? "listing" : "listings"} for {product.name}.
               </p>
               <p className="text-xs md:text-sm text-default-500 mt-1">
-                These supply lines represent verified market presence and execution readiness across the OBAOL network.
+                OBAOL does not own or sell this commodity. Enquiries and execution are coordinated through verified participants.
               </p>
             </div>
             <div className="mt-4">
@@ -332,7 +344,7 @@ export default async function ProductDetailPage({
               {related.map((item: any) => (
                 <Link
                   key={String(item._id)}
-                  href={item.slug ? `/product/${item.slug}` : "/product"}
+                  href={item.slug ? `/trade-directory/${item.slug}` : "/trade-directory"}
                   className="group rounded-3xl border border-default-200 bg-content1 p-6 hover:border-warning-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1"
                 >
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600 mb-2 truncate">

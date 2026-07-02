@@ -1135,7 +1135,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                       onApply={handleFiltersUpdate}
                       searchValue={search}
                       onSearchChange={setSearch}
-                      searchPlaceholder="Search marketplace rates..."
+                      searchPlaceholder="Search trade listing rates..."
                       actionElement={
                         !displayOnly &&
                         rate === "variantRate" &&
@@ -1228,7 +1228,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           Link a company to add your own rates
                         </p>
                         <p className="text-xs text-warning-700/80 dark:text-warning-200/90">
-                          You can still add marketplace products to your
+                          You can still add commodity listings to your
                           personal catalog.
                         </p>
                       </div>
@@ -1266,7 +1266,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   <p className="text-default-500 max-w-[340px] mt-2 mb-8 text-sm leading-relaxed font-medium">
                     Personalize your catalog to share best rates with your
                     buyers. Discover and add global products from the
-                    marketplace.
+                    trade workspace.
                   </p>
                   <Button
                     color="warning"
@@ -1276,7 +1276,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     onPress={() => router.push("/dashboard/marketplace")}
                     startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
                   >
-                    Explore Marketplace
+                    Explore Trade Listings
                   </Button>
                 </div>
               ) : finalTableData.length === 0 &&
@@ -2941,7 +2941,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                       <p className="text-[11px] text-default-600 leading-relaxed font-semibold">
                         Authorized officers will process this request for
                         immediate preparation. Once initiated, the protocol
-                        cannot be cancelled from the marketplace.
+                        cannot be cancelled from Trade Listings.
                       </p>
                     </div>
                   </motion.div>
@@ -3504,7 +3504,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       }
       if (!resolvedSellerAssociateId) {
         throw new Error(
-          "Invalid seller mapping for this row. Please refresh marketplace data or contact admin.",
+          "Invalid seller mapping for this listing. Please refresh trade listing data or contact admin.",
         );
       }
       if (preferredIncotermId && !normalizedPreferredIncotermId) {
@@ -3602,7 +3602,7 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
       showToastMessage({
         type: "error",
         message:
-          "Invalid seller mapping for this row. Please refresh marketplace data.",
+          "Invalid seller mapping for this listing. Please refresh trade listing data.",
       });
       return;
     }

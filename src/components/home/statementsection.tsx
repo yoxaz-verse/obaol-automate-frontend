@@ -53,7 +53,7 @@ export default function StatementSection() {
                         transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
                         className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-foreground/70 tracking-tight"
                     >
-                        Not a Marketplace.
+                        Built for Trade Execution.
                     </motion.p>
                 </motion.div>
 

@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/roles/operator`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/companies`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/obaol`, priority: 0.7, changeFrequency: "monthly", lastModified },
-    { url: `${baseUrl}/product`, priority: 0.8, changeFrequency: "daily", lastModified },
+    { url: `${baseUrl}/trade-directory`, priority: 0.8, changeFrequency: "daily", lastModified },
     { url: `${baseUrl}/faq`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/trade-finance`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/privacy-policy`, priority: 0.5, changeFrequency: "yearly", lastModified },
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const res = await fetch(buildPublicWebApiUrl("/products?limit=1000&fields=slug"), { cache: "no-store" });
+    const res = await fetch(buildPublicWebApiUrl("/trade-directory/commodities?limit=100"), { cache: "no-store" });
     if (!res.ok) return staticEntries;
 
     const body = await res.json();
@@ -46,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((row: any) => String(row?.slug || "").trim())
       .filter(Boolean)
       .map((slug: string) => ({
-        url: `${baseUrl}/product/${slug}`,
+        url: `${baseUrl}/trade-directory/${slug}`,
         priority: 0.7,
         changeFrequency: "weekly" as const,
         lastModified,

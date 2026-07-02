@@ -582,7 +582,7 @@ export default function ExternalOrderCreatePage() {
                   onPress={() => router.push("/dashboard/marketplace")}
                   startContent={<LuBookOpen size={18} className="mr-2" />}
                 >
-                  GO TO MARKETPLACE
+                  GO TO TRADE LISTINGS
                 </Button>
                 {!canStartDocumentationFlow && (
                   <div className="text-[9px] font-black uppercase tracking-[0.35em] text-danger-500/80 text-center italic">

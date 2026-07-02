@@ -29,21 +29,21 @@ const associateFeatureSections = [
     icon: LuLayoutGrid,
     items: [
       {
-        name: "My Product",
+        name: "My Trade Listings",
         route: "/dashboard/product",
         what: "Create and manage your product listings and pricing details.",
         actions: "Add products, update variants, review pricing and visibility.",
       },
       {
-        name: "Global Catalog",
+        name: "Commodity Directory",
         route: "/dashboard/catalog",
         what: "Browse the broader catalog and match listings to enquiries.",
         actions: "Search, filter, and open product detail views.",
       },
       {
-        name: "Marketplace",
+        name: "Trade Listings",
         route: "/dashboard/marketplace",
-        what: "Monitor marketplace activity and connect to active opportunities.",
+        what: "Review current commodity listings and connect to active trade opportunities.",
         actions: "Open listings, start enquiries, and track interest.",
       },
     ],
@@ -162,7 +162,7 @@ const associateVideoOutline = [
     title: "3. Product Setup",
     points: [
       "Create a product listing and confirm it appears in catalog.",
-      "Show how marketplace ties into enquiries.",
+      "Show how trade listings connect to enquiries.",
     ],
   },
   {
@@ -196,21 +196,21 @@ const operatorFeatureSections = [
     icon: LuLayoutGrid,
     items: [
       {
-        name: "My Product",
+        name: "My Trade Listings",
         route: "/dashboard/product",
         what: "Review assigned company products and ensure listings are complete.",
         actions: "Verify details, cross‑check compliance, flag missing data.",
       },
       {
-        name: "Global Catalog",
+        name: "Commodity Directory",
         route: "/dashboard/catalog",
         what: "Reference catalog items while validating enquiries and orders.",
         actions: "Search SKUs, verify specs, compare variants.",
       },
       {
-        name: "Marketplace",
+        name: "Trade Listings",
         route: "/dashboard/marketplace",
-        what: "Monitor marketplace listings tied to operator assignments.",
+        what: "Monitor trade listings tied to operator assignments.",
         actions: "Review activity, track demand signals, report issues.",
       },
     ],

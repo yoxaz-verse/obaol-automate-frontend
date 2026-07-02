@@ -27,3 +27,26 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
   const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/herosection.tsx");
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
 });
+
+test("the public commodity experience is an Associate Trade Directory", () => {
+  const header = read("../src/components/home/header.tsx");
+  const footer = read("../src/components/home/footer.tsx");
+  const directory = read("../src/app/product/page.tsx");
+  const middleware = read("../src/middleware.ts");
+  assert.equal(header.includes('label: "Associate Trade Directory"'), true);
+  assert.equal(footer.includes('name: "Associate Trade Directory"'), true);
+  assert.equal(directory.includes("Commodities Traded by"), true);
+  assert.equal(directory.includes("OBAOL does not own or sell these commodities"), true);
+  assert.equal(directory.includes("/api/trade-directory"), true);
+  assert.equal(middleware.includes("/trade-directory${suffix}"), true);
+});
+
+test("dashboard discovery uses Trade Listings terminology", () => {
+  const access = read("../src/utils/dashboardAccess.ts");
+  const discovery = read("../src/app/dashboard/marketplace/page.tsx");
+  assert.equal(access.includes('label: "Trade Listings"'), true);
+  assert.equal(access.includes('label: "My Trade Listings"'), true);
+  assert.equal(access.includes('label: "Commodity Directory"'), true);
+  assert.equal(discovery.includes("Trade Listing Discovery"), true);
+  assert.equal(discovery.includes('aria-label="Trade listing status"'), true);
+});

@@ -18,7 +18,7 @@ export default function robots(): MetadataRoute.Robots {
           "/roles/associate",
           "/roles/associate/",
           "/roles/operator",
-          "/product",
+          "/trade-directory",
           "/brand",
           "/companies",
           "/obaol",

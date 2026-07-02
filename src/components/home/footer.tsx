@@ -110,6 +110,7 @@ export default function Footer() {
               <ul className="flex flex-col gap-4">
                 {[
                   { name: "About OBAOL", href: "/about" },
+                  { name: "Roles & Participants", href: "/roles" },
                   { name: "Why OBAOL", href: "/why-obaol" },
                   { name: "How It Works", href: "/how-it-works" },
                   { name: "Procurement", href: "/procurement" },

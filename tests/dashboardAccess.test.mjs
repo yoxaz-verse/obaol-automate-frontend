@@ -29,7 +29,7 @@ test("legacy Customer is normalized to a buying Associate", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/product", role: "Customer" }), false);
 });
 
-test("BUY, SELL, and BOTH receive the intended Associate navigation", () => {
+test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", () => {
   const linksFor = (tradeMode) => new Set(
     getAccessibleDashboardRoutes({ role: "Associate", tradeMode }).map((route) => route.path)
   );
@@ -37,6 +37,20 @@ test("BUY, SELL, and BOTH receive the intended Associate navigation", () => {
   assert.equal(linksFor("BUY").has("/dashboard/product"), false);
   assert.equal(linksFor("SELL").has("/dashboard/product"), true);
   assert.equal(linksFor("BOTH").has("/dashboard/product"), true);
+  assert.equal(normalizeTradeMode("SERVICE", "Associate"), "SERVICE");
+  assert.equal(linksFor("SERVICE").has("/dashboard"), true);
+  assert.equal(linksFor("SERVICE").has("/dashboard/company"), true);
+  assert.equal(linksFor("SERVICE").has("/dashboard/product"), false);
+});
+
+test("SERVICE Associates receive only capability-relevant service navigation", () => {
+  const links = new Set(getAccessibleDashboardRoutes({
+    role: "Associate",
+    tradeMode: "SERVICE",
+    companyInterests: ["WAREHOUSING"],
+  }).map((route) => route.path));
+  assert.equal(links.has("/dashboard/warehouse-rent"), true);
+  assert.equal(links.has("/dashboard/quality-labs"), false);
 });
 
 test("Team receives Operator routes without Admin routes", () => {

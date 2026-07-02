@@ -12,9 +12,15 @@ test("the root viewport allows browser zoom", () => {
   assert.equal(layout.includes("Skip to main content"), true);
 });
 
-test("the public entry explains buyer, seller, and operator choices", () => {
+test("the public entry clearly separates Associate and Operator accounts", () => {
   const entry = read("../src/components/Auth/AuthEntry.tsx");
-  for (const phrase of ["I want to buy", "I want to sell", "I work in operations"]) assert.equal(entry.includes(phrase), true);
+  for (const phrase of [
+    "I represent an industry business",
+    "I want to become an OBAOL Operator",
+    "Registered company required",
+    "not an internal operations or employee login",
+  ]) assert.equal(entry.includes(phrase), true);
+  for (const phrase of ["I want to buy", "I want to sell", "I work in operations"]) assert.equal(entry.includes(phrase), false);
 });
 
 test("active homepage source does not advertise fabricated runtime telemetry", () => {

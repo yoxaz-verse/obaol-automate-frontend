@@ -453,7 +453,7 @@ const SectionDecoration = () => (
   <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/5 blur-[80px] rounded-full -mr-16 -mt-16 pointer-events-none" />
 );
 
-type RoleView = "associate" | "buyer" | "seller" | "both" | "operator";
+type RoleView = "associate" | "buyer" | "seller" | "both" | "service" | "operator";
 
 type GuidanceContentProps = {
   roleView?: RoleView;
@@ -470,12 +470,14 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
       ? "buyer"
       : tradeMode === "SELL"
         ? "seller"
+        : tradeMode === "SERVICE"
+          ? "service"
         : "both";
   const activeRole = roleView === "associate" ? inferredRole : (roleView || inferredRole);
   const isOperator = activeRole === "operator";
   const featureSections = isOperator
     ? operatorFeatureSections
-    : activeRole === "buyer"
+    : activeRole === "buyer" || activeRole === "service"
       ? associateFeatureSections
           .map((section) => ({
             ...section,
@@ -492,6 +494,8 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
       ? "Buying Associate"
       : activeRole === "seller"
         ? "Selling Associate"
+        : activeRole === "service"
+          ? "Service Provider Associate"
         : "Buying & Selling Associate";
 
   return (

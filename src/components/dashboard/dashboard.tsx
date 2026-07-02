@@ -81,6 +81,8 @@ const Dashboard: NextPage = () => {
     ? "Admin Dashboard"
     : isOperatorUser
       ? "Operator Dashboard"
+      : tradeMode === "SERVICE"
+        ? "Service Provider Workspace"
       : tradeMode === "BUY"
         ? "Buying Workspace"
         : tradeMode === "SELL"
@@ -90,6 +92,8 @@ const Dashboard: NextPage = () => {
     ? "System overview is ready."
     : isOperatorUser
       ? "Operator overview is ready."
+      : tradeMode === "SERVICE"
+        ? "Your company services and execution work are ready."
       : tradeMode === "BUY"
         ? "Your buying pipeline and next actions are ready."
         : tradeMode === "SELL"
@@ -1023,7 +1027,7 @@ const Dashboard: NextPage = () => {
               <div className="hidden md:block h-6 w-px db-border-subtle border-l" />
               <div className="flex items-center gap-2.5">
                 <Chip variant="flat" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 db-inset border db-border-subtle">
-                  {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
+                  {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : tradeMode === "SERVICE" ? "Service Provider" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
                 </Chip>
                 <Chip variant="flat" color="primary" className="h-10 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-5 border border-primary/20">
                   {activeOrders} Active Orders

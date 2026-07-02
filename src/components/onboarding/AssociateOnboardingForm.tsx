@@ -140,7 +140,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     associateDivision: "",
     associatePincodeEntry: "",
     referralCode: "",
-    tradeMode: "BOTH" as "BUY" | "SELL" | "BOTH",
+    tradeMode: "" as "" | "BUY" | "SELL" | "BOTH" | "SERVICE",
   });
 
   const hydrateDraft = useCallback((parsed: any) => {
@@ -186,7 +186,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     setFormData((prev) => ({
       ...prev,
       email: prev.email || (isOnboarding ? "" : prefill),
-      tradeMode: (["BUY", "SELL", "BOTH"].includes(intent) ? intent : prev.tradeMode) as "BUY" | "SELL" | "BOTH",
+      tradeMode: (["BUY", "SELL", "BOTH", "SERVICE"].includes(intent) ? intent : prev.tradeMode) as "" | "BUY" | "SELL" | "BOTH" | "SERVICE",
     }));
   }, [isOnboarding, searchParams]);
 
@@ -613,7 +613,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   };
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isCompanyFlow = formData.hasCompany === "yes";
+  // Associates always represent a registered company. Individual participation uses the Operator flow.
+  const isCompanyFlow = true;
   const isNewCompany = isCompanyFlow && formData.companyMode === "new";
   const hasExistingCompanyOptions = existingCompanies.length > 0;
   const hasCompanyTypeOptions = companyTypes.length > 0;
@@ -629,7 +630,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     const stepErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!["BUY", "SELL", "BOTH"].includes(formData.tradeMode)) stepErrors.tradeMode = "Choose how you will trade";
+      if (!["BUY", "SELL", "BOTH", "SERVICE"].includes(formData.tradeMode)) stepErrors.tradeMode = "Choose how your company will participate";
       if (!formData.name.trim()) stepErrors.name = "Name is required";
       if (!formData.email.trim()) stepErrors.email = "Email is required";
       if (formData.email && !emailRegex.test(formData.email)) stepErrors.email = "Invalid email format";
@@ -836,9 +837,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         associateInterests: [],
         designation: "",
         password: requiresPassword ? formData.password : undefined,
-        hasCompany: isCompanyFlow,
-        companyMode: isCompanyFlow ? formData.companyMode : null,
-        associateCompanyId: isCompanyFlow && formData.companyMode === "existing" ? formData.associateCompanyId : null,
+        hasCompany: true,
+        companyMode: formData.companyMode,
+        associateCompanyId: formData.companyMode === "existing" ? formData.associateCompanyId : null,
         contactPreference: formData.contactPreference,
         contactNotes: formData.contactNotes.trim(),
         associateAddress: !isCompanyFlow ? formData.associateAddress.trim() : undefined,
@@ -957,9 +958,17 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[620px]"}
       embedded={isOnboarding}
       leftPanel={{
-        headline: "Start trading with OBAOL",
-        highlight: formData.tradeMode === "BUY" ? "BUYING WORKSPACE" : formData.tradeMode === "SELL" ? "SELLING WORKSPACE" : "BUYING AND SELLING",
-        description: "Create one verified profile for marketplace discovery, enquiries, samples, orders, and trade execution.",
+        headline: "Connect your company to the OBAOL ecosystem",
+        highlight: formData.tradeMode === "BUY"
+          ? "BUY COMMODITIES"
+          : formData.tradeMode === "SELL"
+            ? "SELL COMMODITIES"
+            : formData.tradeMode === "BOTH"
+              ? "BUY AND SELL"
+              : formData.tradeMode === "SERVICE"
+                ? "PROVIDE TRADE SERVICES"
+                : "CHOOSE YOUR PARTICIPATION",
+        description: "Create one verified company profile for commodity trade or execution-support services.",
         tags: [
           "Manufacturers",
           "Traders",
@@ -1198,18 +1207,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
 
                   <div className="md:col-span-2 pt-3">
                     <RadioGroup
-                      label="How will you use OBAOL?"
-                      orientation="horizontal"
+                      label="How will your company participate?"
                       value={formData.tradeMode}
                       onValueChange={(value) => setField("tradeMode", value)}
                       isInvalid={Boolean(errors.tradeMode)}
                       errorMessage={errors.tradeMode}
                       classNames={{ label: "text-[10px] font-black uppercase tracking-widest text-default-500" }}
                     >
-                      <Radio value="BUY" description="Discover products and create enquiries">Buy</Radio>
-                      <Radio value="SELL" description="List products and respond to buyers">Sell</Radio>
-                      <Radio value="BOTH" description="Use both buying and selling workflows">Both</Radio>
+                      <Radio value="BUY" description="Discover products and create enquiries">Buy commodities</Radio>
+                      <Radio value="SELL" description="List products and respond to buyers">Sell commodities</Radio>
+                      <Radio value="BOTH" description="Use buying and selling workflows">Buy and sell commodities</Radio>
+                      <Radio value="SERVICE" description="Provide logistics, freight, warehousing, testing, or other trade services">Provide trade services</Radio>
                     </RadioGroup>
+                    <p className="mt-3 text-xs leading-5 text-default-500">
+                      Service providers choose their specific company capabilities in step 3. Companies that also trade commodities can select Buy, Sell, or Buy and sell here and add service capabilities later.
+                    </p>
                   </div>
 
                   <div className="md:col-span-2 pt-4">
@@ -1248,16 +1260,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   className="flex flex-col gap-6"
                 >
                   <div className="p-5 rounded-[2rem] bg-content2/40 border border-default-200">
-                    <RadioGroup
-                      label={<span className="text-xs font-black uppercase tracking-widest text-default-400">Representation</span>}
-                      orientation="horizontal"
-                      value={formData.hasCompany}
-                      onValueChange={(v) => setField("hasCompany", v)}
-                      classNames={{ wrapper: "gap-6" }}
-                    >
-                      <Radio value="yes" classNames={{ label: "text-sm font-bold" }}>Yes, I have a company</Radio>
-                      <Radio value="no" classNames={{ label: "text-sm font-bold" }}>No, as Individual</Radio>
-                    </RadioGroup>
+                    <p className="text-xs font-black uppercase tracking-widest text-default-400">Company required</p>
+                    <p className="mt-2 text-sm leading-6 text-foreground/70">
+                      Associate accounts represent registered businesses. Select a company already on OBAOL or register a new company below. Individuals should register as Operators.
+                    </p>
                   </div>
 
                   {isCompanyFlow ? (

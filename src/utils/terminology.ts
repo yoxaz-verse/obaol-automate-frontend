@@ -2,6 +2,7 @@ export const EXPERIENCE_TERMS = {
   buyer: "Buyer",
   seller: "Seller",
   both: "Buying and selling",
+  service: "Trade services",
   operator: "Operator",
   enquiry: "Enquiry",
   sample: "Sample request",
@@ -15,6 +16,7 @@ export const tradeModeLabel = (mode: unknown) => {
   const normalized = String(mode || "BOTH").toUpperCase();
   if (normalized === "BUY") return "Buying";
   if (normalized === "SELL") return "Selling";
+  if (normalized === "SERVICE") return "Trade services";
   return "Buying and selling";
 };
 

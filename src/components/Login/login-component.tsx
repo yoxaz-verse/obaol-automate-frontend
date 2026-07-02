@@ -177,7 +177,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         setIsRedirecting(true);
         const tradeIntent = String(searchParams?.get("intent") || "").toUpperCase();
         const onboardingQuery = new URLSearchParams({ auth: "google" });
-        if (["BUY", "SELL", "BOTH"].includes(tradeIntent)) onboardingQuery.set("intent", tradeIntent);
+        if (["BUY", "SELL", "BOTH", "SERVICE"].includes(tradeIntent)) onboardingQuery.set("intent", tradeIntent);
         router.push(`/dashboard/onboarding?${onboardingQuery.toString()}`);
       } else {
         await loginWithGoogle({

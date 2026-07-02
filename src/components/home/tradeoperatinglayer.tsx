@@ -2,6 +2,8 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import Link from "next/link";
+import { FiArrowRight } from "react-icons/fi";
 
 export default function WhoCanUseObaol() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -176,6 +178,25 @@ export default function WhoCanUseObaol() {
             ]}
           />
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mt-16 flex justify-center"
+        >
+          <Link
+            href="/roles"
+            className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl bg-orange-600 px-7 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-orange-600/20 transition-all hover:-translate-y-0.5 hover:bg-orange-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Explore All Platform Roles
+            <FiArrowRight
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+        </motion.div>
 
         {/* TRUST & CLARITY FOOTNOTE */}
         <motion.div

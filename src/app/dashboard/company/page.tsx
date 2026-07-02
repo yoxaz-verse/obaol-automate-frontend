@@ -307,7 +307,7 @@ export default function CompanyWorkspacePage() {
   });
 
   const tradeModeMutation = useMutation({
-    mutationFn: async (tradeMode: "BUY" | "SELL" | "BOTH") => {
+    mutationFn: async (tradeMode: "BUY" | "SELL" | "BOTH" | "SERVICE") => {
       const response = await putData("/auth/trade-mode", { tradeMode });
       if (!response?.data?.success) throw new Error(response?.data?.message || "Failed to update trading mode.");
       return response.data.data;
@@ -666,11 +666,11 @@ export default function CompanyWorkspacePage() {
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Trading Mode</h2>
-            <p className="text-sm text-default-600">Choose whether this account buys, sells, or handles both workflows.</p>
+            <h2 className="text-xl font-semibold text-foreground">Company Participation</h2>
+            <p className="text-sm text-default-600">Choose whether your company buys, sells, uses both workflows, or provides trade services.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {(["BUY", "SELL", "BOTH"] as const).map((mode) => (
+          {(["BUY", "SELL", "BOTH", "SERVICE"] as const).map((mode) => (
               <Button
                 key={mode}
                 size="sm"
@@ -679,7 +679,7 @@ export default function CompanyWorkspacePage() {
                 isLoading={tradeModeMutation.isPending && tradeModeMutation.variables === mode}
                 onPress={() => tradeModeMutation.mutate(mode)}
               >
-                {mode === "BUY" ? "Buy" : mode === "SELL" ? "Sell" : "Buy & Sell"}
+                {mode === "BUY" ? "Buy" : mode === "SELL" ? "Sell" : mode === "SERVICE" ? "Service Provider" : "Buy & Sell"}
               </Button>
             ))}
           </div>

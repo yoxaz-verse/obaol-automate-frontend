@@ -1,5 +1,5 @@
 export type DashboardRole = "admin" | "associate" | "operator" | "team";
-export type TradeMode = "BUY" | "SELL" | "BOTH";
+export type TradeMode = "BUY" | "SELL" | "BOTH" | "SERVICE";
 export type DashboardSection =
   | "Overview"
   | "Trade"
@@ -30,7 +30,7 @@ export type DashboardRouteDefinition = {
 
 type DashboardRouteInput = Omit<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId"> & Partial<Pick<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId">>;
 
-const ALL_ASSOCIATE_MODES: TradeMode[] = ["BUY", "SELL", "BOTH"];
+const ALL_ASSOCIATE_MODES: TradeMode[] = ["BUY", "SELL", "BOTH", "SERVICE"];
 const SELLING_MODES: TradeMode[] = ["SELL", "BOTH"];
 
 const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
@@ -132,7 +132,7 @@ export const normalizeDashboardRole = (role: unknown): DashboardRole | null => {
 export const normalizeTradeMode = (mode: unknown, role?: unknown): TradeMode => {
   if (String(role || "").trim().toLowerCase() === "customer") return "BUY";
   const normalized = String(mode || "").trim().toUpperCase();
-  return normalized === "BUY" || normalized === "SELL" || normalized === "BOTH"
+  return normalized === "BUY" || normalized === "SELL" || normalized === "BOTH" || normalized === "SERVICE"
     ? normalized
     : "BOTH";
 };

@@ -89,7 +89,7 @@ export default function RolesPage() {
                   </div>
 
                   <p className="text-sm text-default-600 mb-6 leading-relaxed">
-                    Designed for established entities and trade partners. Associates represent the core workforce of the ecosystem, managing goods, services, and logistics.
+                    Registered companies across the complete trade ecosystem can participate as Associates, including traders, suppliers, importers, exporters, logistics providers, warehouses, labs, finance partners, and other execution-critical businesses.
                   </p>
 
                   <div className="mb-6 p-4 rounded-xl bg-default-100/50 border border-default-200/50">
@@ -130,7 +130,7 @@ export default function RolesPage() {
                       href="/roles/associate"
                       className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
                     >
-                      <span className="text-sm">More Details</span>
+                      <span className="text-sm">Explore Associate Roles</span>
                       <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                     </Link>
                   </div>

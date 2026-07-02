@@ -8,6 +8,7 @@ import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 const NAV = [
   { href: "/about", label: "Platform" },
+  { href: "/roles", label: "Roles" },
   { href: "/how-it-works", label: "How it Works" },
   { href: "/product", label: "Marketplace" },
   { href: "/procurement", label: "Services" },

@@ -546,7 +546,7 @@ export default function SampleRequestDetailPage() {
           <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-2xl overflow-hidden p-0">
             <div className="p-8 border-b border-foreground/5 bg-foreground/[0.01]">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning-500/10 rounded-2xl text-warning-500 shadow-inner group">
+                <div className="p-3 bg-obaol-500/10 rounded-2xl text-obaol-500 shadow-inner group">
                   <LuActivity className="group-hover:animate-pulse" size={20} />
                 </div>
                 <div>
@@ -560,14 +560,14 @@ export default function SampleRequestDetailPage() {
               <div className="flex flex-col gap-4">
                 {status === "REQUESTED" && canSupplier && (
                   <div className="space-y-4">
-                     <div className="p-5 rounded-2xl bg-warning-500/5 border border-warning-500/10 mb-2">
-                        <p className="text-[11px] font-bold text-warning-200/80 uppercase tracking-widest leading-relaxed">
+                     <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/10 mb-2">
+                        <p className="text-[11px] font-bold text-obaol-200/80 uppercase tracking-widest leading-relaxed">
                           Awaiting Quote Submission. Tactical parameter input required for procurement link.
                         </p>
                      </div>
                      <Button 
                        fullWidth
-                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30px_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                        onPress={() => {
                          setSamplePaymentTerm(request?.samplePaymentTerm || "ADVANCE");
                          setQuoteModalOpen(true);
@@ -631,14 +631,14 @@ export default function SampleRequestDetailPage() {
 
                 {status === "PAYMENT_RECEIVED" && canSupplier && (
                   <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-warning-500/5 border border-warning-500/10">
-                      <p className="text-[11px] font-bold text-warning-200/80 uppercase tracking-widest leading-relaxed">
+                    <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/10">
+                      <p className="text-[11px] font-bold text-obaol-200/80 uppercase tracking-widest leading-relaxed">
                         Buyer payment received ({paymentModeLabel}{String(request?.paymentMode || "").toUpperCase() === "ONLINE" ? ` • ${onlinePaymentMethodLabel}` : ""}). Next step: initiate packaging protocol.
                       </p>
                     </div>
                     <Button 
                       fullWidth
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30px_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30px_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => packagingStartMutation.mutate()}
                       startContent={<LuPackageOpen size={18} />}
                     >
@@ -650,7 +650,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PREPARING_PACKAGING" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-warning-500 shadow-[0_10px_30_rgba(245,158,11,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => packagedMutation.mutate()}
                     startContent={<LuPackage size={18} />}
                   >
@@ -759,10 +759,10 @@ export default function SampleRequestDetailPage() {
             <>
               <ModalHeader className="flex flex-col gap-1 py-6 px-8">
                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-warning rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                    <div className="w-1.5 h-6 bg-warning rounded-full shadow-[0_0_10px_rgba(207,152,60,0.5)]" />
                     <span className="text-xl font-black uppercase italic tracking-tight text-white">Project Quote Initiation</span>
                  </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-warning-500/60 mt-1 italic">Tactical Parameter Selection</p>
+                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-obaol-500/60 mt-1 italic">Tactical Parameter Selection</p>
               </ModalHeader>
               <ModalBody className="px-8 py-8">
                 <div className="space-y-10">
@@ -806,7 +806,7 @@ export default function SampleRequestDetailPage() {
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                       label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
-                      popoverContent: "bg-[#0B0F14] border border-white/10",
+                      popoverContent: "bg-[#0E0D0A] border border-white/10",
                     }}
                   >
                     <SelectItem key="ADVANCE" className="text-white font-bold text-xs uppercase tracking-widest">Advance</SelectItem>
@@ -827,7 +827,7 @@ export default function SampleRequestDetailPage() {
                    variant="shadow"
                    onPress={() => quoteMutation.mutate()} 
                    isDisabled={!quoteMinQty || !quotePrice}
-                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(245,158,11,0.2)] bg-gradient-to-r from-warning to-warning-600"
+                   className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] shadow-[0_0_30px_rgba(207,152,60,0.2)] bg-gradient-to-r from-warning to-obaol-600"
                 >
                    Execute Submission
                 </Button>
@@ -874,7 +874,7 @@ export default function SampleRequestDetailPage() {
                   classNames={{
                     trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                     label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
-                    popoverContent: "bg-[#0B0F14] border border-white/10",
+                    popoverContent: "bg-[#0E0D0A] border border-white/10",
                   }}
                 >
                   <SelectItem key="CASH" className="text-white font-bold text-xs uppercase tracking-widest">Cash</SelectItem>
@@ -894,7 +894,7 @@ export default function SampleRequestDetailPage() {
                     classNames={{
                       trigger: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14",
                       label: "text-[10px] font-black uppercase tracking-widest text-white/40 mb-2",
-                      popoverContent: "bg-[#0B0F14] border border-white/10",
+                      popoverContent: "bg-[#0E0D0A] border border-white/10",
                     }}
                   >
                     <SelectItem key="GPAY" className="text-white font-bold text-xs uppercase tracking-widest">GPay</SelectItem>

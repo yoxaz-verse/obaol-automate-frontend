@@ -242,7 +242,7 @@ export default function OperatorRolePage() {
                         />
                       </div>
 
-                      <div className="flex items-center gap-6 p-8 rounded-3xl bg-orange-500 shadow-[0_20px_50px_-10px_rgba(245,165,36,0.3)] border border-orange-400 group relative">
+                      <div className="flex items-center gap-6 p-8 rounded-3xl bg-orange-500 shadow-[0_20px_50px_-10px_rgba(207,152,60,0.3)] border border-orange-400 group relative">
                         <div className="absolute -inset-1 bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                         <FiZap className="text-white text-4xl animate-pulse" />
                         <div className="relative z-10">
@@ -497,7 +497,7 @@ export default function OperatorRolePage() {
               <div className="flex flex-col md:flex-row justify-center gap-6 md:gap-8">
                 <Link
                   href="/auth/operator/register"
-                  className="group relative inline-flex justify-center items-center gap-4 md:gap-6 px-10 md:px-14 py-5 md:py-7 rounded-full bg-orange-500 text-white font-black text-xl shadow-[0_25px_80px_-15px_rgba(245,165,36,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
+                  className="group relative inline-flex justify-center items-center gap-4 md:gap-6 px-10 md:px-14 py-5 md:py-7 rounded-full bg-orange-500 text-white font-black text-xl shadow-[0_25px_80px_-15px_rgba(207,152,60,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
                 >
                   Start Operator Entry
                   <FiArrowRight size={24} className="transition-transform group-hover:translate-x-3" />

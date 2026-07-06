@@ -598,8 +598,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   const themeField = {
     base: "text-foreground",
     label: "font-black uppercase text-[9px] sm:text-[10px] tracking-[0.14em] sm:tracking-[0.2em] text-default-400 mb-1.5 sm:mb-2 ml-1",
-    trigger: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
-    inputWrapper: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-warning-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
+    trigger: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[open=true]:border-obaol-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
+    inputWrapper: "rounded-xl sm:rounded-2xl border-default-200 bg-content2 hover:bg-content3 data-[focus=true]:border-obaol-500/40 data-[hover=true]:border-default-300 transition-all border shadow-inner h-12 sm:h-14",
     innerWrapper: "text-foreground",
     value: "text-foreground font-black uppercase text-[10px] sm:text-[11px] tracking-[0.08em] sm:tracking-widest !text-foreground",
     input: "text-foreground placeholder:text-default-300 font-bold text-xs sm:text-sm !text-foreground",
@@ -612,7 +612,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   };
 
   const itemClasses = {
-    base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-warning-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
+    base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-obaol-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
     title: "font-black uppercase tracking-widest text-[11px] text-foreground",
   };
   const isNatural = Boolean(formData.isNatural);
@@ -747,11 +747,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.4em] text-warning-400">
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.4em] text-obaol-400">
             Trade Mission • Step {step} of 4
           </div>
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {stepLabel?.icon && <stepLabel.icon size={22} className="text-warning-400 sm:w-7 sm:h-7" />}
+            {stepLabel?.icon && <stepLabel.icon size={22} className="text-obaol-400 sm:w-7 sm:h-7" />}
             <div>
               <h3 className="text-xl sm:text-2xl font-black text-foreground leading-tight">{stepLabel?.title}</h3>
               <p className="text-xs sm:text-sm text-default-500">{stepLabel?.subtitle}</p>
@@ -761,7 +761,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
         <ModalBody className="pb-8">
           <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
             {stepMeta.map((item) => (
-              <div key={item.key} className={`flex-1 h-1 rounded-full ${item.key <= step ? "bg-warning-400" : "bg-default-200"}`} />
+              <div key={item.key} className={`flex-1 h-1 rounded-full ${item.key <= step ? "bg-obaol-400" : "bg-default-200"}`} />
             ))}
           </div>
           <AnimatePresence mode="wait">
@@ -840,22 +840,22 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       </>
                     )}
                     {fixedVariantId && (
-                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-warning-500/30 bg-warning-500/10 text-white text-sm sm:text-base">
+                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-white text-sm sm:text-base">
                         Variant preselected for this listing.
                       </div>
                     )}
-                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-warning-500/30 bg-warning-500/10 px-3 sm:px-4 py-3">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-3 sm:px-4 py-3">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-start gap-2">
-                          <FiGlobe size={16} className="text-warning-400 mt-0.5" />
-                          <p className="text-[11px] sm:text-xs text-warning-700 dark:text-warning-300 leading-relaxed font-medium">
+                          <FiGlobe size={16} className="text-obaol-400 mt-0.5" />
+                          <p className="text-[11px] sm:text-xs text-obaol-700 dark:text-obaol-300 leading-relaxed font-medium">
                             Can&apos;t find your product or variant? Go to Global Catalog and add it.
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => router.push("/dashboard/product")}
-                          className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider text-warning-300 hover:text-warning-200 underline underline-offset-4 transition-colors"
+                          className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider text-obaol-300 hover:text-obaol-200 underline underline-offset-4 transition-colors"
                         >
                           Go to Global Catalog
                           <FiArrowRight size={14} />
@@ -1091,7 +1091,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between text-sm text-white/70">
                           <span>Commission ({commissionPercent}%)</span>
-                          <span className="font-bold text-warning-300">{computedCommission.toFixed(2)}</span>
+                          <span className="font-bold text-obaol-300">{computedCommission.toFixed(2)}</span>
                         </div>
                         <div className="h-[1px] w-full bg-white/10"></div>
                         <div className="flex items-center justify-between text-sm font-medium text-white/90">
@@ -1181,7 +1181,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         </div>
                         <div>
                           <div className="text-xs uppercase text-default-400">Commission</div>
-                          <div className="text-lg font-bold text-warning-500">{computedCommission.toFixed(2)}</div>
+                          <div className="text-lg font-bold text-obaol-500">{computedCommission.toFixed(2)}</div>
                         </div>
                         <div>
                           <div className="text-xs uppercase text-default-400">Price After Commission</div>

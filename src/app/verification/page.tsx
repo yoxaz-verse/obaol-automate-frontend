@@ -210,17 +210,17 @@ export default function VerificationPage() {
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
             <div className="p-8 md:p-10 rounded-[2.5rem] bg-warning/5 border border-warning/20 h-full flex flex-col transition-shadow hover:shadow-lg">
-              <div className="w-16 h-16 rounded-2xl bg-warning/20 text-warning-600 flex items-center justify-center mb-8">
+              <div className="w-16 h-16 rounded-2xl bg-warning/20 text-obaol-600 flex items-center justify-center mb-8">
                 <LuClock className="w-8 h-8" />
               </div>
               <h3 className="text-3xl font-bold mb-4 tracking-tight">Not a One-Time Event</h3>
               <p className="text-foreground/70 text-lg mb-8 leading-relaxed">Many failures occur <strong className="text-foreground">after initial checks</strong>. OBAOL continues verification iteratively:</p>
               <ul className="space-y-4 mb-8 flex-grow">
-                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-warning-500 w-6 h-6" /> When terms change</li>
-                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-warning-500 w-6 h-6" /> When timelines shift</li>
-                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-warning-500 w-6 h-6" /> When execution pressure increases</li>
+                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-obaol-500 w-6 h-6" /> When terms change</li>
+                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-obaol-500 w-6 h-6" /> When timelines shift</li>
+                <li className="flex items-center gap-4 text-foreground/80 font-medium text-lg p-3 rounded-xl bg-background border border-warning/10"><LuCheckCircle className="text-obaol-500 w-6 h-6" /> When execution pressure increases</li>
               </ul>
-              <div className="p-4 rounded-xl bg-warning-50 text-warning-900 border border-warning-200 mt-auto">
+              <div className="p-4 rounded-xl bg-obaol-50 text-obaol-900 border border-obaol-200 mt-auto">
                 <p className="font-semibold text-center">Verification is maintained until execution completes.</p>
               </div>
             </div>

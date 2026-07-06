@@ -463,7 +463,7 @@ export default function EditModal({
                 size="sm"
                 type="button"
                 onClick={() => addPaymentMilestone(f.key)}
-                className="px-3 py-1 bg-warning-500 text-white rounded"
+                className="px-3 py-1 bg-obaol-500 text-white rounded"
                 isDisabled={milestones.length >= 3}
               >
                 + Add Segment
@@ -816,7 +816,7 @@ export default function EditModal({
               accept={f.accept || "image/*,application/pdf"}
               disabled={disabled}
               onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-warning-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
             />
             <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose a new file only if you want to replace the existing one."}</p>
             {formData[f.key] && (
@@ -856,10 +856,10 @@ export default function EditModal({
       {!isControlled && (
         <Tooltip content="Edit Record" closeDelay={0}>
           <span
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-warning-500/10 hover:bg-warning-500/20 cursor-pointer active:opacity-50 group transition-all"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-obaol-500/10 hover:bg-obaol-500/20 cursor-pointer active:opacity-50 group transition-all"
             onClick={() => setOpen(true)}
           >
-            <FiEdit2 size={20} className="text-warning-500/80 group-hover:text-warning-600 transition-colors" />
+            <FiEdit2 size={20} className="text-obaol-500/80 group-hover:text-obaol-600 transition-colors" />
             <div className="h-[2px]" />
           </span>
         </Tooltip>

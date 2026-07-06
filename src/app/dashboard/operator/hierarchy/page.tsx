@@ -217,7 +217,7 @@ const toneByKind: Record<TreeNodeKind, string> = {
   self: "border-primary-500/30 bg-primary-500/5 text-primary-600 dark:text-primary-400 shadow-[0_0_20px_rgba(59,130,246,0.1)]",
   direct_team: "border-success-500/30 bg-success-500/5 text-success-600 dark:text-success-400 shadow-[0_0_20px_rgba(34,197,94,0.1)]",
   team: "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.05)]",
-  leadership: "border-warning-500/30 bg-warning-500/5 text-warning-600 dark:text-warning-400 shadow-[0_0_20px_rgba(245,165,36,0.1)]",
+  leadership: "border-obaol-500/30 bg-obaol-500/5 text-obaol-600 dark:text-obaol-400 shadow-[0_0_20px_rgba(207,152,60,0.1)]",
 };
 
 type BranchProps = {
@@ -770,7 +770,7 @@ export default function OperatorHierarchyPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {[
           { label: "Active Agent", value: toName(operator.name), icon: <FiBriefcase className="text-primary-500" />, sub: "Identity" },
-          { label: "Vantage Level", value: `L${operatorLevel}`, icon: <FiAward className="text-warning-500" />, sub: "Rank" },
+          { label: "Vantage Level", value: `L${operatorLevel}`, icon: <FiAward className="text-obaol-500" />, sub: "Rank" },
           { label: "Strategic Mentor", value: mentor ? toName(mentor.name) : "Autonomous", icon: <FiTarget className="text-secondary-500" />, sub: "Upline" },
           { label: "Network Size", value: networkCount, icon: <FiUsers className="text-success-500" />, sub: "Members" },
           { label: "Total Yield", value: formatRate(Number(summary.totalEarnings || 0)), icon: <FiZap className="text-yellow-500" />, sub: "Commissions" },
@@ -922,9 +922,9 @@ export default function OperatorHierarchyPage() {
                       <span className="text-[10px] font-black uppercase tracking-widest">Synchronizing...</span>
                     </div>
                   ) : hasRestrictedMetrics ? (
-                    <div className="rounded-2xl border border-warning-500/20 bg-warning-500/5 p-6 text-center space-y-2">
-                      <FiShield className="mx-auto text-warning-500" size={24} />
-                      <p className="text-[10px] font-black text-warning-600 uppercase tracking-widest">Access Restricted</p>
+                    <div className="rounded-2xl border border-obaol-500/20 bg-obaol-500/5 p-6 text-center space-y-2">
+                      <FiShield className="mx-auto text-obaol-500" size={24} />
+                      <p className="text-[10px] font-black text-obaol-600 uppercase tracking-widest">Access Restricted</p>
                       <p className="text-[11px] font-medium text-default-500 leading-relaxed">Financial metrics are isolated for nodes outside your immediate leadership scope.</p>
                     </div>
                   ) : selectedSummaryQuery.isError ? (

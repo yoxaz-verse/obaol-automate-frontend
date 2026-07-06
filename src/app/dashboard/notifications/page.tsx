@@ -363,7 +363,7 @@ const NotificationsPage = () => {
                       }`}
                     >
                       {/* Status indicator line */}
-                      {!item.isRead && <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary shadow-[0_0_15px_rgba(249,115,22,0.5)]" />}
+                      {!item.isRead && <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary shadow-[0_0_15px_rgba(207,152,60,0.5)]" />}
                       
                       <div className="p-6 flex items-start justify-between gap-6 relative z-10">
                         <div className="flex-1 min-w-0 flex gap-5">

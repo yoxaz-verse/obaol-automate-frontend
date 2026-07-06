@@ -85,7 +85,7 @@ const ProductNews: React.FC<ProductNewsProps> = ({ query }) => {
                     >
                         <CardBody className="p-4 space-y-3">
                             <div className="flex items-center justify-between gap-2">
-                                <span className="text-[10px] font-black text-warning-600 uppercase tracking-widest truncate max-w-[60%]">
+                                <span className="text-[10px] font-black text-obaol-600 uppercase tracking-widest truncate max-w-[60%]">
                                     {item.sourceName}
                                 </span>
                                 <span className="flex items-center gap-1 text-[10px] font-bold text-default-400 shrink-0">
@@ -103,7 +103,7 @@ const ProductNews: React.FC<ProductNewsProps> = ({ query }) => {
                             </p>
 
                             <div className="flex justify-end pt-1">
-                                <FiArrowUpRight className="text-default-300 group-hover:text-warning-500 transition-colors" />
+                                <FiArrowUpRight className="text-default-300 group-hover:text-obaol-500 transition-colors" />
                             </div>
                         </CardBody>
                     </Card>

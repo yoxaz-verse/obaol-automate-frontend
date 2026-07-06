@@ -29,7 +29,7 @@ export default function DashboardContextBar() {
         <span className="truncate font-semibold text-foreground" aria-current="page">{route.label}</span>
       </nav>
       <div className="flex items-center gap-3">
-        <span className="rounded-full bg-warning-500/10 px-2.5 py-1 font-semibold text-warning-700 dark:text-warning-400">{roleLabel}</span>
+        <span className="rounded-full bg-obaol-500/10 px-2.5 py-1 font-semibold text-obaol-700 dark:text-obaol-300">{roleLabel}</span>
         <Link href={`/dashboard/guidance#${route.helpId}`} className="font-semibold db-muted hover:text-foreground">Help for this page</Link>
       </div>
     </div>

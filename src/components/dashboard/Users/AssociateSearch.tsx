@@ -123,11 +123,11 @@ export default function AssociateSearch({
       radius="full"
       selectedKey={selectedKey || undefined}
       isClearable
-      className="text-warning-400 w-full mb-6"
+      className="text-obaol-400 w-full mb-6"
       classNames={{
         base: "max-w-full",
         listboxWrapper: "max-h-[320px]",
-        selectorButton: "text-warning-500",
+        selectorButton: "text-obaol-500",
       }}
       startContent={
         <SearchIcon className="text-default-400" size={20} strokeWidth={2.5} />

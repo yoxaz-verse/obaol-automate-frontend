@@ -37,11 +37,11 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
       <div className={`flex flex-col md:flex-row justify-between items-start gap-8 border-b pb-12 mb-12 relative rounded-3xl p-6 ${themeShellClass || "bg-transparent"} ${themeBorderClass || "border-foreground/5"}`}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20 shadow-lg shadow-warning-500/5">
+            <div className="w-12 h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20 shadow-lg shadow-obaol-500/5">
               <FiPackage size={24} />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500 opacity-80">Product Record</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-obaol-500 opacity-80">Product Record</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
                 <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Active in Catalog</span>
@@ -65,7 +65,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
           </div>
 
           {product.description && (
-            <div className="relative pl-6 border-l-2 border-warning-500/20 py-1 text-left">
+            <div className="relative pl-6 border-l-2 border-obaol-500/20 py-1 text-left">
               <p className="text-default-500 text-sm max-w-3xl leading-relaxed font-medium">
                 {product.description}
               </p>
@@ -117,14 +117,14 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
             <div className="space-y-10">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4 text-left">
-                  <div className="w-1 h-8 bg-warning-500 rounded-full" />
+                  <div className="w-1 h-8 bg-obaol-500 rounded-full" />
                   <div>
                     <h3 className="text-2xl font-black text-foreground tracking-tight uppercase">Product Variants</h3>
                     <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">Specifications & Real-time Market Rates</p>
                   </div>
                 </div>
                 {productVariantFormFields && user?.role !== "Associate" && (
-                  <div className="shadow-2xl shadow-warning-500/10 rounded-[1.5rem] overflow-hidden">
+                  <div className="shadow-2xl shadow-obaol-500/10 rounded-[1.5rem] overflow-hidden">
                     <AddModal
                       name="Product Variant"
                       buttonLabel="Create New Variant"
@@ -146,7 +146,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                     className="px-0 gap-6"
                     variant="splitted"
                     itemClasses={{
-                      base: "group/item py-0 mb-6 bg-foreground/[0.02] dark:bg-foreground/[0.01] border border-foreground/[0.06] rounded-[2.5rem] transition-all duration-300 hover:bg-foreground/[0.04] !shadow-none data-[open=true]:bg-foreground/[0.03] data-[open=true]:border-warning-500/20 data-[open=true]:rounded-[3rem] data-[open=true]:shadow-2xl data-[open=true]:shadow-warning-500/5",
+                      base: "group/item py-0 mb-6 bg-foreground/[0.02] dark:bg-foreground/[0.01] border border-foreground/[0.06] rounded-[2.5rem] transition-all duration-300 hover:bg-foreground/[0.04] !shadow-none data-[open=true]:bg-foreground/[0.03] data-[open=true]:border-obaol-500/20 data-[open=true]:rounded-[3rem] data-[open=true]:shadow-2xl data-[open=true]:shadow-obaol-500/5",
                       title: "font-black text-lg tracking-wide text-foreground/90 py-5",
                       trigger: "px-8 py-6 rounded-[2.5rem]",
                       content: "px-8 pb-8 pt-2",
@@ -170,7 +170,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                 {isAdded && <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-0.5">Active in my catalog</span>}
                               </div>
                               {isAdded && (
-                                <div className="hidden sm:flex items-center gap-2.5 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-warning-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black border border-orange-500/20 shadow-xl shadow-orange-500/5 transition-all">
+                                <div className="hidden sm:flex items-center gap-2.5 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-obaol-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black border border-orange-500/20 shadow-xl shadow-orange-500/5 transition-all">
                                   <span className="relative flex h-2.5 w-2.5">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
@@ -195,10 +195,10 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                                 {isAdded && (
                                   <div className="animate-in fade-in slide-in-from-top-2 duration-500">
                                     <div className="flex items-center gap-4 mb-8 text-left">
-                                      <div className="h-[1px] flex-1 bg-gradient-to-r from-warning-500/50 to-transparent" />
+                                      <div className="h-[1px] flex-1 bg-gradient-to-r from-obaol-500/50 to-transparent" />
                                       <div className="flex items-center gap-2">
-                                        <FiCheckCircle className="text-warning-500" size={14} />
-                                        <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-warning-500">Proprietary Assets</h4>
+                                        <FiCheckCircle className="text-obaol-500" size={14} />
+                                        <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Proprietary Assets</h4>
                                       </div>
                                     </div>
                                     <div className="bg-content1/40 border border-divider/50 rounded-[2.5rem] p-8 backdrop-blur-md shadow-inner text-left">
@@ -235,9 +235,9 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
                               /* Standard View for Admin/Others */
                               <div className="animate-in fade-in duration-500">
                                 <div className="flex items-center gap-4 mb-8 text-left">
-                                  <div className="h-[1px] flex-1 bg-gradient-to-r from-warning-500/50 to-transparent" />
+                                  <div className="h-[1px] flex-1 bg-gradient-to-r from-obaol-500/50 to-transparent" />
                                   <div className="flex items-center gap-2">
-                                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-warning-500">Unified Rate Ledger</h4>
+                                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-obaol-500">Unified Rate Ledger</h4>
                                   </div>
                                 </div>
                                 <div className="bg-foreground/[0.01] border border-divider/50 rounded-[3rem] p-8 shadow-inner overflow-hidden text-left">
@@ -291,7 +291,7 @@ export const ProductList = ({ product, setProduct, myCatalogItems, themeShellCla
   ) : (
     <div className="h-full flex flex-col items-center justify-center text-center gap-6 py-20 animate-in fade-in duration-700">
       <div className="relative">
-        <div className="absolute inset-0 bg-warning-500/10 blur-3xl rounded-full animate-pulse scale-150" />
+        <div className="absolute inset-0 bg-obaol-500/10 blur-3xl rounded-full animate-pulse scale-150" />
         <div className="relative w-32 h-32 rounded-[3rem] bg-foreground/5 flex items-center justify-center border border-foreground/10 rotate-6 hover:rotate-0 transition-transform duration-500">
           <FiPackage size={48} className="opacity-20" />
         </div>

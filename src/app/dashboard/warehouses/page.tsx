@@ -248,7 +248,7 @@ export default function WarehousesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground uppercase leading-tight">
-                        Warehouse <span className="text-warning-500">Management</span>
+                        Warehouse <span className="text-obaol-500">Management</span>
                     </h1>
                     <p className="text-xs text-default-400 mt-1 font-medium">
                         Monitor storage facilities, stock movements, assignments, and charges.
@@ -280,7 +280,7 @@ export default function WarehousesPage() {
                         size="sm"
                         startContent={<LuPlus size={16} />}
                         onPress={() => router.push("/dashboard/warehouses/location")}
-                        className="font-bold shadow-md shadow-warning-500/20"
+                        className="font-bold shadow-md shadow-obaol-500/20"
                     >
                         Add Warehouse
                     </Button>
@@ -289,7 +289,7 @@ export default function WarehousesPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard icon={<LuWarehouse />} label="Total" value={loadingWarehouses ? "—" : warehouses.length} color="bg-warning-500/10 text-warning-500" />
+                <StatCard icon={<LuWarehouse />} label="Total" value={loadingWarehouses ? "—" : warehouses.length} color="bg-obaol-500/10 text-obaol-500" />
                 <StatCard icon={<BsBoxes />} label="Active" value={loadingWarehouses ? "—" : warehouses.filter(w => w.isActive).length} color="bg-success-500/10 text-success-500" />
                 <StatCard icon={<FiTrendingUp />} label="Movements" value={movements.length || "—"} color="bg-primary-500/10 text-primary-500" />
                 <StatCard icon={<TbContainer />} label="Charge Records" value={charges.length || "—"} color="bg-secondary-500/10 text-secondary-500" />
@@ -304,7 +304,7 @@ export default function WarehousesPage() {
                 classNames={{
                     tabList: "gap-4 border-b border-default-200 w-full",
                     tab: "text-xs font-bold uppercase tracking-widest pb-3",
-                    cursor: "bg-warning-500",
+                    cursor: "bg-obaol-500",
                 }}
             >
                 {/* ── My Warehouses Tab ── */}
@@ -315,10 +315,10 @@ export default function WarehousesPage() {
                                 : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                                         {warehouses.map((wh) => (
-                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-warning-500/30 transition-all duration-200 group">
+                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-obaol-500/30 transition-all duration-200 group">
                                                 <CardHeader className="flex items-start justify-between gap-3 pb-2 px-4 pt-4">
                                                     <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="w-9 h-9 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 flex-shrink-0">
+                                                        <div className="w-9 h-9 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 flex-shrink-0">
                                                             <LuWarehouse size={18} />
                                                         </div>
                                                         <div className="min-w-0">
@@ -337,7 +337,7 @@ export default function WarehousesPage() {
                                                         </Chip>
                                                         <button
                                                             onClick={() => openEdit(wh)}
-                                                            className="w-7 h-7 rounded-lg flex items-center justify-center text-default-400 hover:text-warning-500 hover:bg-warning-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                            className="w-7 h-7 rounded-lg flex items-center justify-center text-default-400 hover:text-obaol-500 hover:bg-obaol-500/10 transition-all opacity-0 group-hover:opacity-100"
                                                         >
                                                             <LuPencil size={13} />
                                                         </button>
@@ -381,10 +381,10 @@ export default function WarehousesPage() {
                                 : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                                         {availableWarehouses.map((wh) => (
-                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-warning-500/30 transition-all duration-200">
+                                            <Card key={wh._id} className="bg-content1 border border-default-200/50 shadow-sm hover:shadow-md hover:border-obaol-500/30 transition-all duration-200">
                                                 <CardHeader className="flex items-start justify-between gap-3 pb-2 px-4 pt-4">
                                                     <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="w-9 h-9 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 flex-shrink-0">
+                                                        <div className="w-9 h-9 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 flex-shrink-0">
                                                             <LuWarehouse size={18} />
                                                         </div>
                                                         <div className="min-w-0">
@@ -508,13 +508,13 @@ export default function WarehousesPage() {
                                 onSelectionChange={(keys) => setWarehouseForm(f => ({ ...f, category: Array.from(keys)[0] as any }))}
                                 popoverProps={{
                                   classNames: {
-                                    content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                    content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                   },
                                   offset: 8
                                 }}
                                 listboxProps={{
                                   itemClasses: {
-                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-obaol-500/10 data-[selected=true]:bg-obaol-500/20 data-[selected=true]:text-obaol-500",
                                   }
                                 }}
                                 classNames={{ 
@@ -536,7 +536,7 @@ export default function WarehousesPage() {
                                 </SelectItem>
                                 <SelectItem key="BONDED" textValue="Bonded Warehouse">
                                     <div className="flex items-center gap-3">
-                                        <LuWarehouse className="text-warning-500" />
+                                        <LuWarehouse className="text-obaol-500" />
                                         <span className="text-xs font-bold uppercase tracking-tight">Bonded Warehouse</span>
                                     </div>
                                 </SelectItem>
@@ -653,13 +653,13 @@ export default function WarehousesPage() {
                                 onSelectionChange={(keys) => setMovementForm(f => ({ ...f, warehouseId: Array.from(keys)[0] as string }))}
                                 popoverProps={{
                                   classNames: {
-                                    content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                    content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                   },
                                   offset: 8
                                 }}
                                 listboxProps={{
                                   itemClasses: {
-                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                    base: "rounded-xl py-2 px-3 data-[hover=true]:bg-obaol-500/10 data-[selected=true]:bg-obaol-500/20 data-[selected=true]:text-obaol-500",
                                   }
                                 }}
                                 classNames={{ 
@@ -670,7 +670,7 @@ export default function WarehousesPage() {
                                 {warehouses.filter(w => w.isActive).map(wh => (
                                     <SelectItem key={wh._id} textValue={wh.name}>
                                         <div className="flex items-center gap-3">
-                                            <BsBoxes className="text-warning-500" />
+                                            <BsBoxes className="text-obaol-500" />
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-black uppercase italic tracking-tighter leading-tight">{wh.name}</span>
                                                 <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-60">ID: {wh._id.slice(-6)}</span>

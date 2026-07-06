@@ -72,8 +72,8 @@ export default function ExternalOrdersPage() {
                                 {canUseDemo && (
                                     <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-warning/20 bg-warning/5 px-6 py-4 backdrop-blur-3xl shadow-sm">
                                         <div className="flex flex-col gap-1">
-                                            <div className="text-sm font-bold text-warning-700">Admin Resource Emulator</div>
-                                            <div className="text-[11px] font-medium text-warning-600/80">
+                                            <div className="text-sm font-bold text-obaol-700">Admin Resource Emulator</div>
+                                            <div className="text-[11px] font-medium text-obaol-600/80">
                                                 Generate high-fidelity demo clusters to validate execution streams.
                                             </div>
                                         </div>
@@ -151,7 +151,7 @@ export default function ExternalOrdersPage() {
                                                 onSelectionChange={(key) => setSelectedTab(key as string)}
                                                 classNames={{
                                                     tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
-                                                    cursor: "bg-warning w-full h-[2.5px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-warning-rgb),0.3)]",
+                                                    cursor: "bg-warning w-full h-[2.5px] rounded-t-full shadow-[0_-1px_10px_rgba(var(--heroui-obaol-rgb),0.3)]",
                                                     tab: "max-w-fit px-4 h-11 transition-all duration-300",
                                                     tabContent: "font-bold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning"
                                                 }}

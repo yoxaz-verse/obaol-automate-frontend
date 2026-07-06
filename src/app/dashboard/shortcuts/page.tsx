@@ -79,7 +79,7 @@ export default function ShortcutsPage() {
                   saveShortcuts(DEFAULT_SHORTCUTS);
                   setShortcutError("");
                 }}
-                className="w-full rounded-2xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-xs font-black uppercase tracking-[0.3em] text-warning-600 hover:bg-warning-500/20 transition"
+                className="w-full rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-xs font-black uppercase tracking-[0.3em] text-obaol-600 hover:bg-obaol-500/20 transition"
               >
                 Reset to Defaults
               </button>

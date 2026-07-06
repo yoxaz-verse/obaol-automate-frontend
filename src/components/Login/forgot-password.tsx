@@ -77,7 +77,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
 
     const inputClasses = {
         label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-2 ml-1",
-        inputWrapper: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-warning-500/50 transition-all h-12 rounded-2xl shadow-sm",
+        inputWrapper: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-obaol-500/50 transition-all h-12 rounded-2xl shadow-sm",
         input: "font-medium text-sm text-foreground placeholder:text-default-300",
         base: "mb-2"
     };
@@ -88,8 +88,8 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-[440px] px-4"
         >
-            <Card className="w-full bg-content1/80 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-divider shadow-xl dark:shadow-2xl rounded-[2.5rem] p-2 md:p-4 overflow-hidden relative shadow-slate-200/40 dark:shadow-black/40">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 pointer-events-none" />
+            <Card className="relative w-full overflow-hidden rounded-[2.5rem] border border-obaol-200/60 bg-content1/80 p-2 shadow-xl shadow-obaol-900/5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 dark:shadow-2xl dark:shadow-black/40 md:p-4">
+                <div className="pointer-events-none absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-obaol-500/10 blur-[60px]" />
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary-500/5 blur-[60px] rounded-full -ml-12 -mb-12 pointer-events-none" />
 
                 <CardHeader className="flex flex-col items-center pb-2 pt-8 relative z-10">
@@ -100,18 +100,18 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 variant="flat"
                                 radius="full"
                                 size="sm"
-                                className="bg-content2/50 backdrop-blur-sm border border-divider hover:bg-warning-500/10 hover:text-warning-500 transition-all"
+                                className="border border-divider bg-content2/50 backdrop-blur-sm transition-all hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300"
                                 onClick={() => step === "REQUEST" ? router.push("/auth") : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
                             >
                                 <IoArrowBack className="text-base" />
                             </Button>
                         )}
                         <div className="flex flex-col items-center flex-1">
-                            <h4 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-foreground">
-                                Forgot <span className="text-warning-500 underline decoration-warning-500/20 underline-offset-4">Password</span>
+                            <h4 className="text-xl font-bold uppercase tracking-tight text-foreground md:text-2xl">
+                                Forgot <span className="text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 dark:text-obaol-300">Password</span>
                             </h4>
                             <div className="flex items-center gap-2 mt-2">
-                                <span className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
+                                <span className="h-1 w-1 animate-pulse rounded-full bg-obaol-500" />
                                 <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">{role} Account</p>
                             </div>
                         </div>
@@ -149,7 +149,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 <Button
                                     type="submit"
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
                                     isLoading={isLoading}
                                 >
                                     Send OTP
@@ -168,7 +168,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                             >
                                 <div className="text-center space-y-3">
                                     <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">Code sent to</p>
-                                    <div className="px-4 py-2 rounded-xl bg-warning-500/5 border border-warning-500/10 inline-block font-black text-xs text-warning-500 uppercase italic tracking-wider shadow-inner">
+                                    <div className="inline-block rounded-xl border border-obaol-500/10 bg-obaol-500/5 px-4 py-2 text-xs font-bold uppercase tracking-wider text-obaol-700 shadow-inner dark:text-obaol-300">
                                         {email}
                                     </div>
                                 </div>
@@ -182,7 +182,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                             color="warning"
                                             variant="bordered"
                                             classNames={{
-                                                segment: "w-12 h-14 text-lg font-black italic border-divider rounded-xl focus-within:border-warning-500 transition-all",
+                                                segment: "w-12 h-14 text-lg font-bold border-divider rounded-xl focus-within:border-obaol-500 transition-all",
                                                 segmentWrapper: "gap-3",
                                             }}
                                         />
@@ -193,7 +193,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                     <Button
                                         type="submit"
                                         color="warning"
-                                        className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                        className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
                                         disabled={otp.length !== 6 || isLoading}
                                         isLoading={isLoading}
                                     >
@@ -203,7 +203,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                     <Button
                                         variant="light"
                                         size="sm"
-                                        className="w-full font-black uppercase text-[10px] tracking-widest text-default-400 hover:text-warning-500"
+                                        className="w-full text-[10px] font-bold uppercase tracking-widest text-default-400 hover:text-obaol-700 dark:hover:text-obaol-300"
                                         onClick={(e) => handleRequestOtp(e as any)}
                                     >
                                         Resend OTP
@@ -256,7 +256,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 <Button
                                     type="submit"
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
                                     isLoading={isLoading}
                                 >
                                     Reset Password
@@ -278,14 +278,14 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                    </div>
                                 </div>
                                 <div className="space-y-3">
-                                    <h4 className="text-2xl font-black italic tracking-tighter uppercase text-foreground">Password <span className="text-success-500">Reset</span></h4>
+                                    <h4 className="text-2xl font-bold uppercase tracking-tight text-foreground">Password <span className="text-success-500">Reset</span></h4>
                                     <p className="text-[11px] font-bold text-default-500 uppercase tracking-widest leading-relaxed">
                                         Your password has been updated. <br/> You can sign in now.
                                     </p>
                                 </div>
                                 <Button
                                     color="warning"
-                                    className="w-full font-black uppercase italic tracking-[0.2em] text-xs h-12 rounded-2xl shadow-lg shadow-warning-500/10 bg-warning-500 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
                                     onClick={() => {
                                         const r = role.toLowerCase();
                                         const target = r === 'operator' || r === 'team' ? '/auth/operator' : '/auth';

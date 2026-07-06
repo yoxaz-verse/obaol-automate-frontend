@@ -521,7 +521,7 @@ export default function OperatorTeamPage() {
           </div>
 
           {operatorLookupQuery.isError ? (
-            <p className="text-xs text-warning-600 dark:text-warning-300">
+            <p className="text-xs text-obaol-600 dark:text-obaol-300">
               Operator email/join-date enrichment is currently unavailable.
             </p>
           ) : null}

@@ -20,7 +20,7 @@ const toRows = (res: any): any[] => {
 
 // Simple initials avatar colour based on name
 const PALETTE = [
-    "bg-warning-500/10 text-warning-600",
+    "bg-obaol-500/10 text-obaol-600",
     "bg-success-500/10 text-success-600",
     "bg-secondary-500/10 text-secondary-600",
     "bg-primary-500/10 text-primary-600",
@@ -75,14 +75,14 @@ export default function CompaniesPage() {
             <section className="relative overflow-hidden py-12 md:py-16 px-6 text-center">
                 {/* ambient glow */}
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="w-[600px] h-[600px] rounded-full bg-warning-500/5 blur-[120px]" />
+                    <div className="w-[600px] h-[600px] rounded-full bg-obaol-500/5 blur-[120px]" />
                 </div>
 
                 <motion.p
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="text-[11px] font-black uppercase tracking-[0.25em] text-warning-500 mb-4"
+                    className="text-[11px] font-black uppercase tracking-[0.25em] text-obaol-500 mb-4"
                 >
                     Our Network
                 </motion.p>
@@ -122,7 +122,7 @@ export default function CompaniesPage() {
                         classNames={{
                             input: "text-sm",
                             inputWrapper:
-                                "border-foreground/10 hover:border-warning-500/40 focus-within:border-warning-500/60 bg-foreground/[0.02]",
+                                "border-foreground/10 hover:border-obaol-500/40 focus-within:border-obaol-500/60 bg-foreground/[0.02]",
                         }}
                     />
                 </motion.div>
@@ -136,7 +136,7 @@ export default function CompaniesPage() {
                             {[0, 1, 2].map((i) => (
                                 <motion.div
                                     key={i}
-                                    className="w-2 h-2 rounded-full bg-warning-500"
+                                    className="w-2 h-2 rounded-full bg-obaol-500"
                                     animate={{ opacity: [0.3, 1, 0.3] }}
                                     transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
                                 />
@@ -164,7 +164,7 @@ export default function CompaniesPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.5) }}
-                                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-foreground/[0.07] bg-foreground/[0.01] hover:border-warning-500/20 hover:bg-warning-500/[0.02] transition-all"
+                                    className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-foreground/[0.07] bg-foreground/[0.01] hover:border-obaol-500/20 hover:bg-obaol-500/[0.02] transition-all"
                                 >
                                     {/* Initials avatar */}
                                     <div

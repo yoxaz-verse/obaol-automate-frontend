@@ -1040,7 +1040,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   </div>
                 </motion.div>
               ) : (
-                <p className="text-xs text-warning-500">Google sign-up is not configured.</p>
+                <p className="text-xs text-obaol-500">Google sign-up is not configured.</p>
               )}
             </>
           )}
@@ -1048,7 +1048,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             <div className="flex items-center justify-between relative px-2 mb-6">
               <div className="absolute top-1/2 left-0 w-full h-[2.5px] bg-default-100/50 -translate-y-1/2 z-0 rounded-full" />
               <motion.div
-                className="absolute top-1/2 left-0 h-[2.5px] bg-warning-500 -translate-y-1/2 z-0 rounded-full"
+                className="absolute top-1/2 left-0 h-[2.5px] bg-obaol-500 -translate-y-1/2 z-0 rounded-full"
                 initial={{ width: "0%" }}
                 animate={{ width: `${((currentStep - 1) / 3) * 100}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -1057,9 +1057,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                 <div
                   key={s}
                   className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 shadow-sm border-2 ${s < currentStep
-                    ? "bg-warning-500 border-warning-500 text-white"
+                    ? "bg-obaol-500 border-obaol-500 text-white"
                     : s === currentStep
-                      ? "bg-background border-warning-500 text-warning-500 scale-110 shadow-warning-500/20"
+                      ? "bg-background border-obaol-500 text-obaol-500 scale-110 shadow-obaol-500/20"
                       : "bg-background border-default-200 text-default-400"
                     }`}
                 >
@@ -1071,7 +1071,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               {["Profile", "Company", "Capability", "Verify"].map((label, idx) => (
                 <span
                   key={label}
-                  className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${idx + 1 <= currentStep ? "text-warning-500" : "text-default-400"
+                  className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${idx + 1 <= currentStep ? "text-obaol-500" : "text-default-400"
                     }`}
                 >
                   {label}
@@ -1131,7 +1131,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     )}
                   </div>
                   <div className="md:col-span-2">
-                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
                       <PhoneField
                         name="phone"
                         label="Primary Phone Number"
@@ -1148,7 +1148,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     {errors.phone ? <p className="text-danger text-[11px] mt-1 font-medium pl-2">{errors.phone}</p> : null}
                   </div>
                   <div className="md:col-span-2">
-                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                    <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
                       <PhoneField
                         name="phoneSecondary"
                         label="Secondary Phone (Optional)"
@@ -1225,10 +1225,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   </div>
 
                   <div className="md:col-span-2 pt-4">
-                    <div className="p-4 rounded-2xl bg-warning-500/5 border border-dashed border-warning-500/30 flex flex-col gap-3">
+                    <div className="p-4 rounded-2xl bg-obaol-500/5 border border-dashed border-obaol-500/30 flex flex-col gap-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-warning-600">Operator Referral (Optional)</span>
+                        <div className="w-1.5 h-4 bg-obaol-500 rounded-full" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-obaol-600">Operator Referral (Optional)</span>
                       </div>
                       <Input
                         type="text"
@@ -1330,7 +1330,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             classNames={{ inputWrapper: "h-12 border-default-200" }}
                           />
                           <div className="md:col-span-2">
-                            <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-warning-500/50">
+                            <div className="rounded-xl border border-default-200 p-0.5 overflow-hidden transition-all hover:border-obaol-500/50">
                               <PhoneField
                                 name="companyPhone"
                                 label="Company Contact"
@@ -1613,11 +1613,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="p-5 rounded-2xl bg-warning-500/10 border-2 border-warning-500/50 shadow-[0_0_20px_rgba(245,158,11,0.2)] text-center">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-warning-500">
+                  <div className="p-5 rounded-2xl bg-obaol-500/10 border-2 border-obaol-500/50 shadow-[0_0_20px_rgba(207,152,60,0.2)] text-center">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-obaol-500">
                       Select 1 to 6 main categories
                     </h3>
-                    <p className="mt-2 text-xs font-semibold tracking-wide text-warning-500/80 normal-case">
+                    <p className="mt-2 text-xs font-semibold tracking-wide text-obaol-500/80 normal-case">
                       Your choices customize the platform you see after onboarding. Pick up to 3 priorities.
                     </p>
                   </div>
@@ -1626,11 +1626,11 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     <p className="text-[11px] font-black uppercase tracking-[0.3em] text-default-400">How This Affects Your Dashboard</p>
                     <ul className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-default-500 font-semibold">
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-obaol-500" />
                         Shows tools and workflows based on your selected categories.
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning-500" />
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-obaol-500" />
                         Your top priorities appear first on the dashboard.
                       </li>
                     </ul>
@@ -1648,7 +1648,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           <button
                             type="button"
                             onClick={() => setCurrentStep(2)}
-                            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold bg-warning-500/10 text-warning-600 hover:bg-warning-500/20 transition"
+                            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold bg-obaol-500/10 text-obaol-600 hover:bg-obaol-500/20 transition"
                           >
                             Back to Company Step
                           </button>
@@ -1668,22 +1668,22 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 disabled={isDisabled}
                                 onClick={() => updateCompanyFunctionSelection(fnId)}
                                 className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
-                                  ? "border-warning-500 bg-warning-500/10 shadow-lg shadow-warning-500/5 ring-1 ring-warning-500/20"
+                                  ? "border-obaol-500 bg-obaol-500/10 shadow-lg shadow-obaol-500/5 ring-1 ring-obaol-500/20"
                                   : isDisabled
                                     ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
-                                    : "border-default-200 bg-content2/20 hover:border-warning-500/50 hover:bg-content2/40"
+                                    : "border-default-200 bg-content2/20 hover:border-obaol-500/50 hover:bg-content2/40"
                                   }`}
                               >
                                 <div className="flex items-center justify-between gap-3">
                                   <div className="flex items-center gap-3">
-                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-warning-500 bg-warning-500" : "border-default-300"}`}>
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-obaol-500 bg-obaol-500" : "border-default-300"}`}>
                                       {isSelected && <FiCheck className="text-[10px] text-white stroke-[4]" />}
                                     </div>
-                                    <p className={`text-xs font-bold ${isSelected ? "text-warning-600" : "text-foreground/70"}`}>{fn?.name}</p>
+                                    <p className={`text-xs font-bold ${isSelected ? "text-obaol-600" : "text-foreground/70"}`}>{fn?.name}</p>
                                   </div>
                                   {priorityIndex > -1 && (
                                     <span className="inline-flex items-center gap-2">
-                                      <span className="rounded-full bg-warning-500/20 text-warning-600 text-[9px] font-black uppercase tracking-widest px-2 py-1">
+                                      <span className="rounded-full bg-obaol-500/20 text-obaol-600 text-[9px] font-black uppercase tracking-widest px-2 py-1">
                                         Priority {priorityIndex + 1}
                                       </span>
                                     </span>
@@ -1708,7 +1708,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           {existingCompanyCapabilityLabels.map((label, idx) => (
                             <span
                               key={`${label}-${idx}`}
-                              className="px-3 py-1 rounded-full text-xs font-semibold bg-warning-500/10 text-warning-600 border border-warning-500/20"
+                              className="px-3 py-1 rounded-full text-xs font-semibold bg-obaol-500/10 text-obaol-600 border border-obaol-500/20"
                             >
                               {label}
                             </span>
@@ -1722,7 +1722,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           <button
                             type="button"
                             onClick={() => setCurrentStep(2)}
-                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold bg-warning-500/10 text-warning-600 hover:bg-warning-500/20 transition"
+                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold bg-obaol-500/10 text-obaol-600 hover:bg-obaol-500/20 transition"
                           >
                             Back to Company Step
                           </button>
@@ -1739,7 +1739,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                           {formData.companyFunctionPriorities.map((id, index) => (
                             <div key={`${id}-${index}`} className="flex items-center justify-between rounded-xl border border-default-200 bg-content1/40 px-3 py-2">
                               <div className="flex items-center gap-3">
-                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-warning-500 text-black text-[10px] font-black">
+                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-obaol-500 text-black text-[10px] font-black">
                                   {index + 1}
                                 </span>
                                 <span className="text-xs font-bold text-foreground/80">
@@ -1751,7 +1751,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   type="button"
                                   onClick={() => moveCompanyFunctionPriority(id, "up")}
                                   disabled={index === 0}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                 >
                                   <FiChevronUp className="mx-auto text-sm" />
                                 </button>
@@ -1759,7 +1759,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                   type="button"
                                   onClick={() => moveCompanyFunctionPriority(id, "down")}
                                   disabled={index === formData.companyFunctionPriorities.length - 1}
-                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-warning-500 hover:border-warning-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                  className="h-7 w-7 rounded-full border border-default-200 text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                 >
                                   <FiChevronDown className="mx-auto text-sm" />
                                 </button>
@@ -1808,7 +1808,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                     onValueChange={(v) => setField("contactNotes", v)}
                     classNames={{ inputWrapper: "border-default-200" }}
                   />
-                  <div className="p-6 rounded-[2.5rem] bg-warning-500/5 border border-warning-500/20 text-sm text-warning-600 leading-relaxed font-bold text-center italic shadow-inner">
+                  <div className="p-6 rounded-[2.5rem] bg-obaol-500/5 border border-obaol-500/20 text-sm text-obaol-600 leading-relaxed font-bold text-center italic shadow-inner">
                     &quot;Authorized access only. Your details will be reviewed within 24-48 hours. A verification call may be initiated to finalize onboarding.&quot;
                   </div>
                 </motion.div>
@@ -1854,7 +1854,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                 className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
                   ${isSubmittingSuccess
                     ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
-                    : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20 hover:shadow-warning-500/40"
+                    : "bg-gradient-to-r from-obaol-500 to-amber-600 shadow-obaol-500/20 hover:shadow-obaol-500/40"
                   }`}
                 onPress={() => (currentStep === 4 ? handleSubmit() : handleNext())}
                 isLoading={isLoading || isSubmittingSuccess}
@@ -1875,7 +1875,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               <button
                 type="button"
                 onClick={() => router.push("/auth/login?role=Associate")}
-                className="text-warning hover:text-warning-400 font-semibold transition-colors"
+                className="text-warning hover:text-obaol-400 font-semibold transition-colors"
               >
                 Sign In
               </button>

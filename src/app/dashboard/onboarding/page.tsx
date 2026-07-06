@@ -50,8 +50,8 @@ export default function DashboardOnboardingPage() {
 
   return (
     <div className="w-full max-w-[1100px] mx-auto">
-      <div className="mb-6 rounded-3xl border border-warning-500/20 bg-warning-500/5 px-6 py-5">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-600">Guided Setup</p>
+      <div className="mb-6 rounded-3xl border border-obaol-500/20 bg-obaol-500/5 px-6 py-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600">Guided Setup</p>
         <h1 className="text-2xl font-black text-foreground mt-2">Welcome inside OBAOL</h1>
         <p className="text-sm text-default-600 mt-2 max-w-2xl">
           Follow the steps below to activate your profile. Navigation stays locked until onboarding is complete.

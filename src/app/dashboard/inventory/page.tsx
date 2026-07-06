@@ -8,7 +8,7 @@ export default function InventoryPage() {
                 <div className="min-h-[70vh] pb-10">
                     <div className="mb-8 mt-4">
                         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">
-                            Inventory <span className="text-warning-500">Management</span>
+                            Inventory <span className="text-obaol-500">Management</span>
                         </h1>
                         <p className="text-sm text-default-400 mt-1">
                             Track and manage your physical stock levels across warehouses.

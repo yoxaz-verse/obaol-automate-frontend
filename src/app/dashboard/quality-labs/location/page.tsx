@@ -814,9 +814,9 @@ export default function QualityLabsLocationPage() {
               {locationBusy ? (
                 <div className="flex items-center gap-2 text-xs text-default-500"><FiLoader className="animate-spin" /> Syncing location...</div>
               ) : null}
-              {locationError ? <p className="text-xs text-warning-500">{locationError}</p> : null}
-              {linkError ? <p className="text-xs text-warning-500">{linkError}</p> : null}
-              {matchWarning ? <p className="text-xs text-warning-500">{matchWarning}</p> : null}
+              {locationError ? <p className="text-xs text-obaol-500">{locationError}</p> : null}
+              {linkError ? <p className="text-xs text-obaol-500">{linkError}</p> : null}
+              {matchWarning ? <p className="text-xs text-obaol-500">{matchWarning}</p> : null}
               {pincodeInfo ? <p className="text-xs text-success-500">{pincodeInfo}</p> : null}
               <div className="pt-1">
                 <Button
@@ -891,7 +891,7 @@ export default function QualityLabsLocationPage() {
                       )}
                     </Select>
                     {adminHasNoCompanies ? (
-                      <p className="text-[10px] text-warning-500 ml-1 mt-2">Create/select associate company first.</p>
+                      <p className="text-[10px] text-obaol-500 ml-1 mt-2">Create/select associate company first.</p>
                     ) : null}
                   </>
                 )}
@@ -1020,7 +1020,7 @@ export default function QualityLabsLocationPage() {
 
             <div className="flex items-center justify-end gap-2">
               {!requiredValid ? (
-                <p className="mr-auto text-[10px] text-warning-500">
+                <p className="mr-auto text-[10px] text-obaol-500">
                   Fill required fields: company, lab display name, lab email, primary and secondary lab phone.
                 </p>
               ) : null}

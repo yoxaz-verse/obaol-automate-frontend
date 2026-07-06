@@ -92,14 +92,14 @@ export default function OtpVerification({ user }: IVerification) {
   return (
     <Card className="max-w-md w-full mx-auto bg-white/85 dark:bg-content1/50 backdrop-blur-3xl border border-divider shadow-xl dark:shadow-2xl rounded-[2rem] overflow-hidden shadow-slate-200/40 dark:shadow-black/40">
       <CardBody className="p-8 lg:p-10 flex flex-col items-center">
-        <div className="w-16 h-16 rounded-2xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center mb-8 relative">
-          <FiShield className="text-3xl text-warning-500" />
-          <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-40 animate-pulse" />
+        <div className="relative mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-obaol-500/20 bg-obaol-500/10">
+          <FiShield className="text-3xl text-obaol-600 dark:text-obaol-300" />
+          <div className="absolute inset-0 animate-pulse bg-obaol-500/20 opacity-40 blur-xl" />
         </div>
 
         <div className="text-center mb-10 space-y-2">
-          <h2 className="text-2xl font-black italic tracking-tighter uppercase text-foreground">
-            Identity <span className="text-warning-500">Verification</span>
+          <h2 className="text-2xl font-bold uppercase tracking-tight text-foreground">
+            Identity <span className="text-obaol-700 dark:text-obaol-300">Verification</span>
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-default-400 opacity-60">
             Node_Access_Control
@@ -113,7 +113,7 @@ export default function OtpVerification({ user }: IVerification) {
             className="flex flex-col items-center gap-8 w-full"
           >
             <div className="p-4 rounded-xl bg-content2/50 border border-divider w-full flex items-center gap-4">
-               <FiMail className="text-warning-500 text-xl" />
+               <FiMail className="text-xl text-obaol-600 dark:text-obaol-300" />
                <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-widest text-default-400">Target Protocol</span>
                   <span className="text-sm font-bold">{maskEmail(user.email)}</span>
@@ -126,7 +126,7 @@ export default function OtpVerification({ user }: IVerification) {
                 sendOtpMutation.mutate();
               }}
               isLoading={loading}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-lg shadow-warning-500/10"
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-obaol-400 to-obaol-600 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10"
             >
               Initialize Access
             </Button>
@@ -155,7 +155,7 @@ export default function OtpVerification({ user }: IVerification) {
                     variant="bordered"
                     onValueChange={handleChange}
                     classNames={{
-                      segment: "w-11 h-12 lg:w-12 lg:h-14 font-black italic text-lg border-divider rounded-xl",
+                      segment: "w-11 h-12 lg:w-12 lg:h-14 font-bold text-lg border-divider rounded-xl",
                       segmentWrapper: "gap-2 lg:gap-3",
                     }}
                   />
@@ -167,7 +167,7 @@ export default function OtpVerification({ user }: IVerification) {
                   type="submit"
                   disabled={otp.length !== 6 || loading}
                   isLoading={loading}
-                     className="w-full h-14 rounded-2xl bg-gradient-to-r from-warning-500 to-amber-600 font-black uppercase italic tracking-[0.2em] text-xs shadow-lg shadow-warning-500/10"
+                     className="h-14 w-full rounded-2xl bg-gradient-to-r from-obaol-400 to-obaol-600 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10"
                 >
                   Verify Protocol Access
                 </Button>
@@ -175,7 +175,7 @@ export default function OtpVerification({ user }: IVerification) {
                 <button
                   type="button"
                   onClick={() => sendOtpMutation.mutate()}
-                  className="w-full text-[10px] font-black uppercase tracking-widest text-default-400 hover:text-warning-500 transition-colors py-2"
+                  className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-default-400 transition-colors hover:text-obaol-700 dark:hover:text-obaol-300"
                 >
                   Re-transmit Sequence
                 </button>

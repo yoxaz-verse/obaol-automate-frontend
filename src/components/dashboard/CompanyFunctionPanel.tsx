@@ -125,7 +125,7 @@ export default function CompanyFunctionPanel({ name, slug, priorityRank, metrics
           </div>
         </div>
         {showNoKpi ? (
-          <div className="text-xs text-warning-600">No KPI yet for this function.</div>
+          <div className="text-xs text-obaol-600">No KPI yet for this function.</div>
         ) : null}
         <div className="flex flex-wrap gap-2">
           {actions.map((action) => (

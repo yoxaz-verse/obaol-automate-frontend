@@ -60,17 +60,17 @@ export default function EnquiryPage() {
 
       <div className="mx-2 md:mx-6 mb-8 rounded-[2rem] border db-panel px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center">
-                <FiArrowRight size={20} className="text-warning-600 rotate-180" />
+            <div className="w-10 h-10 rounded-xl bg-obaol-500/10 border border-obaol-500/20 flex items-center justify-center">
+                <FiArrowRight size={20} className="text-obaol-600 rotate-180" />
             </div>
             <p className="text-[11px] font-black uppercase tracking-widest db-muted">
-                Start new enquiries from <span className="text-warning-500">Trade Listings</span>
+                Start new enquiries from <span className="text-obaol-500">Trade Listings</span>
             </p>
         </div>
         <Button
           variant="flat"
           onPress={() => router.push("/dashboard/marketplace")}
-          className="w-full md:w-auto font-black uppercase text-[10px] tracking-widest rounded-xl bg-warning-500 text-black h-11 shadow-lg shadow-warning-500/10"
+          className="w-full md:w-auto font-black uppercase text-[10px] tracking-widest rounded-xl bg-obaol-500 text-black h-11 shadow-lg shadow-obaol-500/10"
         >
           Go to Trade Listings
         </Button>
@@ -281,9 +281,9 @@ export default function EnquiryPage() {
                     className="w-fit"
                     classNames={{
                       tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
-                      cursor: "bg-warning-500 w-full h-[3px] rounded-t-full",
+                      cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full",
                       tab: "max-w-fit px-2 h-12 transition-all duration-300",
-                      tabContent: "font-black uppercase tracking-[0.15em] text-[10px] db-muted group-data-[selected=true]:text-warning-500"
+                      tabContent: "font-black uppercase tracking-[0.15em] text-[10px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
                     <Tab key="All" title="Global Pipeline" />
@@ -306,9 +306,9 @@ export default function EnquiryPage() {
                     className="w-fit"
                     classNames={{
                       tabList: "gap-6 relative rounded-none p-0 border-b db-border-subtle",
-                      cursor: "bg-warning-500/60 w-full h-[2px] rounded-t-full",
+                      cursor: "bg-obaol-500/60 w-full h-[2px] rounded-t-full",
                       tab: "max-w-fit px-2 h-10 transition-all duration-300",
-                      tabContent: "font-black uppercase tracking-[0.12em] text-[9px] db-muted group-data-[selected=true]:text-warning-500"
+                      tabContent: "font-black uppercase tracking-[0.12em] text-[9px] db-muted group-data-[selected=true]:text-obaol-500"
                     }}
                   >
                     <Tab key="All" title="Full Stack" />
@@ -330,8 +330,8 @@ export default function EnquiryPage() {
                         className="absolute inset-0 z-10 flex flex-col items-center justify-center db-overlay-soft backdrop-blur-[2px] rounded-2xl"
                       >
                         <div className="flex flex-col items-center gap-4">
-                          <div className="w-10 h-10 border-2 border-warning-500/20 border-t-warning-500 rounded-full animate-spin" />
-                          <p className="text-[10px] font-black uppercase tracking-widest text-warning-500 animate-pulse">
+                          <div className="w-10 h-10 border-2 border-obaol-500/20 border-t-obaol-500 rounded-full animate-spin" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-obaol-500 animate-pulse">
                             Syncing Pipeline
                           </p>
                         </div>
@@ -405,15 +405,15 @@ export default function EnquiryPage() {
                       <div className="flex flex-col items-center gap-6 text-center max-w-sm px-6">
                         {/* Icon */}
                         <div className="relative">
-                          <div className="absolute inset-0 bg-warning-500/10 blur-2xl rounded-full" />
-                          <div className="relative w-20 h-20 rounded-[1.75rem] bg-warning-500/[0.06] border border-warning-500/20 flex items-center justify-center">
-                            <FiArrowRight className="-rotate-45 text-warning-500/60" size={28} />
+                          <div className="absolute inset-0 bg-obaol-500/10 blur-2xl rounded-full" />
+                          <div className="relative w-20 h-20 rounded-[1.75rem] bg-obaol-500/[0.06] border border-obaol-500/20 flex items-center justify-center">
+                            <FiArrowRight className="-rotate-45 text-obaol-500/60" size={28} />
                           </div>
                         </div>
 
                         {/* Text */}
                         <div className="flex flex-col gap-2">
-                          <p className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-500/80">
+                          <p className="text-[11px] font-black uppercase tracking-[0.4em] text-obaol-500/80">
                             NO_ENQUIRIES_FOUND
                           </p>
                           <h3 className="text-base font-black text-foreground uppercase tracking-tight leading-snug">
@@ -430,7 +430,7 @@ export default function EnquiryPage() {
                         <Button
                           variant="flat"
                           onPress={() => router.push("/dashboard/marketplace")}
-                          className="font-black uppercase text-[10px] tracking-widest rounded-2xl bg-warning-500 text-black h-11 px-8 shadow-lg shadow-warning-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                          className="font-black uppercase text-[10px] tracking-widest rounded-2xl bg-obaol-500 text-black h-11 px-8 shadow-lg shadow-obaol-500/20 hover:scale-[1.02] active:scale-95 transition-all"
                           endContent={<FiArrowRight size={14} />}
                         >
                           Go to Trade Listings

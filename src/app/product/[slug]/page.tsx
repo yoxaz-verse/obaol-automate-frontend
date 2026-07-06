@@ -219,12 +219,12 @@ export default async function ProductDetailPage({
         <div className="mx-auto w-[95%] max-w-6xl">
           <div className="space-y-4">
             <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-default-400">
-              <Link href="/" className="hover:text-warning-500 transition-colors">Home</Link>
+              <Link href="/" className="hover:text-obaol-500 transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/trade-directory" className="hover:text-warning-500 transition-colors">Catalog</Link>
+              <Link href="/trade-directory" className="hover:text-obaol-500 transition-colors">Catalog</Link>
             </nav>
 
-            <p className="text-xs font-bold uppercase tracking-widest text-warning-600">
+            <p className="text-xs font-bold uppercase tracking-widest text-obaol-600">
               Commodity Profile · {" "}
               {product.subCategory?.category?.name || "Commodity"} / {product.subCategory?.name || "General"}
             </p>
@@ -284,7 +284,7 @@ export default async function ProductDetailPage({
             <div className="rounded-3xl border border-default-200 bg-content1/50 p-8 shadow-sm space-y-6">
               <div>
                 <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-warning-500 rounded-full" />
+                  <span className="w-1.5 h-6 bg-obaol-500 rounded-full" />
                   Available Regions
                 </h2>
                 <p className="mt-2 text-sm text-default-500 leading-relaxed">
@@ -345,12 +345,12 @@ export default async function ProductDetailPage({
                 <Link
                   key={String(item._id)}
                   href={item.slug ? `/trade-directory/${item.slug}` : "/trade-directory"}
-                  className="group rounded-3xl border border-default-200 bg-content1 p-6 hover:border-warning-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1"
+                  className="group rounded-3xl border border-default-200 bg-content1 p-6 hover:border-obaol-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600 mb-2 truncate">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-600 mb-2 truncate">
                     {item.subCategory?.name || "Commodity"}
                   </p>
-                  <h3 className="text-lg font-black text-foreground group-hover:text-warning-600 transition-colors">
+                  <h3 className="text-lg font-black text-foreground group-hover:text-obaol-600 transition-colors">
                     {item.name}
                   </h3>
                   <p className="mt-3 text-xs text-default-500 line-clamp-2 leading-relaxed font-medium">

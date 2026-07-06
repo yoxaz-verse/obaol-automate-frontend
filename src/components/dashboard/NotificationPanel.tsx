@@ -87,11 +87,11 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       animate={panelMotion.animate}
       exit={panelMotion.exit}
       transition={panelMotion.transition}
-      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/20 ring-1 ring-black/5 dark:ring-white/10 bg-white/95 dark:bg-[#0B0F14]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
+      className="w-[420px] max-w-[calc(100vw-24px)] rounded-[24px] border border-default-300 dark:border-white/20 ring-1 ring-black/5 dark:ring-white/10 bg-white/95 dark:bg-[#0E0D0A]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-black backdrop-blur-3xl overflow-hidden"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-default-200/50 dark:border-white/5 bg-default-50/50 dark:bg-white/5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[14px] bg-warning-500/10 flex items-center justify-center text-warning-500">
+          <div className="w-10 h-10 rounded-[14px] bg-obaol-500/10 flex items-center justify-center text-obaol-700 dark:text-obaol-300">
              <FiBell size={20} className={notifications.filter(n => !n.isRead).length > 0 ? "animate-wiggle" : ""} />
           </div>
           <div className="flex flex-col">
@@ -102,7 +102,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
         <button
           onClick={() => markAllMutation.mutate()}
           disabled={markAllMutation.isPending || notifications.every((x) => x.isRead)}
-          className="text-[11px] font-black uppercase tracking-wider text-warning-600 dark:text-warning-500 hover:opacity-70 transition-opacity disabled:opacity-30"
+          className="text-[11px] font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 hover:opacity-70 transition-opacity disabled:opacity-30"
         >
           Finalize All
         </button>
@@ -141,11 +141,11 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                       }}
                       className={`w-full text-left p-4 rounded-[18px] transition-all duration-500 group relative border ${item.isRead
                         ? "bg-transparent border-transparent hover:bg-default-100/50 dark:hover:bg-white/5 text-default-500"
-                        : "bg-warning-500/5 dark:bg-warning-500/10 border-warning-500/20 hover:border-warning-500/40 shadow-sm"
+                        : "bg-obaol-500/5 dark:bg-obaol-500/10 border-obaol-500/20 hover:border-obaol-500/40 shadow-sm"
                         }`}
                     >
                       <div className="flex gap-4">
-                        <div className={`mt-1 h-2 w-2 rounded-full shrink-0 transition-all duration-500 ${item.isRead ? "bg-default-200" : "bg-warning-500 shadow-[0_0_10px_rgba(245,158,11,0.6)] animate-pulse"}`} />
+                        <div className={`mt-1 h-2 w-2 rounded-full shrink-0 transition-all duration-500 ${item.isRead ? "bg-default-200" : "bg-obaol-500 shadow-[0_0_10px_rgba(207,152,60,0.6)] animate-pulse"}`} />
                         <div className="flex-1 min-w-0">
                            <p className={`text-sm font-black leading-snug tracking-tight transition-colors ${item.isRead ? "text-default-600" : "text-[#1F2937] dark:text-white"}`}>
                               {item.title}
@@ -155,7 +155,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                            </p>
                            <div className="mt-4 flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full">
                                    {item.type.split('_').join(' ')}
                                 </span>
                                 <span className="text-[9px] font-black text-default-400 uppercase tracking-widest tabular-nums flex items-center gap-1">
@@ -163,7 +163,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                                    {dayjs(item.createdAt).fromNow()}
                                 </span>
                               </div>
-                              <FiExternalLink size={14} className="text-default-300 group-hover:text-warning-500 group-hover:translate-x-0.5 transition-all" />
+                              <FiExternalLink size={14} className="text-default-300 group-hover:text-obaol-600 dark:group-hover:text-obaol-300 group-hover:translate-x-0.5 transition-all" />
                            </div>
                         </div>
                       </div>
@@ -179,7 +179,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
       <div className="px-6 py-5 border-t border-default-200/50 dark:border-white/5 flex items-center justify-between bg-default-50/30 dark:bg-black/20">
         <button
           onClick={() => { router.push("/dashboard/notifications"); onClose?.(); }}
-          className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-warning-500 transition-colors"
+          className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-obaol-700 dark:hover:text-obaol-300 transition-colors"
         >
           Access History Archive
         </button>

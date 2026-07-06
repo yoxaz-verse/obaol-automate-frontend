@@ -535,22 +535,22 @@ export default function ImportsPage() {
       </div>
 
       {/* --- AMBIENT DECO --- */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-warning-500/[0.02] rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-warning-500/[0.01] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-obaol-500/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-obaol-500/[0.01] rounded-full blur-[120px] pointer-events-none" />
       <div className="relative z-10 w-full max-w-[1500px]">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-warning-500/5 border border-warning-500/20 backdrop-blur-md shadow-sm">
+              <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-obaol-500/5 border border-obaol-500/20 backdrop-blur-md shadow-sm">
                 <div className="relative">
-                  <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(234,179,8,0.6)]" />
-                  <div className="absolute -inset-1 bg-warning-500/20 rounded-full blur-sm" />
+                  <div className="w-2 h-2 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
+                  <div className="absolute -inset-1 bg-obaol-500/20 rounded-full blur-sm" />
                 </div>
-                <span className="text-[11px] font-black tracking-[0.25em] uppercase text-warning-600 dark:text-warning-500">Imports to India</span>
-                <div className="h-4 w-px bg-warning-500/30 mx-1" />
-                <div className="flex items-center gap-2 text-[9px] font-black text-warning-600 bg-warning-500/10 px-2.5 py-0.5 rounded-lg border border-warning-500/10">
+                <span className="text-[11px] font-black tracking-[0.25em] uppercase text-obaol-600 dark:text-obaol-500">Imports to India</span>
+                <div className="h-4 w-px bg-obaol-500/30 mx-1" />
+                <div className="flex items-center gap-2 text-[9px] font-black text-obaol-600 bg-obaol-500/10 px-2.5 py-0.5 rounded-lg border border-obaol-500/10">
                   <span className="tracking-tighter italic">INBOUND</span>
-                  <div className="w-1 h-1 rounded-full bg-warning-500" />
+                  <div className="w-1 h-1 rounded-full bg-obaol-500" />
                   <span>IND</span>
                 </div>
               </div>
@@ -629,34 +629,34 @@ export default function ImportsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#04070f] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-warning-500/30 transition-all duration-500 h-full">
+                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
                       <CardHeader className="flex flex-col gap-4 p-8 pb-4">
                         <div className="flex items-start justify-between w-full">
                           <div className="flex flex-col gap-1.5">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-warning-500">Import Details</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-obaol-500">Import Details</span>
                             <h4 className="text-lg font-bold text-foreground uppercase tracking-tight line-clamp-2">
                               {listing.commodityName}
                             </h4>
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-warning-500/10 border border-warning-500/20 shadow-sm">
-                                <div className="w-1.5 h-1.5 rounded-full bg-warning-500" />
+                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-obaol-500/10 border border-obaol-500/20 shadow-sm">
+                                <div className="w-1.5 h-1.5 rounded-full bg-obaol-500" />
                                 <span className="text-[9px] font-bold text-warning-500 uppercase tracking-widest">{listing.status}</span>
-                                <div className="h-2.5 w-px bg-warning-500/30 mx-0.5" />
-                                <span className="text-[8px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-tighter italic">IND</span>
+                                <div className="h-2.5 w-px bg-obaol-500/30 mx-0.5" />
+                                <span className="text-[8px] font-black text-obaol-600 dark:text-obaol-500 uppercase tracking-tighter italic">IND</span>
                              </div>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-start gap-6 text-default-400">
                            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-foreground/[0.03] border border-foreground/5 shadow-sm">
-                             <LuMapPin size={12} className="text-warning-500/50" />
+                             <LuMapPin size={12} className="text-obaol-500/50" />
                              <span className="text-[9px] font-black uppercase tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
-                             <div className="w-1 h-1 rounded-full bg-warning-500/30" />
-                             <span className="text-[8px] font-black text-warning-600/60 uppercase tracking-tighter">IND</span>
+                             <div className="w-1 h-1 rounded-full bg-obaol-500/30" />
+                             <span className="text-[8px] font-black text-obaol-600/60 uppercase tracking-tighter">IND</span>
                            </div>
                            <div className="flex items-center gap-2">
-                             <LuClock size={14} className="text-warning-500/50" />
+                             <LuClock size={14} className="text-obaol-500/50" />
                              <span className="text-[10px] font-bold uppercase tracking-widest">
                                 ETA {listing.expectedArrivalDate ? new Date(listing.expectedArrivalDate).toLocaleDateString() : "TBD"}
                              </span>
@@ -696,7 +696,7 @@ export default function ImportsPage() {
                            <div className="flex flex-col gap-2 items-end">
                               <span className="text-[9px] font-bold uppercase tracking-wider text-default-400">Rate</span>
                               <div className="flex items-baseline gap-1.5 justify-end">
-                                <span className="text-lg font-bold text-warning-500 tracking-tighter">
+                                <span className="text-lg font-bold text-obaol-500 tracking-tighter">
                                   {getDisplayPrice(listing)}
                                 </span>
                                 <span className="text-[10px] font-bold text-default-500 uppercase">/{listing.priceUnit}</span>
@@ -827,10 +827,10 @@ export default function ImportsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#04070f] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-warning-500/30 transition-all duration-500 h-full">
+                    <Card className="rounded-[2.5rem] bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
                       <CardHeader className="flex items-start justify-between p-8 pb-4">
                         <div className="flex flex-col gap-1.5">
-                           <span className="text-[9px] font-bold uppercase tracking-widest text-warning-500 pb-1">Reserve Node</span>
+                           <span className="text-[9px] font-bold uppercase tracking-widest text-obaol-500 pb-1">Reserve Node</span>
                            <h4 className="text-lg font-bold text-foreground uppercase tracking-tight line-clamp-2">
                              {reservation.listingId?.commodityName || "Import Mission"}
                            </h4>
@@ -844,7 +844,7 @@ export default function ImportsPage() {
                         <div className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${
                           resolveReservationStatus(reservation) === "APPROVED" ? "bg-success-500/10 text-success-500 border border-success-500/20" :
                           resolveReservationStatus(reservation) === "REJECTED" ? "bg-danger-500/10 text-danger-500 border border-danger-500/20" :
-                          "bg-warning-500/10 text-warning-500 border border-warning-500/20"
+                          "bg-obaol-500/10 text-obaol-500 border border-obaol-500/20"
                         }`}>
                           {resolveReservationStatus(reservation)}
                         </div>
@@ -977,8 +977,8 @@ export default function ImportsPage() {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -989,7 +989,7 @@ export default function ImportsPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Inception Phase</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Inception Phase</span>
                 <h3 className="text-xl font-bold text-white uppercase tracking-tight">Create Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
@@ -997,7 +997,7 @@ export default function ImportsPage() {
                   {/* Entity & Product Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Parameters</span>
                     </div>
 
@@ -1080,7 +1080,7 @@ export default function ImportsPage() {
                   {/* Operational Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Capacity</span>
                     </div>
 
@@ -1172,7 +1172,7 @@ export default function ImportsPage() {
                   {/* Supply Chain Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Logistics Initialization</span>
                     </div>
 
@@ -1254,7 +1254,7 @@ export default function ImportsPage() {
                 </Button>
                 <Button
                   color="warning"
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={createMutation.isPending}
                   isDisabled={!createForm.productId || !createForm.productVariant}
                   onClick={() =>
@@ -1298,8 +1298,8 @@ export default function ImportsPage() {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1310,7 +1310,7 @@ export default function ImportsPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Inventory Control</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Inventory Control</span>
                 <h3 className="text-xl font-bold text-white uppercase tracking-tight">Reserve Quantity</h3>
               </ModalHeader>
               <ModalBody className="gap-6">
@@ -1361,7 +1361,7 @@ export default function ImportsPage() {
                             setReserveStatus("idle");
                           }}
                           classNames={{
-                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors data-[focus=true]:border-warning-500/50",
+                            inputWrapper: "bg-white/5 border border-white/10 h-14 rounded-2xl hover:bg-white/10 transition-colors data-[focus=true]:border-obaol-500/50",
                             label: "text-default-400 font-medium",
                             input: "text-white font-bold uppercase text-sm placeholder:text-white/20",
                           }}
@@ -1369,10 +1369,10 @@ export default function ImportsPage() {
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-[2rem] bg-warning-500/5 border border-warning-500/10 flex flex-col gap-2">
+                    <div className="p-6 rounded-[2rem] bg-obaol-500/5 border border-obaol-500/10 flex flex-col gap-2">
                       <div className="flex items-center gap-2">
-                        <FiPackage size={14} className="text-warning-500" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-warning-500">Available Infrastructure</span>
+                        <FiPackage size={14} className="text-obaol-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-obaol-500">Available Infrastructure</span>
                       </div>
                       <p className="text-xs text-default-300 font-medium leading-relaxed">
                         Secure up to <span className="text-white font-bold">{maxReservableQty} MT</span> for this shipment. 
@@ -1420,7 +1420,7 @@ export default function ImportsPage() {
                 {reserveStatus !== "success" && (
                   <Button
                     color="warning"
-                    className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
+                    className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                     isLoading={reserveMutation.isPending}
                     isDisabled={
                       !reserveQty ||
@@ -1514,8 +1514,8 @@ export default function ImportsPage() {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl overflow-hidden",
+          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl overflow-hidden",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1526,7 +1526,7 @@ export default function ImportsPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Logistics Oversight</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Logistics Oversight</span>
                 <h3 className="text-xl font-bold text-white uppercase tracking-tight">Manage Reservations</h3>
               </ModalHeader>
               <ModalBody className="gap-4">
@@ -1551,7 +1551,7 @@ export default function ImportsPage() {
                             {/* Reservation Content */}
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-2xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center text-warning-500 shrink-0">
+                              <div className="w-12 h-12 rounded-2xl bg-obaol-500/10 border border-obaol-500/20 flex items-center justify-center text-obaol-500 shrink-0">
                                 <FiBriefcase size={20} />
                               </div>
                               <div className="flex flex-col">
@@ -1564,7 +1564,7 @@ export default function ImportsPage() {
                                   </span>
                                   <div className="w-1 h-1 rounded-full bg-white/10" />
                                   <div className="flex items-center gap-1.5 text-default-500">
-                                    <FiCalendar size={12} className="text-warning-500/50" />
+                                    <FiCalendar size={12} className="text-obaol-500/50" />
                                     <span className="text-[10px] font-bold uppercase tracking-widest">
                                       {reservation.listingId?.expectedArrivalDate
                                         ? `ETA ${new Date(reservation.listingId.expectedArrivalDate).toLocaleDateString()}`
@@ -1579,7 +1579,7 @@ export default function ImportsPage() {
                               <div className="text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <span className="text-2xl font-black text-white">{reservation.quantityRequested}</span>
-                                  <span className="text-xs font-bold text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-lg border border-warning-500/20">MT</span>
+                                  <span className="text-xs font-bold text-obaol-500 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-lg border border-obaol-500/20">MT</span>
                                 </div>
                                 <span className="text-[9px] font-bold text-default-500 uppercase tracking-[0.2em]">Allocated Volume</span>
                               </div>
@@ -1607,7 +1607,7 @@ export default function ImportsPage() {
                               <Button
                                 size="sm"
                                 color="warning"
-                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest flex-1 bg-warning-500 text-black shadow-lg shadow-warning-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                className="h-10 rounded-xl font-bold uppercase text-[10px] tracking-widest flex-1 bg-obaol-500 text-black shadow-lg shadow-obaol-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 isLoading={acceptMutation.isPending && pendingReservationId === reservation._id}
                                 isDisabled={(acceptMutation.isPending || rejectMutation.isPending) && pendingReservationId === reservation._id}
                                 onClick={() => {
@@ -1708,8 +1708,8 @@ export default function ImportsPage() {
         isKeyboardDismissDisabled
         shouldCloseOnInteractOutside={() => false}
         classNames={{
-          backdrop: "bg-[#04070f]/80 backdrop-blur-sm",
-          base: "border border-white/10 bg-[#04070f] rounded-[2.5rem] shadow-2xl",
+          backdrop: "bg-[#090806]/80 backdrop-blur-sm",
+          base: "border border-white/10 bg-[#090806] rounded-[2.5rem] shadow-2xl",
           header: "border-b border-white/5 p-8",
           footer: "border-t border-white/5 p-8",
           body: "p-8",
@@ -1720,7 +1720,7 @@ export default function ImportsPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-warning-500 font-bold">Node Configuration</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-obaol-500 font-bold">Node Configuration</span>
                 <h3 className="text-xl font-bold text-white uppercase tracking-tight">Edit Import Listing</h3>
               </ModalHeader>
               <ModalBody className="gap-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
@@ -1728,7 +1728,7 @@ export default function ImportsPage() {
                   {/* Base Identity Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Mission Identity</span>
                     </div>
                     
@@ -1773,7 +1773,7 @@ export default function ImportsPage() {
                   {/* Operational Parameters Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Operational Parameters</span>
                     </div>
 
@@ -1862,7 +1862,7 @@ export default function ImportsPage() {
                   {/* Logistics Section */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Supply Chain Control</span>
                     </div>
 
@@ -1942,7 +1942,7 @@ export default function ImportsPage() {
                 </Button>
                 <Button
                   color="warning"
-                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
+                  className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                   isLoading={editMutation.isPending}
                   onClick={() => {
                     if (!selectedListing?._id) return;

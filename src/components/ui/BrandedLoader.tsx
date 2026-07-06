@@ -73,17 +73,17 @@ export default function BrandedLoader({
       {fullScreen && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Radial centre glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] bg-[radial-gradient(circle_at_center,rgba(234,179,8,0.06)_0%,transparent_60%)]" />
+          <div className="absolute left-1/2 top-1/2 h-[160%] w-[160%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,rgba(207,152,60,0.08)_0%,transparent_60%)]" />
           {/* Moving scanline */}
           <motion.div
             animate={{ y: ["-100%", "200%"] }}
             transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-x-0 h-[22vh] bg-gradient-to-b from-transparent via-warning-500/[0.04] to-transparent"
+            className="absolute inset-x-0 h-[22vh] bg-gradient-to-b from-transparent via-obaol-500/[0.05] to-transparent"
           />
           {/* Grid lines */}
           <div className="absolute inset-0 grid grid-cols-12 opacity-[0.025]">
             {Array.from({ length: 48 }).map((_, i) => (
-              <div key={i} className="border-[0.5px] border-warning-500" />
+              <div key={i} className="border-[0.5px] border-obaol-500" />
             ))}
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function BrandedLoader({
             <motion.circle
               cx="50" cy="50" r="48" fill="none"
               stroke="currentColor" strokeWidth="0.6" strokeDasharray="4 5"
-              className="text-warning-500"
+              className="text-obaol-500"
               animate={{ rotate: 360 }}
               transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
             />
@@ -108,17 +108,17 @@ export default function BrandedLoader({
 
           {/* Corner brackets */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-warning-500/40 rounded-tl-xl" />
-            <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-warning-500/40 rounded-tr-xl" />
-            <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-warning-500/40 rounded-bl-xl" />
-            <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-warning-500/40 rounded-br-xl" />
+            <div className="absolute left-3 top-3 h-5 w-5 rounded-tl-xl border-l-2 border-t-2 border-obaol-500/40" />
+            <div className="absolute right-3 top-3 h-5 w-5 rounded-tr-xl border-r-2 border-t-2 border-obaol-500/40" />
+            <div className="absolute bottom-3 left-3 h-5 w-5 rounded-bl-xl border-b-2 border-l-2 border-obaol-500/40" />
+            <div className="absolute bottom-3 right-3 h-5 w-5 rounded-br-xl border-b-2 border-r-2 border-obaol-500/40" />
           </div>
 
           {/* Logo pulse */}
           <motion.div
             animate={{ scale: [1, 1.04, 1] }}
             transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
-            className="relative bg-background p-6 rounded-3xl border border-default-200 shadow-[0_0_40px_rgba(234,179,8,0.08)] z-10"
+            className="relative z-10 rounded-3xl border border-default-200 bg-background p-6 shadow-[0_0_40px_rgba(207,152,60,0.12)]"
           >
             <Image
               src="/logo.png"
@@ -130,7 +130,7 @@ export default function BrandedLoader({
 
             {/* Stage badge — always rendered, icon swaps with CSS transition */}
             <div
-              className="absolute -top-5 -right-5 w-11 h-11 bg-warning-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.5)] border-2 border-background"
+              className="absolute -right-5 -top-5 flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-background bg-obaol-500 shadow-[0_0_20px_rgba(207,152,60,0.52)]"
               style={{ transition: "opacity 0.3s", opacity: textVisible ? 1 : 0 }}
             >
               <ActiveIcon size={currentSize.iconSize} className="text-black" />
@@ -143,14 +143,14 @@ export default function BrandedLoader({
           className="flex flex-col items-center text-center gap-2 px-8 w-full"
           style={{ opacity: textVisible ? 1 : 0, transition: "opacity 0.3s ease" }}
         >
-          <p className="text-[10px] font-black tracking-[0.45em] text-warning-500 uppercase italic leading-none">
+          <p className="text-[10px] font-bold uppercase leading-none tracking-[0.45em] text-obaol-700 dark:text-obaol-300">
             {active.title}
           </p>
           <h3 className="text-base font-black text-foreground uppercase tracking-tight leading-snug mt-1 min-h-[1.4em]">
             {active.status}
           </h3>
           <div className="flex items-center gap-2 mt-3 text-[9px] font-bold text-default-400 tracking-[0.3em] uppercase">
-            <LuNetwork className="text-warning-500/50 shrink-0" size={12} />
+            <LuNetwork className="shrink-0 text-obaol-500/60" size={12} />
             {message}
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function BrandedLoader({
           {MISSION_STAGES.map((_, i) => (
             <div key={i} className="flex-1 h-[2px] rounded-full bg-default-100 relative overflow-hidden">
               {i < stage && (
-                <div className="absolute inset-0 bg-warning-500/40 rounded-full" />
+                <div className="absolute inset-0 rounded-full bg-obaol-500/40" />
               )}
               {i === stage && (
                 <motion.div
@@ -168,7 +168,7 @@ export default function BrandedLoader({
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ duration: INTERVAL_MS / 1000, ease: "linear" }}
-                  className="absolute inset-0 bg-warning-500 rounded-full"
+                  className="absolute inset-0 rounded-full bg-obaol-500"
                 />
               )}
             </div>

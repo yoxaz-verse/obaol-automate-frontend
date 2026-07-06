@@ -534,7 +534,7 @@ export default function CompanyWorkspacePage() {
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-            <div className="rounded-2xl border border-divider/50 bg-[#0B0F14]/50 backdrop-blur-xl p-6 shadow-2xl relative overflow-hidden group/list">
+            <div className="rounded-2xl border border-divider/50 bg-[#0E0D0A]/50 backdrop-blur-xl p-6 shadow-2xl relative overflow-hidden group/list">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] -z-10 group-hover/list:bg-primary-500/10 transition-all duration-1000" />
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-1.5 h-8 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(0,111,238,0.5)]" />
@@ -552,7 +552,7 @@ export default function CompanyWorkspacePage() {
                 Failed to load assigned companies.
               </div>
             ) : operatorAssignedCompanies.length === 0 ? (
-              <div className="rounded-lg border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800 dark:border-warning-400/30 dark:bg-warning-500/10 dark:text-warning-100">
+              <div className="rounded-lg border border-obaol-200 bg-obaol-50 px-4 py-3 text-sm text-obaol-800 dark:border-obaol-400/30 dark:bg-obaol-500/10 dark:text-obaol-100">
                 No companies are assigned yet. Use the onboarding form above to create one.
               </div>
             ) : (
@@ -757,17 +757,17 @@ export default function CompanyWorkspacePage() {
           </Chip>
         </div>
         {(latestPendingLikeReport || recentInterestSubmission) && (
-          <div className="mb-4 rounded-lg border border-warning-200 bg-warning-50 px-3 py-2 dark:border-warning-400/30 dark:bg-warning-400/10">
-            <div className="text-sm font-medium text-warning-800 dark:text-warning-200">
+          <div className="mb-4 rounded-lg border border-obaol-200 bg-obaol-50 px-3 py-2 dark:border-obaol-400/30 dark:bg-obaol-400/10">
+            <div className="text-sm font-medium text-obaol-800 dark:text-obaol-200">
               {latestPendingLikeReport ? "Request sent and pending admin approval." : "Submitting request (syncing status...)"} 
             </div>
-            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+            <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Previous pending/under-review requests were auto-cancelled. Latest request is now active.
             </div>
-            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+            <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Approval is completed by Admin from Dashboard &gt; Reports.
             </div>
-            <div className="mt-1 text-xs text-warning-700/90 dark:text-warning-200/90">
+            <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Services requested:
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -777,7 +777,7 @@ export default function CompanyWorkspacePage() {
                 </Chip>
               ))}
             </div>
-            <div className="mt-2 text-xs text-warning-700/90 dark:text-warning-200/90">
+            <div className="mt-2 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Submitted: {formatDate(pendingBannerCreatedAt)}
             </div>
           </div>

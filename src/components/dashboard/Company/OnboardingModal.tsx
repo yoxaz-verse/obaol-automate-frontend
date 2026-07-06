@@ -485,7 +485,7 @@ export default function OnboardingModal({
       backdrop="blur"
       isDismissable={false}
       classNames={{
-        base: "bg-[#0B0F14]/95 border border-divider/50 shadow-2xl rounded-[2rem] max-h-[calc(100vh-2rem)] flex flex-col",
+        base: "bg-[#0E0D0A]/95 border border-divider/50 shadow-2xl rounded-[2rem] max-h-[calc(100vh-2rem)] flex flex-col",
         header: "border-b border-divider/50 py-6 px-6 md:px-10 shrink-0",
         body: "py-6 px-6 md:px-10 overflow-y-auto flex-1",
         footer: "border-t border-divider/50 py-6 px-6 md:px-10 shrink-0",
@@ -708,8 +708,8 @@ export default function OnboardingModal({
                                 <div><p className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none mb-1">Contact</p><p className="text-[11px] font-bold text-default-500">{combinedAssociateForm.email} • {combinedAssociateForm.phone}</p></div>
                               </div>
                             </div>
-                            <div className="rounded-[1.5rem] border border-warning-500/20 bg-warning-500/5 p-6 space-y-4">
-                              <h4 className="text-[10px] font-black uppercase text-warning-500 tracking-[0.3em] italic mb-2">Company Entity Summary</h4>
+                            <div className="rounded-[1.5rem] border border-obaol-500/20 bg-obaol-500/5 p-6 space-y-4">
+                              <h4 className="text-[10px] font-black uppercase text-obaol-500 tracking-[0.3em] italic mb-2">Company Entity Summary</h4>
                               <div className="space-y-3">
                                 <div><p className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none mb-1">Entity</p><p className="text-sm font-black text-foreground italic uppercase tracking-tighter">{operatorCompanyForm.name}</p></div>
                                 <div><p className="text-[9px] font-black text-default-400 uppercase tracking-widest leading-none mb-1">Contact</p><p className="text-[11px] font-bold text-default-500">{operatorCompanyForm.email} • {operatorCompanyForm.phone}</p></div>

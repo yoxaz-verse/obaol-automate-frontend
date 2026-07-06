@@ -40,7 +40,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                 }
             }}
         >
-            <Card className="h-full db-panel border db-border-subtle shadow-none overflow-hidden group rounded-[2rem] transition-all duration-500 hover:border-warning-500/30">
+            <Card className="h-full db-panel border db-border-subtle shadow-none overflow-hidden group rounded-[2rem] transition-all duration-500 hover:border-obaol-500/30">
                 <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
                     <div className="flex flex-row justify-between w-full items-center gap-4">
                         <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full ${
@@ -56,7 +56,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         </div>
                     </div>
                     <div className="w-full">
-                        <h4 className="text-lg font-black text-foreground tracking-tight group-hover:text-warning-500 transition-colors line-clamp-2">
+                        <h4 className="text-lg font-bold text-foreground tracking-tight group-hover:text-obaol-700 dark:group-hover:text-obaol-300 transition-colors line-clamp-2">
                             {productName}
                         </h4>
                         {variantName && (
@@ -81,8 +81,8 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                 <CardBody className="px-6 py-5 flex flex-col gap-6">
                     {/* Identity - Precise & Spaced */}
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-center shrink-0">
-                            <FiUser size={18} className="text-warning-600" />
+                        <div className="w-10 h-10 rounded-xl bg-obaol-500/10 border border-obaol-500/20 flex items-center justify-center shrink-0">
+                            <FiUser size={18} className="text-obaol-700 dark:text-obaol-300" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <h5 className="text-[10px] font-black text-foreground uppercase tracking-wider truncate">
@@ -117,9 +117,9 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         {data.isAdmin && (data.adminCommission !== undefined || (data.mediatorCommission !== undefined && data.type === "Mediated")) && (
                             <div className="flex flex-wrap gap-2 pt-3 border-t db-border-subtle">
                                 {data.adminCommission !== undefined && (
-                                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-warning-500/10 border border-warning-500/20">
-                                        <span className="text-[7px] font-black text-warning-600 uppercase">OBAOL</span>
-                                        <span className="text-[9px] font-black text-warning-700">+{formatRate(data.adminCommission)}</span>
+                                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-obaol-500/10 border border-obaol-500/20">
+                                        <span className="text-[7px] font-bold text-obaol-700 dark:text-obaol-300 uppercase">OBAOL</span>
+                                        <span className="text-[9px] font-bold text-obaol-700 dark:text-obaol-300">+{formatRate(data.adminCommission)}</span>
                                     </div>
                                 )}
                                 {data.mediatorCommission !== undefined && data.type === "Mediated" && (
@@ -134,11 +134,11 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
 
                     <div className="flex items-center justify-between text-[9px] font-black db-muted uppercase tracking-[0.15em] px-1">
                         <div className="flex items-center gap-2.5">
-                             <FiMapPin size={12} className="text-warning-500/60" />
+                             <FiMapPin size={12} className="text-obaol-600/70 dark:text-obaol-300/70" />
                              <span>{data.portName || "Pending Port"}</span>
                         </div>
                         <div className="flex items-center gap-2.5">
-                             <FiBriefcase size={12} className="text-warning-500/60" />
+                             <FiBriefcase size={12} className="text-obaol-600/70 dark:text-obaol-300/70" />
                              <span className="opacity-80">{data.assignedOperator}</span>
                         </div>
                     </div>
@@ -158,7 +158,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                     </Button>
                                     <Button
                                         variant="flat"
-                                        className="flex-1 font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
+                                        className="flex-1 font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all uppercase"
                                         onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.buyerPhone}`; }}
                                     >
                                         Buyer
@@ -167,7 +167,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                             ) : (
                                 <Button
                                     variant="flat"
-                                    className="w-full font-black text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/20 border border-transparent transition-all uppercase"
+                                    className="w-full font-bold text-[9px] tracking-widest h-10 rounded-xl db-subtle hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/20 border border-transparent transition-all uppercase"
                                     onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${data.operatorPhone}`; }}
                                 >
                                     View Enquiry Details
@@ -176,9 +176,9 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                         </div>
                         <div onClick={(e) => e.stopPropagation()} className="shrink-0">{action}</div>
                     </div>
-                    <div className="flex justify-start items-center gap-4 px-4 py-2.5 db-inset rounded-2xl border db-border-subtle transition-all group-hover:border-warning-500/20">
+                    <div className="flex justify-start items-center gap-4 px-4 py-2.5 db-inset rounded-2xl border db-border-subtle transition-all group-hover:border-obaol-500/20">
                         <EnquiryStatus status={status} />
-                        <FiActivity className="text-default-200 group-hover:text-warning-500 transition-colors ml-auto opacity-30 group-hover:opacity-100" size={12} />
+                        <FiActivity className="text-default-200 group-hover:text-obaol-600 dark:group-hover:text-obaol-300 transition-colors ml-auto opacity-30 group-hover:opacity-100" size={12} />
                     </div>
                 </CardFooter>
             </Card>

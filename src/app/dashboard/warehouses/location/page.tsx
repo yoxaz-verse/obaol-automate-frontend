@@ -297,9 +297,9 @@ export default function WarehouseLocationPage() {
   }, [form.location]);
 
   const fieldBaseClass =
-    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle h-14 rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-warning-400/70 focus-within:ring-2 focus-within:ring-warning-500/30 transition-all";
+    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle h-14 rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-obaol-400/70 focus-within:ring-2 focus-within:ring-obaol-500/30 transition-all";
   const textareaBaseClass =
-    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-warning-400/70 focus-within:ring-2 focus-within:ring-warning-500/30 transition-all p-4";
+    "bg-black/[0.03] dark:bg-white/[0.04] border db-border-subtle rounded-2xl hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-within:bg-black/[0.06] dark:focus-within:bg-white/[0.10] focus-within:border-obaol-400/70 focus-within:ring-2 focus-within:ring-obaol-500/30 transition-all p-4";
   const fieldLabelClass = "text-default-500 dark:text-white/70 font-semibold";
   const fieldInputClass = "text-foreground font-bold uppercase text-sm placeholder:text-default-400 dark:placeholder:text-white/35";
   const selectPopoverClass = "db-panel border db-border-subtle rounded-2xl";
@@ -322,7 +322,7 @@ export default function WarehouseLocationPage() {
         <Card className="border db-panel rounded-[2.5rem] overflow-hidden">
           <CardHeader className="p-8 border-b db-border-subtle">
             <div className="flex items-center gap-4">
-              <div className="w-1 h-3 bg-warning-500 rounded-full" />
+              <div className="w-1 h-3 bg-obaol-500 rounded-full" />
               <div>
                 <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Pin Warehouse Location</h2>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-default-400 mt-1">
@@ -334,14 +334,14 @@ export default function WarehouseLocationPage() {
           <CardBody className="px-6 pb-6 space-y-4">
             {form.location && (
               <div className="text-[10px] font-bold uppercase tracking-widest text-default-500 dark:text-white/50 flex flex-wrap gap-x-2 gap-y-1">
-                <span className="text-warning-500">Detected Node:</span> {locationLabel}
+                <span className="text-obaol-500">Detected Node:</span> {locationLabel}
                 {form.location.district && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.district}</>}
                 {form.location.pincode && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.pincode}</>}
                 {form.location.city && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.city}</>}
                 {form.location.state && <><span className="text-default-300 dark:text-white/10">•</span> {form.location.state}</>}
               </div>
             )}
-            <div className="rounded-[2rem] overflow-hidden border db-border-strong shadow-lg shadow-warning-500/10 warehouse-location-map">
+            <div className="rounded-[2rem] overflow-hidden border db-border-strong shadow-lg shadow-obaol-500/10 warehouse-location-map">
               <WarehouseLocationPicker value={pendingLocation} onChange={setPendingLocation} height={460} />
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -576,7 +576,7 @@ export default function WarehouseLocationPage() {
               </div>
               <Button
                 color="warning"
-                className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-warning-500 text-black shadow-lg shadow-warning-500/20 hover:scale-105 active:scale-95 transition-all"
+                className="h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] px-8 bg-obaol-500 text-black shadow-lg shadow-obaol-500/20 hover:scale-105 active:scale-95 transition-all"
                 isDisabled={!form.name.trim() || !form.contactPhone.trim() || !form.location}
                 isLoading={createMutation.isPending}
                 onPress={() => createMutation.mutate(form)}

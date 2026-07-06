@@ -163,7 +163,7 @@ const classificationTone = (label: string): string => {
   if (key === "natural")
     return "bg-secondary-500/15 text-secondary-400 border-secondary-500/30";
   if (key.includes("gi"))
-    return "bg-warning-500/15 text-warning-400 border-warning-500/30";
+    return "bg-obaol-500/15 text-obaol-400 border-obaol-500/30";
   return "bg-default-500/15 text-default-300 border-default-400/20";
 };
 const formatLastLiveDate = (value: any) => {
@@ -181,8 +181,8 @@ const formatLastLiveDate = (value: any) => {
   if (sameDay(date, today)) {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(234,179,8,0.8)]" />
-        <span className="text-[10px] font-black text-warning-500 uppercase tracking-[0.1em] italic">
+        <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
+        <span className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.1em] italic">
           Today
         </span>
       </div>
@@ -868,7 +868,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                 // Column Mapping
                 rate: (
-                  <span className="text-warning-500 font-bold tracking-tight text-sm">
+                  <span className="text-obaol-500 font-bold tracking-tight text-sm">
                     {isAdminUser && isMarketplace
                       ? formatRate(totalRate)
                       : user?.role?.toLowerCase() === "admin"
@@ -1141,13 +1141,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         rate === "variantRate" &&
                         canAddOwnRate &&
                         showCreateButton ? (
-                          <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden">
+                          <div className="shrink-0 shadow-lg shadow-obaol-500/10 rounded-2xl overflow-hidden">
                             <Button
                               size="sm"
                               onPress={() => setWizardOpen(true)}
                               variant="shadow"
                               color="warning"
-                              className="font-black tracking-widest px-3 sm:px-5 h-10 rounded-xl uppercase text-[9px] sm:text-[11px] shadow-warning-500/30"
+                              className="font-black tracking-widest px-3 sm:px-5 h-10 rounded-xl uppercase text-[9px] sm:text-[11px] shadow-obaol-500/30"
                               startContent={
                                 <FiPlus size={14} className="sm:w-4 sm:h-4" />
                               }
@@ -1183,13 +1183,13 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   rate === "variantRate" &&
                   canAddOwnRate &&
                   showCreateButton && (
-                    <div className="shrink-0 shadow-lg shadow-warning-500/10 rounded-2xl overflow-hidden ml-auto">
+                    <div className="shrink-0 shadow-lg shadow-obaol-500/10 rounded-2xl overflow-hidden ml-auto">
                       <Button
                         size="sm"
                         onPress={() => setWizardOpen(true)}
                         variant="shadow"
                         color="warning"
-                        className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-warning-500/30"
+                        className="font-black tracking-widest px-5 h-10 rounded-xl uppercase text-[11px] shadow-obaol-500/30"
                         startContent={<FiPlus size={16} />}
                       >
                         List your product
@@ -1220,14 +1220,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
               rate === "variantRate" &&
               isAssociateUser &&
               !hasLinkedCompany && (
-                <Card className="mb-4 border border-warning-300/30 bg-warning-500/10">
+                <Card className="mb-4 border border-obaol-300/30 bg-obaol-500/10">
                   <CardBody className="py-3 px-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-warning-700 dark:text-warning-300">
+                        <p className="text-sm font-semibold text-obaol-700 dark:text-obaol-300">
                           Link a company to add your own rates
                         </p>
-                        <p className="text-xs text-warning-700/80 dark:text-warning-200/90">
+                        <p className="text-xs text-obaol-700/80 dark:text-obaol-200/90">
                           You can still add commodity listings to your
                           personal catalog.
                         </p>
@@ -1252,8 +1252,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
               isAssociateUser ? (
                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
                   <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                    <div className="absolute inset-0 bg-obaol-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-obaol-500 shadow-xl">
                       <FiShoppingBag size={48} strokeWidth={1.5} />
                     </div>
                     <div className="absolute -bottom-2 -right-2 p-2 bg-success-500 text-white rounded-full border-4 border-background shadow-lg">
@@ -1272,7 +1272,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     color="warning"
                     variant="shadow"
                     size="lg"
-                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-warning-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
+                    className="font-black px-10 rounded-2xl h-14 text-sm uppercase tracking-widest shadow-obaol-500/20 shadow-lg hover:scale-105 active:scale-95 transition-all text-black"
                     onPress={() => router.push("/dashboard/marketplace")}
                     startContent={<FiShoppingBag size={20} strokeWidth={2.5} />}
                   >
@@ -1315,8 +1315,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 additionalParams?.isLive === true ? (
                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
                   <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-warning-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-warning-500 shadow-xl">
+                    <div className="absolute inset-0 bg-obaol-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <div className="relative p-6 bg-content2 border border-divider rounded-[2.5rem] text-obaol-500 shadow-xl">
                       <FiShoppingBag size={48} strokeWidth={1.5} />
                     </div>
                     <div className="absolute -bottom-2 -right-2 p-2 bg-default-100 text-default-400 rounded-full border-4 border-background shadow-lg">
@@ -1573,7 +1573,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <td className="py-4 px-6 align-top">
                                   <div className="flex flex-col gap-1 min-w-0">
                                     <p
-                                      className="text-[10px] sm:text-xs font-semibold text-warning-500 uppercase tracking-widest truncate"
+                                      className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                       title={toDisplayText(
                                         item.product,
                                         "Product",
@@ -1613,7 +1613,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   </div>
                                 </td>
                                 <td className="py-4 px-6 align-top whitespace-nowrap">
-                                  <div className="text-base font-black text-warning-500 drop-shadow-md">
+                                  <div className="text-base font-black text-obaol-500 drop-shadow-md">
                                     {formatRate(item.rawBasePrice)}
                                   </div>
                                 </td>
@@ -1830,7 +1830,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                                 <div className="flex-1 flex flex-col gap-1 min-w-0">
                                   <p
-                                    className="text-[10px] sm:text-xs font-semibold text-warning-500 uppercase tracking-widest truncate"
+                                    className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                     title={toDisplayText(
                                       item.product,
                                       "Product",
@@ -1878,7 +1878,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
                                       Final Price
                                     </span>
-                                    <div className="text-base sm:text-xl font-black text-warning-500 drop-shadow-md">
+                                    <div className="text-base sm:text-xl font-black text-obaol-500 drop-shadow-md">
                                       {formatRate(item.rawBasePrice)}
                                     </div>
                                   </div>
@@ -1933,7 +1933,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className={`shrink-0 w-2 h-2 rounded-full ${isLive ? "bg-success-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]" : "bg-default-300"}`} />
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
-                                  <span className="text-[10px] font-bold text-warning-500 uppercase tracking-widest truncate w-24 sm:w-auto">
+                                  <span className="text-[10px] font-bold text-obaol-500 uppercase tracking-widest truncate w-24 sm:w-auto">
                                     {toDisplayText(item.product, "Product")}
                                   </span>
                                   <span className="hidden sm:inline text-default-500 text-xs">/</span>
@@ -1947,7 +1947,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   <span className="text-[10px] text-default-400 w-12 text-right">
                                     {item.inventoryQty || item.quantity || "-"}
                                   </span>
-                                  <span className="text-sm font-bold text-warning-400 w-24 text-right tabular-nums">
+                                  <span className="text-sm font-bold text-obaol-400 w-24 text-right tabular-nums">
                                     {formatRate(item.rawBasePrice)}
                                   </span>
                                 </div>
@@ -2003,7 +2003,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               {/* Product Details */}
                               <div className="flex flex-col gap-1 mt-1">
                                 <p
-                                  className="text-[10px] sm:text-xs font-semibold text-warning-500 uppercase tracking-widest truncate"
+                                  className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                   title={toDisplayText(item.product, "Product")}
                                 >
                                   {toDisplayText(item.product, "Product")}
@@ -2047,7 +2047,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
                                     Final Price
                                   </span>
-                                  <div className="text-base sm:text-xl font-black text-warning-500 drop-shadow-md">
+                                  <div className="text-base sm:text-xl font-black text-obaol-500 drop-shadow-md">
                                     {formatRate(item.rawBasePrice)}
                                   </div>
                                 </div>
@@ -2111,7 +2111,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                         "gap-2 overflow-visible h-10 rounded-2xl border border-white/5 bg-content1/50 backdrop-blur-md shadow-lg",
                       item: "w-10 h-10 text-sm font-bold bg-transparent text-default-500 hover:bg-white/5",
                       cursor:
-                        "bg-warning-500 font-black text-black shadow-[0_0_15px_rgba(245,165,36,0.4)]",
+                        "bg-obaol-500 font-black text-black shadow-[0_0_15px_rgba(207,152,60,0.4)]",
                       prev: "bg-transparent text-default-500 hover:bg-white/5",
                       next: "bg-transparent text-default-500 hover:bg-white/5",
                     }}
@@ -2135,7 +2135,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
               <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
                 <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="p-2 bg-warning/10 rounded-xl text-warning-500 shadow-sm shadow-warning/10">
+                    <div className="p-2 bg-warning/10 rounded-xl text-obaol-500 shadow-sm shadow-warning/10">
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -2172,7 +2172,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           {selectedInventoryRate.product || "—"}
                         </span>
                       </div>
-                      <div className="px-3 py-1.5 bg-warning/10 text-warning-600 rounded-xl text-xs font-black border border-warning/20 shadow-inner shrink-0">
+                      <div className="px-3 py-1.5 bg-warning/10 text-obaol-600 rounded-xl text-xs font-black border border-warning/20 shadow-inner shrink-0">
                         {selectedInventoryRate.productVariant || "Standard"}
                       </div>
                     </div>
@@ -2204,7 +2204,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                   {/* Info note */}
                   <div className="flex items-start gap-2 text-xs text-default-400 bg-default-100/40 px-3 py-2.5 rounded-xl border border-divider/20">
                     <svg
-                      className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning-500"
+                      className="w-3.5 h-3.5 shrink-0 mt-0.5 text-obaol-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -2746,20 +2746,20 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
           </span>
         }
         closeDelay={0}
-        className="bg-[#0B0F14] border border-white/10 rounded-lg shadow-2xl"
+        className="bg-[#0E0D0A] border border-white/10 rounded-lg shadow-2xl"
       >
         <span
           onClick={onOpen}
           className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${
             isCooldownActive
               ? "bg-success-500/10 text-success-500 cursor-not-allowed opacity-50"
-              : "bg-warning-500/10 hover:bg-warning-500/20 text-warning-500 cursor-pointer active:scale-90"
+              : "bg-obaol-500/10 hover:bg-obaol-500/20 text-obaol-500 cursor-pointer active:scale-90"
           }`}
         >
           <LuBox
             size={22}
             className={
-              isCooldownActive ? "text-success-600/80" : "text-warning-600/80"
+              isCooldownActive ? "text-success-600/80" : "text-obaol-600/80"
             }
           />
           <div className="h-[2px]" />
@@ -2840,7 +2840,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                         <p className="text-[9px] text-default-400 font-black uppercase tracking-[0.2em] leading-loose italic">
                           Logistics Lock: Next sample dispatch protocol
                           available in{" "}
-                          <span className="text-warning-500">
+                          <span className="text-obaol-500">
                             {sampleCooldownDays} days
                           </span>{" "}
                           for this node.
@@ -2876,9 +2876,9 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                     animate={{ opacity: 1, x: 0 }}
                     className="flex flex-col gap-6"
                   >
-                    <div className="p-6 bg-warning-500/5 rounded-[2rem] border border-warning-500/10 backdrop-blur-md">
+                    <div className="p-6 bg-obaol-500/5 rounded-[2rem] border border-obaol-500/10 backdrop-blur-md">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-warning-500/10 rounded-xl text-warning-500">
+                        <div className="p-2 bg-obaol-500/10 rounded-xl text-obaol-500">
                           <FiInfo size={18} />
                         </div>
                         <h4 className="text-sm font-black uppercase tracking-widest">
@@ -2919,7 +2919,7 @@ const RequestSampleButton: React.FC<RequestSampleButtonProps> = ({
                           <span className="text-[10px] font-black uppercase text-default-400 tracking-widest">
                             Quantity
                           </span>
-                          <span className="text-sm font-black text-warning-500">
+                          <span className="text-sm font-black text-obaol-500">
                             {requestedSampleQtyKg} KG
                           </span>
                         </div>
@@ -3239,7 +3239,7 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
           </span>
         }
         closeDelay={0}
-        className="bg-[#0B0F14] border border-white/10 rounded-lg shadow-2xl"
+        className="bg-[#0E0D0A] border border-white/10 rounded-lg shadow-2xl"
       >
         <span
           onClick={onOpen}

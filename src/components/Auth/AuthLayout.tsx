@@ -47,7 +47,7 @@ const FloatingPixel = ({ delay }: { delay: number }) => {
 
     return (
         <motion.div
-            className="absolute w-1 h-1 bg-warning-500/30 rounded-full"
+            className="absolute h-1 w-1 rounded-full bg-obaol-500/30"
             initial={{ y: "110vh", x: config.x, opacity: 0 }}
             animate={{
                 y: "-10vh",
@@ -121,7 +121,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 <div className={`w-full ${cardMaxWidthClass} mx-auto`}>
                     <div className="rounded-[2.5rem] border border-divider bg-content1/80 p-8 shadow-2xl backdrop-blur-3xl">
                         <div className="mb-8 items-center flex flex-col text-center">
-                            <h2 className="text-3xl font-black tracking-tight text-foreground mb-2">
+                            <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground">
                                 {title}
                             </h2>
                             {subtitle && (
@@ -140,10 +140,10 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
     }
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#04070f] dark:text-foreground relative font-sans selection:bg-warning-500/30">
+        <div className="relative flex h-screen w-full overflow-hidden bg-obaol-50/45 text-slate-900 selection:bg-obaol-500/30 dark:bg-[#090806] dark:text-foreground">
             {/* Branded background layer */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(245,165,36,0.03)_0%,_transparent_50%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.08)_0%,_transparent_55%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(207,152,60,0.03)_0%,_transparent_50%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:50px_50px]" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:10px_10px]" />
                 
@@ -152,14 +152,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 ))}
 
                 {/* Ambient Glows */}
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-warning-500/10 rounded-full blur-[150px] opacity-20" />
+                <div className="absolute left-[-10%] top-[-10%] h-[50%] w-[50%] rounded-full bg-obaol-500/10 opacity-30 blur-[150px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary-500/10 rounded-full blur-[150px] opacity-20" />
             </div>
 
             <div className="relative z-10 w-full h-full flex flex-col lg:flex-row">
                 {/* Left Side: Tactical Branding */}
                 <motion.div
-                    className="hidden lg:flex w-5/12 flex-col justify-center items-center p-8 xl:p-10 relative border-r border-slate-200 bg-white/70 backdrop-blur-2xl overflow-hidden dark:border-white/5 dark:bg-white/[0.01]"
+                className="relative hidden w-5/12 flex-col items-center justify-center overflow-hidden border-r border-obaol-200/70 bg-white/70 p-8 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-white/[0.01] lg:flex xl:p-10"
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
@@ -169,12 +169,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                     <div className="relative z-20 w-full max-w-xl mx-auto">
                         <Link href="/" className="flex items-center gap-4 mb-8 group cursor-pointer justify-center lg:justify-start">
-                            <div className="w-12 h-12 relative flex items-center justify-center bg-warning-500/10 rounded-xl border border-warning-500/30 group-hover:scale-110 transition-transform duration-500">
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-obaol-500/30 bg-obaol-500/10 transition-transform duration-500 group-hover:scale-110">
                                 <Image src="/logo.png" alt="OBAOL" width={32} height={32} className="object-contain" />
-                                <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-obaol-500/20 opacity-0 blur-xl transition-opacity group-hover:opacity-100" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-black italic tracking-tighter leading-none">OBAOL <span className="text-warning-500">SUPREME</span></span>
+                                <span className="text-xl font-bold leading-none tracking-tight">OBAOL <span className="bg-gradient-to-r from-obaol-700 to-obaol-500 bg-clip-text text-transparent dark:from-obaol-200">SUPREME</span></span>
                                 <span className="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-default-400">AGRO TRADE EXECUTION PLATFORM</span>
                             </div>
                         </Link>
@@ -188,15 +188,15 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                 >
                                     {roleIdentity && (
                                         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1">
-                                            <span className="w-2 h-2 rounded-full bg-warning-500" />
+                                            <span className="h-2 w-2 rounded-full bg-obaol-500" />
                                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 dark:text-foreground/70">
                                                 {roleIdentity.panelLabel}
                                             </span>
                                         </div>
                                     )}
-                                    <p className="text-4xl xl:text-5xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-2 leading-[0.92]">
+                                    <p className="mb-2 text-4xl font-bold leading-[0.96] tracking-tight text-slate-900 dark:text-foreground xl:text-5xl">
                                         {leftPanel.headline} <br />
-                                        <span className={`text-transparent bg-clip-text ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-warning-500 to-amber-600"}`}>
+                                        <span className={`bg-clip-text text-transparent ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-obaol-200 via-obaol-400 to-obaol-600"}`}>
                                             {leftPanel.highlight || "TRADE WORKSPACE"}
                                         </span>
                                     </p>
@@ -208,7 +208,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 0.45, delay: 0.2 }}
                                 >
-                                    <p className="text-base xl:text-lg text-slate-600 dark:text-foreground/60 pl-4 border-l-2 border-warning-500/40 leading-relaxed font-medium italic">
+                                    <p className="border-l-2 border-obaol-500/40 pl-4 text-base font-medium leading-relaxed text-slate-600 dark:text-foreground/60 xl:text-lg">
                                         {leftPanel.description}
                                     </p>
 
@@ -216,7 +216,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         <div className="grid gap-2 pt-3">
                                             {leftPanel.points.map((point, idx) => (
                                                 <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-foreground/40 uppercase tracking-widest group/point">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-warning-500/20 group-hover:bg-warning-500 transition-colors" />
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-obaol-500/20 transition-colors group-hover:bg-obaol-500" />
                                                     {point}
                                                 </div>
                                             ))}
@@ -245,7 +245,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                                         {leftPanel.knowMoreLink && (
                                             <Link
                                                 href={leftPanel.knowMoreLink}
-                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-slate-200 text-[9px] font-black uppercase tracking-[0.18em] hover:bg-warning-500/10 hover:text-warning-600 hover:border-warning-500/30 transition-all group shadow-sm justify-center dark:bg-white/[0.03] dark:border-white/10 dark:hover:text-warning-500 dark:hover:border-warning-500/20"
+                                                className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-obaol-200 bg-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.18em] shadow-sm transition-all hover:border-obaol-500/30 hover:bg-obaol-500/10 hover:text-obaol-700 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-obaol-500/20 dark:hover:text-obaol-300"
                                             >
                                                 Learn about this role
                                                 <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -256,13 +256,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             </div>
                         ) : (
                             <div className="space-y-8">
-                                <p className="text-5xl xl:text-7xl font-black tracking-tighter text-slate-900 dark:text-foreground mb-4 leading-[0.85] uppercase italic">
+                                <p className="mb-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-slate-900 dark:text-foreground xl:text-7xl">
                                     OBAOL <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-500 to-amber-600 min-h-[1.2em] block leading-tight">
+                                    <span className="block min-h-[1.2em] bg-gradient-to-r from-obaol-200 via-obaol-400 to-obaol-600 bg-clip-text leading-tight text-transparent">
                                         <TypewriterEffect words={["BUYING", "SELLING", "LOGISTICS", "INVENTORY", "TRADE EXECUTION"]} />
                                     </span>
                                 </p>
-                                <p className="text-xl text-slate-600 dark:text-foreground/60 pl-6 border-l-2 border-warning-500/40 leading-relaxed font-medium italic max-w-sm">
+                                <p className="max-w-sm border-l-2 border-obaol-500/40 pl-6 text-xl font-medium leading-relaxed text-slate-600 dark:text-foreground/60">
                                     Bring product discovery, verification, logistics, documents, and orders into one guided workflow.
                                 </p>
                             </div>
@@ -282,34 +282,34 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                             transition={{ duration: 0.55, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
                         >
                             {/* Card Decoration */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-warning-500/[0.03] blur-[120px] rounded-full -z-10" />
+                            <div className="absolute left-1/2 top-0 -z-10 h-[120%] w-[120%] -translate-x-1/2 rounded-full bg-obaol-500/[0.04] blur-[120px]" />
                             {roleIdentity && (
                                 <div className={`absolute inset-4 rounded-[2.3rem] border border-white/5 -z-10 pointer-events-none ${roleIdentity.motifClassName}`} />
                             )}
 
                             {/* Mobile Identity */}
                             <Link href="/" className="lg:hidden mb-3 flex flex-col items-center group cursor-pointer">
-                                <div className="w-11 h-11 relative bg-warning-500/10 rounded-xl border border-warning-500/30 mb-2 flex items-center justify-center shadow-xl shadow-warning-500/10 group-hover:scale-110 transition-transform">
+                                <div className="relative mb-2 flex h-11 w-11 items-center justify-center rounded-xl border border-obaol-500/30 bg-obaol-500/10 shadow-xl shadow-obaol-500/10 transition-transform group-hover:scale-110">
                                     <Image src="/logo.png" alt="OBAOL" width={40} height={40} className="object-contain" />
                                 </div>
-                                <h2 className="text-xl font-black italic tracking-tighter text-slate-900 dark:text-foreground uppercase">
-                                    OBAOL <span className="text-warning-500">Supreme</span>
+                                <h2 className="text-xl font-bold uppercase tracking-tight text-slate-900 dark:text-foreground">
+                                    OBAOL <span className="text-obaol-700 dark:text-obaol-300">Supreme</span>
                                 </h2>
                                 <p className="text-[8px] font-black tracking-[0.35em] text-slate-500 dark:text-default-400 mt-1 uppercase">Go-To Agro Trade Platform</p>
                             </Link>
 
                             <div className="relative group">
                                 <motion.div
-                                    className="relative bg-white/85 dark:bg-[#0B0F14]/80 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2.2rem] lg:rounded-[2.5rem] p-5 lg:p-7 shadow-xl dark:shadow-2xl overflow-hidden shadow-slate-200/40 dark:shadow-black/40"
+                                    className="relative overflow-hidden rounded-[2.2rem] border border-obaol-200/60 bg-white/85 p-5 shadow-xl shadow-obaol-900/5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 dark:shadow-2xl dark:shadow-black/40 lg:rounded-[2.5rem] lg:p-7"
                                     whileHover={{ boxShadow: "0 40px 120px -20px rgba(15, 23, 42, 0.08)" }}
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}
                                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                    <div className="absolute top-0 right-0 w-40 h-40 bg-warning-500/10 blur-[80px] rounded-full -mr-20 -mt-20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                    <div className="absolute right-0 top-0 -mr-20 -mt-20 h-40 w-40 rounded-full bg-obaol-500/10 opacity-0 blur-[80px] transition-opacity duration-1000 group-hover:opacity-100" />
 
                                     <div className="mb-4 relative">
-                                        <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-foreground leading-none">
+                                        <h1 className="text-2xl font-bold leading-none tracking-tight text-slate-900 dark:text-foreground lg:text-3xl">
                                             {title}
                                         </h1>
                                         {subtitle && (

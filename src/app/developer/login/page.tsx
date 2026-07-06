@@ -201,7 +201,7 @@ export default function DeveloperLoginPage() {
           </p>
         )}
         {configWarning && (
-          <p className="mt-4 rounded-lg border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-100">
+          <p className="mt-4 rounded-lg border border-obaol-300 bg-obaol-50 px-3 py-2 text-sm text-obaol-800 dark:border-obaol-500/40 dark:bg-obaol-500/10 dark:text-obaol-100">
             {configWarning}
           </p>
         )}

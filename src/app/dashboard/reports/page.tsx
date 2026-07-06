@@ -438,13 +438,13 @@ export default function ReportsPage() {
               </div>
             ) : null}
             {String(activeReport?.reasonCode || "").toUpperCase() === "REOPEN_INQUIRY_REQUEST" ? (
-              <div className="rounded-lg border border-warning-200/60 bg-warning-50/60 px-3 py-2 text-sm text-warning-800">
+              <div className="rounded-lg border border-obaol-200/60 bg-obaol-50/60 px-3 py-2 text-sm text-obaol-800">
                 <div className="font-semibold">Reopen enquiry request</div>
                 <div className="text-xs mt-1">Inquiry ID: {String(activeReport?.payload?.inquiryId || "-")}</div>
               </div>
             ) : null}
             {isCompanyInterestActive ? (
-              <div className="rounded-lg border border-warning-200/60 bg-warning-50/60 px-3 py-2 text-sm text-warning-800">
+              <div className="rounded-lg border border-obaol-200/60 bg-obaol-50/60 px-3 py-2 text-sm text-obaol-800">
                 <div className="font-semibold">Interest approval action</div>
                 <div className="text-xs mt-1">
                   Admin decisions here update company interests directly.

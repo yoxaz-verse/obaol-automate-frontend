@@ -952,9 +952,9 @@ export default function OrderDetailsPage() {
     const nextOrderAction = String((order as any)?.nextAction || "Review the current milestone and complete any available action.");
 
     return (
-        <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-warning-500/30">
+        <div className="w-full min-h-screen p-6 flex flex-col gap-8 bg-background text-foreground selection:bg-obaol-500/30">
             <DashboardBreadcrumb parentLabel="Orders" parentPath="/dashboard/orders" currentLabel={`Order ${String(order?._id || "").slice(-6).toUpperCase()}`} />
-            <section aria-label="Your role and next action" className="rounded-2xl border border-warning-500/25 bg-warning-500/5 p-4">
+            <section aria-label="Your role and next action" className="rounded-2xl border border-obaol-500/25 bg-obaol-500/5 p-4">
                 <p className="text-sm font-bold text-foreground">You are the {transactionRole} in this transaction.</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextOrderAction}</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
@@ -976,7 +976,7 @@ export default function OrderDetailsPage() {
                     <Button
                         isIconOnly
                         variant="light"
-                        className="text-default-400 hover:text-warning-500 hover:bg-default-100 transition-all"
+                        className="text-default-400 hover:text-obaol-500 hover:bg-default-100 transition-all"
                         onPress={() => router.back()}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
@@ -984,7 +984,7 @@ export default function OrderDetailsPage() {
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">ORDER: {orderId?.slice(-8).toUpperCase()}</h1>
-                            <div className="px-2 py-0.5 rounded bg-warning-500 text-xs font-black text-black uppercase tracking-widest">In progress</div>
+                            <div className="px-2 py-0.5 rounded bg-obaol-500 text-xs font-black text-black uppercase tracking-widest">In progress</div>
                         </div>
                         <p className="text-sm font-bold text-default-500 mt-2 uppercase tracking-wider opacity-80">
                             {isExternal ? "External logistics order" : `ENQUIRY REF: ${(order.enquiry?._id || order.enquiry)?.slice(-8).toUpperCase()}`}
@@ -995,7 +995,7 @@ export default function OrderDetailsPage() {
                 <div className="flex items-center gap-10">
                     <div className="h-12 w-px bg-divider hidden md:block" />
                     <div className="text-right">
-                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest mb-1">Workflow Stage</div>
+                        <div className="text-xs font-black text-obaol-500 uppercase tracking-widest mb-1">Workflow Stage</div>
                         <div className="text-xl font-black text-foreground uppercase tracking-tight">{String(workflowStage || order.workflowStage || order.status || "").replaceAll("_", " ")}</div>
                         {canManageMainFlow && workflowStageOptions.length > 0 && (
                             <div className="mt-3 flex justify-end">
@@ -1043,32 +1043,32 @@ export default function OrderDetailsPage() {
             <div className="sticky top-20 z-30 w-full rounded-2xl border border-divider bg-background/80 backdrop-blur-xl px-4 py-3 flex flex-wrap items-center gap-3">
                 <Link
                     href={ordersBackHref}
-                    className="inline-flex items-center justify-center rounded-xl border border-divider bg-default-100/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-foreground hover:border-warning-500/40 hover:text-warning-500 transition-all"
+                    className="inline-flex items-center justify-center rounded-xl border border-divider bg-default-100/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-foreground hover:border-obaol-500/40 hover:text-obaol-500 transition-all"
                 >
                     Back To Orders
                 </Link>
                 <div className="text-[9px] font-black uppercase tracking-widest text-default-400">Quick Jump</div>
                 <a
                     href="#order-plan"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
                 >
                     Plan
                 </a>
                 <a
                     href="#subflows"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
                 >
                     Subflows
                 </a>
                 <a
                     href="#execution-bidding"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
                 >
                     Bidding
                 </a>
                 <a
                     href="#order-docs"
-                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-warning-500 hover:border-warning-500/40 transition-all"
+                    className="rounded-full border border-divider bg-default-100/50 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-default-500 hover:text-obaol-500 hover:border-obaol-500/40 transition-all"
                 >
                     Documents
                 </a>
@@ -1218,17 +1218,17 @@ export default function OrderDetailsPage() {
             {isExternal && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
-                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">CONSIGNEE (BUYER)</div>
+                        <div className="text-xs font-black text-obaol-500 uppercase tracking-wider mb-3">CONSIGNEE (BUYER)</div>
                         <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalBuyer?.name || "Buyer"}</div>
                         <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalBuyer?.email || "No email"}</div>
                     </div>
                     <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
-                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">CONSIGNOR (SELLER)</div>
+                        <div className="text-xs font-black text-obaol-500 uppercase tracking-wider mb-3">CONSIGNOR (SELLER)</div>
                         <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalSeller?.name || "Seller"}</div>
                         <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalSeller?.email || "No email"}</div>
                     </div>
                     <div className="bg-default-100/40 border border-divider rounded-2xl p-5 hover:bg-default-100 transition-colors backdrop-blur-md">
-                        <div className="text-xs font-black text-warning-500 uppercase tracking-wider mb-3">PRODUCT SCOPE</div>
+                        <div className="text-xs font-black text-obaol-500 uppercase tracking-wider mb-3">PRODUCT SCOPE</div>
                         <div className="text-lg font-black text-foreground uppercase truncate">{(order as any)?.externalProduct?.name || "Product"}</div>
                         <div className="text-sm text-default-500 mt-1 font-medium">{(order as any)?.externalProduct?.quantity || "0"} {(order as any)?.externalProduct?.unit || ""}</div>
                     </div>
@@ -1236,7 +1236,7 @@ export default function OrderDetailsPage() {
             )}
 
             {workflowStageOptions.length === 0 ? (
-                <div className="w-full rounded-2xl border border-warning-500/20 bg-warning-500/5 px-5 py-4 text-xs font-bold text-warning-600 uppercase tracking-widest">
+                <div className="w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/5 px-5 py-4 text-xs font-bold text-obaol-600 uppercase tracking-widest">
                     No flow rules configured for orders. Configure Flow Rules to unlock order stages.
                 </div>
             ) : (
@@ -1248,11 +1248,11 @@ export default function OrderDetailsPage() {
                             const isCurrent = index === currentStepIndex;
                             return (
                                 <div key={step} className="flex flex-col items-center gap-4 min-w-[120px] shrink-0 group">
-                                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-warning-500 border-warning-400 scale-125 shadow-[0_0_15px_rgba(245,165,36,0.6)]' :
+                                    <div className={`w-3 h-3 rounded-full border-2 transition-all duration-500 z-10 ${isCurrent ? 'bg-obaol-500 border-obaol-400 scale-125 shadow-[0_0_15px_rgba(207,152,60,0.6)]' :
                                         isCompleted ? 'bg-success-500 border-success-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]' :
                                             'bg-default-200 border-divider'
                                         }`} />
-                                    <div className={`text-xs font-black uppercase tracking-tight transition-colors text-center ${isCurrent ? 'text-warning-500' :
+                                    <div className={`text-xs font-black uppercase tracking-tight transition-colors text-center ${isCurrent ? 'text-obaol-500' :
                                         isCompleted ? 'text-success-500/80' :
                                             'text-default-500 group-hover:text-default-700 dark:group-hover:text-default-300'
                                         }`}>
@@ -1350,10 +1350,10 @@ export default function OrderDetailsPage() {
                             if (!isNeeded) return null;
 
                             return (
-                                <div key={m.label} className="p-5 rounded-3xl border border-divider bg-default-50/50 flex flex-col gap-4 group/m hover:border-warning-500/30 transition-all backdrop-blur-sm relative overflow-hidden">
+                                <div key={m.label} className="p-5 rounded-3xl border border-divider bg-default-50/50 flex flex-col gap-4 group/m hover:border-obaol-500/30 transition-all backdrop-blur-sm relative overflow-hidden">
                                     <div className="flex items-center justify-between">
-                                        <div className="text-[10px] font-black text-warning-500 uppercase tracking-[0.2em]">{m.label}</div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-warning-500/20" />
+                                        <div className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.2em]">{m.label}</div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-obaol-500/20" />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
@@ -1379,24 +1379,24 @@ export default function OrderDetailsPage() {
                 {/* Next Step Protocol: Action Roadmap */}
                 <div className="lg:col-span-1 flex flex-col gap-8">
                     {!hasLinkedExecutionTasks && (
-                        <div className="rounded-3xl border border-warning-500/30 bg-warning-500/10 p-6 backdrop-blur-xl flex flex-col gap-3">
-                            <div className="text-xs font-black uppercase tracking-widest text-warning-600">Execution Requests Needed</div>
+                        <div className="rounded-3xl border border-obaol-500/30 bg-obaol-500/10 p-6 backdrop-blur-xl flex flex-col gap-3">
+                            <div className="text-xs font-black uppercase tracking-widest text-obaol-600">Execution Requests Needed</div>
                             <div className="text-sm font-semibold text-default-600">
                                 Create execution requests to start subflow bidding and coordination.
                             </div>
                             <Link
                                 href={`/dashboard/execution-enquiries${enquiryRefId ? `?enquiryId=${enquiryRefId}` : ""}`}
-                                className="inline-flex items-center justify-center rounded-2xl bg-warning-500 text-black text-xs font-black uppercase tracking-widest h-10 px-4 shadow-[0_10px_30px_rgba(245,165,36,0.25)]"
+                                className="inline-flex items-center justify-center rounded-2xl bg-obaol-500 text-black text-xs font-black uppercase tracking-widest h-10 px-4 shadow-[0_10px_30px_rgba(207,152,60,0.25)]"
                             >
                                 Create Execution Request
                             </Link>
                         </div>
                     )}
                     <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group flex flex-col h-full">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-warning-500/20 transition-all duration-700" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-obaol-500/10 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-obaol-500/20 transition-all duration-700" />
 
-                        <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-6 flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-warning-500 block shadow-[0_0_8px_rgba(245,165,36,0.6)]" />
+                        <h2 className="text-xs font-black uppercase tracking-widest text-obaol-500 mb-6 flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-obaol-500 block shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
                             Next Step Protocol
                         </h2>
 
@@ -1408,10 +1408,10 @@ export default function OrderDetailsPage() {
                                     <p className="text-xs font-medium text-default-500">This order runs without execution support flows.</p>
                                 </div>
                             ) : subflowStatus.find(f => !f.isComplete) ? (
-                                <div className="p-5 rounded-2xl bg-warning-500/5 border border-warning-500/20 space-y-4">
-                                    <div className="text-[10px] font-black text-warning-600 uppercase tracking-widest">Active Dependency</div>
+                                <div className="p-5 rounded-2xl bg-obaol-500/5 border border-obaol-500/20 space-y-4">
+                                    <div className="text-[10px] font-black text-obaol-600 uppercase tracking-widest">Active Dependency</div>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-warning-500/20 flex items-center justify-center text-warning-500">
+                                        <div className="w-10 h-10 rounded-xl bg-obaol-500/20 flex items-center justify-center text-obaol-500">
                                             <FiArrowRight size={20} />
                                         </div>
                                         <div>
@@ -1429,7 +1429,7 @@ export default function OrderDetailsPage() {
                                         </div>
                                     </div>
                                     <p className="text-[11px] font-medium text-default-500 leading-relaxed">
-                                        Update the milestones within the <span className="text-warning-500 font-bold">Synchronized Pipelines</span> below to unlock next stage.
+                                        Update the milestones within the <span className="text-obaol-500 font-bold">Synchronized Pipelines</span> below to unlock next stage.
                                     </p>
                                 </div>
                             ) : (
@@ -1451,7 +1451,7 @@ export default function OrderDetailsPage() {
                                     ) : (
                                         subflowStatus.filter(f => !f.isComplete).slice(0, 2).map((f, i) => (
                                             <div key={f.type} className="relative flex items-center gap-3">
-                                                <div className={`absolute -left-[30px] w-2.5 h-2.5 rounded-full border-2 border-background shadow-sm ${i === 0 ? 'bg-warning-500' : 'bg-default-300'}`} />
+                                                <div className={`absolute -left-[30px] w-2.5 h-2.5 rounded-full border-2 border-background shadow-sm ${i === 0 ? 'bg-obaol-500' : 'bg-default-300'}`} />
                                                 <span className={`text-[11px] font-black uppercase tracking-tight ${i === 0 ? 'text-foreground' : 'text-default-400'}`}>
                                                     {f.label}
                                                 </span>
@@ -1466,7 +1466,7 @@ export default function OrderDetailsPage() {
                             <Button
                                 color="warning"
                                 variant="solid"
-                                className="font-black text-sm uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(245,165,36,0.2)] hover:shadow-[0_15px_40px_rgba(245,165,36,0.3)] hover:-translate-y-0.5 transition-all w-full"
+                                className="font-black text-sm uppercase tracking-widest h-14 rounded-2xl shadow-[0_10px_30px_rgba(207,152,60,0.2)] hover:shadow-[0_15px_40px_rgba(207,152,60,0.3)] hover:-translate-y-0.5 transition-all w-full"
                                 onClick={handleGeneralUpdate}
                                 isLoading={updateMutation.isPending}
                             >
@@ -1486,8 +1486,8 @@ export default function OrderDetailsPage() {
                     <div className="lg:col-span-2 bg-default-100/40 border border-divider rounded-3xl backdrop-blur-xl overflow-hidden h-full">
                         <div className="p-8 border-b border-divider flex justify-between items-end">
                             <div>
-                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-warning-500 flex items-center gap-3 mb-2">
-                                    <span className="w-2 h-2 rounded-full bg-warning-500 block animate-pulse shadow-[0_0_12px_rgba(245,165,36,0.6)]" />
+                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-obaol-500 flex items-center gap-3 mb-2">
+                                    <span className="w-2 h-2 rounded-full bg-obaol-500 block animate-pulse shadow-[0_0_12px_rgba(207,152,60,0.6)]" />
                                     Synchronized Pipelines
                                 </h2>
                                 <p className="text-[11px] font-black text-default-400 uppercase tracking-widest max-w-xs leading-relaxed">
@@ -1508,13 +1508,13 @@ export default function OrderDetailsPage() {
                                             title={
                                                 <div className="flex items-center justify-between gap-4 w-full h-full relative group/item">
                                                     <div className="flex items-center gap-5">
-                                                        <div className={`w-3 h-3 rounded-full transition-all duration-700 ${flow.isComplete ? "bg-success-500 shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-warning-500 shadow-[0_0_15px_rgba(245,165,36,0.6)] animate-pulse"}`} />
+                                                        <div className={`w-3 h-3 rounded-full transition-all duration-700 ${flow.isComplete ? "bg-success-500 shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-obaol-500 shadow-[0_0_15px_rgba(207,152,60,0.6)] animate-pulse"}`} />
                                                         <div className="flex flex-col gap-1.5 text-left">
-                                                            <div className="text-sm font-black text-foreground uppercase tracking-tight group-hover/item:text-warning-500 transition-colors">{flow.label}</div>
+                                                            <div className="text-sm font-black text-foreground uppercase tracking-tight group-hover/item:text-obaol-500 transition-colors">{flow.label}</div>
                                                             <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
                                                             <div className="text-[9px] font-black uppercase tracking-widest bg-default-200/50 dark:bg-default-50/10 px-2 py-0.5 rounded-md border border-divider">
                                                                 <span className="text-default-400 mr-1.5">STATUS:</span>
-                                                                <span className="text-warning-500">{flow.currentLabel}</span>
+                                                                <span className="text-obaol-500">{flow.currentLabel}</span>
                                                             </div>
                                                             {flow.biddingLabel ? (
                                                                 <div className="text-[9px] font-black uppercase tracking-widest bg-default-200/50 dark:bg-default-50/10 px-2 py-0.5 rounded-md border border-divider">
@@ -1544,7 +1544,7 @@ export default function OrderDetailsPage() {
                                                 </div>
                                             }
                                             classNames={{
-                                                base: "bg-default-50/20 border border-divider rounded-[1.5rem] shadow-sm hover:border-warning-500/30 transition-all px-2",
+                                                base: "bg-default-50/20 border border-divider rounded-[1.5rem] shadow-sm hover:border-obaol-500/30 transition-all px-2",
                                                 trigger: "py-5",
                                                 content: "pt-2 pb-8 px-4",
                                                 title: "w-full"
@@ -1591,7 +1591,7 @@ export default function OrderDetailsPage() {
                                                                 );
                                                             })()}
                                                             {!isBiddingConfirmed(flow.type, flow.instanceKey) && (
-                                                                <div className="text-[10px] font-bold text-warning-500 uppercase tracking-widest px-1">
+                                                                <div className="text-[10px] font-bold text-obaol-500 uppercase tracking-widest px-1">
                                                                     Confirm bidding before selecting a stage.
                                                                 </div>
                                                             )}
@@ -1605,7 +1605,7 @@ export default function OrderDetailsPage() {
                                                     {/* Parallel Dates Section */}
                                                     {dateFields.length > 0 && (
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 rounded-[1.5rem] bg-default-100/20 border border-divider shadow-inner group/dates relative overflow-hidden">
-                                                            <div className="absolute top-0 left-0 w-1 h-full bg-warning-500/20" />
+                                                            <div className="absolute top-0 left-0 w-1 h-full bg-obaol-500/20" />
                                                         {dateFields.map((field) => (
                                                             <div key={field.key} className="flex flex-col gap-2.5">
                                                                 <label className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] px-0.5">{field.label}</label>
@@ -1647,9 +1647,9 @@ export default function OrderDetailsPage() {
                                                                         const hasDoc = hasDocType(String(docType || ""));
                                                                         const rule = getDocRule(String(docType || ""));
                                                                         return (
-                                                                            <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-warning-500/30 transition-all">
+                                                                            <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-obaol-500/30 transition-all">
                                                                                 <div className="flex items-center gap-3">
-                                                                                    <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
+                                                                                    <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]'}`} />
                                                                                     <div className="text-xs font-black text-foreground uppercase tracking-wider">
                                                                                         {DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}
                                                                                     </div>
@@ -1678,12 +1678,12 @@ export default function OrderDetailsPage() {
                                                     {flow.type === "INLAND_TRANSPORTATION" && canSeeFleet() && (
                                                         <div className="bg-default-100/40 border border-divider rounded-2xl p-6 backdrop-blur-xl">
                                                             <div className="flex justify-between items-center mb-6">
-                                                                <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 flex items-center gap-3">
-                                                                    <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" /> Fleet Telemetry
+                                                                <h2 className="text-xs font-black uppercase tracking-widest text-obaol-500 flex items-center gap-3">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-obaol-500 block" /> Fleet Telemetry
                                                                 </h2>
                                                                 <div className="flex gap-2">
                                                                     <Button size="sm" color="warning" variant="flat" className="h-8 text-xs font-black uppercase px-4 rounded-lg" onPress={addTruck}> + UNIT </Button>
-                                                                    <Button size="sm" color="warning" variant="solid" className="h-8 text-xs font-black uppercase px-4 rounded-lg shadow-lg shadow-warning-500/20" onPress={() => updateMutation.mutate({ logistics: logisticsList })} isLoading={updateMutation.isPending}> SYNC FLEET </Button>
+                                                                    <Button size="sm" color="warning" variant="solid" className="h-8 text-xs font-black uppercase px-4 rounded-lg shadow-lg shadow-obaol-500/20" onPress={() => updateMutation.mutate({ logistics: logisticsList })} isLoading={updateMutation.isPending}> SYNC FLEET </Button>
                                                                 </div>
                                                             </div>
                                                             <div className="space-y-4">
@@ -1691,7 +1691,7 @@ export default function OrderDetailsPage() {
                                                                     <div className="py-10 border border-dashed border-divider rounded-2xl text-center text-xs font-black text-default-400 uppercase tracking-widest"> No fleet units prioritized </div>
                                                                 )}
                                                                 {logisticsList.map((truck, index) => (
-                                                                    <div key={index} className="p-5 rounded-2xl bg-default-100/50 border border-divider relative group hover:border-warning-500/30 transition-all">
+                                                                    <div key={index} className="p-5 rounded-2xl bg-default-100/50 border border-divider relative group hover:border-obaol-500/30 transition-all">
                                                                         <Button isIconOnly size="sm" variant="light" className="absolute top-4 right-4 text-danger-400 group-hover:opacity-100 transition-opacity" onPress={() => removeTruck(index)}>
                                                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                                                         </Button>
@@ -1712,7 +1712,7 @@ export default function OrderDetailsPage() {
                                                             <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">
                                                                 Subflow Progression Pipeline
                                                             </div>
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-warning-500 bg-warning-500/10 px-3 py-1 rounded-full border border-warning-500/20">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-obaol-500 bg-obaol-500/10 px-3 py-1 rounded-full border border-obaol-500/20">
                                                             {flow.totalCount > 0 ? Math.round((flow.completedCount / flow.totalCount) * 100) : 0}% OVERALL
                                                         </div>
                                                     </div>
@@ -1754,19 +1754,19 @@ export default function OrderDetailsPage() {
                                                                     {/* ACTIVE STAGE CARD */}
                                                                     {!flow.isComplete && activeStage && (
                                                                         <div className="flex flex-col gap-3">
-                                                                            <div className="text-[10px] font-black text-warning-500 uppercase tracking-widest px-1">In-Focus Objective</div>
+                                                                            <div className="text-[10px] font-black text-obaol-500 uppercase tracking-widest px-1">In-Focus Objective</div>
                                                                             <div
-                                                                                className="p-5 rounded-2xl border-2 border-warning-500/30 bg-warning-500/10 shadow-lg shadow-warning-500/5 relative overflow-hidden group/stageActive"
+                                                                                className="p-5 rounded-2xl border-2 border-obaol-500/30 bg-obaol-500/10 shadow-lg shadow-obaol-500/5 relative overflow-hidden group/stageActive"
                                                                             >
                                                                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/stageActive:rotate-12 transition-transform">
                                                                                     <FiLoader size={32} className="animate-spin-slow" />
                                                                                 </div>
                                                                                 <div className="flex items-center justify-between mb-2">
                                                                                     <div className="text-sm font-black uppercase tracking-tight text-foreground flex items-center gap-2.5">
-                                                                                        <span className="w-3 h-3 rounded-full bg-warning-500 animate-pulse-slow shadow-[0_0_12px_rgba(245,165,36,0.6)]" />
+                                                                                        <span className="w-3 h-3 rounded-full bg-obaol-500 animate-pulse-slow shadow-[0_0_12px_rgba(207,152,60,0.6)]" />
                                                                                         {activeStage.label}
                                                                                     </div>
-                                                                                    <div className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border text-warning-500 border-warning-500/30 bg-warning-500/10">
+                                                                                    <div className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border text-obaol-500 border-obaol-500/30 bg-obaol-500/10">
                                                                                         Live Phase
                                                                                     </div>
                                                                                 </div>
@@ -1788,7 +1788,7 @@ export default function OrderDetailsPage() {
                                                                                         className="p-3.5 rounded-xl border border-divider bg-default-100/30 hover:bg-default-100/60 hover:border-default-300 transition-all flex items-center justify-between group/next"
                                                                                     >
                                                                                         <div className="flex items-center gap-3">
-                                                                                            <FiCircle size={10} className="text-default-300 group-hover/next:text-warning-500 transition-colors" />
+                                                                                            <FiCircle size={10} className="text-default-300 group-hover/next:text-obaol-500 transition-colors" />
                                                                                             <span className="text-[11px] font-black uppercase tracking-tight text-default-600 group-hover/next:text-foreground">{stage.label}</span>
                                                                                         </div>
                                                                                         <FiChevronRight size={12} className="text-default-300 opacity-0 group-hover/next:opacity-100 transition-all" />
@@ -1830,8 +1830,8 @@ export default function OrderDetailsPage() {
 
                 {/* Authority Configuration */}
                 <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl h-full flex flex-col">
-                    <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" />
+                    <h2 className="text-xs font-black uppercase tracking-widest text-obaol-500 mb-8 flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-obaol-500 block" />
                         Authority Configuration
                     </h2>
                     <div className="flex-grow space-y-4">
@@ -1849,7 +1849,7 @@ export default function OrderDetailsPage() {
                                 <div className="flex justify-between items-center px-1">
                                     <label className="text-[10px] font-black text-default-400 uppercase tracking-widest">{resp.label}</label>
                                     {resp.date && (
-                                        <div className="text-[9px] font-black text-warning-500 bg-warning-500/10 px-2 py-0.5 rounded-md border border-warning-500/20">
+                                        <div className="text-[9px] font-black text-obaol-500 bg-obaol-500/10 px-2 py-0.5 rounded-md border border-obaol-500/20">
                                             {dayjs(resp.date).format("DD MMM")}
                                         </div>
                                     )}
@@ -1964,8 +1964,8 @@ export default function OrderDetailsPage() {
                 <div id="execution-bidding" className="mt-10 bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
                     <div className="flex items-start justify-between gap-4 mb-6">
                         <div>
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-warning-500 flex items-center gap-3 mb-2">
-                                <span className="w-2 h-2 rounded-full bg-warning-500 block shadow-[0_0_8px_rgba(245,165,36,0.6)]" />
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-obaol-500 flex items-center gap-3 mb-2">
+                                <span className="w-2 h-2 rounded-full bg-obaol-500 block shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
                                 Execution Bidding
                             </h2>
                             <p className="text-[11px] font-black text-default-400 uppercase tracking-widest">
@@ -1988,7 +1988,7 @@ export default function OrderDetailsPage() {
                             classNames={{
                                 tabList: "gap-6",
                                 tab: "text-xs font-black uppercase tracking-widest",
-                                cursor: "bg-warning-500"
+                                cursor: "bg-obaol-500"
                             }}
                         >
                             {executionBidTasks.map((task: any) => {
@@ -2006,7 +2006,7 @@ export default function OrderDetailsPage() {
                                                 <div className="text-[11px] font-black uppercase tracking-widest text-default-500">
                                                     Bidding Status
                                                 </div>
-                                                <div className="text-[11px] font-black uppercase tracking-widest text-warning-600">
+                                                <div className="text-[11px] font-black uppercase tracking-widest text-obaol-600">
                                                     {getExecutionBidLabel(task)}
                                                 </div>
                                             </div>
@@ -2048,7 +2048,7 @@ export default function OrderDetailsPage() {
                                                                             <td className="py-1 truncate max-w-[140px] text-foreground">
                                                                                 {getCompanyName(bid?.company || bid?.companyId || bid?.provider)}
                                                                             </td>
-                                                                            <td className="py-1 text-warning-600">
+                                                                            <td className="py-1 text-obaol-600">
                                                                                 {amount !== null ? formatRate(Number(amount)) : "-"}
                                                                             </td>
                                                                             <td className="py-1 text-default-500 truncate max-w-[160px]">{bid?.note || "-"}</td>
@@ -2076,8 +2076,8 @@ export default function OrderDetailsPage() {
             <div id="order-docs" className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Order Core Documents */}
                 <div className="bg-default-100/40 border border-divider rounded-3xl p-8 backdrop-blur-xl">
-                    <h2 className="text-xs font-black uppercase tracking-widest text-warning-500 mb-8 flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-warning-500 block" /> Order Core Documents
+                    <h2 className="text-xs font-black uppercase tracking-widest text-obaol-500 mb-8 flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-obaol-500 block" /> Order Core Documents
                     </h2>
                     <div className="space-y-3">
                         {orderCoreDocTypes.length === 0 ? (
@@ -2087,9 +2087,9 @@ export default function OrderDetailsPage() {
                                 const hasDoc = hasDocType(String(docType || ""));
                                 const rule = getDocRule(String(docType || ""));
                                 return (
-                                    <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-warning-500/30 transition-all">
+                                    <div key={docType} className="p-4 rounded-xl bg-default-100/50 border border-divider flex items-center justify-between group hover:border-obaol-500/30 transition-all">
                                     <div className="flex items-center gap-4">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,165,36,0.5)]'}`} />
+                                        <div className={`w-1.5 h-1.5 rounded-full ${hasDoc ? 'bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]'}`} />
                                         <div className="text-xs font-black text-foreground uppercase tracking-wider">{DOC_TYPE_LABELS[String(docType || "").toUpperCase()] || String(docType).replaceAll("_", " ")}</div>
                                     </div>
                                         <div className="flex items-end gap-2">
@@ -2138,11 +2138,11 @@ export default function OrderDetailsPage() {
                         {String(docActionRule?.actionType || "") === "UPLOAD" && (
                             <Input label="REMOTE SECURE URL" placeholder="https://..." value={docActionFileUrl} onChange={(e) => setDocActionFileUrl(e.target.value)} variant="bordered" classNames={{ input: "text-foreground" }} />
                         )}
-                        <div className="text-xs font-black text-warning-500 uppercase tracking-widest mt-2">{docActionRule?.responsibleRole ? `PRIORITY: ${docActionRule.responsibleRole} AUTHORITY` : ""}</div>
+                        <div className="text-xs font-black text-obaol-500 uppercase tracking-widest mt-2">{docActionRule?.responsibleRole ? `PRIORITY: ${docActionRule.responsibleRole} AUTHORITY` : ""}</div>
                     </ModalBody>
                     <ModalFooter>
                         <Button variant="light" className="text-default-400 font-black text-xs uppercase" onPress={() => setDocActionOpen(false)}> CANCEL </Button>
-                        <Button color="warning" className="font-black text-xs uppercase shadow-lg shadow-warning-500/20" onPress={() => createDocMutation.mutate()}> COMMIT TO REGISTRY </Button>
+                        <Button color="warning" className="font-black text-xs uppercase shadow-lg shadow-obaol-500/20" onPress={() => createDocMutation.mutate()}> COMMIT TO REGISTRY </Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

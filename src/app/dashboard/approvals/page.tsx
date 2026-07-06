@@ -151,9 +151,9 @@ export default function ApprovalsPage() {
           color="warning"
           classNames={{
             tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
-            cursor: "bg-warning-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(234,179,8,0.2)]",
+            cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(207,152,60,0.25)]",
             tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
-            tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-warning-500 group-data-[selected=true]:scale-105 transition-all"
+            tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-obaol-700 dark:group-data-[selected=true]:text-obaol-300 group-data-[selected=true]:scale-105 transition-all"
           }}
         >
           <Tab
@@ -206,7 +206,7 @@ export default function ApprovalsPage() {
             startContent={<LuSearch className="text-default-400" size={18} />}
             classNames={{
               input: "font-medium text-sm",
-              inputWrapper: "h-12 bg-background border border-foreground/5 shadow-none hover:border-warning-500/20 transition-colors rounded-xl"
+              inputWrapper: "h-12 bg-background border border-foreground/5 shadow-none hover:border-obaol-500/20 transition-colors rounded-xl"
             }}
           />
         </div>
@@ -223,7 +223,7 @@ export default function ApprovalsPage() {
               }
             }}
             classNames={{
-              trigger: "h-12 bg-background border border-foreground/5 shadow-none hover:border-warning-500/20 transition-colors rounded-xl",
+              trigger: "h-12 bg-background border border-foreground/5 shadow-none hover:border-obaol-500/20 transition-colors rounded-xl",
               value: "font-medium text-sm"
             }}
           >
@@ -245,7 +245,7 @@ export default function ApprovalsPage() {
             maxRows={2}
             classNames={{
               input: "font-medium text-sm",
-              inputWrapper: "bg-background border border-foreground/5 shadow-none hover:border-warning-500/20 transition-colors rounded-xl"
+              inputWrapper: "bg-background border border-foreground/5 shadow-none hover:border-obaol-500/20 transition-colors rounded-xl"
             }}
           />
         </div>

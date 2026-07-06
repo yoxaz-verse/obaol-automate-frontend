@@ -53,7 +53,7 @@ export default function CinematicIntro() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#030813] overflow-hidden"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#090806] overflow-hidden"
         >
           {/* Ambient Glowing Orbs */}
           <motion.div

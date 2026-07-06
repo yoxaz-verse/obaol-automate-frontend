@@ -41,14 +41,14 @@ function DeepSearchResult({
   onNavigate: (item: any, type: string) => void;
 }) {
   const icons = {
-    category: <FiFolder size={20} className="text-warning-500" />,
-    subCategory: <FiLayers size={20} className="text-warning-600" />,
-    product: <FiPackage size={20} className="text-warning-700" />,
+    category: <FiFolder size={20} className="text-obaol-500" />,
+    subCategory: <FiLayers size={20} className="text-obaol-600" />,
+    product: <FiPackage size={20} className="text-obaol-700" />,
   };
   const labels = { category: "Category", subCategory: "Sub Category", product: "Product" };
   const typeColors = {
-    category: "bg-warning-100 text-warning-700 dark:bg-warning-500/20 dark:text-warning-400",
-    subCategory: "bg-warning-200 text-warning-800 dark:bg-warning-500/30 dark:text-warning-300",
+    category: "bg-obaol-100 text-obaol-700 dark:bg-obaol-500/20 dark:text-obaol-400",
+    subCategory: "bg-obaol-200 text-obaol-800 dark:bg-obaol-500/30 dark:text-obaol-300",
     product: "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400",
   };
 
@@ -56,10 +56,10 @@ function DeepSearchResult({
     <motion.button
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full text-left group flex items-center gap-4 p-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-warning-500/5 hover:border-warning-500/20 transition-all outline-none focus:outline-none"
+      className="w-full text-left group flex items-center gap-4 p-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-obaol-500/5 hover:border-obaol-500/20 transition-all outline-none focus:outline-none"
       onClick={() => onNavigate(item, type)}
     >
-      <div className="shrink-0 w-11 h-11 rounded-xl bg-warning-500/10 flex items-center justify-center group-hover:bg-warning-500/20 transition-colors">
+      <div className="shrink-0 w-11 h-11 rounded-xl bg-obaol-500/10 flex items-center justify-center group-hover:bg-obaol-500/20 transition-colors">
         {icons[type]}
       </div>
 
@@ -113,7 +113,7 @@ function DeepSearchPanel({
           if (!items.length) return null;
           return (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-warning-500 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-obaol-500 mb-3 flex items-center gap-2">
                 <FiFolder size={12} /> Categories
               </p>
               <div className="flex flex-col gap-2">
@@ -139,7 +139,7 @@ function DeepSearchPanel({
           if (!items.length) return null;
           return (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-warning-600 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-obaol-600 mb-3 flex items-center gap-2">
                 <FiLayers size={12} /> Sub Categories
               </p>
               <div className="flex flex-col gap-2">
@@ -398,7 +398,7 @@ export default function CatalogPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-6 border-b border-foreground/5 pb-6">
           <div className="flex flex-col">
             <h1 className="text-4xl font-bold tracking-tight text-foreground mb-1 uppercase">
-              Global <span className="text-warning-500">Catalog</span>
+              Global <span className="text-obaol-500">Catalog</span>
             </h1>
             <p className="text-default-400 text-sm font-medium tracking-wide">
               Browse through our premium selection of commodities and variants.
@@ -408,7 +408,7 @@ export default function CatalogPage() {
                 <Chip size="sm" color="warning" variant="flat">
                   Personal Catalog Mode
                 </Chip>
-                <Chip size="sm" variant="bordered" className="border-warning-400/50 text-warning-700 dark:text-warning-300">
+                <Chip size="sm" variant="bordered" className="border-obaol-400/50 text-obaol-700 dark:text-obaol-300">
                   Own rates require company linkage
                 </Chip>
               </div>
@@ -420,15 +420,15 @@ export default function CatalogPage() {
                 placeholder="Deep search — products, categories, variants..."
                 value={search}
                 onValueChange={setSearch}
-                startContent={<FiSearch className={isSearching ? "text-warning-500" : "text-default-400"} />}
-                endContent={search && <FiX className="cursor-pointer text-default-400 hover:text-warning-500 transition-colors" onClick={() => setSearch("")} />}
+                startContent={<FiSearch className={isSearching ? "text-obaol-500" : "text-default-400"} />}
+                endContent={search && <FiX className="cursor-pointer text-default-400 hover:text-obaol-500 transition-colors" onClick={() => setSearch("")} />}
                 classNames={{
-                  inputWrapper: `bg-foreground/[0.03] border shadow-xl backdrop-blur-md h-12 px-4 transition-all ${isSearching ? "border-warning-500/40 bg-warning-500/5" : "border-transparent"}`,
+                  inputWrapper: `bg-foreground/[0.03] border shadow-xl backdrop-blur-md h-12 px-4 transition-all ${isSearching ? "border-obaol-500/40 bg-obaol-500/5" : "border-transparent"}`,
                   input: "text-sm",
                 }}
               />
               {isSearching && (
-                <div className="absolute -bottom-1.5 left-4 right-4 h-[2px] bg-gradient-to-r from-warning-400 to-orange-500 rounded-full" />
+                <div className="absolute -bottom-1.5 left-4 right-4 h-[2px] bg-gradient-to-r from-obaol-400 to-orange-500 rounded-full" />
               )}
             </div>
 
@@ -471,10 +471,10 @@ export default function CatalogPage() {
               title={(
                 <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 transition-all ${
                   classificationTab === "all"
-                    ? "bg-warning-500/15 border-warning-400/45 text-warning-600 shadow-sm font-bold"
+                    ? "bg-obaol-500/15 border-obaol-400/45 text-obaol-600 shadow-sm font-bold"
                     : "bg-transparent border-transparent text-default-400 hover:bg-default-500/10 font-semibold"
                 }`}>
-                  <FiGrid size={14} className={classificationTab === "all" ? "text-warning-500" : "text-default-400"} />
+                  <FiGrid size={14} className={classificationTab === "all" ? "text-obaol-500" : "text-default-400"} />
                   <span>All</span>
                 </span>
               )}
@@ -513,14 +513,14 @@ export default function CatalogPage() {
               exit={{ opacity: 0, y: -8 }}
             className="flex items-center gap-3 mb-5"
             >
-              <FiSearch className="text-warning-500" size={16} />
+              <FiSearch className="text-obaol-500" size={16} />
               <span className="text-sm font-semibold text-default-500">
                 Searching across all levels for{" "}
-                <span className="text-warning-500 font-bold">&quot;{search}&quot;</span>
+                <span className="text-obaol-500 font-bold">&quot;{search}&quot;</span>
               </span>
               <button
                 onClick={() => setSearch("")}
-                className="ml-auto text-xs font-bold text-default-400 hover:text-warning-500 transition-colors flex items-center gap-1"
+                className="ml-auto text-xs font-bold text-default-400 hover:text-obaol-500 transition-colors flex items-center gap-1"
               >
                 <FiX size={12} /> Clear
               </button>
@@ -551,7 +551,7 @@ export default function CatalogPage() {
               >
                 {selectedProduct ? (
                   <div className={`rounded-[3rem] p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden border ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-warning-400 to-orange-500 opacity-50" />
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-obaol-400 to-orange-500 opacity-50" />
                     <ProductList
                       product={selectedProduct}
                       setProduct={setSelectedProduct}

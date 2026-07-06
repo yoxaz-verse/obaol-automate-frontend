@@ -755,12 +755,12 @@ const ResponsibilityEventForm: React.FC<Props> = ({
               )}
 
               {isInternational && (
-                <div className="flex items-center gap-5 p-6 rounded-[2rem] bg-warning-500/10 border border-warning-500/20 backdrop-blur-xl relative overflow-hidden">
-                  <div className="w-12 h-12 rounded-xl bg-warning-500/20 flex items-center justify-center text-warning-500 shrink-0">
+                <div className="flex items-center gap-5 p-6 rounded-[2rem] bg-obaol-500/10 border border-obaol-500/20 backdrop-blur-xl relative overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-obaol-500/20 flex items-center justify-center text-obaol-500 shrink-0">
                     <FiInfo size={24} />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-warning-500">Deployment Context</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-obaol-500">Deployment Context</span>
                     <p className="text-[11px] font-medium text-foreground opacity-80 leading-tight tracking-tight italic">Cross-border logistics and port handling protocols will be enforced.</p>
                   </div>
                 </div>
@@ -783,7 +783,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           {!isResponsibilityEventChanged && responsibilitySavedAt ? "Workspace Synced" : "Synchronize Workspace"}
                         </Button>
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/[0.03] border border-foreground/5">
-                           <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged ? "bg-warning-500 animate-pulse" : "bg-success"}`} />
+                           <div className={`w-1.5 h-1.5 rounded-full ${isResponsibilityEventChanged ? "bg-obaol-500 animate-pulse" : "bg-success"}`} />
                            <span className={`text-[9px] font-bold uppercase tracking-widest italic leading-none ${isResponsibilityEventChanged ? "text-default-400" : "text-success"}`}>
                              {isResponsibilityEventChanged ? "Awaiting Synchronization" : "Workspace Synchronized"}
                            </span>
@@ -803,7 +803,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                           className={`h-16 rounded-[1.75rem] font-black uppercase tracking-[0.4em] text-[11px] italic transition-all duration-500 relative overflow-hidden group/btn
                             ${isReadOnlyAfterConversion 
                               ? "bg-success/10 text-success border border-success/30 shadow-[0_0_25px_rgba(34,197,94,0.15)]" 
-                              : "bg-warning-500 text-black shadow-[0_15px_45px_rgba(234,179,8,0.3)] hover:shadow-warning-500/60 hover:-translate-y-1 hover:scale-[1.02]"
+                              : "bg-obaol-500 text-black shadow-[0_15px_45px_rgba(234,179,8,0.3)] hover:shadow-obaol-500/60 hover:-translate-y-1 hover:scale-[1.02]"
                             }`}
                           startContent={!finalizeLoading && (isReadOnlyAfterConversion 
                             ? <LuShieldCheck size={18} className="mr-1" /> 
@@ -818,7 +818,7 @@ const ResponsibilityEventForm: React.FC<Props> = ({
                   </div>
                   <div className="flex flex-col items-center gap-2 mt-4">
                     <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-foreground/[0.04] border border-white/5 shadow-inner">
-                       <div className={`w-1.5 h-1.5 rounded-full ${isReadOnlyAfterConversion ? "bg-success animate-pulse" : "bg-warning-500 animate-pulse"} shadow-[0_0_8px_rgba(234,179,8,0.5)]`} />
+                       <div className={`w-1.5 h-1.5 rounded-full ${isReadOnlyAfterConversion ? "bg-success animate-pulse" : "bg-obaol-500 animate-pulse"} shadow-[0_0_8px_rgba(234,179,8,0.5)]`} />
                        <span className="text-[9px] font-black uppercase tracking-[0.5em] text-white/40 italic">
                           {finalizeLoading || savingFramework
                             ? "PARSING PROTOCOL..."

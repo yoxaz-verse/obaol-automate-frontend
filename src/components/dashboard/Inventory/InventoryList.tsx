@@ -203,7 +203,7 @@ const InventoryList: React.FC = () => {
             )}
 
             {!shouldFetchInventory && (
-                <div className="mb-6 rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-3 text-sm text-warning-700 dark:text-warning-300">
+                <div className="mb-6 rounded-xl border border-obaol-300/30 bg-obaol-500/10 px-4 py-3 text-sm text-obaol-700 dark:text-obaol-300">
                     Select a company to view and manage inventory.
                 </div>
             )}
@@ -587,8 +587,8 @@ const InventoryList: React.FC = () => {
                                 <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} aria-label="Inventory tabs">
                                     <Tab key="inventory" title="Inventory">
                                         {suggestedRates.length > 0 && (
-                                            <div className="mb-6 rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-4">
-                                                <div className="mb-2 text-sm font-semibold text-warning-700 dark:text-warning-300">
+                                            <div className="mb-6 rounded-xl border border-obaol-300/30 bg-obaol-500/10 px-4 py-4">
+                                                <div className="mb-2 text-sm font-semibold text-obaol-700 dark:text-obaol-300">
                                                     Suggested From Rates
                                                 </div>
                                                 <div className="flex flex-col gap-2">
@@ -824,7 +824,7 @@ const InventoryList: React.FC = () => {
                                     <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
                                         <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
                                             <div className="flex items-center gap-4 pt-2">
-                                                <div className="p-2.5 bg-warning/10 rounded-xl text-warning-500 shadow-sm shadow-warning/10">
+                                                <div className="p-2.5 bg-warning/10 rounded-xl text-obaol-500 shadow-sm shadow-warning/10">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                                     </svg>
@@ -846,7 +846,7 @@ const InventoryList: React.FC = () => {
                                                         </span>
                                                     </div>
                                                     {(selectedInventory?.productVariant || selectedInventory?.variantName) && (
-                                                        <div className="px-3 py-1.5 bg-warning/10 text-warning-600 rounded-xl text-xs font-black border border-warning/20 shadow-inner shrink-0">
+                                                        <div className="px-3 py-1.5 bg-warning/10 text-obaol-600 rounded-xl text-xs font-black border border-warning/20 shadow-inner shrink-0">
                                                             {selectedInventory?.productVariant || selectedInventory?.variantName}
                                                         </div>
                                                     )}
@@ -872,7 +872,7 @@ const InventoryList: React.FC = () => {
                                             />
                                             {/* Info note */}
                                             <div className="flex items-start gap-2 text-xs text-default-400 bg-default-100/40 px-3 py-2.5 rounded-xl border border-divider/20">
-                                                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-obaol-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 This will increase the available stock for this inventory item.
@@ -950,7 +950,7 @@ const InventoryList: React.FC = () => {
 
                                                 if (!ratePerUnit) {
                                                     return (
-                                                        <div className="rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-3 text-sm text-warning-700 dark:text-warning-300">
+                                                        <div className="rounded-xl border border-obaol-300/30 bg-obaol-500/10 px-4 py-3 text-sm text-obaol-700 dark:text-obaol-300">
                                                             Rate not configured for this warehouse.
                                                         </div>
                                                     );

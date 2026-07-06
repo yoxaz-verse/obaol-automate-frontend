@@ -89,8 +89,8 @@ function ProgressBarContent() {
             width: `${progress}%`,
             height: "3px",
             background:
-              "linear-gradient(90deg, rgba(251,146,60,1) 0%, rgba(245,158,11,1) 55%, rgba(251,191,36,1) 100%)",
-            boxShadow: "0 0 10px rgba(251,146,60,0.45)",
+              "linear-gradient(90deg, rgba(228,199,153,1) 0%, rgba(207,152,60,1) 55%, rgba(209,147,57,1) 100%)",
+            boxShadow: "0 0 10px rgba(228,199,153,0.45)",
             zIndex: 99999,
             pointerEvents: "none",
           }}

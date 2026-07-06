@@ -88,10 +88,10 @@ export default function SampleRequestsPage() {
       >
         <div className="flex flex-col gap-2">
            <div className="flex items-center gap-3 mb-1">
-              <div className="p-3 bg-warning-500/10 rounded-2xl text-warning-500 shadow-inner">
+              <div className="p-3 bg-obaol-500/10 rounded-2xl text-obaol-500 shadow-inner">
                  <LuBox size={24} />
               </div>
-              <h2 className="text-4xl font-black text-foreground tracking-tight uppercase">Sample <span className="text-warning-500">Hub</span></h2>
+              <h2 className="text-4xl font-black text-foreground tracking-tight uppercase">Sample <span className="text-obaol-500">Hub</span></h2>
            </div>
            <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] ml-1">Protocol Initialization & Sample Logistics Lifecycle</p>
         </div>
@@ -106,17 +106,17 @@ export default function SampleRequestsPage() {
             className="w-full"
             classNames={{
               input: "font-black text-xs tracking-tight",
-              inputWrapper: "h-14 bg-content1/40 hover:bg-content1/60 border border-divider/50 hover:border-warning-500/50 rounded-2xl transition-all pl-12 shadow-xl backdrop-blur-md"
+              inputWrapper: "h-14 bg-content1/40 hover:bg-content1/60 border border-divider/50 hover:border-obaol-500/50 rounded-2xl transition-all pl-12 shadow-xl backdrop-blur-md"
             }}
           />
-          <LuSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-warning-500 opacity-40 group-hover:opacity-100 transition-opacity" size={18} />
+          <LuSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-obaol-500 opacity-40 group-hover:opacity-100 transition-opacity" size={18} />
         </div>
       </motion.div>
 
       <div className="mx-4 md:mx-10 pb-20">
         {(scopedRows || []).length === 0 ? (
           <div className="rounded-[3rem] border border-dashed border-divider bg-content1/30 px-10 py-40 flex flex-col items-center justify-center text-center backdrop-blur-xl">
-             <div className="w-20 h-20 bg-warning-500/10 rounded-3xl flex items-center justify-center mb-8 text-warning-500 shadow-inner">
+             <div className="w-20 h-20 bg-obaol-500/10 rounded-3xl flex items-center justify-center mb-8 text-obaol-500 shadow-inner">
                <LuPackage size={36} />
              </div>
              <h4 className="text-2xl font-black text-foreground uppercase tracking-tight">System Empty</h4>
@@ -127,7 +127,7 @@ export default function SampleRequestsPage() {
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16 text-left">
                 {[
                   { step: "01", title: "EXPLORE LISTINGS", desc: "Open Trade Listings or the Commodity Directory to browse current cargo rates.", icon: LuSearch, color: "text-blue-500" },
-                  { step: "02", title: "INITIATE PROTOCOL", desc: "Select the 'Request Sample' icon on any live product to start the dispatch sequence.", icon: LuBox, color: "text-warning-500" },
+                  { step: "02", title: "INITIATE PROTOCOL", desc: "Select the 'Request Sample' icon on any live product to start the dispatch sequence.", icon: LuBox, color: "text-obaol-500" },
                   { step: "03", title: "TRACK DISPATCH", desc: "Monitor your sample's logistics lifecycle right here in the Sample Hub.", icon: LuActivity, color: "text-emerald-500" }
                 ].map((item, i) => (
                   <div key={i} className="p-6 rounded-[2rem] bg-foreground/[0.03] border border-white/5 relative group hover:bg-foreground/[0.05] transition-all">
@@ -142,7 +142,7 @@ export default function SampleRequestsPage() {
              <div className="flex flex-wrap items-center justify-center gap-4">
                 <Button 
                    color="warning" 
-                   className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest uppercase shadow-warning-500/20 shadow-2xl bg-warning-500 text-black border-none hover:scale-105 transition-all"
+                   className="font-black h-14 px-10 rounded-[1.5rem] text-[11px] tracking-widest uppercase shadow-obaol-500/20 shadow-2xl bg-obaol-500 text-black border-none hover:scale-105 transition-all"
                    onPress={() => router.push("/dashboard/product")}
                    startContent={<LuBox size={20} />}
                 >
@@ -193,13 +193,13 @@ export default function SampleRequestsPage() {
                    transition={{ delay: idx * 0.05 }}
                    className="h-full"
                 >
-                  <Card className="bg-white dark:bg-[#04070f] border border-default-300 dark:border-white/20 shadow-none rounded-[2rem] overflow-hidden group hover:border-warning-500/30 transition-all duration-500 h-full flex flex-col">
+                  <Card className="bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none rounded-[2rem] overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full flex flex-col">
                     <CardBody className="p-0 flex flex-col h-full">
                       <div className="p-6 pb-4 flex flex-col gap-3">
                         <div className="flex items-start justify-between w-full">
                             <div className="flex items-center gap-2">
-                                <span className="text-[8px] font-black text-warning-500 uppercase tracking-widest bg-warning-500/10 px-2 py-0.5 rounded-full border border-warning-500/20">ID: {String(row._id).slice(-6).toUpperCase()}</span>
-                                <div className="w-1 h-1 rounded-full bg-warning-500 animate-pulse" />
+                                <span className="text-[8px] font-black text-obaol-500 uppercase tracking-widest bg-obaol-500/10 px-2 py-0.5 rounded-full border border-obaol-500/20">ID: {String(row._id).slice(-6).toUpperCase()}</span>
+                                <div className="w-1 h-1 rounded-full bg-obaol-500 animate-pulse" />
                             </div>
                             {!hideStatusChip && (
                               <Chip 
@@ -213,7 +213,7 @@ export default function SampleRequestsPage() {
                             )}
                         </div>
                         <div>
-                            <h3 className="text-lg font-black text-foreground tracking-tight group-hover:text-warning-500 transition-colors uppercase leading-tight">{productName}</h3>
+                            <h3 className="text-lg font-black text-foreground tracking-tight group-hover:text-obaol-500 transition-colors uppercase leading-tight">{productName}</h3>
                             <p className="text-[9px] font-bold text-default-400 uppercase tracking-widest opacity-70 mt-0.5">{variantName}</p>
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export default function SampleRequestsPage() {
                             ? [{ label: "Entity", val: supplierDisplay || "—", icon: LuPackage, color: "text-orange-500/50" }]
                             : []),
                           { label: "Zone", val: location, icon: LuMapPin, color: "text-emerald-500/50" },
-                          { label: "Load", val: requestedQty, icon: LuActivity, color: "text-warning-500/50" },
+                          { label: "Load", val: requestedQty, icon: LuActivity, color: "text-obaol-500/50" },
                         ].map((detail, dIdx) => (
                            <div key={dIdx} className="flex flex-col gap-1 overflow-hidden">
                               <span className="text-[8px] font-black text-default-400 uppercase tracking-[0.1em] flex items-center gap-2 opacity-60">
@@ -241,7 +241,7 @@ export default function SampleRequestsPage() {
                         {canView && (
                           <Button
                             fullWidth
-                            className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl h-10 shadow-lg shadow-warning-500/10 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="bg-obaol-500 text-black font-black uppercase text-[10px] tracking-widest rounded-xl h-10 shadow-lg shadow-obaol-500/10 hover:scale-[1.02] active:scale-95 transition-all"
                             isLoading={isMoving}
                             onPress={() => {
                                setNavigatingId(row._id);

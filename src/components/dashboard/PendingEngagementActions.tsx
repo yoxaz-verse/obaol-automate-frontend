@@ -138,7 +138,7 @@ export default function PendingEngagementActions({ user }: Props) {
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         {canSupplier && (
-          <Button className="bg-warning-500 text-black font-black uppercase tracking-[0.12em]" onPress={() => setSupplierOpen(true)}>
+          <Button className="bg-obaol-500 text-obaol-950 font-bold uppercase tracking-[0.12em]" onPress={() => setSupplierOpen(true)}>
             List Your Products
           </Button>
         )}

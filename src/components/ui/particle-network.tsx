@@ -167,7 +167,7 @@ export default function ParticleNetwork() {
             <div
                 className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-60 mix-blend-screen transition-opacity duration-1000"
                 style={{
-                    background: `radial-gradient(600px circle at ${mounted ? 'var(--mouse-x, -1000px)' : '-1000px'} ${mounted ? 'var(--mouse-y, -1000px)' : '-1000px'}, ${isDark ? 'rgba(251, 146, 60, 0.1)' : 'rgba(251, 146, 60, 0.05)'}, transparent 80%)`
+                    background: `radial-gradient(600px circle at ${mounted ? 'var(--mouse-x, -1000px)' : '-1000px'} ${mounted ? 'var(--mouse-y, -1000px)' : '-1000px'}, ${isDark ? 'rgba(228,199,153, 0.1)' : 'rgba(228,199,153, 0.05)'}, transparent 80%)`
                 }}
             />
 

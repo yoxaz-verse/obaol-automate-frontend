@@ -147,11 +147,11 @@ export default function CompanySearch({
         selectedKey={selectedKey || undefined}
         isClearable
         isDisabled={isDisabled || (isLoading && companies.length === 0)}
-        className="text-warning-400 w-full"
+        className="text-obaol-400 w-full"
         classNames={{
           base: "max-w-full",
           listboxWrapper: "max-h-[320px]",
-          selectorButton: "text-warning-500",
+          selectorButton: "text-obaol-500",
         }}
         startContent={
           <SearchIcon className="text-default-400" size={20} strokeWidth={2.5} />

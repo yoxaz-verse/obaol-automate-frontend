@@ -6,25 +6,15 @@ import { BASE_URL, DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, GEO_KEYWORDS, PRIMARY_
 import AnalyticsTracker from "@/components/ui/AnalyticsTracker";
 import { Suspense } from "react";
 import { BUSINESS_IDENTITY, ORGANIZATION_SAME_AS } from "@/utils/businessIdentity";
+import localFont from "next/font/local";
 
-// app/layout.tsx
-
-
-// import { Source_Serif_4, IBM_Plex_Sans } from "next/font/google";
-
-// const headingFont = Source_Serif_4({
-//   subsets: ["latin"],
-//   weight: ["600"],
-//   variable: "--font-heading",
-//   display: "swap",
-// });
-
-// const bodyFont = IBM_Plex_Sans({
-//   subsets: ["latin"],
-//   weight: ["400", "500"],
-//   variable: "--font-body",
-//   display: "swap",
-// });
+const obaolFont = localFont({
+  src: "./fonts/plus-jakarta-sans-latin.woff2",
+  weight: "200 800",
+  style: "normal",
+  display: "swap",
+  variable: "--font-obaol",
+});
 
 
 export const metadata: Metadata = {
@@ -107,7 +97,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="text-foreground"
+      className={`${obaolFont.variable} text-foreground`}
     >
 
       <head>

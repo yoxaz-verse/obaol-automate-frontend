@@ -55,13 +55,13 @@ export default function AuthEntry() {
           <Link href="/" aria-label="OBAOL home">
             <Image src="/logo.png" alt="OBAOL" width={105} height={32} priority />
           </Link>
-          <Link href="/how-it-works" className="text-sm font-semibold text-foreground/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-warning-500">
+          <Link href="/how-it-works" className="text-sm font-semibold text-foreground/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-500">
             How OBAOL works
           </Link>
         </div>
 
         <section className="rounded-[2rem] border border-default-200 bg-content1/70 p-6 shadow-xl backdrop-blur-xl md:p-10" aria-labelledby="auth-entry-title">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-warning-600">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">
             {signInView ? "Choose your account" : "Choose your OBAOL role"}
           </p>
           <h1 id="auth-entry-title" className="mt-3 text-3xl font-bold tracking-tight md:text-5xl">
@@ -75,13 +75,13 @@ export default function AuthEntry() {
 
           {signInView ? (
             <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <Link href="/auth/associate" className="rounded-2xl border border-default-200 bg-background p-6 transition hover:-translate-y-0.5 hover:border-warning-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-warning-500">
-                <span className="text-xs font-bold uppercase tracking-wider text-warning-600">Associate account</span>
+              <Link href="/auth/associate" className="rounded-2xl border border-default-200 bg-background p-6 transition hover:-translate-y-0.5 hover:border-obaol-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-500">
+                <span className="text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300">Associate account</span>
                 <h2 className="mt-2 text-xl font-bold">Sign in for your company</h2>
                 <p className="mt-2 text-sm leading-6 text-foreground/60">For registered businesses providing commodities or trade-support services.</p>
               </Link>
-              <Link href="/auth/operator" className="rounded-2xl border border-default-200 bg-background p-6 transition hover:-translate-y-0.5 hover:border-warning-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-warning-500">
-                <span className="text-xs font-bold uppercase tracking-wider text-warning-600">Operator account</span>
+              <Link href="/auth/operator" className="rounded-2xl border border-default-200 bg-background p-6 transition hover:-translate-y-0.5 hover:border-obaol-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-500">
+                <span className="text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300">Operator account</span>
                 <h2 className="mt-2 text-xl font-bold">Sign in as an Operator</h2>
                 <p className="mt-2 text-sm leading-6 text-foreground/60">For individuals managing company relationships and trade execution.</p>
               </Link>
@@ -89,8 +89,8 @@ export default function AuthEntry() {
           ) : (
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               {roleOptions.map((option) => (
-                <article key={option.role} className="flex flex-col rounded-2xl border border-default-200 bg-background p-6 transition hover:border-warning-500">
-                  <span className="text-xs font-bold uppercase tracking-wider text-warning-600">{option.role}</span>
+                <article key={option.role} className="flex flex-col rounded-2xl border border-default-200 bg-background p-6 transition hover:border-obaol-500">
+                  <span className="text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300">{option.role}</span>
                   <h2 className="mt-2 text-xl font-bold">{option.title}</h2>
                   <p className="mt-3 text-sm leading-6 text-foreground/65">{option.description}</p>
 
@@ -103,17 +103,17 @@ export default function AuthEntry() {
                       ))}
                     </div>
                   ) : (
-                    <p className="mt-5 rounded-xl border border-warning-500/20 bg-warning-500/5 p-3 text-xs leading-5 text-foreground/65">
+                    <p className="mt-5 rounded-xl border border-obaol-500/20 bg-obaol-500/5 p-3 text-xs leading-5 text-foreground/65">
                       {option.note}
                     </p>
                   )}
 
                   <p className="mt-5 text-xs font-bold text-foreground/75">{option.requirement}</p>
                   <div className="mt-auto flex flex-wrap items-center gap-4 pt-6">
-                    <Link href={option.href} className="inline-flex min-h-11 items-center rounded-xl bg-warning-500 px-4 py-2 text-sm font-bold text-black transition hover:bg-warning-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-warning-500">
+                    <Link href={option.href} className="inline-flex min-h-11 items-center rounded-xl bg-obaol-500 px-4 py-2 text-sm font-bold text-obaol-950 transition hover:bg-obaol-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-500">
                       Continue as {option.role} <span aria-hidden="true" className="ml-2">→</span>
                     </Link>
-                    <Link href={option.detailHref} className="text-sm font-bold text-warning-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-warning-500">
+                    <Link href={option.detailHref} className="text-sm font-bold text-obaol-700 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-500 dark:text-obaol-300">
                       {option.detailLabel}
                     </Link>
                   </div>
@@ -126,12 +126,12 @@ export default function AuthEntry() {
             {signInView ? (
               <>
                 <span className="text-foreground/60">New to OBAOL?</span>
-                <Link href="/auth" className="font-bold text-warning-600">Choose your role</Link>
+                <Link href="/auth" className="font-bold text-obaol-700 dark:text-obaol-300">Choose your role</Link>
               </>
             ) : (
               <>
                 <span className="text-foreground/60">Already registered?</span>
-                <Link href="/auth?view=signin" className="font-bold text-warning-600">Sign in</Link>
+                <Link href="/auth?view=signin" className="font-bold text-obaol-700 dark:text-obaol-300">Sign in</Link>
               </>
             )}
           </div>

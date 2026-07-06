@@ -197,7 +197,7 @@ const SelectModal: React.FC<SelectModalProps> = ({
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-default-500 font-medium">Your Commission</span>
-                        <span className="text-warning-500 font-bold">+ {formatSelectedCurrency(commission)}</span>
+                        <span className="text-obaol-500 font-bold">+ {formatSelectedCurrency(commission)}</span>
                       </div>
                       <Divider className="my-1" />
                       <div className="flex justify-between items-center">

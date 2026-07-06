@@ -86,7 +86,7 @@ export default function BrandPage() {
 
                 {/* Ambient Glow */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                     <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-warning-500/[0.02] rounded-full blur-[120px]" />
+                     <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-obaol-500/[0.02] rounded-full blur-[120px]" />
                 </div>
             </div>
         );
@@ -103,9 +103,9 @@ export default function BrandPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-warning-500 selection:text-black">
+        <div className="min-h-screen bg-black text-white selection:bg-obaol-500 selection:text-black">
             {!company.isWebsiteLive && (
-                <div className="sticky top-0 z-50 bg-warning-500/10 border-b border-warning-500/30 text-warning-100 px-4 py-3 text-sm font-semibold text-center">
+                <div className="sticky top-0 z-50 bg-obaol-500/10 border-b border-obaol-500/30 text-obaol-100 px-4 py-3 text-sm font-semibold text-center">
                     Preview Mode: This brand page isn&apos;t live yet, but you&apos;re viewing the draft preview.
                 </div>
             )}
@@ -119,7 +119,7 @@ export default function BrandPage() {
                         />
                         <div className="flex flex-col">
                            <span className="text-sm font-black uppercase tracking-tight text-white leading-none">{company.name}</span>
-                           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-warning-500 mt-1 italic">Verified Industry Partner</span>
+                           <span className="text-[8px] font-black uppercase tracking-[0.3em] text-obaol-500 mt-1 italic">Verified Industry Partner</span>
                         </div>
                     </div>
                     <div className="hidden md:flex items-center gap-10">
@@ -130,7 +130,7 @@ export default function BrandPage() {
                             as="a"
                             href="/"
                             variant="flat"
-                            className="bg-warning-500 text-black text-[10px] font-black uppercase tracking-widest h-11 px-8 rounded-full shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
+                            className="bg-obaol-500 text-black text-[10px] font-black uppercase tracking-widest h-11 px-8 rounded-full shadow-[0_10px_30px_rgba(207,152,60,0.2)]"
                         >
                             Procure Now
                         </Button>
@@ -145,7 +145,7 @@ export default function BrandPage() {
             <section className="relative min-h-[90vh] flex items-center overflow-hidden">
                 {/* Refined Background Elements */}
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] bg-warning-500/[0.03] rounded-full blur-[150px]" />
+                    <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] bg-obaol-500/[0.03] rounded-full blur-[150px]" />
                     <div className="absolute bottom-[20%] left-[5%] w-[400px] h-[400px] bg-white/[0.01] rounded-full blur-[120px]" />
                     {company.banner && (
                         <div className="absolute inset-0 opacity-20 grayscale hover:grayscale-0 transition-all duration-1000">
@@ -161,7 +161,7 @@ export default function BrandPage() {
                         {/* Global Identity Marker */}
                         <div className="flex items-center gap-4">
                             <div className="flex -space-x-2">
-                                <div className="w-4 h-4 rounded-full bg-warning-500 shadow-[0_0_10px_rgba(245,158,11,0.5)] border border-black" />
+                                <div className="w-4 h-4 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(207,152,60,0.5)] border border-black" />
                                 <div className="w-4 h-4 rounded-full bg-white/20 border border-black" />
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-[0.6em] text-white/30 italic">Direct Protocol Access</span>
@@ -177,8 +177,8 @@ export default function BrandPage() {
                                 ))}
                             </h1>
                             <div className="flex items-center gap-6 pt-4">
-                               <div className="h-0.5 w-20 bg-warning-500" />
-                               <p className="text-2xl md:text-3xl font-light text-warning-500 italic lowercase tracking-tight">
+                               <div className="h-0.5 w-20 bg-obaol-500" />
+                               <p className="text-2xl md:text-3xl font-light text-obaol-500 italic lowercase tracking-tight">
                                 {company.description || "The future of quality sourcing."}
                                </p>
                             </div>
@@ -220,8 +220,8 @@ export default function BrandPage() {
                     <div className="lg:col-span-6 space-y-16">
                         <div className="space-y-8">
                             <div className="flex items-center gap-6">
-                                <div className="h-10 w-[2px] bg-warning-500" />
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-500">The Manifesto & Legacy</h3>
+                                <div className="h-10 w-[2px] bg-obaol-500" />
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-obaol-500">The Manifesto & Legacy</h3>
                             </div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight leading-[0.9] text-white italic">
                                 Redefining the <br /> <span className="text-white/40">Sourcing Standard.</span>
@@ -233,12 +233,12 @@ export default function BrandPage() {
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                             <div className="space-y-4">
-                                <div className="text-4xl font-black text-warning-500/20 italic">01.</div>
+                                <div className="text-4xl font-black text-obaol-500/20 italic">01.</div>
                                 <h4 className="text-xs font-black uppercase tracking-widest text-white/80">Direct Trade Focus</h4>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 leading-relaxed">Eliminating inefficiencies in the global supply chain through direct partnership.</p>
                             </div>
                             <div className="space-y-4">
-                                <div className="text-4xl font-black text-warning-500/20 italic">02.</div>
+                                <div className="text-4xl font-black text-obaol-500/20 italic">02.</div>
                                 <h4 className="text-xs font-black uppercase tracking-widest text-white/80">Execution Visibility</h4>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 leading-relaxed">Providing end-to-end transparency in every transaction within our ecosystem.</p>
                             </div>
@@ -247,12 +247,12 @@ export default function BrandPage() {
 
                     <div className="lg:col-span-6 sticky top-32">
                         <div className="relative group">
-                            <div className="absolute inset-0 bg-warning-500/5 blur-[120px] rounded-full" />
+                            <div className="absolute inset-0 bg-obaol-500/5 blur-[120px] rounded-full" />
                             <div className="relative bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-12 overflow-hidden">
-                                <div className="absolute -top-10 -right-10 w-48 h-48 bg-warning-500/[0.05] rounded-full blur-[80px]" />
+                                <div className="absolute -top-10 -right-10 w-48 h-48 bg-obaol-500/[0.05] rounded-full blur-[80px]" />
                                 
                                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-12 flex items-center gap-4">
-                                    <LuGlobe size={18} className="text-warning-500" />
+                                    <LuGlobe size={18} className="text-obaol-500" />
                                     Global Corporate Record
                                 </h3>
 
@@ -268,7 +268,7 @@ export default function BrandPage() {
                                         <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Core Capabilities</span>
                                         <div className="flex flex-wrap gap-2">
                                             {capabilityLabels.length > 0 ? capabilityLabels.map((cap: string) => (
-                                                <div key={cap} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-warning-500/80">
+                                                <div key={cap} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-obaol-500/80">
                                                     {cap}
                                                 </div>
                                             )) : (
@@ -279,7 +279,7 @@ export default function BrandPage() {
 
                                     <div className="pt-10 border-t border-white/5 flex flex-wrap items-center justify-between gap-8">
                                         {company.website && (
-                                            <a href={company.website} target="_blank" className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-warning-500 transition-colors flex items-center gap-2">
+                                            <a href={company.website} target="_blank" className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-obaol-500 transition-colors flex items-center gap-2">
                                                 <LuExternalLink size={14} /> Official Portal
                                             </a>
                                         )}
@@ -290,7 +290,7 @@ export default function BrandPage() {
                                                 { icon: LuTwitter, link: company.socialLinks?.twitter },
                                                 { icon: LuInstagram, link: company.socialLinks?.instagram },
                                             ].filter(s => s.link).map((s, i) => (
-                                                <a key={i} href={s.link} target="_blank" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:bg-warning-500 hover:text-black transition-all">
+                                                <a key={i} href={s.link} target="_blank" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:bg-obaol-500 hover:text-black transition-all">
                                                     <s.icon size={16} />
                                                 </a>
                                             ))}
@@ -321,10 +321,10 @@ export default function BrandPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {products.map((product: any) => (
                                 <Card key={product.productId} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all rounded-[30px] p-8 overflow-hidden group shadow-none">
-                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-warning-500/10 blur-[50px] group-hover:bg-warning-500/20 transition-all" />
+                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-obaol-500/10 blur-[50px] group-hover:bg-obaol-500/20 transition-all" />
                                     <div className="relative z-10 space-y-6">
                                         <div className="flex justify-between items-start">
-                                            <div className="w-12 h-12 rounded-2xl bg-warning-500/20 flex items-center justify-center text-warning-500 italic font-black text-xl">
+                                            <div className="w-12 h-12 rounded-2xl bg-obaol-500/20 flex items-center justify-center text-obaol-500 italic font-black text-xl">
                                                 {String(product.productName || "").charAt(0)}
                                             </div>
                                             <Chip size="sm" color="warning" variant="flat" className="h-5 text-[9px] font-black uppercase">Coverage</Chip>
@@ -360,15 +360,15 @@ export default function BrandPage() {
 
             {/* Futuristic CTA */}
             <section className="py-40 relative overflow-hidden">
-                <div className="absolute inset-0 bg-warning-500/5 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-obaol-500/5 mix-blend-overlay" />
                 <div className="container mx-auto px-4 relative z-10 text-center">
                     <div className="max-w-4xl mx-auto space-y-12">
-                        <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">Powered by <br /> <span className="text-warning-500 underline decoration-white/10">OBAOL OS</span></h2>
+                        <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">Powered by <br /> <span className="text-obaol-500 underline decoration-white/10">OBAOL OS</span></h2>
                         <p className="text-xl text-default-400">Join the ecosystem of transparent trade and intelligent sourcing.</p>
                         <div className="flex justify-center gap-6">
                             <Button
                                 variant="bordered"
-                                className="h-16 px-8 rounded-full border-white/20 font-bold uppercase tracking-widest text-xs hover:border-warning-500 hover:text-warning-500"
+                                className="h-16 px-8 rounded-full border-white/20 font-bold uppercase tracking-widest text-xs hover:border-obaol-500 hover:text-obaol-500"
                                 onClick={() => window.open('https://obaol.com', '_blank')}
                             >
                                 Become Partner <LuExternalLink className="ml-2" />
@@ -383,7 +383,7 @@ export default function BrandPage() {
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
                     <div>© {new Date().getFullYear()} {company.name} | ALL RIGHTS RESERVED</div>
                     <div className="flex items-center gap-2">
-                        DESIGNED & SECURED BY <span className="text-warning-500">OBAOL CORE</span>
+                        DESIGNED & SECURED BY <span className="text-obaol-500">OBAOL CORE</span>
                     </div>
                 </div>
             </footer>

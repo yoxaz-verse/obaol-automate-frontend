@@ -100,7 +100,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
             }`}
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent" />
             <div className="flex justify-around items-center h-full px-2 max-w-lg mx-auto">
                 {filteredNavItems.map((item) => {
                     const isActive = pathname === item.link;
@@ -110,12 +110,12 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
                             <div
                                 key={item.name}
                                 className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 opacity-40 cursor-not-allowed ${
-                                    isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400"
+                                    isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400"
                                 }`}
                                 aria-disabled="true"
                             >
                                 {isActive && (
-                                    <div className="absolute -top-[1px] w-8 h-[2px] bg-warning-500 rounded-full shadow-[0_2px_10px_rgba(245,165,36,0.5)]" />
+                                    <div className="absolute -top-[1px] w-8 h-[2px] bg-obaol-500 rounded-full shadow-[0_2px_10px_rgba(207,152,60,0.5)]" />
                                 )}
                                 <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
                                     {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
@@ -129,11 +129,11 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
                                 key={item.name}
                                 href={item.link}
                                 className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 ${
-                                    isActive ? "text-warning-600 dark:text-warning-500" : "text-default-400 group-hover:text-foreground"
+                                    isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 group-hover:text-foreground"
                                 }`}
                             >
                             {isActive && (
-                                <div className="absolute -top-[1px] w-8 h-[2px] bg-warning-500 rounded-full shadow-[0_2px_10px_rgba(245,165,36,0.5)]" />
+                                <div className="absolute -top-[1px] w-8 h-[2px] bg-obaol-500 rounded-full shadow-[0_2px_10px_rgba(207,152,60,0.5)]" />
                             )}
                             <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
                                 {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}

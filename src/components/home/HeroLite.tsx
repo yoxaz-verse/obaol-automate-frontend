@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function HeroLite() {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,rgba(251,146,60,0.22),transparent_45%),radial-gradient(circle_at_70%_30%,rgba(59,130,246,0.14),transparent_45%),linear-gradient(180deg,#0b0d14_0%,#0a0a0a_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,rgba(228,199,153,0.22),transparent_45%),radial-gradient(circle_at_70%_30%,rgba(59,130,246,0.14),transparent_45%),linear-gradient(180deg,#0b0d14_0%,#0a0a0a_100%)]" />
       <div className="absolute inset-0 -z-10 opacity-30 [background:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:42px_42px]" />
 
       <div className="container mx-auto max-w-7xl px-4 md:px-6 text-white">

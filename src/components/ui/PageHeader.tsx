@@ -32,7 +32,7 @@ export default function PageHeader({
       )}
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0 max-w-3xl">
-          {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-warning-600">{eyebrow}</p>}
+          {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">{eyebrow}</p>}
           <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{title}</h1>
           {description && <p className="mt-2 max-w-2xl text-sm leading-6 db-muted md:text-base">{description}</p>}
         </div>
@@ -40,7 +40,7 @@ export default function PageHeader({
           <div className="flex flex-wrap items-center gap-3">
             {secondaryAction}
             {primaryAction && (
-              <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-warning-500 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-warning-400">
+              <Link href={primaryAction.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 hover:bg-obaol-400">
                 {primaryAction.label}
               </Link>
             )}

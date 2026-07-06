@@ -218,7 +218,7 @@ export default function PublicRateList({
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search products, variants, suppliers..."
-          className="min-h-11 flex-1 rounded-xl border border-default-200 bg-background px-4 text-sm font-medium text-foreground outline-none transition focus:border-warning-500"
+          className="min-h-11 flex-1 rounded-xl border border-default-200 bg-background px-4 text-sm font-medium text-foreground outline-none transition focus:border-obaol-500"
         />
         <div className="text-[11px] font-black uppercase tracking-[0.18em] text-default-500">
           {loading ? "Syncing" : `${meta.totalCount ?? rows.length} Items`}
@@ -253,11 +253,11 @@ export default function PublicRateList({
           {rows.map((item) => (
             <article
               key={item.id}
-              className="group flex min-h-56 flex-col rounded-2xl border border-default-200/70 bg-content1/70 p-5 shadow-sm backdrop-blur-md transition hover:-translate-y-0.5 hover:border-warning-500/40 hover:shadow-lg"
+              className="group flex min-h-56 flex-col rounded-2xl border border-default-200/70 bg-content1/70 p-5 shadow-sm backdrop-blur-md transition hover:-translate-y-0.5 hover:border-obaol-500/40 hover:shadow-lg"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-warning-600">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-obaol-600">
                     {item.isLive ? "Live rate" : "Verified rate"}
                   </p>
                   <h3 className="mt-2 line-clamp-2 text-xl font-black tracking-tight text-foreground">
@@ -297,13 +297,13 @@ export default function PublicRateList({
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Ex factory</p>
-                  <p className="mt-1 text-base font-black text-warning-600">{formatPrice(item.price, item.currency)}</p>
+                  <p className="mt-1 text-base font-black text-obaol-600">{formatPrice(item.price, item.currency)}</p>
                 </div>
               </div>
 
               <Link
                 href="/auth"
-                className="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-warning-500 px-4 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:bg-warning-400"
+                className="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-obaol-500 px-4 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:bg-obaol-400"
               >
                 Start enquiry
               </Link>

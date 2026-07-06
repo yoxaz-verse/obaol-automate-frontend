@@ -518,7 +518,7 @@ const Dashboard: NextPage = () => {
         />
       </div>
 
-      <Card className="border border-warning-500/20 bg-warning-500/5 rounded-[1.5rem] shadow-none">
+      <Card className="border border-obaol-500/20 bg-obaol-500/5 rounded-[1.5rem] shadow-none">
         <CardBody className="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1">
             <h4 className="text-sm font-black text-foreground uppercase tracking-widest">Unassigned Companies</h4>
@@ -618,13 +618,13 @@ const Dashboard: NextPage = () => {
   const renderAssociateDashboard = () => (
     <>
       {!user?.companyInterestsConfigured && (
-        <Card className="border border-warning-500/30 bg-warning-500/10">
+        <Card className="border border-obaol-500/30 bg-obaol-500/10">
           <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <h4 className="font-semibold text-warning-600 dark:text-warning-300">
+              <h4 className="font-semibold text-obaol-600 dark:text-obaol-300">
                 Configure your company responsibilities to unlock full panels.
               </h4>
-              <p className="text-xs text-warning-600/80 dark:text-warning-200/80 mt-1">
+              <p className="text-xs text-obaol-600/80 dark:text-obaol-200/80 mt-1">
                 Add your company functions so the dashboard can tailor execution and routing.
               </p>
             </div>
@@ -709,11 +709,11 @@ const Dashboard: NextPage = () => {
             </CardBody>
           </Card>
         ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
-          <Card className="border border-warning-200 bg-warning-50/60">
+          <Card className="border border-obaol-200 bg-obaol-50/60">
             <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
-                <h4 className="font-semibold text-warning-700">No company functions configured yet.</h4>
-                <p className="text-xs text-warning-600/80 mt-1">
+                <h4 className="font-semibold text-obaol-700">No company functions configured yet.</h4>
+                <p className="text-xs text-obaol-600/80 mt-1">
                   Add company priorities so this dashboard can personalize your workflow.
                 </p>
               </div>
@@ -757,7 +757,7 @@ const Dashboard: NextPage = () => {
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">2h ago</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500">Market Insight</span>
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500">Market Insight</span>
                        <p className="text-xs font-bold text-foreground leading-snug">New logistics route opened for sea freight.</p>
                        <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">5h ago</span>
                     </div>
@@ -1018,7 +1018,7 @@ const Dashboard: NextPage = () => {
               {isAssociate && tradeMode === "BOTH" && (
                 <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1">
                   {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
-                    <button key={focus} type="button" onClick={() => setWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-9 rounded-lg px-3 text-xs font-bold ${workspaceFocus === focus ? "bg-warning-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
+                    <button key={focus} type="button" onClick={() => setWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-9 rounded-lg px-3 text-xs font-bold ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
                       {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
                     </button>
                   ))}

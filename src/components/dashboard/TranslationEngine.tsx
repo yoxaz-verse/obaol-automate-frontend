@@ -294,7 +294,7 @@ export const TranslationEngine = () => {
   const overlay = isSwitching ? (
     <div className="fixed inset-0 z-[1000000] flex items-center justify-center bg-background/80 backdrop-blur-xl">
       <div className="flex flex-col items-center gap-4 rounded-3xl border border-default-200 bg-content1 px-8 py-7 shadow-xl">
-        <LuLanguages className="text-warning-500 h-12 w-12" />
+        <LuLanguages className="text-obaol-500 h-12 w-12" />
         <p className="text-sm font-bold tracking-wide uppercase text-default-600">Applying language</p>
         <p className="text-lg font-semibold text-foreground">{targetLang || "Language"}</p>
       </div>

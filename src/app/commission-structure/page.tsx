@@ -29,7 +29,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 
 const DecorativeNode = ({ className = "" }: { className?: string }) => (
   <div className={`absolute pointer-events-none opacity-10 ${className}`}>
-    <div className="w-12 h-12 rounded-full border border-warning-500/20 animate-[pulse_4s_infinite]" />
+    <div className="w-12 h-12 rounded-full border border-obaol-500/20 animate-[pulse_4s_infinite]" />
   </div>
 );
 
@@ -92,17 +92,17 @@ export default function CommissionStructurePage() {
       desc: "Shared across leadership levels beyond L2. The 10% pool is split across active L3+ layers, with a 5% cap per layer.",
       impact: "Keeps deep leadership rewards balanced and clear.",
       icon: LuGlobe,
-      color: "text-warning-400"
+      color: "text-obaol-400"
     }
   };
 
   return (
-    <section className="min-h-screen bg-background text-foreground selection:bg-warning-500/30 overflow-x-hidden">
+    <section className="min-h-screen bg-background text-foreground selection:bg-obaol-500/30 overflow-x-hidden">
       <Header />
       <ThemedContentWrapper>
         <div className="mx-auto max-w-[1280px] px-6 pt-24 md:pt-32 pb-12 md:pb-20 relative">
           
-          <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-warning-500/5 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-obaol-500/5 blur-[100px] rounded-full pointer-events-none" />
           <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] bg-primary-500/5 blur-[80px] rounded-full pointer-events-none" />
 
           {/* Hero Section */}
@@ -111,11 +111,11 @@ export default function CommissionStructurePage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-16 text-center max-w-3xl mx-auto relative z-10"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-warning-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6 shadow-lg">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-obaol-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6 shadow-lg">
               <LuChartPie size={12} className="animate-pulse" /> Commission Structure
             </div>
             <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 leading-tight uppercase italic text-foreground">
-              Clear <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning-400 via-amber-500 to-orange-600">Commission</span> <br/> 
+              Clear <span className="text-transparent bg-clip-text bg-gradient-to-r from-obaol-400 via-amber-500 to-orange-600">Commission</span> <br/>
               <span className="text-foreground/90">Breakdown</span>
             </h1>
             <p className="text-sm md:text-base text-foreground/70 font-medium leading-relaxed">
@@ -125,12 +125,12 @@ export default function CommissionStructurePage() {
 
           {/* 01. Layering Structure Hub */}
           <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden group border-r-4 border-r-warning-500/20">
+            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden group border-r-4 border-r-obaol-500/20">
               <CardBody className="p-0">
                 <div className="flex flex-col lg:flex-row">
                   <div className="lg:w-1/2 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-default-200/50 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="h-10 w-10 rounded-xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20">
+                      <div className="h-10 w-10 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20">
                         <LuNetwork size={20} />
                       </div>
                       <h2 className="text-2xl font-black tracking-tighter uppercase leading-none text-foreground">Commission Pool</h2>
@@ -138,7 +138,7 @@ export default function CommissionStructurePage() {
                     <p className="text-base text-foreground/70 leading-relaxed font-medium mb-10">
                       When a trade is fully completed and profit is confirmed, 50% of that profit becomes the total commission pool.
                     </p>
-                    <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-warning-500 to-orange-700 text-white shadow-xl overflow-hidden group">
+                    <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white shadow-xl overflow-hidden group">
                       <div className="relative z-10 flex items-end gap-2">
                         <span className="text-5xl md:text-6xl font-black tracking-tighter leading-none">50%</span>
                         <div className="flex flex-col mb-1">
@@ -221,7 +221,7 @@ export default function CommissionStructurePage() {
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
               <CardBody className="p-8 md:p-12">
                 <div className="flex items-center gap-4 mb-12">
-                  <div className="h-14 w-14 rounded-[1.25rem] bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/30 shadow-inner">
+                  <div className="h-14 w-14 rounded-[1.25rem] bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/30 shadow-inner">
                     <LuBookOpen size={28} />
                   </div>
                   <div>
@@ -238,10 +238,10 @@ export default function CommissionStructurePage() {
                     <motion.div 
                       key={i} 
                       whileHover={{ scale: 1.03 }}
-                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-warning-500/30"
+                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-obaol-500/30"
                     >
                       <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-warning-500 group-hover:border-warning-500/30 transition-colors shadow-sm">
+                         <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-obaol-500 group-hover:border-obaol-500/30 transition-colors shadow-sm">
                            <item.icon size={18} />
                          </div>
                          <div className="text-[14px] font-black uppercase tracking-[0.1em] text-foreground/90">{item.term}</div>
@@ -256,16 +256,16 @@ export default function CommissionStructurePage() {
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="p-8 rounded-[2rem] bg-gradient-to-r from-warning-500/10 to-transparent border border-warning-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group shadow-inner"
+                    className="p-8 rounded-[2rem] bg-gradient-to-r from-obaol-500/10 to-transparent border border-obaol-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group shadow-inner"
                 >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-warning-500/10 blur-3xl rounded-full pointer-events-none" />
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-warning-500 text-white flex items-center justify-center shadow-lg shadow-warning-500/30">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-obaol-500/10 blur-3xl rounded-full pointer-events-none" />
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-obaol-500 text-white flex items-center justify-center shadow-lg shadow-obaol-500/30">
                        <LuShieldCheck size={28} />
                     </div>
                     <div className="relative z-10">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-warning-600 dark:text-warning-500 mb-2">Critical System Rule</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-obaol-600 dark:text-obaol-500 mb-2">Critical System Rule</div>
                         <p className="text-base md:text-lg text-foreground/80 font-bold leading-relaxed">
-                            The supplier’s business owner is <span className="text-warning-600 dark:text-warning-500 px-1 decoration-warning-500/50 underline">not part of commission</span> unless they explicitly operate the account natively in the OBAOL platform.
+                            The supplier’s business owner is <span className="text-obaol-600 dark:text-obaol-500 px-1 decoration-obaol-500/50 underline">not part of commission</span> unless they explicitly operate the account natively in the OBAOL platform.
                         </p>
                     </div>
                 </motion.div>
@@ -277,7 +277,7 @@ export default function CommissionStructurePage() {
           <div className="mb-12 md:mb-16 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
               {[
                 { label: "Core Pool", share: "30%", icon: LuCpu, color: "text-primary-500", tone: "bg-primary-500/5", border: "border-primary-500/20" },
-                { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-warning-500", tone: "bg-warning-500/5", border: "border-warning-500/20" },
+                { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-obaol-500", tone: "bg-obaol-500/5", border: "border-obaol-500/20" },
                 { label: "Handler", share: "10%", icon: LuLayers, color: "text-secondary-500", tone: "bg-secondary-500/5", border: "border-secondary-500/20" },
               ].map((item, index) => (
                 <Card key={index} className={`bg-content1/50 backdrop-blur-xl ${item.border} shadow-lg rounded-[2rem]`}>
@@ -315,7 +315,7 @@ export default function CommissionStructurePage() {
                     {/* Controller */}
                     <div className="flex flex-col items-center text-center space-y-8 border-b border-default-200/50 pb-12 mb-12">
                         <div className="flex flex-col gap-4 w-full max-w-xl px-4">
-                            <span className="text-[11px] font-black uppercase text-warning-500 tracking-[0.4em] mb-1">Trade Profit Input</span>
+                            <span className="text-[11px] font-black uppercase text-obaol-500 tracking-[0.4em] mb-1">Trade Profit Input</span>
                             <div className="flex items-center justify-center mb-2">
                                <span className="text-4xl md:text-6xl font-black text-foreground tracking-tighter leading-none italic tabular-nums">{displayRate(profit)}</span>
                             </div>
@@ -330,15 +330,15 @@ export default function CommissionStructurePage() {
                                 className="w-full"
                                 classNames={{
                                     base: "max-w-md mx-auto",
-                                    filler: "bg-warning-500",
-                                    thumb: "bg-warning-500 border-2 border-white shadow-lg h-6 w-6",
+                                    filler: "bg-obaol-500",
+                                    thumb: "bg-obaol-500 border-2 border-white shadow-lg h-6 w-6",
                                     track: "bg-default-200 h-2 rounded-full"
                                 }}
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                            <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-warning-500 to-orange-700 text-white shadow-lg flex flex-col items-center justify-center">
+                            <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white shadow-lg flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Total Pool (50%)</span>
                                 <span className="text-3xl font-black tracking-tighter italic leading-none">{displayRate(shares.totalCommissionPool)}</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-3">Total commission created</span>
@@ -367,7 +367,7 @@ export default function CommissionStructurePage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                             {[
-                                { label: "DC", share: "40%", amt: shares.closer, color: "text-warning-500", bg: "bg-warning-500", icon: LuUserCheck },
+                                { label: "DC", share: "40%", amt: shares.closer, color: "text-obaol-500", bg: "bg-obaol-500", icon: LuUserCheck },
                                 { label: "Supplier Portfolio Owner", share: "30%", amt: shares.owner, color: "text-primary-500", bg: "bg-primary-500", icon: LuBriefcase },
                                 { label: "L1 Mentor", share: "12%", amt: shares.l1, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuShieldCheck },
                                 { label: "L2 Mentor", share: "8%", amt: shares.l2, color: "text-secondary-500", bg: "bg-secondary-500", icon: LuNetwork },
@@ -398,9 +398,9 @@ export default function CommissionStructurePage() {
           <div className="mb-12 md:mb-16 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">
-                Handler <span className="text-warning-500">Star Dependency</span>
+                Handler <span className="text-obaol-500">Star Dependency</span>
               </h2>
-              <div className="h-1 w-20 bg-warning-500 mx-auto rounded-full mb-6" />
+              <div className="h-1 w-20 bg-obaol-500 mx-auto rounded-full mb-6" />
               <p className="text-sm text-foreground/70 font-medium max-w-2xl mx-auto leading-relaxed">
                 The Handler’s 10% share is earned through ratings from both buyer and seller.
               </p>
@@ -422,8 +422,8 @@ export default function CommissionStructurePage() {
           {/* 07. How You Become a Leader */}
           <div className="mb-16 md:mb-24 relative z-10">
             <div className="text-center mb-16">
-               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">How You Become a <span className="text-warning-500">Leader</span></h2>
-               <div className="h-1 w-20 bg-warning-500 mx-auto rounded-full mb-6" />
+               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">How You Become a <span className="text-obaol-500">Leader</span></h2>
+               <div className="h-1 w-20 bg-obaol-500 mx-auto rounded-full mb-6" />
                <p className="text-sm text-foreground/70 font-medium max-w-xl mx-auto leading-relaxed">
                  Grow by mentoring others. Leadership rewards follow the portfolio ownership chain.
                </p>
@@ -431,7 +431,7 @@ export default function CommissionStructurePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
               {[
-                { step: "Step 01", title: "Active Deals", icon: LuUserCheck, color: "text-warning-500", desc: "Close trades and manage your supplier portfolio. This earns the DC and Supplier Portfolio Owner shares." },
+                { step: "Step 01", title: "Active Deals", icon: LuUserCheck, color: "text-obaol-500", desc: "Close trades and manage your supplier portfolio. This earns the DC and Supplier Portfolio Owner shares." },
                 { step: "Step 02", title: "Mentor Others", icon: LuUsers, color: "text-primary-500", desc: "Onboard new operators. You receive the L1 share on their completed trades." },
                 { step: "Step 03", title: "Build A Team", icon: LuTrendingUp, color: "text-secondary-500", desc: "As your team grows, L2 and L3+ shares apply across deeper levels." }
               ].map((item, i) => (
@@ -439,7 +439,7 @@ export default function CommissionStructurePage() {
                   <div className="absolute -inset-2 bg-gradient-to-b from-content2/50 to-transparent rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-all" />
                   <Card className="relative h-full bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-md rounded-[3rem] overflow-hidden hover:translate-y-[-10px] transition-all">
                     <CardBody className="p-10">
-                      <div className="text-[10px] font-black uppercase tracking-[0.5em] text-warning-500 mb-6 font-bold">{item.step}</div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.5em] text-obaol-500 mb-6 font-bold">{item.step}</div>
                       <div className={`h-14 w-14 rounded-2xl ${item.color.replace('text', 'bg')}/10 border border-current/20 flex items-center justify-center ${item.color} mb-8 shadow-inner`}>
                         <item.icon size={28} />
                       </div>
@@ -525,13 +525,13 @@ export default function CommissionStructurePage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-20 p-1 rounded-[3rem] bg-gradient-to-r from-warning-500 via-amber-600 to-orange-700 shadow-xl"
+            className="mt-20 p-1 rounded-[3rem] bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700 shadow-xl"
           >
             <div className="bg-[#05070c] rounded-[2.9rem] p-12 md:p-16 text-center relative overflow-hidden text-white">
                 <div className="relative z-10">
-                    <LuShieldCheck size={50} className="text-warning-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
+                    <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
                     <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-foreground">
-                        Ready to <span className="text-warning-500">Scale?</span>
+                        Ready to <span className="text-obaol-500">Scale?</span>
                     </h2>
                     <p className="text-sm text-foreground/70 max-w-xl mx-auto mb-10 font-medium leading-relaxed">
                         Join our elite network of operators and architects. Activate your organizational position to secure tiered yields.
@@ -541,7 +541,7 @@ export default function CommissionStructurePage() {
                         as="a"
                         href="/dashboard"
                         size="md"
-                        className="bg-warning-500 text-black font-black px-8 h-12 rounded-2xl shadow-lg hover:scale-105 transition-all text-[10px] uppercase tracking-widest font-sans"
+                        className="bg-obaol-500 text-black font-black px-8 h-12 rounded-2xl shadow-lg hover:scale-105 transition-all text-[10px] uppercase tracking-widest font-sans"
                         endContent={<LuArrowRight size={14} />}
                         >
                         Go To Dashboard

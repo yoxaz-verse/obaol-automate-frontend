@@ -406,7 +406,7 @@ export default function CompanyProductPage() {
   ]);
 
   const PALETTE = [
-    "bg-warning-500/10 text-warning-600",
+    "bg-obaol-500/10 text-obaol-600",
     "bg-success-500/10 text-success-600",
     "bg-secondary-500/10 text-secondary-600",
     "bg-primary-500/10 text-primary-600",
@@ -709,9 +709,9 @@ export default function CompanyProductPage() {
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-warning-500/10 border border-warning-500/20">
-                <LuSettings className="text-warning-500" size={12} />
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-warning-500">Configuration</span>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-obaol-500/10 border border-obaol-500/20">
+                <LuSettings className="text-obaol-500" size={12} />
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-obaol-500">Configuration</span>
               </div>
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">
                 {dashboardCopy(obaolCompanyId ? "PROTOCOL_SYNCHRONIZED" : "MAPPING_REQUIRED")}
@@ -720,10 +720,10 @@ export default function CompanyProductPage() {
             </div>
             <div className="flex items-center gap-3">
               <div className={`px-3 py-2 rounded-xl border flex items-center gap-2 ${
-                obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-warning-500/10 border-warning-500/20"
+                obaolCompanyId ? "bg-success-500/10 border-success-500/20" : "bg-obaol-500/10 border-obaol-500/20"
               }`}>
-                <div className={`w-2 h-2 rounded-full ${obaolCompanyId ? "bg-success-500" : "bg-warning-500"}`} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${obaolCompanyId ? "text-success-500" : "text-warning-500"}`}>
+                <div className={`w-2 h-2 rounded-full ${obaolCompanyId ? "bg-success-500" : "bg-obaol-500"}`} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${obaolCompanyId ? "text-success-500" : "text-obaol-500"}`}>
                   {obaolCompanyId ? "Live" : "Pending"}
                 </span>
               </div>
@@ -737,8 +737,8 @@ export default function CompanyProductPage() {
         {isConfigExpanded ? (
           <div className="px-5 md:px-7 pb-6 md:pb-7 border-t border-divider/70">
             <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] items-end gap-6 p-6 md:p-7 mt-5 rounded-[1.5rem] bg-content2/30 dark:bg-black/20 border border-divider shadow-inner relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-warning-500/20 rounded-tl-sm" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-warning-500/20 rounded-br-sm" />
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-obaol-500/20 rounded-tl-sm" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-obaol-500/20 rounded-br-sm" />
               <Select
                 label="Select company"
                 labelPlacement="outside"
@@ -752,7 +752,7 @@ export default function CompanyProductPage() {
                 popoverProps={{
                   classNames: {
                     base: "before:bg-divider",
-                    content: "bg-content1/90 dark:bg-[#0B0F14]/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] p-2",
+                    content: "bg-content1/90 dark:bg-[#0E0D0A]/90 backdrop-blur-2xl border border-divider shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] p-2",
                   },
                   offset: 12
                 }}
@@ -761,10 +761,10 @@ export default function CompanyProductPage() {
                     base: [
                       "rounded-2xl",
                       "transition-opacity",
-                      "data-[hover=true]:bg-warning-500/10",
-                      "data-[selectable=true]:focus:bg-warning-500/10",
-                      "data-[selected=true]:bg-warning-500/20",
-                      "data-[selected=true]:text-warning-500",
+                      "data-[hover=true]:bg-obaol-500/10",
+                      "data-[selectable=true]:focus:bg-obaol-500/10",
+                      "data-[selected=true]:bg-obaol-500/20",
+                      "data-[selected=true]:text-obaol-500",
                       "py-3",
                       "px-4",
                       "my-1"
@@ -772,7 +772,7 @@ export default function CompanyProductPage() {
                   },
                 }}
                 classNames={{
-                  trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-warning-500/50 transition-all h-14 rounded-2xl shadow-sm",
+                  trigger: "bg-content1 dark:bg-white/[0.03] border-divider hover:border-obaol-500/50 transition-all h-14 rounded-2xl shadow-sm",
                   label: "text-[10px] font-black uppercase tracking-[0.3em] text-default-400 mb-3 ml-1",
                   value: "text-sm font-black text-foreground uppercase tracking-widest",
                   base: "max-w-full"
@@ -780,7 +780,7 @@ export default function CompanyProductPage() {
                 renderValue={(items) => {
                   return items.map((item) => (
                     <div key={item.key} className="flex items-center gap-3">
-                      <div className="w-1 h-3 bg-warning-500 rounded-full" />
+                      <div className="w-1 h-3 bg-obaol-500 rounded-full" />
                       <span className="text-sm font-black uppercase italic tracking-tighter">{toName(item.data, "Unnamed")}</span>
                     </div>
                   ));
@@ -796,7 +796,7 @@ export default function CompanyProductPage() {
                       className="group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black transition-all border border-divider">
+                        <div className="w-10 h-10 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-obaol-500 group-data-[selected=true]:text-black transition-all border border-divider">
                           <LuBox size={18} />
                         </div>
                         <div className="flex flex-col gap-0.5">
@@ -810,7 +810,7 @@ export default function CompanyProductPage() {
               </Select>
 
               <Button
-                className="h-14 px-10 rounded-2xl bg-warning-500 text-black font-black uppercase tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-warning-500/40"
+                className="h-14 px-10 rounded-2xl bg-obaol-500 text-black font-black uppercase tracking-[0.25em] italic text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(207,152,60,0.2)] hover:shadow-obaol-500/40"
                 isLoading={obaolConfigMutation.isPending}
                 isDisabled={!selectedObaolCompanyId}
                 onPress={() => obaolConfigMutation.mutate(selectedObaolCompanyId)}
@@ -856,9 +856,9 @@ export default function CompanyProductPage() {
                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-success-600">Assigned</p>
                 <p className="text-2xl font-black text-success-500">{assignedCount}</p>
               </div>
-              <div className="rounded-xl border border-warning-500/20 bg-warning-500/10 p-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">Unassigned</p>
-                <p className="text-2xl font-black text-warning-500">{unassignedCount}</p>
+              <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 p-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-600">Unassigned</p>
+                <p className="text-2xl font-black text-obaol-500">{unassignedCount}</p>
               </div>
             </div>
           </Card>
@@ -868,7 +868,7 @@ export default function CompanyProductPage() {
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-default-500">Live Products Status</p>
                 <p className="text-xs font-bold text-default-400 uppercase tracking-wider">Companies with live products</p>
               </div>
-              <LuGlobe className="text-warning-500/70" size={18} />
+              <LuGlobe className="text-obaol-500/70" size={18} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-success-500/20 bg-success-500/10 p-3">
@@ -886,7 +886,7 @@ export default function CompanyProductPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
-              <div className="w-1 h-6 bg-warning-500 rounded-full shadow-[0_0_12px_rgba(245,158,11,0.5)]" />
+              <div className="w-1 h-6 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(207,152,60,0.5)]" />
               <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-foreground italic">Company <span className="text-default-400">Directory</span></h2>
             </div>
             <p className="text-[10px] font-bold text-default-500 uppercase tracking-widest opacity-80">
@@ -928,9 +928,9 @@ export default function CompanyProductPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Assignment Filter</p>
                 {companiesQuery.isFetching ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-warning-500/20 bg-warning-500/10 px-3 py-1">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1">
                     <Spinner size="sm" color="warning" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-600">
                       Refreshing directory
                     </span>
                   </div>
@@ -965,7 +965,7 @@ export default function CompanyProductPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-[10px] font-black uppercase tracking-[0.25em] text-default-500">Live Product Filter</p>
               {companiesQuery.isFetching ? (
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500/80">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500/80">
                   Applying filters...
                 </p>
               ) : null}
@@ -1006,8 +1006,8 @@ export default function CompanyProductPage() {
             <div className="w-full space-y-6">
               {companiesQuery.isLoading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-6">
-                  <div className="w-12 h-12 border-2 border-warning-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(245,158,11,0.2)]" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-500/60 animate-pulse">Loading companies...</p>
+                  <div className="w-12 h-12 border-2 border-obaol-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(207,152,60,0.2)]" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-500/60 animate-pulse">Loading companies...</p>
                 </div>
               ) : companiesQuery.isError ? (
                 <div className="py-16 px-6 text-center bg-danger-500/5 rounded-[2.5rem] border border-danger-500/30 space-y-4">
@@ -1027,12 +1027,12 @@ export default function CompanyProductPage() {
                 <div className="relative">
                   <div className={`space-y-6 transition-opacity duration-200 ${companiesQuery.isFetching ? "opacity-45 pointer-events-none select-none" : ""}`}>
                   <div className="flex items-center gap-4 px-2">
-                    <LuUsers className="text-warning-500/50" size={14} />
+                    <LuUsers className="text-obaol-500/50" size={14} />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">
                       {directoryTotalCount} companies found
                     </span>
                     {companiesQuery.isFetching ? (
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-500/70">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500/70">
                         Refreshing...
                       </span>
                     ) : null}
@@ -1053,7 +1053,7 @@ export default function CompanyProductPage() {
                             if (companiesQuery.isFetching) return;
                             setSelectedCompanyId(company?._id || null);
                           }}
-                          className="group relative text-left flex flex-col gap-6 rounded-[2.5rem] border border-divider bg-content1/30 p-6 hover:border-warning-500/40 hover:bg-content1 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-warning-500/[0.05] backdrop-blur-xl"
+                          className="group relative text-left flex flex-col gap-6 rounded-[2.5rem] border border-divider bg-content1/30 p-6 hover:border-obaol-500/40 hover:bg-content1 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-obaol-500/[0.05] backdrop-blur-xl"
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div
@@ -1064,7 +1064,7 @@ export default function CompanyProductPage() {
                               {initials(name)}
                             </div>
                             <div className="grow flex flex-col min-w-0 pt-1">
-                              <span className="text-base font-black text-foreground leading-tight line-clamp-2 group-hover:text-warning-600 transition-colors uppercase tracking-tight italic">
+                              <span className="text-base font-black text-foreground leading-tight line-clamp-2 group-hover:text-obaol-600 transition-colors uppercase tracking-tight italic">
                                 {name}
                               </span>
                               <span className="text-[10px] font-black text-default-500 uppercase tracking-widest mt-2 bg-default-100 dark:bg-white/5 w-fit px-2 py-0.5 rounded-lg border border-divider">
@@ -1075,7 +1075,7 @@ export default function CompanyProductPage() {
                           
                           <div className="space-y-2 mt-auto">
                             <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest truncate">
-                              <LuGlobe size={14} className="shrink-0 text-warning-500/40" />
+                              <LuGlobe size={14} className="shrink-0 text-obaol-500/40" />
                               {toText(company?.email, "Not available")}
                             </div>
                             <div className="flex items-center gap-3 text-[10px] text-default-500 font-black uppercase tracking-widest">
@@ -1103,10 +1103,10 @@ export default function CompanyProductPage() {
                           </div>
 
                           <div className="pt-4 border-t border-divider flex items-center justify-between">
-                            <span className="text-[9px] font-black text-warning-500 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
+                            <span className="text-[9px] font-black text-obaol-500 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
                               Open details
                             </span>
-                            <div className="w-8 h-8 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-warning-500 group-hover:text-black transition-all">
+                            <div className="w-8 h-8 rounded-xl bg-default-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-obaol-500 group-hover:text-black transition-all">
                               <LuChevronLeft size={16} className="rotate-180" />
                             </div>
                           </div>
@@ -1140,9 +1140,9 @@ export default function CompanyProductPage() {
                 </div>
                   {companiesQuery.isFetching ? (
                     <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2.5rem] bg-background/40 backdrop-blur-[2px]">
-                      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-warning-500/20 bg-content1/90 px-6 py-5 shadow-2xl">
-                        <div className="w-10 h-10 border-2 border-warning-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(245,158,11,0.15)]" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-600">
+                      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-obaol-500/20 bg-content1/90 px-6 py-5 shadow-2xl">
+                        <div className="w-10 h-10 border-2 border-obaol-500 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(207,152,60,0.15)]" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600">
                           Updating company directory
                         </p>
                         <p className="text-[10px] font-bold text-default-500 text-center">
@@ -1163,15 +1163,15 @@ export default function CompanyProductPage() {
                     variant="flat" 
                     radius="full" 
                     size="lg" 
-                    className="bg-content2/50 hover:bg-warning-500 hover:text-black transition-all shadow-sm"
+                    className="bg-content2/50 hover:bg-obaol-500 hover:text-black transition-all shadow-sm"
                     onPress={() => setSelectedCompanyId(null)}
                   >
                     <LuChevronLeft size={24} />
                   </Button>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 bg-warning-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.4em] text-warning-600 dark:text-warning-500 italic">Company Details</span>
+                      <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(255,193,7,0.6)]" />
+                      <span className="text-[11px] font-black uppercase tracking-[0.4em] text-obaol-600 dark:text-obaol-500 italic">Company Details</span>
                     </div>
                     <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase italic">{selectedCompanyName}</h3>
                   </div>
@@ -1189,9 +1189,9 @@ export default function CompanyProductPage() {
                     <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border transition-all ${
                       selectedCompany.isWebsiteLive 
                         ? "border-success-500/10 bg-success-500/5 text-success-600 dark:text-success-400" 
-                        : "border-warning-500/10 bg-warning-500/5 text-warning-600 dark:text-warning-400"
+                        : "border-obaol-500/10 bg-obaol-500/5 text-obaol-600 dark:text-obaol-400"
                     }`}>
-                      <div className={`w-1 h-3 rounded-full ${selectedCompany.isWebsiteLive ? "bg-success-500/30" : "bg-warning-500/30"}`} />
+                      <div className={`w-1 h-3 rounded-full ${selectedCompany.isWebsiteLive ? "bg-success-500/30" : "bg-obaol-500/30"}`} />
                       <span className="text-[9px] font-black uppercase tracking-[0.25em]">
                         {selectedCompany.isWebsiteLive ? "Website Active" : "Internal Sync Only"}
                       </span>
@@ -1215,7 +1215,7 @@ export default function CompanyProductPage() {
                     <Card className="rounded-[2.5rem] bg-content2/30 dark:bg-white/[0.02] border border-divider p-8 shadow-sm backdrop-blur-xl">
                       <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
-                          <LuGlobe className="text-warning-500" size={16} />
+                          <LuGlobe className="text-obaol-500" size={16} />
                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Contact Information</span>
                         </div>
                         <div className="space-y-5">
@@ -1353,7 +1353,7 @@ export default function CompanyProductPage() {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <LuUsers className="text-warning-500" size={16} />
+                            <LuUsers className="text-obaol-500" size={16} />
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400 italic">Personnel Network</span>
                           </div>
                           <Chip size="sm" color="primary" variant="flat">

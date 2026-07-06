@@ -125,7 +125,7 @@ export default function MarketplacePage() {
                 {/* Page Header */}
                 <header className={`mb-4 md:mb-8 flex flex-col gap-2 rounded-3xl border px-4 md:px-5 py-4 md:py-6 ${activeTheme.shellClass} ${activeTheme.shellBorderClass}`}>
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 md:p-3 bg-warning-100 rounded-2xl text-warning-600">
+                        <div className="p-2.5 md:p-3 bg-obaol-100 rounded-2xl text-obaol-600">
                             <LuWarehouse size={22} className="md:hidden" />
                             <LuWarehouse size={28} className="hidden md:block" />
                         </div>
@@ -166,9 +166,9 @@ export default function MarketplacePage() {
                                 color="warning"
                                 classNames={{
                                     tabList: "gap-2 md:gap-6 relative rounded-none p-0 border-b border-divider/30 min-w-max",
-                                    cursor: "bg-warning-500 w-full h-[2px] rounded-t-full",
+                                    cursor: "bg-obaol-500 w-full h-[2px] rounded-t-full",
                                     tab: "max-w-fit px-2 md:px-2 h-10 md:h-11",
-                                    tabContent: "font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-warning-500"
+                                    tabContent: "font-semibold uppercase tracking-wider text-[9px] md:text-[10px] text-default-400 transition-all whitespace-nowrap group-data-[selected=true]:text-obaol-500"
                                 }}
                             >
                                 <TabAny

@@ -483,7 +483,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
       <div className="rounded-[2rem] border border-divider bg-content1 shadow-2xl shadow-black/5 overflow-hidden">
         <div className="bg-default-50/50 px-6 py-4 border-b border-divider flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-warning-500/10 rounded-xl text-warning-600">
+            <div className="p-2 bg-obaol-500/10 rounded-xl text-obaol-600">
               <FiActivity size={18} />
             </div>
             <span className="text-xs font-black uppercase tracking-[0.2em] text-foreground/80">
@@ -501,23 +501,23 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             const endLabel = orderStageLabelMap.get(String(config.mustCompleteBeforeOrderStage)) || "End";
 
             return (
-              <div key={flow.key} className="group relative pl-5 border-l-2 border-warning-500/30 hover:border-warning-500 transition-colors duration-300">
+              <div key={flow.key} className="group relative pl-5 border-l-2 border-obaol-500/30 hover:border-obaol-500 transition-colors duration-300">
                 <div className="flex flex-col gap-2.5 mb-2">
                   <div className="flex flex-col">
                     <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{flow.label}</span>
                     <span className="text-[9px] font-black text-default-400 uppercase tracking-widest opacity-60">Subflow Node</span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-default-50/50 p-1.5 rounded-xl border border-divider self-start">
-                    <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-warning-500 text-black shadow-sm uppercase">{startLabel}</span>
+                    <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-obaol-500 text-black shadow-sm uppercase">{startLabel}</span>
                     <FiArrowRight size={12} className="text-default-400 mx-1 shrink-0" />
                     <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-background border border-divider text-default-500 uppercase shadow-sm">{endLabel}</span>
                   </div>
                 </div>
                 {config.biddingStartAtOrderStage && (
-                  <div className="flex items-center gap-3 mt-2 px-3 py-1.5 rounded-xl bg-warning-500/5 border border-warning-500/10">
-                    <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
-                    <span className="text-[9px] font-black uppercase text-warning-700 tracking-widest">Bidding Window:</span>
-                    <span className="text-[9px] font-black text-warning-600 italic tracking-tight">
+                  <div className="flex items-center gap-3 mt-2 px-3 py-1.5 rounded-xl bg-obaol-500/5 border border-obaol-500/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-obaol-500 animate-pulse" />
+                    <span className="text-[9px] font-black uppercase text-obaol-700 tracking-widest">Bidding Window:</span>
+                    <span className="text-[9px] font-black text-obaol-600 italic tracking-tight">
                       {orderStageLabelMap.get(String(config.biddingStartAtOrderStage))} ⇢ {orderStageLabelMap.get(String(config.biddingEndAtOrderStage)) || "End"}
                     </span>
                   </div>
@@ -754,7 +754,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                           transition={{ delay: index * 0.05 }}
                           className={`group relative flex flex-col rounded-[2rem] border-2 transition-all duration-500 overflow-hidden
                             ${isActive
-                              ? "bg-content1 border-warning-500/20 shadow-2xl shadow-warning-500/5 hover:border-warning-500/40"
+                              ? "bg-content1 border-obaol-500/20 shadow-2xl shadow-obaol-500/5 hover:border-obaol-500/40"
                               : "bg-default-50/10 border-default-100 opacity-40 grayscale scale-[0.98]"
                             }`}
                         >
@@ -762,7 +762,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                           <div className={`p-6 flex items-center justify-between border-b ${isActive ? "bg-default-50/50 border-default-100" : "bg-default-50 border-default-100/50"}`}>
                             <div className="flex items-center gap-5">
                               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg
-                                ${isActive ? "bg-gradient-to-br from-warning-400 to-warning-600 text-black shadow-warning-500/20" : "bg-default-200 text-default-400"}`}>
+                                ${isActive ? "bg-gradient-to-br from-obaol-400 to-obaol-600 text-black shadow-obaol-500/20" : "bg-default-200 text-default-400"}`}>
                                 <Icon size={24} strokeWidth={2.5} />
                               </div>
                               <div>
@@ -992,9 +992,9 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                       );
                     })}
                   </div>
-                  <div className="mt-5 flex items-center gap-2 p-3 rounded-xl bg-warning-500/5 border border-warning-500/10">
-                    <FiAlertCircle className="text-warning-500 shrink-0" />
-                    <span className="text-[10px] font-semibold text-warning-700/80 uppercase tracking-widest">
+                  <div className="mt-5 flex items-center gap-2 p-3 rounded-xl bg-obaol-500/5 border border-obaol-500/10">
+                    <FiAlertCircle className="text-obaol-500 shrink-0" />
+                    <span className="text-[10px] font-semibold text-obaol-700/80 uppercase tracking-widest">
                       Subflows run in parallel and gate order stages. Bidding is allowed only between the configured bidding stages.
                     </span>
                   </div>
@@ -1014,8 +1014,8 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
             restoreLoading={seedMutation.isPending}
           />
           {rules.length === 0 && (autoSeeding || seedMutation.isPending) && (
-            <div className="mt-3 px-4 py-3 rounded-xl border border-warning-500/20 bg-warning-500/10 text-[10px] font-black uppercase tracking-widest text-warning-700/80 flex items-center gap-2">
-              <FiAlertCircle className="text-warning-600" />
+            <div className="mt-3 px-4 py-3 rounded-xl border border-obaol-500/20 bg-obaol-500/10 text-[10px] font-black uppercase tracking-widest text-obaol-700/80 flex items-center gap-2">
+              <FiAlertCircle className="text-obaol-600" />
               Restoring default flow rules…
             </div>
           )}
@@ -1046,7 +1046,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                 }
               }
               if (!rule.isActive) {
-                badges.push({ label: "Inactive", colorClass: "text-warning-600 bg-warning-500/10" });
+                badges.push({ label: "Inactive", colorClass: "text-obaol-600 bg-obaol-500/10" });
               }
               return badges;
             }}
@@ -1085,22 +1085,22 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                           <button
                             onClick={() => setPreviewStageKey(rule.stageKey)}
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 z-10 shrink-0 ${isActiveStage
-                              ? "bg-warning-500 border-warning-500 shadow-lg shadow-warning-500/40"
+                              ? "bg-obaol-500 border-obaol-500 shadow-lg shadow-obaol-500/40"
                               : isBiddingStage
-                                ? "bg-content1 border-warning-500/40"
-                                : "bg-content1 border-default-300 hover:border-warning-400"
+                                ? "bg-content1 border-obaol-500/40"
+                                : "bg-content1 border-default-300 hover:border-obaol-400"
                               }`}
                           >
                             {isActiveStage ? (
                               <FiCheck className="text-white text-[10px] font-black" />
                             ) : isBiddingStage ? (
-                              <div className="w-1.5 h-1.5 rounded-full bg-warning-500/60 animate-pulse" />
+                              <div className="w-1.5 h-1.5 rounded-full bg-obaol-500/60 animate-pulse" />
                             ) : (
                               <div className="w-1.5 h-1.5 rounded-full bg-default-300" />
                             )}
                           </button>
                           {!isLast && (
-                            <div className={`w-0.5 flex-1 min-h-[2.5rem] transition-colors duration-500 ${isActiveStage ? "bg-warning-500/50" : "bg-divider/40"
+                            <div className={`w-0.5 flex-1 min-h-[2.5rem] transition-colors duration-500 ${isActiveStage ? "bg-obaol-500/50" : "bg-divider/40"
                               }`} />
                           )}
                         </div>
@@ -1109,16 +1109,16 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                           className={`flex-1 pb-6 text-left group transition-all duration-500 ${isActiveStage ? "translate-x-2" : ""}`}
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <div className={`text-xs font-black uppercase tracking-[0.15em] transition-colors ${isActiveStage ? "text-warning-600" : "text-default-500 group-hover/item:text-default-800"}`}>
+                            <div className={`text-xs font-black uppercase tracking-[0.15em] transition-colors ${isActiveStage ? "text-obaol-600" : "text-default-500 group-hover/item:text-default-800"}`}>
                               {rule.label || rule.stageKey}
                             </div>
                             {isBiddingStage && (
-                              <span className="text-[9px] font-black uppercase tracking-widest text-warning-500/80 flex items-center gap-1 bg-warning-500/5 px-2 py-0.5 rounded-md border border-warning-500/10">
+                              <span className="text-[9px] font-black uppercase tracking-widest text-obaol-500/80 flex items-center gap-1 bg-obaol-500/5 px-2 py-0.5 rounded-md border border-obaol-500/10">
                                 <FiZap size={8} className="animate-pulse" /> Bidding
                               </span>
                             )}
                           </div>
-                          <div className={`text-[10px] font-black transition-opacity uppercase tracking-widest ${isActiveStage ? "text-warning-500/60" : "text-default-400 opacity-40"}`}>
+                          <div className={`text-[10px] font-black transition-opacity uppercase tracking-widest ${isActiveStage ? "text-obaol-500/60" : "text-default-400 opacity-40"}`}>
                             {rule.stageKey}
                           </div>
                         </button>
@@ -1138,7 +1138,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
                     <div>
                       <div className="text-[10px] font-black uppercase tracking-[0.25em] text-default-400 mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
+                          <div className="w-1.5 h-4 bg-obaol-500 rounded-full" />
                           <span>Required Actions</span>
                         </div>
                         <span className="text-[9px] opacity-40">STAGE PROTOCOL</span>

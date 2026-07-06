@@ -218,13 +218,13 @@ export default function DeveloperKeysPage() {
             <input type="number" min={10} max={5000} value={rateLimit} onChange={(e) => setRateLimit(Number(e.target.value || 120))} className="rounded-lg border border-default-300 bg-transparent px-3 py-2 text-sm text-default-900 dark:text-white dark:border-white/25 dark:bg-white/5" placeholder="Rate limit/min" />
           </div>
           <div className="mt-4">
-            <button disabled={isCreating} onClick={handleCreate} className="rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-black disabled:opacity-60">
+            <button disabled={isCreating} onClick={handleCreate} className="rounded-lg bg-obaol-500 px-4 py-2 text-sm font-medium text-black disabled:opacity-60">
               {isCreating ? "Generating..." : "Generate API Key"}
             </button>
           </div>
 
           {newRawKey && (
-            <div className="mt-4 rounded-lg border border-warning-300 bg-warning-50 p-3 text-sm text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-100">
+            <div className="mt-4 rounded-lg border border-obaol-300 bg-obaol-50 p-3 text-sm text-obaol-800 dark:border-obaol-500/40 dark:bg-obaol-500/10 dark:text-obaol-100">
               <p className="font-medium">Copy this API key now. It will not be shown again.</p>
               <code className="mt-2 block break-all rounded bg-black/5 px-2 py-1 dark:bg-white/10">{newRawKey}</code>
             </div>
@@ -321,7 +321,7 @@ export default function DeveloperKeysPage() {
             <button
               disabled={isConnectorCreating}
               onClick={handleCreateConnector}
-              className="rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+              className="rounded-lg bg-obaol-500 px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
             >
               {isConnectorCreating ? "Generating..." : "Generate Connector Token"}
             </button>
@@ -338,7 +338,7 @@ export default function DeveloperKeysPage() {
           </div>
 
           {newConnectorToken ? (
-            <div className="mt-4 rounded-lg border border-warning-300 bg-warning-50 p-3 text-sm text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-100">
+            <div className="mt-4 rounded-lg border border-obaol-300 bg-obaol-50 p-3 text-sm text-obaol-800 dark:border-obaol-500/40 dark:bg-obaol-500/10 dark:text-obaol-100">
               <p className="font-medium">Copy this connector token now. It will not be shown again.</p>
               <code className="mt-2 block break-all rounded bg-black/5 px-2 py-1 dark:bg-white/10">{newConnectorToken}</code>
               {newConnectorUrl ? (
@@ -398,7 +398,7 @@ export default function DeveloperKeysPage() {
             </table>
           </div>
           {connectorWarning ? (
-            <p className="mt-4 rounded-lg border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-100">
+            <p className="mt-4 rounded-lg border border-obaol-300 bg-obaol-50 px-3 py-2 text-sm text-obaol-800 dark:border-obaol-500/40 dark:bg-obaol-500/10 dark:text-obaol-100">
               {connectorWarning}
             </p>
           ) : null}

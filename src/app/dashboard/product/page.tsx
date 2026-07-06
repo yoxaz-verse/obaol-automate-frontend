@@ -85,8 +85,8 @@ export default function Product() {
       <div className="w-full px-4 md:px-0 md:w-[95%]">
         <div className="min-h-[70vh] pb-10">
           {isNoCompanyAssociate && (
-            <div className="mb-4 rounded-xl border border-warning-300/30 bg-warning-500/10 px-4 py-3">
-              <p className="text-xs font-semibold text-warning-700 dark:text-warning-300">
+            <div className="mb-4 rounded-xl border border-obaol-300/30 bg-obaol-500/10 px-4 py-3">
+              <p className="text-xs font-semibold text-obaol-700 dark:text-obaol-300">
                 Trade-listing mode active. Link a company to publish your own commodity listings.
               </p>
             </div>
@@ -112,9 +112,9 @@ export default function Product() {
               color="warning"
               classNames={{
                 tabList: "gap-10 relative rounded-none p-0 border-b border-divider/40 flex-nowrap overflow-x-auto no-scrollbar bg-transparent",
-                cursor: "bg-warning-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(245,158,11,0.4)]",
+                cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(207,152,60,0.4)]",
                 tab: "max-w-fit px-2 h-14 transition-all duration-300",
-                tabContent: "font-black uppercase tracking-widest text-[11px] text-default-400 group-data-[selected=true]:text-warning-500 group-data-[selected=true]:scale-110 transition-transform"
+                tabContent: "font-black uppercase tracking-widest text-[11px] text-default-400 group-data-[selected=true]:text-obaol-500 group-data-[selected=true]:scale-110 transition-transform"
               }}
             >
               {isAssociate ? (

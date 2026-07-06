@@ -12,7 +12,6 @@ const NAV = [
   { href: "/how-it-works", label: "How it Works" },
   { href: "/trade-directory", label: "Catalog" },
   { href: "/procurement", label: "Services" },
-  { href: "/trust", label: "Trust" },
   { href: "/faq", label: "Resources" },
 ];
 
@@ -59,7 +58,7 @@ export default function Header() {
               <Link href={isAuthenticated ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-10 items-center px-2 text-sm font-semibold text-foreground/70 hover:text-foreground">
                 {!loading && isAuthenticated ? "Dashboard" : "Sign In"}
               </Link>
-              <Link href={isAuthenticated ? "/dashboard" : "/auth"} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-orange-600 md:px-4 md:py-2 md:text-sm">
+              <Link href={isAuthenticated ? "/dashboard" : "/auth"} className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-obaol-300/40 bg-obaol-500 px-3 py-1.5 text-xs font-bold text-obaol-950 shadow-[0_10px_28px_-14px_rgba(207,152,60,0.75)] transition-all hover:-translate-y-0.5 hover:bg-obaol-400 md:px-4 md:py-2 md:text-sm">
                 {!loading && isAuthenticated ? "Open workspace" : "Get Started"}
               </Link>
 
@@ -92,7 +91,7 @@ export default function Header() {
 
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-foreground/10 pt-3">
             <Link href="/auth?view=signin" onClick={() => setMobileOpen(false)} className="rounded-xl border border-foreground/10 px-4 py-3 text-center text-sm font-semibold">Sign In</Link>
-            <Link href="/auth" onClick={() => setMobileOpen(false)} className="rounded-xl bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white">Get Started</Link>
+            <Link href="/auth" onClick={() => setMobileOpen(false)} className="rounded-xl border border-obaol-300/40 bg-obaol-500 px-4 py-3 text-center text-sm font-bold text-obaol-950">Get Started</Link>
           </div>
 
           <div className="mt-3 pt-3 border-t border-foreground/10 flex justify-center">

@@ -36,7 +36,7 @@ const AddModal: React.FC<AddModalProps & { onSuccess?: (data: any) => void }> = 
           onPress={openModal}
           variant="flat"
           color="warning"
-          className="font-bold tracking-tight px-4 h-9 rounded-xl hover:bg-warning-500 hover:text-white transition-all duration-200"
+          className="font-bold tracking-tight px-4 h-9 rounded-xl hover:bg-obaol-500 hover:text-white transition-all duration-200"
           startContent={<LuPlus className="text-lg font-black" />}
         >
           {buttonLabel || (name ? `Add ${name}` : `Create ${currentTable}`)}

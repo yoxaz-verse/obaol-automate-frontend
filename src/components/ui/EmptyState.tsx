@@ -29,7 +29,7 @@ export default function EmptyState({
                 }}
                 className="relative mb-6"
             >
-                <div className="absolute inset-0 bg-warning-500/10 blur-3xl rounded-full" />
+                <div className="absolute inset-0 rounded-full bg-obaol-500/10 blur-3xl" />
                 <motion.div
                     animate={{
                         y: [0, -10, 0],
@@ -63,7 +63,7 @@ export default function EmptyState({
                 {message}
             </motion.p>
             {action && (
-                <Link href={action.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-warning-500 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-warning-400">
+                <Link href={action.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-5 py-2.5 text-sm font-bold text-obaol-950 hover:bg-obaol-400">
                     {action.label}
                 </Link>
             )}

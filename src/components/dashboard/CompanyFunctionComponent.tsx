@@ -443,7 +443,7 @@ const ActionCardGrid = ({ actions, accent = "primary" }: { actions: ActionLink[]
                 <span className="text-[9px] font-black text-primary/50 uppercase tracking-[0.2em] mb-1">EXECUTE</span>
                 <span className="text-sm font-black text-foreground uppercase tracking-wider group-hover:text-primary transition-colors duration-300">{action.label}</span>
             </div>
-            <div className="h-10 w-10 rounded-2xl bg-default-200/30 flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary group-hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] transition-all duration-300">
+            <div className="h-10 w-10 rounded-2xl bg-default-200/30 flex items-center justify-center group-hover:bg-primary/20 group-hover:text-primary group-hover:shadow-[0_0_20px_rgba(207,152,60,0.2)] transition-all duration-300">
               <LuArrowRight size={18} className="group-hover:translate-x-1- transition-transform" />
             </div>
           </div>
@@ -473,7 +473,7 @@ const SourcingSection = (props: SectionProps) => (
                         whileHover={{ scale: 1.02, x: 5 }}
                         className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-content1/40 border border-transparent hover:border-primary/20 hover:shadow-md transition-all cursor-pointer group/item"
                     >
-                        <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(249,115,22,0.4)] group-hover/item:scale-125 transition-transform" />
+                        <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(207,152,60,0.4)] group-hover/item:scale-125 transition-transform" />
                         <div className="flex flex-col flex-1 min-w-0">
                             <span className="text-xs font-black text-foreground truncate group-hover/item:text-primary transition-colors">{item.title || "Enquiry Pipeline"}</span>
                             <span className="text-[9px] text-default-400 font-bold uppercase tracking-tighter">{item.type}</span>
@@ -508,7 +508,7 @@ const SourcingSection = (props: SectionProps) => (
               >
                 <div className="flex justify-between items-end mb-2">
                     <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-2xl flex items-center justify-center text-xs font-black ${idx < 2 ? "bg-primary text-white shadow-[0_4px_12px_rgba(249,115,22,0.3)]" : "bg-default-100 text-default-400"} group-hover/funnel:scale-110 transition-all duration-300`}>
+                        <div className={`h-8 w-8 rounded-2xl flex items-center justify-center text-xs font-black ${idx < 2 ? "bg-primary text-white shadow-[0_4px_12px_rgba(207,152,60,0.3)]" : "bg-default-100 text-default-400"} group-hover/funnel:scale-110 transition-all duration-300`}>
                             {idx + 1}
                         </div>
                         <div className="flex flex-col">
@@ -523,7 +523,7 @@ const SourcingSection = (props: SectionProps) => (
                         initial={{ width: 0 }}
                         animate={{ width: idx < 2 ? "100%" : "0%" }}
                         transition={{ duration: 1.5, ease: "circOut", delay: 0.6 + idx * 0.1 }}
-                        className="h-full bg-gradient-to-r from-primary/40 to-primary shadow-[0_0_8px_rgba(249,115,22,0.4)]"
+                        className="h-full bg-gradient-to-r from-primary/40 to-primary shadow-[0_0_8px_rgba(207,152,60,0.4)]"
                     />
                 </div>
               </motion.div>

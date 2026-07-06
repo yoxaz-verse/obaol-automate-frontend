@@ -166,14 +166,14 @@ function CategoryList({
                 <span className="font-semibold text-base tracking-wide text-foreground/90 group-hover:text-orange-400 transition-colors">{cat.name}</span>
                 <div className="flex gap-2">
                   {myCount > 0 && (
-                    <span className="flex items-center px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-bold border border-orange-500/20 shadow-[0_0_10px_rgba(251,146,60,0.1)]">
+                    <span className="flex items-center px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-bold border border-orange-500/20 shadow-[0_0_10px_rgba(228,199,153,0.1)]">
                       {myCount} Products
                     </span>
                   )}
                 </div>
               </div>
             }
-            className="group mb-3 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(251,146,60,0.05)]"
+            className="group mb-3 border border-foreground/10 bg-foreground/[0.02] hover:bg-foreground/[0.04] backdrop-blur-md rounded-2xl transition-all shadow-sm data-[open=true]:border-orange-500/30 data-[open=true]:bg-orange-500/5 data-[open=true]:shadow-[0_4px_24px_rgba(228,199,153,0.05)]"
           >
             <div className="pl-6 ml-4 border-l-2 border-orange-500/10 pb-4">
               {cat.description && <p className="text-sm text-default-400 mb-4 px-2">{cat.description}</p>}
@@ -296,7 +296,7 @@ function SubCategoryList({
                 <span className="text-sm font-semibold tracking-wide text-foreground/80 group-hover:text-orange-400 transition-colors">{sub.name}</span>
                 {myCount > 0 && (
                   <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-bold border border-orange-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_6px_rgba(251,146,60,0.8)]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_6px_rgba(228,199,153,0.8)]" />
                     {myCount} Added
                   </span>
                 )}
@@ -400,7 +400,7 @@ function ProductSection({
                 <div
                   key={p._id}
                   className={`group flex items-center justify-between pl-4 py-4 pr-0 rounded-xl transition-all duration-300 cursor-pointer ${myCount > 0
-                    ? "bg-orange-500/5 border border-orange-500/20 shadow-[inset_0_0_12px_rgba(251,146,60,0.05)] hover:bg-orange-500/10 hover:border-orange-500/30"
+                    ? "bg-orange-500/5 border border-orange-500/20 shadow-[inset_0_0_12px_rgba(228,199,153,0.05)] hover:bg-orange-500/10 hover:border-orange-500/30"
                     : "bg-foreground/[0.02] border border-foreground/5 hover:bg-foreground/[0.05] hover:border-foreground/20 hover:shadow-lg"
                     }`}
                   onClick={() => setSelectedProduct(p)}
@@ -415,7 +415,7 @@ function ProductSection({
                     )}
                   </div>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${myCount > 0
-                    ? "bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-black group-hover:shadow-[0_0_12px_rgba(251,146,60,0.5)]"
+                    ? "bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-black group-hover:shadow-[0_0_12px_rgba(228,199,153,0.5)]"
                     : "bg-foreground/5 text-default-500 group-hover:bg-foreground/10 group-hover:text-foreground"
                     }`}>
                     <svg className="w-4 h-4 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">

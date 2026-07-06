@@ -20,7 +20,7 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
       return (
         <Card className="db-panel shadow-none border db-border-subtle h-full">
           <CardBody className="flex flex-col items-center justify-center py-6">
-            <span className="text-4xl font-bold text-warning-500 mb-2">{data}</span>
+            <span className="mb-2 text-4xl font-bold text-obaol-700 dark:text-obaol-300">{data}</span>
             <span className="text-sm font-medium text-default-500 uppercase tracking-wider text-center">
               {heading}
             </span>
@@ -30,15 +30,15 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
     }
     if (type === "view") {
       return (
-        <Card className="db-subtle backdrop-blur-md shadow-sm border db-border-subtle h-full hover:db-inset hover:shadow-lg hover:border-warning-500/30 transition-all duration-300 group overflow-hidden">
+        <Card className="db-subtle backdrop-blur-md shadow-sm border db-border-subtle h-full hover:db-inset hover:shadow-lg hover:border-obaol-500/30 transition-all duration-300 group overflow-hidden">
           <Link href={data.link || "#"} className="w-full h-full flex flex-col items-center justify-center p-3 sm:p-5 gap-2 group">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 text-xl sm:text-2xl group-hover:bg-warning-500 group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-warning-500/40">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-700 dark:text-obaol-300 text-xl sm:text-2xl group-hover:bg-obaol-500 group-hover:text-obaol-950 transition-all duration-300 shadow-inner group-hover:shadow-obaol-500/40">
               {data.icon}
             </div>
-            <div className="font-black text-foreground text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-center line-clamp-1 px-1 mt-1 transition-all group-hover:text-warning-500">
+            <div className="font-bold text-foreground text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-center line-clamp-1 px-1 mt-1 transition-all group-hover:text-obaol-700 dark:group-hover:text-obaol-300">
               {data.name}
             </div>
-            <div className="px-3 py-1 db-inset rounded-full text-[8px] sm:text-[9px] text-default-400 group-hover:bg-warning-500 group-hover:text-white transition-all uppercase tracking-[0.2em] font-black border border-transparent">
+            <div className="px-3 py-1 db-inset rounded-full text-[8px] sm:text-[9px] text-default-400 group-hover:bg-obaol-500 group-hover:text-obaol-950 transition-all uppercase tracking-[0.2em] font-bold border border-transparent">
               View
             </div>
           </Link>
@@ -55,7 +55,7 @@ const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
             <CircularProgress
               classNames={{
                 svg: "w-24 h-24 drop-shadow-md",
-                indicator: "stroke-warning-500",
+                indicator: "stroke-obaol-500",
                 track: "stroke-default-200",
                 value: "text-xl font-semibold text-foreground",
               }}

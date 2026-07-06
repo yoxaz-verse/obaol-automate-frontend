@@ -51,7 +51,7 @@ function AdminDashboardPanel() {
   return (
     <div className="w-full mt-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-2 h-8 bg-warning-500 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)]" />
+        <div className="w-2 h-8 bg-obaol-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
         <div>
           <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">Platform Command Overview</h3>
           <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">High-level System Metrics & Global Assets</p>
@@ -61,22 +61,22 @@ function AdminDashboardPanel() {
         <InsightCard
           title="Global Enquiries"
           metric={globalStats?.enquiries || 0}
-          icon={<FiActivity size={20} className="text-warning-500" />}
+          icon={<FiActivity size={20} className="text-obaol-500" />}
         />
         <InsightCard
           title="Onboarded Entities"
           metric={globalStats?.companies || 0}
-          icon={<FiBriefcase size={20} className="text-warning-500" />}
+          icon={<FiBriefcase size={20} className="text-obaol-500" />}
         />
         <InsightCard
           title="Trade Listing Users"
           metric={globalStats?.users || 0}
-          icon={<FiLayers size={20} className="text-warning-500" />}
+          icon={<FiLayers size={20} className="text-obaol-500" />}
         />
         <InsightCard
           title="Catalog Scale"
           metric={globalStats?.products || 0}
-          icon={<FiDatabase size={20} className="text-warning-500" />}
+          icon={<FiDatabase size={20} className="text-obaol-500" />}
         />
       </div>
     </div>
@@ -102,7 +102,7 @@ function AssociateDashboardPanel({ userId }: { userId: string }) {
   return (
     <div className="w-full mt-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-2 h-8 bg-orange-500 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]" />
+        <div className="w-2 h-8 bg-orange-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
         <div>
           <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase">My Trading Ecosystem</h3>
           <p className="text-[10px] font-bold text-default-400 uppercase tracking-[0.2em] mt-0.5">Commercial Performance & Listing Reach</p>
@@ -336,17 +336,17 @@ export default function ProfilePage() {
                 {/* Left Node: Tactical Identity */}
                 <div className="xl:w-[420px] flex flex-col gap-4 sm:gap-8 shrink-0">
                   <Card className="border border-foreground/5 bg-foreground/[0.02] backdrop-blur-3xl shadow-xl sm:shadow-2xl rounded-[1.5rem] sm:rounded-[3rem] overflow-hidden">
-                    <div className="h-28 sm:h-44 bg-gradient-to-br from-warning-500/15 via-orange-500/5 to-transparent relative overflow-hidden">
+                    <div className="h-28 sm:h-44 bg-gradient-to-br from-obaol-500/15 via-orange-500/5 to-transparent relative overflow-hidden">
                       <div className="absolute top-3 right-3 sm:top-6 sm:right-6">
                         <Chip
                           color="warning"
                           variant="shadow"
-                          className="font-black uppercase text-[8px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.3em] h-6 sm:h-8 px-2.5 sm:px-4 bg-warning-500/90 sm:bg-warning-500 text-black border-none"
+                          className="font-black uppercase text-[8px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.3em] h-6 sm:h-8 px-2.5 sm:px-4 bg-obaol-500/90 sm:bg-obaol-500 text-black border-none"
                         >
                           {displayRole}
                         </Chip>
                       </div>
-                      <div className="absolute -bottom-7 -right-7 sm:-bottom-10 sm:-right-10 w-24 h-24 sm:w-40 sm:h-40 bg-warning-500/5 sm:bg-warning-500/10 blur-2xl sm:blur-3xl rounded-full" />
+                      <div className="absolute -bottom-7 -right-7 sm:-bottom-10 sm:-right-10 w-24 h-24 sm:w-40 sm:h-40 bg-obaol-500/5 sm:bg-obaol-500/10 blur-2xl sm:blur-3xl rounded-full" />
                     </div>
 
                     <CardBody className="relative flex flex-col items-center -mt-14 sm:-mt-24 pb-5 sm:pb-12 px-4 sm:px-10">
@@ -376,7 +376,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="bg-foreground/[0.03] sm:bg-foreground/[0.04] p-3 sm:p-5 rounded-[1rem] sm:rounded-[2rem] border border-foreground/5 text-center">
                           <p className="text-[8px] sm:text-[10px] font-black text-default-400 uppercase tracking-[0.1em] sm:tracking-widest mb-1 sm:mb-1.5 opacity-60 italic">System Rank</p>
-                          <p className="text-[10px] sm:text-xs font-black text-warning-500 uppercase tracking-tight sm:tracking-tighter">Alpha Class</p>
+                          <p className="text-[10px] sm:text-xs font-black text-obaol-500 uppercase tracking-tight sm:tracking-tighter">Alpha Class</p>
                         </div>
                       </div>
 
@@ -393,9 +393,9 @@ export default function ProfilePage() {
                     </CardBody>
                   </Card>
 
-                  <Card className="border border-warning-500/10 bg-warning-500/[0.02] sm:bg-warning-500/[0.03] backdrop-blur-3xl shadow-lg sm:shadow-xl rounded-[1.2rem] sm:rounded-[2.5rem] p-3.5 sm:p-7 group cursor-pointer hover:bg-warning-500/[0.05] sm:hover:bg-warning-500/[0.06] transition-all">
+                  <Card className="border border-obaol-500/10 bg-obaol-500/[0.02] sm:bg-obaol-500/[0.03] backdrop-blur-3xl shadow-lg sm:shadow-xl rounded-[1.2rem] sm:rounded-[2.5rem] p-3.5 sm:p-7 group cursor-pointer hover:bg-obaol-500/[0.05] sm:hover:bg-obaol-500/[0.06] transition-all">
                     <div className="flex items-center gap-3 sm:gap-6">
-                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-warning-500/8 sm:bg-warning-500/10 rounded-lg sm:rounded-2xl flex items-center justify-center text-warning-500 border border-warning-500/15 sm:border-warning-500/20 group-hover:scale-105 transition-transform">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-obaol-500/8 sm:bg-obaol-500/10 rounded-lg sm:rounded-2xl flex items-center justify-center text-obaol-500 border border-obaol-500/15 sm:border-obaol-500/20 group-hover:scale-105 transition-transform">
                         <FiInfo size={22} className="sm:hidden" />
                         <FiInfo size={28} className="hidden sm:block" />
                       </div>
@@ -412,12 +412,12 @@ export default function ProfilePage() {
                 {/* Right Matrix: Informative Hub */}
                 <div className="flex-1 flex flex-col gap-5 sm:gap-12">
                   {roleKey === "associate" && !profile?.associateCompany && (
-                    <Card className="border-2 border-dashed border-warning-500/25 sm:border-warning-500/30 bg-warning-500/[0.02] sm:bg-warning-500/[0.03] shadow-xl sm:shadow-2xl rounded-[1.5rem] sm:rounded-[3.5rem] animate-in fade-in slide-in-from-top-6 duration-1000">
+                    <Card className="border-2 border-dashed border-obaol-500/25 sm:border-obaol-500/30 bg-obaol-500/[0.02] sm:bg-obaol-500/[0.03] shadow-xl sm:shadow-2xl rounded-[1.5rem] sm:rounded-[3.5rem] animate-in fade-in slide-in-from-top-6 duration-1000">
                       <CardBody className="p-5 sm:p-16 flex flex-col items-center text-center gap-5 sm:gap-12">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-warning-500/15 sm:bg-warning-500/20 blur-[36px] sm:blur-[50px] rounded-full scale-150 animate-pulse" />
-                          <div className="relative w-16 h-16 sm:w-28 sm:h-28 bg-warning-500/8 sm:bg-warning-500/10 rounded-[1.1rem] sm:rounded-[2.5rem] flex items-center justify-center border border-warning-500/15 sm:border-warning-500/20 shadow-xl sm:shadow-2xl">
-                            <FiBriefcase className="text-warning-500 w-7 h-7 sm:w-12 sm:h-12" />
+                          <div className="absolute inset-0 bg-obaol-500/15 sm:bg-obaol-500/20 blur-[36px] sm:blur-[50px] rounded-full scale-150 animate-pulse" />
+                          <div className="relative w-16 h-16 sm:w-28 sm:h-28 bg-obaol-500/8 sm:bg-obaol-500/10 rounded-[1.1rem] sm:rounded-[2.5rem] flex items-center justify-center border border-obaol-500/15 sm:border-obaol-500/20 shadow-xl sm:shadow-2xl">
+                            <FiBriefcase className="text-obaol-500 w-7 h-7 sm:w-12 sm:h-12" />
                           </div>
                         </div>
                         <div className="flex flex-col gap-2.5 sm:gap-5">
@@ -462,7 +462,7 @@ export default function ProfilePage() {
                         >
                           <CardHeader className="px-4 sm:px-12 pt-4 sm:pt-12 flex items-center justify-between gap-2.5 sm:gap-3">
                             <div className="flex items-center gap-2.5 sm:gap-5">
-                              <div className="w-1 sm:w-2 h-6 sm:h-10 bg-warning-500/80 sm:bg-warning-500 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.25)] sm:shadow-[0_0_15px_rgba(234,179,8,0.4)]" />
+                              <div className="w-1 sm:w-2 h-6 sm:h-10 bg-obaol-500/80 sm:bg-obaol-500 rounded-full shadow-[0_0_10px_rgba(207,152,60,0.25)] sm:shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
                               <h3 className="text-lg sm:text-3xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase italic leading-[0.9] sm:leading-[0.8] pr-1 sm:pr-4">
                                 {group.title}
                               </h3>
@@ -478,12 +478,12 @@ export default function ProfilePage() {
                                 const value = getValue(profile, key);
                                 return (
                                   <div key={key} className="flex flex-col gap-1 sm:gap-3 relative group/field">
-                                    <div className="absolute -left-2.5 sm:-left-6 top-0 bottom-0 w-1 bg-warning-500/0 group-hover/field:bg-warning-500/35 sm:group-hover/field:bg-warning-500/50 transition-all rounded-full" />
+                                    <div className="absolute -left-2.5 sm:-left-6 top-0 bottom-0 w-1 bg-obaol-500/0 group-hover/field:bg-obaol-500/35 sm:group-hover/field:bg-obaol-500/50 transition-all rounded-full" />
                                     <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.14em] sm:tracking-[0.4em] text-default-400 group-hover/field:translate-x-1 transition-transform inline-block">
                                       {label}
                                     </span>
                                     <div className="flex items-center gap-1.5 sm:gap-3">
-                                      <span className="text-[15px] sm:text-xl font-black text-foreground tracking-tight group-hover/field:text-warning-500 transition-colors uppercase">
+                                      <span className="text-[15px] sm:text-xl font-black text-foreground tracking-tight group-hover/field:text-obaol-500 transition-colors uppercase">
                                         {format ? format(value, profile) : value ?? "NODE_NUL"}
                                       </span>
                                     </div>

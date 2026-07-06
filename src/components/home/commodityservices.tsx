@@ -367,7 +367,7 @@ export default function ResponsibilityTransferSection() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 relative z-10 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(251,146,60,0.3)_transparent]">
+            <div className="flex-1 relative z-10 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(228,199,153,0.3)_transparent]">
               {obaolHandles.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}

@@ -16,7 +16,7 @@ export default function RejectedPage() {
   const rejectionReason = (user as any)?.rejectionReason || "";
 
   return (
-    <div className="min-h-screen px-6 py-16 md:px-12 lg:px-20 bg-[#04070f]">
+    <div className="min-h-screen px-6 py-16 md:px-12 lg:px-20 bg-[#090806]">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-end">
           <Button

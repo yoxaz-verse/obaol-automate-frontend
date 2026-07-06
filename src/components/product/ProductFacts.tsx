@@ -26,7 +26,7 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-warning-500/5 text-warning-500">
+                                    <div className="w-full h-full flex items-center justify-center bg-obaol-500/5 text-obaol-500">
                                         <FiLayers size={32} />
                                     </div>
                                 )}
@@ -62,7 +62,7 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                             <div className="flex flex-wrap gap-4 pt-2">
                                 {productionRegions && productionRegions.length > 0 && (
                                     <div className="flex items-center gap-2 text-xs font-bold text-default-500">
-                                        <FiMapPin className="text-warning-500" />
+                                        <FiMapPin className="text-obaol-500" />
                                         <span>Global Production Centers</span>
                                     </div>
                                 )}
@@ -72,7 +72,7 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                                     isExternal
                                     showAnchorIcon
                                     anchorIcon={<FiExternalLink className="ml-1" />}
-                                    className="text-xs font-bold text-warning-600 hover:text-warning-500"
+                                    className="text-xs font-bold text-obaol-600 hover:text-obaol-500"
                                 >
                                     Research Source
                                 </NextLink>

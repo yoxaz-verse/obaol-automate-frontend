@@ -450,7 +450,7 @@ const operatorVideoOutline = [
 ];
 
 const SectionDecoration = () => (
-  <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/5 blur-[80px] rounded-full -mr-16 -mt-16 pointer-events-none" />
+  <div className="absolute top-0 right-0 w-32 h-32 bg-obaol-500/5 blur-[80px] rounded-full -mr-16 -mt-16 pointer-events-none" />
 );
 
 type RoleView = "associate" | "buyer" | "seller" | "both" | "service" | "operator";
@@ -508,20 +508,20 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
           animate={{ opacity: 1, y: 0 }}
           className="relative p-10 md:p-16 rounded-[3rem] bg-content2/30 dark:bg-white/[0.02] border border-divider shadow-2xl overflow-hidden group"
         >
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-warning-500/[0.03] blur-[120px] rounded-full -mr-40 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-obaol-500/[0.03] blur-[120px] rounded-full -mr-40 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-1/3 h-full bg-primary-500/[0.01] blur-[100px] rounded-full -ml-40 pointer-events-none" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-warning-500/10 border border-warning-500/20 mb-8">
-              <LuBookOpen className="text-warning-500 animate-pulse" size={14} />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-500">
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-obaol-500/10 border border-obaol-500/20 mb-8">
+              <LuBookOpen className="text-obaol-500 animate-pulse" size={14} />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-500">
                 System Protocol: Training // Orientation
               </span>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black text-foreground uppercase tracking-tighter italic leading-none mb-6">
               Platform{" "}
-              <span className="text-warning-500 underline decoration-warning-500/20 underline-offset-8">Guidance Map</span>
+              <span className="text-obaol-500 underline decoration-obaol-500/20 underline-offset-8">Guidance Map</span>
             </h1>
 
             <p className="text-sm md:text-lg font-bold text-default-600 dark:text-default-400 uppercase tracking-widest max-w-3xl leading-relaxed opacity-90">
@@ -530,7 +530,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
             </p>
 
             {showToggle && (
-              <div className="mt-10 inline-flex items-center gap-2 rounded-2xl border border-warning-500/20 bg-warning-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-warning-600">
+              <div className="mt-10 inline-flex items-center gap-2 rounded-2xl border border-obaol-500/20 bg-obaol-500/10 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-obaol-600">
                 {isOperator ? <LuTerminal size={14} /> : <LuLayers size={14} />}
                 {guidanceLabel}
               </div>
@@ -552,7 +552,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                   <div key={section.title} className="space-y-6">
                     <div className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-4">
-                        <div className="w-1.5 h-6 bg-warning-500 rounded-full shadow-[0_0_12px_rgba(245,158,11,0.5)]" />
+                        <div className="w-1.5 h-6 bg-obaol-500 rounded-full shadow-[0_0_12px_rgba(207,152,60,0.5)]" />
                         <div>
                           <h2 className="text-sm font-black uppercase tracking-[0.4em] text-foreground italic">
                             {section.title}
@@ -562,7 +562,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                           </p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-black text-warning-500/60 uppercase tracking-[0.3em]">
+                      <span className="text-[10px] font-black text-obaol-500/60 uppercase tracking-[0.3em]">
                         [{section.items.length} ACTIVE NODES]
                       </span>
                     </div>
@@ -572,7 +572,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                         <motion.div
                           key={item.route}
                           whileHover={{ x: 10 }}
-                          className="relative group p-6 rounded-[2rem] bg-content1/40 dark:bg-white/[0.02] border border-divider hover:border-warning-500/30 hover:bg-content1/60 dark:hover:bg-white/[0.04] transition-all duration-500 backdrop-blur-3xl overflow-hidden"
+                          className="relative group p-6 rounded-[2rem] bg-content1/40 dark:bg-white/[0.02] border border-divider hover:border-obaol-500/30 hover:bg-content1/60 dark:hover:bg-white/[0.04] transition-all duration-500 backdrop-blur-3xl overflow-hidden"
                         >
                           <SectionDecoration />
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -581,7 +581,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                                 <span className="text-base font-black text-foreground uppercase tracking-tight">
                                   {item.name}
                                 </span>
-                                <span className="text-[10px] font-bold text-warning-500/60 bg-warning-500/5 px-2 py-0.5 rounded-full border border-warning-500/20">
+                                <span className="text-[10px] font-bold text-obaol-500/60 bg-obaol-500/5 px-2 py-0.5 rounded-full border border-obaol-500/20">
                                   {item.route}
                                 </span>
                               </div>
@@ -589,7 +589,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                                 {item.what}
                               </p>
                               <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-widest italic leading-none opacity-80">
+                                <span className="text-[10px] font-black text-obaol-600 dark:text-obaol-500 uppercase tracking-widest italic leading-none opacity-80">
                                   Protocol Actions:
                                 </span>
                                 <span className="text-[11px] font-black text-default-500 uppercase tracking-widest leading-none">
@@ -597,7 +597,7 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                                 </span>
                               </div>
                             </div>
-                            <LuChevronRight className="text-warning-500/30 group-hover:text-warning-500 transition-colors" size={20} />
+                            <LuChevronRight className="text-obaol-500/30 group-hover:text-obaol-500 transition-colors" size={20} />
                           </div>
                         </motion.div>
                       ))}
@@ -644,19 +644,19 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
             <div className="sticky top-8 space-y-6">
               <div className="p-8 rounded-[2.5rem] bg-content2/40 dark:bg-white/[0.02] border border-divider backdrop-blur-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <LuVideo className="text-warning-500" size={18} />
+                  <LuVideo className="text-obaol-500" size={18} />
                   <h2 className="text-xs font-black text-foreground uppercase tracking-[0.2em]">
                     Narration Outline
                   </h2>
                 </div>
 
                 <div className="space-y-8 relative">
-                  <div className="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-warning-500/50 via-warning-500/20 to-transparent" />
+                  <div className="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-obaol-500/50 via-obaol-500/20 to-transparent" />
 
                   {videoOutline.map((step, i) => (
                     <div key={step.title} className="relative pl-10">
-                      <div className="absolute left-0 top-0 w-8 h-8 rounded-lg bg-content4 dark:bg-[#0a0f1d] border border-warning-500/30 flex items-center justify-center z-10 shadow-sm">
-                        <span className="text-[11px] font-black text-warning-500 italic">{i + 1}</span>
+                      <div className="absolute left-0 top-0 w-8 h-8 rounded-lg bg-content4 dark:bg-[#0a0f1d] border border-obaol-500/30 flex items-center justify-center z-10 shadow-sm">
+                        <span className="text-[11px] font-black text-obaol-500 italic">{i + 1}</span>
                       </div>
                       <p className="text-[12px] font-black text-foreground uppercase tracking-widest mb-3">
                         {step.title}
@@ -700,8 +700,8 @@ export default function GuidanceContent({ roleView, showToggle = true }: Guidanc
                 </div>
               )}
 
-              <div className="p-6 rounded-[2rem] bg-warning-500/[0.05] dark:bg-warning-500/[0.02] border border-warning-500/30 backdrop-blur-xl group">
-                <div className="flex items-center gap-3 mb-3 text-warning-500">
+              <div className="p-6 rounded-[2rem] bg-obaol-500/[0.05] dark:bg-obaol-500/[0.02] border border-obaol-500/30 backdrop-blur-xl group">
+                <div className="flex items-center gap-3 mb-3 text-obaol-500">
                   <LuCircleCheck size={16} />
                   <span className="text-[11px] font-black uppercase tracking-[0.2em]">System Advisory</span>
                 </div>

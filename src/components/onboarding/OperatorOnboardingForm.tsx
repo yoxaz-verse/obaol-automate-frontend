@@ -475,14 +475,14 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
         <div className="flex items-center justify-between relative px-2">
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-default-100 -translate-y-1/2 z-0" />
           <motion.div
-            className="absolute top-1/2 left-0 h-[2px] bg-warning-500 -translate-y-1/2 z-0"
+            className="absolute top-1/2 left-0 h-[2px] bg-obaol-500 -translate-y-1/2 z-0"
             initial={{ width: "0%" }}
             animate={{ width: `${((currentStep - 1) / 2) * 100}%` }}
           />
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${s <= currentStep ? "bg-warning-500 text-white" : "bg-content2 text-default-400"
+              className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${s <= currentStep ? "bg-obaol-500 text-white" : "bg-content2 text-default-400"
                 }`}
             >
               {s < currentStep ? <FiCheck /> : s}
@@ -517,7 +517,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                 </div>
               </motion.div>
             ) : (
-              <p className="text-xs text-warning-500">Google sign-up is not configured.</p>
+              <p className="text-xs text-obaol-500">Google sign-up is not configured.</p>
             )}
           </div>
         )}
@@ -585,7 +585,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                         ? "text-success-500"
                         : emailCheckStatus === "exists"
                           ? "text-danger-500"
-                          : "text-warning-500"
+                          : "text-obaol-500"
                         }`}>
                         {emailCheckMessage}
                       </span>
@@ -647,7 +647,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                     errorMessage={fieldErrors.password}
                     endContent={
                       <Button size="sm" variant="light" isIconOnly onPress={() => setShowPassword((prev) => !prev)}>
-                        <FiGlobe className={showPassword ? "text-warning-500" : "text-default-400"} />
+                        <FiGlobe className={showPassword ? "text-obaol-500" : "text-default-400"} />
                       </Button>
                     }
                   />
@@ -714,7 +714,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                   <Button
                     size="sm"
                     variant={form.geoType === "INDIAN" ? "solid" : "bordered"}
-                    className={form.geoType === "INDIAN" ? "bg-warning-500 text-black" : "border-default-300 text-default-500"}
+                    className={form.geoType === "INDIAN" ? "bg-obaol-500 text-black" : "border-default-300 text-default-500"}
                     onPress={() => {
                       setForm((prev) => ({ ...prev, geoType: "INDIAN", country: "" }));
                       setFieldErrors((prev) => ({ ...prev, country: "" }));
@@ -725,7 +725,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                   <Button
                     size="sm"
                     variant={form.geoType === "INTERNATIONAL" ? "solid" : "bordered"}
-                    className={form.geoType === "INTERNATIONAL" ? "bg-warning-500 text-black" : "border-default-300 text-default-500"}
+                    className={form.geoType === "INTERNATIONAL" ? "bg-obaol-500 text-black" : "border-default-300 text-default-500"}
                     onPress={() => {
                       setForm((prev) => ({ ...prev, geoType: "INTERNATIONAL", state: "", district: "" }));
                       setFieldErrors((prev) => ({ ...prev, state: "", district: "" }));
@@ -814,7 +814,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-4 bg-warning-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                  <div className="w-1 h-4 bg-obaol-500 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.4)]" />
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 italic">Linguistic Profile // Languages Known</label>
                 </div>
                 
@@ -832,7 +832,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                           variant="flat"
                           className={`h-11 px-6 cursor-pointer transition-all duration-300 border-2 rounded-2xl
                             ${selected 
-                              ? "bg-warning-500/20 border-warning-500 text-warning-500 shadow-[0_0_20px_rgba(245,158,11,0.15)]" 
+                              ? "bg-obaol-500/20 border-obaol-500 text-obaol-500 shadow-[0_0_20px_rgba(207,152,60,0.15)]"
                               : "bg-white/[0.03] border-white/5 text-default-400 hover:border-white/20"
                             }`}
                           startContent={
@@ -864,7 +864,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
                         {selected && (
                           <motion.div 
                             layoutId={`glow-${lang._id}`}
-                            className="absolute inset-0 bg-warning-500/10 blur-xl rounded-2xl -z-10" 
+                            className="absolute inset-0 bg-obaol-500/10 blur-xl rounded-2xl -z-10"
                           />
                         )}
                       </motion.div>
@@ -902,7 +902,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
               className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
                 ${isSubmittingSuccess
                   ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
-                  : "bg-gradient-to-r from-warning-500 to-amber-600 shadow-warning-500/20 hover:shadow-warning-500/40"
+                  : "bg-gradient-to-r from-obaol-500 to-amber-600 shadow-obaol-500/20 hover:shadow-obaol-500/40"
                 }`}
               isLoading={isLoading || isSubmittingSuccess}
               onPress={() => (currentStep === 3 ? handleSubmit() : handleNext())}
@@ -923,7 +923,7 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
 
 export default function OperatorOnboardingForm({ mode = "auth" }: { mode?: "auth" | "onboarding" }) {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><FiGlobe className="animate-spin text-warning-500 text-3xl" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><FiGlobe className="animate-spin text-obaol-500 text-3xl" /></div>}>
       <OperatorRegisterForm mode={mode} />
     </Suspense>
   );

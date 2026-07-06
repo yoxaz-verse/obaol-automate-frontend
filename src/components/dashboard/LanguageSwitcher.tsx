@@ -122,9 +122,9 @@ export const LanguageSwitcher = () => {
     // notranslate + translate="no" stops ALL translation engines from touching this element
     <div className="flex items-center gap-2 notranslate" translate="no">
       <div className="relative group notranslate" translate="no">
-        <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-warning-500 w-4 h-4 z-10 pointer-events-none" />
+        <LuLanguages className="absolute left-3 top-1/2 -translate-y-1/2 text-obaol-500 w-4 h-4 z-10 pointer-events-none" />
         <select
-          className={`notranslate appearance-none ${pendingLang ? 'w-[100px]' : 'w-[135px]'} bg-default-100 hover:bg-default-200 transition-all cursor-pointer text-foreground font-black text-[9px] uppercase tracking-[0.1em] h-9 pl-8 pr-5 rounded-xl outline-none border border-transparent focus:border-warning-500/50 focus:ring-2 focus:ring-warning-500/20`}
+          className={`notranslate appearance-none ${pendingLang ? 'w-[100px]' : 'w-[135px]'} bg-default-100 hover:bg-default-200 transition-all cursor-pointer text-foreground font-black text-[9px] uppercase tracking-[0.1em] h-9 pl-8 pr-5 rounded-xl outline-none border border-transparent focus:border-obaol-500/50 focus:ring-2 focus:ring-obaol-500/20`}
           value={pendingLang ?? currentLang}
           disabled={isSwitching}
           onChange={(e) => handleSelectChange(String(e.target.value || "en"))}
@@ -153,7 +153,7 @@ export const LanguageSwitcher = () => {
       {pendingLang && (
         <button
           onClick={() => applyLanguage(pendingLang)}
-          className="notranslate flex items-center justify-center gap-1 px-2.5 h-9 rounded-xl bg-warning-500/10 hover:bg-warning-500/20 border border-warning-500/20 active:scale-95 transition-all text-warning-600 dark:text-warning-400 font-black text-[9px] uppercase tracking-[0.1em] shadow-[0_0_10px_rgba(245,165,36,0.05)] animate-in fade-in slide-in-from-right-2 duration-200"
+          className="notranslate flex items-center justify-center gap-1 px-2.5 h-9 rounded-xl bg-obaol-500/10 hover:bg-obaol-500/20 border border-obaol-500/20 active:scale-95 transition-all text-obaol-600 dark:text-obaol-400 font-black text-[9px] uppercase tracking-[0.1em] shadow-[0_0_10px_rgba(207,152,60,0.05)] animate-in fade-in slide-in-from-right-2 duration-200"
           title={`Apply ${pendingLabel}`}
           translate="no"
         >

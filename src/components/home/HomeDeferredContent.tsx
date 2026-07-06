@@ -74,7 +74,7 @@ export default function HomeDeferredContent() {
         <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
           <div className="max-w-3xl space-y-8">
             <h2 className={`${homeTitleStyles.sectionTitle} leading-tight md:text-6xl`}>
-              India-first execution <br />
+              <span className="text-white">India-first execution</span> <br />
               <span className="text-orange-500">from India to anywhere.</span>
             </h2>
             <p className="text-xl text-white/50 leading-relaxed font-medium">

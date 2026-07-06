@@ -59,8 +59,8 @@ const services = [
     imageAlt:
       "Agricultural supplier weighing a sack of produce for procurement",
     icon: FiShoppingBag,
-    accent: "from-orange-400 to-amber-500",
-    color: "#fb923c",
+    accent: "from-obaol-300 to-obaol-500",
+    color: "#CF983C",
   },
   {
     id: "quality",
@@ -122,7 +122,7 @@ const services = [
     imageAlt:
       "Advanced Indian commercial warehouse with organized inventory, forklift operations, and professional staff",
     icon: FaWarehouse,
-    accent: "from-amber-400 to-orange-600",
+    accent: "from-amber-400 to-obaol-600",
     color: "#f59e0b",
   },
   {
@@ -174,8 +174,8 @@ function RealisticServiceVisual({ service }: { service: Service }) {
         <Icon size={58} />
       </div>
 
-      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/42 px-4 py-2 font-mono text-[10px] font-black uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-md md:left-8 md:top-8">
-        <span className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.9)]" />
+      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/42 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-md md:left-8 md:top-8">
+        <span className="h-2 w-2 rounded-full bg-obaol-400 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
         Indian Origin Operations
       </div>
 
@@ -183,14 +183,14 @@ function RealisticServiceVisual({ service }: { service: Service }) {
         <div className="absolute right-7 top-28 hidden max-w-[210px] rounded-2xl border border-blue-300/35 bg-black/45 p-4 text-white/72 shadow-xl shadow-black/30 backdrop-blur-md md:block">
           <div className="flex items-center gap-3">
             <FiFileText size={24} className="text-blue-300" />
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em]">Trade File</span>
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">Trade File</span>
           </div>
           <div className="mt-4 space-y-2">
             {["PO", "PI", "COO"].map((item) => (
               <div key={item} className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
                 <span className="h-1.5 flex-1 rounded-full bg-white/18" />
-                <span className="font-mono text-[8px] font-black text-white/45">{item}</span>
+                <span className="font-mono text-[8px] font-bold text-white/45">{item}</span>
               </div>
             ))}
           </div>
@@ -235,11 +235,11 @@ export default function ServiceShowcase() {
   return (
     <section className="relative overflow-hidden bg-background py-16 md:py-24">
       <div className="absolute inset-0 pointer-events-none opacity-60">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(249,115,22,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(249,115,22,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(207,152,60,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(207,152,60,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]" />
         {particleSeeds.map((particle) => (
           <motion.span
             key={particle.id}
-            className="absolute rounded-full bg-orange-300/70 shadow-[0_0_14px_rgba(251,146,60,0.55)]"
+            className="absolute rounded-full bg-obaol-300/70 shadow-[0_0_14px_rgba(207,152,60,0.5)]"
             style={{
               left: particle.left,
               top: particle.top,
@@ -284,7 +284,7 @@ export default function ServiceShowcase() {
                     onClick={() => setActiveIndex(index)}
                     className={`group flex min-h-[76px] flex-col justify-between rounded-2xl border px-3.5 py-3 text-left transition-all duration-500 ${
                       service.isActive
-                        ? "border-orange-400/70 bg-orange-500/10 shadow-[0_0_26px_rgba(249,115,22,0.16)]"
+                        ? "border-obaol-400/70 bg-obaol-500/10 shadow-[0_0_26px_rgba(207,152,60,0.18)]"
                         : "border-white/10 bg-white/[0.035] hover:border-white/25 hover:bg-white/[0.06]"
                     }`}
                     aria-pressed={service.isActive}
@@ -294,10 +294,10 @@ export default function ServiceShowcase() {
                         <ServiceIcon size={15} />
                       </span>
                       {service.isActive && (
-                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.9)]" />
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-obaol-400 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
                       )}
                     </div>
-                    <p className="mt-2.5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] text-foreground/80 leading-tight">
+                    <p className="mt-2.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/80 leading-tight">
                       {service.title}
                     </p>
                   </button>
@@ -307,7 +307,7 @@ export default function ServiceShowcase() {
           </div>
 
           <div className="lg:col-span-8">
-            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-2xl shadow-orange-950/20 md:min-h-[620px]">
+            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-obaol-500/15 bg-black shadow-2xl shadow-obaol-950/30 md:min-h-[620px]">
               <AnimatePresence mode="wait">
                 <RealisticServiceVisual
                   key={activeService.id}
@@ -329,11 +329,11 @@ export default function ServiceShowcase() {
                       <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${activeService.accent} text-black shadow-xl`}>
                         <Icon size={22} />
                       </span>
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-orange-300">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-obaol-200">
                         {activeService.eyebrow} / {activeService.metric}
                       </span>
                     </div>
-                    <h3 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-black leading-none tracking-normal text-white">
+                    <h3 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-bold leading-none tracking-[-0.02em] text-white">
                       {activeService.title}
                     </h3>
                     <p className="mt-5 max-w-xl text-sm md:text-base font-medium leading-relaxed text-white/72">
@@ -348,7 +348,7 @@ export default function ServiceShowcase() {
                   <span
                     key={service.id}
                     className={`h-1.5 flex-1 rounded-full transition-all duration-700 ${
-                      index === activeIndex ? "bg-orange-400" : "bg-white/20"
+                      index === activeIndex ? "bg-obaol-400" : "bg-white/20"
                     }`}
                   />
                 ))}

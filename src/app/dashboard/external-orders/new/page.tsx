@@ -508,7 +508,7 @@ export default function ExternalOrderCreatePage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-              <h3 className="text-[11px] font-black text-warning-500 uppercase tracking-[0.4em] italic mb-1">Initiation Mode</h3>
+              <h3 className="text-[11px] font-black text-obaol-500 uppercase tracking-[0.4em] italic mb-1">Initiation Mode</h3>
               <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">CHOOSE EXECUTION PATH</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
@@ -531,17 +531,17 @@ export default function ExternalOrderCreatePage() {
                       key={mode.key}
                       className={`group relative rounded-[2rem] border p-8 text-left transition-all duration-500 overflow-hidden ${
                         selected
-                          ? "border-warning-500/30 bg-warning-500/10 shadow-[0_0_40px_rgba(234,179,8,0.1)]"
+                          ? "border-obaol-500/30 bg-obaol-500/10 shadow-[0_0_40px_rgba(207,152,60,0.1)]"
                           : "border-foreground/5 bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/10"
                       }`}
                       onClick={() => setInitiationMode(mode.key as "DIRECT" | "DOCS")}
                     >
                       {selected && (
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-warning-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-obaol-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
                       )}
                       <div className="flex flex-col gap-2">
                         <span className="text-[9px] font-black text-default-400 uppercase tracking-widest">MODE</span>
-                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-warning-500" : "text-foreground"}`}>
+                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>
                           {mode.title}
                         </div>
                         <p className="text-[10px] font-bold text-default-500 uppercase mt-2 leading-relaxed opacity-60">
@@ -560,7 +560,7 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
               <CardBody className="px-12 py-12 flex flex-col items-center text-center gap-6">
-                <div className="w-16 h-16 rounded-[2rem] bg-warning-500 text-black flex items-center justify-center">
+                <div className="w-16 h-16 rounded-[2rem] bg-obaol-500 text-black flex items-center justify-center">
                   <LuFileCheck size={28} />
                 </div>
                 <div className="max-w-2xl flex flex-col gap-3">
@@ -575,8 +575,8 @@ export default function ExternalOrderCreatePage() {
                   color="warning"
                   variant="shadow"
                   className="font-black px-16 h-14 rounded-[2.5rem] text-[12px] tracking-[0.4em] uppercase italic transition-all duration-500 
-                    bg-warning-500 text-black hover:scale-[1.03] active:scale-95
-                    shadow-[0_20px_60px_rgba(234,179,8,0.4)] hover:shadow-warning-500/60
+                    bg-obaol-500 text-black hover:scale-[1.03] active:scale-95
+                    shadow-[0_20px_60px_rgba(207,152,60,0.4)] hover:shadow-obaol-500/60
                     disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
                   isDisabled={!canStartDocumentationFlow}
                   onPress={() => router.push("/dashboard/marketplace")}
@@ -601,7 +601,7 @@ export default function ExternalOrderCreatePage() {
         >
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-              <h3 className="text-[11px] font-black text-warning-500 uppercase tracking-[0.4em] italic mb-1">Trade Role Selection</h3>
+              <h3 className="text-[11px] font-black text-obaol-500 uppercase tracking-[0.4em] italic mb-1">Trade Role Selection</h3>
               <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">HOW DO YOU PARTICIPATE?</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
@@ -617,20 +617,20 @@ export default function ExternalOrderCreatePage() {
                       key={role.id}
                       className={`group relative rounded-[2rem] border p-8 text-left transition-all duration-500 overflow-hidden ${
                         selected 
-                        ? "border-warning-500/30 bg-warning-500/10 shadow-[0_0_40px_rgba(234,179,8,0.1)]" 
+                        ? "border-obaol-500/30 bg-obaol-500/10 shadow-[0_0_40px_rgba(207,152,60,0.1)]"
                         : "border-foreground/5 bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/10"
                       }`}
                       onClick={() => setExternalRole(role.id)}
                     >
                       {selected && (
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-warning-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-obaol-500/10 blur-[40px] rounded-full -mr-8 -mt-8" />
                       )}
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 ${selected ? "bg-warning-500 text-black scale-110" : "bg-foreground/5 text-default-400 group-hover:scale-110"}`}>
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 ${selected ? "bg-obaol-500 text-black scale-110" : "bg-foreground/5 text-default-400 group-hover:scale-110"}`}>
                         <role.icon size={24} />
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-black text-default-400 uppercase tracking-widest">{role.sub}</span>
-                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-warning-500" : "text-foreground"}`}>{role.id}</div>
+                        <div className={`text-xl font-black uppercase tracking-tight italic transition-colors ${selected ? "text-obaol-500" : "text-foreground"}`}>{role.id}</div>
                       </div>
                       <p className="text-[10px] font-bold text-default-500 uppercase mt-4 leading-relaxed opacity-60">
                          {role.id === "BUYER" ? "Primary asset acquirer and capital dispatch node." : role.id === "SELLER" ? "Asset origin and supply chain fulfillment entity." : "Cross-border operational facilitation and logistics oversight."}
@@ -647,7 +647,7 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
                  <p className="text-xl font-black text-foreground uppercase tracking-tight italic">BUYER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
@@ -666,7 +666,7 @@ export default function ExternalOrderCreatePage() {
                       href={buyerPreviewUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[9px] font-black uppercase tracking-[0.35em] text-warning-500/80 hover:text-warning-400 transition-colors ml-1"
+                      className="text-[9px] font-black uppercase tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
                     >
                       OPEN_ASSOCIATE_SITE
                     </a>
@@ -700,7 +700,7 @@ export default function ExternalOrderCreatePage() {
                         inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
                         label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
                       }}
-                      startContent={<field.icon className="text-warning-500/50 mr-2" size={16} />}
+                      startContent={<field.icon className="text-obaol-500/50 mr-2" size={16} />}
                     />
                   ))}
                 </div>
@@ -711,7 +711,7 @@ export default function ExternalOrderCreatePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] h-full overflow-hidden">
               <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-                 <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
+                 <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Identity Module</h3>
                  <p className="text-xl font-black text-foreground uppercase tracking-tight italic">SELLER DETAILS</p>
               </CardHeader>
               <CardBody className="px-10 pb-10 flex flex-col gap-8">
@@ -730,7 +730,7 @@ export default function ExternalOrderCreatePage() {
                       href={sellerPreviewUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[9px] font-black uppercase tracking-[0.35em] text-warning-500/80 hover:text-warning-400 transition-colors ml-1"
+                      className="text-[9px] font-black uppercase tracking-[0.35em] text-obaol-500/80 hover:text-obaol-400 transition-colors ml-1"
                     >
                       OPEN_ASSOCIATE_SITE
                     </a>
@@ -764,7 +764,7 @@ export default function ExternalOrderCreatePage() {
                         inputWrapper: "h-14 bg-foreground/5 hover:bg-foreground/10 border-none rounded-2xl transition-all",
                         label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2"
                       }}
-                      startContent={<field.icon className="text-warning-500/50 mr-2" size={16} />}
+                      startContent={<field.icon className="text-obaol-500/50 mr-2" size={16} />}
                     />
                   ))}
                 </div>
@@ -776,7 +776,7 @@ export default function ExternalOrderCreatePage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card className="border-none bg-foreground/[0.02] shadow-none backdrop-blur-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="flex flex-col items-start gap-1 px-10 pt-10 pb-6">
-               <h3 className="text-[10px] font-black text-warning-500 uppercase tracking-[0.3em] italic mb-1">Cargo Manifest</h3>
+               <h3 className="text-[10px] font-black text-obaol-500 uppercase tracking-[0.3em] italic mb-1">Cargo Manifest</h3>
                <p className="text-xl font-black text-foreground uppercase tracking-tight italic">PRODUCT PARAMETERS</p>
             </CardHeader>
             <CardBody className="px-10 pb-10">
@@ -788,7 +788,7 @@ export default function ExternalOrderCreatePage() {
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, name: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
                   classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
-                  startContent={<LuPackage className="text-warning-500/50 mr-2" size={16} />}
+                  startContent={<LuPackage className="text-obaol-500/50 mr-2" size={16} />}
                 />
                 <Input
                   label="CARGO VARIANT"
@@ -797,7 +797,7 @@ export default function ExternalOrderCreatePage() {
                   onValueChange={(value) => setExternalProduct((prev) => ({ ...prev, variant: value }))}
                   variant="flat" size="lg" labelPlacement="outside"
                   classNames={{ input: "font-bold text-xs uppercase tracking-widest", inputWrapper: "h-14 bg-foreground/5 border-none rounded-2xl", label: "text-[9px] font-black uppercase tracking-[0.3em] mb-3 ml-2" }}
-                  startContent={<LuTag className="text-warning-500/50 mr-2" size={16} />}
+                  startContent={<LuTag className="text-obaol-500/50 mr-2" size={16} />}
                 />
                 <Input
                   label="PAYLOAD QUANTITY"
@@ -877,9 +877,9 @@ export default function ExternalOrderCreatePage() {
           <Card className="border-none bg-foreground/[0.04] backdrop-blur-3xl shadow-2xl rounded-[3.5rem] overflow-hidden">
             <CardBody className="px-12 py-12 flex flex-col xl:flex-row items-center justify-between gap-10">
               <div className="flex items-start gap-6 max-w-2xl">
-                <div className="w-16 h-16 bg-warning-500 rounded-[2rem] flex items-center justify-center text-black shrink-0 relative">
+                <div className="w-16 h-16 bg-obaol-500 rounded-[2rem] flex items-center justify-center text-black shrink-0 relative">
                    <LuShoppingBag size={32} />
-                   <div className="absolute inset-0 bg-warning-500 blur-2xl opacity-30 animate-pulse" />
+                   <div className="absolute inset-0 bg-obaol-500 blur-2xl opacity-30 animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="text-2xl font-black text-foreground uppercase tracking-tight italic leading-none">INITIALIZE EXTERNAL ORDER</div>
@@ -913,8 +913,8 @@ export default function ExternalOrderCreatePage() {
                   color="warning"
                   variant="shadow"
                   className="font-black px-16 h-16 rounded-[2.5rem] text-[13px] tracking-[0.4em] uppercase italic transition-all duration-500 
-                    bg-warning-500 text-black hover:scale-[1.03] active:scale-95
-                    shadow-[0_20px_60px_rgba(234,179,8,0.4)] hover:shadow-warning-500/60
+                    bg-obaol-500 text-black hover:scale-[1.03] active:scale-95
+                    shadow-[0_20px_60px_rgba(207,152,60,0.4)] hover:shadow-obaol-500/60
                     disabled:bg-foreground/5 disabled:text-default-400 disabled:shadow-none"
                   isLoading={submitting}
                   isDisabled={!canSubmit || submitting}

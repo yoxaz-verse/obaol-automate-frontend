@@ -2346,7 +2346,7 @@ export default function EnquiryDetailsPage() {
                     <BreadcrumbItem isCurrent>#{enquiryId.slice(-6).toUpperCase()}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
-            <section aria-label="Your role and next action" className="rounded-2xl border border-warning-500/25 bg-warning-500/5 p-4">
+            <section aria-label="Your role and next action" className="rounded-2xl border border-obaol-500/25 bg-obaol-500/5 p-4">
                 <p className="text-sm font-bold text-foreground">You are the {transactionRole} in this transaction.</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Next action:</strong> {nextActionSummary}</p>
                 <p className="mt-1 text-sm text-default-500"><strong className="text-foreground">Responsible party:</strong> {nextResponsibleParty}</p>
@@ -2400,7 +2400,7 @@ export default function EnquiryDetailsPage() {
                                     {enquiry.status}
                                 </Chip>
                                 {(String(enquiry?.sourceType || "").toUpperCase() === "IMPORT" || enquiry?.importListingId) && (
-                                    <Chip size="sm" variant="flat" className="font-bold border-none bg-warning-500/15 text-warning-600">
+                                    <Chip size="sm" variant="flat" className="font-bold border-none bg-obaol-500/15 text-obaol-600">
                                         Import Enquiry
                                     </Chip>
                                 )}
@@ -2416,14 +2416,14 @@ export default function EnquiryDetailsPage() {
                                     </Chip>
                                 )}
                                 {isImportEnquiry && (
-                                    <div className="mt-4 flex items-center gap-4 p-5 rounded-[2rem] border border-warning-500/20 bg-warning-500/5 backdrop-blur-3xl relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-warning-500/10 blur-[40px] rounded-full -mr-16 -mt-16 animate-pulse" />
-                                        <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-600 shrink-0 border border-warning-500/10 shadow-inner">
+                                    <div className="mt-4 flex items-center gap-4 p-5 rounded-[2rem] border border-obaol-500/20 bg-obaol-500/5 backdrop-blur-3xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-obaol-500/10 blur-[40px] rounded-full -mr-16 -mt-16 animate-pulse" />
+                                        <div className="w-12 h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-600 shrink-0 border border-obaol-500/10 shadow-inner">
                                             <LuAnchor size={20} className="group-hover:rotate-12 transition-transform duration-500" />
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-warning-600/70">Import workflow</span>
-                                            <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation does not apply to this import enquiry. Choose <span className="text-warning-600">Port Pickup</span> or <span className="text-warning-600">OBAOL Service</span> to continue.</p>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-600/70">Import workflow</span>
+                                            <p className="text-[11px] font-bold text-foreground opacity-90 leading-tight pr-4">Inventory reservation does not apply to this import enquiry. Choose <span className="text-obaol-600">Port Pickup</span> or <span className="text-obaol-600">OBAOL Service</span> to continue.</p>
                                         </div>
                                     </div>
                                 )}
@@ -2448,7 +2448,7 @@ export default function EnquiryDetailsPage() {
                             {isImportEnquiry && (
                                 <div className="w-full md:w-[280px] group">
                                     <Select
-                                        label={<span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-warning-500 transition-colors">Logistics Strategy</span>}
+                                        label={<span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-obaol-500 transition-colors">Logistics Strategy</span>}
                                         labelPlacement="outside"
                                         placeholder="Select Framework..."
                                         selectedKeys={importDeliveryMode ? [importDeliveryMode] : []}
@@ -2460,11 +2460,11 @@ export default function EnquiryDetailsPage() {
                                         }}
                                         isDisabled={updateImportDeliveryModeMutation.isPending || isReadOnlyAfterConversion}
                                         classNames={{
-                                            trigger: "h-14 bg-background border border-divider/50 hover:border-warning-500/50 shadow-none rounded-2xl transition-all group-data-[selected=true]:bg-warning-500/5",
+                                            trigger: "h-14 bg-background border border-divider/50 hover:border-obaol-500/50 shadow-none rounded-2xl transition-all group-data-[selected=true]:bg-obaol-500/5",
                                             value: "font-black text-sm uppercase tracking-wider text-foreground",
                                             label: "mb-2"
                                         }}
-                                        startContent={<LuNavigation size={18} className="text-warning-500 mr-1" />}
+                                        startContent={<LuNavigation size={18} className="text-obaol-500 mr-1" />}
                                     >
                                         <SelectItem 
                                             key="PORT_PICKUP" 
@@ -2490,7 +2490,7 @@ export default function EnquiryDetailsPage() {
                                         </SelectItem>
                                     </Select>
                                     {!importDeliveryMode && (
-                                        <div className="flex items-center gap-1.5 text-[9px] text-warning-600 font-black uppercase tracking-widest mt-3 ml-1 animate-pulse">
+                                        <div className="flex items-center gap-1.5 text-[9px] text-obaol-600 font-black uppercase tracking-widest mt-3 ml-1 animate-pulse">
                                             <FiAlertCircle size={10} />
                                             Deployment required
                                         </div>
@@ -2579,7 +2579,7 @@ export default function EnquiryDetailsPage() {
                     <CardBody className="px-4 md:px-6 py-6 md:py-10">
                         {/* Status Stepper */}
                         {workflowStageOptions.length === 0 ? (
-                            <div className="rounded-xl border border-warning-500/20 bg-warning-500/5 px-4 py-3 text-xs font-bold text-warning-600 uppercase tracking-widest">
+                            <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/5 px-4 py-3 text-xs font-bold text-obaol-600 uppercase tracking-widest">
                                 No flow rules configured for enquiries. Configure Flow Rules to unlock stages and actions.
                             </div>
                         ) : (
@@ -2631,8 +2631,8 @@ export default function EnquiryDetailsPage() {
                                     <span className="w-2 h-2 rounded-full bg-primary" />
                                     Buyer Pending
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 text-warning-600">
-                                    <span className="w-2 h-2 rounded-full bg-warning-500" />
+                                <span className="inline-flex items-center gap-1.5 text-obaol-600">
+                                    <span className="w-2 h-2 rounded-full bg-obaol-500" />
                                     Seller Pending
                                 </span>
                             </div>
@@ -2660,7 +2660,7 @@ export default function EnquiryDetailsPage() {
                                                 </div>
                                                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
                                                     row.source === "Counter Accepted"
-                                                        ? "bg-warning-500/10 border-warning-500/25 text-warning-700 dark:text-warning-300"
+                                                        ? "bg-obaol-500/10 border-obaol-500/25 text-obaol-700 dark:text-obaol-300"
                                                         : "bg-success-500/10 border-success-500/25 text-success-700 dark:text-success-300"
                                                 }`}>
                                                     {row.source}
@@ -2776,11 +2776,11 @@ export default function EnquiryDetailsPage() {
                                 <div className="px-6 pt-6 pb-3 flex items-center justify-between border-b border-divider/50 bg-white/10 dark:bg-black/10">
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                                            <div className="w-2 h-2 rounded-full bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.4)]" />
                                             <span className="text-[10px] uppercase font-black tracking-[0.2em] text-default-500 dark:text-default-400">Negotiation Loop</span>
                                         </div>
                                         <h3 className="text-lg font-black text-foreground tracking-tighter inline-flex items-center gap-2">
-                                            <FiEdit3 className="text-warning-500" size={20} />
+                                            <FiEdit3 className="text-obaol-500" size={20} />
                                             Revision Hub
                                         </h3>
                                     </div>
@@ -2860,14 +2860,14 @@ export default function EnquiryDetailsPage() {
 
                                                         {/* Supplier Rate Context Hint */}
                                                         {baseRate > 0 && (
-                                                            <div className="flex items-start gap-3 p-4 rounded-2xl bg-warning-500/[0.05] border border-warning-500/20 relative overflow-hidden">
-                                                                <div className="absolute top-0 left-0 w-1 h-full bg-warning-500/50 rounded-l-2xl" />
+                                                            <div className="flex items-start gap-3 p-4 rounded-2xl bg-obaol-500/[0.05] border border-obaol-500/20 relative overflow-hidden">
+                                                                <div className="absolute top-0 left-0 w-1 h-full bg-obaol-500/50 rounded-l-2xl" />
                                                                 <div className="flex flex-col gap-1 min-w-0">
                                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-warning-600 dark:text-warning-400">
+                                                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-obaol-600 dark:text-obaol-400">
                                                                             SUPPLIER ASKING RATE
                                                                         </span>
-                                                                        <span className="text-sm font-black text-warning-600 dark:text-warning-300">
+                                                                        <span className="text-sm font-black text-obaol-600 dark:text-obaol-300">
                                                                             {formatRate(baseRate)}<span className="text-[10px] font-bold text-default-400 ml-1">/KG</span>
                                                                         </span>
                                                                     </div>
@@ -2909,7 +2909,7 @@ export default function EnquiryDetailsPage() {
                                                                 setClarificationDeliveryMode((value as any) || "");
                                                             }}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-warning-600 mb-1 pl-1",
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
                                                                 trigger: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
                                                                 value: "font-black text-xs uppercase"
                                                             }}
@@ -2924,7 +2924,7 @@ export default function EnquiryDetailsPage() {
                                                             value={clarificationDeliveryDate}
                                                             onValueChange={setClarificationDeliveryDate}
                                                             classNames={{
-                                                                label: "font-black uppercase text-[10px] tracking-widest text-warning-600 mb-1 pl-1",
+                                                                label: "font-black uppercase text-[10px] tracking-widest text-obaol-600 mb-1 pl-1",
                                                                 inputWrapper: "rounded-2xl border-divider bg-default-100/10 dark:bg-black/20 hover:bg-default-100/20 data-[hover=true]:border-warning transition-all h-14 shadow-inner",
                                                                 input: "font-black text-xs uppercase"
                                                             }}
@@ -2955,7 +2955,7 @@ export default function EnquiryDetailsPage() {
                                                             ))}
                                                         </Select>
                                                         {clarificationReasonPayment && !clarificationPaymentTermId && (
-                                                            <div className="mt-1 text-[10px] font-bold text-warning-600 uppercase tracking-wide">
+                                                            <div className="mt-1 text-[10px] font-bold text-obaol-600 uppercase tracking-wide">
                                                                 Select a payment term to submit this revision.
                                                             </div>
                                                         )}
@@ -2985,7 +2985,7 @@ export default function EnquiryDetailsPage() {
                                                         I have informed the supplier about this revision through secure channels.
                                                     </p>
                                                     {!clarificationCommunicated && (
-                                                        <span className="text-[9px] font-black text-warning-600 uppercase tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
+                                                        <span className="text-[9px] font-black text-obaol-600 uppercase tracking-widest ml-8 animate-pulse mt-1 inline-flex items-center gap-2">
                                                             <FiAlertCircle size={10} />
                                                             Protocol confirmation required
                                                         </span>
@@ -3073,7 +3073,7 @@ export default function EnquiryDetailsPage() {
                                                                 )}
                                                                 {itemKey === "DELIVERY_TIMELINE" && (
                                                                     <div className="text-sm font-black text-foreground">
-                                                                        Target: <span className="text-warning-600 underline decoration-2 underline-offset-4">{item.buyerDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span> 
+                                                                        Target: <span className="text-obaol-600 underline decoration-2 underline-offset-4">{item.buyerDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span>
                                                                         <span className="text-default-400 font-bold mx-2">•</span> 
                                                                         {item.buyerDeliveryDate ? dayjs(item.buyerDeliveryDate).format("DD MMM YYYY") : "-"}
                                                                     </div>
@@ -3085,12 +3085,12 @@ export default function EnquiryDetailsPage() {
                                                                 )}
                                                                 {itemKey === "PAYMENT_TERMS" && item?.supplierCounterPaymentTermId && (
                                                                     <div className="text-sm font-black text-foreground">
-                                                                        Seller Counter: <span className="text-warning-600">{String(paymentTermOptions.find((it: any) => String(it?._id || it?.id) === String(item?.supplierCounterPaymentTermId))?.label || "Not specified")}</span>
+                                                                        Seller Counter: <span className="text-obaol-600">{String(paymentTermOptions.find((it: any) => String(it?._id || it?.id) === String(item?.supplierCounterPaymentTermId))?.label || "Not specified")}</span>
                                                                     </div>
                                                                 )}
                                                                 {itemKey === "DELIVERY_TIMELINE" && item?.supplierCounterDeliveryMode && item?.supplierCounterDeliveryDate && (
                                                                     <div className="text-sm font-black text-foreground">
-                                                                        Seller Counter: <span className="text-warning-600 underline decoration-2 underline-offset-4">{item.supplierCounterDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span>
+                                                                        Seller Counter: <span className="text-obaol-600 underline decoration-2 underline-offset-4">{item.supplierCounterDeliveryMode === "DELIVER_TO_LOCATION" ? "To Location" : "Ready for Pickup"}</span>
                                                                         <span className="text-default-400 font-bold mx-2">•</span>
                                                                         {dayjs(item.supplierCounterDeliveryDate).format("DD MMM YYYY")}
                                                                     </div>
@@ -3272,8 +3272,8 @@ export default function EnquiryDetailsPage() {
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400">Negotiation Status</span>
                                                     {!allRevisionAcknowledged ? (
-                                                        <div className="flex items-center gap-1.5 text-warning-600 font-bold text-[10px] italic uppercase tracking-tight">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                                                        <div className="flex items-center gap-1.5 text-obaol-600 font-bold text-[10px] italic uppercase tracking-tight">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-obaol-500 animate-pulse" />
                                                             Waiting for supplier response
                                                         </div>
                                                     ) : (
@@ -3804,7 +3804,7 @@ export default function EnquiryDetailsPage() {
                                     {mediatorCommission > 0 && (
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-default-500 font-medium">+ Mediator Margin</span>
-                                            <span className="font-bold text-warning-600">{formatRate(mediatorCommission)}</span>
+                                            <span className="font-bold text-obaol-600">{formatRate(mediatorCommission)}</span>
                                         </div>
                                     )}
                                     <div className="w-full h-[1px] bg-default-200 mt-1 mb-0.5" />
@@ -3846,17 +3846,17 @@ export default function EnquiryDetailsPage() {
 
                     {/* Responsibility Arena */}
                     {isImportPortPickup ? (
-                        <Card className="md:col-span-2 lg:col-span-3 order-12 border border-warning-500/20 bg-warning-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group w-full">
-                            <div className="absolute top-0 right-0 w-80 h-80 bg-warning-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
+                        <Card className="md:col-span-2 lg:col-span-3 order-12 border border-obaol-500/20 bg-obaol-500/[0.02] backdrop-blur-3xl p-1 shadow-2xl rounded-[2.5rem] relative overflow-hidden group w-full">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-obaol-500/5 blur-[100px] rounded-full -mr-40 -mt-40 transition-all duration-700 group-hover:scale-110" />
                             <CardBody className="flex flex-col md:flex-row items-center gap-8 px-8 py-10 relative z-10">
-                                <div className="w-24 h-24 rounded-[2rem] bg-warning-500/10 flex items-center justify-center text-warning-600 border border-warning-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
+                                <div className="w-24 h-24 rounded-[2rem] bg-obaol-500/10 flex items-center justify-center text-obaol-600 border border-obaol-500/10 shadow-inner group-hover:rotate-6 transition-transform duration-500">
                                     <LuAnchor size={40} />
                                 </div>
                                 <div className="flex flex-col gap-4 flex-1 text-center md:text-left">
                                     <div className="flex flex-col gap-1">
                                          <div className="flex items-center gap-2 justify-center md:justify-start">
-                                            <div className="w-1.5 h-1.5 bg-warning-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-warning-600 opacity-80">Logistics Profile</span>
+                                            <div className="w-1.5 h-1.5 bg-obaol-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.5)]" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600 opacity-80">Logistics Profile</span>
                                          </div>
                                         <h3 className="text-2xl font-bold tracking-tight text-foreground">Port Pickup Protocol</h3>
                                     </div>
@@ -3883,14 +3883,14 @@ export default function EnquiryDetailsPage() {
                             </CardBody>
                         </Card>
                     ) : (
-                        <div className={`md:col-span-2 lg:col-span-3 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-warning-500/40 shadow-[0_0_40px_rgba(234,179,8,0.08)]" : ""}`}>
+                        <div className={`md:col-span-2 lg:col-span-3 relative transition-all duration-500 w-full ${workflowStage === "PROFORMA_ISSUED" ? "rounded-[2.5rem] ring-2 ring-obaol-500/40 shadow-[0_0_40px_rgba(207,152,60,0.08)]" : ""}`}>
                             {!hasResponsibilitiesFinalized && workflowStage === "PROFORMA_ISSUED" && (
                                 <div className="flex items-center gap-3 px-6 pt-5 pb-0">
-                                    <div className="w-2 h-2 rounded-full bg-warning-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.35em] text-warning-600 dark:text-warning-400">
+                                    <div className="w-2 h-2 rounded-full bg-obaol-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.35em] text-obaol-600 dark:text-obaol-400">
                                         ACTION REQUIRED — Finalize Responsibilities
                                     </span>
-                                    <div className="flex-1 h-px bg-gradient-to-r from-warning-500/30 to-transparent" />
+                                    <div className="flex-1 h-px bg-gradient-to-r from-obaol-500/30 to-transparent" />
                                 </div>
                             )}
                             <ResponsibilityEventForm
@@ -3993,8 +3993,8 @@ export default function EnquiryDetailsPage() {
                             <div className="flex flex-col gap-2">
                                 <span className="text-[10px] uppercase font-bold text-default-400">Legal Closer Operator</span>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    <div className={`w-2 h-2 rounded-full ${dealCloserOperatorAssigned ? "bg-warning-500 animate-pulse" : "bg-default-400"}`} />
-                                    <span className={dealCloserOperatorAssigned ? "text-warning-500" : "text-default-500"}>
+                                    <div className={`w-2 h-2 rounded-full ${dealCloserOperatorAssigned ? "bg-obaol-500 animate-pulse" : "bg-default-400"}`} />
+                                    <span className={dealCloserOperatorAssigned ? "text-obaol-500" : "text-default-500"}>
                                         {isAssignmentAdmin ? dealCloserOperatorName : getAssignmentStatus(dealCloserOperatorAssigned)}
                                     </span>
                                 </div>
@@ -4090,7 +4090,7 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             )}
                             {hasPendingHandlerRequest && (
-                                <div className="flex flex-col gap-2 rounded-lg border border-warning-500/30 bg-warning-500/5 px-3 py-2">
+                                <div className="flex flex-col gap-2 rounded-lg border border-obaol-500/30 bg-obaol-500/5 px-3 py-2">
                                     <span className="text-[10px] uppercase font-black tracking-widest text-warning-600">Pending Handler Request</span>
                                     <span className="text-xs font-semibold text-default-700">
                                         {pendingHandlerOperatorName}
@@ -4187,7 +4187,7 @@ export default function EnquiryDetailsPage() {
                             {enquiry.mediatorAssociateId && (
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[10px] uppercase font-bold text-default-400">Mediator</span>
-                                    <span className="font-medium text-warning-600">{enquiry.mediatorAssociateId?.name || "N/A"}</span>
+                                    <span className="font-medium text-obaol-600">{enquiry.mediatorAssociateId?.name || "N/A"}</span>
                                 </div>
                             )}
                         </CardBody>
@@ -4334,7 +4334,7 @@ export default function EnquiryDetailsPage() {
                                     <span className="text-lg font-black">Review responsibilities before locking</span>
                                 </ModalHeader>
                                 <ModalBody className="flex flex-col gap-4 py-6">
-                                        <div className="rounded-2xl border border-warning-500/30 bg-warning-500/10 px-4 py-3 text-[11px] font-bold text-warning-600 uppercase tracking-widest">
+                                        <div className="rounded-2xl border border-obaol-500/30 bg-obaol-500/10 px-4 py-3 text-[11px] font-bold text-obaol-600 uppercase tracking-widest">
                                             Finalizing will create execution tasks and move this enquiry into the Execution Panel.
                                         </div>
                                         <div className="flex items-center gap-2 mb-3">
@@ -4346,7 +4346,7 @@ export default function EnquiryDetailsPage() {
                                                 { label: "From", value: responsibilitySummary.originLabel, icon: <LuMapPin size={14} className="text-blue-500" /> },
                                                 { label: "To", value: responsibilitySummary.destinationLabel, icon: <LuMapPin size={14} className="text-danger-500" /> },
                                                 { label: "Incoterm", value: responsibilitySummary.incotermLabel, icon: <LuGlobe size={14} className="text-primary" /> },
-                                                { label: "Payment", value: responsibilitySummary.paymentLabel, icon: <FiPercent size={14} className="text-warning-500" /> },
+                                                { label: "Payment", value: responsibilitySummary.paymentLabel, icon: <FiPercent size={14} className="text-obaol-500" /> },
                                                 { label: "Trade Type", value: responsibilitySummary.tradeType, icon: <LuActivity size={14} className="text-success-500" /> },
                                             ].map((term) => {
                                                 const isMissing = String(term.value || "").toLowerCase().includes("not spec") || String(term.value || "").toLowerCase().includes("not set");
@@ -4378,7 +4378,7 @@ export default function EnquiryDetailsPage() {
  
                                     <div className="rounded-2xl border border-default-200/50 bg-content2/10 p-5">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-1 h-3 rounded-full bg-warning-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
+                                            <div className="w-1 h-3 rounded-full bg-obaol-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
                                             <span className="text-[10px] uppercase font-black tracking-widest text-default-500 dark:text-default-400 leading-none">Responsibility Matrix</span>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -4397,7 +4397,7 @@ export default function EnquiryDetailsPage() {
                                                     icon = <LuStore size={14} />;
                                                     label = "SUPPLIER";
                                                 } else if (ownerKey === "obaol") {
-                                                    badgeStyles = "bg-warning-500/10 text-warning-600 dark:text-warning-400 border border-warning-500/20";
+                                                    badgeStyles = "bg-obaol-500/10 text-obaol-600 dark:text-obaol-400 border border-obaol-500/20";
                                                     icon = <LuShieldCheck size={14} />;
                                                     label = "OBAOL";
                                                 }
@@ -4415,7 +4415,7 @@ export default function EnquiryDetailsPage() {
                                         </div>
                                     </div>
  
-                                    <div className="rounded-xl border border-warning-400/20 bg-warning-500/5 p-4 text-[10px] text-warning-600 dark:text-warning-500 font-bold flex items-start gap-3">
+                                    <div className="rounded-xl border border-obaol-400/20 bg-obaol-500/5 p-4 text-[10px] text-obaol-600 dark:text-obaol-500 font-bold flex items-start gap-3">
                                         <FiAlertCircle size={16} className="mt-0.5 shrink-0" />
                                         <span>Finalizing will lock responsibilities and generate execution inquiries. Changes will not be allowed after conversion.</span>
                                     </div>
@@ -4495,7 +4495,7 @@ export default function EnquiryDetailsPage() {
                                             I have informed the supplier about this revision.
                                         </Checkbox>
                                         {!clarificationCommunicated && (
-                                            <span className="text-[11px] font-semibold text-warning-500">Check this box to enable Submit.</span>
+                                            <span className="text-[11px] font-semibold text-obaol-500">Check this box to enable Submit.</span>
                                         )}
                                     </div>
                                     {revisionError && (
@@ -4637,7 +4637,7 @@ export default function EnquiryDetailsPage() {
                                                 Loading inventory...
                                             </div>
                                         ) : (
-                                            <div className="rounded-lg border border-warning-300/30 bg-warning-500/10 px-3 py-2 text-sm text-warning-700">
+                                            <div className="rounded-lg border border-obaol-300/30 bg-obaol-500/10 px-3 py-2 text-sm text-obaol-700">
                                                 No existing inventory found. Please add a new warehouse and stock below.
                                             </div>
                                         )}
@@ -4739,7 +4739,7 @@ export default function EnquiryDetailsPage() {
                                             />
                                         </div>
                                         {!isAddingNewInventory && selectedInventory && selectedInventory.availableQty < requiredQty && (
-                                            <div className="text-[10px] text-warning-600 font-bold px-1 italic">
+                                            <div className="text-[10px] text-obaol-600 font-bold px-1 italic">
                                                 * This inventory has insufficient stock. Please add the missing {(requiredQty - selectedInventory.availableQty).toFixed(2)} MT to enable selection.
                                             </div>
                                         )}
@@ -4795,7 +4795,7 @@ export default function EnquiryDetailsPage() {
                     backdrop="blur"
                     scrollBehavior="inside"
                     classNames={{
-                        base: "bg-[#04070f] dark:bg-[#04070f] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
+                        base: "bg-[#090806] dark:bg-[#090806] border border-white/5 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] max-h-[92vh]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
@@ -4890,7 +4890,7 @@ export default function EnquiryDetailsPage() {
 
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-1.5 h-6 bg-warning-500 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+                                            <div className="w-1.5 h-6 bg-obaol-500 rounded-full shadow-[0_0_15px_rgba(207,152,60,0.5)]" />
                                             <span className="text-[11px] uppercase font-black tracking-[0.25em] text-white/50 italic">ORDER_CONTEXT_METADATA</span>
                                         </div>
                                         <Textarea
@@ -4920,7 +4920,7 @@ export default function EnquiryDetailsPage() {
                                         <Button
                                             variant="flat"
                                             onPress={() => window?.open(`/dashboard/execution-enquiries?enquiryId=${enquiryId}`, "_blank")}
-                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-warning-600 border border-warning-500/30 bg-warning-500/10 hover:bg-warning-500/20 shadow-xl shadow-warning-500/5"
+                                            className="flex-1 max-w-[240px] h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-obaol-600 border border-obaol-500/30 bg-obaol-500/10 hover:bg-obaol-500/20 shadow-xl shadow-obaol-500/5"
                                         >
                                             Open Execution Panel
                                         </Button>
@@ -4983,7 +4983,7 @@ export default function EnquiryDetailsPage() {
                     isDismissable={false}
                     isKeyboardDismissDisabled
                     classNames={{
-                        base: "bg-black/90 dark:bg-[#0B0F14]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+                        base: "bg-black/90 dark:bg-[#0E0D0A]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
                         wrapper: "z-[10000]",
                         backdrop: "bg-black/60 backdrop-blur-2xl",
                         closeButton: "hover:bg-white/5 active:scale-95 transition-all top-6 right-6",
@@ -4992,11 +4992,11 @@ export default function EnquiryDetailsPage() {
                     <ModalContent>
                         <ModalHeader className="flex flex-col gap-1 pt-10 px-8 shrink-0">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-warning-500/10 flex items-center justify-center text-warning-500 border border-warning-500/20 shadow-lg">
+                                <div className="w-12 h-12 rounded-2xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20 shadow-lg">
                                     {String(docActionRule?.actionType || "") === "UPLOAD" ? <FiPackage size={22} /> : <FiPlus size={22} />}
                                 </div>
                                 <div className="flex flex-col gap-0.5">
-                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-warning-500/80 leading-none italic">
+                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-obaol-500/80 leading-none italic">
                                         {String(docActionRule?.actionType || "EXECUTION") === "UPLOAD" ? "UPLOAD_SEQUENCE" : "GENERATION_REQUEST"}
                                     </span>
                                     <span className="text-xl font-black tracking-tight text-white uppercase italic leading-none mt-1">
@@ -5009,7 +5009,7 @@ export default function EnquiryDetailsPage() {
                             {String(docActionRule?.actionType || "") === "UPLOAD" ? (
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <div className="w-1.5 h-4 bg-warning-500 rounded-full" />
+                                        <div className="w-1.5 h-4 bg-obaol-500 rounded-full" />
                                         <span className="text-[10px] uppercase font-black tracking-[0.2em] text-white/40">Resource Target</span>
                                     </div>
                                     <Input
@@ -5020,7 +5020,7 @@ export default function EnquiryDetailsPage() {
                                         value={docActionFileUrl}
                                         onChange={(e) => setDocActionFileUrl(e.target.value)}
                                         classNames={{
-                                            inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14 px-5 focus-within:ring-1 focus-within:ring-warning-500/40",
+                                            inputWrapper: "bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all rounded-2xl h-14 px-5 focus-within:ring-1 focus-within:ring-obaol-500/40",
                                             label: "hidden",
                                             input: "text-[12px] font-bold text-white placeholder:text-white/20"
                                         }}
@@ -5028,8 +5028,8 @@ export default function EnquiryDetailsPage() {
                                 </div>
                             ) : (
                                 <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-4">
-                                    <div className="mt-1 bg-warning-500/10 p-1.5 rounded-lg">
-                                        <FiInfo className="text-warning-500" size={18} />
+                                    <div className="mt-1 bg-obaol-500/10 p-1.5 rounded-lg">
+                                        <FiInfo className="text-obaol-500" size={18} />
                                     </div>
                                     <p className="text-[11px] font-bold text-default-400 leading-relaxed uppercase tracking-wide">
                                         Initiating automated generation protocol for {docActionRule?.docType?.replaceAll('_', ' ')}. 
@@ -5046,7 +5046,7 @@ export default function EnquiryDetailsPage() {
                                 <Chip 
                                     size="sm" 
                                     variant="flat" 
-                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-5 bg-warning-500/10 text-warning-500 border border-warning-500/20"
+                                    className="font-black uppercase text-[8px] tracking-[0.2em] h-5 bg-obaol-500/10 text-obaol-500 border border-obaol-500/20"
                                 >
                                     {docActionRule?.responsibleRole ? docActionRule.responsibleRole : "AUTH_PENDING"}
                                 </Chip>
@@ -5067,7 +5067,7 @@ export default function EnquiryDetailsPage() {
                                 onPress={() => createDocMutation.mutate(undefined)}
                                 isLoading={createDocMutation.isPending}
                                 isDisabled={String(docActionRule?.actionType || "") === "UPLOAD" && !docActionFileUrl.trim()}
-                                className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.2)] bg-gradient-to-r from-warning-500 to-warning-600 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(207,152,60,0.2)] bg-gradient-to-r from-obaol-500 to-obaol-600 hover:scale-[1.02] active:scale-95 transition-all"
                             >
                                 {String(docActionRule?.actionType || "") === "UPLOAD" ? "UPLOAD_FILE" : "EXECUTE_INITIATION"}
                             </Button>

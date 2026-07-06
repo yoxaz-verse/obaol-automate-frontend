@@ -119,9 +119,9 @@ export default function WarehouseLocationPicker({
           position: absolute;
           inset: 0;
           border-radius: 999px;
-          border: 2px solid rgba(245, 165, 36, 0.9);
-          background: rgba(245, 165, 36, 0.15);
-          box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12), 0 10px 22px rgba(0, 0, 0, 0.35);
+          border: 2px solid rgba(207,152,60, 0.9);
+          background: rgba(207,152,60, 0.15);
+          box-shadow: 0 0 0 4px rgba(207,152,60, 0.12), 0 10px 22px rgba(0, 0, 0, 0.35);
         }
         .warehouse-pin__glyph {
           position: absolute;

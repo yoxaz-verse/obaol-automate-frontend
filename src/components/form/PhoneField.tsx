@@ -63,8 +63,8 @@ export default function PhoneField({
           inputProps={{
             autoComplete: "off",
             classNames: {
-              inputWrapper: "shadow-none bg-transparent border-none min-h-[44px] h-[44px] px-3 ring-0 outline-none data-[focus=true]:bg-warning-500/5 group-data-[focus=true]:border-none shadow-none",
-              input: "text-xs font-black tracking-widest selection:bg-warning-500/20 selection:text-warning-600 outline-none ring-0",
+              inputWrapper: "shadow-none bg-transparent border-none min-h-[44px] h-[44px] px-3 ring-0 outline-none data-[focus=true]:bg-obaol-500/5 group-data-[focus=true]:border-none shadow-none",
+              input: "text-xs font-black tracking-widest selection:bg-obaol-500/20 selection:text-obaol-600 outline-none ring-0",
             }
           }}
           disabledKeys={[]}
@@ -106,8 +106,8 @@ export default function PhoneField({
             value={parsed.national}
             className="w-full"
             classNames={{
-              inputWrapper: "bg-transparent border-none min-h-[44px] h-[44px] px-4 shadow-none ring-0 outline-none data-[focus=true]:bg-warning-500/5 group-data-[focus=true]:border-none shadow-none",
-              input: "text-sm font-black tracking-widest placeholder:text-default-300 selection:bg-warning-500/30 selection:text-warning-600 outline-none ring-0",
+              inputWrapper: "bg-transparent border-none min-h-[44px] h-[44px] px-4 shadow-none ring-0 outline-none data-[focus=true]:bg-obaol-500/5 group-data-[focus=true]:border-none shadow-none",
+              input: "text-sm font-black tracking-widest placeholder:text-default-300 selection:bg-obaol-500/30 selection:text-obaol-600 outline-none ring-0",
             }}
             onValueChange={(next) => {
               const national = String(next || "").replace(/\D/g, "");

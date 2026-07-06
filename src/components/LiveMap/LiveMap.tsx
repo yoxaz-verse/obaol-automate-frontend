@@ -90,7 +90,7 @@ const LiveMap: React.FC<LiveMapProps> = ({ markers }) => {
                <section>    <div class="max-h-[250px] overflow-auto mb-4">
    ${popupContent}
     </div>
-                  <strong class="text-warning-500">Rates Number:  ${group.length}</strong>
+                  <strong class="text-obaol-500">Rates Number:  ${group.length}</strong>
     </section>
           `
         );

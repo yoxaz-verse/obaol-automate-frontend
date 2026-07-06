@@ -8,6 +8,9 @@ import { FiArrowUp } from "react-icons/fi";
 import { BUSINESS_IDENTITY } from "@/utils/businessIdentity";
 
 export default function Footer() {
+  const accentText = "text-obaol-700 dark:text-obaol-300";
+  const accentHover = "hover:text-obaol-700 dark:hover:text-obaol-300";
+  const accentLine = "bg-obaol-500";
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -33,7 +36,7 @@ export default function Footer() {
   return (
     <footer className="relative bg-background border-t border-white/[0.05] pt-24 pb-12 overflow-hidden z-0">
       {/* DECORATIVE BACKGROUND ELEMENTS */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute left-1/4 top-0 z-0 h-[500px] w-[500px] rounded-full bg-obaol-500/[0.08] blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none z-0" />
 
 
@@ -48,8 +51,8 @@ export default function Footer() {
           {/* BRAND SECTION */}
           <motion.div variants={itemVariants} className="lg:col-span-5 flex flex-col items-start">
             <Link href="/" className="group">
-              <h3 className="text-3xl font-black tracking-tighter text-foreground flex items-center gap-2">
-                OBAOL <span className="text-orange-500 italic">Supreme</span>
+              <h3 className="flex items-center gap-2 text-3xl font-bold tracking-[-0.025em] text-foreground">
+                OBAOL <span className="bg-gradient-to-r from-obaol-700 to-obaol-500 bg-clip-text text-transparent dark:from-obaol-200 dark:to-obaol-500">Supreme</span>
               </h3>
             </Link>
             <p className="mt-6 text-default-500 text-lg leading-relaxed max-w-md">
@@ -58,24 +61,24 @@ export default function Footer() {
 
             <div className="mt-10 flex flex-col gap-6">
               <div className="flex items-center gap-4 group">
-                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:bg-orange-500/10 group-hover:border-orange-500/20 transition-all duration-300">
-                  <MdEmail className="text-xl text-orange-500" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] transition-all duration-300 group-hover:border-obaol-500/25 group-hover:bg-obaol-500/10">
+                  <MdEmail className={`text-xl ${accentText}`} />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Email Us</span>
-                  <a href={`mailto:${BUSINESS_IDENTITY.email}`} className="text-foreground font-medium hover:text-orange-500 transition-colors">
+                  <a href={`mailto:${BUSINESS_IDENTITY.email}`} className={`text-foreground font-medium transition-colors ${accentHover}`}>
                     {BUSINESS_IDENTITY.email}
                   </a>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 group">
-                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:bg-orange-500/10 group-hover:border-orange-500/20 transition-all duration-300">
-                  <span className="text-xl text-orange-500">✓</span>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] transition-all duration-300 group-hover:border-obaol-500/25 group-hover:bg-obaol-500/10">
+                  <span className={`text-xl ${accentText}`}>✓</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-default-400">Verified Identity</span>
-                  <Link href="/trust" className="text-foreground font-medium hover:text-orange-500 transition-colors">
+                  <Link href="/trust" className={`text-foreground font-medium transition-colors ${accentHover}`}>
                     View trust profile
                   </Link>
                 </div>
@@ -106,7 +109,7 @@ export default function Footer() {
           <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
             {/* PLATFORM */}
             <motion.div variants={itemVariants}>
-              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-foreground mb-8">Platform</h4>
+              <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Platform</h4>
               <ul className="flex flex-col gap-4">
                 {[
                   { name: "About OBAOL", href: "/about" },
@@ -118,7 +121,7 @@ export default function Footer() {
                 ].map((link) => (
                   <li key={link.name}>
                     <Link href={link.href} className="text-default-500 hover:text-foreground hover:translate-x-1 transition-all inline-flex items-center gap-2 group">
-                      <span className="w-0 h-[1px] bg-orange-500 group-hover:w-3 transition-all duration-300" />
+                      <span className={`w-0 h-[1px] group-hover:w-3 transition-all duration-300 ${accentLine}`} />
                       {link.name}
                     </Link>
                   </li>
@@ -128,7 +131,7 @@ export default function Footer() {
 
             {/* RESOURCES */}
             <motion.div variants={itemVariants}>
-              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-foreground mb-8">Resources</h4>
+              <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Resources</h4>
               <ul className="flex flex-col gap-4">
                 {[
                   { name: "FAQs", href: "/faq" },
@@ -139,7 +142,7 @@ export default function Footer() {
                 ].map((link) => (
                   <li key={link.name}>
                     <Link href={link.href} className="text-default-500 hover:text-foreground hover:translate-x-1 transition-all inline-flex items-center gap-2 group">
-                      <span className="w-0 h-[1px] bg-orange-500 group-hover:w-3 transition-all duration-300" />
+                      <span className={`w-0 h-[1px] group-hover:w-3 transition-all duration-300 ${accentLine}`} />
                       {link.name}
                     </Link>
                   </li>
@@ -149,7 +152,7 @@ export default function Footer() {
 
             {/* LEGAL */}
             <motion.div variants={itemVariants} className="col-span-2 md:col-span-1">
-              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-foreground mb-8">Legal</h4>
+              <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.2em] text-foreground">Legal</h4>
               <ul className="flex flex-col gap-4">
                 {[
                   { name: "Privacy Policy", href: "/privacy-policy" },
@@ -159,7 +162,7 @@ export default function Footer() {
                 ].map((link) => (
                   <li key={link.name}>
                     <Link href={link.href} className="text-default-500 hover:text-foreground hover:translate-x-1 transition-all inline-flex items-center gap-2 group">
-                      <span className="w-0 h-[1px] bg-orange-500 group-hover:w-3 transition-all duration-300" />
+                      <span className={`w-0 h-[1px] group-hover:w-3 transition-all duration-300 ${accentLine}`} />
                       {link.name}
                     </Link>
                   </li>
@@ -176,7 +179,7 @@ export default function Footer() {
           transition={{ delay: 0.3, duration: 0.8 }}
           className="mt-24 w-full flex justify-center items-center overflow-hidden"
         >
-          <p aria-hidden="true" className="text-[clamp(2.5rem,11vw,140px)] leading-none font-black text-foreground tracking-tighter whitespace-nowrap">
+          <p aria-hidden="true" className="whitespace-nowrap text-[clamp(2.5rem,11vw,140px)] font-bold leading-none tracking-[-0.035em] text-foreground">
             OBAOL Supreme
           </p>
         </motion.div>
@@ -193,18 +196,18 @@ export default function Footer() {
               © {new Date().getFullYear()} OBAOL Supreme. All rights reserved.
             </p>
             <p className="text-[10px] text-default-400 uppercase tracking-widest font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+              <span className={`w-2 h-2 rounded-full animate-pulse ${accentLine}`} />
               Empowering Global Agro Trade
             </p>
           </div>
 
           <button
             onClick={scrollToTop}
-            className="group p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all duration-500 flex items-center gap-3"
+            className="group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition-all duration-500 hover:border-obaol-500/30 hover:bg-obaol-500/10"
           >
-            <span className="text-[10px] font-black uppercase tracking-widest text-default-400 group-hover:text-foreground transition-colors">Back to Top</span>
-            <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
-              <FiArrowUp className="text-orange-500 group-hover:text-white group-hover:-translate-y-1 transition-all" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 transition-colors group-hover:text-foreground">Back to Top</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-obaol-500/10 transition-all duration-500 group-hover:bg-obaol-500 group-hover:text-obaol-950">
+              <FiArrowUp className="text-obaol-700 transition-all group-hover:-translate-y-1 group-hover:text-obaol-950 dark:text-obaol-300" />
             </div>
           </button>
 

@@ -10,8 +10,8 @@ export default function ThemedContentWrapper({
     className?: string;
 }) {
     return (
-        <div className={`bg-background text-foreground min-h-screen ${className}`}>
-            <div className="prose prose-neutral dark:prose-invert max-w-7xl mx-auto px-6 py-32">
+        <div className={`min-h-screen bg-background text-foreground ${className}`}>
+            <div className="prose prose-neutral mx-auto max-w-7xl px-6 py-32 prose-headings:font-bold prose-a:text-obaol-700 prose-strong:text-foreground dark:prose-invert dark:prose-a:text-obaol-300">
                 {children}
             </div>
         </div>

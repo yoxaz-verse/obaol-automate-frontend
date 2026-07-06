@@ -256,7 +256,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                 color="warning"
                 size="sm"
                 onClose={() => removeFilter(key)}
-                className="bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/25"
+                className="bg-obaol-500/15 text-foreground backdrop-blur-md border border-obaol-500/25"
               >
                 <span className="font-semibold opacity-70 mr-1">{field?.label}:</span>
                 {Array.isArray(value) ? `${value.length} selected` : String(value)}
@@ -302,12 +302,12 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             variant="flat"
             size="md"
             color="warning"
-            className="sm:flex-none bg-warning-500/10 dark:bg-warning-500/15 text-foreground backdrop-blur-md border border-warning-500/30 font-bold hover:bg-warning-500/20 transition-all shadow-sm"
+            className="sm:flex-none bg-obaol-500/10 dark:bg-obaol-500/15 text-foreground backdrop-blur-md border border-obaol-500/30 font-bold hover:bg-obaol-500/20 transition-all shadow-sm"
             startContent={<IoFilterOutline className="text-lg" />}
           >
             Filters
             {activeFiltersCount > 0 && (
-              <span className="ml-1 bg-warning-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black">
+              <span className="ml-1 bg-obaol-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black">
                 {activeFiltersCount}
               </span>
             )}
@@ -340,8 +340,8 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             <>
               <ModalHeader className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-warning-500/10 rounded-xl">
-                    <IoFilterOutline className="text-warning-500 text-xl" />
+                  <div className="p-2 bg-obaol-500/10 rounded-xl">
+                    <IoFilterOutline className="text-obaol-500 text-xl" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold tracking-tight text-foreground">

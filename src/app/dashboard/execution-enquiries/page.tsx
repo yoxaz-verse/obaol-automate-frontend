@@ -300,18 +300,18 @@ export default function ExecutionEnquiriesPage() {
 
   const SectionLoader = () => (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div className="w-12 h-12 border-2 border-warning-500/20 border-t-warning-500 rounded-full animate-spin" />
-      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-warning-500 animate-pulse">Syncing Tactical Data</p>
+      <div className="w-12 h-12 border-2 border-obaol-500/20 border-t-obaol-500 rounded-full animate-spin" />
+      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-obaol-500 animate-pulse">Syncing Tactical Data</p>
     </div>
   );
 
   return (
-    <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground selection:bg-warning-500/30">
+    <section className="w-full min-h-screen p-4 md:p-8 bg-background text-foreground selection:bg-obaol-500/30">
       {/* Dynamic Header: Command Interface */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-divider">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-warning-500 text-black shadow-lg shadow-warning-500/20">
+            <div className="p-3 rounded-2xl bg-obaol-500 text-black shadow-lg shadow-obaol-500/20">
               <FiGlobe className="text-2xl" />
             </div>
             <div>
@@ -325,7 +325,7 @@ export default function ExecutionEnquiriesPage() {
               size="sm"
               variant={activeTab === "deal-execution" ? "solid" : "light"}
               color={activeTab === "deal-execution" ? "warning" : "default"}
-              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-warning-500/20" : "opacity-60"}`}
+              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "deal-execution" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
               onPress={() => setActiveTab("deal-execution")}
             >
               <FiActivity className="mr-2" /> Deal Execution
@@ -334,7 +334,7 @@ export default function ExecutionEnquiriesPage() {
               size="sm"
               variant={activeTab === "execution-bidding" ? "solid" : "light"}
               color={activeTab === "execution-bidding" ? "warning" : "default"}
-              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-warning-500/20" : "opacity-60"}`}
+              className={`font-black uppercase tracking-widest text-xs h-9 px-6 rounded-xl transition-all ${activeTab === "execution-bidding" ? "shadow-lg shadow-obaol-500/20" : "opacity-60"}`}
               onPress={() => setActiveTab("execution-bidding")}
             >
               <FiZap className="mr-2" /> Execution Bidding
@@ -381,7 +381,7 @@ export default function ExecutionEnquiriesPage() {
                     <div className="flex items-center gap-5">
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-black uppercase tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
                           <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
@@ -404,7 +404,7 @@ export default function ExecutionEnquiriesPage() {
                         <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
                           <span className="opacity-60">{enq.variant}</span>
                           <span className="w-1 h-1 rounded-full bg-divider" />
-                          <span className="text-warning-500/80">{enq.tasks.length} Active Nodes</span>
+                          <span className="text-obaol-500/80">{enq.tasks.length} Active Nodes</span>
                         </div>
                       </div>
                     </div>
@@ -430,11 +430,11 @@ export default function ExecutionEnquiriesPage() {
                         className="relative pb-8 last:pb-0"
                       >
                         {/* Flow Node Pulse */}
-                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-warning-500 flex items-center justify-center z-10">
+                        <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-obaol-500 flex items-center justify-center z-10">
                           <div className={`w-1.5 h-1.5 rounded-full ${task.status === "COMPLETED" ? "bg-success-500" : "bg-warning-500 animate-pulse"}`} />
                         </div>
 
-                        <div className="flex items-start justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300 group/task">
+                        <div className="flex items-start justify-between gap-4 p-5 rounded-2xl bg-background/40 border border-divider hover:border-obaol-500/30 transition-all duration-300 group/task">
                           <div className="flex items-center gap-5 min-w-0">
                             <div className={`p-2.5 rounded-xl border border-divider ${task.status === "COMPLETED" ? "bg-success-500/10 text-success-500" : "bg-warning-500/10 text-warning-600"} shrink-0`}>
                               {(() => {
@@ -503,7 +503,7 @@ export default function ExecutionEnquiriesPage() {
             {/* Execution Bids */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black uppercase tracking-widest text-warning-500">Execution Bids</h2>
+                <h2 className="text-sm font-black uppercase tracking-widest text-obaol-500">Execution Bids</h2>
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400">
                   OPEN TASKS
                 </span>
@@ -521,7 +521,7 @@ export default function ExecutionEnquiriesPage() {
                       <div className="flex items-center gap-5">
                         <div>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xs font-black uppercase tracking-widest text-warning-600 bg-warning-500/10 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-black uppercase tracking-widest text-obaol-600 bg-obaol-500/10 px-2 py-0.5 rounded-md">
                             Anchor
                           </span>
                           <span className="text-xs font-black text-default-400">#{enq.enquiryCode}</span>
@@ -544,7 +544,7 @@ export default function ExecutionEnquiriesPage() {
                           <div className="flex items-center gap-3 mt-2 text-xs font-black text-default-500 uppercase tracking-widest">
                             <span className="opacity-60">{enq.variant}</span>
                             <span className="w-1 h-1 rounded-full bg-divider" />
-                            <span className="text-warning-500/80">{enq.tasks.length} Open Nodes</span>
+                            <span className="text-obaol-500/80">{enq.tasks.length} Open Nodes</span>
                           </div>
                         </div>
                       </div>
@@ -589,14 +589,14 @@ export default function ExecutionEnquiriesPage() {
 
                         return (
                           <div key={key} className="relative">
-                            <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-warning-500 flex items-center justify-center z-10">
-                              <div className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
+                            <div className="absolute -left-[41px] top-0 w-4 h-4 rounded-full bg-background border-2 border-obaol-500 flex items-center justify-center z-10">
+                              <div className="w-1.5 h-1.5 rounded-full bg-obaol-500 animate-pulse" />
                             </div>
 
-                            <div className="p-5 rounded-2xl bg-background/40 border border-divider hover:border-warning-500/30 transition-all duration-300">
+                            <div className="p-5 rounded-2xl bg-background/40 border border-divider hover:border-obaol-500/30 transition-all duration-300">
                               <div className="flex items-start justify-between gap-4 mb-4">
                                 <div className="flex items-center gap-5 min-w-0">
-                                  <div className="p-2.5 rounded-xl border border-divider bg-warning-500/10 text-warning-600 shrink-0">
+                                  <div className="p-2.5 rounded-xl border border-divider bg-obaol-500/10 text-obaol-600 shrink-0">
                                     {(() => {
                                       const type = String(task.type || "").toUpperCase();
                                       if (type.includes("PROCUREMENT")) return <FiShoppingCart className="text-lg" />;
@@ -631,7 +631,7 @@ export default function ExecutionEnquiriesPage() {
                                     if (flowConf?.biddingEndAtOrderStage) {
                                       return (
                                         <div className="flex flex-col items-end">
-                                          <span className="text-[9px] font-black text-warning-600/80 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-1">
+                                          <span className="text-[9px] font-black text-obaol-600/80 uppercase tracking-[0.2em] mb-1.5 flex items-center gap-1">
                                             <FiZap size={10} className={task.status === "OPEN" ? "animate-pulse" : ""} /> Bidding Closes At
                                           </span>
                                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border leading-none tracking-tight ${task.status === "OPEN" ? "text-warning-700 bg-warning-500/20 border-warning-500/30 shadow-sm" : "text-default-500 bg-default-100 border-divider"
@@ -668,7 +668,7 @@ export default function ExecutionEnquiriesPage() {
                                         {bids.map((bid: any, bidIdx: number) => (
                                           <tr key={`${key}-task-bid-${bidIdx}`} className="border-t border-default-100/50 font-bold">
                                             <td className="py-0.5 truncate max-w-[120px] text-foreground">{getName(bid?.company)}</td>
-                                            <td className="py-0.5 text-warning-600">
+                                            <td className="py-0.5 text-obaol-600">
                                               {typeof bid?.amount === "number" && !Number.isNaN(bid.amount) ? formatRate(bid.amount) : "-"}
                                             </td>
                                             <td className="py-0.5 text-default-500 truncate max-w-[140px]">{bid?.note || "-"}</td>
@@ -703,13 +703,13 @@ export default function ExecutionEnquiriesPage() {
                                           }
                                           popoverProps={{
                                             classNames: {
-                                              content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                              content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                             },
                                             offset: 8
                                           }}
                                           listboxProps={{
                                             itemClasses: {
-                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-obaol-500/10 data-[selected=true]:bg-obaol-500/20 data-[selected=true]:text-obaol-500",
                                             }
                                           }}
                                           classNames={{ 
@@ -727,7 +727,7 @@ export default function ExecutionEnquiriesPage() {
                                                 textValue={companyName}
                                               >
                                                 <div className="flex items-center gap-3">
-                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black border border-divider">
+                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-obaol-500 group-data-[selected=true]:text-black border border-divider">
                                                       <FiPackage size={14} />
                                                    </div>
                                                    <div className="flex flex-col">
@@ -823,13 +823,13 @@ export default function ExecutionEnquiriesPage() {
                                           }
                                           popoverProps={{
                                             classNames: {
-                                              content: "bg-content1/95 dark:bg-[#0B0F14]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
+                                              content: "bg-content1/95 dark:bg-[#0E0D0A]/95 backdrop-blur-2xl border border-divider shadow-2xl rounded-[1.5rem] p-1",
                                             },
                                             offset: 8
                                           }}
                                           listboxProps={{
                                             itemClasses: {
-                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-warning-500/10 data-[selected=true]:bg-warning-500/20 data-[selected=true]:text-warning-500",
+                                              base: "rounded-xl py-2 px-3 data-[hover=true]:bg-obaol-500/10 data-[selected=true]:bg-obaol-500/20 data-[selected=true]:text-obaol-500",
                                             }
                                           }}
                                           classNames={{ 
@@ -847,7 +847,7 @@ export default function ExecutionEnquiriesPage() {
                                                 textValue={companyName}
                                               >
                                                 <div className="flex items-center gap-3">
-                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-warning-500 group-data-[selected=true]:text-black border border-divider">
+                                                   <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-white/5 flex items-center justify-center text-default-400 group-data-[selected=true]:bg-obaol-500 group-data-[selected=true]:text-black border border-divider">
                                                       <FiShield size={14} />
                                                    </div>
                                                    <div className="flex flex-col">

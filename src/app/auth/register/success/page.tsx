@@ -56,7 +56,7 @@ export default function RegisterSuccessPage() {
             Home
           </Button>
           <Button
-            className="h-12 rounded-xl font-bold border-warning-500/20 bg-warning-500/10 text-warning-500 shadow-lg shadow-warning-500/10"
+            className="h-12 rounded-xl font-bold border-obaol-500/20 bg-obaol-500/10 text-obaol-500 shadow-lg shadow-obaol-500/10"
             variant="flat"
             onPress={() => router.push("/auth/login?role=Associate")}
             startContent={<FiLogIn />}

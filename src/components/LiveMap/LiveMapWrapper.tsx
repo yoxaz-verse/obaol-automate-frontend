@@ -170,10 +170,10 @@ export default function LiveMapWrapper({ mappingValue }: LiveMapProps) {
         <div className="absolute inset-0 z-[100] rounded-xl bg-content1/40 backdrop-blur-[2px] transition-all duration-500 flex flex-col items-center justify-center p-6 text-center">
           <div className="bg-content1/90 p-8 rounded-3xl shadow-2xl border border-default-200/50 flex flex-col items-center gap-5 max-w-sm w-full animate-in fade-in zoom-in duration-300">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-warning-500/10 flex items-center justify-center border-2 border-warning-400/20 shadow-inner">
-                <LuMapPin className="text-warning-500 animate-bounce" size={36} />
+              <div className="w-20 h-20 rounded-full bg-obaol-500/10 flex items-center justify-center border-2 border-obaol-400/20 shadow-inner">
+                <LuMapPin className="text-obaol-500 animate-bounce" size={36} />
               </div>
-              <div className="absolute inset-0 rounded-full border-2 border-warning-500/30 animate-ping opacity-20" />
+              <div className="absolute inset-0 rounded-full border-2 border-obaol-500/30 animate-ping opacity-20" />
               <span className="absolute -right-1 -top-1">
                 <Spinner size="sm" color="warning" />
               </span>
@@ -194,7 +194,7 @@ export default function LiveMapWrapper({ mappingValue }: LiveMapProps) {
             <div className="w-full space-y-2 pt-2">
               <div className="w-full h-1.5 rounded-full bg-default-100 overflow-hidden relative border border-default-200/30">
                 <div
-                  className="absolute inset-y-0 bg-gradient-to-r from-warning-400 to-warning-600 rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                  className="absolute inset-y-0 bg-gradient-to-r from-obaol-400 to-obaol-600 rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(207,152,60,0.4)]"
                   style={{
                     width: markers.length > 0 ? `${Math.min(100, (markers.length / (geocodingCount || 1)) * 100)}%` : '15%',
                     animation: markers.length === 0 ? "shimmer 2s ease-in-out infinite" : "none"
@@ -203,7 +203,7 @@ export default function LiveMapWrapper({ mappingValue }: LiveMapProps) {
               </div>
               <div className="flex justify-between items-center px-1">
                 <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Processing</span>
-                <span className="text-[10px] font-black text-warning-500 tracking-tighter">
+                <span className="text-[10px] font-black text-obaol-500 tracking-tighter">
                   {Math.round(markers.length > 0 ? (markers.length / (geocodingCount || 1)) * 100 : 15)}%
                 </span>
               </div>

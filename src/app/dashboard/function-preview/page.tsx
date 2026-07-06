@@ -180,15 +180,15 @@ export default function FunctionPreviewPage() {
         {previewQuery.isError && (
           <div className="relative z-50">
             <div className="absolute -inset-1 bg-gradient-to-r from-warning/40 via-transparent to-warning/40 blur-md rounded-[2.1rem]" />
-            <Card className="border border-warning-200/50 bg-warning-50/10 backdrop-blur-2xl rounded-[2rem] relative z-10">
-                <CardBody className="text-xs font-black text-warning-700 flex items-center justify-between p-8">
+            <Card className="border border-obaol-200/50 bg-obaol-50/10 backdrop-blur-2xl rounded-[2rem] relative z-10">
+                <CardBody className="text-xs font-black text-obaol-700 flex items-center justify-between p-8">
                     <div className="flex items-center gap-5">
                         <div className="h-10 w-10 rounded-2xl bg-warning/20 flex items-center justify-center text-warning">
                             <LuInfo size={20} />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <p className="uppercase tracking-widest text-warning-600">Telemetry Feed Offline</p>
-                            <p className="text-[10px] font-bold text-warning-500/80">RENDERING SIMULATED COMPONENT PROTOTYPES</p>
+                            <p className="uppercase tracking-widest text-obaol-600">Telemetry Feed Offline</p>
+                            <p className="text-[10px] font-bold text-obaol-500/80">RENDERING SIMULATED COMPONENT PROTOTYPES</p>
                         </div>
                     </div>
                     <Chip size="sm" variant="shadow" color="warning" className="uppercase font-black h-6 px-4 text-[9px] tracking-widest border-none">LINK FAILURE</Chip>

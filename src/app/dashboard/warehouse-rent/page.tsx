@@ -302,7 +302,7 @@ export default function WarehouseRentPage() {
               <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="w-2.5 h-2.5 rounded-full mt-2 shrink-0" style={{ background: color, boxShadow: `0 0 0 4px ${color}22` }} />
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-warning-400 transition-colors truncate">{warehouse.name}</h3>
+                  <h3 className="text-lg font-bold tracking-tight text-foreground group-hover:text-obaol-400 transition-colors truncate">{warehouse.name}</h3>
                   <div className="mt-2 flex items-center gap-2 text-default-400 min-w-0">
                     <FiMapPin size={13} className="text-default-500 shrink-0" />
                     <span className="text-sm truncate">{warehouse.address || "Location not specified"}</span>
@@ -321,7 +321,7 @@ export default function WarehouseRentPage() {
               </div>
               <div className="rounded-xl border border-default-200/70 bg-content2/60 p-3">
                 <div className="text-[11px] font-semibold text-default-400 mb-1">Rate</div>
-                <div className="text-sm font-semibold text-warning-400">
+                <div className="text-sm font-semibold text-obaol-400">
                   {warehouse.storageRatePerUnit ?? "0"} <span className="text-default-400 font-medium">{warehouse.unit || "MT"}</span>
                 </div>
               </div>
@@ -363,7 +363,7 @@ export default function WarehouseRentPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-orange-500 mb-2">
-              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.8)]" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Operations_Terminal</span>
             </motion.div>
             <Title title="Warehouse Contact Directory" />

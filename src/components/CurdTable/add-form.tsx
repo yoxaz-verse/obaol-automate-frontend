@@ -589,7 +589,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 size="sm"
                 type="button"
                 onClick={() => addPaymentMilestone(field.key)}
-                className="px-3 py-1 bg-warning-500 text-white rounded"
+                className="px-3 py-1 bg-obaol-500 text-white rounded"
                 isDisabled={milestones.length >= 3}
               >
                 + Add Segment
@@ -989,7 +989,7 @@ const AddForm: React.FC<AddFormProps> = ({
               type="file"
               accept={field.accept || "image/*,application/pdf"}
               onChange={(event) => setSelectedUploadFile(event.target.files?.[0] || null)}
-              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-warning-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
+              className="block w-full rounded-xl border border-default-200 bg-content1 px-3 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-obaol-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"
             />
             <p className="mt-2 text-xs text-default-500" aria-live="polite">{selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : "Choose one image or PDF."}</p>
           </div>
@@ -1036,7 +1036,7 @@ const AddForm: React.FC<AddFormProps> = ({
                   delay: i * 0.2,
                   ease: "easeOut",
                 }}
-                className="absolute w-2 h-2 rounded-full bg-warning-400/40"
+                className="absolute w-2 h-2 rounded-full bg-obaol-400/40"
               />
             ))}
 
@@ -1049,7 +1049,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 damping: 20,
                 delay: 0.1,
               }}
-              className="w-24 h-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-warning-400 to-orange-500 text-white shadow-[0_20px_50px_rgba(251,146,60,0.3)] mb-8"
+              className="w-24 h-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-obaol-400 to-orange-500 text-white shadow-[0_20px_50px_rgba(228,199,153,0.3)] mb-8"
             >
               <svg
                 width="48"
@@ -1108,7 +1108,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
             <div className="flex justify-end w-full mt-4">
               <Button
-                className="min-w-[100px] bg-warning-400 rounded-3xl text-white h-[38px] text-sm"
+                className="min-w-[100px] bg-obaol-400 rounded-3xl text-white h-[38px] text-sm"
                 type="submit"
                 disabled={loading}
               >

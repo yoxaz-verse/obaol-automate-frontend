@@ -145,7 +145,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
       className="relative z-50 flex text-foreground justify-between items-center px-6 py-3 my-2 mx-2 md:mx-4 rounded-2xl border db-shell db-border-subtle backdrop-blur-[24px] transition-all duration-500 overflow-visible"
     >
       {/* Structural Accents */}
-      <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-warning-500/20 to-transparent opacity-40 dark:opacity-50" />
+      <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent opacity-40 dark:opacity-50" />
       <div className="absolute -bottom-[1px] left-12 right-12 h-[1px] bg-gradient-to-r from-transparent via-default-200/50 dark:via-white/5 to-transparent" />
 
       {/* Left Section: Mission Telemetry & Identity */}
@@ -159,7 +159,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 if (isOnboardingLocked) return;
                 setIsMobileMenuOpen(true);
               }}
-              className={`group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-warning-500/10 hover:text-warning-500 transition-all active:scale-95 ${isOnboardingLocked ? "opacity-50 cursor-not-allowed hover:bg-default-100/80 hover:text-current" : ""}`}
+              className={`group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 transition-all active:scale-95 ${isOnboardingLocked ? "opacity-50 cursor-not-allowed hover:bg-default-100/80 hover:text-current" : ""}`}
             >
               <CiMenuBurger size={20} className="group-hover:rotate-180 transition-transform duration-500" />
             </button>
@@ -188,7 +188,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                           <Image src="/logo.png" width={28} height={28} alt="Logo" />
                           <div>
                             <p className="font-black text-xs tracking-widest uppercase">OBAOL</p>
-                            <p className="text-[9px] font-bold text-warning-500 uppercase tracking-widest">Supreme</p>
+                            <p className="text-[9px] font-bold text-obaol-700 uppercase tracking-widest dark:text-obaol-300">Supreme</p>
                           </div>
                         </div>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center">
@@ -204,7 +204,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                  <button
                                    key={opt.name}
                                    onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-warning-500/10 text-warning-600 font-bold" : "text-default-600 hover:db-inset"}`}
+                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>
@@ -229,19 +229,19 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               <span className="text-[11px] font-black text-foreground tracking-[0.25em] uppercase">{username?.split('@')[0]}</span>
             </div>
             <div className="flex items-center gap-2">
-               <span className="text-[9px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-[0.2em] italic opacity-80">{displayRole} CORE ONLINE</span>
+               <span className="text-[9px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-[0.2em] opacity-80">{displayRole} CORE ONLINE</span>
             </div>
           </div>
         </div>
 
         {/* Telemetry Group: Global Synchronization */}
         <div className="hidden lg:flex items-center gap-12 pl-8 h-12">
-           <div className="flex flex-col border-l-2 border-warning-500/20 pl-6 h-full justify-center">
+           <div className="flex flex-col border-l-2 border-obaol-500/20 pl-6 h-full justify-center">
               <span className="text-[13px] font-black text-foreground tracking-[0.15em] tabular-nums flex items-center gap-2">
-                <span className="w-1 h-3 bg-warning-500/40 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.2)]" />
+                <span className="w-1 h-3 bg-obaol-500/40 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.25)]" />
                 {mounted ? (currentTime || "--:--:--") : "--:--:--"}
               </span>
-              <span className="text-[9px] font-black text-warning-500/60 uppercase tracking-[0.4em] mt-1.5 italic">Local Terminal</span>
+              <span className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.4em] text-obaol-700/70 dark:text-obaol-300/70">Local Terminal</span>
            </div>
            
            <div className="flex flex-col border-l border-default-200/60 dark:border-white/5 pl-8 h-full justify-center opacity-60 hover:opacity-100 transition-opacity">
@@ -279,7 +279,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-500 ${
-                    unreadCount > 0 ? "bg-warning-500/15 text-warning-600" : "text-default-500 hover:db-inset hover:text-foreground"
+                    unreadCount > 0 ? "bg-obaol-500/15 text-obaol-700 dark:text-obaol-300" : "text-default-500 hover:db-inset hover:text-foreground"
                   }`}
                 >
                   <FiBell size={18} className={unreadCount > 0 ? "animate-bounce" : ""} />
@@ -308,13 +308,13 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
               {...({ placement: "bottom-end", className: "p-0" } as any)}
             >
               <DropdownTrigger>
-                <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-warning-500/10 to-black/[0.02] dark:to-white/5 border border-warning-500/20 hover:border-warning-500/40 transition-all outline-none">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-xs font-black group-hover:scale-105 transition-transform">
+                <button className="group flex items-center gap-3 p-1.5 pr-4 rounded-2xl bg-gradient-to-br from-obaol-500/10 to-black/[0.02] dark:to-white/5 border border-obaol-500/20 hover:border-obaol-500/40 transition-all outline-none">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-obaol-400 to-obaol-600 flex items-center justify-center text-obaol-950 text-xs font-bold group-hover:scale-105 transition-transform">
                     {username?.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start sr-only sm:not-sr-only">
                     <span className="text-[10px] font-black text-foreground uppercase tracking-wider leading-none mb-1">{username?.split('@')[0]}</span>
-                    <span className="text-[8px] font-bold text-warning-600 dark:text-warning-500 uppercase tracking-widest leading-none opacity-80 italic">{displayRole}</span>
+                    <span className="text-[8px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-widest leading-none opacity-80">{displayRole}</span>
                   </div>
                 </button>
               </DropdownTrigger>
@@ -336,21 +336,21 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                   textValue="User Profile Header"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-warning-500 to-amber-600 flex items-center justify-center text-white text-lg font-black">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-obaol-400 to-obaol-600 flex items-center justify-center text-obaol-950 text-lg font-bold">
                       {username?.slice(0, 1).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-black text-foreground uppercase tracking-wider">{username?.split('@')[0]}</span>
-                      <span className="text-[9px] font-black text-warning-600 dark:text-warning-500 uppercase tracking-[0.2em] mt-1 italic">{displayRole}</span>
+                      <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{displayRole}</span>
                     </div>
                   </div>
                 </DropdownItem>
 
                 <DropdownItem 
                   key="profile" 
-                  startContent={<FiUser size={16} className="text-warning-500" />} 
+                  startContent={<FiUser size={16} className="text-obaol-600 dark:text-obaol-300" />}
                   onClick={() => router.push("/dashboard/profile")}
-                  className="data-[hover=true]:bg-warning-500/10 data-[hover=true]:text-warning-600"
+                  className="data-[hover=true]:bg-obaol-500/10 data-[hover=true]:text-obaol-700 dark:data-[hover=true]:text-obaol-300"
                   textValue="Account Master Control"
                 >
                    <span className="font-bold tracking-tight">Management Portal</span>

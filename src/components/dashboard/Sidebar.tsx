@@ -84,14 +84,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             className={`fixed left-0 top-0 h-full min-h-0 z-50 transition-all duration-500 ease-in-out db-shell border-r db-border-subtle hidden md:flex flex-col backdrop-blur-[22px] ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
         >
             {/* Structural Accents */}
-            <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-warning-500/10 to-transparent opacity-30" />
+            <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-obaol-500/10 to-transparent opacity-30" />
             
             {/* Toggle System */}
             <button
                 type="button"
                 aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
                 onClick={() => { play("toggle"); setIsCollapsed(!isCollapsed); }}
-                className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl db-panel border db-border-strong flex items-center justify-center text-default-400 hover:text-warning-600 hover:border-warning-500/50 transition-all shadow-lg z-50 group"
+                className="absolute -right-4 top-[84px] w-8 h-8 rounded-xl db-panel border db-border-strong flex items-center justify-center text-default-400 hover:text-obaol-700 dark:hover:text-obaol-300 hover:border-obaol-500/50 transition-all shadow-lg z-50 group"
             >
                 {isCollapsed ? <FiChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" /> : <FiChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />}
             </button>
@@ -105,16 +105,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                 }}
             >
                 <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-warning-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-obaol-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-default-100 to-transparent dark:from-white/10 dark:to-transparent border border-default-200 dark:border-white/10 flex items-center justify-center shadow-sm overflow-hidden">
                        <Image src="/logo.png" width={28} height={28} alt="Obaol" className="object-contain" />
-                       <div className="absolute bottom-0 left-0 w-full h-[2px] bg-warning-500 opacity-50 shadow-[0_-4px_10px_rgba(245,165,36,0.5)]" />
+                       <div className="absolute bottom-0 left-0 w-full h-[2px] bg-obaol-500 opacity-50 shadow-[0_-4px_10px_rgba(207,152,60,0.5)]" />
                     </div>
                 </div>
                 {!isCollapsed && (
                     <div className="flex flex-col">
                         <span className="font-black text-lg tracking-[0.25em] text-foreground leading-none">OBAOL</span>
-                        <span className="text-[8px] font-black text-warning-600 dark:text-warning-500/60 tracking-[0.3em] uppercase mt-2">Trade workspace</span>
+                        <span className="mt-2 text-[8px] font-bold uppercase tracking-[0.3em] text-obaol-700 dark:text-obaol-300/70">Trade workspace</span>
                     </div>
                 )}
             </div>
@@ -122,8 +122,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             {/* Navigation Array */}
             <div className="flex-1 min-h-0 px-4 space-y-6 overflow-y-auto overscroll-contain no-scrollbar pb-10">
                 {isOnboardingLocked && !isCollapsed && (
-                    <div className="mx-2 mb-2 rounded-xl border border-warning-500/20 bg-warning-500/10 px-3 py-2">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-warning-600">
+                    <div className="mx-2 mb-2 rounded-xl border border-obaol-500/20 bg-obaol-500/10 px-3 py-2">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
                             Complete onboarding to unlock navigation
                         </p>
                     </div>
@@ -152,15 +152,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                             onClick={(e) => handleOptionClick(e, opt.link)}
                                             className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
                                                 isActive 
-                                                ? "bg-warning-500/10 text-warning-700 dark:text-white font-bold shadow-sm" 
+                                                ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
                                                 : "text-default-500 hover:text-foreground hover:db-inset"
                                             } ${isCollapsed ? "justify-center" : "px-3 gap-3"} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
                                             aria-disabled={isOnboardingLocked}
                                         >
                                             {isActive && (
-                                                <div className="absolute left-0 w-[2.5px] h-5 bg-warning-500 rounded-r-full shadow-[0_0_10px_rgba(245,165,36,0.6)]" />
+                                                <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
                                             )}
-                                            <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-warning-600 dark:text-warning-500 scale-110" : "group-hover:scale-110 group-hover:text-warning-500"}`}>
+                                            <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : "group-hover:scale-110 group-hover:text-obaol-500"}`}>
                                                 {opt.icon}
                                             </div>
                                             {!isCollapsed && (
@@ -177,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                                <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                                             )}
                                             {isCollapsed && isActive && (
-                                               <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-warning-500 shadow-[0_0_8px_rgba(245,165,36,0.6)]" />
+                                               <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-500 shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
                                             )}
                                         </button>
                                     );
@@ -206,7 +206,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                     </div>
                 ) : (
                     <div className="flex justify-center">
-                        <div className="w-1 h-8 bg-gradient-to-b from-transparent via-warning-500/20 to-transparent rounded-full" />
+                        <div className="w-1 h-8 bg-gradient-to-b from-transparent via-obaol-500/20 to-transparent rounded-full" />
                     </div>
                 )}
             </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useTransform, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
@@ -340,7 +340,6 @@ const HOVER_TIMING = {
 const HERO_ROTATION_INTERVAL = 3500;
 
 export default function HeroSection() {
-  const heroRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const { isAuthenticated, loading } = usePublicAuthStatus();
   const prefersReducedMotion = useReducedMotion();
@@ -394,8 +393,8 @@ export default function HeroSection() {
 
   return (
     <section
-      ref={heroRef}
-      className="relative min-h-[85vh] lg:h-[800px] flex flex-col items-center justify-center overflow-hidden bg-background pt-20"
+      data-natural-scroll-hero="true"
+      className="relative min-h-[85vh] bg-background pt-20"
     >
       {/* ================= BACKGROUND ================= */}
       <motion.div
@@ -502,7 +501,7 @@ export default function HeroSection() {
 
       {/* ================= MAIN CONTENT ================= */}
       <motion.div
-        className="relative z-30 container mx-auto px-6 sm:px-12 py-12 md:py-20 flex flex-col items-start text-left w-full"
+        className="relative z-30 container mx-auto flex w-full flex-col items-start px-6 py-12 text-left sm:px-12 md:py-16 lg:py-8"
       >
         <motion.div
           initial={isMobile ? false : "hidden"}
@@ -510,16 +509,18 @@ export default function HeroSection() {
           variants={containerVariants}
           className="w-full max-w-6xl xl:max-w-7xl"
         >
-          <div className="space-y-4 lg:space-y-5">
-            <motion.p
-              variants={itemVariants}
-              className="mb-2 text-[8px] font-bold uppercase tracking-[0.45em] text-obaol-700 dark:text-obaol-300 sm:text-xs"
-            >
-              The Agro Execution System for Agro Trade
-            </motion.p>
+          <div className="w-full gap-8 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-4 xl:gap-6">
+              <div
+                data-sticky-copy="true"
+                className="w-full space-y-6 lg:sticky lg:top-28 lg:self-start lg:space-y-5 lg:pr-3"
+              >
+                <motion.p
+                  variants={itemVariants}
+                  className="mb-2 text-[8px] font-bold uppercase tracking-[0.45em] text-obaol-700 dark:text-obaol-300 sm:text-xs"
+                >
+                  The Agro Execution System for Agro Trade
+                </motion.p>
 
-            <div className="w-full gap-8 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4 xl:gap-6">
-              <div className="w-full space-y-6 lg:space-y-7 lg:pr-3">
                 <motion.h1
                   initial={isMobile ? false : "hidden"}
                   animate="visible"
@@ -608,15 +609,16 @@ export default function HeroSection() {
                 </motion.div>
               </div>
 
-              {/* Editorial platform collage */}
+              {/* Natural-flow execution story */}
               <motion.div
                 variants={itemVariants}
-                className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:translate-x-4 xl:translate-x-10 2xl:translate-x-16"
+                className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:pb-20"
               >
-                <motion.div
+                <div
+                  data-hero-panel="execution-flow"
                   role="img"
                   aria-label="OBAOL execution flow: discovery, sampling, coordination, documentation, inspection visit, quality testing, packaging, procurement, inland transportation, and freight forwarding"
-                  className="relative hidden aspect-[7/5] w-[min(56vw,880px)] lg:block"
+                  className="relative hidden aspect-[7/5] w-full max-w-[880px] lg:block"
                 >
                   <DesktopFlowConnectors prefersReducedMotion={prefersReducedMotion} />
                   {DESKTOP_COLLAGE_SLOTS.map((slot) => {
@@ -631,7 +633,7 @@ export default function HeroSection() {
                       />
                     );
                   })}
-                </motion.div>
+                </div>
 
                 <div
                   role="region"
@@ -652,9 +654,58 @@ export default function HeroSection() {
                     </Fragment>
                   ))}
                 </div>
+
               </motion.div>
-            </div>
           </div>
+
+          <div
+            aria-hidden="true"
+            data-process-to-laptop-arrow="true"
+            className="pointer-events-none relative z-20 mx-auto mt-2 flex h-24 w-full max-w-[760px] items-center justify-center text-obaol-600/70 dark:text-obaol-300/70 lg:mt-0 lg:h-32 lg:max-w-[980px]"
+          >
+            <svg className="h-full w-full overflow-visible" viewBox="0 0 760 140" fill="none">
+              <defs>
+                <marker id="process-to-laptop-arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+                  <path d="M 0 0 L 10 5 L 0 10 Z" fill="currentColor" fillOpacity="0.8" />
+                </marker>
+              </defs>
+              <path
+                d="M 126 18 C 230 72 308 54 380 96 C 452 54 530 72 634 18"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeDasharray="7 10"
+                opacity="0.42"
+              />
+              <path
+                d="M 380 24 C 380 52 380 78 380 118"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="8 9"
+                markerEnd="url(#process-to-laptop-arrowhead)"
+              />
+            </svg>
+          </div>
+
+          <figure
+            data-hero-panel="unified-system"
+            className="relative mx-auto mt-0 w-full max-w-[760px] overflow-hidden lg:max-w-[1120px] lg:-mb-24 lg:max-h-[620px] xl:-mb-32 xl:max-w-[1240px]"
+          >
+            <figcaption className="relative z-30 mb-2 text-center text-[10px] font-bold uppercase tracking-[0.28em] text-obaol-700/80 dark:text-obaol-300/80 sm:text-xs lg:mb-0 lg:-translate-y-1">
+              All execution stages, tracked in one OBAOL workspace.
+            </figcaption>
+            <div className="pointer-events-none absolute left-1/2 top-[30%] z-10 h-28 w-2/3 -translate-x-1/2 rounded-full bg-obaol-500/18 blur-3xl" />
+            <div className="relative z-20 aspect-square w-full lg:-mb-[18%]">
+              <Image
+                src="/images/order-execution-laptop.png"
+                alt="OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."
+                fill
+                sizes="(max-width: 1023px) calc(100vw - 3rem), 1120px"
+                className="object-contain drop-shadow-[0_34px_60px_rgba(0,0,0,0.55)]"
+              />
+            </div>
+          </figure>
         </motion.div>
       </motion.div>
 

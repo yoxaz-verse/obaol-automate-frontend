@@ -1,19 +1,18 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
-import { FiArrowRight } from "react-icons/fi";
-import { FaShieldHalved, FaTruckFront, FaEarthAsia, FaGlobe } from "react-icons/fa6";
+import { FiArrowRight, FiCompass, FiGitBranch } from "react-icons/fi";
+import { FaShieldHalved, FaTruckFront, FaEarthAsia } from "react-icons/fa6";
 import Link from "next/link";
 import Header from "@/components/home/header";
 import HeroSection from "@/components/home/herosection";
 import ServiceShowcase from "@/components/home/ServiceShowcase";
-import DealWalkthrough from "@/components/home/DealWalkthrough";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import PerspectiveGateway from "@/components/home/PerspectiveGateway";
+import UnifiedExecutionWorkspace from "@/components/home/UnifiedExecutionWorkspace";
 
 const intentCards = [
     {
@@ -21,75 +20,27 @@ const intentCards = [
         description: "Understand why OBAOL is needed, what problem it solves, and why execution structure matters in real commodity trade.",
         href: "/why-obaol",
         cta: "Read Why OBAOL",
+        eyebrow: "The OBAOL rationale",
+        number: "01",
     },
     {
         title: "How OBAOL Works",
         description: "See the complete step-by-step execution model. This page also includes procurement, verification, logistics, and settlement flow.",
         href: "/how-it-works",
         cta: "View How It Works",
+        eyebrow: "The execution model",
+        number: "02",
     },
 ];
 
-const panelFeatures = [
-    {
-        title: "Verified Ecosystem",
-        desc: "Approval checks, role‑based access, and verified participants.",
-    },
-    {
-        title: "Enquiry Hub",
-        desc: "Manage enquiries and keep every function in sync.",
-    },
-    {
-        title: "Execution Panels",
-        desc: "Role‑based execution queues per function/person in real time.",
-    },
-    {
-        title: "Commodity Catalog & Trade Listings",
-        desc: "Commodity discovery and current trade listings in one connected view.",
-    },
-    {
-        title: "Samples & Documents",
-        desc: "Sample Requests and compliance documents stay tied to every order.",
-    },
-    {
-        title: "Importer Service",
-        desc: "Imports workflow covering customs, ports, and distribution steps.",
-    },
-    {
-        title: "Warehouse Rent Management",
-        desc: "Warehouse booking services with capacity planning and reservations.",
-    },
-    {
-        title: "Orders & External Orders",
-        desc: "Track internal and external orders with live status updates.",
-    },
-] as const;
-
 export default function HomeContent() {
-    const scrollToDealWalkthrough = () => {
-        if (typeof window === "undefined") {
-            return;
-        }
-
-        const target = document.getElementById("deal-walkthrough");
-        if (!target) {
-            return;
-        }
-
-        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        target.scrollIntoView({
-            behavior: prefersReducedMotion ? "auto" : "smooth",
-            block: "start",
-        });
-    };
-
     return (
         <>
             <Header />
             <HeroSection />
             <PerspectiveGateway />
             <ServiceShowcase />
-            <section className="relative py-12 md:py-16">
+            <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="flex flex-col gap-10 md:gap-16">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
@@ -114,27 +65,10 @@ export default function HomeContent() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                            {panelFeatures.map((feature) => (
-                                <button
-                                    key={feature.title}
-                                    type="button"
-                                    onClick={scrollToDealWalkthrough}
-                                    aria-label={`Go to deal walkthrough from ${feature.title}`}
-                                    className="group relative p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md hover:border-obaol-500/45 hover:bg-background transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-obaol-500/10 active:scale-[0.99] cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                >
-                                    <h3 className={`${homeTitleStyles.cardTitle} flex items-center gap-3`}>
-                                        <div className="w-2 h-4 rounded-full bg-obaol-500/30 group-hover:bg-obaol-500 transition-colors duration-300" />
-                                        {feature.title}
-                                    </h3>
-                                    <p className="text-sm md:text-base text-foreground/60 font-medium leading-relaxed mt-3 ml-5 group-hover:text-foreground/80 transition-colors">{feature.desc}</p>
-                                </button>
-                            ))}
-                        </div>
+                        <UnifiedExecutionWorkspace />
 
                     </div>
 
-                    <DealWalkthrough />
                 </div>
             </section>
             <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 mb-10">
@@ -196,35 +130,74 @@ export default function HomeContent() {
             </section>
 
             {/* ── INTENT CARDS ── */}
-            <section className="py-10 md:py-24 bg-default-50/50 border-y border-default-100">
+            <section className="relative py-14 md:py-28 bg-default-50/50 border-y border-default-100 overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.035] dark:opacity-[0.06] bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
+                <div className="absolute left-1/2 top-0 h-40 w-[44rem] -translate-x-1/2 rounded-full bg-obaol-500/10 blur-[100px] pointer-events-none" />
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+                    <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {intentCards.map((card, i) => (
                             <motion.article
                                 key={card.href}
                                 initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="relative group p-[1px] bg-gradient-to-br from-default-200 via-transparent to-default-200 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden transition-all hover:from-obaol-500/25"
+                                className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(0,0,0,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)]"
                             >
-                                <div className="relative p-6 md:p-12 rounded-[1.4rem] md:rounded-[2.8rem] bg-white dark:bg-[#0A0A0A] h-full flex flex-col justify-between items-start gap-6 md:gap-12">
-                                    <div className="space-y-3 md:space-y-6">
+                                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="relative h-full p-7 md:p-10 lg:p-12 flex flex-col">
+                                    <div className="mb-10 flex items-center justify-between">
+                                        <span className="inline-flex items-center gap-2 rounded-full border border-obaol-400/20 bg-obaol-500/[0.07] px-3 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-obaol-400 shadow-[0_0_10px_rgba(207,152,60,0.9)]" />
+                                            {card.eyebrow}
+                                        </span>
+                                        <span className="font-mono text-xs font-bold tracking-[0.2em] text-default-400">{card.number} / 02</span>
+                                    </div>
+
+                                    <div className="relative mb-10 h-36 overflow-hidden rounded-[1.5rem] border border-default-200/60 bg-default-50/70 dark:bg-black/30" aria-hidden="true">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(207,152,60,0.12),transparent_65%)]" />
+                                        {i === 0 ? (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="absolute h-28 w-28 rounded-full border border-dashed border-obaol-400/30 transition-transform duration-[1200ms] group-hover:rotate-45" />
+                                                <div className="absolute h-20 w-20 rounded-full border border-obaol-400/20" />
+                                                {["top-4 left-1/2 -translate-x-1/2", "bottom-4 left-8", "bottom-4 right-8"].map((position) => (
+                                                    <span key={position} className={`absolute ${position} h-2.5 w-2.5 rounded-full border-2 border-content1 bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.65)]`} />
+                                                ))}
+                                                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-obaol-400/30 bg-content1 text-obaol-500 shadow-xl shadow-obaol-500/10 transition-transform duration-500 group-hover:scale-110">
+                                                    <FiCompass size={25} />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="absolute inset-0 flex items-center justify-center px-8">
+                                                <div className="relative flex w-full max-w-xs items-center justify-between">
+                                                    <div className="absolute left-4 right-4 top-4 h-px -translate-y-1/2 bg-gradient-to-r from-obaol-400/20 via-obaol-400/80 to-obaol-400/20" />
+                                                    {["Plan", "Verify", "Move", "Settle"].map((step, stepIndex) => (
+                                                        <div key={step} className="relative flex flex-col items-center gap-2">
+                                                            <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-black transition-all duration-500 ${stepIndex === 1 ? "border-obaol-400 bg-obaol-400 text-obaol-950 shadow-[0_0_22px_rgba(207,152,60,0.35)] group-hover:scale-110" : "border-default-300 bg-content1 text-default-500"}`}>
+                                                                {stepIndex + 1}
+                                                            </span>
+                                                            <span className="text-[9px] font-bold uppercase tracking-wider text-default-400">{step}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <FiGitBranch className="absolute right-4 top-4 text-obaol-400/30" size={18} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="mb-9 flex-1 space-y-3 md:space-y-5">
                                         <h3 className={homeTitleStyles.cardTitleLarge}>{card.title}</h3>
-                                        <p className="text-sm md:text-lg text-default-500 leading-relaxed font-medium">{card.description}</p>
+                                        <p className="max-w-xl text-sm md:text-base text-default-500 leading-relaxed font-medium">{card.description}</p>
                                     </div>
 
                                     <Link
                                         href={card.href}
-                                        className="inline-flex items-center gap-2 md:gap-4 px-6 py-3 md:px-10 md:py-5 rounded-full border border-obaol-300/40 bg-obaol-500 text-obaol-950 font-bold text-sm md:text-lg shadow-[0_14px_34px_-20px_rgba(207,152,60,0.8)] transition-all hover:scale-105 hover:bg-obaol-400 active:scale-95 group/btn"
+                                        className="group/btn inline-flex w-full items-center justify-between rounded-2xl border border-default-200 bg-default-50/80 px-5 py-4 text-sm md:text-base font-black text-foreground transition-all duration-300 hover:border-obaol-400/40 hover:bg-obaol-500 hover:text-obaol-950"
                                     >
-                                        {card.cta}
-                                        <FiArrowRight size={18} className="md:size-6 group-hover/btn:translate-x-2 transition-transform" />
+                                        <span>{card.cta}</span>
+                                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-obaol-500 text-obaol-950 transition-all group-hover/btn:bg-obaol-950 group-hover/btn:text-obaol-200">
+                                            <FiArrowRight size={18} className="transition-transform group-hover/btn:translate-x-0.5" />
+                                        </span>
                                     </Link>
-
-                                    {/* Background accent */}
-                                    <div className="absolute top-0 right-0 p-4 md:p-8 text-foreground/[0.03] group-hover:text-obaol-500/[0.07] transition-colors pointer-events-none">
-                                        <FaGlobe size={100} className="md:size-[200px]" />
-                                    </div>
                                 </div>
                             </motion.article>
                         ))}

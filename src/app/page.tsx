@@ -27,7 +27,7 @@ const webPageJsonLd = buildWebPageJsonLd({
 
 export default function HomePage() {
   return (
-    <main className="obaol-home bg-background text-foreground overflow-hidden">
+    <main className="obaol-home bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}

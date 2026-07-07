@@ -30,10 +30,13 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
 
 test("homepage hero presents the ordered ten-stage execution flow", () => {
   const hero = read("../src/components/home/herosection.tsx");
+  const homepage = read("../src/app/page.tsx");
+  const globals = read("../src/app/globals.css");
   const showcase = read("../src/components/home/ServiceShowcase.tsx");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
   const desktopBlock = hero.match(/const DESKTOP_COLLAGE_SLOTS[\s\S]*?\n\];/)?.[0] ?? "";
   const connectorBlock = hero.match(/const FLOW_CONNECTOR_PATHS = \[[\s\S]*?\] as const;/)?.[0] ?? "";
+  const laptopBlock = hero.match(/<figure\s+data-hero-panel="unified-system"[\s\S]*?<\/figure>/)?.[0] ?? "";
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/\n\s+label: "([^"]+)"/g)].map((match) => match[1]);
   const stageSequences = [...stagesBlock.matchAll(/\n\s+sequence: (\d+)/g)].map((match) => Number(match[1]));
@@ -79,11 +82,61 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   assert.equal(hero.includes("index < HERO_STAGES.length - 1"), true);
   assert.equal(hero.includes("pointer-events-none absolute inset-0 z-[1]"), true);
   assert.equal(hero.includes('markerEnd="url(#flow-arrowhead)"'), true);
+  assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
+  assert.equal(hero.includes('data-sticky-copy="true"'), true);
+  assert.equal(hero.includes('lg:sticky lg:top-28'), true);
+  assert.equal(hero.includes('data-hero-panel="execution-flow"'), true);
+  assert.equal(hero.includes('data-hero-panel="unified-system"'), true);
+  assert.equal(hero.includes('data-process-unifier="true"'), false);
+  assert.equal(hero.includes("Every stage comes together on one OBAOL platform"), false);
+  assert.equal(hero.includes('/images/order-execution-laptop.png'), true);
+  assert.equal(hero.includes('/images/order-execution-tracking.png'), false);
+  assert.equal(hero.includes("LaptopConvergencePaths"), false);
+  assert.equal(hero.includes('data-convergence-overlay="true"'), false);
+  assert.equal(hero.includes("data-convergence-path="), false);
+  assert.equal(hero.includes('data-process-to-laptop-arrow="true"'), true);
+  assert.equal(hero.includes("process-to-laptop-arrowhead"), true);
+  assert.equal(hero.includes("All execution stages, tracked in one OBAOL workspace."), true);
+  assert.equal(hero.includes("OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."), true);
+  assert.equal(laptopBlock.includes("whileInView"), false);
+  assert.equal(laptopBlock.includes("viewport="), false);
+  assert.equal(laptopBlock.includes("initial="), false);
+  assert.equal(laptopBlock.includes("<motion.figure"), false);
+  assert.equal(hero.includes("useScroll"), false);
+  assert.equal(hero.includes("200svh"), false);
+  assert.equal(hero.includes("smoothScrollProgress"), false);
+  assert.equal(hero.includes('data-hero-scene='), false);
+  assert.equal(hero.includes("whileInView={{ opacity: 1, y: 0, scale: 1 }}"), false);
+  assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);
+  assert.equal(homepage.includes("overflow-hidden"), false);
+  assert.equal(globals.includes("overflow-x: clip !important"), true);
 
   for (const imagePath of imagePaths) {
     const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.png", import.meta.url))), true);
+});
+
+test("the OBAOL perspective gateway presents a premium three-card entry point", () => {
+  const perspective = read("../src/components/home/PerspectiveGateway.tsx");
+  assert.equal(perspective.includes('aria-labelledby="obaol-perspective-heading"'), true);
+  assert.equal(perspective.includes("Trade is more than buying and selling."), true);
+  assert.equal(perspective.includes('href: "/why-obaol"'), true);
+  assert.equal(perspective.includes('href: "/trust"'), true);
+  assert.equal(perspective.includes('href: "/roles"'), true);
+  assert.equal(perspective.includes("Market context"), true);
+  assert.equal(perspective.includes("Verified execution"), true);
+  assert.equal(perspective.includes("Role-based participation"), true);
+  assert.equal(perspective.includes('data-perspective-card="true"'), true);
+  assert.equal(perspective.includes('number: "01 / 03"'), true);
+  assert.equal(perspective.includes('number: "02 / 03"'), true);
+  assert.equal(perspective.includes('number: "03 / 03"'), true);
+  assert.equal(perspective.includes("FiArrowRight"), true);
+  assert.equal(perspective.includes("FiCompass"), true);
+  assert.equal(perspective.includes("FiShield"), true);
+  assert.equal(perspective.includes("FiUsers"), true);
+  assert.equal(perspective.includes("bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)]"), true);
 });
 
 test("the public commodity experience uses concise Catalog naming", () => {

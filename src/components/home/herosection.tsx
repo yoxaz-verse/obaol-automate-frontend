@@ -293,13 +293,22 @@ function EditorialCollageTile({
   );
 }
 
-function MobileExecutionFlowCard({ stage, prefersReducedMotion }: { stage: HeroStage; prefersReducedMotion: boolean | null }) {
+function MobileExecutionFlowCard({
+  stage,
+  prefersReducedMotion,
+  animateIn = true,
+}: {
+  stage: HeroStage;
+  prefersReducedMotion: boolean | null;
+  animateIn?: boolean;
+}) {
   return (
     <motion.figure
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.55, delay: Math.min(stage.sequence * 0.035, 0.28) }}
+      initial={prefersReducedMotion || !animateIn ? false : { opacity: 0, y: 18 }}
+      whileInView={animateIn ? { opacity: 1, y: 0 } : undefined}
+      animate={!animateIn ? { opacity: 1, y: 0 } : undefined}
+      viewport={animateIn ? { once: true, amount: 0.35 } : undefined}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.55, delay: animateIn ? Math.min(stage.sequence * 0.035, 0.28) : 0 }}
       className="relative aspect-[4/3] w-[78vw] max-w-[320px] shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-white/20 bg-black shadow-[0_22px_42px_-24px_rgba(0,0,0,0.85)]"
     >
       <Image src={stage.src} alt="" fill sizes="78vw" className="object-cover" style={{ objectPosition: stage.objectPosition }} />
@@ -330,6 +339,76 @@ function MobileFlowConnector({ from, to, prefersReducedMotion }: { from: string;
       <path d="M 6 12 H 29" fill="none" stroke={OBAOL_GOLD} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2.5 3.5" />
       <path d="M 27 8 L 33 12 L 27 16" fill="none" stroke={OBAOL_GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </motion.svg>
+  );
+}
+
+function MobileExecutionFlowSequence({
+  includeLoopConnector,
+  ariaHidden,
+  animateIn,
+  prefersReducedMotion,
+}: {
+  includeLoopConnector: boolean;
+  ariaHidden?: boolean;
+  animateIn: boolean;
+  prefersReducedMotion: boolean | null;
+}) {
+  return (
+    <div className="flex shrink-0 gap-4 pr-4" aria-hidden={ariaHidden}>
+      {HERO_STAGES.map((stage, index) => {
+        const nextStage = HERO_STAGES[(index + 1) % HERO_STAGES.length];
+        const showConnector = includeLoopConnector || index < HERO_STAGES.length - 1;
+
+        return (
+          <Fragment key={`${ariaHidden ? "clone" : "primary"}-${stage.id}`}>
+            <MobileExecutionFlowCard
+              stage={stage}
+              prefersReducedMotion={prefersReducedMotion}
+              animateIn={animateIn}
+            />
+            {showConnector && (
+              <MobileFlowConnector
+                from={stage.id}
+                to={nextStage.id}
+                prefersReducedMotion={prefersReducedMotion}
+              />
+            )}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+function MobileExecutionFlowTrack({ prefersReducedMotion }: { prefersReducedMotion: boolean | null }) {
+  if (prefersReducedMotion) {
+    return (
+      <div
+        role="region"
+        aria-label="Ten-stage OBAOL execution flow. Scroll horizontally to review every stage."
+        tabIndex={0}
+        className="scrollbar-hide -mx-6 flex w-[calc(100%+3rem)] snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-5 pt-2 outline-none focus-visible:ring-2 focus-visible:ring-obaol-400/70 sm:-mx-12 sm:w-[calc(100%+6rem)] sm:px-12 lg:hidden"
+      >
+        <MobileExecutionFlowSequence includeLoopConnector={false} animateIn prefersReducedMotion={prefersReducedMotion} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      role="region"
+      aria-label="Ten-stage OBAOL execution flow moving automatically from discovery through freight forwarding."
+      className="-mx-6 w-[calc(100%+3rem)] overflow-hidden px-6 pb-5 pt-2 [mask-image:linear-gradient(to_right,transparent,black_9%,black_91%,transparent)] sm:-mx-12 sm:w-[calc(100%+6rem)] sm:px-12 lg:hidden"
+    >
+      <motion.div
+        className="flex w-max"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 72, ease: "linear", repeat: Infinity }}
+      >
+        <MobileExecutionFlowSequence includeLoopConnector animateIn={false} prefersReducedMotion={prefersReducedMotion} />
+        <MobileExecutionFlowSequence includeLoopConnector ariaHidden animateIn={false} prefersReducedMotion={prefersReducedMotion} />
+      </motion.div>
+    </div>
   );
 }
 
@@ -635,25 +714,7 @@ export default function HeroSection() {
                   })}
                 </div>
 
-                <div
-                  role="region"
-                  aria-label="Ten-stage OBAOL execution flow. Scroll horizontally to review every stage."
-                  tabIndex={0}
-                  className="scrollbar-hide -mx-6 flex w-[calc(100%+3rem)] snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-5 pt-2 outline-none focus-visible:ring-2 focus-visible:ring-obaol-400/70 sm:-mx-12 sm:w-[calc(100%+6rem)] sm:px-12 lg:hidden"
-                >
-                  {HERO_STAGES.map((stage, index) => (
-                    <Fragment key={stage.id}>
-                      <MobileExecutionFlowCard stage={stage} prefersReducedMotion={prefersReducedMotion} />
-                      {index < HERO_STAGES.length - 1 && (
-                        <MobileFlowConnector
-                          from={stage.id}
-                          to={HERO_STAGES[index + 1].id}
-                          prefersReducedMotion={prefersReducedMotion}
-                        />
-                      )}
-                    </Fragment>
-                  ))}
-                </div>
+                <MobileExecutionFlowTrack prefersReducedMotion={prefersReducedMotion} />
 
               </motion.div>
           </div>
@@ -690,19 +751,19 @@ export default function HeroSection() {
 
           <figure
             data-hero-panel="unified-system"
-            className="relative mx-auto mt-0 w-full max-w-[760px] overflow-hidden lg:max-w-[1120px] lg:-mb-24 lg:max-h-[620px] xl:-mb-32 xl:max-w-[1240px]"
+            className="relative -mx-6 mt-0 w-[calc(100%+3rem)] max-w-none overflow-hidden sm:-mx-12 sm:w-[calc(100%+6rem)] lg:mx-auto lg:max-h-[620px] lg:w-full lg:max-w-[1120px] lg:-mb-24 xl:-mb-32 xl:max-w-[1240px]"
           >
             <figcaption className="relative z-30 mb-2 text-center text-[10px] font-bold uppercase tracking-[0.28em] text-obaol-700/80 dark:text-obaol-300/80 sm:text-xs lg:mb-0 lg:-translate-y-1">
               All execution stages, tracked in one OBAOL workspace.
             </figcaption>
             <div className="pointer-events-none absolute left-1/2 top-[30%] z-10 h-28 w-2/3 -translate-x-1/2 rounded-full bg-obaol-500/18 blur-3xl" />
-            <div className="relative z-20 aspect-square w-full lg:-mb-[18%]">
+            <div className="relative z-20 -mx-10 aspect-square w-[calc(100%+5rem)] sm:-mx-14 sm:w-[calc(100%+7rem)] lg:mx-0 lg:w-full lg:-mb-[18%]">
               <Image
                 src="/images/order-execution-laptop.png"
                 alt="OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."
                 fill
-                sizes="(max-width: 1023px) calc(100vw - 3rem), 1120px"
-                className="object-contain drop-shadow-[0_34px_60px_rgba(0,0,0,0.55)]"
+                sizes="(max-width: 1023px) calc(100vw + 7rem), 1120px"
+                className="object-contain opacity-90 drop-shadow-[0_34px_60px_rgba(0,0,0,0.55)]"
               />
             </div>
           </figure>

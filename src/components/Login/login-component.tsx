@@ -1329,7 +1329,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             ) : (role === "Operator" || role === "team") ? (
               <button
                 type="button"
-                onClick={() => router.push("/auth")}
+                onClick={() => router.push("/auth/associate")}
                 className="group/btn flex h-11 w-full items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 text-[10px] font-bold uppercase tracking-[0.15em] text-foreground shadow-sm transition-all duration-500 hover:border-obaol-500/20 hover:bg-white/[0.06]"
               >
                 <div className="flex flex-col items-start gap-0.5">

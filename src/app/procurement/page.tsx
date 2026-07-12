@@ -1,9 +1,8 @@
 import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import FadeIn from "./FadeIn";
-import ProcurementSpecialistSection from "@/components/home/procurementprocess";
+import dynamic from "next/dynamic";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
-import { Spacer } from "@nextui-org/react";
 import { 
   FiAlertTriangle, 
   FiCheckCircle, 
@@ -18,6 +17,11 @@ import {
   FiTrendingUp,
   FiGlobe
 } from "react-icons/fi";
+
+const ProcurementSpecialistSection = dynamic(() => import("@/components/home/procurementprocess"), {
+  ssr: false,
+  loading: () => <div className="min-h-[320px] rounded-3xl border border-default-200 bg-content1/50" />,
+});
 
 export const metadata = buildMetadata({
   title: "Procurement & Verification Support | OBAOL",
@@ -308,7 +312,7 @@ export default function ProcurementPage() {
           </div>
         </FadeIn>
 
-        <Spacer y={16} />
+        <div className="h-16" />
 
         <FadeIn>
           <div className="text-center max-w-3xl mx-auto bg-foreground text-background p-12 rounded-[3rem] shadow-2xl relative overflow-hidden">

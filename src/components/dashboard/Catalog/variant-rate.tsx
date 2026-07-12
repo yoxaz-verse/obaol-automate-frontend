@@ -3556,8 +3556,6 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
         notes: `Enquiry for ${variantRate.product} - ${variantRate.productVariant}`,
       };
 
-      console.log("Submitting Enquiry Payload:", payload);
-
       return postData(`${apiRoutesByRole["enquiry"]}`, payload);
     },
     onMutate: () => {

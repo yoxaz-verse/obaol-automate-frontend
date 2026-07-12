@@ -1,8 +1,12 @@
 // pages/users.tsx
 "use client";
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { Tabs, Tab } from "@nextui-org/react";
-import UserTabContent from "@/components/dashboard/Users/user-tab-content";
+
+const UserTabContent = dynamic(() => import("@/components/dashboard/Users/user-tab-content"), {
+  loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
+});
 
 export default function Page() {
   const [currentTable, setCurrentTable] = useState("manager"); // Default role set to 'manager'

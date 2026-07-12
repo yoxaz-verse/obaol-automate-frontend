@@ -1,6 +1,7 @@
 "use client";
 
 import React, { use } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { brandPublicRoutes } from "@/core/api/apiRoutes";
@@ -149,7 +150,7 @@ export default function BrandPage() {
                     <div className="absolute bottom-[20%] left-[5%] w-[400px] h-[400px] bg-white/[0.01] rounded-full blur-[120px]" />
                     {company.banner && (
                         <div className="absolute inset-0 opacity-20 grayscale hover:grayscale-0 transition-all duration-1000">
-                             <img src={company.banner} alt="" className="w-full h-full object-cover" />
+                             <Image src={company.banner} alt="" fill unoptimized sizes="100vw" className="object-cover" />
                         </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent lg:to-black/20" />

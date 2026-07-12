@@ -68,7 +68,10 @@ export default function DocumentationRulesPage() {
     queryKey: ["document-rules"],
     queryFn: () => getData(apiRoutes.documentRules.list),
   });
-  const rules = Array.isArray(rulesResponse?.data?.data) ? rulesResponse.data.data : [];
+  const rules = useMemo(
+    () => (Array.isArray(rulesResponse?.data?.data) ? rulesResponse.data.data : []),
+    [rulesResponse]
+  );
 
   const filteredRules = useMemo(() => {
     if (!search.trim()) return rules;

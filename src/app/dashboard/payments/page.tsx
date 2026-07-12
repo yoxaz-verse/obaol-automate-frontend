@@ -1,9 +1,13 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import { Tabs, Tab } from "@nextui-org/react";
 import Title from "@/components/titles";
-import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
+
+const EssentialTabContent = dynamic(() => import("@/components/dashboard/Essentials/essential-tab-content"), {
+  loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
+});
 
 export default function PaymentsHubPage() {
   const [activeTab, setActiveTab] = React.useState("paymentTerm");

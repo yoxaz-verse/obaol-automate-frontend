@@ -9,8 +9,8 @@
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "start": "next start",
     "lint": "next lint",
-    "test:access": "node --experimental-strip-types --test tests/dashboardAccess.test.mjs",
-    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:access": "NODE_OPTIONS=--disable-warning=MODULE_TYPELESS_PACKAGE_JSON node --experimental-strip-types --test tests/dashboardAccess.test.mjs",
+    "test:unit": "NODE_OPTIONS=--disable-warning=MODULE_TYPELESS_PACKAGE_JSON node --experimental-strip-types --test tests/*.test.mjs",
     "test": "npm run test:unit",
     "typecheck": "tsc --noEmit --incremental false"
   },

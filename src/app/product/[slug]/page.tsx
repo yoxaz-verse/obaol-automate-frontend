@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CTASection from "@/components/home/ctasection";
@@ -6,7 +7,6 @@ import Footer from "@/components/home/footer";
 import { buildPublicWebApiUrl } from "@/utils/publicApi";
 import { fetchCommodityFacts } from "@/utils/research";
 import ProductFacts from "@/components/product/ProductFacts";
-import { Spacer, Chip, Divider, Card, Image } from "@nextui-org/react";
 import { buildMetadata } from "@/utils/seo";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 
@@ -272,7 +272,10 @@ export default async function ProductDetailPage({
                   <Image
                     src={productImage}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    width={640}
+                    height={640}
+                    sizes="(min-width: 1024px) 33vw, 95vw"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-default-400 text-sm font-semibold">
@@ -295,13 +298,12 @@ export default async function ProductDetailPage({
               {states.length ? (
                 <div className="flex flex-wrap gap-2">
                   {states.map((stateName) => (
-                    <Chip
+                    <span
                       key={stateName}
-                      variant="flat"
                       className="bg-default-100/50 border border-default-200 text-default-700 font-bold text-xs px-3"
                     >
                       {stateName}
-                    </Chip>
+                    </span>
                   ))}
                 </div>
               ) : (
@@ -313,7 +315,7 @@ export default async function ProductDetailPage({
                 </div>
               )}
 
-              <Divider className="opacity-50" />
+              <div className="h-px bg-default-200/60" />
 
               <div className="space-y-4">
                 <h3 className="text-sm font-black uppercase tracking-widest text-default-400">Execution Support</h3>

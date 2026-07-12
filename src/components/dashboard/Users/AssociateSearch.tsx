@@ -79,15 +79,12 @@ export default function AssociateSearch({
       }),
   });
 
-  const rawAssociates = Array.isArray(associateData?.data?.data?.data)
-    ? associateData?.data?.data?.data
-    : Array.isArray(associateData?.data?.data)
-      ? associateData?.data?.data
-      : Array.isArray(associateData?.data)
-        ? associateData?.data
-        : [];
-  
-  const associates: Associate[] = useMemo(() => rawAssociates || [], [rawAssociates]);
+  const associates: Associate[] = useMemo(() => {
+    if (Array.isArray(associateData?.data?.data?.data)) return associateData.data.data.data;
+    if (Array.isArray(associateData?.data?.data)) return associateData.data.data;
+    if (Array.isArray(associateData?.data)) return associateData.data;
+    return [];
+  }, [associateData]);
 
   useEffect(() => {
     if (defaultSelected === undefined) return;

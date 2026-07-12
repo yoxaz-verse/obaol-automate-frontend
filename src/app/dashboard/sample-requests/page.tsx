@@ -48,9 +48,14 @@ export default function SampleRequestsPage() {
     queryFn: () => getData(apiRoutes.sampleRequest.list, { page: 1, limit: 100 }),
   });
 
-  const sampleRows = Array.isArray(sampleResponse?.data?.data?.data)
-    ? sampleResponse?.data?.data?.data
-    : (sampleResponse?.data?.data || []);
+  const sampleRows = useMemo(
+    () => (
+      Array.isArray(sampleResponse?.data?.data?.data)
+        ? sampleResponse?.data?.data?.data
+        : (sampleResponse?.data?.data || [])
+    ),
+    [sampleResponse]
+  );
 
   const filteredRows = useMemo(() => {
     const term = search.trim().toLowerCase();

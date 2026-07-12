@@ -43,7 +43,6 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       queryClient.refetchQueries({
         queryKey: [currentTable, apiEndpoint],
       });
-      console.log("Data uploaded successfully!"); //Translate
       setStatusMessage("Data uploaded successfully!"); // Success toast //Translate
       setStatusType("success");
       setLoading(false);
@@ -135,7 +134,6 @@ const BulkAdd: React.FC<BulkAddProps> = ({
             });
           }
 
-          console.log("jsonData", jsonData);
           // Call the mutate function with the prepared data
           addItem.mutate(jsonData);
         } catch (error) {

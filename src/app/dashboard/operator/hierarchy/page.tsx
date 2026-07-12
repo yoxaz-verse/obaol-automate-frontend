@@ -425,12 +425,19 @@ export default function OperatorHierarchyPage() {
   const leadershipData = leadershipQuery.data?.data?.data || {};
   const teamData = teamQuery.data?.data?.data || {};
 
-  const operator: OperatorBasic = leadershipData.operator || { operatorId: operatorId, name: user?.name || "You" };
+  const operator: OperatorBasic = useMemo(
+    () => leadershipData.operator || { operatorId: operatorId, name: user?.name || "You" },
+    [leadershipData.operator, operatorId, user?.name]
+  );
   const mentor: OperatorBasic | null = leadershipData.mentor || null;
-  const leadershipChain: LeadershipMember[] = Array.isArray(leadershipData.leadershipChain)
-    ? leadershipData.leadershipChain
-    : [];
-  const directTeam: TeamMember[] = Array.isArray(teamData.directTeam) ? teamData.directTeam : [];
+  const leadershipChain: LeadershipMember[] = useMemo(
+    () => (Array.isArray(leadershipData.leadershipChain) ? leadershipData.leadershipChain : []),
+    [leadershipData.leadershipChain]
+  );
+  const directTeam: TeamMember[] = useMemo(
+    () => (Array.isArray(teamData.directTeam) ? teamData.directTeam : []),
+    [teamData.directTeam]
+  );
 
   const summary = selfSummaryQuery.data?.data?.data?.summary || {};
 

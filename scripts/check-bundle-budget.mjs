@@ -6,6 +6,15 @@ const budgets = {
   "/dashboard/page": 300,
   "/page": 250,
   "/auth/page": 200,
+  "/product/[slug]/page": 210,
+  "/trade-directory/[slug]/page": 210,
+  "/procurement/page": 220,
+  "/dashboard/inventory/page": 550,
+  "/dashboard/rates/page": 220,
+  "/dashboard/users/page": 210,
+  "/dashboard/essentials/page": 230,
+  "/dashboard/payments/page": 210,
+  "/dashboard/calculations/page": 240,
 };
 
 let failed = false;

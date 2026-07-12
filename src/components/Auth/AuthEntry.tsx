@@ -26,7 +26,7 @@ const roleOptions = [
   {
     role: "Associate",
     kicker: "Business network",
-    title: "Register your company into the trade layer",
+    title: "I represent an industry business",
     description:
       "For businesses that buy, sell, move, inspect, finance, package, or support commodities across the OBAOL network.",
     href: "/auth/register",
@@ -41,7 +41,7 @@ const roleOptions = [
   {
     role: "Operator",
     kicker: "Execution desk",
-    title: "Become the person who moves trade forward",
+    title: "I want to become an OBAOL Operator",
     description:
       "For individuals who build company portfolios, develop buyer and supplier relationships, and coordinate trade execution through OBAOL.",
     href: "/auth/operator/register",
@@ -51,7 +51,7 @@ const roleOptions = [
     icon: FiBriefcase,
     aura: "from-cyan-400/20 via-emerald-400/10 to-transparent",
     stats: ["Portfolio building", "Relationship execution", "Deal coordination"],
-    note: "Independent trade-execution role. Not an internal operations or employee login.",
+    note: "Independent trade-execution role, not an internal operations or employee login.",
   },
 ] as const;
 

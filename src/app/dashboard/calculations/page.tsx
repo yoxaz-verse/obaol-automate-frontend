@@ -1,14 +1,18 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button, Card, CardBody, CardHeader, Divider, Input, Spacer } from "@nextui-org/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Title from "@/components/titles";
-import EssentialTabContent from "@/components/dashboard/Essentials/essential-tab-content";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import { DEFAULT_CALCULATION_CONFIG, useCalculationConfig } from "@/hooks/useCalculationConfig";
+
+const EssentialTabContent = dynamic(() => import("@/components/dashboard/Essentials/essential-tab-content"), {
+  loading: () => <div className="min-h-[360px] rounded-2xl border border-default-200 bg-content1/70" />,
+});
 
 const toNumber = (value: string) => {
   const num = Number(value);

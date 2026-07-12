@@ -151,7 +151,7 @@ export default function OperatorEarningsPage() {
   });
 
   const data = earningsQuery.data?.data?.data || {};
-  const rows: CommissionRow[] = Array.isArray(data.rows) ? data.rows : [];
+  const rows: CommissionRow[] = useMemo(() => (Array.isArray(data.rows) ? data.rows : []), [data.rows]);
   const summary = data.summary || {};
   const pagination = data.pagination || { page: 1, totalPages: 1, total: 0 };
 

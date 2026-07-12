@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
     Chip,
@@ -69,11 +69,16 @@ const InventoryList: React.FC = () => {
         enabled: isOperatorUser,
     });
 
-    const operatorScopedCompanyIds: string[] = isOperatorUser
-        ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
-            .map((company) => company?._id)
-            .filter((id): id is string => Boolean(id))
-        : [];
+    const operatorScopedCompanyIds: string[] = useMemo(
+        () => (
+            isOperatorUser
+                ? ((companyData?.data?.data?.data || []) as Array<{ _id?: string }>)
+                    .map((company) => company?._id)
+                    .filter((id): id is string => Boolean(id))
+                : []
+        ),
+        [companyData, isOperatorUser]
+    );
 
     useEffect(() => {
         if (isOperatorUser && !selectedCompanyId && operatorScopedCompanyIds.length === 1) {
@@ -106,9 +111,11 @@ const InventoryList: React.FC = () => {
         : selectedCompanyId;
     const shouldFetchInventory = !isAdmin || Boolean(effectiveCompanyId);
 
+    const filtersKey = JSON.stringify(filters || {});
+
     useEffect(() => {
         setPage(1);
-    }, [debouncedSearch, JSON.stringify(filters || {}), effectiveCompanyId, activeTab]);
+    }, [debouncedSearch, filtersKey, effectiveCompanyId, activeTab]);
 
     const handleFiltersUpdate = (updatedFilters: Record<string, any>) => {
         setFilters(updatedFilters);

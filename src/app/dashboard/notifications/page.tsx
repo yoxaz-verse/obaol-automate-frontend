@@ -85,8 +85,11 @@ const NotificationsPage = () => {
     refetchInterval: 30000,
   });
 
-  const rows = data?.rows || [];
-  const meta = data?.meta || { page, limit, pages: 1, total: 0 };
+  const rows = useMemo(() => data?.rows || [], [data?.rows]);
+  const meta = useMemo(
+    () => data?.meta || { page, limit, pages: 1, total: 0 },
+    [data?.meta, page, limit]
+  );
 
   useEffect(() => {
     patchData(notificationRoutes.markSectionRead("notifications"), {}).catch(() => {});

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -526,10 +527,12 @@ export default function ImportsPage() {
     >
       {/* --- CINEMATIC LOGISTICS BACKGROUND --- */}
       <div className="absolute inset-0 pointer-events-none z-0">
-         <img 
+         <Image
             src="/high_tech_logistics_bg_png_1774979381331.png" 
             alt="" 
-            className="w-full h-full object-cover opacity-[0.03] dark:opacity-[0.05] grayscale mix-blend-luminosity scale-110"
+            fill
+            sizes="100vw"
+            className="object-cover opacity-[0.03] dark:opacity-[0.05] grayscale mix-blend-luminosity scale-110"
          />
          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       </div>

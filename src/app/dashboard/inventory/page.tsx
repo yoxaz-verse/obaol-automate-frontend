@@ -1,5 +1,9 @@
 import React from "react";
-import InventoryList from "@/components/dashboard/Inventory/InventoryList";
+import dynamic from "next/dynamic";
+
+const InventoryList = dynamic(() => import("@/components/dashboard/Inventory/InventoryList"), {
+    loading: () => <div className="min-h-[420px] rounded-2xl border border-default-200 bg-content1/70" />,
+});
 
 export default function InventoryPage() {
     return (

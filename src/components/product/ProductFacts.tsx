@@ -1,7 +1,5 @@
-"use client";
-
 import React from "react";
-import { Card, CardBody, Chip, Divider, Link as NextLink, Image } from "@nextui-org/react";
+import Image from "next/image";
 import { FiInfo, FiLayers, FiMapPin, FiExternalLink } from "react-icons/fi";
 import { CommodityFacts } from "@/utils/research";
 
@@ -13,17 +11,17 @@ interface ProductFactsProps {
 const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions }) => {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Card className="border-none bg-content1/50 backdrop-blur-md shadow-sm">
-                <CardBody className="p-0">
+            <div className="overflow-hidden rounded-3xl border border-default-200 bg-content1/50 shadow-sm backdrop-blur-md">
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] lg:grid-cols-[200px_1fr] gap-6 p-6">
-                        {/* Thumbnail/Image */}
                         <div className="relative group">
-                            <div className="aspect-square rounded-2xl overflow-hidden bg-default-100 border border-default-200">
+                            <div className="relative aspect-square rounded-2xl overflow-hidden bg-default-100 border border-default-200">
                                 {facts.thumbnail ? (
                                     <Image
                                         src={facts.thumbnail}
                                         alt={facts.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        fill
+                                        sizes="(min-width: 1024px) 200px, (min-width: 768px) 33vw, 90vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-obaol-500/5 text-obaol-500">
@@ -36,17 +34,10 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                         {/* Facts Content */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
-                                <Chip
-                                    {...({
-                                        startContent: <FiInfo size={14} />,
-                                        variant: "flat",
-                                        color: "warning",
-                                        size: "sm",
-                                        className: "font-bold uppercase tracking-wider text-[10px]"
-                                    } as any)}
-                                >
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-warning-700">
+                                    <FiInfo size={14} />
                                     Resource Insight
-                                </Chip>
+                                </span>
                                 <div className="h-px flex-1 bg-default-100" />
                             </div>
 
@@ -67,33 +58,32 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                                     </div>
                                 )}
 
-                                <NextLink
+                                <a
                                     href={facts.sourceUrl}
-                                    isExternal
-                                    showAnchorIcon
-                                    anchorIcon={<FiExternalLink className="ml-1" />}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-xs font-bold text-obaol-600 hover:text-obaol-500"
                                 >
                                     Research Source
-                                </NextLink>
+                                    <FiExternalLink className="ml-1 inline-block" />
+                                </a>
                             </div>
                         </div>
                     </div>
 
                     {(productionRegions && productionRegions.length > 0) && (
                         <>
-                            <Divider className="opacity-50" />
+                            <div className="h-px bg-default-200/60" />
                             <div className="p-4 bg-default-50/50 flex flex-wrap gap-2">
                                 {productionRegions.map((region) => (
-                                    <Chip key={region} {...({ size: "sm", variant: "bordered" } as any)} className="border-default-200 text-default-600 font-medium">
+                                    <span key={region} className="rounded-full border border-default-200 px-2.5 py-1 text-xs font-medium text-default-600">
                                         {region}
-                                    </Chip>
+                                    </span>
                                 ))}
                             </div>
                         </>
                     )}
-                </CardBody>
-            </Card>
+            </div>
         </div>
     );
 };

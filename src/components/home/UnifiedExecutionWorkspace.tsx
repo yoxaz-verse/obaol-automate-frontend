@@ -573,6 +573,7 @@ export default function UnifiedExecutionWorkspace() {
                           type="button"
                           aria-pressed={isSelected}
                           aria-current={status === "current" ? "step" : undefined}
+                          data-workflow-step={step.id}
                           tabIndex={isSelected ? 0 : -1}
                           onClick={() => selectStep(index)}
                           onKeyDown={(event) => handleStepKeyDown(event, index)}
@@ -609,8 +610,8 @@ export default function UnifiedExecutionWorkspace() {
               <div className="mb-2 flex items-center justify-between text-[8px] font-bold uppercase tracking-[0.14em] text-foreground/40"><span>Live order progress</span><span>{currentStepIndex + 1} of {dealSteps.length}</span></div>
               <div className="h-1.5 overflow-hidden rounded-full bg-default-200/65" role="progressbar" aria-label="Live order progress" aria-valuemin={1} aria-valuemax={dealSteps.length} aria-valuenow={currentStepIndex + 1}><div className="h-full w-3/4 rounded-full bg-gradient-to-r from-obaol-600 to-obaol-400" /></div>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <button type="button" onClick={() => selectStep(selectedStepIndex - 1)} disabled={selectedStepIndex === 0} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-default-200/70 bg-background/60 px-3 text-[8px] font-bold uppercase tracking-wider text-foreground/60 hover:border-obaol-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/70 disabled:cursor-not-allowed disabled:opacity-35"><FiChevronLeft size={13} /> Previous</button>
-                <button type="button" onClick={() => selectStep(selectedStepIndex + 1)} disabled={selectedStepIndex === dealSteps.length - 1} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-obaol-500 px-3 text-[8px] font-bold uppercase tracking-wider text-obaol-950 hover:bg-obaol-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/70 disabled:cursor-not-allowed disabled:opacity-35">Next <FiChevronRight size={13} /></button>
+                <button type="button" data-workflow-step="previous" onClick={() => selectStep(selectedStepIndex - 1)} disabled={selectedStepIndex === 0} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-default-200/70 bg-background/60 px-3 text-[8px] font-bold uppercase tracking-wider text-foreground/60 hover:border-obaol-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/70 disabled:cursor-not-allowed disabled:opacity-35"><FiChevronLeft size={13} /> Previous</button>
+                <button type="button" data-workflow-step="next" onClick={() => selectStep(selectedStepIndex + 1)} disabled={selectedStepIndex === dealSteps.length - 1} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-obaol-500 px-3 text-[8px] font-bold uppercase tracking-wider text-obaol-950 hover:bg-obaol-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500/70 disabled:cursor-not-allowed disabled:opacity-35">Next <FiChevronRight size={13} /></button>
               </div>
             </div>
           </motion.div>

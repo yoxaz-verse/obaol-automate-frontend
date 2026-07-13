@@ -3,8 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { FiVolume2, FiVolumeX } from "react-icons/fi";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
+import { useSoundEffect } from "@/context/SoundContext";
 
 const NAV = [
   { href: "/about", label: "Platform" },
@@ -19,6 +21,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, loading } = usePublicAuthStatus();
+  const { soundEnabled, setSoundEnabled } = useSoundEffect();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -54,6 +57,17 @@ export default function Header() {
               <div className="hidden xl:flex items-center gap-1.5 px-1.5 py-1 rounded-xl border border-foreground/10 bg-foreground/[0.03]">
                 <ThemeSwitcher />
               </div>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={soundEnabled}
+                aria-label={soundEnabled ? "Disable sound" : "Enable sound"}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/10 bg-foreground/[0.03] text-foreground/60 transition-all hover:border-obaol-300/40 hover:bg-obaol-500/10 hover:text-obaol-600 dark:hover:text-obaol-300"
+              >
+                {soundEnabled ? <FiVolume2 size={16} /> : <FiVolumeX size={16} />}
+              </button>
 
               <Link href={isAuthenticated ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-10 items-center px-2 text-sm font-semibold text-foreground/70 hover:text-foreground">
                 {!loading && isAuthenticated ? "Dashboard" : "Sign In"}
@@ -95,7 +109,19 @@ export default function Header() {
           </div>
 
           <div className="mt-3 pt-3 border-t border-foreground/10 flex justify-center">
-            <ThemeSwitcher />
+            <div className="flex items-center gap-2">
+              <ThemeSwitcher />
+              <button
+                type="button"
+                role="switch"
+                aria-checked={soundEnabled}
+                aria-label={soundEnabled ? "Disable sound" : "Enable sound"}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/10 bg-foreground/[0.04] text-foreground/60 transition-colors hover:text-foreground"
+              >
+                {soundEnabled ? <FiVolume2 size={16} /> : <FiVolumeX size={16} />}
+              </button>
+            </div>
           </div>
         </nav>
       </div>

@@ -22,7 +22,7 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 import Image from "next/image";
-import { FiBell, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut, FiMoon, FiSun } from "react-icons/fi";
+import { FiBell, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
@@ -38,7 +38,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const [mounted, setMounted] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
-  const { soundEnabled, setSoundEnabled, play } = useSoundEffect();
+  const { soundEnabled, setSoundEnabled } = useSoundEffect();
   const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
@@ -273,6 +273,16 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
         ) : (
           <>
             <div className="flex items-center db-subtle border db-border-subtle rounded-2xl p-1 gap-1">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={soundEnabled}
+                aria-label={soundEnabled ? "Disable sound" : "Enable sound"}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="relative w-9 h-9 flex items-center justify-center rounded-xl text-default-500 transition-all duration-300 hover:db-inset hover:text-foreground"
+              >
+                {soundEnabled ? <FiVolume2 size={17} /> : <FiVolumeX size={17} />}
+              </button>
               <div className="w-[1px] h-4 bg-default-300/50 dark:bg-white/10 mx-1" />
               
               <div className="relative" ref={notificationRef}>

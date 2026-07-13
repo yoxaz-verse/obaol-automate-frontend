@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { IconType } from "react-icons";
-import { FiArrowRight, FiBriefcase, FiGlobe, FiLayers, FiShield, FiUsers } from "react-icons/fi";
+import { FiArrowRight, FiBriefcase, FiGlobe, FiLayers, FiUsers } from "react-icons/fi";
 
 const associateExamples = [
   "Trader",
@@ -138,40 +138,40 @@ export default function AuthEntry() {
           </Link>
         </header>
 
-        <section className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:py-12" aria-labelledby="auth-entry-title">
+        <section className="grid flex-1 items-center gap-9 py-10 lg:grid-cols-[0.55fr_1.45fr] lg:gap-12 lg:py-12" aria-labelledby="auth-entry-title">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
-            className="max-w-2xl"
+            className="max-w-2xl lg:max-w-md"
           >
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-obaol-400/20 bg-obaol-500/10 px-3 py-1.5">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-obaol-400/20 bg-obaol-500/10 px-3 py-1.5">
               <span className="h-2 w-2 rounded-full bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.8)]" />
               <span className="text-[10px] font-black uppercase tracking-[0.28em] text-obaol-200">
                 {signInView ? "Secure account access" : "Choose your OBAOL lane"}
               </span>
             </div>
 
-            <h1 id="auth-entry-title" className="text-4xl font-black leading-[0.95] tracking-tight text-white md:text-6xl xl:text-7xl">
+            <h1 id="auth-entry-title" className="text-4xl font-black leading-[0.98] tracking-tight text-white md:text-5xl xl:text-5xl 2xl:text-6xl">
               {signInView ? "Step back into your trade command." : "Enter the network where trade becomes executable."}
             </h1>
-            <p className="mt-6 max-w-xl text-base font-medium leading-8 text-white/60 md:text-lg">
+            <p className="mt-5 max-w-lg text-sm font-medium leading-7 text-white/55 md:text-base lg:max-w-sm">
               {signInView
                 ? "Choose the account lane you already use. Company teams and individual Operators enter different workspaces."
-                : "Start with who you are in the ecosystem. OBAOL shapes the next steps around your company, your relationships, and the work you are here to move."}
+                : "Start with who you are. OBAOL shapes the next steps around your company, relationships, and execution work."}
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="mt-7 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {entrySignals.map((signal, index) => (
                 <motion.div
                   key={signal}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: 0.08 * index }}
-                  className="rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 backdrop-blur"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 backdrop-blur"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/40">Layer {index + 1}</p>
-                  <p className="mt-1 text-sm font-bold text-white/80">{signal}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/35">Layer {index + 1}</p>
+                  <p className="mt-1 text-xs font-bold text-white/70">{signal}</p>
                 </motion.div>
               ))}
             </div>
@@ -184,9 +184,9 @@ export default function AuthEntry() {
             className="relative"
           >
             <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-obaol-500/20 via-white/[0.03] to-cyan-400/10 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0b08]/88 p-4 shadow-2xl shadow-black/50 backdrop-blur-2xl md:p-6">
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0b08]/88 p-4 shadow-2xl shadow-black/50 backdrop-blur-2xl md:p-6 xl:p-7">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-              <div className="mb-6 flex flex-wrap items-end justify-between gap-4 px-1">
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-4 px-1">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.25em] text-obaol-300">
                     {signInView ? "Choose your account" : "Select your path"}
@@ -195,8 +195,7 @@ export default function AuthEntry() {
                     {signInView ? "Where should we take you?" : "Two doors. One trade layer."}
                   </h2>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
-                  <FiShield className="text-obaol-300" />
+                <div className="pt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
                   Secure
                 </div>
               </div>
@@ -229,17 +228,22 @@ export default function AuthEntry() {
                   ))}
                 </div>
               ) : (
-                <div className="grid gap-4 xl:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-2 xl:gap-5">
                   {roleOptions.map((option, index) => (
                     <motion.article
                       key={option.role}
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.45, delay: 0.1 + index * 0.08 }}
-                      className="group relative flex min-h-[480px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5 transition duration-500 hover:-translate-y-1 hover:border-obaol-400/40 hover:bg-white/[0.055]"
+                      className="group relative flex min-h-[430px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5 shadow-black/20 transition duration-500 hover:-translate-y-1 hover:border-obaol-400/45 hover:bg-white/[0.05] hover:shadow-2xl hover:shadow-black/35 focus-within:-translate-y-1 focus-within:border-obaol-400/45 focus-within:bg-white/[0.05] focus-within:shadow-2xl focus-within:shadow-black/35 md:p-6"
                     >
-                      <div className={`absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${option.aura} blur-3xl transition duration-700 group-hover:scale-125`} />
-                      <div className="relative flex flex-1 flex-col">
+                      <div className={`absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${option.aura} blur-3xl transition duration-700 group-hover:scale-125 group-focus-within:scale-125`} />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.075),rgba(255,255,255,0.012)_42%,transparent_43%,transparent_57%,rgba(255,255,255,0.018)_58%,rgba(255,255,255,0.06))] opacity-45 transition duration-700 group-hover:opacity-70 group-focus-within:opacity-70" />
+                      <div className="pointer-events-none absolute inset-y-5 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/20 to-transparent opacity-45 transition duration-700 group-hover:opacity-80 group-focus-within:opacity-80" />
+                      <div className="pointer-events-none absolute inset-y-4 left-4 w-[calc(50%-1rem)] rounded-l-[1.15rem] border border-white/[0.055] bg-white/[0.018] transition duration-700 group-hover:-translate-x-2 group-hover:border-obaol-300/20 group-hover:bg-obaol-300/[0.035] group-focus-within:-translate-x-2 group-focus-within:border-obaol-300/20 group-focus-within:bg-obaol-300/[0.035]" />
+                      <div className="pointer-events-none absolute inset-y-4 right-4 w-[calc(50%-1rem)] rounded-r-[1.15rem] border border-white/[0.045] bg-black/[0.08] transition duration-700 group-hover:translate-x-2 group-hover:border-white/10 group-hover:bg-white/[0.025] group-focus-within:translate-x-2 group-focus-within:border-white/10 group-focus-within:bg-white/[0.025]" />
+                      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100 group-focus-within:opacity-100" />
+                      <div className="relative flex flex-1 flex-col transition duration-700 group-hover:translate-x-1 group-focus-within:translate-x-1">
                         <div className="flex items-start justify-between gap-4">
                           <IconBadge icon={option.icon} />
                           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-white/50">
@@ -248,45 +252,44 @@ export default function AuthEntry() {
                         </div>
 
                         <p className="mt-6 text-[10px] font-black uppercase tracking-[0.25em] text-obaol-300">{option.role}</p>
-                        <h3 className="mt-2 text-2xl font-black leading-tight text-white">{option.title}</h3>
-                        <p className="mt-4 text-sm font-medium leading-6 text-white/60">{option.description}</p>
+                        <h3 className="mt-2 text-[1.35rem] font-black leading-tight text-white xl:text-2xl">{option.title}</h3>
+                        <p className="mt-3 text-sm font-medium leading-6 text-white/60">{option.description}</p>
 
-                        <div className="mt-5 grid gap-2">
+                        <div className="mt-5 grid gap-2.5 border-y border-white/10 py-3.5">
                           {option.stats.map((stat) => (
-                            <div key={stat} className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                            <div key={stat} className="flex items-center gap-3">
                               <span className="h-1.5 w-1.5 rounded-full bg-obaol-400" />
-                              <span className="text-xs font-bold text-white/60">{stat}</span>
+                              <span className="text-sm font-bold text-white/60">{stat}</span>
                             </div>
                           ))}
                         </div>
 
                         {"examples" in option ? (
-                          <div className="mt-5 flex flex-wrap gap-2" aria-label="Examples of Associate businesses">
-                            {option.examples.slice(0, 8).map((example) => (
-                              <span key={example} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-bold text-white/60">
+                          <div className="mt-4 flex flex-wrap gap-2" aria-label="Examples of Associate businesses">
+                            {option.examples.slice(0, 6).map((example) => (
+                              <span key={example} className="rounded-full bg-white/[0.045] px-2.5 py-1 text-[10px] font-bold text-white/50">
                                 {example}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <p className="mt-5 rounded-2xl border border-obaol-400/20 bg-obaol-500/10 p-3 text-xs font-semibold leading-5 text-white/60">
+                          <p className="mt-4 rounded-xl border border-obaol-400/20 bg-obaol-400/10 px-3 py-2.5 text-xs font-semibold leading-5 text-white/60">
                             {option.note}
                           </p>
                         )}
 
-                        <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-white/40">{option.requirement}</p>
-
-                        <div className="mt-auto flex flex-col gap-3 pt-6 sm:flex-row sm:items-center">
+                        <div className="mt-auto flex flex-col gap-3 pt-6">
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/40">{option.requirement}</p>
                           <Link
                             href={option.href}
-                            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-obaol-500 px-4 py-2 text-sm font-black text-obaol-950 transition hover:bg-obaol-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
+                            className="group/cta inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-obaol-500 px-4 py-2 text-sm font-black text-obaol-950 transition hover:bg-obaol-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400 sm:w-fit"
                           >
                             Continue as {option.role}
-                            <FiArrowRight className="ml-2" />
+                            <FiArrowRight className="ml-2 transition-transform duration-300 group-hover/cta:translate-x-1" />
                           </Link>
                           <Link
                             href={option.detailHref}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl px-2 text-sm font-bold text-obaol-200 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
+                            className="inline-flex w-fit items-center text-sm font-bold text-obaol-200/80 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
                           >
                             {option.detailLabel}
                           </Link>

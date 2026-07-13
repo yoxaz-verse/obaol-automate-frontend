@@ -763,7 +763,7 @@ export default function HeroSection() {
                 alt="OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."
                 fill
                 sizes="(max-width: 1023px) calc(100vw + 7rem), 1120px"
-                className="object-contain opacity-90 drop-shadow-[0_34px_60px_rgba(0,0,0,0.55)]"
+                className="object-contain opacity-75 drop-shadow-[0_34px_60px_rgba(0,0,0,0.35)]"
               />
             </div>
           </figure>

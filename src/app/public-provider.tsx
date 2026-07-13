@@ -2,6 +2,8 @@
 
 import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { SoundProvider } from "@/context/SoundContext";
+import SoundInitializer from "@/components/ui/SoundInitializer";
 
 export function PublicProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +13,10 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
         defaultTheme="system"
         enableSystem={true}
       >
-        {children}
+        <SoundProvider>
+          <SoundInitializer />
+          {children}
+        </SoundProvider>
       </NextThemesProvider>
     </NextUIProvider>
   );

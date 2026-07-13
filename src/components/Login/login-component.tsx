@@ -836,10 +836,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
   }
 
-  if (loading) {
-    return <BrandedLoader fullScreen message="Preparing sign in" variant="compact" />;
-  }
-
   const joinCta = roleKey === "operator"
     ? {
       title: "New Operator?",
@@ -853,6 +849,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const canSendOtp = !!email.trim() && isInvalidEmail;
   const otpExpiryRemaining = Math.max(0, (otpExpiresAt || 0) - nowTs);
   const resendRemaining = Math.max(0, (resendAvailableAt || 0) - nowTs);
+  const isPreparingSession = authMode === "login" && loading;
   const formatCountdown = (ms: number) => {
     const totalSeconds = Math.ceil(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -911,7 +908,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 {roleIdentity.infoStripTitle}
               </p>
               <p className="text-[11px] font-semibold text-foreground/75 leading-tight">
-                {roleIdentity.infoStripMessage}
+                {isPreparingSession ? "Preparing sign in..." : roleIdentity.infoStripMessage}
               </p>
             </div>
           </div>
@@ -989,7 +986,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           variant="bordered"
           label="Email Address"
           labelPlacement="outside"
-          isDisabled={authMode === "signup" && otpSent}
+          isDisabled={isPreparingSession || (authMode === "signup" && otpSent)}
           isInvalid={authMode === "signup"
             ? (otpAttempted && (!email.trim() || !isInvalidEmail))
             : (!isInvalidEmail && email.length > 0)}
@@ -1025,6 +1022,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             placeholder="Enter your password"
             variant="bordered"
             isRequired
+            isDisabled={isPreparingSession}
             isInvalid={false}
             errorMessage={""}
             endContent={
@@ -1046,24 +1044,32 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         )}
 
         {authMode === "login" && (
-          <div className="flex justify-between items-center w-full px-2">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative flex items-center">
+          <div className="flex w-full flex-wrap items-center justify-between gap-3 px-2">
+            <label className="group inline-flex cursor-pointer items-center gap-3 rounded-xl py-1 pr-2">
+              <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
                 <input
                   type="checkbox"
                   checked={rememberMe}
+                  disabled={isPreparingSession}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 cursor-pointer rounded border-divider bg-content2 text-obaol-500 transition-all focus:ring-obaol-500/20"
+                  className="peer sr-only"
                 />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 group-hover:text-foreground transition-colors">
+                <span
+                  aria-hidden="true"
+                  className="flex h-5 w-5 items-center justify-center rounded-md border border-white/15 bg-white/[0.03] text-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 group-hover:border-obaol-400/60 group-hover:bg-obaol-500/10 peer-checked:border-obaol-400 peer-checked:bg-gradient-to-br peer-checked:from-obaol-300 peer-checked:to-obaol-600 peer-checked:text-obaol-950 peer-focus-visible:ring-2 peer-focus-visible:ring-obaol-400/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background dark:border-white/20 dark:bg-white/[0.04]"
+                >
+                  <FiCheck className="h-3.5 w-3.5 stroke-[3.5]" />
+                </span>
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-default-400 transition-colors group-hover:text-foreground">
                 Remember me
               </span>
             </label>
             <button
               type="button"
+              disabled={isPreparingSession}
               onClick={() => router.push(`/auth/forgot-password?role=${roleLower === 'operator' || roleLower === 'team' ? 'Operator' : 'Associate'}`)}
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 dark:text-obaol-300 dark:hover:text-obaol-200"
+              className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 disabled:pointer-events-none disabled:opacity-50 dark:text-obaol-300 dark:hover:text-obaol-200"
             >
               Forgot password?
             </button>
@@ -1090,7 +1096,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               color="warning"
               size="lg"
               radius="lg"
-              isLoading={isLoading}
+              isLoading={isLoading || isPreparingSession}
+              isDisabled={isPreparingSession}
             >
               {loginStatus === "success"
                 ? "Signed In"
@@ -1098,6 +1105,8 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   ? "Sign In"
                   : isLoading
                     ? "Signing in..."
+                    : isPreparingSession
+                      ? "Preparing..."
                     : "Sign In"}
             </Button>
           </motion.div>

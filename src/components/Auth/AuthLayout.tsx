@@ -106,14 +106,6 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
 };
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity }) => {
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) return null;
-
     if (embedded) {
         return (
             <div className="w-full text-foreground">
@@ -160,9 +152,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 {/* Left Side: Tactical Branding */}
                 <motion.div
                 className="relative hidden w-5/12 flex-col items-center justify-center overflow-hidden border-r border-obaol-200/70 bg-white/70 p-8 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-white/[0.01] lg:flex xl:p-10"
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
+                    initial={false}
+                    animate={{ opacity: 1 }}
                 >
                     {/* Background Scanline */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
@@ -204,8 +195,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                                 <motion.div
                                     className="max-w-lg mx-auto lg:mx-0 space-y-5"
-                                    initial={{ opacity: 0, x: -14 }}
-                                    animate={{ opacity: 1, x: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     transition={{ duration: 0.45, delay: 0.2 }}
                                 >
                                     <p className="border-l-2 border-obaol-500/40 pl-4 text-base font-medium leading-relaxed text-slate-600 dark:text-foreground/60 xl:text-lg">
@@ -277,9 +268,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                     <div className="flex-grow flex items-center justify-center p-4 lg:p-8 xl:p-10 relative z-10">
                         <motion.div
                             className={`w-full ${cardMaxWidthClass} relative`}
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.55, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
+                            initial={false}
+                            animate={{ opacity: 1 }}
                         >
                             {/* Card Decoration */}
                             <div className="absolute left-1/2 top-0 -z-10 h-[120%] w-[120%] -translate-x-1/2 rounded-full bg-obaol-500/[0.04] blur-[120px]" />

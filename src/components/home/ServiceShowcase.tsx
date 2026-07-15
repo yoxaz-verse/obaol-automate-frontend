@@ -12,6 +12,8 @@ import {
 } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
+import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
+import { useInViewport } from "@/hooks/useInViewport";
 
 const services = [
   {
@@ -145,42 +147,50 @@ const services = [
 
 type Service = (typeof services)[number];
 
-function RealisticServiceVisual({ service }: { service: Service }) {
+function RealisticServiceVisual({
+  service,
+  shouldReduceMotion,
+}: {
+  service: Service;
+  shouldReduceMotion: boolean;
+}) {
   const Icon = service.icon;
 
   return (
     <motion.div
       key={service.id}
       className="absolute inset-0 overflow-hidden bg-black"
-      initial={{ opacity: 0, scale: 1.06, filter: "blur(16px)" }}
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 1.04, filter: "blur(10px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      exit={{ opacity: 0, scale: 1.035, filter: "blur(12px)" }}
-      transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+      exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 1.02, filter: "blur(8px)" }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       <motion.img
         key={service.image}
         src={service.image}
         alt={service.imageAlt}
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 !h-full !w-full !max-w-none object-cover"
         style={{ objectPosition: service.imagePosition }}
-        initial={{ scale: 1.04 }}
+        initial={shouldReduceMotion ? false : { scale: 1.03 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 5.2, ease: "easeOut" }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 3.2, ease: "easeOut" }}
       />
 
       <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.48)_43%,rgba(0,0,0,0.1)_76%),linear-gradient(to_right,rgba(0,0,0,0.42),transparent_64%)]" />
 
-      <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/35 text-white/36 shadow-[0_0_34px_rgba(0,0,0,0.42)] backdrop-blur-md md:flex">
+      <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/45 text-white/36 shadow-[0_0_28px_rgba(0,0,0,0.38)] backdrop-blur-sm md:flex">
         <Icon size={58} />
       </div>
 
-      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/42 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-md md:left-8 md:top-8">
+      <div className="absolute left-5 top-5 flex items-center gap-3 rounded-full border border-white/12 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/64 shadow-lg shadow-black/20 backdrop-blur-sm md:left-8 md:top-8">
         <span className="h-2 w-2 rounded-full bg-obaol-400 shadow-[0_0_12px_rgba(207,152,60,0.8)]" />
         Indian Origin Operations
       </div>
 
       {service.id === "documentation" && (
-        <div className="absolute right-7 top-28 hidden max-w-[210px] rounded-2xl border border-blue-300/35 bg-black/45 p-4 text-white/72 shadow-xl shadow-black/30 backdrop-blur-md md:block">
+        <div className="absolute right-7 top-28 hidden max-w-[210px] rounded-2xl border border-blue-300/35 bg-black/55 p-4 text-white/72 shadow-xl shadow-black/30 backdrop-blur-sm md:block">
           <div className="flex items-center gap-3">
             <FiFileText size={24} className="text-blue-300" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">Trade File</span>
@@ -210,16 +220,25 @@ const particleSeeds = Array.from({ length: 42 }, (_, index) => ({
 }));
 
 export default function ServiceShowcase() {
+  const [sectionRef, isInView] = useInViewport<HTMLElement>({
+    rootMargin: "220px 0px",
+    initialInView: false,
+  });
+  const adaptiveMotion = useAdaptiveMotion();
+  const shouldReduceMotion = adaptiveMotion.shouldReduceMotion;
+  const allowAnimatedScene = isInView && adaptiveMotion.allowDecorativeMotion;
   const [activeIndex, setActiveIndex] = useState(0);
   const activeService = services[activeIndex];
 
   useEffect(() => {
+    if (!allowAnimatedScene) return;
+
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % services.length);
     }, 4200);
 
     return () => window.clearInterval(interval);
-  }, [activeIndex]);
+  }, [allowAnimatedScene]);
 
   const Icon = activeService.icon;
 
@@ -233,10 +252,10 @@ export default function ServiceShowcase() {
   );
 
   return (
-    <section className="relative overflow-hidden bg-background py-16 md:py-24">
+    <section ref={sectionRef} className="relative overflow-hidden bg-background py-16 md:py-24">
       <div className="absolute inset-0 pointer-events-none opacity-60">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(207,152,60,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(207,152,60,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]" />
-        {particleSeeds.map((particle) => (
+        {allowAnimatedScene && particleSeeds.map((particle) => (
           <motion.span
             key={particle.id}
             className="absolute rounded-full bg-obaol-300/70 shadow-[0_0_14px_rgba(207,152,60,0.5)]"
@@ -312,6 +331,7 @@ export default function ServiceShowcase() {
                 <RealisticServiceVisual
                   key={activeService.id}
                   service={activeService}
+                  shouldReduceMotion={shouldReduceMotion}
                 />
               </AnimatePresence>
 
@@ -319,10 +339,10 @@ export default function ServiceShowcase() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeService.id}
-                    initial={{ opacity: 0, y: 24 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -18 }}
-                    transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                    exit={shouldReduceMotion ? undefined : { opacity: 0, y: -14 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                     className="max-w-2xl"
                   >
                     <div className="flex items-center gap-3">

@@ -6,7 +6,7 @@ import { FaShieldHalved, FaTruckFront, FaEarthAsia } from "react-icons/fa6";
 import Link from "next/link";
 import Header from "@/components/home/header";
 import HeroSection from "@/components/home/herosection";
-import ServiceShowcase from "@/components/home/ServiceShowcase";
+import DeferredServiceShowcase from "@/components/home/DeferredServiceShowcase";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
@@ -39,7 +39,7 @@ export default function HomeContent() {
             <Header />
             <HeroSection />
             <PerspectiveGateway />
-            <ServiceShowcase />
+            <DeferredServiceShowcase />
             <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
                     <div className="flex flex-col gap-10 md:gap-16">

@@ -24,16 +24,34 @@ export default function Header() {
   const { soundEnabled, setSoundEnabled } = useSoundEffect();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    let frame = 0;
+    let lastState = window.scrollY > 20;
+    setScrolled(lastState);
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const nextState = window.scrollY > 20;
+        if (nextState !== lastState) {
+          lastState = nextState;
+          setScrolled(nextState);
+        }
+      });
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
         <div className="mx-auto max-w-7xl px-4">
-          <div className={`flex items-center justify-between rounded-2xl px-4 md:px-6 border border-default-200/50 bg-background/85 backdrop-blur-xl transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
+          <div className={`flex items-center justify-between rounded-2xl px-4 md:px-6 border border-default-200/50 bg-background/92 shadow-[0_12px_34px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
             <Link href="/" className="relative flex items-center gap-2.5 group flex-shrink-0">
               <Image
                 src="/logo.png"
@@ -90,7 +108,7 @@ export default function Header() {
         </div>
       </header>
 
-      <div className={`fixed top-[72px] left-4 right-4 z-40 rounded-2xl border border-foreground/10 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden transition-all duration-200 lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
+      <div className={`fixed top-[72px] left-4 right-4 z-40 rounded-2xl border border-foreground/10 bg-background/97 shadow-2xl overflow-hidden transition-all duration-200 lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
         <nav className="flex flex-col p-4 gap-1">
           {NAV.map((link) => (
             <Link

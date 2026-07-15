@@ -456,13 +456,13 @@ export default function UnifiedExecutionWorkspace() {
   };
 
   return (
-    <section aria-labelledby="unified-workspace-title" className="group/workspace relative overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-gradient-to-b from-obaol-50/30 via-content1/40 to-background/45 p-3 shadow-[0_24px_80px_-48px_rgba(207,152,60,0.35)] backdrop-blur-3xl sm:p-4 md:rounded-[2.75rem] md:p-6 dark:from-obaol-950/20 dark:via-content1/35">
+    <section aria-labelledby="unified-workspace-title" className="group/workspace relative overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-gradient-to-b from-obaol-50/30 via-content1/40 to-background/45 p-3 shadow-[0_24px_80px_-48px_rgba(207,152,60,0.35)] backdrop-blur-md sm:p-4 md:rounded-[2.75rem] md:p-6 dark:from-obaol-950/20 dark:via-content1/35">
       <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-obaol-500/8 blur-3xl" />
 
       <header className="relative mb-4 flex flex-col gap-4 border-b border-default-200/60 px-2 pb-5 sm:px-3 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           <figure className="relative hidden h-16 w-28 shrink-0 overflow-hidden rounded-2xl border border-obaol-500/20 bg-black sm:block">
-            <Image src="/images/order-execution-tracking.png" alt="OBAOL panel tracking a Black Pepper export order" fill loading="eager" sizes="112px" className="object-cover object-[center_62%]" />
+            <Image src="/images/order-execution-tracking.png" alt="OBAOL panel tracking a Black Pepper export order" fill loading="lazy" sizes="112px" className="object-cover object-[center_62%]" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
           </figure>
           <div className="min-w-0">

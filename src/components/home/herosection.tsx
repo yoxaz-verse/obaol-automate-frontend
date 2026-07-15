@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { FiArrowRight } from "react-icons/fi";
+import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 /* ================= ANIMATION VARIANTS ================= */
 /* The hero wall is rendered from fixed stage slots to keep hydration deterministic. */
@@ -421,8 +422,11 @@ const HERO_ROTATION_INTERVAL = 3500;
 export default function HeroSection() {
   const router = useRouter();
   const { isAuthenticated, loading } = usePublicAuthStatus();
-  const prefersReducedMotion = useReducedMotion();
-  const [isMobile, setIsMobile] = useState(true);
+  const adaptiveMotion = useAdaptiveMotion();
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = prefersReducedMotion || adaptiveMotion.shouldReduceMotion;
+  const allowDecorativeMotion = adaptiveMotion.allowDecorativeMotion;
+  const allowPointerEffects = adaptiveMotion.allowPointerEffects;
   const [isNavigating, setIsNavigating] = useState(false);
   const [isSystemActive, setIsSystemActive] = useState(false);
   const [isAgroActive, setIsAgroActive] = useState(false);
@@ -434,8 +438,18 @@ export default function HeroSection() {
 
   const smoothMouseX = useSpring(mouseX, { stiffness: 50, damping: 20 });
   const smoothMouseY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+  const cursorGlow = useTransform(
+    [smoothMouseX, smoothMouseY],
+    ([x, y]) => `radial-gradient(600px circle at calc(50% + ${x}px) calc(50% + ${y}px), rgba(207,152,60,0.07), transparent 45%)`
+  );
 
   useEffect(() => {
+    if (!allowPointerEffects) {
+      mouseX.set(0);
+      mouseY.set(0);
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
       const moveX = (clientX - window.innerWidth / 2) / 30;
@@ -445,30 +459,30 @@ export default function HeroSection() {
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    const mobileMedia = window.matchMedia("(max-width: 1023px)");
-
-    const update = () => {
-      setIsMobile(mobileMedia.matches);
-    };
-
-    update();
-    mobileMedia.addEventListener("change", update);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      mobileMedia.removeEventListener("change", update);
     };
-  }, [mouseX, mouseY]);
+  }, [allowPointerEffects, mouseX, mouseY]);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (shouldReduceMotion) return;
 
     const timeoutId = window.setTimeout(() => {
       setActiveServiceIndex((current) => (current + 1) % HERO_SERVICES.length);
     }, HERO_ROTATION_INTERVAL);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeServiceIndex, prefersReducedMotion]);
+  }, [activeServiceIndex, shouldReduceMotion]);
+
+  const activateSystem = () => {
+    if (allowDecorativeMotion) setIsSystemActive(true);
+  };
+  const deactivateSystem = () => setIsSystemActive(false);
+  const activateAgro = () => {
+    if (allowDecorativeMotion) setIsAgroActive(true);
+  };
+  const deactivateAgro = () => setIsAgroActive(false);
 
   return (
     <section
@@ -478,9 +492,9 @@ export default function HeroSection() {
       {/* ================= BACKGROUND ================= */}
       <motion.div
         className="absolute inset-0 z-0 select-none pointer-events-none"
-        initial={{ opacity: 0, scale: 1.05 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: "easeOut" }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 z-10" />
         <div className="obaol-hero-ambient absolute inset-0" />
@@ -490,9 +504,9 @@ export default function HeroSection() {
       <motion.div
         initial={{ opacity: 0.08 }}
         animate={{
-          opacity: (isSystemActive || isAgroActive) ? 0.25 : 0.08,
+          opacity: allowDecorativeMotion && (isSystemActive || isAgroActive) ? 0.2 : 0.08,
         }}
-        className="absolute inset-0 z-10 pointer-events-none transition-all duration-1000 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
+        className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
         style={{
           backgroundImage: `linear-gradient(to right, ${OBAOL_GOLD} 1px, transparent 1px), linear-gradient(to bottom, ${OBAOL_GOLD} 1px, transparent 1px)`,
           backgroundSize: "4rem 4rem"
@@ -501,7 +515,7 @@ export default function HeroSection() {
 
       {/* ================= SYSTEM / AGRO HUD OVERLAY ================= */}
       <AnimatePresence>
-        {isSystemActive && (
+        {allowDecorativeMotion && isSystemActive && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -535,7 +549,7 @@ export default function HeroSection() {
           </motion.div>
         )}
 
-        {isAgroActive && (
+        {allowDecorativeMotion && isAgroActive && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -559,16 +573,16 @@ export default function HeroSection() {
       <div className="absolute inset-0 z-15 pointer-events-none opacity-[0.05] dark:opacity-[0.1]">
         <svg className="w-full h-full" preserveAspectRatio="none">
           <motion.path
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            transition={allowDecorativeMotion ? { duration: 3, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
             d="M 12% 15% Q 30% 35% 45% 45% T 88% 85%"
             stroke={OBAOL_GOLD} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
           />
           <motion.path
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" }}
+            transition={allowDecorativeMotion ? { duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
             d="M 88% 15% Q 70% 35% 55% 50% T 12% 85%"
             stroke={OBAOL_GOLD} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
           />
@@ -583,9 +597,9 @@ export default function HeroSection() {
         className="relative z-30 container mx-auto flex w-full flex-col items-start px-6 py-12 text-left sm:px-12 md:py-16 lg:py-8"
       >
         <motion.div
-          initial={isMobile ? false : "hidden"}
+          initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          variants={containerVariants}
+          variants={shouldReduceMotion ? undefined : containerVariants}
           className="w-full max-w-6xl xl:max-w-7xl"
         >
           <div className="w-full gap-8 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-4 xl:gap-6">
@@ -601,12 +615,12 @@ export default function HeroSection() {
                 </motion.p>
 
                 <motion.h1
-                  initial={isMobile ? false : "hidden"}
+                  initial={shouldReduceMotion ? false : "hidden"}
                   animate="visible"
-                  variants={itemVariants}
+                  variants={shouldReduceMotion ? undefined : itemVariants}
                   className="inline-block w-max max-w-none overflow-visible pr-8 pb-1 text-4xl sm:text-5xl md:text-6xl lg:text-[clamp(3rem,5vw,4.5rem)] font-bold tracking-[-0.03em] leading-[1.08] text-slate-950 dark:text-[#F5F1E8] cursor-pointer select-none"
-                  onMouseEnter={() => setIsSystemActive(true)}
-                  onMouseLeave={() => setIsSystemActive(false)}
+                  onMouseEnter={activateSystem}
+                  onMouseLeave={deactivateSystem}
                 >
                   The Execution <br />
                   <span className="inline-block bg-gradient-to-r from-obaol-700 via-obaol-600 to-obaol-500 bg-clip-text pr-[0.12em] text-transparent dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-500">
@@ -620,12 +634,12 @@ export default function HeroSection() {
                 </motion.div>
 
                 <motion.div
-                  initial={isMobile ? false : "hidden"}
+                  initial={shouldReduceMotion ? false : "hidden"}
                   animate="visible"
-                  variants={itemVariants}
+                  variants={shouldReduceMotion ? undefined : itemVariants}
                   className="w-full py-1"
-                  onMouseEnter={() => setIsAgroActive(true)}
-                  onMouseLeave={() => setIsAgroActive(false)}
+                  onMouseEnter={activateAgro}
+                  onMouseLeave={deactivateAgro}
                 >
                   <h2 className={`text-2xl sm:text-4xl md:text-5xl lg:text-[clamp(1.5rem,3.5vw,3rem)] font-bold tracking-[-0.02em] leading-[1.1] text-foreground transition-all duration-500 ${isAgroActive ? "text-obaol-700 dark:text-obaol-300 lg:scale-[1.02] origin-left" : ""}`}>
                     B2B Agro Trade.
@@ -635,10 +649,10 @@ export default function HeroSection() {
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.p
                         key={activeService.id}
-                        initial={prefersReducedMotion ? false : { y: 10, opacity: 0 }}
+                        initial={shouldReduceMotion ? false : { y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        exit={prefersReducedMotion ? { opacity: 0 } : { y: -10, opacity: 0 }}
-                        transition={prefersReducedMotion ? { duration: 0 } : HOVER_TIMING.textSwap}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 }}
+                        transition={shouldReduceMotion ? { duration: 0 } : HOVER_TIMING.textSwap}
                         className="absolute inset-x-0 top-0 max-w-xl text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-snug text-obaol-700 dark:text-obaol-300"
                       >
                         {activeService.message}
@@ -658,8 +672,8 @@ export default function HeroSection() {
 
                   <div className="flex flex-col items-start gap-8 md:gap-10">
                     <button
-                      onMouseEnter={() => setIsSystemActive(true)}
-                      onMouseLeave={() => setIsSystemActive(false)}
+                      onMouseEnter={activateSystem}
+                      onMouseLeave={deactivateSystem}
                       onClick={() => {
                         setIsNavigating(true);
                         router.push(!loading && isAuthenticated ? "/dashboard" : "/auth");
@@ -699,7 +713,7 @@ export default function HeroSection() {
                   aria-label="OBAOL execution flow: discovery, sampling, coordination, documentation, inspection visit, quality testing, packaging, procurement, inland transportation, and freight forwarding"
                   className="relative hidden aspect-[7/5] w-full max-w-[880px] lg:block"
                 >
-                  <DesktopFlowConnectors prefersReducedMotion={prefersReducedMotion} />
+                  <DesktopFlowConnectors prefersReducedMotion={shouldReduceMotion} />
                   {DESKTOP_COLLAGE_SLOTS.map((slot) => {
                     const stage = HERO_STAGE_BY_ID[slot.stageId];
                     return (
@@ -707,14 +721,14 @@ export default function HeroSection() {
                         key={slot.id}
                         slot={slot}
                         stage={stage}
-                        prefersReducedMotion={prefersReducedMotion}
+                        prefersReducedMotion={shouldReduceMotion}
                         sizes="(max-width: 1279px) 14vw, 11vw"
                       />
                     );
                   })}
                 </div>
 
-                <MobileExecutionFlowTrack prefersReducedMotion={prefersReducedMotion} />
+                <MobileExecutionFlowTrack prefersReducedMotion={shouldReduceMotion} />
 
               </motion.div>
           </div>
@@ -756,7 +770,7 @@ export default function HeroSection() {
             <figcaption className="relative z-30 mb-2 text-center text-[10px] font-bold uppercase tracking-[0.28em] text-obaol-700/80 dark:text-obaol-300/80 sm:text-xs lg:mb-0 lg:-translate-y-1">
               All execution stages, tracked in one OBAOL workspace.
             </figcaption>
-            <div className="pointer-events-none absolute left-1/2 top-[30%] z-10 h-28 w-2/3 -translate-x-1/2 rounded-full bg-obaol-500/18 blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-[30%] z-10 h-24 w-2/3 -translate-x-1/2 rounded-full bg-obaol-500/14 blur-2xl md:blur-3xl" />
             <div className="relative z-20 -mx-10 aspect-square w-[calc(100%+5rem)] sm:-mx-14 sm:w-[calc(100%+7rem)] lg:mx-0 lg:w-full lg:-mb-[18%]">
               <Image
                 src="/images/order-execution-laptop.png"
@@ -771,15 +785,12 @@ export default function HeroSection() {
       </motion.div>
 
       {/* Dynamic Cursor Light Overlay */}
-      <motion.div
-        className="absolute inset-0 z-40 pointer-events-none"
-        style={{
-          background: useTransform(
-            [smoothMouseX, smoothMouseY],
-            ([x, y]) => `radial-gradient(600px circle at calc(50% + ${x}px) calc(50% + ${y}px), rgba(207,152,60,0.07), transparent 45%)`
-          )
-        }}
-      />
+      {allowPointerEffects && (
+        <motion.div
+          className="absolute inset-0 z-40 pointer-events-none"
+          style={{ background: cursorGlow }}
+        />
+      )}
     </section>
   );
 }

@@ -12,6 +12,28 @@ test("the root viewport allows browser zoom", () => {
   assert.equal(layout.includes("Skip to main content"), true);
 });
 
+test("mobile app shell primitives are present", () => {
+  const layout = read("../src/app/layout.tsx");
+  const manifest = read("../src/app/manifest.ts");
+  const globals = read("../src/app/globals.css");
+  const dashboardLayout = read("../src/app/dashboard/layout.tsx");
+  const bottomNav = read("../src/components/dashboard/BottomNav.tsx");
+  const table = read("../src/components/CurdTable/common-table.tsx");
+
+  assert.equal(layout.includes('manifest: "/manifest.webmanifest"'), true);
+  assert.equal(layout.includes("appleWebApp"), true);
+  assert.equal(manifest.includes('display: "standalone"'), true);
+  assert.equal(manifest.includes('start_url: "/dashboard"'), true);
+  assert.equal(globals.includes("--mobile-app-bottom-space"), true);
+  assert.equal(globals.includes(".touch-target"), true);
+  assert.equal(globals.includes("100dvh"), true);
+  assert.equal(dashboardLayout.includes("h-[100dvh] max-h-[100dvh]"), true);
+  assert.equal(dashboardLayout.includes("var(--mobile-app-bottom-space)"), true);
+  assert.equal(bottomNav.includes("env(safe-area-inset-bottom)"), true);
+  assert.equal(table.includes("sm:hidden"), true);
+  assert.equal(table.includes("mobileActionColumns"), true);
+});
+
 test("the public entry clearly separates Associate and Operator accounts", () => {
   const entry = read("../src/components/Auth/AuthEntry.tsx");
   for (const phrase of [

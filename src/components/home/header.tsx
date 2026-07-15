@@ -47,9 +47,21 @@ export default function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = previousOverflow;
+    }
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
+      <header className={`fixed top-0 left-0 right-0 z-[100] safe-pt transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
         <div className="mx-auto max-w-7xl px-4">
           <div className={`flex items-center justify-between rounded-2xl px-4 md:px-6 border border-default-200/50 bg-background/92 shadow-[0_12px_34px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
             <Link href="/" className="relative flex items-center gap-2.5 group flex-shrink-0">
@@ -82,7 +94,7 @@ export default function Header() {
                 aria-checked={soundEnabled}
                 aria-label={soundEnabled ? "Disable sound" : "Enable sound"}
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl border border-foreground/10 bg-foreground/[0.03] text-foreground/60 transition-all hover:border-obaol-300/40 hover:bg-obaol-500/10 hover:text-obaol-600 dark:hover:text-obaol-300"
+                className="hidden sm:inline-flex touch-target items-center justify-center rounded-xl border border-foreground/10 bg-foreground/[0.03] text-foreground/60 transition-all hover:border-obaol-300/40 hover:bg-obaol-500/10 hover:text-obaol-600 dark:hover:text-obaol-300"
               >
                 {soundEnabled ? <FiVolume2 size={16} /> : <FiVolumeX size={16} />}
               </button>
@@ -96,7 +108,7 @@ export default function Header() {
 
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="lg:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04]"
+                className="lg:hidden touch-target flex flex-col justify-center items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04]"
                 aria-label="Toggle menu"
               >
                 <span className={`w-4 h-px bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-[5px] rotate-45" : ""}`} />
@@ -108,22 +120,22 @@ export default function Header() {
         </div>
       </header>
 
-      <div className={`fixed top-[72px] left-4 right-4 z-40 rounded-2xl border border-foreground/10 bg-background/97 shadow-2xl overflow-hidden transition-all duration-200 lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
-        <nav className="flex flex-col p-4 gap-1">
+      <div className={`fixed left-4 right-4 top-[calc(72px+var(--safe-top))] z-40 max-h-[calc(100dvh-6rem-var(--safe-top)-var(--safe-bottom))] rounded-2xl border border-foreground/10 bg-background/97 shadow-2xl overflow-hidden transition-all duration-200 lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
+        <nav className="flex max-h-[inherit] flex-col overflow-y-auto scroll-touch p-4 pb-[calc(1rem+var(--safe-bottom))] gap-1">
           {NAV.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-foreground/[0.06]"
+              className="flex min-h-11 items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-foreground/[0.06]"
             >
               <span>{link.label}</span>
             </Link>
           ))}
 
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-foreground/10 pt-3">
-            <Link href="/auth?view=signin" onClick={() => setMobileOpen(false)} className="rounded-xl border border-foreground/10 px-4 py-3 text-center text-sm font-semibold">Sign In</Link>
-            <Link href="/auth" onClick={() => setMobileOpen(false)} className="rounded-xl border border-obaol-300/40 bg-obaol-500 px-4 py-3 text-center text-sm font-bold text-obaol-950">Get Started</Link>
+            <Link href="/auth?view=signin" onClick={() => setMobileOpen(false)} className="min-h-11 rounded-xl border border-foreground/10 px-4 py-3 text-center text-sm font-semibold">Sign In</Link>
+            <Link href="/auth" onClick={() => setMobileOpen(false)} className="min-h-11 rounded-xl border border-obaol-300/40 bg-obaol-500 px-4 py-3 text-center text-sm font-bold text-obaol-950">Get Started</Link>
           </div>
 
           <div className="mt-3 pt-3 border-t border-foreground/10 flex justify-center">

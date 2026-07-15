@@ -31,6 +31,13 @@
   --db-overlay: rgba(15, 23, 42, 0.12);
   --db-overlay-soft: rgba(15, 23, 42, 0.06);
   --db-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --mobile-bottom-nav-height: 4rem;
+  --mobile-bottom-nav-gap: 0.75rem;
+  --mobile-app-bottom-space: calc(var(--mobile-bottom-nav-height) + var(--mobile-bottom-nav-gap) + var(--safe-bottom));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -135,7 +142,23 @@ body {
 html,
 body {
   width: 100%;
+  min-height: 100%;
   overflow-x: clip !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior-x: none;
+  touch-action: manipulation;
+}
+
+html {
+  min-height: 100%;
+  scroll-padding-top: calc(5rem + var(--safe-top));
+}
+
+body {
+  min-height: 100dvh;
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
 }
 
 img,
@@ -147,16 +170,45 @@ canvas {
 }
 
 [data-slot="content"][role="dialog"] {
-  max-height: 90vh;
+  max-height: min(90vh, calc(100dvh - 1rem - var(--safe-top) - var(--safe-bottom)));
 }
 
 [data-slot="body"] {
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .safe-px {
+    padding-left: max(1rem, var(--safe-left));
+    padding-right: max(1rem, var(--safe-right));
+  }
+
+  .safe-pt {
+    padding-top: var(--safe-top);
+  }
+
+  .safe-pb {
+    padding-bottom: var(--safe-bottom);
+  }
+
+  .mobile-app-bottom-space {
+    padding-bottom: var(--mobile-app-bottom-space);
+  }
+
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .scroll-touch {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -248,6 +300,15 @@ textarea {
   font-family: inherit;
 }
 
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Headings */
 h1,
 h2,
@@ -297,4 +358,14 @@ a {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@media (max-width: 767px) {
+  [data-topbar] {
+    margin-top: max(0.5rem, var(--safe-top));
+  }
+
+  [data-dashboard-scroll] {
+    scroll-padding-bottom: var(--mobile-app-bottom-space);
+  }
 }

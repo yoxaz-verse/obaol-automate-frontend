@@ -258,6 +258,12 @@ export default function CommonTable({
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
+  const getRowKey = React.useCallback((item: any, index: number) => {
+    return String(item?._id || item?.id || item?.slug || item?.email || item?.name || index);
+  }, []);
+  const mobileColumns = React.useMemo(() => safeColumns.filter((column: any) => !isActionColumn(column.uid)), [isActionColumn, safeColumns]);
+  const mobileActionColumns = React.useMemo(() => safeColumns.filter((column: any) => isActionColumn(column.uid)), [isActionColumn, safeColumns]);
+  const primaryMobileColumn = mobileColumns[0];
 
   const updateScrollState = React.useCallback(() => {
     const el = scrollRef.current;
@@ -282,97 +288,139 @@ export default function CommonTable({
   return (
     <div className="group relative w-full min-w-0 max-w-full overflow-hidden">
       {!isEmpty ? (
-        <div
-          ref={scrollRef}
-          onScroll={updateScrollState}
-          className="scrollbar-gutter-stable w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2"
-        >
-          <Table
-            {...({
-              removeWrapper: true,
-              isHeaderSticky: true,
-              isStriped: true,
-              color: "warning",
-              className: "w-max",
-              classNames: {
-                base: "w-full min-w-0 max-w-full overflow-visible",
-                wrapper: "p-0 bg-transparent shadow-none overflow-visible",
-                table: "w-max table-auto",
-                th: [
-                  "bg-foreground/[0.04]",
-                  "dark:bg-white/[0.02]",
-                  "text-default-700",
-                  "dark:text-white/60",
-                  "font-black",
-                  "text-[10px]",
-                  "uppercase",
-                  "tracking-[0.2em]",
-                  "border-b",
-                  "border-white/10",
-                  "whitespace-nowrap",
-                  "min-w-[140px]",
-                  "h-14",
-                  "backdrop-blur-xl",
-                ],
-                td: [
-                  "py-5",
-                  "align-middle",
-                  "text-[13px]",
-                  "text-default-800",
-                  "dark:text-white",
-                  "whitespace-nowrap",
-                  "min-w-[140px]",
-                  "border-b",
-                  "border-white/5",
-                  "group-hover/row:border-obaol-500/20",
-                  "transition-all",
-                ],
-                tr: [
-                  "group/row",
-                  "hover:bg-default-50/50",
-                  "dark:hover:bg-obaol-500/[0.03]",
-                  "transition-all",
-                  "cursor-default",
-                ],
-              },
-            } as any)}
-            style={{ minWidth: `${minTableWidthPx}px` }}
+        <>
+          <div className="grid gap-3 sm:hidden">
+            {items.map((item: any, index: number) => (
+              <article
+                key={getRowKey(item, index)}
+                className="w-full min-w-0 rounded-2xl border border-default-200/70 bg-content1/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
+              >
+                {primaryMobileColumn && (
+                  <div className="mb-3 border-b border-default-200/70 pb-3 dark:border-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">
+                      {primaryMobileColumn.name}
+                    </p>
+                    <div className="mt-1 text-sm font-bold text-foreground break-words">
+                      {renderCell(item, primaryMobileColumn.uid)}
+                    </div>
+                  </div>
+                )}
+                <dl className="grid gap-3">
+                  {mobileColumns.slice(primaryMobileColumn ? 1 : 0, 7).map((column: any) => (
+                    <div key={String(column.uid)} className="grid grid-cols-[minmax(6.5rem,0.44fr)_minmax(0,1fr)] items-start gap-3">
+                      <dt className="text-[10px] font-black uppercase tracking-[0.14em] text-default-400">
+                        {column.name}
+                      </dt>
+                      <dd className="min-w-0 text-right text-xs font-semibold text-default-700 break-words dark:text-white/80">
+                        {renderCell(item, column.uid)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                {mobileActionColumns.length > 0 && (
+                  <div className="mt-4 flex flex-wrap items-center justify-end gap-3 border-t border-default-200/70 pt-3 dark:border-white/10">
+                    {mobileActionColumns.map((column: any) => (
+                      <div key={String(column.uid)} className="min-h-11 flex items-center">
+                        {renderCell(item, column.uid)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollState}
+            className="scrollbar-gutter-stable hidden w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2 sm:block"
           >
-            <TableHeader columns={safeColumns}>
-              {(column) => (
-                <TableColumn
-                  key={column.uid}
-                  align={isActionColumn(column.uid) ? "center" : column.align || "start"}
-                  className={
-                    isActionColumn(column.uid)
-                      ? "whitespace-nowrap min-w-[150px] px-4 text-center"
-                      : "whitespace-nowrap min-w-[140px]"
-                  }
-                >
-                  {column.name}
-                </TableColumn>
-              )}
-            </TableHeader>
+            <Table
+              {...({
+                removeWrapper: true,
+                isHeaderSticky: true,
+                isStriped: true,
+                color: "warning",
+                className: "w-max",
+                classNames: {
+                  base: "w-full min-w-0 max-w-full overflow-visible",
+                  wrapper: "p-0 bg-transparent shadow-none overflow-visible",
+                  table: "w-max table-auto",
+                  th: [
+                    "bg-foreground/[0.04]",
+                    "dark:bg-white/[0.02]",
+                    "text-default-700",
+                    "dark:text-white/60",
+                    "font-black",
+                    "text-[10px]",
+                    "uppercase",
+                    "tracking-[0.2em]",
+                    "border-b",
+                    "border-white/10",
+                    "whitespace-nowrap",
+                    "min-w-[140px]",
+                    "h-14",
+                    "backdrop-blur-xl",
+                  ],
+                  td: [
+                    "py-5",
+                    "align-middle",
+                    "text-[13px]",
+                    "text-default-800",
+                    "dark:text-white",
+                    "whitespace-nowrap",
+                    "min-w-[140px]",
+                    "border-b",
+                    "border-white/5",
+                    "group-hover/row:border-obaol-500/20",
+                    "transition-all",
+                  ],
+                  tr: [
+                    "group/row",
+                    "hover:bg-default-50/50",
+                    "dark:hover:bg-obaol-500/[0.03]",
+                    "transition-all",
+                    "cursor-default",
+                  ],
+                },
+              } as any)}
+              style={{ minWidth: `${minTableWidthPx}px` }}
+            >
+              <TableHeader columns={safeColumns}>
+                {(column) => (
+                  <TableColumn
+                    key={column.uid}
+                    align={isActionColumn(column.uid) ? "center" : column.align || "start"}
+                    className={
+                      isActionColumn(column.uid)
+                        ? "whitespace-nowrap min-w-[150px] px-4 text-center"
+                        : "whitespace-nowrap min-w-[140px]"
+                    }
+                  >
+                    {column.name}
+                  </TableColumn>
+                )}
+              </TableHeader>
 
-            <TableBody items={items}>
-              {(item: any) => (
-                <TableRow key={item._id} className="text-foreground">
-                  {(columnKey) => (
-                    <TableCell
-                      className={
-                        isActionColumn(columnKey)
-                          ? "min-w-[150px] px-4 text-center"
-                          : "min-w-[140px]"
-                      }
-                    >
-                      {renderCell(item, columnKey)}
-                    </TableCell>
-                  )}
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              <TableBody items={items}>
+                {(item: any) => (
+                  <TableRow key={getRowKey(item, 0)} className="text-foreground">
+                    {(columnKey) => (
+                      <TableCell
+                        className={
+                          isActionColumn(columnKey)
+                            ? "min-w-[150px] px-4 text-center"
+                            : "min-w-[140px]"
+                        }
+                      >
+                        {renderCell(item, columnKey)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       ) : (
         <div className="w-full">{emptyContent || <EmptyState />}</div>
       )}

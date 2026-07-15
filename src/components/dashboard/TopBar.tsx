@@ -81,13 +81,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   }, [isNotificationOpen]);
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = previousOverflow;
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = previousOverflow;
     };
   }, [isMobileMenuOpen]);
 
@@ -142,14 +143,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   return (
     <div
       data-topbar
-      className="relative z-50 flex text-foreground justify-between items-center px-6 py-3 my-2 mx-2 md:mx-4 rounded-2xl border db-shell db-border-subtle backdrop-blur-[24px] transition-all duration-500 overflow-visible"
+      className="relative z-50 flex text-foreground justify-between items-center gap-2 px-3 py-2 my-2 mx-2 md:mx-4 md:px-6 md:py-3 rounded-2xl border db-shell db-border-subtle backdrop-blur-[24px] transition-all duration-500 overflow-visible"
     >
       {/* Structural Accents */}
       <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent opacity-40 dark:opacity-50" />
       <div className="absolute -bottom-[1px] left-12 right-12 h-[1px] bg-gradient-to-r from-transparent via-default-200/50 dark:via-white/5 to-transparent" />
 
       {/* Left Section: Mission Telemetry & Identity */}
-      <div className="flex items-center gap-6 divide-x divide-default-200/60 dark:divide-white/5">
+      <div className="flex min-w-0 items-center gap-2 md:gap-6 md:divide-x md:divide-default-200/60 dark:md:divide-white/5">
         <div className="flex gap-1 md:gap-4 items-center">
           {/* Side Drawer - Mobile only */}
           <div className="md:hidden">
@@ -180,10 +181,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       animate={{ x: 0 }}
                       exit={{ x: "-100%" }}
                       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                      className="absolute top-0 left-0 bottom-0 w-[300px] db-panel border-r db-border-subtle flex flex-col"
+                      className="absolute top-0 left-0 bottom-0 w-[min(21rem,calc(100vw-2rem))] max-w-[calc(100vw-var(--safe-right)-1rem)] db-panel border-r db-border-subtle flex flex-col safe-pt"
                     >
                       {/* Drawer content */}
-                      <div className="p-8 border-b db-border-subtle flex items-center justify-between">
+                      <div className="p-5 sm:p-8 border-b db-border-subtle flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Image src="/logo.png" width={28} height={28} alt="Logo" />
                           <div>
@@ -191,11 +192,11 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                             <p className="text-[9px] font-bold text-obaol-700 uppercase tracking-widest dark:text-obaol-300">Supreme</p>
                           </div>
                         </div>
-                        <button onClick={() => setIsMobileMenuOpen(false)} className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center">
+                        <button onClick={() => setIsMobileMenuOpen(false)} className="touch-target rounded-full bg-default-100 flex items-center justify-center">
                           <FiX size={14} />
                         </button>
                       </div>
-                      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                      <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(1rem+var(--safe-bottom))] space-y-6">
                         {mobileSections.map((sec) => (
                            <div key={sec.label}>
                              <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-3 px-3">{sec.label}</p>
@@ -204,7 +205,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                  <button
                                    key={opt.name}
                                    onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                   className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                  >
                                    <span className="text-lg">{opt.icon}</span>
                                    <span className="text-sm">{opt.name}</span>
@@ -254,7 +255,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
       </div>
 
       {/* Right Section: Command Bar */}
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-2 md:gap-4">
         {isOnboardingLocked ? (
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-2xl border border-warning-500/30 bg-warning-500/10">
@@ -304,7 +305,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 </button>
                 <AnimatePresence>
                   {isNotificationOpen && (
-                    <div className="fixed right-6 top-[88px] z-[1000]">
+                    <div className="fixed left-3 right-3 top-[calc(5rem+var(--safe-top))] z-[1000] sm:left-auto sm:right-6 sm:top-[88px]">
                       <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
                     </div>
                   )}

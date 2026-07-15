@@ -70,13 +70,29 @@ export const metadata: Metadata = {
   },
 
   category: "Business",
+  applicationName: "OBAOL",
+  appleWebApp: {
+    capable: true,
+    title: "OBAOL",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/logo.png", href: "/logo.png", type: "image/png" }
     ],
     apple: [
-      { url: "/logo.png", href: "/logo.png", type: "image/png" }
+      { url: "/apple-touch-icon.png", href: "/apple-touch-icon.png", type: "image/png" }
     ]
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-title": "OBAOL",
+    "apple-mobile-web-app-status-bar-style": "default",
   }
 };
 

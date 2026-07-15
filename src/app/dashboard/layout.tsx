@@ -179,7 +179,7 @@ function DashboardLayoutContent({
   }
 
   return (
-    <section className="w-full min-w-0 h-[100dvh] flex overflow-hidden db-bg relative">
+    <section className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
       <PrivateRoute pathname={pathname}>
         <DashboardEnhancements />
         {!isWorkspaceLocked && (
@@ -199,9 +199,9 @@ function DashboardLayoutContent({
 
             <div
               data-dashboard-scroll
-              className="flex-1 min-h-0 w-full min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain px-1 md:px-0"
+              className="flex-1 min-h-0 w-full min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain scroll-touch px-1 md:px-0"
               style={{
-                paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))"
+                paddingBottom: "var(--mobile-app-bottom-space)"
               }}
             >
               <div className="max-w-full mx-auto w-full p-2 md:p-6 min-w-0">

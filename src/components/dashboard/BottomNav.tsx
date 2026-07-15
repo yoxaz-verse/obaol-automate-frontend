@@ -95,7 +95,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
     return (
         <div
             data-bottomnav
-            className={`fixed bottom-3 left-4 right-4 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden transition-all duration-300 ease-out ${
+            className={`fixed bottom-3 left-3 right-3 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden transition-all duration-300 ease-out ${
                 isVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-[calc(100%+1.5rem)] opacity-0 pointer-events-none"
             }`}
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
@@ -109,7 +109,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
                         isDisabled ? (
                             <div
                                 key={item.name}
-                                className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 opacity-40 cursor-not-allowed ${
+                                className={`relative flex flex-col items-center justify-center min-w-[56px] min-h-11 h-full transition-all duration-300 opacity-40 cursor-not-allowed ${
                                     isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400"
                                 }`}
                                 aria-disabled="true"
@@ -128,7 +128,7 @@ const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolea
                             <Link
                                 key={item.name}
                                 href={item.link}
-                                className={`relative flex flex-col items-center justify-center min-w-[64px] h-full transition-all duration-300 ${
+                                className={`relative flex flex-col items-center justify-center min-w-[56px] min-h-11 h-full transition-all duration-300 ${
                                     isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 group-hover:text-foreground"
                                 }`}
                             >

@@ -456,18 +456,37 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[560px]"}
       embedded={isOnboarding}
       leftPanel={{
-        headline: "OBAOL",
+        headline: "Prepare your access to the",
         highlight: "OPERATOR PORTAL",
-        description: "Designed for internal operators, mediators, and individuals entering digital agro-trading.",
+        description: "This setup confirms who you are, how you can be reached, and where your operational work should be mapped before the dashboard opens.",
+        guidanceSections: [
+          {
+            title: "Why this process matters",
+            body: "Identity and contact checks protect operational tools from unverified access and help reviewers confirm your profile quickly."
+          },
+          {
+            title: "What this helps us prepare",
+            body: "Your location and operating details help OBAOL route work, permissions, and support context to the right operator workspace."
+          },
+          {
+            title: "After approval you can",
+            body: "Move into the dashboard with secure access, cleaner assignments, and the right starting context for day-to-day execution."
+          }
+        ],
+        points: [
+          "Identity confirmation",
+          "Operational assignment",
+          "Secure workspace access",
+          "Review readiness"
+        ],
         tags: [
           "Individuals",
           "Portfolio Managers",
           "Digital Traders",
           "Business Developers",
-          "Internal Operations",
-          "Retired Custom Brokers"
+          "Internal Operations"
         ],
-        footer: "Operator_Portal_v2",
+        footer: "Progress saved automatically",
         knowMoreLink: "/roles/operator"
       }}
     >

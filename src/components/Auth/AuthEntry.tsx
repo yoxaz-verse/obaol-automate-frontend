@@ -192,7 +192,7 @@ export default function AuthEntry() {
                     {signInView ? "Choose your account" : "Select your path"}
                   </p>
                   <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                    {signInView ? "Where should we take you?" : "Two doors. One trade layer."}
+                    {signInView ? "Where should we take you?" : "Two paths. One trade layer."}
                   </h2>
                 </div>
                 <div className="pt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
@@ -238,12 +238,11 @@ export default function AuthEntry() {
                       className="group relative flex min-h-[430px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5 shadow-black/20 transition duration-500 hover:-translate-y-1 hover:border-obaol-400/45 hover:bg-white/[0.05] hover:shadow-2xl hover:shadow-black/35 focus-within:-translate-y-1 focus-within:border-obaol-400/45 focus-within:bg-white/[0.05] focus-within:shadow-2xl focus-within:shadow-black/35 md:p-6"
                     >
                       <div className={`absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${option.aura} blur-3xl transition duration-700 group-hover:scale-125 group-focus-within:scale-125`} />
-                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.075),rgba(255,255,255,0.012)_42%,transparent_43%,transparent_57%,rgba(255,255,255,0.018)_58%,rgba(255,255,255,0.06))] opacity-45 transition duration-700 group-hover:opacity-70 group-focus-within:opacity-70" />
-                      <div className="pointer-events-none absolute inset-y-5 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/20 to-transparent opacity-45 transition duration-700 group-hover:opacity-80 group-focus-within:opacity-80" />
-                      <div className="pointer-events-none absolute inset-y-4 left-4 w-[calc(50%-1rem)] rounded-l-[1.15rem] border border-white/[0.055] bg-white/[0.018] transition duration-700 group-hover:-translate-x-2 group-hover:border-obaol-300/20 group-hover:bg-obaol-300/[0.035] group-focus-within:-translate-x-2 group-focus-within:border-obaol-300/20 group-focus-within:bg-obaol-300/[0.035]" />
-                      <div className="pointer-events-none absolute inset-y-4 right-4 w-[calc(50%-1rem)] rounded-r-[1.15rem] border border-white/[0.045] bg-black/[0.08] transition duration-700 group-hover:translate-x-2 group-hover:border-white/10 group-hover:bg-white/[0.025] group-focus-within:translate-x-2 group-focus-within:border-white/10 group-focus-within:bg-white/[0.025]" />
                       <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100 group-focus-within:opacity-100" />
-                      <div className="relative flex flex-1 flex-col transition duration-700 group-hover:translate-x-1 group-focus-within:translate-x-1">
+                      <div className="pointer-events-none absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-obaol-300/15 bg-obaol-400/[0.045] text-obaol-200/35 opacity-55 shadow-lg shadow-black/20 transition duration-500 group-hover:border-obaol-300/30 group-hover:bg-obaol-400/[0.075] group-hover:text-obaol-200/55 group-hover:opacity-80 group-focus-within:border-obaol-300/30 group-focus-within:bg-obaol-400/[0.075] group-focus-within:text-obaol-200/55 group-focus-within:opacity-80">
+                        <option.icon className="text-lg" />
+                      </div>
+                      <div className="relative z-10 flex flex-1 flex-col transition duration-700 group-hover:translate-x-1 group-focus-within:translate-x-1">
                         <div className="flex items-start justify-between gap-4">
                           <IconBadge icon={option.icon} />
                           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-white/50">

@@ -958,7 +958,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       cardMaxWidthClass={isOnboarding ? "max-w-full" : "max-w-[620px]"}
       embedded={isOnboarding}
       leftPanel={{
-        headline: "Connect your company to the OBAOL ecosystem",
+        headline: "Set up your company for",
         highlight: formData.tradeMode === "BUY"
           ? "BUY COMMODITIES"
           : formData.tradeMode === "SELL"
@@ -968,17 +968,36 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
               : formData.tradeMode === "SERVICE"
                 ? "PROVIDE TRADE SERVICES"
                 : "CHOOSE YOUR PARTICIPATION",
-        description: "Create one verified company profile for commodity trade or execution-support services.",
-        tags: [
-          "Manufacturers",
-          "Traders",
-          "Logistics Providers",
-          "Exporters & Importers",
-          "Freight Forwarders",
-          "Warehouse Managers",
-          "Company Registration Mandatory"
+        description: "This guided setup helps us verify your business, align it to the right trade capabilities, and prepare the dashboard around the way you actually operate.",
+        guidanceSections: [
+          {
+            title: "Why this process matters",
+            body: "Verified identity, contact, and company details reduce approval back-and-forth and help us keep trade access controlled."
+          },
+          {
+            title: "What this helps us prepare",
+            body: "Your company mode, location, and capability choices tell OBAOL which workflows, documents, and execution roles to unlock first."
+          },
+          {
+            title: "After approval you can",
+            body: "Enter the dashboard with a cleaner profile, role-aware navigation, and the right starting point for buying, selling, or trade services."
+          }
         ],
-        footer: "Your progress is saved during onboarding",
+        points: [
+          "Company verification",
+          "Capability alignment",
+          "Faster review readiness",
+          "Dashboard unlock"
+        ],
+        tags: [
+          "Buyers",
+          "Sellers",
+          "Service Partners",
+          "Exporters",
+          "Warehouses",
+          "Logistics"
+        ],
+        footer: "Progress saved automatically",
         knowMoreLink: "/roles/associate"
       }}
     >

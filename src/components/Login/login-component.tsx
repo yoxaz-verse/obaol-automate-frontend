@@ -24,6 +24,13 @@ interface ILoginProps {
   mode?: "login" | "signup";
 }
 
+type LoginCooldownState = {
+  lockedUntil: number;
+  retryAfterSeconds: number;
+  failedAttempts: number;
+  maxAttempts: number;
+};
+
 const getPasskeyStorageKey = (identity: string) =>
   `obaol-passkey-setup:${String(identity || "guest").toLowerCase()}`;
 
@@ -68,6 +75,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
   const [resendAvailableAt, setResendAvailableAt] = useState<number | null>(null);
   const [nowTs, setNowTs] = useState(Date.now());
+  const [passwordCooldown, setPasswordCooldown] = useState<LoginCooldownState | null>(null);
   const [passkeySupport, setPasskeySupport] = useState<"checking" | "supported" | "unsupported">("checking");
   const [showPasskeySetup, setShowPasskeySetup] = useState(false);
   const [passkeySetupStatus, setPasskeySetupStatus] = useState<"idle" | "creating" | "success" | "error">("idle");
@@ -155,6 +163,19 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     }, 1000);
     return () => clearInterval(timer);
   }, [otpSent, otpVerified]);
+
+  useEffect(() => {
+    if (!passwordCooldown) return;
+    const timer = setInterval(() => {
+      const nextNow = Date.now();
+      setNowTs(nextNow);
+      if (passwordCooldown.lockedUntil <= nextNow) {
+        setPasswordCooldown(null);
+        setErrorMessage("");
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [passwordCooldown]);
 
   const handleGoogleCredential = useCallback(async (resp: { credential?: string }) => {
     try {
@@ -318,9 +339,20 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     }
   };
 
+  const formatCountdown = (ms: number) => {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
+    if (passwordCooldown && passwordCooldown.lockedUntil > Date.now()) {
+      setErrorMessage(`Too many incorrect password attempts. Try again in ${formatCountdown(passwordCooldown.lockedUntil - Date.now())}.`);
+      return;
+    }
     setIsLoading(true);
     setErrorMessage("");
     if (authMode === "signup") {
@@ -370,6 +402,25 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       });
 
       const backendData = error?.response?.data;
+      if (backendData?.code === "LOGIN_COOLDOWN") {
+        const lockedAt = Date.parse(String(backendData.lockedUntil || ""));
+        const retryAfterSeconds = Number(backendData.retryAfterSeconds || 120);
+        const lockedUntil = Number.isFinite(lockedAt)
+          ? lockedAt
+          : Date.now() + retryAfterSeconds * 1000;
+        setPasswordCooldown({
+          lockedUntil,
+          retryAfterSeconds,
+          failedAttempts: Number(backendData.failedAttempts || 5),
+          maxAttempts: Number(backendData.maxAttempts || 5),
+        });
+        const message = `Too many incorrect password attempts. Try again in ${formatCountdown(lockedUntil - Date.now())}.`;
+        setErrorMessage(message);
+        showToastMessage({ type: "error", message, position: "top-right" });
+        play("danger");
+        return;
+      }
+
       const rawMessage = String(backendData?.message || error?.message || "").toLowerCase();
       const isNotFound = rawMessage.includes("not found")
         || rawMessage.includes("not registered")
@@ -849,13 +900,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const canSendOtp = !!email.trim() && isInvalidEmail;
   const otpExpiryRemaining = Math.max(0, (otpExpiresAt || 0) - nowTs);
   const resendRemaining = Math.max(0, (resendAvailableAt || 0) - nowTs);
+  const passwordCooldownRemaining = Math.max(0, (passwordCooldown?.lockedUntil || 0) - nowTs);
+  const isPasswordCooldownActive = authMode === "login" && passwordCooldownRemaining > 0;
   const isPreparingSession = authMode === "login" && loading;
-  const formatCountdown = (ms: number) => {
-    const totalSeconds = Math.ceil(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  };
 
   return (
     <AuthLayout
@@ -939,6 +986,11 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 <p className="text-sm font-bold leading-relaxed">
                   {errorMessage.replace(/sign in\.?$/i, "")}
                 </p>
+                {isPasswordCooldownActive && (
+                  <p className="text-xs font-semibold leading-relaxed opacity-80">
+                    Password sign-in is cooling down for {formatCountdown(passwordCooldownRemaining)}. Google sign-in is still available.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1007,6 +1059,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             setOtpSent(false);
             setOtpVerified(false);
             setOtp("");
+            setPasswordCooldown(null);
             if (errorMessage) setErrorMessage("");
             if (loginStatus !== "idle") setLoginStatus("idle");
           }}
@@ -1022,7 +1075,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             placeholder="Enter your password"
             variant="bordered"
             isRequired
-            isDisabled={isPreparingSession}
+            isDisabled={isPreparingSession || isPasswordCooldownActive}
             isInvalid={false}
             errorMessage={""}
             endContent={
@@ -1097,10 +1150,12 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               size="lg"
               radius="lg"
               isLoading={isLoading || isPreparingSession}
-              isDisabled={isPreparingSession}
+              isDisabled={isPreparingSession || isPasswordCooldownActive}
             >
               {loginStatus === "success"
                 ? "Signed In"
+                : isPasswordCooldownActive
+                  ? `Retry in ${formatCountdown(passwordCooldownRemaining)}`
                 : loginStatus === "error"
                   ? "Sign In"
                   : isLoading
@@ -1131,11 +1186,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   <p className="text-[10px] font-semibold text-foreground/50 text-center">
                     Enter a valid email to continue.
                   </p>
-                )}
-                {errorMessage && authMode === "signup" && (
-                  <div className="rounded-lg border border-danger-500/40 bg-danger-500/15 px-3 py-2 text-[11px] font-semibold text-danger-400 text-center shadow-[0_0_18px_rgba(244,63,94,0.18)]">
-                    {errorMessage}
-                  </div>
                 )}
               </>
             ) : (
@@ -1225,10 +1275,13 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
-              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
+              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google min-h-[74px] flex items-center justify-center">
                 {googleClientId ? (
-                  <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
-                    <div id={`google-login-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
+                  <div className="w-full min-h-[54px] flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
+                    {!googleReady && !googleRenderError && (
+                      <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
+                    )}
+                    <div id={`google-login-${roleLower}`} className="w-full min-h-11 flex justify-center scale-[0.98]" />
                     {!!googleRenderError && (
                       <div className="mt-3 flex flex-col items-center gap-2">
                         <p className="text-[10px] font-semibold text-danger-500 text-center">{googleRenderError}</p>
@@ -1263,10 +1316,13 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             </div>
 
             <div className="w-full flex flex-col gap-1.5">
-              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google">
+              <div className="rounded-[1.5rem] bg-gradient-to-b from-default-100/40 to-transparent border border-default-200/50 p-2.5 shadow-soft group/google min-h-[74px] flex items-center justify-center">
                 {googleClientId ? (
-                  <div className="w-full flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
-                    <div id={`google-signup-${roleLower}`} className="w-full flex justify-center scale-[0.98]" />
+                  <div className="w-full min-h-[54px] flex flex-col items-center justify-center p-1 transition-all duration-500 group-hover/google:drop-shadow-[0_0_15px_rgba(207,152,60,0.12)]">
+                    {!googleReady && !googleRenderError && (
+                      <div className="h-11 w-full max-w-[340px] animate-pulse rounded-full border border-default-200 bg-default-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
+                    )}
+                    <div id={`google-signup-${roleLower}`} className="w-full min-h-11 flex justify-center scale-[0.98]" />
                     {!!googleRenderError && (
                       <div className="mt-3 flex flex-col items-center gap-2">
                         <p className="text-[10px] font-semibold text-danger-500 text-center">{googleRenderError}</p>

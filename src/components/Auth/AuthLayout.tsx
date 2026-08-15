@@ -6,6 +6,20 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
 
+type LeftPanelContent = {
+    headline: string;
+    highlight?: string;
+    description?: string;
+    points?: string[];
+    guidanceSections?: Array<{
+        title: string;
+        body: string;
+    }>;
+    tags?: string[];
+    footer?: string;
+    knowMoreLink?: string;
+};
+
 interface AuthLayoutProps {
     title: string;
     subtitle?: string;
@@ -13,15 +27,7 @@ interface AuthLayoutProps {
     topContent?: React.ReactNode;
     cardMaxWidthClass?: string;
     embedded?: boolean;
-    leftPanel?: {
-        headline: string;
-        highlight?: string;
-        description?: string;
-        points?: string[];
-        tags?: string[];
-        footer?: string;
-        knowMoreLink?: string;
-    };
+    leftPanel?: LeftPanelContent;
     roleIdentity?: {
         roleKey: "associate" | "operator";
         panelLabel: string;
@@ -105,13 +111,130 @@ const TypewriterEffect = ({ words }: { words: string[] }) => {
     );
 };
 
+const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { leftPanel: LeftPanelContent; roleIdentity?: AuthLayoutProps["roleIdentity"]; compact?: boolean }) => (
+    <div className={`${compact ? "space-y-5" : "space-y-7"} text-center lg:text-left`}>
+        <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+        >
+            {roleIdentity && (
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1">
+                    <span className="h-2 w-2 rounded-full bg-obaol-500" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 dark:text-foreground/70">
+                        {roleIdentity.panelLabel}
+                    </span>
+                </div>
+            )}
+            <p className={`${compact ? "text-2xl md:text-3xl" : "text-4xl xl:text-5xl"} mb-2 font-bold leading-[1.02] tracking-tight text-slate-900 dark:text-foreground`}>
+                {leftPanel.headline} <br />
+                <span className={`bg-clip-text text-transparent ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-obaol-700 via-obaol-500 to-amber-500 dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-600"}`}>
+                    {leftPanel.highlight || "TRADE WORKSPACE"}
+                </span>
+            </p>
+        </motion.div>
+
+        <motion.div
+            className="max-w-lg mx-auto lg:mx-0 space-y-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.45, delay: 0.2 }}
+        >
+            {leftPanel.description && (
+                <p className="border-l-2 border-obaol-500/40 pl-4 text-sm font-medium leading-relaxed text-slate-600 dark:text-foreground/60 xl:text-base">
+                    {leftPanel.description}
+                </p>
+            )}
+
+            {!!leftPanel.guidanceSections?.length && (
+                <div className="grid gap-3">
+                    {leftPanel.guidanceSections.map((section) => (
+                        <div key={section.title} className="rounded-lg border border-obaol-200/70 bg-white/75 p-3 text-left shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-obaol-700 dark:text-obaol-300">
+                                {section.title}
+                            </p>
+                            <p className="mt-1 text-xs font-medium leading-relaxed text-slate-600 dark:text-foreground/60">
+                                {section.body}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {!!leftPanel.points?.length && (
+                <div className="grid gap-2 pt-1">
+                    {leftPanel.points.map((point, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-foreground/50 uppercase tracking-widest group/point">
+                            <div className="h-1.5 w-1.5 rounded-full bg-obaol-500/30 transition-colors group-hover/point:bg-obaol-500" />
+                            {point}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {!!leftPanel.tags?.length && (
+                <div className="flex flex-wrap gap-1.5 justify-center lg:justify-start">
+                    {leftPanel.tags.map((tag, idx) => (
+                        <span
+                            key={`${tag}-${idx}`}
+                            className="px-2.5 py-1 rounded-md border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-wide text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
+                        >
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            {!!roleIdentity?.audienceLabels?.length && (
+                <div className="pt-1 space-y-2.5">
+                    <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500 dark:text-default-400">
+                        Primary Users
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 justify-center lg:justify-start">
+                        {roleIdentity.audienceLabels.map((tag, idx) => (
+                            <span
+                                key={`${tag}-${idx}`}
+                                className="px-2.5 py-0.5 rounded-full border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-wide text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 justify-center lg:justify-start">
+                {leftPanel.knowMoreLink && (
+                    <Link
+                        href={leftPanel.knowMoreLink}
+                        className="group inline-flex items-center justify-center gap-2 rounded-lg border border-obaol-200 bg-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.18em] shadow-sm transition-all hover:border-obaol-500/30 hover:bg-obaol-500/10 hover:text-obaol-700 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-obaol-500/20 dark:hover:text-obaol-300"
+                    >
+                        Learn about this role
+                        <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                )}
+                {leftPanel.footer && (
+                    <span className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-2 text-[9px] font-black uppercase tracking-[0.22em] text-slate-500 dark:text-foreground/40">
+                        {leftPanel.footer}
+                    </span>
+                )}
+            </div>
+        </motion.div>
+    </div>
+);
+
 const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topContent, cardMaxWidthClass = "max-w-[460px]", embedded = false, leftPanel, roleIdentity }) => {
     if (embedded) {
         return (
             <div className="w-full text-foreground">
                 {topContent && <div className="mb-4">{topContent}</div>}
-                <div className={`w-full ${cardMaxWidthClass} mx-auto`}>
-                    <div className="rounded-[2.5rem] border border-divider bg-content1/80 p-8 shadow-2xl backdrop-blur-3xl">
+                <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(280px,0.75fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
+                    {leftPanel && (
+                        <div className="order-2 rounded-[1.5rem] border border-obaol-200/60 bg-white/80 p-5 shadow-xl shadow-obaol-900/5 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/80 lg:sticky lg:top-4 lg:order-1">
+                            <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
+                        </div>
+                    )}
+                    <div className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 shadow-2xl backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
                         <div className="mb-8 items-center flex flex-col text-center">
                             <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground">
                                 {title}
@@ -171,80 +294,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                         </Link>
 
                         {leftPanel ? (
-                            <div className="space-y-7 text-center lg:text-left">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 14 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.45, delay: 0.1 }}
-                                >
-                                    {roleIdentity && (
-                                        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1">
-                                            <span className="h-2 w-2 rounded-full bg-obaol-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-700 dark:text-foreground/70">
-                                                {roleIdentity.panelLabel}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <p className="mb-2 text-4xl font-bold leading-[0.96] tracking-tight text-slate-900 dark:text-foreground xl:text-5xl">
-                                        {leftPanel.headline} <br />
-                                        <span className={`bg-clip-text text-transparent ${roleIdentity?.highlightClassName || "bg-gradient-to-r from-obaol-200 via-obaol-400 to-obaol-600"}`}>
-                                            {leftPanel.highlight || "TRADE WORKSPACE"}
-                                        </span>
-                                    </p>
-                                </motion.div>
-
-                                <motion.div
-                                    className="max-w-lg mx-auto lg:mx-0 space-y-5"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.45, delay: 0.2 }}
-                                >
-                                    <p className="border-l-2 border-obaol-500/40 pl-4 text-base font-medium leading-relaxed text-slate-600 dark:text-foreground/60 xl:text-lg">
-                                        {leftPanel.description}
-                                    </p>
-
-                                    {!!leftPanel.points?.length && (
-                                        <div className="grid gap-2 pt-3">
-                                            {leftPanel.points.map((point, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-foreground/40 uppercase tracking-widest group/point">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-obaol-500/20 transition-colors group-hover:bg-obaol-500" />
-                                                    {point}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {!!roleIdentity?.audienceLabels?.length && (
-                                        <div className="pt-1 space-y-2.5">
-                                            <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500 dark:text-default-400">
-                                                Primary Users
-                                            </p>
-                                            <div className="flex flex-wrap gap-1.5 justify-center lg:justify-start">
-                                                {roleIdentity.audienceLabels.map((tag, idx) => (
-                                                    <span
-                                                        key={`${tag}-${idx}`}
-                                                        className="px-2.5 py-0.5 rounded-full border border-slate-200 bg-white/80 text-[9px] font-bold uppercase tracking-wide text-slate-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-foreground/70"
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 justify-center lg:justify-start">
-                                        {leftPanel.knowMoreLink && (
-                                            <Link
-                                                href={leftPanel.knowMoreLink}
-                                                className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-obaol-200 bg-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.18em] shadow-sm transition-all hover:border-obaol-500/30 hover:bg-obaol-500/10 hover:text-obaol-700 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-obaol-500/20 dark:hover:text-obaol-300"
-                                            >
-                                                Learn about this role
-                                                <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                                            </Link>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            </div>
+                            <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} />
                         ) : (
                             <div className="space-y-8">
                                 <p className="mb-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-slate-900 dark:text-foreground xl:text-7xl">

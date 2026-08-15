@@ -49,7 +49,7 @@ export default function DashboardOnboardingPage() {
   if (loading) return null;
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto">
+    <div className="w-full max-w-[1280px] mx-auto">
       <div className="mb-6 rounded-3xl border border-obaol-500/20 bg-obaol-500/5 px-6 py-5">
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-obaol-600">Guided Setup</p>
         <h1 className="text-2xl font-black text-foreground mt-2">Welcome inside OBAOL</h1>

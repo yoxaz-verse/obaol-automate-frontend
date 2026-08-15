@@ -120,7 +120,7 @@ export default function Header() {
         </div>
       </header>
 
-      <div className={`fixed left-4 right-4 top-[calc(72px+var(--safe-top))] z-40 max-h-[calc(100dvh-6rem-var(--safe-top)-var(--safe-bottom))] rounded-2xl border border-foreground/10 bg-background/97 shadow-2xl overflow-hidden transition-all duration-200 lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
+      <div className={`fixed left-4 right-4 top-[calc(72px+var(--safe-top))] z-40 max-h-[calc(100dvh-6rem-var(--safe-top)-var(--safe-bottom))] rounded-2xl border border-foreground/20 bg-[#FCFAF6] shadow-[0_24px_70px_-24px_rgba(0,0,0,0.55)] overflow-hidden transition-all duration-200 dark:border-white/15 dark:bg-[#090806] lg:hidden ${mobileOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
         <nav className="flex max-h-[inherit] flex-col overflow-y-auto scroll-touch p-4 pb-[calc(1rem+var(--safe-bottom))] gap-1">
           {NAV.map((link) => (
             <Link
@@ -156,7 +156,7 @@ export default function Header() {
         </nav>
       </div>
 
-      <div onClick={() => setMobileOpen(false)} className={`fixed inset-0 z-30 lg:hidden transition-opacity duration-200 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} />
+      <div onClick={() => setMobileOpen(false)} className={`fixed inset-0 z-30 bg-black/30 lg:hidden transition-opacity duration-200 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} />
     </>
   );
 }

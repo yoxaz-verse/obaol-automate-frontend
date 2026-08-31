@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { createContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { postData, getData } from "@/core/api/apiHandler";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -81,6 +81,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const queryClient = useQueryClient();
   const sessionQuery = useSessionQuery();
 
+  const verifySession = useCallback(
+    () => getData("/verify-token", {}, { cacheMode: "bypass" }),
+    []
+  );
+
+  const clearLocalSession = useCallback((redirectTo = "/auth?view=signin") => {
+    setAuth({
+      isAuthenticated: false,
+      user: null,
+      loading: false,
+    });
+    queryClient.removeQueries({ queryKey: QUERY_KEYS.session });
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("currentUserToken");
+      sessionStorage.clear();
+    }
+
+    router.replace(redirectTo);
+    router.refresh();
+  }, [queryClient, router]);
+
   useEffect(() => {
     if (sessionQuery.isLoading) {
       setAuth((prev) => ({ ...prev, loading: true }));
@@ -113,16 +135,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       if (response.data.success) {
         try {
-          const userResponse = await queryClient.fetchQuery({
-            queryKey: QUERY_KEYS.session,
-            queryFn: () => getData("/verify-token"),
-          });
+          const userResponse = await verifySession();
           if (userResponse.data.success) {
             setAuth({
               isAuthenticated: true,
               user: userResponse.data.user,
               loading: false,
             });
+            queryClient.setQueryData(QUERY_KEYS.session, userResponse);
           } else {
             throw new Error("Failed to retrieve user data");
           }
@@ -158,16 +178,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       if (response.data.success) {
         try {
-          const userResponse = await queryClient.fetchQuery({
-            queryKey: QUERY_KEYS.session,
-            queryFn: () => getData("/verify-token"),
-          });
+          const userResponse = await verifySession();
           if (userResponse.data.success) {
             setAuth({
               isAuthenticated: true,
               user: userResponse.data.user,
               loading: false,
             });
+            queryClient.setQueryData(QUERY_KEYS.session, userResponse);
           } else {
             throw new Error("Failed to retrieve user data");
           }
@@ -200,21 +218,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       } catch (logoutError) {
         console.warn("Logout API call failed, continuing with local cleanup.", logoutError);
       }
-      // Clear authentication state
-      setAuth({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-      });
-      queryClient.removeQueries({ queryKey: QUERY_KEYS.session });
-
-      // Remove the token from localStorage
-      localStorage.removeItem("currentUserToken");
-      sessionStorage.clear();
-
-      // Redirect to the login page or another route
-      router.replace("/auth");
-      router.refresh();
+      clearLocalSession("/auth");
       if (typeof window !== "undefined") {
         window.location.href = "/auth";
       }
@@ -223,37 +227,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
-      const userResponse = await queryClient.fetchQuery({
-        queryKey: QUERY_KEYS.session,
-        queryFn: () => getData("/verify-token"),
-      });
+      setAuth((prev) => ({ ...prev, loading: true }));
+      const userResponse = await verifySession();
       if (userResponse?.data?.success) {
         setAuth({
           isAuthenticated: true,
           user: userResponse.data.user,
           loading: false,
         });
+        queryClient.setQueryData(QUERY_KEYS.session, userResponse);
         return true;
       } else {
-        setAuth({
-          isAuthenticated: false,
-          user: null,
-          loading: false,
-        });
+        clearLocalSession();
         return false;
       }
     } catch (error) {
       console.error("Refresh user error:", error);
-      setAuth({
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-      });
+      clearLocalSession();
       return false;
     }
-  };
+  }, [clearLocalSession, queryClient, verifySession]);
 
   return (
     <AuthContext.Provider value={{ ...auth, login, loginWithGoogle, logout, refreshUser }}>

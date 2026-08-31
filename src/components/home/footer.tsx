@@ -116,6 +116,7 @@ export default function Footer() {
                   { name: "Roles & Participants", href: "/roles" },
                   { name: "Why OBAOL", href: "/why-obaol" },
                   { name: "How It Works", href: "/how-it-works" },
+                  { name: "Quick Commerce", href: "/quick-commerce-procurement" },
                   { name: "Procurement", href: "/procurement" },
                   { name: "Verification", href: "/verification" },
                 ].map((link) => (

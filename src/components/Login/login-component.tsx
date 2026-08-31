@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { showToastMessage, useEmailValidation } from "../../utils/utils";
 import {
   Button,
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMonitor, FiShield, FiSmartphone, FiTablet, FiUsers } from "react-icons/fi";
+import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiUsers } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
@@ -17,6 +18,7 @@ import { useSoundEffect } from "@/context/SoundContext";
 import { postData } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
+import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
 
 
 interface ILoginProps {
@@ -29,25 +31,6 @@ type LoginCooldownState = {
   retryAfterSeconds: number;
   failedAttempts: number;
   maxAttempts: number;
-};
-
-const getPasskeyStorageKey = (identity: string) =>
-  `obaol-passkey-setup:${String(identity || "guest").toLowerCase()}`;
-
-const toBase64Url = (buffer: ArrayBuffer) => {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-};
-
-const getUserHandle = (identity: string) => {
-  const source = String(identity || "obaol-user");
-  const bytes = new TextEncoder().encode(source);
-  if (bytes.length <= 64) return bytes;
-  return bytes.slice(0, 64);
 };
 
 const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
@@ -77,10 +60,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [nowTs, setNowTs] = useState(Date.now());
   const [passwordCooldown, setPasswordCooldown] = useState<LoginCooldownState | null>(null);
   const [passkeySupport, setPasskeySupport] = useState<"checking" | "supported" | "unsupported">("checking");
-  const [showPasskeySetup, setShowPasskeySetup] = useState(false);
-  const [passkeySetupStatus, setPasskeySetupStatus] = useState<"idle" | "creating" | "success" | "error">("idle");
-  const [passkeySetupMessage, setPasskeySetupMessage] = useState("");
-  const [postLoginRoute, setPostLoginRoute] = useState("/dashboard");
+  const [passkeyLoginStatus, setPasskeyLoginStatus] = useState<"idle" | "loading">("idle");
 
   const normalizeSignupError = (message: string) => {
     const raw = String(message || "");
@@ -147,8 +127,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         return;
       }
       try {
-        const supported = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        setPasskeySupport(supported ? "supported" : "unsupported");
+        setPasskeySupport(browserSupportsWebAuthn() ? "supported" : "unsupported");
       } catch {
         setPasskeySupport("unsupported");
       }
@@ -232,7 +211,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     if (authMode === "signup") {
       return;
     }
-    if (!loading && isAuthenticated && !showPasskeySetup) {
+    if (!loading && isAuthenticated) {
       if (passkeySupport === "checking") {
         setIsRedirecting(true);
         return;
@@ -261,19 +240,10 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           position: "top-right",
         });
       }
-      const passkeyKey = getPasskeyStorageKey(user?.id || user?.email || email || role);
-      const passkeyWasHandled = typeof window !== "undefined"
-        && Boolean(localStorage.getItem(passkeyKey));
-      if (passkeySupport === "supported" && !passkeyWasHandled) {
-        setPostLoginRoute(targetRoute);
-        setIsRedirecting(false);
-        setShowPasskeySetup(true);
-        return;
-      }
       setIsRedirecting(true);
       router.push(targetRoute);
     }
-  }, [authMode, email, isAuthenticated, loading, passkeySupport, role, router, showPasskeySetup, user]);
+  }, [authMode, isAuthenticated, loading, router, user]);
 
   useEffect(() => {
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
@@ -463,84 +433,44 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     router.push(intent && target === "/auth/register" ? `${target}?intent=${encodeURIComponent(intent)}` : target);
   };
 
-  const completePasskeyStep = (markHandled = true) => {
-    if (markHandled && typeof window !== "undefined") {
-      const passkeyKey = getPasskeyStorageKey(user?.id || user?.email || email || role);
-      localStorage.setItem(passkeyKey, String(Date.now()));
-    }
-    setShowPasskeySetup(false);
-    setIsRedirecting(true);
-    router.push(postLoginRoute);
-  };
-
-  const handleCreatePasskey = async () => {
-    if (passkeySetupStatus === "creating") return;
-    if (typeof window === "undefined" || !navigator.credentials || !("PublicKeyCredential" in window)) {
-      setPasskeySetupStatus("error");
-      setPasskeySetupMessage("Passkeys are not available on this browser.");
+  const handlePasskeyLogin = async () => {
+    if (passkeyLoginStatus === "loading" || isLoading) return;
+    if (!email.trim()) {
+      setErrorMessage("Enter your email before passkey sign-in.");
       return;
     }
-
-    setPasskeySetupStatus("creating");
-    setPasskeySetupMessage("");
-
+    if (passkeySupport !== "supported") {
+      setErrorMessage("Passkeys are not available on this browser.");
+      return;
+    }
+    setPasskeyLoginStatus("loading");
+    setErrorMessage("");
     try {
-      const challenge = crypto.getRandomValues(new Uint8Array(32));
-      const identity = user?.id || user?.email || email || "obaol-user";
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge,
-          rp: {
-            name: "OBAOL",
-          },
-          user: {
-            id: getUserHandle(identity),
-            name: user?.email || email || "obaol-user",
-            displayName: user?.name || user?.email || email || "OBAOL User",
-          },
-          pubKeyCredParams: [
-            { type: "public-key", alg: -7 },
-            { type: "public-key", alg: -257 },
-          ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            residentKey: "preferred",
-            userVerification: "required",
-          },
-          timeout: 60000,
-          attestation: "none",
-        },
-      }) as PublicKeyCredential | null;
-
-      if (!credential) {
-        throw new Error("Passkey setup was cancelled.");
-      }
-
-      if (typeof window !== "undefined") {
-        const passkeyKey = getPasskeyStorageKey(identity);
-        localStorage.setItem(passkeyKey, JSON.stringify({
-          credentialId: toBase64Url(credential.rawId),
-          createdAt: new Date().toISOString(),
-          device: navigator.userAgent,
-        }));
-      }
-
-      setPasskeySetupStatus("success");
-      setPasskeySetupMessage("Passkey created on this device.");
-      play("success");
-      showToastMessage({
-        type: "success",
-        message: "Passkey created on this device.",
-        position: "top-right",
+      const optionsResponse = await postData("/auth/passkeys/authentication/options", {
+        email: email.trim(),
+        role,
       });
-      window.setTimeout(() => completePasskeyStep(false), 700);
+      const credential = await startAuthentication({ optionsJSON: optionsResponse.data.options });
+      await postData("/auth/passkeys/authentication/verify", {
+        email: email.trim(),
+        role,
+        response: credential,
+        rememberMe,
+      });
+      const refreshed = await refreshUser();
+      if (!refreshed) throw new Error("Session cookie blocked. Allow cookies for obaol.com/api.obaol.com and retry.");
+      setLoginStatus("success");
+      setIsRedirecting(true);
+      play("success");
+      showToastMessage({ type: "success", message: "Passkey sign-in successful", position: "top-right" });
     } catch (error: any) {
-      const message = error?.name === "NotAllowedError"
-        ? "Passkey setup was cancelled or timed out."
-        : error?.message || "Passkey setup failed. You can continue without it.";
-      setPasskeySetupStatus("error");
-      setPasskeySetupMessage(message);
+      const message = error?.response?.data?.message || error?.message || "Passkey sign-in failed.";
+      setErrorMessage(message);
+      setLoginStatus("error");
       showToastMessage({ type: "error", message, position: "top-right" });
+      play("danger");
+    } finally {
+      setPasskeyLoginStatus("idle");
     }
   };
 
@@ -764,9 +694,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       panelLabel: "Operator Console",
       motifClassName: "bg-[linear-gradient(to_bottom,rgba(16,185,129,0.22),rgba(2,6,23,0.6))]",
       highlightClassName: "bg-gradient-to-r from-emerald-400 to-cyan-500",
-      audienceLabels: ["Operators", "Portfolio Managers", "Internal Ops", "Business Developers", "Digital Traders"],
+      audienceLabels: ["Operators", "Portfolio Managers", "Execution Specialists", "Business Developers", "Digital Traders"],
       infoStripTitle: "Operator Lane",
-      infoStripMessage: "Built for active execution teams.",
+      infoStripMessage: "For independent people coordinating trades, not company registration.",
       infoStripIcon: FiBriefcase,
       switchLabel: "Go to Associate Network",
       switchSubLabel: "Switch Role",
@@ -784,104 +714,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       switchSubLabel: "Switch Role",
     })
     : null;
-
-  if (showPasskeySetup) {
-    const deviceOptions = [
-      { label: "iMac", icon: FiMonitor },
-      { label: "MacBook", icon: FiMonitor },
-      { label: "iPhone", icon: FiSmartphone },
-      { label: "iPad / Tablet", icon: FiTablet },
-    ];
-
-    return (
-      <AuthLayout
-        title="OBAOL"
-        subtitle="Passkey setup"
-        leftPanel={currentRoleContent}
-        roleIdentity={roleIdentity || undefined}
-      >
-        <div className="w-full flex flex-col items-center gap-5">
-          <motion.div
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="w-full rounded-2xl border border-default-200/70 dark:border-white/10 bg-content1/95 dark:bg-white/[0.03] p-5 shadow-xl"
-          >
-            <div className="mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-obaol-500/20 bg-obaol-500/10">
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-background shadow-inner">
-                <FiKey className="text-4xl text-obaol-600 dark:text-obaol-300" />
-                <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-success-500 text-white shadow-lg shadow-success-500/20">
-                  <FiCheck size={16} strokeWidth={4} />
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-center">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                Sign in faster on this device
-              </h2>
-              <p className="mx-auto max-w-sm text-sm font-medium leading-relaxed text-foreground/65">
-                Create a passkey to use Face ID, Touch ID, fingerprint, or your screen lock on supported Apple and tablet devices.
-              </p>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              {deviceOptions.map((device) => (
-                <div
-                  key={device.label}
-                  className="flex items-center gap-2 rounded-xl border border-default-200/70 dark:border-white/10 bg-default-100/50 dark:bg-white/[0.03] px-3 py-2"
-                >
-                  <device.icon className="shrink-0 text-obaol-600 dark:text-obaol-300" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground/65">
-                    {device.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5 rounded-xl border border-primary-500/15 bg-primary-500/10 px-3 py-3">
-              <div className="flex gap-2">
-                <FiInfo className="mt-0.5 shrink-0 text-primary-500" />
-                <p className="text-xs font-semibold leading-relaxed text-foreground/65">
-                  Passkeys are device-bound and require a supported browser with a secure screen lock or biometric unlock.
-                </p>
-              </div>
-            </div>
-
-            {passkeySetupMessage && (
-              <div className={`mt-4 rounded-xl border px-3 py-2 text-center text-xs font-bold ${
-                passkeySetupStatus === "error"
-                  ? "border-danger-500/30 bg-danger-500/10 text-danger-500"
-                  : "border-success-500/30 bg-success-500/10 text-success-500"
-              }`}>
-                {passkeySetupMessage}
-              </div>
-            )}
-
-            <div className="mt-6 flex flex-col gap-3">
-              <Button
-                className="h-14 w-full rounded-2xl bg-gradient-to-r from-obaol-400 to-obaol-600 font-bold uppercase tracking-[0.18em] text-obaol-950 shadow-xl shadow-obaol-500/10"
-                color="warning"
-                size="lg"
-                radius="lg"
-                startContent={passkeySetupStatus === "creating" ? null : <FiShield />}
-                isLoading={passkeySetupStatus === "creating"}
-                onPress={handleCreatePasskey}
-              >
-                {passkeySetupStatus === "creating" ? "Creating passkey..." : "Continue with passkey"}
-              </Button>
-              <button
-                type="button"
-                onClick={() => completePasskeyStep(true)}
-                className="h-11 text-sm font-bold text-obaol-700 transition-colors hover:text-obaol-600 dark:text-obaol-300 dark:hover:text-obaol-200"
-              >
-                Not now
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </AuthLayout>
-    );
-  }
 
   if (isRedirecting) {
     return <BrandedLoader fullScreen message="Signing you in" variant="compact" />;
@@ -961,6 +793,27 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           </div>
         )}
 
+        {authMode === "signup" && roleKey === "operator" && (
+          <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 px-3 py-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
+                  Registering a company?
+                </p>
+                <p className="text-xs font-semibold leading-5 text-foreground/70">
+                  Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account.
+                </p>
+              </div>
+              <Link
+                href="/auth/register"
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-obaol-500 px-4 text-xs font-black uppercase tracking-[0.14em] text-obaol-950 transition hover:bg-obaol-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
+              >
+                Register as Associate
+              </Link>
+            </div>
+          </div>
+        )}
+
 
         {/* Highlighted Error Message for Signup/Login */}
         {errorMessage && (
@@ -1035,6 +888,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           value={email}
           className="w-full"
           type="email"
+          autoComplete="username webauthn"
           variant="bordered"
           label="Email Address"
           labelPlacement="outside"
@@ -1088,6 +942,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               </button>
             }
             type={isVisible ? "text" : "password"}
+            autoComplete="current-password"
             onValueChange={(val) => {
               setPassword(val);
               if (loginStatus !== "idle") setLoginStatus("idle");
@@ -1165,6 +1020,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                     : "Sign In"}
             </Button>
           </motion.div>
+        )}
+
+        {authMode === "login" && (
+          <Button
+            type="button"
+            variant="flat"
+            radius="lg"
+            className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
+            startContent={<FiKey />}
+            isLoading={passkeyLoginStatus === "loading"}
+            isDisabled={passkeySupport !== "supported" || isPreparingSession || passkeyLoginStatus === "loading"}
+            onPress={handlePasskeyLogin}
+          >
+            Sign in with passkey
+          </Button>
         )}
 
         {authMode === "signup" && (

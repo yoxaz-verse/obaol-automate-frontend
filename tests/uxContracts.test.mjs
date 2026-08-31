@@ -36,13 +36,24 @@ test("mobile app shell primitives are present", () => {
 
 test("the public entry clearly separates Associate and Operator accounts", () => {
   const entry = read("../src/components/Auth/AuthEntry.tsx");
+  const login = read("../src/components/Login/login-component.tsx");
   for (const phrase of [
+    "For companies and trade businesses",
+    "For independent execution specialists",
     "I represent an industry business",
     "I want to become an OBAOL Operator",
     "Registered company required",
     "not an internal operations or employee login",
+    "Do not choose this if you are registering",
   ]) assert.equal(entry.includes(phrase), true);
-  for (const phrase of ["I want to buy", "I want to sell", "I work in operations"]) assert.equal(entry.includes(phrase), false);
+  for (const phrase of [
+    "Registering a company?",
+    "For independent people coordinating trades, not company registration.",
+  ]) assert.equal(login.includes(phrase), true);
+  for (const phrase of ["I want to buy", "I want to sell", "I work in operations", "Internal Ops"]) {
+    assert.equal(entry.includes(phrase), false);
+    assert.equal(login.includes(phrase), false);
+  }
 });
 
 test("active homepage source does not advertise fabricated runtime telemetry", () => {
@@ -188,4 +199,12 @@ test("dashboard discovery uses Trade Listings terminology", () => {
   assert.equal(access.includes('label: "Commodity Directory"'), true);
   assert.equal(discovery.includes("Trade Listing Discovery"), true);
   assert.equal(discovery.includes('aria-label="Trade listing status"'), true);
+});
+
+test("variant rate wizard Commodity Directory CTA opens Commodity Directory", () => {
+  const wizard = read("../src/components/dashboard/Catalog/VariantRateWizardModal.tsx");
+  assert.equal(wizard.includes("Go to Commodity Directory"), true);
+  assert.equal(wizard.includes("Go to Global Catalog"), false);
+  assert.equal(wizard.includes('router.push("/dashboard/catalog")'), true);
+  assert.equal(wizard.includes('onClick={() => router.push("/dashboard/product")}'), false);
 });

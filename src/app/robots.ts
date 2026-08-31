@@ -11,6 +11,7 @@ export default function robots(): MetadataRoute.Robots {
           "/about",
           "/why-obaol",
           "/how-it-works",
+          "/quick-commerce-procurement",
           "/procurement",
           "/verification",
           "/export-resources",

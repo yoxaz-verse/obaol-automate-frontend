@@ -34,6 +34,8 @@ const formatDate = (value: any) => {
   return date.toLocaleString();
 };
 
+const getApprovalTimelineValue = (row: any) => row?.approvalRequestedAt || row?.createdAt;
+
 export default function ApprovalsPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"associates" | "companies" | "operators">("associates");
@@ -278,7 +280,7 @@ export default function ApprovalsPage() {
                     <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest">Tier / Designation</th>
                   )}
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Protocol Status</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Registration Timeline</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Approval Timeline</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-right pr-10">Command Hub</th>
                 </tr>
               </thead>
@@ -294,6 +296,7 @@ export default function ApprovalsPage() {
                     actionMutation.isPending &&
                     activeAction?.id === row._id &&
                     activeAction?.action === "REJECT";
+                  const timelineDate = formatDate(getApprovalTimelineValue(row));
 
                   return (
                     <tr
@@ -355,10 +358,10 @@ export default function ApprovalsPage() {
                         <div className="flex flex-col items-center gap-0.5">
                           <span className="text-[11px] font-bold text-default-500 flex items-center gap-1.5">
                             <LuCalendar size={12} className="opacity-40" />
-                            {formatDate(row.createdAt).split(",")[0]}
+                            {timelineDate.split(",")[0]}
                           </span>
                           <span className="text-[9px] font-medium text-default-400 opacity-60">
-                            {formatDate(row.createdAt).split(",")[1]?.trim()}
+                            {timelineDate.split(",")[1]?.trim()}
                           </span>
                         </div>
                       </td>
@@ -408,6 +411,7 @@ export default function ApprovalsPage() {
           <span className="text-[10px] font-bold uppercase tracking-widest text-default-400 opacity-60">System Registry Meta</span>
           <div className="text-xs font-bold text-default-500">
             Page {meta.page} of {meta.pages} <span className="mx-2 text-default-300">|</span> Total Entities: {meta.total}
+            <span className="mx-2 text-default-300">|</span> Newest approvals first
           </div>
         </div>
         <div className="flex items-center gap-3">

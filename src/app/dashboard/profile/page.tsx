@@ -10,6 +10,8 @@ import {
   Divider,
   Spacer as HeroSpacer,
   Chip as HeroChip,
+  Button,
+  Input,
 } from "@nextui-org/react";
 
 const Avatar = HeroAvatar as any;
@@ -20,14 +22,15 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
-import { getData, patchData } from "@/core/api/apiHandler";
+import { deleteDataBody, getData, patchData, postData } from "@/core/api/apiHandler";
 import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
-import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiUser, FiMoreVertical } from "react-icons/fi";
+import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiUser, FiMoreVertical, FiKey, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
 
 function AdminDashboardPanel() {
   const { data: globalStats } = useQuery({
@@ -302,6 +305,167 @@ const roleConfigs: Record<string, any> = {
 const getValue = (obj: any, path: string) =>
   path.split(".").reduce((acc, key) => acc?.[key], obj);
 
+function PasskeySecurityPanel() {
+  const [password, setPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [deviceLabel, setDeviceLabel] = useState("My device");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState("");
+
+  const { data, refetch } = useQuery({
+    queryKey: ["authPasskeys"],
+    queryFn: () => getData("/auth/passkeys"),
+  });
+
+  const passkeys = data?.data?.passkeys || [];
+  const passkeySupported = typeof window !== "undefined" && browserSupportsWebAuthn();
+
+  const sendOtp = async () => {
+    setIsSendingOtp(true);
+    setStatusMessage("");
+    try {
+      await postData("/verification/send-otp", { method: "email" });
+      setStatusMessage("OTP sent to your registered email.");
+    } catch (error: any) {
+      setStatusMessage(error?.response?.data?.message || "Unable to send OTP.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const createPasskey = async () => {
+    if (!passkeySupported) {
+      setStatusMessage("Passkeys are not available on this browser.");
+      return;
+    }
+    setIsCreating(true);
+    setStatusMessage("");
+    try {
+      const optionsResponse = await postData("/auth/passkeys/registration/options", {
+        password,
+        otpCode,
+        deviceLabel,
+      });
+      const registrationResponse = await startRegistration({ optionsJSON: optionsResponse.data.options });
+      await postData("/auth/passkeys/registration/verify", {
+        response: registrationResponse,
+        deviceLabel,
+      });
+      setPassword("");
+      setOtpCode("");
+      setStatusMessage("Passkey added.");
+      await refetch();
+    } catch (error: any) {
+      setStatusMessage(error?.response?.data?.message || error?.message || "Passkey setup failed.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const removePasskey = async (credentialId: string) => {
+    setPendingDeleteId(credentialId);
+    setStatusMessage("");
+    try {
+      await deleteDataBody(`/auth/passkeys/${encodeURIComponent(credentialId)}`, {}, { password, otpCode });
+      setPassword("");
+      setOtpCode("");
+      setStatusMessage("Passkey removed.");
+      await refetch();
+    } catch (error: any) {
+      setStatusMessage(error?.response?.data?.message || "Unable to remove passkey.");
+    } finally {
+      setPendingDeleteId("");
+    }
+  };
+
+  return (
+    <Card className="border db-border-subtle db-panel shadow-none rounded-[1.25rem] sm:rounded-[2rem]">
+      <CardHeader className="flex items-center gap-3 px-5 pt-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-obaol-500/20 bg-obaol-500/10 text-obaol-600 dark:text-obaol-300">
+          <FiKey />
+        </div>
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-[0.16em] text-foreground">Passkeys</h3>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-default-400">Password plus email OTP required</p>
+        </div>
+      </CardHeader>
+      <CardBody className="gap-4 px-5 pb-5">
+        <div className="flex flex-col gap-3">
+          <Input
+            label="Device label"
+            labelPlacement="outside"
+            value={deviceLabel}
+            onValueChange={setDeviceLabel}
+            placeholder="My laptop"
+            variant="bordered"
+          />
+          <Input
+            label="Current password"
+            labelPlacement="outside"
+            value={password}
+            onValueChange={setPassword}
+            placeholder="Enter password"
+            type="password"
+            autoComplete="current-password"
+            variant="bordered"
+          />
+          <Input
+            label="Email OTP"
+            labelPlacement="outside"
+            value={otpCode}
+            onValueChange={(value) => setOtpCode(value.replace(/\D/g, "").slice(0, 6))}
+            placeholder="000000"
+            variant="bordered"
+          />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Button variant="flat" isLoading={isSendingOtp} onPress={sendOtp}>
+              Send OTP
+            </Button>
+            <Button color="warning" isLoading={isCreating} isDisabled={!password || otpCode.length !== 6} onPress={createPasskey}>
+              Add passkey
+            </Button>
+          </div>
+        </div>
+
+        {statusMessage && (
+          <p className="rounded-xl border border-default-200 px-3 py-2 text-xs font-semibold text-foreground/70 dark:border-white/10">
+            {statusMessage}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-2">
+          {passkeys.length === 0 ? (
+            <p className="text-xs font-semibold text-default-400">No passkeys registered.</p>
+          ) : passkeys.map((passkey: any) => (
+            <div key={passkey.credentialId} className="flex items-center justify-between gap-3 rounded-xl border border-default-200 px-3 py-3 dark:border-white/10">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-foreground">{passkey.deviceLabel || "Passkey"}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-default-400">
+                  {passkey.lastUsedAt ? `Last used ${formatDate(passkey.lastUsedAt)}` : `Created ${formatDate(passkey.createdAt)}`}
+                </p>
+              </div>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="flat"
+                color="danger"
+                isLoading={pendingDeleteId === passkey.credentialId}
+                isDisabled={!password || otpCode.length !== 6}
+                onPress={() => removePasskey(passkey.credentialId)}
+                aria-label="Remove passkey"
+              >
+                <FiTrash2 />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardBody>
+    </Card>
+  );
+}
+
 export default function ProfilePage() {
   const { user } = useContext(AuthContext);
   const roleKeyRaw = user?.role?.toLowerCase() as string;
@@ -406,6 +570,8 @@ export default function ProfilePage() {
                       <FiArrowRight size={20} className="text-default-300 group-hover:translate-x-1 transition-transform hidden sm:block" />
                     </div>
                   </Card>
+
+                  <PasskeySecurityPanel />
                 </div>
 
                 {/* Right Matrix: Informative Hub */}

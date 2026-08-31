@@ -25,11 +25,13 @@ const associateExamples = [
 const roleOptions = [
   {
     role: "Associate",
-    kicker: "Business network",
+    audience: "For companies and trade businesses",
+    kicker: "Recommended for companies",
     title: "I represent an industry business",
     description:
       "For businesses that buy, sell, move, inspect, finance, package, or support commodities across the OBAOL network.",
     href: "/auth/register",
+    ctaLabel: "Register company as Associate",
     detailHref: "/roles/associate",
     detailLabel: "Explore Associate roles",
     requirement: "Registered company required",
@@ -40,11 +42,13 @@ const roleOptions = [
   },
   {
     role: "Operator",
-    kicker: "Execution desk",
+    audience: "For independent execution specialists",
+    kicker: "Individual operator role",
     title: "I want to become an OBAOL Operator",
     description:
       "For individuals who build company portfolios, develop buyer and supplier relationships, and coordinate trade execution through OBAOL.",
     href: "/auth/operator/register",
+    ctaLabel: "Apply as Operator",
     detailHref: "/roles/operator",
     detailLabel: "Learn how Operators work",
     requirement: "Individual role, no company account required",
@@ -52,6 +56,8 @@ const roleOptions = [
     aura: "from-cyan-400/20 via-emerald-400/10 to-transparent",
     stats: ["Portfolio building", "Relationship execution", "Deal coordination"],
     note: "Independent trade-execution role, not an internal operations or employee login.",
+    warning:
+      "Do not choose this if you are registering a buyer, seller, supplier, exporter, importer, warehouse, lab, or logistics company.",
   },
 ] as const;
 
@@ -192,7 +198,7 @@ export default function AuthEntry() {
                     {signInView ? "Choose your account" : "Select your path"}
                   </p>
                   <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                    {signInView ? "Where should we take you?" : "Two paths. One trade layer."}
+                    {signInView ? "Where should we take you?" : "Choose the account that matches who you are."}
                   </h2>
                 </div>
                 <div className="pt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
@@ -235,7 +241,11 @@ export default function AuthEntry() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.45, delay: 0.1 + index * 0.08 }}
-                      className="group relative flex min-h-[430px] flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5 shadow-black/20 transition duration-500 hover:-translate-y-1 hover:border-obaol-400/45 hover:bg-white/[0.05] hover:shadow-2xl hover:shadow-black/35 focus-within:-translate-y-1 focus-within:border-obaol-400/45 focus-within:bg-white/[0.05] focus-within:shadow-2xl focus-within:shadow-black/35 md:p-6"
+                      className={`group relative flex min-h-[430px] flex-col overflow-hidden rounded-[1.5rem] p-5 shadow-black/20 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/35 focus-within:-translate-y-1 focus-within:shadow-2xl focus-within:shadow-black/35 md:p-6 ${
+                        option.role === "Associate"
+                          ? "border border-obaol-300/35 bg-obaol-500/[0.08] hover:border-obaol-300/65 hover:bg-obaol-500/[0.12] focus-within:border-obaol-300/65 focus-within:bg-obaol-500/[0.12]"
+                          : "border border-white/10 bg-white/[0.025] hover:border-white/25 hover:bg-white/[0.04] focus-within:border-white/25 focus-within:bg-white/[0.04]"
+                      }`}
                     >
                       <div className={`absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br ${option.aura} blur-3xl transition duration-700 group-hover:scale-125 group-focus-within:scale-125`} />
                       <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100 group-focus-within:opacity-100" />
@@ -250,6 +260,7 @@ export default function AuthEntry() {
                           </span>
                         </div>
 
+                        <p className="mt-5 text-xs font-extrabold text-obaol-200">{option.audience}</p>
                         <p className="mt-6 text-[10px] font-black uppercase tracking-[0.25em] text-obaol-300">{option.role}</p>
                         <h3 className="mt-2 text-[1.35rem] font-black leading-tight text-white xl:text-2xl">{option.title}</h3>
                         <p className="mt-3 text-sm font-medium leading-6 text-white/60">{option.description}</p>
@@ -277,13 +288,23 @@ export default function AuthEntry() {
                           </p>
                         )}
 
+                        {"warning" in option && (
+                          <p className="mt-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 text-xs font-bold leading-5 text-white/70">
+                            {option.warning}
+                          </p>
+                        )}
+
                         <div className="mt-auto flex flex-col gap-3 pt-6">
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/40">{option.requirement}</p>
                           <Link
                             href={option.href}
-                            className="group/cta inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-obaol-500 px-4 py-2 text-sm font-black text-obaol-950 transition hover:bg-obaol-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400 sm:w-fit"
+                            className={`group/cta inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400 sm:w-fit ${
+                              option.role === "Associate"
+                                ? "bg-obaol-500 text-obaol-950 hover:bg-obaol-300"
+                                : "border border-obaol-400/35 bg-transparent text-obaol-200 hover:border-obaol-300 hover:bg-obaol-400/10 hover:text-white"
+                            }`}
                           >
-                            Continue as {option.role}
+                            {option.ctaLabel}
                             <FiArrowRight className="ml-2 transition-transform duration-300 group-hover/cta:translate-x-1" />
                           </Link>
                           <Link

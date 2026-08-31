@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/about`, priority: 0.9, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/why-obaol`, priority: 0.9, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/how-it-works`, priority: 0.9, changeFrequency: "monthly", lastModified },
+    { url: `${baseUrl}/quick-commerce-procurement`, priority: 0.9, changeFrequency: "weekly", lastModified },
     { url: `${baseUrl}/procurement`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/verification`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/export-resources`, priority: 0.8, changeFrequency: "monthly", lastModified },

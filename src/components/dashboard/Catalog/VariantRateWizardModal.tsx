@@ -104,6 +104,10 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
 
   const rateValue = Number(formData.rate || 0);
   const computedCommission = Number.isFinite(rateValue) ? rateValue * (commissionPercent / 100) : 0;
+  const goToGlobalCatalog = () => {
+    onClose();
+    router.push("/dashboard/catalog");
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -849,15 +853,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         <div className="flex items-start gap-2">
                           <FiGlobe size={16} className="text-obaol-400 mt-0.5" />
                           <p className="text-[11px] sm:text-xs text-obaol-700 dark:text-obaol-300 leading-relaxed font-medium">
-                            Can&apos;t find your product or variant? Go to Global Catalog and add it.
+                            Can&apos;t find your product or variant? Go to Commodity Directory and add it.
                           </p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => router.push("/dashboard/product")}
+                          onClick={goToGlobalCatalog}
                           className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider text-obaol-300 hover:text-obaol-200 underline underline-offset-4 transition-colors"
                         >
-                          Go to Global Catalog
+                          Go to Commodity Directory
                           <FiArrowRight size={14} />
                         </button>
                       </div>

@@ -46,6 +46,7 @@ function DashboardLayoutContent({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [verifiedPathname, setVerifiedPathname] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -64,7 +65,7 @@ function DashboardLayoutContent({
     localStorage.setItem("sidebarCollapsed", String(value));
   };
 
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, refreshUser } = useContext(AuthContext);
   const roleLower = String(user?.role || "").toLowerCase();
   const isOperatorFamily = roleLower === "operator" || roleLower === "team";
   const isAssociate = roleLower === "associate";
@@ -116,6 +117,25 @@ function DashboardLayoutContent({
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!isMounted || !pathname.startsWith("/dashboard")) return;
+
+    let active = true;
+
+    const verifyDashboardSession = async () => {
+      const isValid = await refreshUser();
+      if (active && isValid) {
+        setVerifiedPathname(pathname);
+      }
+    };
+
+    void verifyDashboardSession();
+
+    return () => {
+      active = false;
+    };
+  }, [isMounted, pathname, refreshUser]);
 
   useEffect(() => {
     if (loading) return;
@@ -170,10 +190,10 @@ function DashboardLayoutContent({
     return () => window.removeEventListener("keydown", handler, { capture: true } as any);
   }, [router, user?.role, user?.tradeMode]);
 
-  if (!isMounted) {
+  if (!isMounted || verifiedPathname !== pathname || loading) {
     return (
       <section className="db-bg min-h-screen">
-        <BrandedLoader fullScreen message="ESTABLISHING COMMAND LINK" variant="compact" />
+        <BrandedLoader fullScreen message="Loading your workspace" variant="compact" />
       </section>
     );
   }

@@ -88,12 +88,12 @@ export default function BrokenTradeExperience() {
   );
   return (
     <section
-      className="relative py-28 sm:py-40 px-4 sm:px-6 bg-background overflow-hidden"
+      className="relative py-28 sm:py-40 px-4 sm:px-6 bg-background overflow-hidden public-standard-section"
     >
       {/* Ambient error glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 right-0 w-[800px] h-[800px] bg-red-500/5 blur-[150px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] -translate-x-1/4 translate-y-1/4" />
+        <div className="absolute top-1/2 right-0 w-[800px] h-[800px] bg-red-500/5 blur-[150px] -translate-y-1/2 translate-x-1/3 public-decoration" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] -translate-x-1/4 translate-y-1/4 public-decoration" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto">
@@ -127,7 +127,7 @@ export default function BrokenTradeExperience() {
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="relative rounded-3xl backdrop-blur-2xl bg-white/[0.02] border border-default-200/50 shadow-none p-6 sm:p-12 overflow-hidden min-h-[400px] flex flex-col justify-between"
+          className="relative rounded-3xl backdrop-blur-2xl bg-white/[0.02] border border-default-200/50 shadow-none p-6 sm:p-12 overflow-hidden min-h-[400px] flex flex-col justify-between public-surface-card"
         >
           {/* Subtle warning glow tied to progress */}
           <div className="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />

@@ -25,8 +25,8 @@ export default function TrustPage() {
     <section>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       <Header />
-      <main className="max-w-5xl mx-auto px-6 py-16 md:py-24">
-        <div className="rounded-3xl border border-default-200 bg-content1 p-8 md:p-12 shadow-sm">
+      <main className="max-w-5xl mx-auto px-6 py-16 md:py-24 public-layout-container">
+        <div className="rounded-3xl border border-default-200 bg-content1 p-8 md:p-12 shadow-sm public-surface-card">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-default-500">Trust & Verification</p>
           <h1 className="mt-4 text-3xl md:text-5xl font-black tracking-tight text-foreground">Official Business Identity</h1>
           <p className="mt-5 text-default-600 leading-relaxed">

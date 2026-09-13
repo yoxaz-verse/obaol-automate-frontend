@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import { KeyboardEvent, useRef, useState } from "react";
 import {
   FiBox,
@@ -456,13 +456,13 @@ export default function UnifiedExecutionWorkspace() {
   };
 
   return (
-    <section aria-labelledby="unified-workspace-title" className="group/workspace relative overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-gradient-to-b from-obaol-50/30 via-content1/40 to-background/45 p-3 shadow-[0_24px_80px_-48px_rgba(207,152,60,0.35)] backdrop-blur-md sm:p-4 md:rounded-[2.75rem] md:p-6 dark:from-obaol-950/20 dark:via-content1/35">
-      <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-obaol-500/8 blur-3xl" />
+    <section aria-labelledby="unified-workspace-title" className="group/workspace relative overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-gradient-to-b from-obaol-50/30 via-content1/40 to-background/45 p-3 shadow-[0_24px_80px_-48px_rgba(207,152,60,0.35)] backdrop-blur-md sm:p-4 md:rounded-[2.75rem] md:p-6 dark:from-obaol-950/20 dark:via-content1/35 public-surface-card">
+      <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-obaol-500/8 blur-3xl public-decoration" />
 
       <header className="relative mb-4 flex flex-col gap-4 border-b border-default-200/60 px-2 pb-5 sm:px-3 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           <figure className="relative hidden h-16 w-28 shrink-0 overflow-hidden rounded-2xl border border-obaol-500/20 bg-black sm:block">
-            <Image src="/images/order-execution-tracking.png" alt="OBAOL panel tracking a Black Pepper export order" fill loading="lazy" sizes="112px" className="object-cover object-[center_62%]" />
+            <RevealImage src="/images/order-execution-tracking.png" alt="OBAOL panel tracking a Black Pepper export order" fill loading="lazy" sizes="112px" className="object-cover object-[center_62%]" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
           </figure>
           <div className="min-w-0">
@@ -517,7 +517,7 @@ export default function UnifiedExecutionWorkspace() {
               animate={{ opacity: 1, y: 0 }}
               exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
               transition={{ duration: reducedMotion ? 0 : 0.22, ease: "easeOut" }}
-              className="flex h-full min-h-[500px] flex-col overflow-hidden rounded-[1.75rem] border border-obaol-500/20 bg-gradient-to-br from-obaol-500/10 via-content1/75 to-background/70 p-5 sm:p-6 md:p-7"
+              className="flex h-full min-h-[500px] flex-col overflow-hidden rounded-[1.75rem] border border-obaol-500/20 bg-gradient-to-br from-obaol-500/10 via-content1/75 to-background/70 p-5 sm:p-6 md:p-7 public-surface-card"
             >
               <div className="flex items-start justify-between gap-4">
                 <div><p className="text-[9px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">Capability {String(activeIndex + 1).padStart(2, "0")} · Connected workspace</p><h3 className="mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">{activeCapability.title}</h3></div>

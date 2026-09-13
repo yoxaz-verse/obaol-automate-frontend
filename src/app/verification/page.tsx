@@ -44,7 +44,7 @@ export default function VerificationPage() {
       />
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16 public-layout-container">
         <FadeIn>
           <div className="mb-8 flex justify-center">
             <IndiaFirstNote />
@@ -61,7 +61,7 @@ export default function VerificationPage() {
               In commodity trade, most losses do not happen because of price.<br className="hidden md:block" />
               They happen because of <strong className="text-foreground font-semibold">who you are dealing with</strong>.
             </p>
-            <div className="p-6 md:p-8 rounded-3xl bg-primary/5 border border-primary/20 max-w-3xl mx-auto backdrop-blur-sm">
+            <div className="p-6 md:p-8 rounded-3xl bg-primary/5 border border-primary/20 max-w-3xl mx-auto backdrop-blur-sm public-surface-card">
               <p className="text-lg md:text-xl">
                 Verification is not a checkbox. It is a continuous discipline applied at the right stages of execution. 
                 <span className="block mt-4 font-semibold text-primary">OBAOL treats verification as a core responsibility, not an optional step.</span>
@@ -73,7 +73,7 @@ export default function VerificationPage() {
         {/* Why Verification Matters & Approach Grid */}
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 max-w-6xl mx-auto">
           <FadeIn>
-            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider">
+            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider public-surface-card">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-danger/10 text-danger shadow-sm">
                   <LuAlertTriangle className="w-7 h-7" />
@@ -104,7 +104,7 @@ export default function VerificationPage() {
           </FadeIn>
 
           <FadeIn>
-            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider">
+            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider public-surface-card">
                <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-success/10 text-success shadow-sm">
                   <LuShieldCheck className="w-7 h-7" />
@@ -188,7 +188,7 @@ export default function VerificationPage() {
                 number: "04"
               }
             ].map((pillar, i) => (
-              <div key={i} className="flex flex-col p-8 rounded-3xl border border-divider bg-content1 hover:shadow-xl hover:border-primary/50 transition-all relative overflow-hidden group">
+              <div key={i} className="flex flex-col p-8 rounded-3xl border border-divider bg-content1 hover:shadow-xl hover:border-primary/50 transition-all relative overflow-hidden group public-surface-card">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-bl-[100px] -z-10 transition-transform duration-500 group-hover:scale-125" />
                 <div className="absolute top-6 right-6 text-foreground/5 font-black text-6xl select-none z-0">
                   {pillar.number}
@@ -292,7 +292,7 @@ export default function VerificationPage() {
                 For New Entrants
               </h3>
               <p className="text-foreground/70 text-lg mb-8 leading-relaxed">For serious new entrants, verification acts as a definitive bridge to market credibility.</p>
-              <div className="bg-primary/5 rounded-3xl p-8 border border-primary/20 h-[calc(100%-140px)] flex flex-col justify-center">
+              <div className="bg-primary/5 rounded-3xl p-8 border border-primary/20 h-[calc(100%-140px)] flex flex-col justify-center public-surface-card">
                 <ul className="space-y-6 mb-8">
                   <li className="flex items-center gap-4 text-lg font-medium">
                     <div className="bg-primary/10 p-2 rounded-full text-primary">
@@ -352,8 +352,8 @@ export default function VerificationPage() {
 
         <FadeIn>
           <div className="text-center max-w-3xl mx-auto bg-foreground text-background p-12 rounded-[3rem] shadow-2xl relative overflow-hidden">
-             <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 blur-3xl rounded-full" />
-             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary/20 blur-3xl rounded-full" />
+             <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 blur-3xl rounded-full public-decoration" />
+             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary/20 blur-3xl rounded-full public-decoration" />
             
             <h3 className="text-3xl font-bold mb-8 relative z-10">In Summary</h3>
             <p className="text-2xl text-background/80 leading-relaxed font-light relative z-10">

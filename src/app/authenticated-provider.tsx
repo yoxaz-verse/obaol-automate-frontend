@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/context/AuthContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -27,6 +28,14 @@ export const queryClient = new QueryClient({
 });
 
 export function AuthenticatedProviders({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // The account chooser is public and does not consume auth, query, or currency
+  // state. Avoid session verification and provider-driven rerenders on this LCP-
+  // sensitive entry route; the actual sign-in and registration routes retain the
+  // complete provider stack.
+  if (pathname === "/auth") return children;
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

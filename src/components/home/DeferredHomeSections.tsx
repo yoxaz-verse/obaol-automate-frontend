@@ -6,9 +6,9 @@ import { useEffect, useRef, useState } from "react";
 const HomeDeferredContent = dynamic(() => import("@/components/home/HomeDeferredContent"), {
   ssr: false,
   loading: () => (
-    <section className="py-24">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="h-64 rounded-3xl border border-default-200/60 bg-content1/40 animate-pulse" />
+    <section className="py-24 public-standard-section">
+      <div className="mx-auto max-w-7xl px-4 md:px-6 public-layout-container">
+        <div className="h-64 rounded-3xl border border-default-200/60 bg-content1/40 animate-pulse public-surface-card" />
       </div>
     </section>
   ),

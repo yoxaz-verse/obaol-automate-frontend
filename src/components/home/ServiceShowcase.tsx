@@ -14,6 +14,7 @@ import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 import { useInViewport } from "@/hooks/useInViewport";
+import { RevealNativeImage } from "@/components/ui/RevealImage";
 
 const services = [
   {
@@ -165,7 +166,7 @@ function RealisticServiceVisual({
       exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 1.02, filter: "blur(8px)" }}
       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.img
+      <RevealNativeImage
         key={service.image}
         src={service.image}
         alt={service.imageAlt}
@@ -173,12 +174,9 @@ function RealisticServiceVisual({
         decoding="async"
         className="absolute inset-0 !h-full !w-full !max-w-none object-cover"
         style={{ objectPosition: service.imagePosition }}
-        initial={shouldReduceMotion ? false : { scale: 1.03 }}
-        animate={{ scale: 1 }}
-        transition={shouldReduceMotion ? { duration: 0 } : { duration: 3.2, ease: "easeOut" }}
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.48)_43%,rgba(0,0,0,0.1)_76%),linear-gradient(to_right,rgba(0,0,0,0.42),transparent_64%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.48)_43%,rgba(0,0,0,0.1)_76%),linear-gradient(to_right,rgba(0,0,0,0.42),transparent_64%)] public-decoration" />
 
       <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/45 text-white/36 shadow-[0_0_28px_rgba(0,0,0,0.38)] backdrop-blur-sm md:flex">
         <Icon size={58} />
@@ -252,9 +250,9 @@ export default function ServiceShowcase() {
   );
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-background py-16 md:py-24">
+    <section ref={sectionRef} className="relative overflow-hidden bg-background py-16 md:py-24 public-standard-section">
       <div className="absolute inset-0 pointer-events-none opacity-60">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(207,152,60,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(207,152,60,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(207,152,60,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(207,152,60,0.1)_1px,transparent_1px)] bg-[size:4.5rem_4.5rem] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)] public-decoration" />
         {allowAnimatedScene && particleSeeds.map((particle) => (
           <motion.span
             key={particle.id}
@@ -280,7 +278,7 @@ export default function ServiceShowcase() {
         ))}
       </div>
 
-      <div className="container relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
+      <div className="container relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
           <div className="lg:col-span-4 flex flex-col justify-between gap-8">
             <div className="space-y-5">
@@ -326,7 +324,7 @@ export default function ServiceShowcase() {
           </div>
 
           <div className="lg:col-span-8">
-            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-obaol-500/15 bg-black shadow-2xl shadow-obaol-950/30 md:min-h-[620px]">
+            <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] border border-obaol-500/15 bg-black shadow-2xl shadow-obaol-950/30 md:min-h-[620px] public-surface-card">
               <AnimatePresence mode="wait">
                 <RealisticServiceVisual
                   key={activeService.id}

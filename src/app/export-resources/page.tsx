@@ -34,7 +34,7 @@ export default function ExportResourcesPage() {
     <main className="min-h-screen bg-background">
       <Header />
 
-      <section className="mx-auto max-w-7xl px-4 md:px-6 pb-12 pt-28 md:pt-32">
+      <section className="mx-auto max-w-7xl px-4 md:px-6 pb-12 pt-28 md:pt-32 public-layout-container">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             Export Resource Center

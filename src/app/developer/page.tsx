@@ -1,9 +1,177 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  FiActivity,
+  FiArrowRight,
+  FiBookOpen,
+  FiCheckCircle,
+  FiCpu,
+  FiKey,
+  FiLock,
+  FiRefreshCw,
+  FiShield,
+  FiTerminal,
+} from "react-icons/fi";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 
 const BASE_URL = "https://obaol.com";
+const API_BASE_URL = "https://api.obaol.com";
+
+const overviewCards = [
+  {
+    title: "API keys",
+    description: "Create scoped keys, use them as Bearer tokens, rotate access, and revoke compromised keys immediately.",
+    icon: FiKey,
+  },
+  {
+    title: "Trade data APIs",
+    description: "Read products, prices, and verified trader signals, then capture enquiry intent from external workflows.",
+    icon: FiTerminal,
+  },
+  {
+    title: "MCP connectors",
+    description: "Create connector tokens for ChatGPT app connectors and MCP-based assistants without exposing your raw API key.",
+    icon: FiCpu,
+  },
+  {
+    title: "Usage controls",
+    description: "Monitor request volume, top routes, per-key activity, status codes, and rate-limit behavior.",
+    icon: FiActivity,
+  },
+];
+
+const quickStartSteps = [
+  {
+    title: "Sign in to Developer Mode",
+    description: "Use Google sign-in to create or access your developer profile.",
+    href: "/developer/login",
+    cta: "Open login",
+  },
+  {
+    title: "Generate an API key",
+    description: "Create a labeled key, choose a permission preset, and copy the raw key once when it is shown.",
+    href: "/developer/keys",
+    cta: "Manage keys",
+  },
+  {
+    title: "Call an endpoint",
+    description: "Send Authorization: Bearer <API_KEY> with every protected business API request.",
+    href: "#code-examples",
+    cta: "View example",
+  },
+  {
+    title: "Monitor and rotate",
+    description: "Track usage by route and key, revoke keys that are no longer needed, and create replacement keys when required.",
+    href: "/developer/usage",
+    cta: "View usage",
+  },
+];
+
+const endpoints = [
+  {
+    method: "GET",
+    path: "/v1/products/live",
+    permission: "products:read",
+    purpose: "Return live trade-ready product signals.",
+    notes: "Optional query: associateCompany, page, limit.",
+  },
+  {
+    method: "GET",
+    path: "/v1/products/all",
+    permission: "products:read",
+    purpose: "Return the full product catalog for catalog sync and matching.",
+    notes: "Optional query: associateCompany, page, limit.",
+  },
+  {
+    method: "GET",
+    path: "/v1/prices",
+    permission: "prices:read",
+    purpose: "Return commodity price data for response and pricing workflows.",
+    notes: "Optional query: commodity.",
+  },
+  {
+    method: "GET",
+    path: "/v1/traders",
+    permission: "traders:read",
+    purpose: "Return trader records for discovery and verification-aware workflows.",
+    notes: "Optional query: verified=true.",
+  },
+  {
+    method: "POST",
+    path: "/v1/inquiries",
+    permission: "inquiries:create",
+    purpose: "Create an enquiry from an external form, chat, CRM, or automation workflow.",
+    notes: "JSON request body.",
+  },
+  {
+    method: "POST",
+    path: "/v1/calculate/cif",
+    permission: "calculator:use",
+    purpose: "Calculate CIF values for trade estimation workflows.",
+    notes: "JSON request body.",
+  },
+];
+
+const permissionPresets = [
+  {
+    name: "read_only",
+    permissions: "prices:read, traders:read, products:read",
+    description: "Best for dashboards, catalog syncs, and read-only automation.",
+  },
+  {
+    name: "automation_basic",
+    permissions: "prices:read, traders:read, products:read, inquiries:create, calculator:use",
+    description: "Default preset for lead capture, product lookup, and calculation workflows.",
+  },
+  {
+    name: "full_api",
+    permissions: "*",
+    description: "Restricted by server policy and only available when explicitly enabled.",
+  },
+];
+
+const codeExamples = [
+  {
+    title: "Read live products",
+    language: "bash",
+    code: `curl -X GET "${API_BASE_URL}/v1/products/live?page=1&limit=20" \\
+  -H "Authorization: Bearer <API_KEY>"`,
+  },
+  {
+    title: "Create an enquiry",
+    language: "bash",
+    code: `curl -X POST "${API_BASE_URL}/v1/inquiries" \\
+  -H "Authorization: Bearer <API_KEY>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "product": "Turmeric",
+    "quantity": 25,
+    "buyerName": "Example Buyer"
+  }'`,
+  },
+  {
+    title: "Use a connector token",
+    language: "text",
+    code: `${API_BASE_URL}/mcp?connectorToken=<CONNECTOR_TOKEN>`,
+  },
+];
+
+const securityNotes = [
+  "Raw API keys are shown once when created. Store them in a secret manager or automation credential vault.",
+  "API keys are stored as hashes server-side and cannot be recovered after creation.",
+  "Revoked API keys and revoked connector tokens are blocked immediately.",
+  "Every business API request must include Authorization: Bearer <API_KEY> unless you are using a connector-token flow.",
+  "Per-key rate limits are bounded by platform policy and can be monitored from the usage interface.",
+];
+
+const mcpSteps = [
+  "Create an active API key from Developer Keys.",
+  "Create a ChatGPT Connector token linked to that API key.",
+  "Use the generated MCP Server URL in your ChatGPT app connector or MCP-compatible tool.",
+  "Set authentication mode to No Auth because the connector token is already embedded in the URL.",
+  "Use /mcp/info and /mcp/health for connector status checks.",
+];
 
 const faqItems = [
   {
@@ -12,19 +180,19 @@ const faqItems = [
   },
   {
     q: "How do I generate an API key?",
-    a: "Sign in with Google, open Developer Keys, create a key label, and copy the secret once. Use it as a Bearer token in your automation tool.",
+    a: "Sign in with Google, open Developer Keys, create a key label, choose a preset, and copy the secret once.",
   },
   {
     q: "Can I use this with n8n?",
-    a: "Yes. Use the HTTP Request node, pass Authorization: Bearer <YOUR_API_KEY>, and call OBAOL endpoints like /v1/products/live.",
+    a: "Yes. Use the HTTP Request node, pass Authorization: Bearer <API_KEY>, and call OBAOL endpoints such as /v1/products/live.",
   },
   {
     q: "Can I use this for MCP and ChatGPT app connectors?",
-    a: "Yes. Developer Mode is designed to provide stable API-key based access suitable for MCP tooling and custom connector flows.",
+    a: "Yes. Create a connector token in Developer Keys and use the generated MCP URL in ChatGPT app connector setup.",
   },
   {
-    q: "How are API keys secured?",
-    a: "Raw keys are shown once on creation, stored as hashes server-side, and can be revoked immediately from Developer Keys.",
+    q: "Why does /mcp look blank in a browser?",
+    a: "The /mcp endpoint is an SSE stream endpoint for tools and connectors, so direct browser navigation may not show a normal page.",
   },
   {
     q: "What happens when a key is revoked?",
@@ -48,18 +216,19 @@ const faqJsonLd = {
 const webPageJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "OBAOL Developer APIs",
+  name: "OBAOL Developer Documentation",
   url: `${BASE_URL}/developer`,
   description:
-    "Build agri-trade automations with OBAOL developer APIs for live products, catalog sync, and workflow integrations with n8n, MCP, and ChatGPT connectors.",
+    "Developer documentation for OBAOL agri-trade APIs, API keys, MCP connectors, endpoint reference, and automation workflows.",
 };
 
 export const metadata: Metadata = {
-  title: "OBAOL Developer APIs for Agri Trade Automation",
+  title: "OBAOL Developer Documentation and API Reference",
   description:
-    "Use OBAOL Developer Mode to run outreach, capture enquiries and orders through automation, and connect your workflows with n8n, MCP, and ChatGPT app integrations.",
+    "Use OBAOL Developer Mode to generate API keys, call agri-trade endpoints, set up MCP connectors, and monitor automation usage.",
   keywords: [
-    "OBAOL developer API",
+    "OBAOL developer documentation",
+    "OBAOL API reference",
     "agri trade API",
     "export automation API",
     "n8n integration API",
@@ -71,46 +240,24 @@ export const metadata: Metadata = {
     canonical: `${BASE_URL}/developer`,
   },
   openGraph: {
-    title: "OBAOL Developer APIs for Agri Trade Automation",
+    title: "OBAOL Developer Documentation and API Reference",
     description:
-      "Generate API keys and connect OBAOL APIs to n8n, MCP, and ChatGPT app connectors.",
+      "Generate API keys, call OBAOL APIs, connect MCP tools, and monitor developer usage.",
     url: `${BASE_URL}/developer`,
     siteName: "OBAOL",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OBAOL Developer APIs for Agri Trade Automation",
+    title: "OBAOL Developer Documentation and API Reference",
     description:
-      "Build automations and integrations using OBAOL developer APIs.",
+      "Build agri-trade automations using OBAOL developer APIs and connector tokens.",
   },
 };
 
-const buildCards = [
-  "Outreach automation pipelines for email, forms, and chat",
-  "Real-time product and pricing based response systems",
-  "Automatic enquiry capture and routing into your workflow",
-  "Order-intent tracking and handoff automation",
-  "MCP and ChatGPT connector-based sales assistants",
-];
-
-const earnItems = [
-  "Offer outreach automation setups to businesses using OBAOL APIs",
-  "Build done-for-you systems that capture leads, enquiries, and order requests",
-  "Charge for integration, workflow maintenance, and optimization retainers",
-  "Let OBAOL handle downstream trade flow while you focus on automation outcomes",
-];
-
-const howItWorks = [
-  "Sign in with Google",
-  "Generate API key in Developer Keys",
-  "Connect n8n, MCP, or ChatGPT app integrations",
-  "Monitor usage and rotate/revoke keys as needed",
-];
-
 export default function DeveloperIndexPage() {
   return (
-    <main className="min-h-screen bg-default-50 dark:bg-[#07090f]">
+    <main className="min-h-screen bg-default-50 text-foreground dark:bg-[#07090f]">
       <Header />
       <script
         type="application/ld+json"
@@ -121,159 +268,260 @@ export default function DeveloperIndexPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <section className="mx-auto max-w-6xl rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-8 md:p-10 shadow-sm dark:shadow-none mt-24 px-4">
-        <div className="max-w-3xl">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-default-900 dark:text-white">
-            OBAOL Developer APIs for Agri Trade Automation
-          </h1>
-          <p className="mt-4 text-base text-default-700 dark:text-white/80">
-            Use automation to run outreach, capture enquiries, and route order intent at scale. OBAOL APIs help automators and operators plug n8n, MCP, and ChatGPT-based workflows into one execution-ready pipeline.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/developer/login"
-              className="inline-flex items-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
-            >
-              Continue with Google
-            </Link>
+      <section className="mx-auto max-w-6xl px-4 pt-24 md:pt-28">
+        <div className="grid gap-8 rounded-lg border border-default-200 bg-white p-6 shadow-sm dark:border-white/15 dark:bg-[#11151f] md:grid-cols-[1.05fr_0.95fr] md:p-10">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
+              Developer Documentation
+            </p>
+            <h1 className="mt-4 text-3xl font-black tracking-tight text-default-900 dark:text-white md:text-5xl">
+              OBAOL APIs for agri-trade automation.
+            </h1>
+            <p className="mt-5 max-w-3xl text-base leading-relaxed text-default-700 dark:text-white/78 md:text-lg">
+              Generate API keys, connect MCP tools, read live trade data, capture enquiries, and monitor usage from one developer workflow.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/developer/login"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-obaol-500 px-5 py-3 text-sm font-black text-obaol-950 transition hover:bg-obaol-400"
+              >
+                Start with Google
+                <FiArrowRight aria-hidden="true" />
+              </Link>
+              <a
+                href="#endpoint-reference"
+                className="inline-flex items-center justify-center rounded-lg border border-default-300 px-5 py-3 text-sm font-bold text-default-800 transition hover:border-obaol-400 hover:bg-obaol-500/10 dark:border-white/25 dark:text-white"
+              >
+                View endpoint reference
+              </a>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-default-200 bg-default-50 p-5 dark:border-white/15 dark:bg-[#0c1118]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">
+              API Base URL
+            </p>
             <a
-              href="#api-capabilities"
-              className="inline-flex items-center rounded-xl border border-default-300 dark:border-white/25 px-5 py-2.5 text-sm font-semibold text-default-800 dark:text-white hover:bg-default-100 dark:hover:bg-white/10"
+              href={API_BASE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block break-all font-mono text-sm font-bold text-primary-500 hover:underline md:text-base"
             >
-              Explore API Link & Capabilities
+              {API_BASE_URL}
             </a>
+            <dl className="mt-6 grid gap-4 text-sm">
+              <div>
+                <dt className="font-bold text-default-900 dark:text-white">Authentication</dt>
+                <dd className="mt-1 text-default-600 dark:text-white/70">Authorization: Bearer &lt;API_KEY&gt;</dd>
+              </div>
+              <div>
+                <dt className="font-bold text-default-900 dark:text-white">Default key preset</dt>
+                <dd className="mt-1 text-default-600 dark:text-white/70">automation_basic</dd>
+              </div>
+              <div>
+                <dt className="font-bold text-default-900 dark:text-white">Connector model</dt>
+                <dd className="mt-1 text-default-600 dark:text-white/70">MCP connector token linked to an active API key</dd>
+              </div>
+            </dl>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto mt-8 max-w-6xl grid gap-6 md:grid-cols-2 xl:grid-cols-3 px-4">
-        <article className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6">
-          <h2 className="text-lg font-semibold text-default-900 dark:text-white">What You Can Build</h2>
-          <ul className="mt-4 space-y-2 text-sm text-default-700 dark:text-white/80">
-            {buildCards.map((item) => (
-              <li key={item}>- {item}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6">
-          <h2 className="text-lg font-semibold text-default-900 dark:text-white">How Developers Earn</h2>
-          <p className="mt-2 text-xs text-default-500 dark:text-white/60">
-            Service-model examples only. No income guarantees.
-          </p>
-          <ul className="mt-3 space-y-2 text-sm text-default-700 dark:text-white/80">
-            {earnItems.map((item) => (
-              <li key={item}>- {item}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6">
-          <h2 className="text-lg font-semibold text-default-900 dark:text-white">How It Works</h2>
-          <ol className="mt-4 space-y-2 text-sm text-default-700 dark:text-white/80">
-            {howItWorks.map((item, index) => (
-              <li key={item}>{index + 1}. {item}</li>
-            ))}
-          </ol>
-        </article>
-      </section>
-
-      <section
-        id="api-capabilities"
-        className="mx-auto mt-8 max-w-6xl rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 md:p-8 px-4"
-      >
-        <h2 className="text-xl font-semibold text-default-900 dark:text-white">API Capability Snapshot</h2>
-        <div className="mt-4 rounded-xl border border-default-200 dark:border-white/15 bg-default-50 dark:bg-[#0c1118] p-4">
-          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Base URL</p>
-          <a
-            href="https://api.obaol.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block font-mono text-sm text-primary-500 hover:underline"
-          >
-            https://api.obaol.com
-          </a>
-          <p className="mt-2 text-xs text-default-600 dark:text-white/70">
-            Use this base URL in n8n, MCP tools, ChatGPT connectors, and custom apps.
-          </p>
-        </div>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-default-200 dark:border-white/15 text-default-700 dark:text-white/85">
-                <th className="py-2 pr-4">Endpoint</th>
-                <th className="py-2 pr-4">Purpose</th>
-                <th className="py-2">Access</th>
-              </tr>
-            </thead>
-            <tbody className="text-default-700 dark:text-white/80">
-              <tr className="border-b border-default-100 dark:border-white/10">
-                <td className="py-3 pr-4 font-mono">GET https://api.obaol.com/v1/products/live</td>
-                <td className="py-3 pr-4">Use live product signals in outreach and automation flows</td>
-                <td className="py-3">API key required</td>
-              </tr>
-              <tr className="border-b border-default-100 dark:border-white/10">
-                <td className="py-3 pr-4 font-mono">GET https://api.obaol.com/v1/products/all</td>
-                <td className="py-3 pr-4">Build full catalog and matching automations</td>
-                <td className="py-3">API key required</td>
-              </tr>
-              <tr>
-                <td className="py-3 pr-4 font-mono">Authorization Header</td>
-                <td className="py-3 pr-4">Use Bearer API key for all requests</td>
-                <td className="py-3 font-mono">Bearer &lt;API_KEY&gt;</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-5 rounded-xl border border-default-200 dark:border-white/15 p-4">
-          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">Quick cURL</p>
-          <pre className="mt-2 overflow-x-auto text-xs md:text-sm text-default-800 dark:text-white/85">
-            {`curl -X GET "https://api.obaol.com/v1/products/live" \\
-  -H "Authorization: Bearer <API_KEY>"`}
-          </pre>
-        </div>
-        <div className="mt-5 rounded-xl border border-default-200 dark:border-white/15 p-4">
-          <p className="text-xs uppercase tracking-wider text-default-500 dark:text-white/65">ChatGPT App Setup (MCP)</p>
-          <ol className="mt-2 list-decimal pl-5 text-sm text-default-700 dark:text-white/80 space-y-1">
-            <li>Create a connector token in <Link href="/developer/keys" className="text-primary-500 hover:underline">Developer Keys</Link>.</li>
-            <li>In ChatGPT App, use MCP Server URL: <code className="font-mono">https://api.obaol.com/mcp?connectorToken=&lt;TOKEN&gt;</code>.</li>
-            <li>Set authentication mode to <strong>No Auth</strong>.</li>
-            <li>Verify endpoint status at <code>/mcp/info</code> and <code>/mcp/health</code>.</li>
-          </ol>
-          <p className="mt-2 text-xs text-default-600 dark:text-white/70">
-            Opening <code>/mcp</code> directly in browser shows a blank page because it is an SSE stream endpoint.
-          </p>
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            href="/developer/login"
-            className="inline-flex items-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
-          >
-            Sign In to Generate API Key
-          </Link>
-          <Link
-            href="/developer/usage"
-            className="inline-flex items-center rounded-xl border border-default-300 dark:border-white/25 px-5 py-2.5 text-sm font-semibold text-default-800 dark:text-white hover:bg-default-100 dark:hover:bg-white/10"
-          >
-            View Usage Interface
-          </Link>
-        </div>
-      </section>
-
-      <section className="mx-auto mt-8 mb-12 max-w-6xl rounded-2xl border border-default-200 dark:border-white/15 bg-white dark:bg-[#11151f] p-6 md:p-8 px-4">
-        <h2 className="text-xl font-semibold text-default-900 dark:text-white">Developer FAQ</h2>
-        <p className="mt-2 text-sm text-default-600 dark:text-white/75">
-          Run your own outreach and automation stack, and use OBAOL APIs as the core product and trade data layer.
-        </p>
-        <div className="mt-4 space-y-4">
-          {faqItems.map((item) => (
-            <article key={item.q} className="rounded-xl border border-default-200 dark:border-white/15 p-4">
-              <h3 className="text-sm font-semibold text-default-900 dark:text-white">{item.q}</h3>
-              <p className="mt-1 text-sm text-default-700 dark:text-white/80">{item.a}</p>
+      <section className="mx-auto mt-8 grid max-w-6xl gap-4 px-4 md:grid-cols-2 xl:grid-cols-4">
+        {overviewCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <article key={card.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-[#11151f]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+                <Icon aria-hidden="true" />
+              </div>
+              <h2 className="mt-4 text-base font-black text-default-900 dark:text-white">{card.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-default-600 dark:text-white/72">{card.description}</p>
             </article>
-          ))}
+          );
+        })}
+      </section>
+
+      <section id="quick-start" className="mx-auto mt-8 max-w-6xl px-4">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">Quick Start</p>
+              <h2 className="mt-2 text-2xl font-black text-default-900 dark:text-white">From login to first request</h2>
+            </div>
+            <Link href="/developer/keys" className="text-sm font-bold text-primary-500 hover:underline">
+              Open Developer Keys
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            {quickStartSteps.map((step, index) => (
+              <article key={step.title} className="rounded-lg border border-default-200 p-4 dark:border-white/15">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-obaol-500 text-sm font-black text-obaol-950">
+                  {index + 1}
+                </span>
+                <h3 className="mt-4 text-sm font-black text-default-900 dark:text-white">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-default-600 dark:text-white/72">{step.description}</p>
+                <Link href={step.href} className="mt-4 inline-flex text-sm font-bold text-primary-500 hover:underline">
+                  {step.cta}
+                </Link>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
+
+      <section id="endpoint-reference" className="mx-auto mt-8 max-w-6xl px-4">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+          <div className="max-w-3xl">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">Endpoint Reference</p>
+            <h2 className="mt-2 text-2xl font-black text-default-900 dark:text-white">Protected business APIs</h2>
+            <p className="mt-3 text-sm leading-relaxed text-default-600 dark:text-white/72">
+              These routes require an active API key and the listed permission. Responses use JSON with success and data fields, with pagination metadata where the route supports it.
+            </p>
+          </div>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[880px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-default-200 text-default-600 dark:border-white/15 dark:text-white/70">
+                  <th className="py-3 pr-4">Method</th>
+                  <th className="py-3 pr-4">Endpoint</th>
+                  <th className="py-3 pr-4">Permission</th>
+                  <th className="py-3 pr-4">Purpose</th>
+                  <th className="py-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="text-default-700 dark:text-white/82">
+                {endpoints.map((endpoint) => (
+                  <tr key={endpoint.path} className="border-b border-default-100 last:border-0 dark:border-white/10">
+                    <td className="py-4 pr-4">
+                      <span className="rounded-md bg-default-100 px-2 py-1 font-mono text-xs font-black text-default-700 dark:bg-white/10 dark:text-white">
+                        {endpoint.method}
+                      </span>
+                    </td>
+                    <td className="py-4 pr-4 font-mono text-xs font-bold text-default-900 dark:text-white">
+                      {endpoint.path}
+                    </td>
+                    <td className="py-4 pr-4 font-mono text-xs">{endpoint.permission}</td>
+                    <td className="py-4 pr-4">{endpoint.purpose}</td>
+                    <td className="py-4 text-default-500 dark:text-white/62">{endpoint.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="code-examples" className="mx-auto mt-8 grid max-w-6xl gap-4 px-4 lg:grid-cols-3">
+        {codeExamples.map((example) => (
+          <article key={example.title} className="rounded-lg border border-default-200 bg-white p-5 dark:border-white/15 dark:bg-[#11151f]">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-black text-default-900 dark:text-white">{example.title}</h2>
+              <span className="rounded-md bg-default-100 px-2 py-1 text-xs font-bold text-default-500 dark:bg-white/10 dark:text-white/60">
+                {example.language}
+              </span>
+            </div>
+            <pre className="mt-4 overflow-x-auto rounded-lg bg-default-950 p-4 text-xs leading-relaxed text-default-50">
+              <code>{example.code}</code>
+            </pre>
+          </article>
+        ))}
+      </section>
+
+      <section id="authentication" className="mx-auto mt-8 max-w-6xl px-4">
+        <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+              <FiShield aria-hidden="true" />
+            </div>
+            <h2 className="mt-4 text-2xl font-black text-default-900 dark:text-white">Authentication and security</h2>
+            <ul className="mt-5 space-y-3 text-sm leading-relaxed text-default-600 dark:text-white/74">
+              {securityNotes.map((note) => (
+                <li key={note} className="flex gap-3">
+                  <FiCheckCircle className="mt-0.5 shrink-0 text-obaol-600 dark:text-obaol-300" aria-hidden="true" />
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+              <FiLock aria-hidden="true" />
+            </div>
+            <h2 className="mt-4 text-2xl font-black text-default-900 dark:text-white">Permission presets</h2>
+            <div className="mt-5 space-y-3">
+              {permissionPresets.map((preset) => (
+                <article key={preset.name} className="rounded-lg border border-default-200 p-4 dark:border-white/15">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <h3 className="font-mono text-sm font-black text-default-900 dark:text-white">{preset.name}</h3>
+                    <code className="break-words text-xs text-default-500 dark:text-white/60">{preset.permissions}</code>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-default-600 dark:text-white/72">{preset.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mcp-setup" className="mx-auto mt-8 max-w-6xl px-4">
+        <div className="grid gap-6 rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500 dark:text-white/60">MCP / ChatGPT Connector Setup</p>
+            <h2 className="mt-2 text-2xl font-black text-default-900 dark:text-white">Connect tools without sharing raw keys</h2>
+            <p className="mt-3 text-sm leading-relaxed text-default-600 dark:text-white/72">
+              Connector tokens map back to active API keys and can be revoked independently. Use them for ChatGPT app connectors and MCP-compatible tools that need an SSE server URL.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/developer/keys"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-obaol-500 px-5 py-3 text-sm font-black text-obaol-950 transition hover:bg-obaol-400"
+              >
+                Create connector token
+                <FiRefreshCw aria-hidden="true" />
+              </Link>
+              <Link
+                href="/developer/usage"
+                className="inline-flex items-center justify-center rounded-lg border border-default-300 px-5 py-3 text-sm font-bold text-default-800 transition hover:border-obaol-400 hover:bg-obaol-500/10 dark:border-white/25 dark:text-white"
+              >
+                Monitor usage
+              </Link>
+            </div>
+          </div>
+          <ol className="space-y-3">
+            {mcpSteps.map((step, index) => (
+              <li key={step} className="flex gap-3 rounded-lg border border-default-200 p-4 text-sm text-default-700 dark:border-white/15 dark:text-white/78">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-default-100 text-xs font-black text-default-700 dark:bg-white/10 dark:text-white">
+                  {index + 1}
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="faq" className="mx-auto mb-12 mt-8 max-w-6xl px-4">
+        <div className="rounded-lg border border-default-200 bg-white p-6 dark:border-white/15 dark:bg-[#11151f] md:p-8">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+            <FiBookOpen aria-hidden="true" />
+          </div>
+          <h2 className="mt-4 text-2xl font-black text-default-900 dark:text-white">Developer FAQ</h2>
+          <p className="mt-2 text-sm leading-relaxed text-default-600 dark:text-white/72">
+            Common questions for developers building outreach systems, internal dashboards, connector tools, and trade automation workflows.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {faqItems.map((item) => (
+              <article key={item.q} className="rounded-lg border border-default-200 p-4 dark:border-white/15">
+                <h3 className="text-sm font-black text-default-900 dark:text-white">{item.q}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-default-600 dark:text-white/72">{item.a}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </main>
   );

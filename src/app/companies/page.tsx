@@ -72,7 +72,7 @@ export default function CompaniesPage() {
             <Header />
 
             {/* ── Hero ── */}
-            <section className="relative overflow-hidden py-12 md:py-16 px-6 text-center">
+            <section className="relative overflow-hidden py-12 md:py-16 px-6 text-center public-standard-section">
                 {/* ambient glow */}
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="w-[600px] h-[600px] rounded-full bg-obaol-500/5 blur-[120px]" />
@@ -129,7 +129,7 @@ export default function CompaniesPage() {
             </section>
 
             {/* ── Grid ── */}
-            <section className="flex-1 max-w-6xl mx-auto w-full px-6 pb-20">
+            <section className="flex-1 max-w-6xl mx-auto w-full px-6 pb-20 public-layout-container">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-24">
                         <div className="flex gap-1.5">

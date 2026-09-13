@@ -10,8 +10,8 @@ export function PublicProviders({ children }: { children: React.ReactNode }) {
     <NextUIProvider>
       <NextThemesProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem={true}
+        defaultTheme="light"
+        enableSystem={false}
       >
         <SoundProvider>
           <SoundInitializer />

@@ -66,10 +66,10 @@ export default function OperatorRolePage() {
         {/* --- HERO SECTION --- */}
         <div className="relative pt-24 md:pt-32 pb-12 md:pb-20 overflow-hidden">
           {/* Background Ambient Effects */}
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none public-decoration" />
+          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none public-decoration" />
 
-          <div className="container mx-auto max-w-6xl px-4 relative z-10">
+          <div className="container mx-auto max-w-6xl px-4 relative z-10 public-layout-container">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -136,7 +136,7 @@ export default function OperatorRolePage() {
 
         {/* --- GLOBAL ACCESS SECTION (NEW) --- */}
         <div className="py-10 md:py-16 relative overflow-hidden bg-orange-500/[0.03] border-b border-default-100/50">
-          <div className="container mx-auto max-w-6xl px-4 text-center">
+          <div className="container mx-auto max-w-6xl px-4 text-center public-layout-container">
             <motion.div {...fadeIn} className="space-y-8">
               <div className="mx-auto w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 mb-6">
                 <FiGlobe size={32} />
@@ -165,7 +165,7 @@ export default function OperatorRolePage() {
 
         {/* --- IDENTITY & HERITAGE SECTION --- */}
         <div className="py-12 md:py-20 bg-default-50/20 dark:bg-black/20 border-y border-default-100/50 relative overflow-hidden">
-          <div className="container mx-auto max-w-6xl px-4">
+          <div className="container mx-auto max-w-6xl px-4 public-layout-container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
               <motion.div {...fadeIn} className="space-y-12">
                 <div className="space-y-4">
@@ -179,8 +179,8 @@ export default function OperatorRolePage() {
                 </div>
 
                 {/* Legacy/Expertise Note */}
-                <div className="p-8 rounded-3xl bg-orange-500/[0.03] border border-orange-500/10 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full" />
+                <div className="p-8 rounded-3xl bg-orange-500/[0.03] border border-orange-500/10 relative overflow-hidden group public-surface-card">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full public-decoration" />
                   <h3 className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-4 flex items-center gap-3">
                     <FiAward className="fill-orange-500/20" /> Professional Heritage
                   </h3>
@@ -217,7 +217,7 @@ export default function OperatorRolePage() {
                 className="relative p-1 bg-gradient-to-br from-orange-500/20 to-transparent rounded-[4rem]"
               >
                 <div className="bg-background rounded-[3.8rem] p-8 md:p-16 border border-default-100 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full" />
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full public-decoration" />
 
                   <div className="space-y-12 relative z-10">
                     <div className="text-center space-y-2">
@@ -242,8 +242,8 @@ export default function OperatorRolePage() {
                         />
                       </div>
 
-                      <div className="flex items-center gap-6 p-8 rounded-3xl bg-orange-500 shadow-[0_20px_50px_-10px_rgba(207,152,60,0.3)] border border-orange-400 group relative">
-                        <div className="absolute -inset-1 bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="flex items-center gap-6 p-8 rounded-3xl bg-orange-500 shadow-[0_20px_50px_-10px_rgba(207,152,60,0.3)] border border-orange-400 group relative public-surface-card">
+                        <div className="absolute -inset-1 bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity public-decoration" />
                         <FiZap className="text-white text-4xl animate-pulse" />
                         <div className="relative z-10">
                           <div className="font-black text-white text-xl tracking-tight leading-none">Active Execution</div>
@@ -259,7 +259,7 @@ export default function OperatorRolePage() {
         </div>
 
         {/* --- PERFORMANCE ROADMAP (NEW) --- */}
-        <div className="py-12 md:py-20 container mx-auto max-w-7xl px-4">
+        <div className="py-12 md:py-20 container mx-auto max-w-7xl px-4 public-layout-container">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-16 md:mb-24">
             <div className="max-w-2xl space-y-4 text-left">
               <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">The <span className="text-orange-500">Execution</span> Roadmap.</h2>
@@ -298,7 +298,7 @@ export default function OperatorRolePage() {
           {/* Subtle patterns */}
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-          <div className="container mx-auto max-w-6xl px-4 relative z-10">
+          <div className="container mx-auto max-w-6xl px-4 relative z-10 public-layout-container">
             <div className="text-center mb-16 md:mb-24 space-y-6">
               <h2 className="text-4xl md:text-7xl font-black tracking-tight leading-none text-white">Controlled Clarity.</h2>
               <p className="text-xl text-white/50 max-w-2xl mx-auto font-medium tracking-wide italic">Earnings are generated exclusively from completion. No completion, no commission.</p>
@@ -341,7 +341,7 @@ export default function OperatorRolePage() {
                     ))}
                   </div>
                 </div>
-                <div className="mt-12 p-8 rounded-3xl bg-red-500/5 text-red-500/80 text-base italic font-bold leading-relaxed border border-red-500/10">
+                <div className="mt-12 p-8 rounded-3xl bg-red-500/5 text-red-500/80 text-base italic font-bold leading-relaxed border border-red-500/10 public-surface-card">
                   &quot;Efficiency is rewarded. Effort is expected. Completion is what creates value.&quot;
                 </div>
               </motion.div>
@@ -360,7 +360,7 @@ export default function OperatorRolePage() {
         </div>
 
         {/* --- PATHWAYS --- */}
-        <div className="py-12 md:py-20 container mx-auto max-w-6xl px-4">
+        <div className="py-12 md:py-20 container mx-auto max-w-6xl px-4 public-layout-container">
           <div className="text-center mb-16 md:mb-24 space-y-4">
             <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">Two Pathways. One Goal.</h2>
             <p className="text-xl text-foreground/50 font-medium">Choose how you want to integrate into the OBAOL ecosystem.</p>
@@ -410,7 +410,7 @@ export default function OperatorRolePage() {
               whileHover={{ y: -10 }}
               className="p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] bg-orange-500 text-white relative overflow-hidden group flex flex-col min-h-[400px] md:min-h-[500px] shadow-2xl shadow-orange-500/30 border border-orange-400"
             >
-              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none public-decoration" />
 
               <div className="absolute top-0 right-0 p-8">
                 <div className="w-16 h-16 rounded-[2rem] bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold group-hover:scale-110 group-hover:bg-white group-hover:text-orange-600 transition-all duration-500">
@@ -449,7 +449,7 @@ export default function OperatorRolePage() {
 
         {/* --- THE EXECUTION TOOLKIT (NEW) --- */}
         <div className="py-12 md:py-20 bg-default-50/10 relative overflow-hidden">
-          <div className="container mx-auto max-w-6xl px-4 text-center">
+          <div className="container mx-auto max-w-6xl px-4 text-center public-layout-container">
             <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight mb-12 md:mb-20 text-left md:text-center">Tools of The Operator.</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {[
@@ -465,7 +465,7 @@ export default function OperatorRolePage() {
                 <motion.div
                   key={i}
                   whileHover={{ scale: 1.05, y: -5 }}
-                  className="p-6 md:p-8 rounded-3xl bg-content1 border border-default-200 shadow-sm flex flex-col items-center gap-4 group hover:border-orange-500/30 transition-all"
+                  className="p-6 md:p-8 rounded-3xl bg-content1 border border-default-200 shadow-sm flex flex-col items-center gap-4 group hover:border-orange-500/30 transition-all public-surface-card"
                 >
                   <div className="text-3xl text-orange-500/50 group-hover:text-orange-500 transition-colors">{tool.icon}</div>
                   <span className="text-sm font-bold text-foreground/60 group-hover:text-foreground tracking-tight">{tool.label}</span>
@@ -476,7 +476,7 @@ export default function OperatorRolePage() {
         </div>
 
         {/* --- FINAL CTA --- */}
-        <div className="py-16 md:py-24 container mx-auto max-w-5xl px-4 text-center">
+        <div className="py-16 md:py-24 container mx-auto max-w-5xl px-4 text-center public-layout-container">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -484,7 +484,7 @@ export default function OperatorRolePage() {
             className="p-10 md:p-32 rounded-[3.5rem] md:rounded-[5rem] bg-content1 border-2 border-orange-500/20 shadow-2xl relative overflow-hidden group"
           >
             {/* Ambient glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none group-hover:bg-orange-500/20 transition-all duration-1000" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none group-hover:bg-orange-500/20 transition-all duration-1000 public-decoration" />
 
             <div className="relative z-10 space-y-12">
               <div className="space-y-6">

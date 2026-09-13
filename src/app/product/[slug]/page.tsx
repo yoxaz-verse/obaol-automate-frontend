@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CTASection from "@/components/home/ctasection";
@@ -266,10 +266,10 @@ export default async function ProductDetailPage({
 
           {/* Right Column: Execution & Regions */}
           <div className="space-y-6">
-            <div className="rounded-3xl border border-default-200 bg-content1/50 p-6 shadow-sm">
+            <div className="rounded-3xl border border-default-200 bg-content1/50 p-6 shadow-sm public-surface-card">
               <div className="aspect-square rounded-2xl overflow-hidden bg-default-100 border border-default-200">
                 {productImage ? (
-                  <Image
+                  <RevealImage
                     src={productImage}
                     alt={product.name}
                     width={640}
@@ -284,7 +284,7 @@ export default async function ProductDetailPage({
                 )}
               </div>
             </div>
-            <div className="rounded-3xl border border-default-200 bg-content1/50 p-8 shadow-sm space-y-6">
+            <div className="rounded-3xl border border-default-200 bg-content1/50 p-8 shadow-sm space-y-6 public-surface-card">
               <div>
                 <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-obaol-500 rounded-full" />
@@ -347,7 +347,7 @@ export default async function ProductDetailPage({
                 <Link
                   key={String(item._id)}
                   href={item.slug ? `/trade-directory/${item.slug}` : "/trade-directory"}
-                  className="group rounded-3xl border border-default-200 bg-content1 p-6 hover:border-obaol-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1"
+                  className="group rounded-3xl border border-default-200 bg-content1 p-6 hover:border-obaol-500/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 public-surface-card"
                 >
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-600 mb-2 truncate">
                     {item.subCategory?.name || "Commodity"}

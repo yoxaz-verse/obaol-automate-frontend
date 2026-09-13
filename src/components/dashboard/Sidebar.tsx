@@ -56,7 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         "/dashboard/approvals": Number(unreadSummary.approvals || 0),
         "/dashboard/enquiries": Number(unreadSummary.enquiries || 0),
         "/dashboard/orders": Number(unreadSummary.orders || 0),
-        "/dashboard/execution-enquiries": Number(unreadSummary.execution || 0),
+        "/dashboard/inventory": Number(unreadSummary.inventory || 0),
+        "/dashboard/execution-enquiries": Number(unreadSummary.execution || 0) + Number(unreadSummary.bidding || 0),
     };
 
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {

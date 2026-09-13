@@ -54,7 +54,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [otpAttempted, setOtpAttempted] = useState(false);
   const [hasOnboardingSession, setHasOnboardingSession] = useState(false);
-  const [existingAccountFlow, setExistingAccountFlow] = useState(false);
   const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
   const [resendAvailableAt, setResendAvailableAt] = useState<number | null>(null);
   const [nowTs, setNowTs] = useState(Date.now());
@@ -487,8 +486,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     setIsSendingOtp(true);
     try {
       setErrorMessage("");
-      let useExistingFlow = existingAccountFlow;
-      if (!useExistingFlow && !hasOnboardingSession) {
+      if (!hasOnboardingSession) {
         try {
           const payload = {
             email: email.trim(),
@@ -503,25 +501,22 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         } catch (startError: any) {
           const status = Number(startError?.response?.status || 0);
           if (status === 409) {
-            setExistingAccountFlow(true);
-            setErrorMessage("Verify ownership to continue. We'll send a code if this email exists.");
-            useExistingFlow = true;
+            const existingRole = String(startError?.response?.data?.role || "").toLowerCase();
+            const target = existingRole === "operator"
+              ? "/auth/operator"
+              : existingRole === "associate"
+                ? "/auth/associate"
+                : "/auth?view=signin";
+            const separator = target.includes("?") ? "&" : "?";
+            router.push(`${target}${separator}prefill=${encodeURIComponent(email.trim())}`);
+            return;
           } else {
             throw startError;
           }
         }
       }
-      if (useExistingFlow) {
-        await postData("/verification/send-otp-existing", { method: "email", email: email.trim() }, {});
-        showToastMessage({
-          type: "success",
-          message: "If an account exists for this email, an OTP has been sent.",
-          position: "top-right",
-        });
-      } else {
-        await postData("/verification/send-otp", { method: "email", email: email.trim() }, {});
-        showToastMessage({ type: "success", message: "OTP sent to your email.", position: "top-right" });
-      }
+      await postData("/verification/send-otp", { method: "email", email: email.trim() }, {});
+      showToastMessage({ type: "success", message: "OTP sent to your email.", position: "top-right" });
       setOtpSent(true);
       setOtp("");
       setOtpVerified(false);
@@ -550,18 +545,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     }
     setIsVerifyingOtp(true);
     try {
-      if (existingAccountFlow) {
-        const verifyRes = await postData("/verification/verify-otp-existing", { code: otp, method: "email", email: email.trim() }, {});
-        const nextRoute = String(verifyRes?.data?.next || "");
-        showToastMessage({ type: "success", message: "OTP verified.", position: "top-right" });
-        if (nextRoute) {
-          router.push(nextRoute);
-          return;
-        }
-        const target = roleLower === "operator" || roleLower === "team" ? "/auth/operator" : "/auth";
-        router.push(`${target}?prefill=${encodeURIComponent(email.trim())}`);
-        return;
-      }
       await postData("/verification/verify-otp", { code: otp, method: "email", email: email.trim() }, {});
       setOtpVerified(true);
       showToastMessage({ type: "success", message: "Email verified.", position: "top-right" });
@@ -618,33 +601,33 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     },
     associate: {
       headline: "OBAOL",
-      highlight: "ASSOCIATE NETWORK",
-      description: "Empowering manufacturers, traders, and logistics providers with a unified platform for global agro-trade automation.",
+      highlight: "ASSOCIATE ACCOUNT",
+      description: "For companies and business accounts using OBAOL.",
       tags: [
-        "Manufacturers",
-        "Traders",
-        "Logistics Providers",
-        "Exporters & Importers",
-        "Freight Forwarders",
-        "Warehouse Managers",
-        "Company Registration Mandatory"
+        "Buyer",
+        "Seller",
+        "Supplier",
+        "Importer",
+        "Exporter",
+        "Logistics",
+        "Warehouse",
+        "Lab",
+        "Company Required"
       ],
-      footer: "Associate_Hub_Online",
+      footer: "Business account",
       knowMoreLink: "/roles/associate"
     },
     operator: {
       headline: "OBAOL",
-      highlight: "OPERATOR PORTAL",
-      description: "Your go-to platform for the agro trade ecosystem. Manage enquiries, orders, and operations in one place.",
+      highlight: "OPERATOR ACCESS",
+      description: "For OBAOL-approved people who operate or coordinate business execution.",
       tags: [
-        "Individuals",
-        "Portfolio Managers",
-        "Digital Traders",
-        "Business Developers",
-        "Internal Operations",
-        "Retired Custom Brokers"
+        "OBAOL Approved",
+        "Execution Coordinator",
+        "Operator Workspace",
+        "Not a Company Account"
       ],
-      footer: "Operator_Portal_v2",
+      footer: "Operator access",
       knowMoreLink: "/roles/operator"
     },
     "project manager": {
@@ -691,27 +674,27 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     ? (roleKey === "operator"
       ? {
       roleKey: "operator" as const,
-      panelLabel: "Operator Console",
+      panelLabel: "Operator Access",
       motifClassName: "bg-[linear-gradient(to_bottom,rgba(16,185,129,0.22),rgba(2,6,23,0.6))]",
       highlightClassName: "bg-gradient-to-r from-emerald-400 to-cyan-500",
-      audienceLabels: ["Operators", "Portfolio Managers", "Execution Specialists", "Business Developers", "Digital Traders"],
-      infoStripTitle: "Operator Lane",
-      infoStripMessage: "For independent people coordinating trades, not company registration.",
+      audienceLabels: ["OBAOL-approved people", "Execution coordinators", "Operator workspace"],
+      infoStripTitle: "Operator",
+      infoStripMessage: "For OBAOL-approved people, not companies.",
       infoStripIcon: FiBriefcase,
-      switchLabel: "Go to Associate Network",
-      switchSubLabel: "Switch Role",
+      switchLabel: "Company or business? Use Associate",
+      switchSubLabel: "Wrong account type?",
     }
       : {
       roleKey: "associate" as const,
-      panelLabel: "Associate Network",
+      panelLabel: "Associate Account",
       motifClassName: "bg-[linear-gradient(to_bottom,rgba(207,152,60,0.2),rgba(9,8,6,0.7))]",
       highlightClassName: "bg-gradient-to-r from-obaol-200 via-obaol-400 to-obaol-600",
-      audienceLabels: ["Manufacturers", "Traders", "Logistics Partners", "Freight Forwarders", "Export/Import Teams"],
-      infoStripTitle: "Associate Lane",
-      infoStripMessage: "Built for exporters, importers, suppliers, and buyers.",
+      audienceLabels: ["Companies", "Buyers", "Sellers", "Suppliers", "Exporters", "Logistics"],
+      infoStripTitle: "Associate",
+      infoStripMessage: "For companies and business accounts.",
       infoStripIcon: FiUsers,
-      switchLabel: "Go to Operator Console",
-      switchSubLabel: "Switch Role",
+      switchLabel: "Operator access only",
+      switchSubLabel: "OBAOL-approved?",
     })
     : null;
 
@@ -721,12 +704,12 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
 
   const joinCta = roleKey === "operator"
     ? {
-      title: "New Operator?",
-      description: "Create an operator account to access the portal",
+      title: "OBAOL-approved operator?",
+      description: "Create an operator account only if this role applies to you.",
     }
     : {
-      title: "New Associate?",
-      description: "Create an account to start trading",
+      title: "New business account?",
+      description: "Create an Associate account for your company.",
     };
 
   const canSendOtp = !!email.trim() && isInvalidEmail;
@@ -801,7 +784,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   Registering a company?
                 </p>
                 <p className="text-xs font-semibold leading-5 text-foreground/70">
-                  Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account.
+                  Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account. For independent people coordinating trades, not company registration.
                 </p>
               </div>
               <Link
@@ -855,7 +838,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                   className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest px-6 h-8"
                   onPress={() => {
                     const authRole = roleLower === "team" || roleLower === "operator" ? "operator" : "associate";
-                    const target = authRole === "operator" ? "/auth/operator" : "/auth";
+                    const target = authRole === "operator" ? "/auth/operator" : "/auth/associate";
                     router.push(target);
                   }}
                 >
@@ -909,7 +892,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             setEmail(val);
             setNotFoundEmail("");
             setShowNotFoundCta(false);
-            setExistingAccountFlow(false);
+            setHasOnboardingSession(false);
             setOtpSent(false);
             setOtpVerified(false);
             setOtp("");
@@ -1229,7 +1212,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             <button
               type="button"
               onClick={() => {
-                const target = roleLower === "operator" || roleLower === "team" ? "/auth/operator" : "/auth";
+                const target = roleLower === "operator" || roleLower === "team" ? "/auth/operator" : "/auth/associate";
                 router.push(target);
               }}
               className="text-xs font-semibold text-foreground/50 transition-colors hover:text-obaol-700 dark:hover:text-obaol-300"

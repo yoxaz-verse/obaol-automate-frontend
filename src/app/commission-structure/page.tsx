@@ -99,11 +99,11 @@ export default function CommissionStructurePage() {
   return (
     <section className="min-h-screen bg-background text-foreground selection:bg-obaol-500/30 overflow-x-hidden">
       <Header />
-      <ThemedContentWrapper>
-        <div className="mx-auto max-w-[1280px] px-6 pt-24 md:pt-32 pb-12 md:pb-20 relative">
+      <ThemedContentWrapper className="public-reading-page">
+        <div className="mx-auto max-w-[1280px] px-6 pt-24 md:pt-32 pb-12 md:pb-20 relative public-layout-container">
           
-          <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-obaol-500/5 blur-[100px] rounded-full pointer-events-none" />
-          <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] bg-primary-500/5 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-obaol-500/5 blur-[100px] rounded-full pointer-events-none public-decoration" />
+          <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] bg-primary-500/5 blur-[80px] rounded-full pointer-events-none public-decoration" />
 
           {/* Hero Section */}
           <motion.div
@@ -198,7 +198,7 @@ export default function CommissionStructurePage() {
                     <motion.div 
                         key={i} 
                         whileHover={{ y: -5, scale: 1.02 }}
-                        className="relative z-10 p-6 md:p-8 rounded-[2rem] bg-content1/80 backdrop-blur-xl border border-primary-500/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)] hover:shadow-[0_0_40px_rgba(var(--primary-rgb),0.15)] hover:border-primary-500/40 transition-all duration-500 group flex flex-col items-start overflow-hidden"
+                        className="relative z-10 p-6 md:p-8 rounded-[2rem] bg-content1/80 backdrop-blur-xl border border-primary-500/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)] hover:shadow-[0_0_40px_rgba(var(--primary-rgb),0.15)] hover:border-primary-500/40 transition-all duration-500 group flex flex-col items-start overflow-hidden public-surface-card"
                     >
                       <div className="absolute -bottom-4 -right-4 text-[120px] font-black text-foreground/[0.02] select-none pointer-events-none transition-all duration-700 group-hover:text-primary-500/[0.04]">
                         {i + 1}
@@ -238,7 +238,7 @@ export default function CommissionStructurePage() {
                     <motion.div 
                       key={i} 
                       whileHover={{ scale: 1.03 }}
-                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-obaol-500/30"
+                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-obaol-500/30 public-surface-card"
                     >
                       <div className="flex items-center gap-4">
                          <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-obaol-500 group-hover:border-obaol-500/30 transition-colors shadow-sm">
@@ -258,7 +258,7 @@ export default function CommissionStructurePage() {
                     viewport={{ once: true }}
                     className="p-8 rounded-[2rem] bg-gradient-to-r from-obaol-500/10 to-transparent border border-obaol-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group shadow-inner"
                 >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-obaol-500/10 blur-3xl rounded-full pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-obaol-500/10 blur-3xl rounded-full pointer-events-none public-decoration" />
                     <div className="h-14 w-14 shrink-0 rounded-2xl bg-obaol-500 text-white flex items-center justify-center shadow-lg shadow-obaol-500/30">
                        <LuShieldCheck size={28} />
                     </div>
@@ -436,7 +436,7 @@ export default function CommissionStructurePage() {
                 { step: "Step 03", title: "Build A Team", icon: LuTrendingUp, color: "text-secondary-500", desc: "As your team grows, L2 and L3+ shares apply across deeper levels." }
               ].map((item, i) => (
                 <div key={i} className="group relative">
-                  <div className="absolute -inset-2 bg-gradient-to-b from-content2/50 to-transparent rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-all" />
+                  <div className="absolute -inset-2 bg-gradient-to-b from-content2/50 to-transparent rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-all public-decoration" />
                   <Card className="relative h-full bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-md rounded-[3rem] overflow-hidden hover:translate-y-[-10px] transition-all">
                     <CardBody className="p-10">
                       <div className="text-[10px] font-black uppercase tracking-[0.5em] text-obaol-500 mb-6 font-bold">{item.step}</div>

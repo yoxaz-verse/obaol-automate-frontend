@@ -75,6 +75,11 @@ export default function ExecutionEnquiriesPage() {
   const [commitLoadingKey, setCommitLoadingKey] = useState<string | null>(null);
   const [bidErrorMap, setBidErrorMap] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    patchData(apiRoutes.notifications.markSectionRead("execution"), {})
+      .finally(() => queryClient.invalidateQueries({ queryKey: ["notifications", "unread-summary"] }));
+  }, [queryClient]);
+
   // Data Fetching — deal executions come from inquiries that have executionInquiries embedded
   const { data: dealExecutionsResponse, isLoading: dealsLoading } = useQuery({
     queryKey: ["deal-executions"],

@@ -80,13 +80,13 @@ export default function ProcurementSpecialistSection() {
   return (
 
     <section
-      className="relative py-20 md:py-40 px-4 sm:px-6 border-t border-white/5 bg-background overflow-hidden"
+      className="relative py-20 md:py-40 px-4 sm:px-6 border-t border-white/5 bg-background overflow-hidden public-standard-section"
     >
       {/* Cinematic Background Ambient Glows & Grid */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Glows */}
-        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-orange-500/5 blur-[120px] rounded-full -translate-x-1/2" />
-        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-indigo-500/5 blur-[150px] rounded-full translate-x-1/3" />
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-orange-500/5 blur-[120px] rounded-full -translate-x-1/2 public-decoration" />
+        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-indigo-500/5 blur-[150px] rounded-full translate-x-1/3 public-decoration" />
 
         {/* Subtle Tech Grid */}
         <div
@@ -235,7 +235,7 @@ function ContextCard({ title, text }: { title: string; text: string }) {
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: "spring", stiffness: 300 }}
-      className="p-8 md:p-10 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 group relative overflow-hidden"
+      className="p-8 md:p-10 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 group relative overflow-hidden public-surface-card"
     >
       {/* Hover ambient glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />

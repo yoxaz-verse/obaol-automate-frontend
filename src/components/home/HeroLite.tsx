@@ -6,7 +6,7 @@ export default function HeroLite() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,rgba(228,199,153,0.22),transparent_45%),radial-gradient(circle_at_70%_30%,rgba(59,130,246,0.14),transparent_45%),linear-gradient(180deg,#0b0d14_0%,#0a0a0a_100%)]" />
       <div className="absolute inset-0 -z-10 opacity-30 [background:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:42px_42px]" />
 
-      <div className="container mx-auto max-w-7xl px-4 md:px-6 text-white">
+      <div className="container mx-auto max-w-7xl px-4 md:px-6 text-white public-layout-container">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-orange-300">
           India-First Trade Execution
         </p>

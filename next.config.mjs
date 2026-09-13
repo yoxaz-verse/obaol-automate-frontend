@@ -27,16 +27,35 @@ const isLocalOrigin = (value) => {
   }
 };
 
+const shouldUpgradeInsecureRequests = () => {
+  if (process.env.ENABLE_CSP_UPGRADE_INSECURE_REQUESTS) {
+    return process.env.ENABLE_CSP_UPGRADE_INSECURE_REQUESTS === "true";
+  }
+
+  const publicOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "";
+
+  if (!publicOrigin) return false;
+  return publicOrigin.startsWith("https://") && !isLocalOrigin(publicOrigin);
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
-    const connectSrc = isProd
+    const configuredOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+    const localBackendOrigins = isLocalOrigin(configuredOrigin)
+      ? `${configuredOrigin} http://localhost:5001 http://127.0.0.1:5001`
+      : "";
+    const connectSrc = isProd && !localBackendOrigins
       ? "connect-src 'self' https: wss:"
-      : "connect-src 'self' https: http://localhost:5001 http://127.0.0.1:5001 ws: wss:";
+      : `connect-src 'self' https: ${localBackendOrigins} ws: wss:`;
 
-    const csp = [
+    const cspDirectives = [
       "default-src 'self'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -48,8 +67,11 @@ const nextConfig = {
       connectSrc,
       "frame-src 'self' https:",
       "object-src 'none'",
-      "upgrade-insecure-requests",
-    ].join("; ");
+    ];
+    if (shouldUpgradeInsecureRequests()) {
+      cspDirectives.push("upgrade-insecure-requests");
+    }
+    const csp = cspDirectives.join("; ");
 
     return [
       {

@@ -1,6 +1,7 @@
 // src/core/api/apiHandler.ts
 
 import instance from "@/core/api/axiosInstance";
+import type { RequestParams } from "./types";
 
 type GetDataOptions = {
   cacheMode?: "default" | "bypass";
@@ -9,7 +10,7 @@ type GetDataOptions = {
 // GET request to the API
 export const getData = async (
   url: string,
-  params: any = {},
+  params: RequestParams = {},
   options: GetDataOptions = {}
 ) => {
   try {
@@ -37,10 +38,10 @@ export const getData = async (
 };
 
 // POST request to the API
-export const postData = async (url: string, data: any, params: any = {}) => {
+export const postData = async (url: string, data: unknown, params: RequestParams = {}) => {
 
   try {
-    const headers: any = {
+    const headers = {
       Accept: "application/json",
       // "Content-Type" is managed by Axios instance or specific functions
     };
@@ -56,10 +57,10 @@ export const postData = async (url: string, data: any, params: any = {}) => {
 export const postMultipart = async (
   url: string,
   data: FormData,
-  params: any = {}
+  params: RequestParams = {}
 ) => {
   try {
-    const headers: any = {
+    const headers = {
       Accept: "application/json",
       "Content-Type": "multipart/form-data",
     };
@@ -72,9 +73,9 @@ export const postMultipart = async (
 };
 
 // PUT request to the API
-export const putData = async (url: string, data: any, params: any = {}) => {
+export const putData = async (url: string, data: unknown, params: RequestParams = {}) => {
   try {
-    const headers: any = {
+    const headers = {
       Accept: "application/json",
     };
 
@@ -86,9 +87,9 @@ export const putData = async (url: string, data: any, params: any = {}) => {
 };
 
 // PATCH request to the API
-export const patchData = async (url: string, data: any, params: any = {}) => {
+export const patchData = async (url: string, data: unknown, params: RequestParams = {}) => {
   try {
-    const headers: any = {
+    const headers = {
       Accept: "application/json",
     };
 
@@ -100,7 +101,7 @@ export const patchData = async (url: string, data: any, params: any = {}) => {
 };
 
 // DELETE request to the API
-export const deleteData = async (url: string, params: any = {}) => {
+export const deleteData = async (url: string, params: RequestParams = {}) => {
   try {
     return await instance.delete(url, { params });
   } catch (error) {
@@ -112,8 +113,8 @@ export const deleteData = async (url: string, params: any = {}) => {
 // DELETE request with a request body
 export const deleteDataBody = async (
   url: string,
-  params: any = {},
-  data: any
+  params: RequestParams = {},
+  data: unknown
 ) => {
   try {
     return await instance.request({

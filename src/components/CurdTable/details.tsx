@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "@nextui-org/react";
 import { FiEye } from "react-icons/fi";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import { DetailsModalProps } from "@/data/interface-data";
 import StatusHistoryTabContent from "../StatusHistory/statusHistory";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -142,7 +142,7 @@ export default function DetailsModal({
       case "image":
         if (value) {
           return (
-            <Image
+            <RevealImage
               src={value}
               alt="Image"
               width={300}
@@ -153,7 +153,7 @@ export default function DetailsModal({
           );
         }
         return (
-          <Image
+          <RevealImage
             src="/fallback.jpg"
             alt="Fallback Image"
             width={300}

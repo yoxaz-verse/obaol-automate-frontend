@@ -1,7 +1,7 @@
 "use client";
 
 import React, { use } from "react";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
 import { brandPublicRoutes } from "@/core/api/apiRoutes";
@@ -68,7 +68,7 @@ export default function BrandPage() {
                     </div>
                 </div>
 
-                <div className="flex-1 flex items-center px-8 max-w-7xl mx-auto w-full">
+                <div className="flex-1 flex items-center px-8 max-w-7xl mx-auto w-full public-layout-container">
                     <div className="max-w-4xl w-full space-y-12 animate-pulse">
                         <div className="flex items-center gap-4">
                             <div className="w-4 h-4 rounded-full bg-white/5" />
@@ -87,7 +87,7 @@ export default function BrandPage() {
 
                 {/* Ambient Glow */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                     <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-obaol-500/[0.02] rounded-full blur-[120px]" />
+                     <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-obaol-500/[0.02] rounded-full blur-[120px] public-decoration" />
                 </div>
             </div>
         );
@@ -112,7 +112,7 @@ export default function BrandPage() {
             )}
             {/* --- STANDALONE WEBSITE NAVIGATION --- */}
             <nav className="sticky top-0 z-[60] backdrop-blur-xl border-b border-white/5 bg-black/40">
-                <div className="max-w-7xl mx-auto px-8 h-24 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-8 h-24 flex items-center justify-between public-layout-container">
                     <div className="flex items-center gap-5">
                         <Avatar
                             src={company.logo}
@@ -139,25 +139,25 @@ export default function BrandPage() {
                 </div>
             </nav>
 
-            <div className="mx-auto max-w-7xl px-8 pt-8">
+            <div className="mx-auto max-w-7xl px-8 pt-8 public-layout-container">
                 <IndiaFirstNote className="border-white/5 bg-white/[0.01] text-white/20" />
             </div>
             {/* --- LUXURY HERO SECTION --- */}
             <section className="relative min-h-[90vh] flex items-center overflow-hidden">
                 {/* Refined Background Elements */}
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] bg-obaol-500/[0.03] rounded-full blur-[150px]" />
-                    <div className="absolute bottom-[20%] left-[5%] w-[400px] h-[400px] bg-white/[0.01] rounded-full blur-[120px]" />
+                    <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] bg-obaol-500/[0.03] rounded-full blur-[150px] public-decoration" />
+                    <div className="absolute bottom-[20%] left-[5%] w-[400px] h-[400px] bg-white/[0.01] rounded-full blur-[120px] public-decoration" />
                     {company.banner && (
                         <div className="absolute inset-0 opacity-20 grayscale hover:grayscale-0 transition-all duration-1000">
-                             <Image src={company.banner} alt="" fill unoptimized sizes="100vw" className="object-cover" />
+                             <RevealImage src={company.banner} alt="" fill unoptimized sizes="100vw" className="object-cover" />
                         </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent lg:to-black/20" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black" />
                 </div>
 
-                <div className="relative z-10 w-full max-w-7xl mx-auto px-8 py-20 lg:py-40">
+                <div className="relative z-10 w-full max-w-7xl mx-auto px-8 py-20 lg:py-40 public-layout-container">
                     <div className="max-w-4xl space-y-12 animate-in slide-in-from-left-10 duration-1000">
                         {/* Global Identity Marker */}
                         <div className="flex items-center gap-4">
@@ -200,7 +200,7 @@ export default function BrandPage() {
                             </Button>
                             <Button
                                 variant="bordered"
-                                className="h-24 px-12 rounded-[2rem] border border-white/10 text-white/50 font-black text-xs uppercase tracking-[0.3em] hover:bg-white/5 transition-all"
+                                className="h-24 px-12 rounded-[2rem] border border-white/10 text-white/50 font-black text-xs uppercase tracking-[0.3em] hover:bg-white/5 transition-all public-surface-card"
                                 onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
                             >
                                 Structure
@@ -216,7 +216,7 @@ export default function BrandPage() {
             </section>
 
             {/* --- REFINED ABOUT SECTION --- */}
-            <section id="about" className="py-40 px-8 max-w-7xl mx-auto">
+            <section id="about" className="py-40 px-8 max-w-7xl mx-auto public-layout-container">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-32 items-start">
                     <div className="lg:col-span-6 space-y-16">
                         <div className="space-y-8">
@@ -248,9 +248,9 @@ export default function BrandPage() {
 
                     <div className="lg:col-span-6 sticky top-32">
                         <div className="relative group">
-                            <div className="absolute inset-0 bg-obaol-500/5 blur-[120px] rounded-full" />
+                            <div className="absolute inset-0 bg-obaol-500/5 blur-[120px] rounded-full public-decoration" />
                             <div className="relative bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-12 overflow-hidden">
-                                <div className="absolute -top-10 -right-10 w-48 h-48 bg-obaol-500/[0.05] rounded-full blur-[80px]" />
+                                <div className="absolute -top-10 -right-10 w-48 h-48 bg-obaol-500/[0.05] rounded-full blur-[80px] public-decoration" />
                                 
                                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-12 flex items-center gap-4">
                                     <LuGlobe size={18} className="text-obaol-500" />
@@ -305,7 +305,7 @@ export default function BrandPage() {
             </section>
 
             {/* Products Coverage Section */}
-            <section id="products" className="py-32 bg-[rgba(255,255,255,0.02)] border-y border-white/5">
+            <section id="products" className="py-32 bg-[rgba(255,255,255,0.02)] border-y border-white/5 public-standard-section">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="space-y-4">
@@ -322,7 +322,7 @@ export default function BrandPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {products.map((product: any) => (
                                 <Card key={product.productId} className="bg-white/5 border-white/10 hover:bg-white/10 transition-all rounded-[30px] p-8 overflow-hidden group shadow-none">
-                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-obaol-500/10 blur-[50px] group-hover:bg-obaol-500/20 transition-all" />
+                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-obaol-500/10 blur-[50px] group-hover:bg-obaol-500/20 transition-all public-decoration" />
                                     <div className="relative z-10 space-y-6">
                                         <div className="flex justify-between items-start">
                                             <div className="w-12 h-12 rounded-2xl bg-obaol-500/20 flex items-center justify-center text-obaol-500 italic font-black text-xl">

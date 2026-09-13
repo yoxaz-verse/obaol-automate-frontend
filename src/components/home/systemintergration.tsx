@@ -1,179 +1,124 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { FiArrowRight, FiBookOpen, FiKey, FiTerminal } from "react-icons/fi";
 
+const documentationItems = [
+  {
+    title: "Authentication",
+    description: "Generate Bearer API keys, create connector tokens, and revoke access from the developer console.",
+    meta: "API keys",
+    icon: <FiKey aria-hidden="true" />,
+  },
+  {
+    title: "Endpoint Reference",
+    description: "Use live products, prices, verified traders, enquiries, and CIF calculation routes in automation flows.",
+    meta: "REST APIs",
+    icon: <FiTerminal aria-hidden="true" />,
+  },
+  {
+    title: "MCP Setup",
+    description: "Connect OBAOL to ChatGPT app connectors and MCP-based workflow tools through secure connector URLs.",
+    meta: "Connectors",
+    icon: <FiBookOpen aria-hidden="true" />,
+  },
+];
 
-
+const referenceRows = [
+  ["GET", "/v1/products/live", "Live trade-ready products"],
+  ["POST", "/v1/inquiries", "Capture enquiry intent"],
+  ["POST", "/v1/calculate/cif", "Run CIF calculations"],
+];
 
 export default function SystemIntergrationSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  /**
-   * SCROLL → SPACE MAPPING
-   * This is the core of the effect you want
-   */
-  // SLOW, SOFT, CINEMATIC FADE
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.75, 1],
-    [0, 1, 1, 0]
-  );
-
-  // COMING FROM BACK → GOING BACK
-  const y = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.75, 1],
-    [200, 0, 0, -200]
-  );
-
-  // DEPTH FEEL
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 0.25, 0.75, 1],
-    [0.94, 1, 1, 0.94]
-  );
-
-
-
   return (
-
-
-    <section
-      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
-    >
-      {/* Deep Space Grid & Ambient Glow */}
-      <div className="absolute inset-0 pointer-events-none" >
-        <div className="absolute top-1/2 left-0 w-full h-[500px] bg-gradient-to-r from-orange-400/10 via-orange-400/5 to-transparent blur-[120px] -translate-y-1/2" />
-        <div
-          className="absolute inset-0 opacity-[0.02] mix-blend-screen"
-          style={{
-            backgroundImage: `
-                linear-gradient(to right, #ffffff 1px, transparent 1px),
-                linear-gradient(to bottom, #ffffff 1px, transparent 1px)
-              `,
-            backgroundSize: "40px 40px",
-            maskImage: "linear-gradient(to right, black 20%, transparent 80%)",
-            WebkitMaskImage: "linear-gradient(to right, black 20%, transparent 80%)"
-          }}
-        />
-      </div>
-      <div className="max-w-6xl mx-auto relative z-10">
+    <section className="relative overflow-hidden border-t border-default-200 bg-background px-6 py-20 md:py-28 public-standard-section">
+      <div className="absolute inset-0 pointer-events-none opacity-[0.035] dark:opacity-[0.055] bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:44px_44px] public-decoration" />
+      <div className="mx-auto max-w-6xl relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="grid md:grid-cols-2 gap-16 items-center"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="grid items-start gap-12 lg:grid-cols-[0.95fr_1.05fr]"
         >
-          {/* Left: Narrative */}
-          <div className="max-w-xl">
-            <motion.span
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-sm uppercase tracking-wider text-default-500 font-medium"
-            >
-              System Ready
-            </motion.span>
-
-            <h2 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-foreground">
-              Built as Trading Infrastructure,<br />
-              <span className="bg-gradient-to-r from-orange-400 to-orange-400 bg-clip-text text-transparent drop-shadow-sm">
-                Not Just a Platform
-              </span>
+          <div className="max-w-2xl">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
+              Developer Documentation
+            </span>
+            <h2 className="mt-4 text-3xl font-black leading-tight tracking-tight text-foreground md:text-5xl">
+              Build trade automations on top of OBAOL.
             </h2>
-
-            <p className="mt-6 text-default-600 leading-relaxed">
-              OBAOL is designed to operate at the system level. Beyond the
-              interface, we provide structured mechanisms that allow
-              businesses to integrate trading workflows directly into their
-              existing operations.
+            <p className="mt-5 text-base leading-relaxed text-foreground/70 md:text-lg">
+              The documentation now brings API keys, endpoint usage, MCP connector setup, and usage monitoring into one developer-facing path for agri-trade automation.
             </p>
-
-            <p className="mt-4 text-default-500 leading-relaxed">
-              Advanced capabilities such as MCP and API-based automation are
-              available for organizations that require deeper integration and
-              programmable trade execution.
+            <p className="mt-4 text-sm leading-relaxed text-foreground/55 md:text-base">
+              Use live product data, pricing, verified trader signals, enquiry capture, and CIF calculation routes in n8n, ChatGPT connectors, MCP tools, or custom internal systems. Webhook-style automation is positioned as an enterprise workflow capability where available.
             </p>
-
-            <p className="mt-6 text-sm text-default-400">
-              Detailed documentation and automation workflows are available
-              separately.
-            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/developer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-obaol-500 px-5 py-3 text-sm font-black text-obaol-950 transition hover:bg-obaol-400"
+              >
+                Open Documentation
+                <FiArrowRight aria-hidden="true" />
+              </Link>
+              <Link
+                href="/developer/login"
+                className="inline-flex items-center justify-center rounded-lg border border-default-300 px-5 py-3 text-sm font-bold text-foreground transition hover:border-obaol-400 hover:bg-obaol-500/10 dark:border-white/20"
+              >
+                Generate API Key
+              </Link>
+            </div>
           </div>
 
-          {/* Right: Futuristic Visual Cue */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative"
-          >
-            <motion.div
-              transition={{ type: "spring", stiffness: 300 }}
-              className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl relative overflow-hidden shadow-none"
-            >
-              {/* Internal grid glow */}
-              {/* Internal cleaned up card */}
-
-
-              <div className="space-y-4 text-sm text-default-600 relative z-10">
-                <SystemLine label="Live Rates API" highlight />
-                <SystemLine label="MCP Integration" />
-                <SystemLine label="Automation Layer / Workflows" />
-                <SystemLine label="Secure Connectivity" />
-                <SystemLine label="Enterprise Webhooks" />
+          <div className="space-y-4">
+            <div className="rounded-lg border border-default-200 bg-content1 p-5 shadow-[0_18px_60px_-44px_rgba(0,0,0,0.65)] dark:border-white/15">
+              <div className="flex items-center justify-between gap-4 border-b border-default-200 pb-4 dark:border-white/10">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-default-500">Docs Preview</p>
+                  <h3 className="mt-1 text-lg font-black text-foreground">API reference at a glance</h3>
+                </div>
+                <code className="rounded-md border border-default-200 bg-default-50 px-3 py-1.5 text-xs font-bold text-default-700 dark:border-white/15 dark:bg-white/5 dark:text-white/80">
+                  api.obaol.com
+                </code>
               </div>
 
-              {/* Static background */}
-              <div className="absolute inset-0 bg-orange-500/[0.02] pointer-events-none" />
-            </motion.div>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[520px] text-left text-sm">
+                  <tbody>
+                    {referenceRows.map(([method, path, purpose]) => (
+                      <tr key={path} className="border-b border-default-100 last:border-0 dark:border-white/10">
+                        <td className="py-3 pr-3">
+                          <span className="rounded-md bg-obaol-500/10 px-2 py-1 font-mono text-xs font-black text-obaol-700 dark:text-obaol-300">
+                            {method}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-3 font-mono text-xs font-semibold text-foreground">{path}</td>
+                        <td className="py-3 text-xs text-foreground/60">{purpose}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-            {/* Subtle border accent */}
-            <div className="absolute inset-0 rounded-3xl border border-orange-500/20 pointer-events-none" />
-          </motion.div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {documentationItems.map((item) => (
+                <article key={item.title} className="rounded-lg border border-default-200 bg-content1 p-4 dark:border-white/15">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-obaol-500/10 text-obaol-700 dark:text-obaol-300">
+                    {item.icon}
+                  </div>
+                  <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-default-400">{item.meta}</p>
+                  <h3 className="mt-1 text-sm font-black text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-foreground/60">{item.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
-  );
-}
-
-
-
-
-function SystemLine({
-  label,
-  highlight,
-}: {
-  label: string;
-  highlight?: boolean;
-}) {
-  return (
-    <motion.div
-      whileHover={{ x: 5, scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 400 }}
-      className={`flex items-center justify-between px-5 py-4 rounded-xl border transition-all duration-300 backdrop-blur-sm cursor-default
-        ${highlight
-          ? "border-orange-500/40 text-orange-400 bg-orange-500/10 shadow-[0_0_20px_rgba(228,199,153,0.1)]"
-          : "border-default-100 text-foreground/70 bg-white/[0.02] hover:bg-white/[0.05] hover:border-orange-500/20 hover:text-foreground/90"
-        }`}
-    >
-      <span className="font-medium">{label}</span>
-      <span
-        className={`text-xs px-3 py-1.5 font-bold tracking-widest uppercase rounded-lg ${highlight
-          ? "bg-orange-500/10 text-orange-500 border border-orange-500/20"
-          : "bg-default-100 text-default-500 border border-transparent"
-          }`}
-      >
-        {highlight ? "Active" : "Available"}
-      </span>
-    </motion.div>
   );
 }

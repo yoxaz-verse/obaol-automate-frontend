@@ -170,9 +170,9 @@ export default function ProductPage() {
             <ThemedContentWrapper>
                 {/* ── COMPACT HERO & FILTERS ── */}
                 <div className="relative pt-20 pb-10 overflow-hidden border-b border-default-100">
-                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] bg-orange-500/5 blur-[100px] rounded-full" />
+                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] bg-orange-500/5 blur-[100px] rounded-full public-decoration" />
 
-                    <div className="container mx-auto max-w-7xl px-4 relative z-10">
+                    <div className="container mx-auto max-w-7xl px-4 relative z-10 public-layout-container">
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                             <div className="space-y-1 text-left max-w-2xl">
                                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
@@ -226,12 +226,12 @@ export default function ProductPage() {
                 </div>
 
                 {/* ── PRODUCT GRID ── */}
-                <div className="container mx-auto max-w-7xl px-4 py-16">
+                <div className="container mx-auto max-w-7xl px-4 py-16 public-layout-container">
 
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                             {[...Array(8)].map((_, i) => (
-                                <Card key={i} className="h-64 space-y-5 p-8 rounded-[2rem] shadow-sm bg-content1/50 border border-default-100">
+                                <Card key={i} className="h-64 space-y-5 p-8 rounded-[2rem] shadow-sm bg-content1/50 border border-default-100 public-surface-card">
                                     <div className="space-y-3">
                                         <Skeleton className="w-2/5 rounded-lg h-3" />
                                         <Skeleton className="w-4/5 rounded-lg h-6" />
@@ -260,7 +260,7 @@ export default function ProductPage() {
                                                 href={product.slug ? `/trade-directory/${product.slug}` : "#"}
                                                 className={!product.slug ? "pointer-events-none" : "block h-full group"}
                                             >
-                                                <Card className="h-full border border-default-200/50 bg-content1/50 backdrop-blur-md overflow-hidden hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 rounded-[2rem]">
+                                                <Card className="h-full border border-default-200/50 bg-content1/50 backdrop-blur-md overflow-hidden hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 rounded-[2rem] public-surface-card">
                                                     <div className="p-8 pb-0">
                                                         <div className="space-y-1">
                                                             <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/70">

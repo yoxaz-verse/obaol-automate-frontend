@@ -1,13 +1,10 @@
 import AuthEntry from "@/components/Auth/AuthEntry";
-import React, { Suspense } from "react";
-import BrandedLoader from "@/components/ui/BrandedLoader";
+import React from "react";
 
-export default function AuthEntryPage() {
-  return (
-    <>
-      <Suspense fallback={<BrandedLoader fullScreen message="Loading account options" />}>
-        <AuthEntry />
-      </Suspense>
-    </>
-  );
+export default function AuthEntryPage({
+  searchParams,
+}: {
+  searchParams?: { view?: string; prefill?: string };
+}) {
+  return <AuthEntry signInView={searchParams?.view === "signin"} prefill={searchParams?.prefill} />;
 }

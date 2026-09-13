@@ -38,7 +38,7 @@ export default function AboutPage() {
       />
       <Header />
       <WhoCanUseObaol />
-      <ThemedContentWrapper>
+      <ThemedContentWrapper className="public-reading-page">
         <AboutSection key="about-section" />
         <StartedIn key="started-in-section" />
         <AboutExecutionFramework />

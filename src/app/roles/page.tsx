@@ -44,10 +44,10 @@ export default function RolesPage() {
       <ThemedContentWrapper>
         <div className="relative pt-24 pb-16 overflow-hidden">
           {/* Background decorative elements */}
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full" />
-          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full" />
+          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full public-decoration" />
+          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full public-decoration" />
 
-          <div className="container mx-auto max-w-5xl px-4 relative z-10">
+          <div className="container mx-auto max-w-5xl px-4 relative z-10 public-layout-container">
             {/* ── HERO SECTION ── */}
             <div className="text-center space-y-6 mb-12">
               <motion.div
@@ -77,7 +77,7 @@ export default function RolesPage() {
                 className="group relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[1.75rem]" />
-                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-xl overflow-hidden group-hover:-translate-y-2">
+                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-xl overflow-hidden group-hover:-translate-y-2 public-surface-card">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
                       <FiBriefcase size={28} />
@@ -148,7 +148,7 @@ export default function RolesPage() {
                 className="group relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[1.75rem]" />
-                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-lg group-hover:shadow-xl overflow-hidden group-hover:-translate-y-2">
+                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-lg group-hover:shadow-xl overflow-hidden group-hover:-translate-y-2 public-surface-card">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-14 h-14 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/20">
                       <FiUsers size={28} />

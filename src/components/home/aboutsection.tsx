@@ -3,15 +3,15 @@
 import React from "react";
 import ParticleNetwork from "@/components/ui/particle-network";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 
 export default function AboutSection() {
     return (
-        <section className="relative py-32 px-6 bg-background border-t border-white/5 overflow-hidden" id="about">
+        <section className="relative py-32 px-6 bg-background border-t border-white/5 overflow-hidden public-standard-section" id="about">
             {/* Ambient Deep Space Gradients */}
             <div className="absolute inset-0 pointer-events-none z-0">
-                <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/4" />
-                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full translate-y-1/4 translate-x-1/4" />
+                <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-orange-500/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/4 public-decoration" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full translate-y-1/4 translate-x-1/4 public-decoration" />
             </div>
 
             <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 items-center">
@@ -62,9 +62,9 @@ export default function AboutSection() {
                     whileInView={{ opacity: 1, scale: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative h-[500px] md:h-[600px] w-full rounded-3xl overflow-hidden border border-default-200/50 flex items-center justify-center shadow-none group"
+                    className="relative h-[500px] md:h-[600px] w-full rounded-3xl overflow-hidden border border-default-200/50 flex items-center justify-center shadow-none group public-surface-card"
                 >
-                    <Image
+                    <RevealImage
                         src="/images/Jacob-Alwin-New.jpg"
                         alt="Jacob Alwin, Entrepreneur"
                         fill

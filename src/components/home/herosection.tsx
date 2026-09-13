@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import RevealImage from "@/components/ui/RevealImage";
 import { motion, useTransform, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { FiArrowRight } from "react-icons/fi";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
@@ -284,7 +284,7 @@ function EditorialCollageTile({
         zIndex: slot.zIndex,
       }}
     >
-      <Image src={stage.src} alt="" fill sizes={sizes} className="object-cover" style={{ objectPosition: stage.objectPosition }} />
+      <RevealImage src={stage.src} alt="" fill sizes={sizes} className="object-cover" style={{ objectPosition: stage.objectPosition }} />
       <div className="absolute inset-0 bg-gradient-to-tr from-black/35 via-transparent to-white/10" />
       <div className="pointer-events-none absolute inset-x-1.5 bottom-1.5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/70 px-2 py-1 backdrop-blur-md sm:inset-x-auto sm:left-2 sm:bottom-2 sm:px-2.5">
         <span className="font-mono text-[7px] font-bold text-obaol-300 sm:text-[8px]">{String(stage.sequence).padStart(2, "0")}</span>
@@ -312,7 +312,7 @@ function MobileExecutionFlowCard({
       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.55, delay: animateIn ? Math.min(stage.sequence * 0.035, 0.28) : 0 }}
       className="relative aspect-[4/3] w-[78vw] max-w-[320px] shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-white/20 bg-black shadow-[0_22px_42px_-24px_rgba(0,0,0,0.85)]"
     >
-      <Image src={stage.src} alt="" fill sizes="78vw" className="object-cover" style={{ objectPosition: stage.objectPosition }} />
+      <RevealImage src={stage.src} alt="" fill sizes="78vw" className="object-cover" style={{ objectPosition: stage.objectPosition }} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-white/10" />
       <figcaption className="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-full border border-white/10 bg-black/75 px-3 py-2 backdrop-blur-md">
         <span className="font-mono text-[10px] font-bold text-obaol-300">{String(stage.sequence).padStart(2, "0")}</span>
@@ -497,7 +497,7 @@ export default function HeroSection() {
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: "easeOut" }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 z-10" />
-        <div className="obaol-hero-ambient absolute inset-0" />
+        <div className="obaol-hero-ambient absolute inset-0 public-decoration" />
       </motion.div>
 
       {/* Grid Overlay */}
@@ -506,7 +506,7 @@ export default function HeroSection() {
         animate={{
           opacity: allowDecorativeMotion && (isSystemActive || isAgroActive) ? 0.2 : 0.08,
         }}
-        className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
+        className="public-decoration absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
         style={{
           backgroundImage: `linear-gradient(to right, ${OBAOL_GOLD} 1px, transparent 1px), linear-gradient(to bottom, ${OBAOL_GOLD} 1px, transparent 1px)`,
           backgroundSize: "4rem 4rem"
@@ -594,7 +594,7 @@ export default function HeroSection() {
 
       {/* ================= MAIN CONTENT ================= */}
       <motion.div
-        className="relative z-30 container mx-auto flex w-full flex-col items-start px-6 py-12 text-left sm:px-12 md:py-16 lg:py-8"
+        className="public-layout-container relative z-30 container mx-auto flex w-full flex-col items-start px-6 py-12 text-left sm:px-12 md:py-16 lg:py-8"
       >
         <motion.div
           initial={shouldReduceMotion ? false : "hidden"}
@@ -678,11 +678,11 @@ export default function HeroSection() {
                         setIsNavigating(true);
                         router.push(!loading && isAuthenticated ? "/dashboard" : "/auth");
                       }}
-                      className="group relative flex items-center gap-2.5 rounded-[2rem] border border-obaol-300/45 bg-obaol-500 px-6 py-3 text-base font-bold text-obaol-950 shadow-[0_20px_42px_-14px_rgba(207,152,60,0.65)] transition-all hover:scale-105 hover:bg-obaol-400 active:scale-95 md:gap-3 md:px-9 md:py-4 md:text-xl"
+                      className="public-button public-button--primary group relative"
                     >
                       {isNavigating ? "Opening..." : (isAuthenticated ? "Open workspace" : "Get started")}
                       <FiArrowRight size={20} className="md:size-6 group-hover:translate-x-2 transition-transform" />
-                      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity public-decoration" />
                     </button>
 
                     {!loading && !isAuthenticated && (
@@ -733,54 +733,6 @@ export default function HeroSection() {
               </motion.div>
           </div>
 
-          <div
-            aria-hidden="true"
-            data-process-to-laptop-arrow="true"
-            className="pointer-events-none relative z-20 mx-auto mt-2 flex h-24 w-full max-w-[760px] items-center justify-center text-obaol-600/70 dark:text-obaol-300/70 lg:mt-0 lg:h-32 lg:max-w-[980px]"
-          >
-            <svg className="h-full w-full overflow-visible" viewBox="0 0 760 140" fill="none">
-              <defs>
-                <marker id="process-to-laptop-arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
-                  <path d="M 0 0 L 10 5 L 0 10 Z" fill="currentColor" fillOpacity="0.8" />
-                </marker>
-              </defs>
-              <path
-                d="M 126 18 C 230 72 308 54 380 96 C 452 54 530 72 634 18"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeDasharray="7 10"
-                opacity="0.42"
-              />
-              <path
-                d="M 380 24 C 380 52 380 78 380 118"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeDasharray="8 9"
-                markerEnd="url(#process-to-laptop-arrowhead)"
-              />
-            </svg>
-          </div>
-
-          <figure
-            data-hero-panel="unified-system"
-            className="relative -mx-6 mt-0 w-[calc(100%+3rem)] max-w-none overflow-hidden sm:-mx-12 sm:w-[calc(100%+6rem)] lg:mx-auto lg:max-h-[620px] lg:w-full lg:max-w-[1120px] lg:-mb-24 xl:-mb-32 xl:max-w-[1240px]"
-          >
-            <figcaption className="relative z-30 mb-2 text-center text-[10px] font-bold uppercase tracking-[0.28em] text-obaol-700/80 dark:text-obaol-300/80 sm:text-xs lg:mb-0 lg:-translate-y-1">
-              All execution stages, tracked in one OBAOL workspace.
-            </figcaption>
-            <div className="pointer-events-none absolute left-1/2 top-[30%] z-10 h-24 w-2/3 -translate-x-1/2 rounded-full bg-obaol-500/14 blur-2xl md:blur-3xl" />
-            <div className="relative z-20 -mx-10 aspect-square w-[calc(100%+5rem)] sm:-mx-14 sm:w-[calc(100%+7rem)] lg:mx-0 lg:w-full lg:-mb-[18%]">
-              <Image
-                src="/images/order-execution-laptop.png"
-                alt="OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."
-                fill
-                sizes="(max-width: 1023px) calc(100vw + 7rem), 1120px"
-                className="object-contain opacity-75 drop-shadow-[0_34px_60px_rgba(0,0,0,0.35)]"
-              />
-            </div>
-          </figure>
         </motion.div>
       </motion.div>
 

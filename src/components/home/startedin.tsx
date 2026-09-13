@@ -23,7 +23,7 @@ export default function StartedIn() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 px-6 min-h-[720px] bg-background border-t border-white/5 overflow-hidden"
+      className="relative py-32 md:py-48 px-6 min-h-[720px] bg-background border-t border-white/5 overflow-hidden public-standard-section"
     >
       {/* RIGHT-SIDE IMAGE LAYER */}
       <div
@@ -46,8 +46,8 @@ export default function StartedIn() {
 
       {/* Ambient Deep Space Gradients */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full translate-x-1/3 -translate-y-1/4" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-green-500/5 blur-[120px] rounded-full -translate-x-1/3 translate-y-1/4" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-500/5 blur-[150px] rounded-full translate-x-1/3 -translate-y-1/4 public-decoration" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-green-500/5 blur-[120px] rounded-full -translate-x-1/3 translate-y-1/4 public-decoration" />
       </div>
 
       {/* CONTENT (ANIMATED ONLY) */}
@@ -81,7 +81,7 @@ export default function StartedIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] transition-all duration-500"
+            className="p-8 md:p-10 rounded-3xl border border-default-200/50 bg-white/[0.02] backdrop-blur-2xl hover:bg-white/[0.04] transition-all duration-500 public-surface-card"
           >
             <p className="text-base md:text-lg text-default-400 leading-relaxed">
               We began by building and validating the system in India — not
@@ -100,7 +100,7 @@ export default function StartedIn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="p-8 md:p-10 rounded-3xl border border-orange-500/20 bg-orange-500/[0.03] backdrop-blur-2xl shadow-none hover:border-orange-500/40 transition-all duration-500"
+            className="p-8 md:p-10 rounded-3xl border border-orange-500/20 bg-orange-500/[0.03] backdrop-blur-2xl shadow-none hover:border-orange-500/40 transition-all duration-500 public-surface-card"
           >
             <p className="text-base md:text-lg text-foreground font-medium leading-relaxed">
               Validating execution under these conditions ensures the same

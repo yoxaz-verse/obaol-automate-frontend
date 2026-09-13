@@ -72,7 +72,7 @@ export default function TradeFinancePage() {
       />
       <Header />
 
-      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16 public-layout-container">
         <div className="max-w-4xl mx-auto text-center mb-16">
           <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary mb-6">
             Trade-Level Finance Opportunity
@@ -87,7 +87,7 @@ export default function TradeFinancePage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="rounded-3xl border border-warning/20 bg-warning/5 p-8">
+          <div className="rounded-3xl border border-warning/20 bg-warning/5 p-8 public-surface-card">
             <div className="flex items-center gap-3 mb-4">
               <FiAlertTriangle className="w-6 h-6 text-warning" />
               <h2 className="text-2xl font-bold">Why Funding Is Needed</h2>
@@ -99,7 +99,7 @@ export default function TradeFinancePage() {
             </p>
           </div>
 
-          <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8">
+          <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 public-surface-card">
             <div className="flex items-center gap-3 mb-4">
               <FiActivity className="w-6 h-6 text-primary" />
               <h2 className="text-2xl font-bold">What OBAOL Enables</h2>
@@ -118,7 +118,7 @@ export default function TradeFinancePage() {
             {models.map((model) => {
               const Icon = model.icon;
               return (
-                <div key={model.title} className="rounded-3xl border border-divider bg-content1 p-7">
+                <div key={model.title} className="rounded-3xl border border-divider bg-content1 p-7 public-surface-card">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
                     <Icon className="w-6 h-6" />
                   </div>
@@ -130,7 +130,7 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="mb-16 rounded-3xl border border-divider bg-content1/60 p-8 md:p-10">
+        <div className="mb-16 rounded-3xl border border-divider bg-content1/60 p-8 md:p-10 public-surface-card">
           <h2 className="text-3xl font-bold mb-8 text-center">How It Works</h2>
           <div className="grid md:grid-cols-5 gap-4">
             {flow.map((step, index) => (
@@ -145,7 +145,7 @@ export default function TradeFinancePage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="rounded-3xl border border-divider p-8 bg-content1">
+          <div className="rounded-3xl border border-divider p-8 bg-content1 public-surface-card">
             <div className="flex items-center gap-3 mb-4">
               <FiShield className="w-6 h-6 text-primary" />
               <h3 className="text-2xl font-bold">Risk & Governance</h3>
@@ -157,7 +157,7 @@ export default function TradeFinancePage() {
             </ul>
           </div>
 
-          <div className="rounded-3xl border border-warning/20 p-8 bg-warning/5">
+          <div className="rounded-3xl border border-warning/20 p-8 bg-warning/5 public-surface-card">
             <div className="flex items-center gap-3 mb-4">
               <FiUsers className="w-6 h-6 text-warning" />
               <h3 className="text-2xl font-bold">Who Can Participate</h3>
@@ -173,7 +173,7 @@ export default function TradeFinancePage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 md:p-10 mb-8">
+        <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 md:p-10 mb-8 public-surface-card">
           <div className="max-w-4xl mx-auto text-center mb-10">
             <p className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/60 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary mb-5">
               Trade Finance Explained

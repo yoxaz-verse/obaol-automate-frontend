@@ -71,7 +71,7 @@ export default function HowItWorksOperationalPipeline() {
     return (
         <div className="space-y-32 py-20">
             {/* SECTION 1: THE OPERATIONAL PIPELINE */}
-            <section className="container mx-auto max-w-6xl px-4">
+            <section className="container mx-auto max-w-6xl px-4 public-layout-container">
                 <motion.div {...fadeIn} className="max-w-4xl space-y-8 mb-24">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-[10px]">
                         Execution Discipline
@@ -118,9 +118,9 @@ export default function HowItWorksOperationalPipeline() {
             </section>
 
             {/* SECTION 2: NOISE FILTERING (SPECIFIC USER REQUEST) */}
-            <section className="container mx-auto max-w-6xl px-4">
+            <section className="container mx-auto max-w-6xl px-4 public-layout-container">
                 <div className="p-12 md:p-24 rounded-[5rem] bg-foreground text-background dark:bg-neutral-900 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none translate-x-1/3 -translate-y-1/3" />
+                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none translate-x-1/3 -translate-y-1/3 public-decoration" />
 
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                         <div className="space-y-10">
@@ -151,7 +151,7 @@ export default function HowItWorksOperationalPipeline() {
                                     { label: "Working Capital", desc: "Prevention of funds stuck in non-viable trades.", icon: <FiActivity /> },
                                     { label: "Market Reputation", desc: "Associated only with serious, verified counterparties.", icon: <FiKey /> }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex gap-6 p-8 rounded-[2rem] bg-orange-500/10 border border-orange-500/20 group hover:bg-orange-500 hover:border-orange-500 transition-all duration-500">
+                                    <div key={i} className="flex gap-6 p-8 rounded-[2rem] bg-orange-500/10 border border-orange-500/20 group hover:bg-orange-500 hover:border-orange-500 transition-all duration-500 public-surface-card">
                                         <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center text-white shrink-0 shadow-lg group-hover:bg-white group-hover:text-orange-500 transition-colors">
                                             {item.icon}
                                         </div>
@@ -168,7 +168,7 @@ export default function HowItWorksOperationalPipeline() {
             </section>
 
             {/* SECTION 3: IMPACT FOR OPERATORS */}
-            <section className="container mx-auto max-w-6xl px-4">
+            <section className="container mx-auto max-w-6xl px-4 public-layout-container">
                 <div className="text-center mb-24 space-y-4">
                     <h2 className="text-3xl md:text-6xl font-black text-foreground tracking-tight">Systemic Support.</h2>
                     <p className="text-xl text-foreground/50 font-medium">How this structure levels the playing field for all operators.</p>
@@ -212,7 +212,7 @@ export default function HowItWorksOperationalPipeline() {
             </section>
 
             {/* SECTION 4: SELECTIVE ENGAGEMENT */}
-            <section className="container mx-auto max-w-5xl px-4">
+            <section className="container mx-auto max-w-5xl px-4 public-layout-container">
                 <div className="p-12 md:p-20 rounded-[4rem] bg-orange-500 text-white shadow-2xl relative overflow-hidden text-center space-y-8">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
                     <div className="relative z-10 space-y-6">

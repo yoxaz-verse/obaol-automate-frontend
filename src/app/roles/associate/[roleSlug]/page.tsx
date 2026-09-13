@@ -126,9 +126,9 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
       
       <main className="relative pt-24 pb-16">
         {/* Background glow effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-orange-500/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-orange-500/5 blur-[120px] rounded-full pointer-events-none public-decoration" />
         
-        <div className="container mx-auto max-w-6xl px-6 relative z-10 space-y-12 md:space-y-16">
+        <div className="container mx-auto max-w-6xl px-6 relative z-10 space-y-12 md:space-y-16 public-layout-container">
           
           {/* Header Section */}
           <div className="space-y-8">
@@ -208,7 +208,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             
             <div className="grid md:grid-cols-2 gap-6">
               {role.faqs.map((faq) => (
-                <div key={faq.question} className="p-8 rounded-[2rem] border border-divider bg-content1/30 hover:bg-content1 transition-colors">
+                <div key={faq.question} className="p-8 rounded-[2rem] border border-divider bg-content1/30 hover:bg-content1 transition-colors public-surface-card">
                   <h3 className="font-bold text-xl mb-3 leading-tight">{faq.question}</h3>
                   <p className="text-foreground/60 leading-relaxed">{faq.answer}</p>
                 </div>
@@ -225,7 +225,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
                   <Link
                     key={relatedRole.slug}
                     href={getAssociateRolePath(relatedRole.slug)}
-                    className="p-6 rounded-3xl border border-divider bg-content1/20 hover:bg-content1 hover:border-orange-500/40 hover:-translate-y-1 hover:shadow-xl transition-all group focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="p-6 rounded-3xl border border-divider bg-content1/20 hover:bg-content1 hover:border-orange-500/40 hover:-translate-y-1 hover:shadow-xl transition-all group focus:outline-none focus:ring-2 focus:ring-orange-500 public-surface-card"
                   >
                     <div className="flex items-center justify-between mb-4">
                        <span className="font-bold text-lg">{relatedRole.displayName}</span>

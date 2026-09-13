@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import { FiInfo, FiLayers, FiMapPin, FiExternalLink } from "react-icons/fi";
 import { CommodityFacts } from "@/utils/research";
 
@@ -16,7 +16,7 @@ const ProductFacts: React.FC<ProductFactsProps> = ({ facts, productionRegions })
                         <div className="relative group">
                             <div className="relative aspect-square rounded-2xl overflow-hidden bg-default-100 border border-default-200">
                                 {facts.thumbnail ? (
-                                    <Image
+                                    <RevealImage
                                         src={facts.thumbnail}
                                         alt={facts.title}
                                         fill

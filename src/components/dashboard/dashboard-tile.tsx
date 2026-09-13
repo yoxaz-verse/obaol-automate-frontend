@@ -7,12 +7,20 @@ import {
   Divider,
 } from "@nextui-org/react";
 import React from "react";
-import { GrAdd } from "react-icons/gr";
-import DoughnutChart from "./Charts/doughnut-chart";
-import { doughnutChartData } from "@/data/content-data";
-import LineChart from "./Charts/line-chart";
-import { GrowthTypeChart } from "./Charts/growth-type-chart";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+const LineChart = dynamic(() => import("./Charts/line-chart"), {
+  ssr: false,
+  loading: () => <div className="h-48 animate-pulse rounded-lg bg-default-100" />,
+});
+const GrowthTypeChart = dynamic(
+  () => import("./Charts/growth-type-chart").then((module) => module.GrowthTypeChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 animate-pulse rounded-lg bg-default-100" />,
+  },
+);
 
 const DashboardTile = ({ heading, data, type, stats }: DashboardTileProps) => {
   function DashboardTileData() {

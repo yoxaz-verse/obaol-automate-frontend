@@ -37,12 +37,12 @@ export default function WhoCanUseObaol() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 px-4 sm:px-6 bg-background border-t border-white/5 overflow-hidden"
+      className="relative py-32 md:py-48 px-4 sm:px-6 bg-background border-t border-white/5 overflow-hidden public-standard-section"
     >
       {/* Deep ambient background glows */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] bg-orange-400/5 blur-[150px]" />
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] public-decoration" />
+        <div className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] bg-orange-400/5 blur-[150px] public-decoration" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
@@ -239,10 +239,10 @@ function BenefitRow({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="group p-8 rounded-3xl bg-white/[0.02] border border-default-200/50 backdrop-blur-xl hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden"
+      className="group p-8 rounded-3xl bg-white/[0.02] border border-default-200/50 backdrop-blur-xl hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden public-surface-card"
     >
       {/* Subtle border accent */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/[0.02] max-w-full rounded-full blur-[40px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/[0.02] max-w-full rounded-full blur-[40px] pointer-events-none public-decoration" />
 
       {/* HEADER */}
       <div className="mb-6 relative z-10">

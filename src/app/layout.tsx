@@ -1,4 +1,6 @@
 import "./globals.css";
+import "./public-ui.css";
+import PublicPageScope from "@/components/public/PublicPageScope";
 import type { Metadata } from "next";
 import { PublicProviders } from "./public-provider";
 import TopLoader from "@/components/ui/TopLoader";
@@ -168,7 +170,7 @@ export default function RootLayout({
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <PublicProviders>
           <TopLoader />
-          <div id="main-content" tabIndex={-1}>{children}</div>
+          <div id="main-content" tabIndex={-1}><PublicPageScope>{children}</PublicPageScope></div>
         </PublicProviders>
         <script
           type="application/ld+json"

@@ -20,7 +20,7 @@ import {
 
 const ProcurementSpecialistSection = dynamic(() => import("@/components/home/procurementprocess"), {
   ssr: false,
-  loading: () => <div className="min-h-[320px] rounded-3xl border border-default-200 bg-content1/50" />,
+  loading: () => <div className="min-h-[320px] rounded-3xl border border-default-200 bg-content1/50 public-surface-card" />,
 });
 
 export const metadata = buildMetadata({
@@ -46,7 +46,7 @@ export default function ProcurementPage() {
       />
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
+      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16 public-layout-container">
         {/* Hero Section */}
         <FadeIn>
           <div className="max-w-4xl mx-auto text-center mb-16">
@@ -57,7 +57,7 @@ export default function ProcurementPage() {
               Procurement is where most commodity trades are truly tested.<br className="hidden md:block" />
               Price agreement alone <strong className="text-foreground font-semibold">does not guarantee supply</strong>.
             </p>
-            <div className="p-6 md:p-8 rounded-3xl bg-primary/5 border border-primary/20 max-w-3xl mx-auto backdrop-blur-sm shadow-xl">
+            <div className="p-6 md:p-8 rounded-3xl bg-primary/5 border border-primary/20 max-w-3xl mx-auto backdrop-blur-sm shadow-xl public-surface-card">
               <p className="text-lg md:text-xl font-medium leading-relaxed">
                 Execution, coordination, and on-ground discipline determine whether procurement actually happens.
               </p>
@@ -72,7 +72,7 @@ export default function ProcurementPage() {
         {/* The Reality of Commodity Procurement */}
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-16 max-w-6xl mx-auto">
           <FadeIn>
-            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider">
+            <div className="space-y-6 flex flex-col h-full bg-content1/50 p-8 rounded-3xl border border-divider public-surface-card">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-warning/10 text-warning shadow-sm">
                   <FiAlertTriangle className="w-7 h-7" />
@@ -98,8 +98,8 @@ export default function ProcurementPage() {
           </FadeIn>
 
           <FadeIn>
-            <div className="space-y-6 flex flex-col justify-center h-full bg-primary/5 p-8 rounded-3xl border border-primary/20 text-center relative overflow-hidden">
-               <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/10 blur-3xl rounded-full" />
+            <div className="space-y-6 flex flex-col justify-center h-full bg-primary/5 p-8 rounded-3xl border border-primary/20 text-center relative overflow-hidden public-surface-card">
+               <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/10 blur-3xl rounded-full public-decoration" />
                <div className="relative z-10 space-y-8">
                 <p className="text-2xl font-light text-foreground/80 leading-relaxed">
                   These issues rarely appear during negotiation.<br/>
@@ -162,7 +162,7 @@ export default function ProcurementPage() {
                 footer: "No mid-process disengagements."
               }
             ].map((pillar, i) => (
-              <div key={i} className="flex flex-col p-6 rounded-3xl border border-divider bg-content1 hover:shadow-xl hover:-translate-y-2 transition-all relative overflow-hidden group">
+              <div key={i} className="flex flex-col p-6 rounded-3xl border border-divider bg-content1 hover:shadow-xl hover:-translate-y-2 transition-all relative overflow-hidden group public-surface-card">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 shrink-0 relative z-10 transition-transform group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
                   {pillar.icon}
                 </div>
@@ -317,7 +317,7 @@ export default function ProcurementPage() {
         <FadeIn>
           <div className="text-center max-w-3xl mx-auto bg-foreground text-background p-12 rounded-[3rem] shadow-2xl relative overflow-hidden">
              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none public-decoration" />
             
             <h3 className="text-3xl font-bold mb-8 relative z-10">In Summary</h3>
             <p className="text-2xl text-background/80 leading-relaxed font-light relative z-10">

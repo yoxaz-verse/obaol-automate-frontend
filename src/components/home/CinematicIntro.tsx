@@ -60,13 +60,13 @@ export default function CinematicIntro() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1.2, opacity: 0.5 }}
             transition={{ duration: 2, ease: "easeOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-orange-500/20 rounded-full blur-[100px] pointer-events-none mix-blend-screen"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-orange-500/20 rounded-full blur-[100px] pointer-events-none mix-blend-screen public-decoration"
           />
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1.5, opacity: 0.3 }}
             transition={{ duration: 2.5, ease: "easeOut", delay: 0.2 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none mix-blend-screen"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none mix-blend-screen public-decoration"
           />
 
           {/* Random Tech Text Overlays */}
@@ -84,7 +84,7 @@ export default function CinematicIntro() {
           ))}
 
           {/* Grid lines for execution theme */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none public-decoration" />
 
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center justify-center text-center">

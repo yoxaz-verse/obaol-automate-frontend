@@ -12,7 +12,7 @@ import {
 } from "@/data/associateRoles";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -73,7 +73,7 @@ export default function AssociateRolePage() {
             transition={{ duration: 1.4 }}
             className="absolute inset-0 z-0 pointer-events-none"
           >
-            <Image
+            <RevealImage
               src="/images/roles/associate/hero_bg.png"
               alt="Associate ecosystem background"
               fill
@@ -83,7 +83,7 @@ export default function AssociateRolePage() {
           </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-[1]" />
 
-          <div className="container mx-auto max-w-7xl px-4 relative z-10">
+          <div className="container mx-auto max-w-7xl px-4 relative z-10 public-layout-container">
             <Link
               href="/roles"
               className="inline-flex items-center gap-2 text-sm font-bold text-orange-500/70 hover:text-orange-500 transition-all group px-4 py-2 rounded-full border border-orange-500/10 bg-orange-500/5 backdrop-blur-sm"
@@ -139,7 +139,7 @@ export default function AssociateRolePage() {
         </div>
 
         <div id="directory" className="py-16 border-y border-default-100/50 bg-content1/30">
-          <div className="container mx-auto max-w-7xl px-4">
+          <div className="container mx-auto max-w-7xl px-4 public-layout-container">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Associate Role Directory</h2>
               <p className="text-default-500 max-w-3xl mx-auto">
@@ -158,7 +158,7 @@ export default function AssociateRolePage() {
                 >
                   <Link
                     href={getAssociateRolePath(role.slug)}
-                    className="group block h-full p-7 rounded-[2rem] bg-background border border-default-200/60 hover:border-orange-500/40 shadow-lg transition-all hover:-translate-y-1"
+                    className="group block h-full p-7 rounded-[2rem] bg-background border border-default-200/60 hover:border-orange-500/40 shadow-lg transition-all hover:-translate-y-1 public-surface-card"
                   >
                     <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:bg-orange-500 group-hover:text-white transition-all">
                       {iconByRoleKey[role.iconKey]}
@@ -177,7 +177,7 @@ export default function AssociateRolePage() {
         </div>
 
         <div className="py-16 bg-foreground/[0.02] border-t border-default-100">
-          <div className="container mx-auto max-w-7xl px-4">
+          <div className="container mx-auto max-w-7xl px-4 public-layout-container">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">How Associates Work on OBAOL</h2>
               <p className="text-default-500 max-w-2xl mx-auto">
@@ -191,7 +191,7 @@ export default function AssociateRolePage() {
                 { i: "02", icon: <FiTarget />, label: "Activation", text: "Connect your service layer, inventory, or trade capability to active execution workflows." },
                 { i: "03", icon: <FiCheckCircle />, label: "Execution", text: "Collaborate with other associates through role-specific subpages and shared execution visibility." },
               ].map((item) => (
-                <div key={item.i} className="relative p-8 rounded-3xl bg-background border border-default-200/50 hover:border-orange-500/20 transition-all">
+                <div key={item.i} className="relative p-8 rounded-3xl bg-background border border-default-200/50 hover:border-orange-500/20 transition-all public-surface-card">
                   <div className="absolute right-6 top-5 text-5xl font-black text-foreground/[0.03]">{item.i}</div>
                   <div className="w-11 h-11 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center mb-5">
                     {item.icon}

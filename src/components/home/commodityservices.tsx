@@ -162,9 +162,9 @@ export default function ResponsibilityTransferSection() {
     >
       {/* Soft background continuity & Futuristic ambient glows */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-orange-400/15 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px]" />
-        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-orange-400/15 blur-[120px] public-decoration" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] public-decoration" />
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] public-decoration" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
       </div>
 
@@ -339,7 +339,7 @@ export default function ResponsibilityTransferSection() {
           {/* RIGHT — Responsibility Panel */}
           <div className="sticky top-28 p-8 rounded-2xl border border-default-200/50 bg-foreground/[0.02] backdrop-blur-xl shadow-none relative overflow-hidden h-[480px] flex flex-col">
             {/* Ambient glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400/10 blur-[80px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400/10 blur-[80px] pointer-events-none public-decoration" />
             {/* Active glow — visible when something is selected */}
             {obaolHandles.length > 0 && (
               <motion.div

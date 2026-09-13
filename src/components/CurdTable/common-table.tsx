@@ -14,7 +14,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import EmptyState from "../ui/EmptyState";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { TableProps } from "@/data/interface-data";
@@ -185,7 +185,7 @@ export default function CommonTable({
           if (!cellValue) return <span>No Image</span>;
           const imageURL = (item as any).fileURL || `${baseUrl}/${cellValue}`;
           return (
-            <Image
+            <RevealImage
               src={imageURL}
               alt={(item as any).name}
               width={72}

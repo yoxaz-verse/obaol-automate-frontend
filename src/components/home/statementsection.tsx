@@ -19,7 +19,7 @@ export default function StatementSection() {
     return (
         <section
             ref={sectionRef}
-            className="relative py-32 md:py-48 lg:py-56 px-6 overflow-hidden bg-background"
+            className="relative py-32 md:py-48 lg:py-56 px-6 overflow-hidden bg-background public-standard-section"
         >
             {/* Animated ambient glow that follows scroll */}
             <motion.div
@@ -27,15 +27,15 @@ export default function StatementSection() {
                 style={{ y: glowY }}
             >
                 <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-orange-400 blur-[200px]"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-orange-400 blur-[200px] public-decoration"
                     style={{ scale: glowScale, opacity: glowOpacity }}
                 />
             </motion.div>
 
             {/* Secondary subtle glow */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-full bg-orange-400/3 blur-[100px]" />
-                <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-orange-500/3 blur-[100px]" />
+                <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-full bg-orange-400/3 blur-[100px] public-decoration" />
+                <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-orange-500/3 blur-[100px] public-decoration" />
             </div>
 
             <div className="relative z-10 max-w-5xl mx-auto text-center">

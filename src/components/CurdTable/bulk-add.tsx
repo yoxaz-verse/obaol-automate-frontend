@@ -10,9 +10,18 @@ import {
 } from "@nextui-org/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postData } from "@/core/api/apiHandler"; // Your API handler
-import * as XLSX from "xlsx";
 import { BulkAddProps } from "@/data/interface-data";
-import { toast } from "react-toastify"; // Assuming you're using toast for success/error messages
+
+type SpreadsheetRow = Record<string, unknown>;
+
+type UploadError = {
+  response?: {
+    data?: {
+      message?: string;
+      invalidRows?: Array<{ row: number; issues: string[] }>;
+    };
+  };
+};
 
 // Helper function to convert Excel serial date to ISO format
 const convertExcelDateToIso = (excelDate: number): string => {
@@ -37,7 +46,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
   const queryClient = useQueryClient();
 
   const addItem = useMutation({
-    mutationFn: async (data: any) => postData(apiEndpoint, data, {}),
+    mutationFn: async (data: SpreadsheetRow[]) => postData(apiEndpoint, data, {}),
     onSuccess: () => {
       // Refetch data after successful upload
       queryClient.refetchQueries({
@@ -49,7 +58,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       setFile(null);
       refetchData(); // Refetch data from parent component (if necessary)
     },
-    onError: (error: any) => {
+    onError: (error: UploadError) => {
       // Handle error scenario
       setStatusType("error");
 
@@ -96,43 +105,29 @@ const BulkAdd: React.FC<BulkAddProps> = ({
     const reader = new FileReader();
     reader.onload = async (e) => {
       const data = e.target?.result;
-      if (typeof data === "string" || data instanceof ArrayBuffer) {
+      if (data instanceof ArrayBuffer) {
         try {
-          let jsonData;
-
-          if (file.type === "text/csv") {
-            const csvString =
-              typeof data === "string" ? data : new TextDecoder().decode(data);
-            const workbook = XLSX.read(csvString, { type: "string" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            jsonData = jsonData.map((item: any) => {
-              Object.keys(item).forEach((key) => {
-                const value = item[key];
-                if (typeof value === "number" && value > 25569) {
-                  item[key] = convertExcelDateToIso(value);
-                }
-              });
-              return item;
-            });
-          } else {
-            const workbook = XLSX.read(data, { type: "binary" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            jsonData = jsonData.map((item: any) => {
-              Object.keys(item).forEach((key) => {
-                const value = item[key];
-                if (typeof value === "number" && value > 25569) {
-                  item[key] = convertExcelDateToIso(value);
-                }
-              });
-              return item;
-            });
+          // Keep the sizeable spreadsheet parser out of routes that never open
+          // the bulk-upload control.
+          const XLSX = await import("xlsx");
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          if (!sheetName || !worksheet) {
+            throw new Error("The workbook does not contain a readable sheet.");
           }
+
+          const jsonData = XLSX.utils
+            .sheet_to_json<SpreadsheetRow>(worksheet)
+            .map((item) => {
+              Object.keys(item).forEach((key) => {
+                const value = item[key];
+                if (typeof value === "number" && value > 25569) {
+                  item[key] = convertExcelDateToIso(value);
+                }
+              });
+              return item;
+            });
 
           // Call the mutate function with the prepared data
           addItem.mutate(jsonData);
@@ -147,7 +142,7 @@ const BulkAdd: React.FC<BulkAddProps> = ({
       }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
   return (

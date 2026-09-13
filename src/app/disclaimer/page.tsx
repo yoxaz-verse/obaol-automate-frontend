@@ -27,7 +27,7 @@ export default function DisclaimerPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
       <Header />
-      <ThemedContentWrapper>
+      <ThemedContentWrapper className="public-reading-page">
         <div className="mb-6">
           <IndiaFirstNote />
         </div>

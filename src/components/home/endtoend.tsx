@@ -44,13 +44,13 @@ export default function EndToEndSection() {
   return (
 
     <section
-      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden"
+      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden public-standard-section"
     >
       {/* Deep Space Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-400/5 rounded-full blur-[150px] -translate-y-1/2" />
-        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-orange-400/5 rounded-full blur-[120px] translate-x-1/2" />
-        <div className="absolute top-1/2 left-1/2 w-[1000px] h-[500px] bg-indigo-500/5 blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-400/5 rounded-full blur-[150px] -translate-y-1/2 public-decoration" />
+        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-orange-400/5 rounded-full blur-[120px] translate-x-1/2 public-decoration" />
+        <div className="absolute top-1/2 left-1/2 w-[1000px] h-[500px] bg-indigo-500/5 blur-[150px] -translate-x-1/2 -translate-y-1/2 public-decoration" />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">

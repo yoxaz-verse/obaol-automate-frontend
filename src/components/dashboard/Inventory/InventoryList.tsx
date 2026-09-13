@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     Chip,
     Button,
@@ -33,6 +33,7 @@ import { showToastMessage } from "@/utils/utils";
 import CompanySearch from "@/components/dashboard/Company/CompanySearch";
 
 const InventoryList: React.FC = () => {
+    const queryClient = useQueryClient();
     const { user } = useContext(AuthContext);
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [search, setSearch] = useState("");
@@ -62,6 +63,11 @@ const InventoryList: React.FC = () => {
     const isOperatorUser = roleLower === "operator" || roleLower === "team";
     const isAssociate = roleLower === "associate";
     const canUseDemo = isAdmin || isOperatorUser;
+
+    useEffect(() => {
+        patchData(apiRoutes.notifications.markSectionRead("inventory"), {})
+            .finally(() => queryClient.invalidateQueries({ queryKey: ["notifications", "unread-summary"] }));
+    }, [queryClient]);
 
     const { data: companyData } = useQuery({
         queryKey: ["inventory-assigned-companies", associateCompanyRoutes.getAll, user?.id, roleLower],

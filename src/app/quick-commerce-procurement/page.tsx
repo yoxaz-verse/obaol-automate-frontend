@@ -1,4 +1,4 @@
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import Link from "next/link";
 import {
   FiArrowRight,
@@ -214,9 +214,9 @@ export default function QuickCommerceProcurementPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-obaol-500/10 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-content1 shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)]">
-                <Image
+              <div className="absolute -inset-4 rounded-[2rem] bg-obaol-500/10 blur-2xl public-decoration" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-content1 shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)] public-surface-card">
+                <RevealImage
                   src="/images/order-execution-laptop.png"
                   alt="OBAOL procurement execution workspace"
                   width={980}
@@ -241,7 +241,7 @@ export default function QuickCommerceProcurementPage() {
           </div>
         </section>
 
-        <section className="px-6 py-20">
+        <section className="px-6 py-20 public-standard-section">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <p className="text-sm font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
@@ -263,7 +263,7 @@ export default function QuickCommerceProcurementPage() {
           </div>
         </section>
 
-        <section className="border-y border-foreground/10 bg-foreground/[0.03] px-6 py-20">
+        <section className="border-y border-foreground/10 bg-foreground/[0.03] px-6 py-20 public-standard-section">
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
               <div>
@@ -296,9 +296,9 @@ export default function QuickCommerceProcurementPage() {
           </div>
         </section>
 
-        <section className="px-6 py-20">
+        <section className="px-6 py-20 public-standard-section">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[2rem] border border-foreground/10 bg-content1 p-8 md:p-10">
+            <div className="rounded-[2rem] border border-foreground/10 bg-content1 p-8 md:p-10 public-surface-card">
               <p className="text-sm font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
                 Practical workflow
               </p>
@@ -337,7 +337,7 @@ export default function QuickCommerceProcurementPage() {
           </div>
         </section>
 
-        <section className="border-y border-foreground/10 bg-content1 px-6 py-20">
+        <section className="border-y border-foreground/10 bg-content1 px-6 py-20 public-standard-section">
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
@@ -362,7 +362,7 @@ export default function QuickCommerceProcurementPage() {
           </div>
         </section>
 
-        <section className="px-6 py-20">
+        <section className="px-6 py-20 public-standard-section">
           <div className="mx-auto max-w-5xl text-center">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-obaol-700 dark:text-obaol-300">
               Make the process easier

@@ -39,12 +39,18 @@ test("the public entry clearly separates Associate and Operator accounts", () =>
   const login = read("../src/components/Login/login-component.tsx");
   for (const phrase of [
     "For companies and trade businesses",
-    "For independent execution specialists",
-    "I represent an industry business",
-    "I want to become an OBAOL Operator",
-    "Registered company required",
-    "not an internal operations or employee login",
-    "Do not choose this if you are registering",
+    "For OBAOL-approved execution specialists",
+    "Choose your account",
+    'href: "/auth/register"',
+    'href: "/auth/operator/register"',
+    'signInHref: "/auth/associate"',
+    'signInHref: "/auth/operator"',
+    "Register as {option.role}",
+    "Sign in as {option.role}",
+    "Commodity discovery",
+    "Verified partners",
+    "Execution workflows",
+    "Documents and orders",
   ]) assert.equal(entry.includes(phrase), true);
   for (const phrase of [
     "Registering a company?",
@@ -69,7 +75,7 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
   const desktopBlock = hero.match(/const DESKTOP_COLLAGE_SLOTS[\s\S]*?\n\];/)?.[0] ?? "";
   const connectorBlock = hero.match(/const FLOW_CONNECTOR_PATHS = \[[\s\S]*?\] as const;/)?.[0] ?? "";
-  const laptopBlock = hero.match(/<figure\s+data-hero-panel="unified-system"[\s\S]*?<\/figure>/)?.[0] ?? "";
+  const laptopBlock = read("../src/components/home/ExecutionPreview.tsx");
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/\n\s+label: "([^"]+)"/g)].map((match) => match[1]);
   const stageSequences = [...stagesBlock.matchAll(/\n\s+sequence: (\d+)/g)].map((match) => Number(match[1]));
@@ -119,18 +125,18 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   assert.equal(hero.includes('data-sticky-copy="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), true);
   assert.equal(hero.includes('data-hero-panel="execution-flow"'), true);
-  assert.equal(hero.includes('data-hero-panel="unified-system"'), true);
+  assert.equal(laptopBlock.includes('data-hero-panel="unified-system"'), true);
   assert.equal(hero.includes('data-process-unifier="true"'), false);
   assert.equal(hero.includes("Every stage comes together on one OBAOL platform"), false);
-  assert.equal(hero.includes('/images/order-execution-laptop.png'), true);
+  assert.equal(hero.includes('/images/order-execution-laptop.png'), false);
   assert.equal(hero.includes('/images/order-execution-tracking.png'), false);
   assert.equal(hero.includes("LaptopConvergencePaths"), false);
   assert.equal(hero.includes('data-convergence-overlay="true"'), false);
   assert.equal(hero.includes("data-convergence-path="), false);
-  assert.equal(hero.includes('data-process-to-laptop-arrow="true"'), true);
-  assert.equal(hero.includes("process-to-laptop-arrowhead"), true);
-  assert.equal(hero.includes("All execution stages, tracked in one OBAOL workspace."), true);
-  assert.equal(hero.includes("OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."), true);
+  assert.equal(hero.includes('data-process-to-laptop-arrow="true"'), false);
+  assert.equal(hero.includes("process-to-laptop-arrowhead"), false);
+  assert.equal(laptopBlock.includes("All execution stages, tracked in one OBAOL workspace."), true);
+  assert.equal(hero.includes("OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."), false);
   assert.equal(laptopBlock.includes("whileInView"), false);
   assert.equal(laptopBlock.includes("viewport="), false);
   assert.equal(laptopBlock.includes("initial="), false);
@@ -169,7 +175,7 @@ test("the OBAOL perspective gateway presents a premium three-card entry point", 
   assert.equal(perspective.includes("FiCompass"), true);
   assert.equal(perspective.includes("FiShield"), true);
   assert.equal(perspective.includes("FiUsers"), true);
-  assert.equal(perspective.includes("bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)]"), true);
+  assert.equal(perspective.includes("bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)]"), false);
 });
 
 test("the public commodity experience uses concise Catalog naming", () => {
@@ -177,7 +183,7 @@ test("the public commodity experience uses concise Catalog naming", () => {
   const footer = read("../src/components/home/footer.tsx");
   const directory = read("../src/app/product/page.tsx");
   const middleware = read("../src/middleware.ts");
-  assert.equal(header.includes('label: "Catalog"'), true);
+  assert.equal(read("../src/data/publicNavigation.ts").includes('label: "Catalog"'), true);
   assert.equal(footer.includes('name: "Catalog"'), true);
   assert.equal(directory.includes("Commodity"), true);
   assert.equal(directory.includes(">Catalog<"), true);

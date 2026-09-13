@@ -13,8 +13,8 @@ export default function HomeShell() {
       <Header />
       <HeroLite />
 
-      <section className="relative py-12 md:py-16">
-        <div className="container mx-auto max-w-7xl px-4 md:px-6">
+      <section className="relative py-12 md:py-16 public-standard-section">
+        <div className="container mx-auto max-w-7xl px-4 md:px-6 public-layout-container">
           <div className="flex flex-col gap-10 md:gap-16">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
               <div className="lg:col-span-5 space-y-5 md:space-y-6">
@@ -47,7 +47,7 @@ export default function HomeShell() {
                 "Warehouse Rent Management",
                 "Orders and External Orders",
               ].map((title) => (
-                <article key={title} className="p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md">
+                <article key={title} className="p-6 md:p-7 rounded-[2rem] border border-default-200/60 bg-content1/30 backdrop-blur-md public-surface-card">
                   <h3 className={homeTitleStyles.cardTitle}>{title}</h3>
                 </article>
               ))}

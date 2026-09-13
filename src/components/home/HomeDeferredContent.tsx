@@ -25,8 +25,8 @@ const intentCards = [
 export default function HomeDeferredContent() {
   return (
     <>
-      <section className="relative py-16 md:py-24 bg-background overflow-hidden">
-        <div className="container mx-auto max-w-7xl px-4 md:px-6">
+      <section className="relative py-16 md:py-24 bg-background overflow-hidden public-standard-section">
+        <div className="container mx-auto max-w-7xl px-4 md:px-6 public-layout-container">
           <div className="max-w-3xl mb-12 md:mb-16 space-y-4">
             <h2 className={homeTitleStyles.sectionTitle}>
               Built for <span className={homeTitleStyles.sectionTitleAccent}>Serious Trade.</span>
@@ -42,7 +42,7 @@ export default function HomeDeferredContent() {
               "Unified Execution",
               "Global Compliance",
             ].map((title) => (
-              <article key={title} className="p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-content1 border border-default-200">
+              <article key={title} className="p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-content1 border border-default-200 public-surface-card">
                 <h3 className={`${homeTitleStyles.cardTitle} mb-3 md:mb-4`}>{title}</h3>
               </article>
             ))}
@@ -50,8 +50,8 @@ export default function HomeDeferredContent() {
         </div>
       </section>
 
-      <section className="py-10 md:py-24 bg-default-50/50 border-y border-default-100">
-        <div className="container mx-auto max-w-7xl px-4 md:px-6">
+      <section className="py-10 md:py-24 bg-default-50/50 border-y border-default-100 public-standard-section">
+        <div className="container mx-auto max-w-7xl px-4 md:px-6 public-layout-container">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
             {intentCards.map((card) => (
               <article key={card.href} className="relative p-[1px] bg-gradient-to-br from-default-200 via-transparent to-default-200 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden">
@@ -70,8 +70,8 @@ export default function HomeDeferredContent() {
         </div>
       </section>
 
-      <section className="relative py-24 overflow-hidden bg-black text-white">
-        <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
+      <section className="relative py-24 overflow-hidden bg-black text-white public-standard-section">
+        <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10 public-layout-container">
           <div className="max-w-3xl space-y-8">
             <h2 className={`${homeTitleStyles.sectionTitle} leading-tight md:text-6xl`}>
               <span className="text-white">India-first execution</span> <br />

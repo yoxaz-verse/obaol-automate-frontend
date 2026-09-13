@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useMemo, useState } from "react";
-import Image from "next/image";
+import RevealImage from "@/components/ui/RevealImage";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -527,7 +527,7 @@ export default function ImportsPage() {
     >
       {/* --- CINEMATIC LOGISTICS BACKGROUND --- */}
       <div className="absolute inset-0 pointer-events-none z-0">
-         <Image
+         <RevealImage
             src="/high_tech_logistics_bg_png_1774979381331.png" 
             alt="" 
             fill

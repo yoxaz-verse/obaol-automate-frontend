@@ -40,8 +40,8 @@ export default function HomeContent() {
             <HeroSection />
             <PerspectiveGateway />
             <DeferredServiceShowcase />
-            <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16">
-                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
+            <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
                     <div className="flex flex-col gap-10 md:gap-16">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 items-start">
                             <div className="lg:col-span-5 space-y-5 md:space-y-6">
@@ -71,15 +71,15 @@ export default function HomeContent() {
 
                 </div>
             </section>
-            <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 mb-10">
+            <section className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 mb-10 public-layout-container">
                 <IndiaFirstNote />
             </section>
 
             {/* ── FEATURE GRID ── */}
-            <section className="relative py-16 md:py-24 bg-background overflow-hidden">
+            <section className="relative py-16 md:py-24 bg-background overflow-hidden public-standard-section">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-default-200 to-transparent opacity-50" />
 
-                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
                     <div className="max-w-3xl mb-12 md:mb-16 space-y-4">
                         <h2 className={homeTitleStyles.sectionTitle}>
                             Built for <span className={homeTitleStyles.sectionTitleAccent}>Serious Trade.</span>
@@ -116,7 +116,7 @@ export default function HomeContent() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="group p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-content1 border border-default-200 hover:border-obaol-500/30 transition-all hover:shadow-2xl hover:shadow-obaol-500/5"
+                                className="group p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-content1 border border-default-200 hover:border-obaol-500/30 transition-all hover:shadow-2xl hover:shadow-obaol-500/5 public-surface-card"
                             >
                                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl ${feature.color.replace('text-', 'bg-')}/10 ${feature.color} flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500`}>
                                     {feature.icon}
@@ -130,10 +130,10 @@ export default function HomeContent() {
             </section>
 
             {/* ── INTENT CARDS ── */}
-            <section className="relative py-14 md:py-28 bg-default-50/50 border-y border-default-100 overflow-hidden">
-                <div className="absolute inset-0 opacity-[0.035] dark:opacity-[0.06] bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
-                <div className="absolute left-1/2 top-0 h-40 w-[44rem] -translate-x-1/2 rounded-full bg-obaol-500/10 blur-[100px] pointer-events-none" />
-                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12">
+            <section className="relative py-14 md:py-28 bg-default-50/50 border-y border-default-100 overflow-hidden public-standard-section">
+                <div className="absolute inset-0 opacity-[0.035] dark:opacity-[0.06] bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none public-decoration" />
+                <div className="absolute left-1/2 top-0 h-40 w-[44rem] -translate-x-1/2 rounded-full bg-obaol-500/10 blur-[100px] pointer-events-none public-decoration" />
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
                     <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {intentCards.map((card, i) => (
                             <motion.article
@@ -141,7 +141,7 @@ export default function HomeContent() {
                                 initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(0,0,0,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)]"
+                                className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(0,0,0,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)] public-surface-card"
                             >
                                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <div className="relative h-full p-7 md:p-10 lg:p-12 flex flex-col">
@@ -206,10 +206,10 @@ export default function HomeContent() {
             </section>
 
             {/* ── COVERAGE STRIP ── */}
-            <section className="relative py-32 overflow-hidden bg-black text-white">
+            <section className="relative py-32 overflow-hidden bg-black text-white public-standard-section">
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
 
-                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 relative z-10">
+                <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 relative z-10 public-layout-container">
                     <div className="max-w-3xl space-y-8">
                         <h2 className={`${homeTitleStyles.sectionTitle} leading-tight md:text-6xl`}>
                             <span className="text-white">India-first execution</span> <br />

@@ -36,12 +36,12 @@ export default function Footer() {
   return (
     <footer className="relative bg-background border-t border-white/[0.05] pt-24 pb-12 overflow-hidden z-0">
       {/* DECORATIVE BACKGROUND ELEMENTS */}
-      <div className="absolute left-1/4 top-0 z-0 h-[500px] w-[500px] rounded-full bg-obaol-500/[0.08] blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none z-0" />
+      <div className="absolute left-1/4 top-0 z-0 h-[500px] w-[500px] rounded-full bg-obaol-500/[0.08] blur-[120px] pointer-events-none public-decoration" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none z-0 public-decoration" />
 
 
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10 public-layout-container">
         <motion.div
           variants={containerVariants}
           initial="visible"

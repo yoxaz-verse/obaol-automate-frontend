@@ -3,7 +3,7 @@
 import Link from "next/link";
 import RevealImage from "@/components/ui/RevealImage";
 import { motion, useTransform, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { FiArrowRight } from "react-icons/fi";
@@ -127,12 +127,87 @@ const HERO_STAGES = [
   },
 ] as const satisfies readonly HeroStage[];
 
+const DESKTOP_COLLAGE_SLOTS = [
+  { left: 0, top: 3, width: 23, aspectRatio: 1.08, rotation: -2 },
+  { left: 25.5, top: 0, width: 21.5, aspectRatio: 1.04, rotation: 2 },
+  { left: 49.5, top: 4, width: 21.5, aspectRatio: 1.08, rotation: -2 },
+  { left: 73.5, top: 1, width: 25, aspectRatio: 1.28, rotation: 2 },
+  { left: 70, top: 35, width: 28.5, aspectRatio: 1.4, rotation: 2 },
+  { left: 35.5, top: 33, width: 29, aspectRatio: 1.4, rotation: -2 },
+  { left: 0, top: 35, width: 29, aspectRatio: 1.4, rotation: 2 },
+  { left: 0, top: 70, width: 29, aspectRatio: 1.45, rotation: -2 },
+  { left: 35.5, top: 68, width: 29, aspectRatio: 1.45, rotation: 2 },
+  { left: 70, top: 70, width: 28.5, aspectRatio: 1.45, rotation: -2 },
+] as const;
+
+const FLOW_CONNECTOR_PATHS = [
+  "M 23.3 17 C 24 17, 24.5 16, 25.1 15.5",
+  "M 47.3 15 C 48 15, 48.6 16.5, 49.2 17",
+  "M 71.3 17 C 72 17, 72.6 15.5, 73.2 15",
+  "M 86 28.8 C 87.5 30.5, 86 32.5, 85 34.5",
+  "M 69.6 49 C 68 49, 66.5 48, 64.9 48",
+  "M 35.1 48 C 33.5 48, 31.5 49, 29.4 49",
+  "M 14.5 64.4 C 13.5 66, 14.5 68, 14.5 69.5",
+  "M 29.4 83.5 C 31.5 83.5, 33.5 82, 35.1 82",
+  "M 64.9 82 C 66.5 82, 68 83.5, 69.6 83.5",
+] as const;
+
 
 const HOVER_TIMING = {
   textSwap: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
 };
 
 const HERO_ROTATION_INTERVAL = 3500;
+
+function ExecutionStageCard({
+  stage,
+  active,
+  reducedMotion,
+  onSelect,
+  className,
+  style,
+  sizes,
+}: {
+  stage: HeroStage;
+  active: boolean;
+  reducedMotion: boolean;
+  onSelect: () => void;
+  className: string;
+  style?: CSSProperties;
+  sizes: string;
+}) {
+  return (
+    <button
+      type="button"
+      data-execution-stage={stage.id}
+      aria-current={active ? "step" : undefined}
+      aria-label={`Step ${stage.sequence}: ${stage.label}`}
+      onClick={onSelect}
+      className={`group relative isolate overflow-hidden rounded-[1.15rem] border text-left shadow-[0_18px_35px_-25px_rgba(0,0,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:rounded-[1.4rem] ${reducedMotion ? "" : "transition-[border-color,box-shadow] duration-300"} ${active
+        ? "border-obaol-400 bg-slate-950 text-white shadow-[0_22px_42px_-24px_rgba(0,0,0,0.8)]"
+        : "border-obaol-300/75 bg-gradient-to-br from-obaol-50 via-white to-amber-50 text-slate-900 hover:border-obaol-500 dark:border-obaol-400/30 dark:from-slate-900 dark:via-slate-950 dark:to-amber-950/30 dark:text-white"} ${className}`}
+      style={style}
+    >
+      {active && (
+        <>
+          <RevealImage
+            src={stage.src}
+            alt={`Step ${stage.sequence}: ${stage.label} in the OBAOL agro trade execution flow`}
+            fill
+            sizes={sizes}
+            className="object-cover"
+            style={{ objectPosition: stage.objectPosition }}
+          />
+          <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </>
+      )}
+      <span className={`relative z-10 flex h-full flex-col justify-end p-3 sm:p-4 ${active ? "text-white" : ""}`}>
+        <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${active ? "text-obaol-200" : "text-obaol-700 dark:text-obaol-300"}`}>Step {stage.sequence}</span>
+        <span className="mt-1 text-sm font-bold leading-tight sm:text-base lg:text-[clamp(0.75rem,1vw,1rem)]">{stage.label}</span>
+      </span>
+    </button>
+  );
+}
 
 export default function HeroSection() {
   const router = useRouter();

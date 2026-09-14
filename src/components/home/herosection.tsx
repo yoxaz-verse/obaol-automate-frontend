@@ -153,10 +153,6 @@ const FLOW_CONNECTOR_PATHS = [
 ] as const;
 
 
-const HOVER_TIMING = {
-  textSwap: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
-};
-
 const HERO_ROTATION_INTERVAL = 3500;
 
 function ExecutionStageCard({
@@ -183,7 +179,7 @@ function ExecutionStageCard({
       aria-current={active ? "step" : undefined}
       aria-label={`Step ${stage.sequence}: ${stage.label}`}
       onClick={onSelect}
-      className={`group relative isolate overflow-hidden rounded-[1.15rem] border text-left shadow-[0_18px_35px_-25px_rgba(0,0,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:rounded-[1.4rem] ${reducedMotion ? "" : "transition-[border-color,box-shadow] duration-300"} ${active
+      className={`group isolate overflow-hidden rounded-[1.15rem] border text-left shadow-[0_18px_35px_-25px_rgba(0,0,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:rounded-[1.4rem] ${reducedMotion ? "" : "transition-[border-color,box-shadow] duration-300"} ${active
         ? "border-obaol-400 bg-slate-950 text-white shadow-[0_22px_42px_-24px_rgba(0,0,0,0.8)]"
         : "border-obaol-300/75 bg-gradient-to-br from-obaol-50 via-white to-amber-50 text-slate-900 hover:border-obaol-500 dark:border-obaol-400/30 dark:from-slate-900 dark:via-slate-950 dark:to-amber-950/30 dark:text-white"} ${className}`}
       style={style}
@@ -437,18 +433,9 @@ export default function HeroSection() {
                   </h2>
 
                   <div className="relative mt-3 min-h-[48px] sm:min-h-[52px] md:min-h-[58px] overflow-hidden" aria-atomic="true">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.p
-                        key={activeStage.id}
-                        initial={shouldReduceMotion ? false : { y: 10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={shouldReduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 }}
-                        transition={shouldReduceMotion ? { duration: 0 } : HOVER_TIMING.textSwap}
-                        className="absolute inset-x-0 top-0 max-w-xl text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-snug text-obaol-700 dark:text-obaol-300"
-                      >
-                        {activeStage.message}
-                      </motion.p>
-                    </AnimatePresence>
+                    <p className="absolute inset-x-0 top-0 max-w-xl text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-snug text-obaol-700 dark:text-obaol-300">
+                      {activeStage.message}
+                    </p>
                   </div>
                 </motion.div>
 
@@ -493,58 +480,78 @@ export default function HeroSection() {
                 </motion.div>
               </div>
 
-              {/* One image, with the full execution path always readable. */}
+              {/* The original execution path stays in place; only one stage reveals its photo. */}
               <motion.div
                 variants={itemVariants}
                 className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:pb-20"
               >
                 <div
                   data-hero-panel="execution-flow"
-                  className="grid w-full gap-5 rounded-[1.75rem] border border-obaol-200/60 bg-white/85 p-4 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] dark:border-white/10 dark:bg-slate-950/75 sm:p-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-4"
+                  aria-label="OBAOL's ten-stage execution flow"
+                  onMouseEnter={() => setIsStageControlActive(true)}
+                  onMouseLeave={() => setIsStageControlActive(false)}
+                  onFocusCapture={() => setIsStageControlActive(true)}
+                  onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                      setIsStageControlActive(false);
+                    }
+                  }}
+                  className="relative w-full"
                 >
-                  <figure className="relative min-h-[300px] overflow-hidden rounded-[1.35rem] bg-slate-900 sm:min-h-[380px] lg:min-h-[470px]">
-                    <RevealImage
-                      key={activeStage.id}
-                      src={activeStage.src}
-                      alt={`Step ${activeStage.sequence}: ${activeStage.label} in the OBAOL agro trade execution flow`}
-                      fill
-                      sizes="(max-width: 1023px) 90vw, 36vw"
-                      className="object-cover"
-                      style={{ objectPosition: activeStage.objectPosition }}
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
-                    <figcaption className="absolute inset-x-5 bottom-5 text-white">
-                      <span className="text-xs font-bold uppercase tracking-[0.18em] text-obaol-200">Step {activeStage.sequence} of {HERO_STAGES.length}</span>
-                      <span className="mt-1 block text-2xl font-bold sm:text-3xl">{activeStage.label}</span>
-                    </figcaption>
-                  </figure>
-                  <div
-                    aria-label="Choose an execution stage"
-                    onMouseEnter={() => setIsStageControlActive(true)}
-                    onMouseLeave={() => setIsStageControlActive(false)}
-                    onFocusCapture={() => setIsStageControlActive(true)}
-                    onBlurCapture={(event) => {
-                      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                        setIsStageControlActive(false);
-                      }
-                    }}
-                    className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-1"
-                  >
-                    {HERO_STAGES.map((stage, index) => (
-                      <button
-                        key={stage.id}
-                        type="button"
-                        aria-current={index === activeStageIndex ? "step" : undefined}
-                        aria-label={`Step ${stage.sequence}: ${stage.label}`}
-                        onClick={() => setActiveStageIndex(index)}
-                        className={`flex min-h-10 w-full items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:px-3 lg:min-h-0 ${index === activeStageIndex
-                          ? "border-obaol-500 bg-obaol-100 text-slate-950 shadow-sm dark:bg-obaol-500/20 dark:text-white"
-                          : "border-slate-200 bg-white/75 text-slate-700 hover:border-obaol-400 hover:bg-obaol-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"}`}
-                      >
-                        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-obaol-700 dark:text-obaol-300">Step {stage.sequence}</span>
-                        <span className="text-xs font-semibold leading-tight sm:text-sm">{stage.label}</span>
-                      </button>
-                    ))}
+                  <div className="relative hidden aspect-[7/5] w-full max-w-[880px] xl:block">
+                    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <defs>
+                        <marker id="execution-flow-arrow" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                          <path d="M 0 0 L 5 2.5 L 0 5 Z" fill={OBAOL_GOLD} />
+                        </marker>
+                      </defs>
+                      {FLOW_CONNECTOR_PATHS.map((path, index) => (
+                        <path key={path} d={path} fill="none" stroke={OBAOL_GOLD} strokeOpacity="0.65" strokeWidth="1.4" strokeDasharray="2.2 3.2" vectorEffect="non-scaling-stroke" markerEnd="url(#execution-flow-arrow)" data-flow-connector={index} />
+                      ))}
+                    </svg>
+                    {HERO_STAGES.map((stage, index) => {
+                      const slot = DESKTOP_COLLAGE_SLOTS[index];
+                      return (
+                        <ExecutionStageCard
+                          key={stage.id}
+                          stage={stage}
+                          active={index === activeStageIndex}
+                          reducedMotion={shouldReduceMotion}
+                          onSelect={() => setActiveStageIndex(index)}
+                          className="absolute"
+                          sizes="(max-width: 1279px) 14vw, 11vw"
+                          style={{
+                            left: `${slot.left}%`,
+                            top: `${slot.top}%`,
+                            width: `${slot.width}%`,
+                            aspectRatio: slot.aspectRatio,
+                            transform: `rotate(${slot.rotation}deg)`,
+                            zIndex: index === activeStageIndex ? 4 : 2,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="relative grid grid-cols-2 gap-4 pb-4 xl:hidden">
+                    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <path d="M 25 10 H 75 V 30 H 25 V 50 H 75 V 70 H 25 V 90 H 75" fill="none" stroke={OBAOL_GOLD} strokeOpacity="0.65" strokeWidth="1.5" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
+                    </svg>
+                    {HERO_STAGES.map((stage, index) => {
+                      const row = Math.floor(index / 2);
+                      const column = row % 2 === 0 ? index % 2 + 1 : 2 - index % 2;
+                      return (
+                        <ExecutionStageCard
+                          key={stage.id}
+                          stage={stage}
+                          active={index === activeStageIndex}
+                          reducedMotion={shouldReduceMotion}
+                          onSelect={() => setActiveStageIndex(index)}
+                          className="relative min-h-32 sm:min-h-40"
+                          sizes="(max-width: 639px) 44vw, 40vw"
+                          style={{ gridRow: row + 1, gridColumn: column }}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               </motion.div>

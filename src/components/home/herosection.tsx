@@ -3,14 +3,14 @@
 import Link from "next/link";
 import RevealImage from "@/components/ui/RevealImage";
 import { motion, useTransform, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { FiArrowRight } from "react-icons/fi";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
 
 /* ================= ANIMATION VARIANTS ================= */
-/* The hero wall is rendered from fixed stage slots to keep hydration deterministic. */
+/* The execution story shares one active stage across copy, image, and controls. */
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,40 +32,6 @@ const itemVariants = {
   },
 };
 
-const HERO_SERVICES = [
-  {
-    id: "sourcing",
-    message: "Find the right product and origin.",
-  },
-  {
-    id: "documentation",
-    message: "Plan documents and trade execution.",
-  },
-  {
-    id: "procurement",
-    message: "Get on-ground procurement assistance.",
-  },
-  {
-    id: "quality",
-    message: "Verify quality before shipment.",
-  },
-  {
-    id: "packaging",
-    message: "Prepare export-ready packaging.",
-  },
-  {
-    id: "logistics",
-    message: "Coordinate with inland logistics providers.",
-  },
-  {
-    id: "warehouse",
-    message: "Book and manage warehouse capacity.",
-  },
-  {
-    id: "freight",
-    message: "Move shipments with freight partners.",
-  },
-] as const;
 
 const OBAOL_GOLD = "#CF983C";
 
@@ -73,6 +39,7 @@ type HeroStage = {
   id: string;
   sequence: number;
   label: string;
+  message: string;
   src: string;
   objectPosition: string;
 };
@@ -82,6 +49,7 @@ const HERO_STAGES = [
     id: "discovery",
     sequence: 1,
     label: "Discovery",
+    message: "Discover the right product and origin.",
     src: "/images/execution-flow/01-discovery.webp",
     objectPosition: "center 46%",
   },
@@ -89,6 +57,7 @@ const HERO_STAGES = [
     id: "sampling",
     sequence: 2,
     label: "Sampling",
+    message: "Review samples before committing to a trade.",
     src: "/images/execution-flow/02-sampling.webp",
     objectPosition: "center 48%",
   },
@@ -96,6 +65,7 @@ const HERO_STAGES = [
     id: "coordination",
     sequence: 3,
     label: "Coordination",
+    message: "Keep every trade partner aligned.",
     src: "/images/execution-flow/03-coordination.webp",
     objectPosition: "center 46%",
   },
@@ -103,6 +73,7 @@ const HERO_STAGES = [
     id: "documentation",
     sequence: 4,
     label: "Documentation",
+    message: "Prepare the documents that move trade forward.",
     src: "/images/execution-flow/04-documentation.webp",
     objectPosition: "center 48%",
   },
@@ -110,6 +81,7 @@ const HERO_STAGES = [
     id: "inspection-visit",
     sequence: 5,
     label: "Inspection Visit",
+    message: "Verify goods and operations on the ground.",
     src: "/images/execution-flow/05-inspection-visit.webp",
     objectPosition: "center 48%",
   },
@@ -117,6 +89,7 @@ const HERO_STAGES = [
     id: "quality-testing",
     sequence: 6,
     label: "Quality Testing",
+    message: "Test quality against your requirements.",
     src: "/images/execution-flow/06-quality-testing.webp",
     objectPosition: "center 44%",
   },
@@ -124,6 +97,7 @@ const HERO_STAGES = [
     id: "packaging",
     sequence: 7,
     label: "Packaging",
+    message: "Prepare goods for safe, compliant shipment.",
     src: "/images/execution-flow/07-packaging.webp",
     objectPosition: "center 48%",
   },
@@ -131,6 +105,7 @@ const HERO_STAGES = [
     id: "procurement",
     sequence: 8,
     label: "Procurement",
+    message: "Get on-ground procurement assistance.",
     src: "/images/execution-flow/08-procurement.webp",
     objectPosition: "center 48%",
   },
@@ -138,6 +113,7 @@ const HERO_STAGES = [
     id: "inland-transportation",
     sequence: 9,
     label: "Inland Transportation",
+    message: "Coordinate the journey from source to port.",
     src: "/images/execution-flow/09-inland-transportation.webp",
     objectPosition: "center 48%",
   },
@@ -145,273 +121,12 @@ const HERO_STAGES = [
     id: "freight-forwarding",
     sequence: 10,
     label: "Freight Forwarding",
+    message: "Move shipments with freight partners.",
     src: "/images/hero-operations/freight.webp",
     objectPosition: "center 46%",
   },
 ] as const satisfies readonly HeroStage[];
 
-type HeroStageId = (typeof HERO_STAGES)[number]["id"];
-
-const HERO_STAGE_BY_ID = Object.fromEntries(
-  HERO_STAGES.map((stage) => [stage.id, stage]),
-) as Record<HeroStageId, (typeof HERO_STAGES)[number]>;
-
-type CollageSlot = {
-  id: string;
-  stageId: HeroStageId;
-  left: number;
-  top: number;
-  width: number;
-  aspectRatio: number;
-  rotation: number;
-  zIndex: number;
-  delay: number;
-  entryX: number;
-  entryY: number;
-};
-
-const DESKTOP_COLLAGE_SLOTS: CollageSlot[] = [
-  { id: "discovery-slot", stageId: "discovery", left: 0, top: 3, width: 23, aspectRatio: 1.08, rotation: -2, zIndex: 3, delay: 0.04, entryX: -28, entryY: -18 },
-  { id: "sampling-slot", stageId: "sampling", left: 25.5, top: 0, width: 21.5, aspectRatio: 1.04, rotation: 2, zIndex: 3, delay: 0.09, entryX: -12, entryY: -24 },
-  { id: "coordination-slot", stageId: "coordination", left: 49.5, top: 4, width: 21.5, aspectRatio: 1.08, rotation: -2, zIndex: 3, delay: 0.14, entryX: 12, entryY: -22 },
-  { id: "documentation-slot", stageId: "documentation", left: 73.5, top: 1, width: 25, aspectRatio: 1.28, rotation: 2, zIndex: 3, delay: 0.19, entryX: 28, entryY: -18 },
-  { id: "inspection-slot", stageId: "inspection-visit", left: 70, top: 35, width: 28.5, aspectRatio: 1.4, rotation: 2, zIndex: 3, delay: 0.24, entryX: 28, entryY: 0 },
-  { id: "testing-slot", stageId: "quality-testing", left: 35.5, top: 33, width: 29, aspectRatio: 1.4, rotation: -2, zIndex: 4, delay: 0.29, entryX: 0, entryY: 16 },
-  { id: "packaging-slot", stageId: "packaging", left: 0, top: 35, width: 29, aspectRatio: 1.4, rotation: 2, zIndex: 3, delay: 0.34, entryX: -28, entryY: 0 },
-  { id: "procurement-slot", stageId: "procurement", left: 0, top: 70, width: 29, aspectRatio: 1.45, rotation: -2, zIndex: 3, delay: 0.39, entryX: -28, entryY: 20 },
-  { id: "transport-slot", stageId: "inland-transportation", left: 35.5, top: 68, width: 29, aspectRatio: 1.45, rotation: 2, zIndex: 3, delay: 0.44, entryX: 0, entryY: 24 },
-  { id: "freight-slot", stageId: "freight-forwarding", left: 70, top: 70, width: 28.5, aspectRatio: 1.45, rotation: -2, zIndex: 3, delay: 0.49, entryX: 28, entryY: 20 },
-];
-
-const FLOW_CONNECTOR_PATHS = [
-  { from: "discovery", to: "sampling", start: [23.3, 17], d: "M 23.3 17 C 24 17, 24.5 16, 25.1 15.5" },
-  { from: "sampling", to: "coordination", start: [47.3, 15], d: "M 47.3 15 C 48 15, 48.6 16.5, 49.2 17" },
-  { from: "coordination", to: "documentation", start: [71.3, 17], d: "M 71.3 17 C 72 17, 72.6 15.5, 73.2 15" },
-  { from: "documentation", to: "inspection-visit", start: [86, 28.8], d: "M 86 28.8 C 87.5 30.5, 86 32.5, 85 34.5" },
-  { from: "inspection-visit", to: "quality-testing", start: [69.6, 49], d: "M 69.6 49 C 68 49, 66.5 48, 64.9 48" },
-  { from: "quality-testing", to: "packaging", start: [35.1, 48], d: "M 35.1 48 C 33.5 48, 31.5 49, 29.4 49" },
-  { from: "packaging", to: "procurement", start: [14.5, 64.4], d: "M 14.5 64.4 C 13.5 66, 14.5 68, 14.5 69.5" },
-  { from: "procurement", to: "inland-transportation", start: [29.4, 83.5], d: "M 29.4 83.5 C 31.5 83.5, 33.5 82, 35.1 82" },
-  { from: "inland-transportation", to: "freight-forwarding", start: [64.9, 82], d: "M 64.9 82 C 66.5 82, 68 83.5, 69.6 83.5" },
-] as const;
-
-function DesktopFlowConnectors({ prefersReducedMotion }: { prefersReducedMotion: boolean | null }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-[1] h-full w-full overflow-visible"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-    >
-      <defs>
-        <marker id="flow-arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto" markerUnits="strokeWidth">
-          <path d="M 0 0 L 5 2.5 L 0 5 Z" fill={OBAOL_GOLD} fillOpacity="0.72" />
-        </marker>
-      </defs>
-      {FLOW_CONNECTOR_PATHS.map((connector, index) => (
-        <Fragment key={`${connector.from}-${connector.to}`}>
-          <motion.circle
-            cx={connector.start[0]}
-            cy={connector.start[1]}
-            r="0.48"
-            fill={OBAOL_GOLD}
-            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0 }}
-            animate={{ opacity: 0.72, scale: 1 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, delay: 0.28 + index * 0.09 }}
-          />
-          <motion.path
-            data-flow-connector="desktop"
-            data-from={connector.from}
-            data-to={connector.to}
-            d={connector.d}
-            fill="none"
-            stroke={OBAOL_GOLD}
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeDasharray="2.2 3.2"
-            vectorEffect="non-scaling-stroke"
-            markerEnd="url(#flow-arrowhead)"
-            initial={prefersReducedMotion ? false : { pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.62 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.48, delay: 0.32 + index * 0.09, ease: "easeOut" }}
-          />
-        </Fragment>
-      ))}
-    </svg>
-  );
-}
-
-function EditorialCollageTile({
-  slot,
-  stage,
-  prefersReducedMotion,
-  sizes,
-}: {
-  slot: CollageSlot;
-  stage: HeroStage;
-  prefersReducedMotion: boolean | null;
-  sizes: string;
-}) {
-  const staticState = {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    rotate: slot.rotation,
-  };
-
-  return (
-    <motion.div
-      aria-hidden="true"
-      initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.82, y: 24, rotate: slot.rotation - 3 }}
-      animate={prefersReducedMotion ? staticState : {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        rotate: slot.rotation,
-      }}
-      transition={prefersReducedMotion ? { duration: 0 } : {
-        opacity: { duration: 0.75, delay: slot.delay },
-        scale: { duration: 0.85, delay: slot.delay, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.75, delay: slot.delay, ease: [0.22, 1, 0.36, 1] },
-        rotate: { duration: 0.85, delay: slot.delay, ease: [0.22, 1, 0.36, 1] },
-      }}
-      className="absolute overflow-hidden rounded-[1.15rem] border border-white/20 bg-black shadow-[0_22px_42px_-24px_rgba(0,0,0,0.85)] sm:rounded-[1.45rem]"
-      style={{
-        left: `${slot.left}%`,
-        top: `${slot.top}%`,
-        width: `${slot.width}%`,
-        aspectRatio: slot.aspectRatio,
-        zIndex: slot.zIndex,
-      }}
-    >
-      <RevealImage src={stage.src} alt="" fill sizes={sizes} className="object-cover" style={{ objectPosition: stage.objectPosition }} />
-      <div className="absolute inset-0 bg-gradient-to-tr from-black/35 via-transparent to-white/10" />
-      <div className="pointer-events-none absolute inset-x-1.5 bottom-1.5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/70 px-2 py-1 backdrop-blur-md sm:inset-x-auto sm:left-2 sm:bottom-2 sm:px-2.5">
-        <span className="font-mono text-[7px] font-bold text-obaol-300 sm:text-[8px]">{String(stage.sequence).padStart(2, "0")}</span>
-        <span className="truncate text-[7px] font-bold uppercase tracking-[0.12em] text-white/90 sm:text-[8px]">{stage.label}</span>
-      </div>
-    </motion.div>
-  );
-}
-
-function MobileExecutionFlowCard({
-  stage,
-  prefersReducedMotion,
-  animateIn = true,
-}: {
-  stage: HeroStage;
-  prefersReducedMotion: boolean | null;
-  animateIn?: boolean;
-}) {
-  return (
-    <motion.figure
-      initial={prefersReducedMotion || !animateIn ? false : { opacity: 0, y: 18 }}
-      whileInView={animateIn ? { opacity: 1, y: 0 } : undefined}
-      animate={!animateIn ? { opacity: 1, y: 0 } : undefined}
-      viewport={animateIn ? { once: true, amount: 0.35 } : undefined}
-      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.55, delay: animateIn ? Math.min(stage.sequence * 0.035, 0.28) : 0 }}
-      className="relative aspect-[4/3] w-[78vw] max-w-[320px] shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-white/20 bg-black shadow-[0_22px_42px_-24px_rgba(0,0,0,0.85)]"
-    >
-      <RevealImage src={stage.src} alt="" fill sizes="78vw" className="object-cover" style={{ objectPosition: stage.objectPosition }} />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-white/10" />
-      <figcaption className="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-full border border-white/10 bg-black/75 px-3 py-2 backdrop-blur-md">
-        <span className="font-mono text-[10px] font-bold text-obaol-300">{String(stage.sequence).padStart(2, "0")}</span>
-        <span className="truncate text-[10px] font-bold uppercase tracking-[0.12em] text-white/95">{stage.label}</span>
-      </figcaption>
-    </motion.figure>
-  );
-}
-
-function MobileFlowConnector({ from, to, prefersReducedMotion }: { from: string; to: string; prefersReducedMotion: boolean | null }) {
-  return (
-    <motion.svg
-      aria-hidden="true"
-      data-flow-connector="mobile"
-      data-from={from}
-      data-to={to}
-      className="h-8 w-9 shrink-0 self-center overflow-visible"
-      viewBox="0 0 36 24"
-      initial={prefersReducedMotion ? false : { opacity: 0, scaleX: 0.5 }}
-      whileInView={{ opacity: 0.72, scaleX: 1 }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }}
-    >
-      <circle cx="3" cy="12" r="2" fill={OBAOL_GOLD} />
-      <path d="M 6 12 H 29" fill="none" stroke={OBAOL_GOLD} strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2.5 3.5" />
-      <path d="M 27 8 L 33 12 L 27 16" fill="none" stroke={OBAOL_GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </motion.svg>
-  );
-}
-
-function MobileExecutionFlowSequence({
-  includeLoopConnector,
-  ariaHidden,
-  animateIn,
-  prefersReducedMotion,
-}: {
-  includeLoopConnector: boolean;
-  ariaHidden?: boolean;
-  animateIn: boolean;
-  prefersReducedMotion: boolean | null;
-}) {
-  return (
-    <div className="flex shrink-0 gap-4 pr-4" aria-hidden={ariaHidden}>
-      {HERO_STAGES.map((stage, index) => {
-        const nextStage = HERO_STAGES[(index + 1) % HERO_STAGES.length];
-        const showConnector = includeLoopConnector || index < HERO_STAGES.length - 1;
-
-        return (
-          <Fragment key={`${ariaHidden ? "clone" : "primary"}-${stage.id}`}>
-            <MobileExecutionFlowCard
-              stage={stage}
-              prefersReducedMotion={prefersReducedMotion}
-              animateIn={animateIn}
-            />
-            {showConnector && (
-              <MobileFlowConnector
-                from={stage.id}
-                to={nextStage.id}
-                prefersReducedMotion={prefersReducedMotion}
-              />
-            )}
-          </Fragment>
-        );
-      })}
-    </div>
-  );
-}
-
-function MobileExecutionFlowTrack({ prefersReducedMotion }: { prefersReducedMotion: boolean | null }) {
-  if (prefersReducedMotion) {
-    return (
-      <div
-        role="region"
-        aria-label="Ten-stage OBAOL execution flow. Scroll horizontally to review every stage."
-        tabIndex={0}
-        className="scrollbar-hide -mx-6 flex w-[calc(100%+3rem)] snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-5 pt-2 outline-none focus-visible:ring-2 focus-visible:ring-obaol-400/70 sm:-mx-12 sm:w-[calc(100%+6rem)] sm:px-12 lg:hidden"
-      >
-        <MobileExecutionFlowSequence includeLoopConnector={false} animateIn prefersReducedMotion={prefersReducedMotion} />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      role="region"
-      aria-label="Ten-stage OBAOL execution flow moving automatically from discovery through freight forwarding."
-      className="-mx-6 w-[calc(100%+3rem)] overflow-hidden px-6 pb-5 pt-2 [mask-image:linear-gradient(to_right,transparent,black_9%,black_91%,transparent)] sm:-mx-12 sm:w-[calc(100%+6rem)] sm:px-12 lg:hidden"
-    >
-      <motion.div
-        className="flex w-max"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 72, ease: "linear", repeat: Infinity }}
-      >
-        <MobileExecutionFlowSequence includeLoopConnector animateIn={false} prefersReducedMotion={prefersReducedMotion} />
-        <MobileExecutionFlowSequence includeLoopConnector ariaHidden animateIn={false} prefersReducedMotion={prefersReducedMotion} />
-      </motion.div>
-    </div>
-  );
-}
 
 const HOVER_TIMING = {
   textSwap: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
@@ -430,8 +145,9 @@ export default function HeroSection() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isSystemActive, setIsSystemActive] = useState(false);
   const [isAgroActive, setIsAgroActive] = useState(false);
-  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
-  const activeService = HERO_SERVICES[activeServiceIndex];
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [isStageControlActive, setIsStageControlActive] = useState(false);
+  const activeStage = HERO_STAGES[activeStageIndex];
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -466,14 +182,14 @@ export default function HeroSection() {
   }, [allowPointerEffects, mouseX, mouseY]);
 
   useEffect(() => {
-    if (shouldReduceMotion) return;
+    if (shouldReduceMotion || isStageControlActive) return;
 
     const timeoutId = window.setTimeout(() => {
-      setActiveServiceIndex((current) => (current + 1) % HERO_SERVICES.length);
+      setActiveStageIndex((current) => (current + 1) % HERO_STAGES.length);
     }, HERO_ROTATION_INTERVAL);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeServiceIndex, shouldReduceMotion]);
+  }, [activeStageIndex, isStageControlActive, shouldReduceMotion]);
 
   const activateSystem = () => {
     if (allowDecorativeMotion) setIsSystemActive(true);
@@ -648,14 +364,14 @@ export default function HeroSection() {
                   <div className="relative mt-3 min-h-[48px] sm:min-h-[52px] md:min-h-[58px] overflow-hidden" aria-atomic="true">
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.p
-                        key={activeService.id}
+                        key={activeStage.id}
                         initial={shouldReduceMotion ? false : { y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={shouldReduceMotion ? { opacity: 0 } : { y: -10, opacity: 0 }}
                         transition={shouldReduceMotion ? { duration: 0 } : HOVER_TIMING.textSwap}
                         className="absolute inset-x-0 top-0 max-w-xl text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-snug text-obaol-700 dark:text-obaol-300"
                       >
-                        {activeService.message}
+                        {activeStage.message}
                       </motion.p>
                     </AnimatePresence>
                   </div>
@@ -702,34 +418,60 @@ export default function HeroSection() {
                 </motion.div>
               </div>
 
-              {/* Natural-flow execution story */}
+              {/* One image, with the full execution path always readable. */}
               <motion.div
                 variants={itemVariants}
                 className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:pb-20"
               >
                 <div
                   data-hero-panel="execution-flow"
-                  role="img"
-                  aria-label="OBAOL execution flow: discovery, sampling, coordination, documentation, inspection visit, quality testing, packaging, procurement, inland transportation, and freight forwarding"
-                  className="relative hidden aspect-[7/5] w-full max-w-[880px] lg:block"
+                  className="grid w-full gap-5 rounded-[1.75rem] border border-obaol-200/60 bg-white/85 p-4 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] dark:border-white/10 dark:bg-slate-950/75 sm:p-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-4"
                 >
-                  <DesktopFlowConnectors prefersReducedMotion={shouldReduceMotion} />
-                  {DESKTOP_COLLAGE_SLOTS.map((slot) => {
-                    const stage = HERO_STAGE_BY_ID[slot.stageId];
-                    return (
-                      <EditorialCollageTile
-                        key={slot.id}
-                        slot={slot}
-                        stage={stage}
-                        prefersReducedMotion={shouldReduceMotion}
-                        sizes="(max-width: 1279px) 14vw, 11vw"
-                      />
-                    );
-                  })}
+                  <figure className="relative min-h-[300px] overflow-hidden rounded-[1.35rem] bg-slate-900 sm:min-h-[380px] lg:min-h-[470px]">
+                    <RevealImage
+                      key={activeStage.id}
+                      src={activeStage.src}
+                      alt={`Step ${activeStage.sequence}: ${activeStage.label} in the OBAOL agro trade execution flow`}
+                      fill
+                      sizes="(max-width: 1023px) 90vw, 36vw"
+                      className="object-cover"
+                      style={{ objectPosition: activeStage.objectPosition }}
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                    <figcaption className="absolute inset-x-5 bottom-5 text-white">
+                      <span className="text-xs font-bold uppercase tracking-[0.18em] text-obaol-200">Step {activeStage.sequence} of {HERO_STAGES.length}</span>
+                      <span className="mt-1 block text-2xl font-bold sm:text-3xl">{activeStage.label}</span>
+                    </figcaption>
+                  </figure>
+                  <div
+                    aria-label="Choose an execution stage"
+                    onMouseEnter={() => setIsStageControlActive(true)}
+                    onMouseLeave={() => setIsStageControlActive(false)}
+                    onFocusCapture={() => setIsStageControlActive(true)}
+                    onBlurCapture={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                        setIsStageControlActive(false);
+                      }
+                    }}
+                    className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-1"
+                  >
+                    {HERO_STAGES.map((stage, index) => (
+                      <button
+                        key={stage.id}
+                        type="button"
+                        aria-current={index === activeStageIndex ? "step" : undefined}
+                        aria-label={`Step ${stage.sequence}: ${stage.label}`}
+                        onClick={() => setActiveStageIndex(index)}
+                        className={`flex min-h-10 w-full items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 sm:px-3 lg:min-h-0 ${index === activeStageIndex
+                          ? "border-obaol-500 bg-obaol-100 text-slate-950 shadow-sm dark:bg-obaol-500/20 dark:text-white"
+                          : "border-slate-200 bg-white/75 text-slate-700 hover:border-obaol-400 hover:bg-obaol-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"}`}
+                      >
+                        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-obaol-700 dark:text-obaol-300">Step {stage.sequence}</span>
+                        <span className="text-xs font-semibold leading-tight sm:text-sm">{stage.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-
-                <MobileExecutionFlowTrack prefersReducedMotion={shouldReduceMotion} />
-
               </motion.div>
           </div>
 

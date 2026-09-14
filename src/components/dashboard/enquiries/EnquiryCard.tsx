@@ -8,11 +8,12 @@ import { classificationBadgeClass, classificationIcon, getClassificationBadges }
 
 interface EnquiryCardProps {
     data: any;
+    canViewClientIdentity?: boolean;
     action?: React.ReactNode;
     onCardClick?: () => void;
 }
 
-const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) => {
+const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity = false, action, onCardClick }) => {
     const { formatRate } = useCurrency();
     // Extract data safely
     const productName = data.product || 'Unknown Product';
@@ -79,8 +80,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                 </CardHeader>
 
                 <CardBody className="px-6 py-5 flex flex-col gap-6">
-                    {/* Identity - Precise & Spaced */}
-                    <div className="flex items-center gap-4">
+                    {canViewClientIdentity && <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-obaol-500/10 border border-obaol-500/20 flex items-center justify-center shrink-0">
                             <FiUser size={18} className="text-obaol-700 dark:text-obaol-300" />
                         </div>
@@ -92,7 +92,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, action, onCardClick }) 
                                 {companyName || "Verified Associate"}
                             </p>
                         </div>
-                    </div>
+                    </div>}
 
                     {/* Financial Data Block - High Density */}
                     <div className="db-inset border db-border-subtle rounded-2xl p-4 space-y-4">

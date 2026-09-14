@@ -19,9 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/roles`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/roles/associate`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/roles/operator`, priority: 0.7, changeFrequency: "monthly", lastModified },
-    { url: `${baseUrl}/companies`, priority: 0.8, changeFrequency: "monthly", lastModified },
-    { url: `${baseUrl}/obaol`, priority: 0.7, changeFrequency: "monthly", lastModified },
-    { url: `${baseUrl}/trade-directory`, priority: 0.8, changeFrequency: "daily", lastModified },
     { url: `${baseUrl}/faq`, priority: 0.7, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/trade-finance`, priority: 0.8, changeFrequency: "monthly", lastModified },
     { url: `${baseUrl}/privacy-policy`, priority: 0.5, changeFrequency: "yearly", lastModified },
@@ -38,21 +35,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const res = await fetch(buildPublicWebApiUrl("/trade-directory/commodities?limit=100"), { cache: "no-store" });
-    if (!res.ok) return staticEntries;
-
-    const body = await res.json();
-    const rows = Array.isArray(body?.data?.data) ? body.data.data : Array.isArray(body?.data) ? body.data : [];
-    const productEntries: MetadataRoute.Sitemap = rows
-      .map((row: any) => String(row?.slug || "").trim())
-      .filter(Boolean)
-      .map((slug: string) => ({
-        url: `${baseUrl}/trade-directory/${slug}`,
-        priority: 0.7,
-        changeFrequency: "weekly" as const,
-        lastModified,
-      }));
-
     const companiesRes = await fetch(
       buildPublicWebApiUrl("/associate-companies?limit=2000&fields=slug,subdomain,customDomain"),
       { cache: "no-store" }
@@ -74,17 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified,
       }));
 
-    const catalogEntries: MetadataRoute.Sitemap = companyRows
-      .map((row: any) => String(row?.slug || "").trim())
-      .filter(Boolean)
-      .map((slug: string) => ({
-        url: `${baseUrl}/obaol/${slug}`,
-        priority: 0.6,
-        changeFrequency: "weekly" as const,
-        lastModified,
-      }));
-
-    return [...staticEntries, ...associateRoleEntries, ...productEntries, ...brandEntries, ...catalogEntries];
+    return [...staticEntries, ...associateRoleEntries, ...brandEntries];
   } catch {
     return [...staticEntries, ...associateRoleEntries];
   }

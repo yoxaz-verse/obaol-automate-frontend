@@ -73,14 +73,11 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   const globals = read("../src/app/globals.css");
   const showcase = read("../src/components/home/ServiceShowcase.tsx");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
-  const desktopBlock = hero.match(/const DESKTOP_COLLAGE_SLOTS[\s\S]*?\n\];/)?.[0] ?? "";
-  const connectorBlock = hero.match(/const FLOW_CONNECTOR_PATHS = \[[\s\S]*?\] as const;/)?.[0] ?? "";
   const laptopBlock = read("../src/components/home/ExecutionPreview.tsx");
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/\n\s+label: "([^"]+)"/g)].map((match) => match[1]);
   const stageSequences = [...stagesBlock.matchAll(/\n\s+sequence: (\d+)/g)].map((match) => Number(match[1]));
-  const desktopStageIds = [...desktopBlock.matchAll(/stageId: "([^"]+)"/g)].map((match) => match[1]);
-  const connectorPairs = [...connectorBlock.matchAll(/from: "([^"]+)", to: "([^"]+)"/g)].map((match) => [match[1], match[2]]);
+  const stageMessages = [...stagesBlock.matchAll(/\n\s+message: "([^"]+)"/g)].map((match) => match[1]);
   const showcaseLocalPaths = [...showcase.matchAll(/(?:image|src):\s*"(\/images\/[^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(stageLabels, [
@@ -88,39 +85,29 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
     "Quality Testing", "Packaging", "Procurement", "Inland Transportation", "Freight Forwarding",
   ]);
   assert.deepEqual(stageSequences, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  assert.deepEqual(desktopStageIds, [
-    "discovery", "sampling", "coordination", "documentation", "inspection-visit",
-    "quality-testing", "packaging", "procurement", "inland-transportation", "freight-forwarding",
-  ]);
+  assert.equal(stageMessages.length, 10);
   assert.equal(imagePaths.length, 10);
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).join(""), "/images/hero-operations/freight.webp");
   assert.equal(imagePaths.some((path) => showcaseLocalPaths.includes(path)), false);
-  assert.equal(hero.includes("HERO_STAGES.map((stage)"), true);
-  assert.equal(hero.includes('role="region"'), true);
-  assert.equal(hero.includes("snap-mandatory"), true);
+  assert.equal(hero.includes("HERO_STAGES.map((stage, index)"), true);
+  assert.equal(hero.includes("const activeStage = HERO_STAGES[activeStageIndex]"), true);
+  assert.equal(hero.includes("key={activeStage.id}"), true);
+  assert.equal(hero.includes("{activeStage.message}"), true);
+  assert.equal(hero.includes("HERO_ROTATION_INTERVAL = 3500"), true);
+  assert.equal(hero.includes("(current + 1) % HERO_STAGES.length"), true);
+  assert.equal(hero.includes("shouldReduceMotion || isStageControlActive"), true);
+  assert.equal(hero.includes("onClick={() => setActiveStageIndex(index)}"), true);
+  assert.equal(hero.includes('aria-current={index === activeStageIndex ? "step" : undefined}'), true);
+  assert.equal(hero.includes("Step {stage.sequence}"), true);
   assert.equal(hero.includes("MOBILE_COLLAGE_SLOTS"), false);
   assert.equal(hero.includes("COLLAGE_SWAP_DELAYS"), false);
   assert.equal(hero.includes("DESKTOP_ROTATING_STAGE_ORDER"), false);
   assert.equal(hero.includes("new window.Image()"), false);
   assert.equal(hero.includes("prefersReducedMotion"), true);
-  assert.deepEqual(connectorPairs, [
-    ["discovery", "sampling"],
-    ["sampling", "coordination"],
-    ["coordination", "documentation"],
-    ["documentation", "inspection-visit"],
-    ["inspection-visit", "quality-testing"],
-    ["quality-testing", "packaging"],
-    ["packaging", "procurement"],
-    ["procurement", "inland-transportation"],
-    ["inland-transportation", "freight-forwarding"],
-  ]);
-  assert.equal(hero.includes('data-flow-connector="desktop"'), true);
-  assert.equal(hero.includes('data-flow-connector="mobile"'), true);
-  assert.equal(hero.includes("index < HERO_STAGES.length - 1"), true);
-  assert.equal(hero.includes("pointer-events-none absolute inset-0 z-[1]"), true);
-  assert.equal(hero.includes('markerEnd="url(#flow-arrowhead)"'), true);
+  assert.equal(hero.includes("DesktopFlowConnectors"), false);
+  assert.equal(hero.includes("MobileExecutionFlowTrack"), false);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
   assert.equal(hero.includes('data-sticky-copy="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), true);
@@ -178,23 +165,42 @@ test("the OBAOL perspective gateway presents a premium three-card entry point", 
   assert.equal(perspective.includes("bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)]"), false);
 });
 
-test("the public commodity experience uses concise Catalog naming", () => {
+test("retired public commodity sections are absent from navigation and redirect home", () => {
   const header = read("../src/components/home/header.tsx");
   const footer = read("../src/components/home/footer.tsx");
   const directory = read("../src/app/product/page.tsx");
   const middleware = read("../src/middleware.ts");
-  assert.equal(read("../src/data/publicNavigation.ts").includes('label: "Catalog"'), true);
-  assert.equal(footer.includes('name: "Catalog"'), true);
+  const navigation = read("../src/data/publicNavigation.ts");
+  for (const route of ["/trade-directory", "/product", "/companies", "/obaol"]) {
+    assert.equal(navigation.includes(`href: "${route}"`), false);
+    assert.equal(middleware.includes(`"${route}"`), true);
+  }
+  assert.equal(footer.includes('name: "Catalog"'), false);
   assert.equal(directory.includes("Commodity"), true);
   assert.equal(directory.includes(">Catalog<"), true);
   assert.equal(directory.includes('placeholder="Search commodities"'), true);
   assert.equal(directory.includes("No commodities available"), true);
   assert.equal(directory.includes("OBAOL does not own or sell these commodities"), true);
   assert.equal(directory.includes("/api/trade-directory"), true);
-  assert.equal(middleware.includes("/trade-directory${suffix}"), true);
+  assert.equal(middleware.includes('target.pathname = "/"'), true);
+  assert.equal(middleware.includes('hostResolution.kind === "platform"'), true);
+  assert.equal(read("../src/app/sitemap.ts").includes('url: `${baseUrl}/trade-directory'), false);
+  assert.equal(read("../src/app/sitemap.ts").includes('url: `${baseUrl}/obaol'), false);
+  assert.equal(read("../src/app/robots.ts").includes('"/trade-directory"'), false);
+  assert.equal(read("../src/utils/seo.ts").includes('"@type": "SearchAction"'), false);
+  assert.equal(read("../src/app/layout.tsx").includes('"@type": "SearchAction"'), false);
   for (const phrase of ["Associate Trade Directory", "Associate-traded", "Associate coverage"]) {
     assert.equal((header + footer + directory).includes(phrase), false);
   }
+});
+
+test("Methods uses the shared public header with separate heading styles", () => {
+  const page = read("../src/app/methods/page.tsx");
+  const css = read("../src/app/methods/methods.css");
+  assert.equal(page.includes("<Header />"), true);
+  assert.equal(page.includes('className="methods-heading"'), true);
+  assert.equal(css.includes(".methods-heading"), true);
+  assert.equal(css.includes("padding: calc(8rem + var(--safe-top, 0px))"), true);
 });
 
 test("dashboard discovery uses Trade Listings terminology", () => {

@@ -12,6 +12,7 @@ import {
   LuUser
 } from "react-icons/lu";
 import "./methods.css";
+import Header from "@/components/home/header";
 
 const protocols = [
   {
@@ -39,11 +40,13 @@ const protocols = [
 
 export default function MethodsPage() {
   return (
-    <div className="methods-container">
+    <>
+      <Header />
+      <main className="methods-container">
       <div className="star-field" />
       <div className="grid-overlay" />
 
-      <header className="header">
+      <header className="methods-heading">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -113,6 +116,7 @@ export default function MethodsPage() {
         <LuUser size={20} className="text-success" />
       </div>
 
-    </div>
+      </main>
+    </>
   );
 }

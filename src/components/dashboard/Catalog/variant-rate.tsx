@@ -1969,11 +1969,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               duration: 0.4,
                               ease: "easeOut",
                             }}
-                            className="group relative flex flex-col justify-between bg-content1/60 backdrop-blur-2xl border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300"
+                            className="group relative flex flex-col justify-between bg-white dark:bg-content1/60 border border-amber-100/80 dark:border-white/10 rounded-3xl overflow-hidden shadow-[0_4px_18px_rgba(95,65,25,0.05)] hover:border-amber-200 dark:hover:border-white/20 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] transition-all duration-300"
                           >
                             {/* Top Accent Line */}
                             <div
-                              className={`absolute top-0 inset-x-0 h-1 ${isLive ? "bg-gradient-to-r from-success-500 to-success-300 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-default-200/50"}`}
+                              className={`absolute top-0 inset-x-0 h-1 ${isLive ? "bg-gradient-to-r from-success-500 to-success-300 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-gradient-to-r from-amber-200 via-amber-100 to-transparent dark:from-default-300/40 dark:via-default-200/20"}`}
                             />
 
                             <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3">
@@ -2039,7 +2039,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 )}
                               </div>
 
-                              <Divider className="my-1 bg-white/5" />
+                              <Divider className="my-1 bg-amber-100/80 dark:bg-white/10" />
 
                               {/* Price & Quantity Area */}
                               <div className="flex justify-between items-end">
@@ -2081,7 +2081,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             </div>
 
                             {/* Actions Footer */}
-                            <div className="p-2 sm:p-3 bg-black/20 border-t border-white/5 flex flex-col gap-2 mt-auto">
+                            <div className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-amber-950/20 dark:via-content2/50 dark:to-content1/40 border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto">
                               <div className="flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
                                 {actionButtons}
                                 {secondaryActions}

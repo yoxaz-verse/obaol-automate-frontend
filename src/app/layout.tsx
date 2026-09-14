@@ -246,11 +246,6 @@ export default function RootLayout({
                 { "@type": "Country", name: "United States" },
               ],
               serviceArea: `Primary market: ${PRIMARY_MARKET}. Expanding globally.`,
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${BASE_URL}/trade-directory?q={search_term_string}`,
-                "query-input": "required name=search_term_string",
-              },
             }),
           }}
         />

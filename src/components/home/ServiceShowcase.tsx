@@ -176,7 +176,7 @@ function RealisticServiceVisual({
         style={{ objectPosition: service.imagePosition }}
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.48)_43%,rgba(0,0,0,0.1)_76%),linear-gradient(to_right,rgba(0,0,0,0.42),transparent_64%)] public-decoration" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.96)_0%,rgba(0,0,0,0.82)_24%,rgba(0,0,0,0.42)_52%,transparent_82%),linear-gradient(to_right,rgba(0,0,0,0.35),transparent_64%)]" />
 
       <div className="absolute right-6 top-8 hidden h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/15 bg-black/45 text-white/36 shadow-[0_0_28px_rgba(0,0,0,0.38)] backdrop-blur-sm md:flex">
         <Icon size={58} />
@@ -347,14 +347,14 @@ export default function ServiceShowcase() {
                       <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${activeService.accent} text-black shadow-xl`}>
                         <Icon size={22} />
                       </span>
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-obaol-200">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-white">
                         {activeService.eyebrow} / {activeService.metric}
                       </span>
                     </div>
                     <h3 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-bold leading-none tracking-[-0.02em] text-white">
                       {activeService.title}
                     </h3>
-                    <p className="mt-5 max-w-xl text-sm md:text-base font-medium leading-relaxed text-white/72">
+                    <p className="mt-5 max-w-xl text-sm md:text-base font-medium leading-relaxed text-white/90">
                       {activeService.description}
                     </p>
                   </motion.div>

@@ -38,7 +38,7 @@ test("public navigation supports keyboard dismissal and private styling stays is
   await expect(page.locator(".obaol-public")).toHaveCount(0);
 });
 
-for (const route of ["/about", "/roles", "/procurement", "/trade-directory", "/privacy-policy"]) {
+for (const route of ["/about", "/roles", "/procurement", "/methods", "/privacy-policy"]) {
   test(`shared public styles on ${route}`, async ({ page }) => {
     for (const width of [375, 768, 1440]) {
       for (const theme of ["light", "dark"]) {
@@ -53,16 +53,27 @@ for (const route of ["/about", "/roles", "/procurement", "/trade-directory", "/p
   });
 }
 
-test("theme toggle and catalog search remain interactive", async ({ page }) => {
+test("theme toggle remains interactive", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   const initial = await page.locator("html").getAttribute("class");
   await page.getByRole("button", { name: "Toggle theme" }).filter({ visible: true }).click();
   await expect(page.locator("html")).not.toHaveAttribute("class", initial);
-  await page.goto("/trade-directory");
-  const search = page.getByRole("textbox", { name: "Search commodities" });
-  await search.fill("cacao");
-  await expect(search).toHaveValue("cacao");
-  await search.clear();
-  await expect(search).toHaveValue("");
+});
+
+test("retired public sections redirect home, including detail URLs", async ({ page }) => {
+  for (const route of ["/trade-directory", "/trade-directory/example", "/product", "/product/example", "/companies", "/companies/example", "/obaol", "/obaol/example/product"]) {
+    await page.goto(route);
+    await expect(page).toHaveURL("/");
+  }
+});
+
+test("Methods heading remains below the public header", async ({ page }) => {
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/methods");
+    const headerBottom = await page.locator(".public-header-shell").evaluate(el => el.getBoundingClientRect().bottom);
+    const headingTop = await page.getByRole("heading", { name: "Relationship Methods" }).evaluate(el => el.getBoundingClientRect().top);
+    expect(headingTop).toBeGreaterThan(headerBottom);
+  }
 });

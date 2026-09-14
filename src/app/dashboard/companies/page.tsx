@@ -1452,7 +1452,15 @@ export default function CompanyProductPage() {
                             ) : (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {mappedEnquiries.map((enquiry: any, idx: number) => (
-                                  <EnquiryCard key={enquiry?._id || idx} data={enquiry} />
+                                  <EnquiryCard
+                                    key={enquiry?._id || idx}
+                                    data={enquiry}
+                                    canViewClientIdentity={isAdmin || Boolean(
+                                      user?.id && [enquiry.supplierOperatorId, enquiry.dealCloserOperatorId].some(
+                                        (operator: any) => String(operator?._id || operator || "") === String(user.id)
+                                      )
+                                    )}
+                                  />
                                 ))}
                               </div>
                             )}

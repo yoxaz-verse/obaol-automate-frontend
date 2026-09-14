@@ -1,0 +1,16 @@
+"use client";
+import React, { useState } from "react";
+import { useParams } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getData, postData } from "@/core/api/apiHandler";
+import { apiRoutes } from "@/core/api/apiRoutes";
+import DocumentSheet from "@/components/dashboard/CommercialDocuments/DocumentSheet";
+
+export default function SharedDocumentPage() {
+  const params = useParams(), token = String(params.token || ""), api = apiRoutes.commercialDocuments, client = useQueryClient();
+  const [code, setCode] = useState(""), [message, setMessage] = useState(""), [busy, setBusy] = useState(false);
+  const query = useQuery({ queryKey: ["shared-commercial-document", token], queryFn: async () => (await getData(api.share(token))).data.data, enabled: Boolean(token), retry: false });
+  async function act(path: string, body: any = {}) { setBusy(true); setMessage(""); try { await postData(`${api.share(token)}/${path}`, body); setMessage(path === "code" ? "A code was sent to the recipient email." : "Your decision was recorded."); await client.invalidateQueries({ queryKey: ["shared-commercial-document", token] }); } catch (e: any) { setMessage(e?.response?.data?.message || "Request failed."); } finally { setBusy(false); } }
+  const doc = query.data;
+  return <main className="min-h-screen bg-slate-50 p-4 md:p-10"><div className="no-print max-w-[820px] mx-auto mb-5 flex flex-wrap gap-3 items-center"><h1 className="text-xl font-bold mr-auto">Pure Documents</h1><button onClick={() => window.print()} className="rounded-xl border px-4 py-2">Print / save PDF</button></div>{query.isLoading ? <p>Loading…</p> : query.isError ? <p className="text-center">This link is expired or unavailable.</p> : <><DocumentSheet doc={doc} />{doc?.type === "QUOTATION" && doc?.status === "SENT" && <section className="no-print max-w-[820px] mx-auto mt-5 bg-white border rounded-2xl p-6"><h2 className="text-xl font-semibold">Respond to quotation</h2><p className="text-sm text-slate-600 mb-4">Verify using the code sent to {doc.recipient?.email}.</p><button disabled={busy} onClick={() => act("code")} className="rounded-xl border px-4 py-2">Send verification code</button><div className="flex flex-wrap gap-2 mt-4"><input aria-label="Verification code" inputMode="numeric" maxLength={6} value={code} onChange={e => setCode(e.target.value)} placeholder="6-digit code" className="rounded-xl border p-2" /><button disabled={busy || code.length !== 6} onClick={() => act("decision", { decision: "ACCEPTED", code })} className="rounded-xl bg-green-700 text-white px-4 py-2">Accept quotation</button><button disabled={busy || code.length !== 6} onClick={() => act("decision", { decision: "DECLINED", code })} className="rounded-xl border px-4 py-2">Decline</button></div>{message && <p role="status" className="mt-3">{message}</p>}</section>}{doc?.status === "ACCEPTED" && <p className="text-center mt-5">Quotation accepted.</p>}{doc?.status === "DECLINED" && <p className="text-center mt-5">Quotation declined.</p>}</>}<style jsx global>{`@media print { .no-print { display: none !important; } body { background: white !important; } .commercial-sheet { max-width: none !important; } @page { size: A4; margin: 16mm; } }`}</style></main>;
+}

@@ -26,7 +26,8 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
       await expect(directory.getByRole('link', { name: 'About OBAOL', exact: true })).toHaveAttribute('aria-current', 'page');
       const hrefs = await directory.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href')));
       expect(new Set(hrefs).size).toBe(hrefs.length);
-      expect(hrefs).toEqual(expect.arrayContaining(['/', '/about', '/roles', '/roles/associate', '/roles/operator', '/trade-directory', '/product', '/companies', '/obaol', '/quick-commerce-procurement', '/procurement', '/verification', '/trade-finance', '/faq', '/export-resources', '/commission-structure', '/methods', '/developer', '/trust', '/privacy-policy', '/terms-and-conditions', '/disclaimer', '/why-obaol', '/how-it-works']));
+      expect(hrefs).toEqual(expect.arrayContaining(['/', '/about', '/roles', '/roles/associate', '/roles/operator', '/quick-commerce-procurement', '/procurement', '/verification', '/trade-finance', '/faq', '/export-resources', '/commission-structure', '/methods', '/developer', '/trust', '/privacy-policy', '/terms-and-conditions', '/disclaimer', '/why-obaol', '/how-it-works']));
+      for (const retired of ['/trade-directory', '/product', '/companies', '/obaol']) expect(hrefs).not.toContain(retired);
       const roleSource = fs.readFileSync('src/data/associateRoles.ts', 'utf8');
       for (const [, slug] of roleSource.matchAll(/slug: "([^"]+)"/g)) expect(hrefs).toContain(`/roles/associate/${slug}`);
       for (const href of hrefs) {

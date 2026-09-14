@@ -10,7 +10,6 @@ export type PublicNavGroup = {
 export const primaryPublicLinks: PublicNavLink[] = [
   { href: "/about", label: "Platform" },
   { href: "/roles", label: "Roles" },
-  { href: "/trade-directory", label: "Catalog" },
 ];
 
 export const publicNavigation: PublicNavGroup[] = [
@@ -27,10 +26,6 @@ export const publicNavigation: PublicNavGroup[] = [
     ...associateRoleDefinitions.map((role) => ({ href: getAssociateRolePath(role.slug), label: role.displayName })),
   ] },
   { label: "Trade & Services", icon: "trade", links: [
-    { href: "/trade-directory", label: "Catalog" },
-    { href: "/product", label: "Products" },
-    { href: "/companies", label: "Companies" },
-    { href: "/obaol", label: "OBAOL marketplace" },
     { href: "/quick-commerce-procurement", label: "Quick Commerce" },
     { href: "/procurement", label: "Procurement" },
     { href: "/verification", label: "Verification" },

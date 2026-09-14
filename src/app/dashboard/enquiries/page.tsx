@@ -355,6 +355,7 @@ export default function EnquiryPage() {
                           >
                             <EnquiryCard
                               data={item}
+                              canViewClientIdentity={isSystemAdmin || item.isAssignedOperator}
                               onCardClick={() => {
                                 if (navigatingId) return;
                                 const targetId = String(item?._id || item?.id || "").trim();

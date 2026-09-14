@@ -18,16 +18,19 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    if (url.pathname === "/product" || url.pathname.startsWith("/product/")) {
-        const suffix = url.pathname.slice("/product".length);
+    // Exclude shared routes from subdomain rewrites
+    const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password", "/documents/share"];
+    const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));
+
+    // Retire only platform-owned public sections; branded sites keep their routes.
+    if (hostResolution.kind === "platform" && ["/trade-directory", "/product", "/companies", "/obaol"].some(
+        route => url.pathname === route || url.pathname.startsWith(`${route}/`)
+    )) {
         const target = url.clone();
-        target.pathname = `/trade-directory${suffix}`;
+        target.pathname = "/";
+        target.search = "";
         return NextResponse.redirect(target, 308);
     }
-
-    // Exclude shared routes from subdomain rewrites
-    const sharedRoutes = ["/auth", "/dashboard", "/developer", "/admin", "/login", "/register", "/forgot-password"];
-    const isSharedRoute = sharedRoutes.some(route => url.pathname.startsWith(route));
 
     if (
         !isSharedRoute

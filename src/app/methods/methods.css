@@ -17,7 +17,7 @@
   font-family: 'Outfit', sans-serif;
   overflow-x: hidden;
   position: relative;
-  padding: 4rem 2rem;
+  padding: calc(8rem + var(--safe-top, 0px)) 2rem 4rem;
 }
 
 .star-field {
@@ -42,14 +42,14 @@
   pointer-events: none;
 }
 
-.header {
+.methods-heading {
   text-align: center;
   margin-bottom: 6rem;
   position: relative;
   z-index: 10;
 }
 
-.header h1 {
+.methods-heading h1 {
   font-size: 4rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -62,7 +62,7 @@
   margin-bottom: 0.5rem;
 }
 
-.header .tagline {
+.methods-heading .tagline {
   font-family: 'Roboto Mono', monospace;
   font-size: 0.75rem;
   text-transform: uppercase;

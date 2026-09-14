@@ -51,6 +51,9 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/orders/:id", label: "Order details", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/orders", journeyStage: "execute" },
   { path: "/dashboard/documents", label: "Documents", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, journeyStage: "execute" },
   { path: "/dashboard/documents/:id", label: "Document details", section: "Trade", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/documents", journeyStage: "execute" },
+  { path: "/dashboard/commercial-documents", label: "Pure Documents", section: "Trade", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/new", label: "New quotation or invoice", section: "Trade", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
+  { path: "/dashboard/commercial-documents/:id", label: "Quotation or invoice", section: "Trade", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
 
   { path: "/dashboard/imports", label: "Imports", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["PROCUREMENT", "IMPORTING_DISTRIBUTION"] },
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },

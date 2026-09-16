@@ -240,6 +240,7 @@ export const variantRateRoutes = addCustomRoutes(
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);
 export const catalogItemRoutes = createCRUDRoutes("/catalog-items");
 export const enquiryRoutes = addCustomRoutes(createCRUDRoutes(BASE_PATHS.ENQUIRY), {
+  executionBids: `${BASE_PATHS.ENQUIRY}/execution-bids`,
   seaPorts: `${BASE_PATHS.ENQUIRY}/sea-ports`,
   buyerOptions: `${BASE_PATHS.ENQUIRY}/buyer-options`,
 });

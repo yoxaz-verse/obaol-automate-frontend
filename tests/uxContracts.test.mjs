@@ -97,10 +97,10 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
   assert.equal(hero.includes("const activeStage = HERO_STAGES[activeStageIndex]"), true);
   assert.equal([...desktopSlots.matchAll(/left: \d+(?:\.\d+)?, top:/g)].length, 10);
   assert.equal([...connectorPaths.matchAll(/"M /g)].length, 9);
-  assert.equal(hero.includes("{active && ("), true);
+  assert.equal(hero.includes("{active ? ("), true);
   assert.equal(hero.includes("active={index === activeStageIndex}"), true);
   assert.equal(hero.includes("{activeStage.message}"), true);
-  assert.equal(hero.includes("HERO_ROTATION_INTERVAL = 3500"), true);
+  assert.equal(hero.includes("HERO_ROTATION_INTERVAL = 1800"), true);
   assert.equal(hero.includes("(current + 1) % HERO_STAGES.length"), true);
   assert.equal(hero.includes("shouldReduceMotion || isStageControlActive"), true);
   assert.equal(hero.includes("onSelect={() => setActiveStageIndex(index)}"), true);

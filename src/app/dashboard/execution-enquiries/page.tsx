@@ -35,6 +35,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import ExecutionBiddingPanel from "@/components/dashboard/enquiries/ExecutionBiddingPanel";
 
 
 dayjs.extend(relativeTime);
@@ -84,7 +85,7 @@ export default function ExecutionEnquiriesPage() {
   const { data: dealExecutionsResponse, isLoading: dealsLoading } = useQuery({
     queryKey: ["deal-executions"],
     queryFn: () => getData(apiRoutes.enquiry.getAll, { page: 1, limit: 100, hasExecution: true }),
-    enabled: activeTab === "deal-execution" || activeTab === "execution-bidding",
+    enabled: activeTab === "deal-execution",
   });
 
   const { data: subflowResponse } = useQuery({
@@ -505,8 +506,9 @@ export default function ExecutionEnquiriesPage() {
             exit={{ opacity: 0, y: -10 }}
             className="flex flex-col gap-10"
           >
+            <ExecutionBiddingPanel user={user} />
             {/* Execution Bids */}
-            <div className="flex flex-col gap-4">
+            <div className="hidden">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-black uppercase tracking-widest text-obaol-500">Execution Bids</h2>
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-default-400">

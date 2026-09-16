@@ -153,7 +153,110 @@ const FLOW_CONNECTOR_PATHS = [
 ] as const;
 
 
-const HERO_ROTATION_INTERVAL = 3500;
+const HERO_ROTATION_INTERVAL = 1800;
+
+function StageIllustration({ stageId }: { stageId: string }) {
+  switch (stageId) {
+    case "discovery":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="28" cy="28" r="16" strokeDasharray="3 3" />
+          <circle cx="28" cy="28" r="8" />
+          <line x1="39" y1="39" x2="54" y2="54" strokeWidth="3.5" />
+          <circle cx="28" cy="28" r="2" fill="currentColor" />
+          <path d="M46 14h6m-3-3v6" />
+        </svg>
+      );
+    case "sampling":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M26 10h12m-6 0v10l14 26A4 4 0 0 1 42 52H22a4 4 0 0 1-3.5-6L32 20V10" />
+          <path d="M22 38h20" strokeDasharray="2 2" />
+          <circle cx="28" cy="44" r="2" fill="currentColor" />
+          <circle cx="36" cy="42" r="1.5" fill="currentColor" />
+        </svg>
+      );
+    case "coordination":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="32" cy="16" r="7" />
+          <circle cx="16" cy="46" r="7" />
+          <circle cx="48" cy="46" r="7" />
+          <path d="M26 21l-5 18m17-18l5 18m-17 4h18" strokeDasharray="3 3" />
+          <circle cx="32" cy="33" r="3" fill="currentColor" />
+        </svg>
+      );
+    case "documentation":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 10h20l12 12v32a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z" />
+          <path d="M38 10v12h12" />
+          <line x1="22" y1="28" x2="34" y2="28" />
+          <line x1="22" y1="36" x2="42" y2="36" />
+          <line x1="22" y1="44" x2="38" y2="44" />
+          <path d="M40 46l2 2 4-4" strokeWidth="2.5" />
+        </svg>
+      );
+    case "inspection-visit":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M32 10c-9 0-16 7-16 16 0 12 16 26 16 26s16-14 16-26c0-9-7-16-16-16z" />
+          <circle cx="32" cy="26" r="6" />
+          <path d="M29 26l2 2 4-4" strokeWidth="2" />
+          <path d="M12 54h40" strokeDasharray="3 3" />
+        </svg>
+      );
+    case "quality-testing":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M32 10L14 18v16c0 13 8 23 18 26 10-3 18-13 18-26V18L32 10z" />
+          <path d="M24 32l6 6 10-10" strokeWidth="2.5" />
+          <circle cx="46" cy="18" r="2" fill="currentColor" />
+        </svg>
+      );
+    case "packaging":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M32 10L12 20v24l20 10 20-10V20L32 10z" />
+          <path d="M12 20l20 10 20-10" />
+          <line x1="32" y1="30" x2="32" y2="54" />
+          <path d="M22 15l20 10" strokeDasharray="2 2" />
+        </svg>
+      );
+    case "procurement":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 20h32l-4 28H20L16 20z" />
+          <path d="M24 20v-6a8 8 0 0 1 16 0v6" />
+          <circle cx="32" cy="34" r="5" />
+          <path d="M32 31v6m-3-3h6" />
+        </svg>
+      );
+    case "inland-transportation":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 24h28v20H10z" />
+          <path d="M38 30h10l6 7v7H38V30z" />
+          <circle cx="20" cy="46" r="4" fill="currentColor" fillOpacity="0.2" />
+          <circle cx="44" cy="46" r="4" fill="currentColor" fillOpacity="0.2" />
+          <line x1="10" y1="52" x2="54" y2="52" strokeDasharray="3 3" />
+        </svg>
+      );
+    case "freight-forwarding":
+      return (
+        <svg className="w-10 h-10 sm:w-14 sm:h-14 text-obaol-600 dark:text-obaol-400" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 34l8-14h24l8 14H12z" />
+          <path d="M8 34h48l-6 12H14L8 34z" />
+          <rect x="22" y="14" width="6" height="6" />
+          <rect x="30" y="14" width="6" height="6" />
+          <rect x="38" y="14" width="6" height="6" />
+          <path d="M6 50c8 0 10-2 16-2s8 2 16 2 8-2 16-2" strokeDasharray="3 3" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
 
 function ExecutionStageCard({
   stage,
@@ -184,7 +287,7 @@ function ExecutionStageCard({
         : "border-obaol-300/75 bg-gradient-to-br from-obaol-50 via-white to-amber-50 text-slate-900 hover:border-obaol-500 dark:border-obaol-400/30 dark:from-slate-900 dark:via-slate-950 dark:to-amber-950/30 dark:text-white"} ${className}`}
       style={style}
     >
-      {active && (
+      {active ? (
         <>
           <RevealImage
             src={stage.src}
@@ -196,6 +299,10 @@ function ExecutionStageCard({
           />
           <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center p-2 pt-0 pb-6 opacity-35 transition-all duration-300 group-hover:scale-110 group-hover:opacity-75 dark:opacity-45 pointer-events-none">
+          <StageIllustration stageId={stage.id} />
+        </div>
       )}
       <span className={`relative z-10 flex h-full flex-col justify-end p-3 sm:p-4 ${active ? "text-white" : ""}`}>
         <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${active ? "text-obaol-200" : "text-obaol-700 dark:text-obaol-300"}`}>Step {stage.sequence}</span>

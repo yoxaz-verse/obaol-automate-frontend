@@ -199,6 +199,10 @@ canvas {
     text-wrap: balance;
   }
 
+  .numeric-data {
+    font-variant-numeric: tabular-nums;
+  }
+
   .safe-px {
     padding-left: max(1rem, var(--safe-left));
     padding-right: max(1rem, var(--safe-right));
@@ -288,7 +292,15 @@ canvas {
 /* Default body text */
 body {
   font-family: var(--font-body, ui-sans-serif), var(--font-devanagari, "Noto Sans Devanagari"), system-ui, sans-serif;
+  font-weight: 400;
   line-height: 1.6;
+  letter-spacing: -0.005em;
+  word-spacing: normal;
+  font-kerning: normal;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Homepage-only ambient treatment; typography is now platform-wide. */
@@ -312,7 +324,35 @@ button,
 input,
 select,
 textarea {
-  font-family: inherit;
+  font: inherit;
+}
+
+p,
+li,
+dd {
+  line-height: 1.65;
+}
+
+label,
+button,
+[role="button"] {
+  line-height: 1.3;
+  letter-spacing: 0;
+  word-spacing: normal;
+}
+
+input,
+select,
+textarea {
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+small,
+caption,
+figcaption {
+  line-height: 1.5;
+  letter-spacing: 0.005em;
 }
 
 button,
@@ -332,17 +372,45 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  word-spacing: normal;
 }
 
-/* Optional: strong headings */
 h1 {
-  letter-spacing: -0.03em;
-  font-weight: 700 !important;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
 }
 
 h2 {
-  font-weight: 700 !important;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+
+h1,
+h2 {
+  font-weight: 700;
+}
+
+h3 {
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h4 {
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+h5,
+h6 {
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
 }
 
 a {

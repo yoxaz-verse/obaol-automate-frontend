@@ -723,6 +723,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     <AuthLayout
       title={authMode === "signup" ? `${role} — Create Account` : role}
       subtitle={authMode === "signup" ? "Create Account" : "Login"}
+      cardMaxWidthClass={authMode === "signup" && roleKey === "operator" ? "max-w-[560px]" : undefined}
       leftPanel={currentRoleContent}
       roleIdentity={roleIdentity || undefined}
       topContent={
@@ -777,23 +778,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
         )}
 
         {authMode === "signup" && roleKey === "operator" && (
-          <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 px-3 py-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
-                  Registering a company?
-                </p>
-                <p className="text-xs font-semibold leading-5 text-foreground/70">
-                  Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account. For independent people coordinating trades, not company registration.
-                </p>
-              </div>
+          <div className="rounded-xl border border-obaol-500/20 bg-obaol-500/10 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
+                Registering a company?
+              </p>
               <Link
                 href="/auth/register"
-                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-obaol-500 px-4 text-xs font-black uppercase tracking-[0.14em] text-obaol-950 transition hover:bg-obaol-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
+                className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-obaol-500 px-4 py-2 text-center text-[11px] font-black uppercase tracking-[0.12em] text-obaol-950 transition hover:bg-obaol-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-obaol-400"
               >
                 Register as Associate
               </Link>
             </div>
+            <p className="mt-3 max-w-[58ch] text-xs font-semibold leading-5 text-foreground/70">
+              Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account. Operator accounts are for independent people coordinating trades.
+            </p>
           </div>
         )}
 

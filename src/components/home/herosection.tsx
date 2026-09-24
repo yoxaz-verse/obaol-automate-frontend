@@ -517,7 +517,7 @@ export default function HeroSection() {
                   onMouseLeave={deactivateSystem}
                 >
                   The Execution <br />
-                  <span className="inline-block bg-gradient-to-r from-obaol-700 via-obaol-600 to-obaol-500 bg-clip-text pr-[0.12em] text-transparent dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-500">
+                  <span className="-mb-[0.12em] inline-block bg-gradient-to-r from-obaol-700 via-obaol-600 to-obaol-500 bg-clip-text pr-[0.12em] pb-[0.12em] text-transparent dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-500">
                     Ecosystem
                   </span>
                 </motion.h1>

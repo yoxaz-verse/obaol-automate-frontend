@@ -324,6 +324,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const { play } = useSoundEffect();
   const companyFunctions = Array.isArray(registerOptions?.companyFunctions) ? registerOptions.companyFunctions : EMPTY_LIST;
   const companySubFunctions = Array.isArray(registerOptions?.companySubFunctions) ? registerOptions.companySubFunctions : EMPTY_LIST;
+  const failedOptionKeys = Array.isArray(registerOptions?.meta?.failedKeys) ? registerOptions.meta.failedKeys : EMPTY_LIST;
+  const failedOptionLabels = failedOptionKeys.map((key: string) => ({
+    companyTypes: "company type",
+    existingCompanies: "existing company",
+    designations: "designation",
+    states: "state",
+    districts: "district",
+    divisions: "division",
+    countries: "country",
+    companyFunctions: "company capability",
+    companySubFunctions: "company sub-capability",
+  }[key] || key));
+  const partialOptionsError = registerOptions?.meta?.partial
+    ? `Could not load ${failedOptionLabels.length > 0 ? failedOptionLabels.join(", ") : "some registration"} options. Please retry.`
+    : "";
 
   const [dynamicPincodes, setDynamicPincodes] = useState<any[]>([]);
   const [isPincodesLoading, setIsPincodesLoading] = useState(false);
@@ -1905,9 +1920,9 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       }
 
       {
-        optionsError && (
+        (optionsError || partialOptionsError) && (
           <div className="mt-4 rounded-xl border border-danger-200 bg-danger-50/40 dark:bg-danger-900/15 p-3 text-xs text-danger-700 dark:text-danger-300 flex items-center justify-between gap-3">
-            <span>Could not load company/designation options. Please retry.</span>
+            <span>{partialOptionsError || "Could not load registration options. Please retry."}</span>
             <Button size="sm" color="danger" variant="flat" onPress={() => refetchOptions()}>
               Retry
             </Button>

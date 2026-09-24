@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const DEFAULT_API_ROOT = "/api/v1/web";
-const REQUEST_TIMEOUT_MS = 8000;
+export const REGISTER_OPTIONS_TIMEOUT_MS = 30000;
 
 const normalizeApiRoot = (value: string) =>
   String(value || "")
@@ -33,18 +33,39 @@ export type RegisterOptionsPayload = {
   companySubFunctions: any[];
 };
 
-export async function fetchRegisterOptions(): Promise<RegisterOptionsPayload & { resolvedEndpoint: string }> {
-  const apiRoot = resolveApiRoot();
-  const endpoint = `${apiRoot}/auth/register/options`;
-  const response = await axios.get(endpoint, {
-    timeout: REQUEST_TIMEOUT_MS,
-    withCredentials: false,
-  });
+export type RegisterOptionsMeta = {
+  partial: boolean;
+  failedKeys: string[];
+  error?: string;
+};
 
-  const payload = response.data?.data || response.data?.data?.data || {};
+export type RegisterOptionsResult = RegisterOptionsPayload & {
+  resolvedEndpoint: string;
+  meta: RegisterOptionsMeta;
+};
+
+const normalizeMeta = (value: unknown): RegisterOptionsMeta => {
+  const meta = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  const failedKeys = normalizeArray<unknown>(meta.failedKeys)
+    .map((key) => String(key || "").trim())
+    .filter(Boolean);
+  const error = typeof meta.error === "string" && meta.error.trim() ? meta.error.trim() : undefined;
 
   return {
-    resolvedEndpoint: endpoint,
+    partial: Boolean(meta.partial) || failedKeys.length > 0,
+    failedKeys,
+    ...(error ? { error } : {}),
+  };
+};
+
+export function parseRegisterOptionsResponse(responseBody: any): Omit<RegisterOptionsResult, "resolvedEndpoint"> {
+  const envelope = responseBody && typeof responseBody === "object" ? responseBody : {};
+  const firstData = envelope.data && typeof envelope.data === "object" ? envelope.data : {};
+  const nestedData = firstData.data && typeof firstData.data === "object" ? firstData.data : null;
+  const payload = nestedData || firstData;
+  const meta = normalizeMeta(envelope.meta || firstData.meta);
+
+  return {
     existingCompanies: normalizeArray(payload?.existingCompanies),
     designations: normalizeArray(payload?.designations),
     companyTypes: normalizeArray(payload?.companyTypes),
@@ -55,5 +76,22 @@ export async function fetchRegisterOptions(): Promise<RegisterOptionsPayload & {
     countries: normalizeArray(payload?.countries),
     companyFunctions: normalizeArray(payload?.companyFunctions),
     companySubFunctions: normalizeArray(payload?.companySubFunctions),
+    meta,
+  };
+}
+
+export async function fetchRegisterOptions(): Promise<RegisterOptionsResult> {
+  const apiRoot = resolveApiRoot();
+  const endpoint = `${apiRoot}/auth/register/options`;
+  const response = await axios.get(endpoint, {
+    timeout: REGISTER_OPTIONS_TIMEOUT_MS,
+    withCredentials: false,
+  });
+
+  const parsed = parseRegisterOptionsResponse(response.data);
+
+  return {
+    resolvedEndpoint: endpoint,
+    ...parsed,
   };
 }

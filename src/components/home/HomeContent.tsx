@@ -12,7 +12,7 @@ import Footer from "@/components/home/footer";
 import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import PerspectiveGateway from "@/components/home/PerspectiveGateway";
-import UnifiedExecutionWorkspace from "@/components/home/UnifiedExecutionWorkspace";
+import DeferredExecutionWorkspace from "@/components/home/DeferredExecutionWorkspace";
 
 const intentCards = [
     {
@@ -65,7 +65,7 @@ export default function HomeContent() {
                             </div>
                         </div>
 
-                        <UnifiedExecutionWorkspace />
+                        <DeferredExecutionWorkspace />
 
                     </div>
 

@@ -84,6 +84,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const submitInFlightRef = useRef(false);
   const [googleSignUp, setGoogleSignUp] = useState(false);
   const [googleIdToken, setGoogleIdToken] = useState("");
   const [googleReady, setGoogleReady] = useState(false);
@@ -641,7 +643,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
     return "Verification & Submit";
   }, [currentStep]);
 
-  const validateStep = (step: StepKey) => {
+  const getStepErrors = (step: StepKey) => {
     const stepErrors: Record<string, string> = {};
 
     if (step === 1) {
@@ -733,8 +735,21 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       if (!formData.contactPreference) stepErrors.contactPreference = "Select how admin should contact you";
     }
 
-    setErrors((prev) => ({ ...prev, ...stepErrors }));
+    return stepErrors;
+  };
+
+  const validateStep = (step: StepKey) => {
+    const stepErrors = getStepErrors(step);
+    setErrors((prev) => ({ ...prev, general: "", ...stepErrors }));
     return Object.keys(stepErrors).length === 0;
+  };
+
+  const moveToInvalidStep = (step: StepKey) => {
+    setCurrentStep(step);
+    window.requestAnimationFrame(() => {
+      formRef.current?.focus({ preventScroll: true });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleNext = async () => {
@@ -817,9 +832,19 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
   };
 
   const handleSubmit = async () => {
-    if (isLoading || isSubmittingSuccess) return;
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
-      showToastMessage({ type: "error", message: "Please complete required fields.", position: "top-right" });
+    if (submitInFlightRef.current || isLoading || isSubmittingSuccess) return;
+
+    const validationResults = ([1, 2, 3, 4] as StepKey[]).map((step) => ({
+      step,
+      errors: getStepErrors(step),
+    }));
+    const firstInvalid = validationResults.find(({ errors: stepErrors }) => Object.keys(stepErrors).length > 0);
+    if (firstInvalid) {
+      const allErrors = Object.assign({}, ...validationResults.map(({ errors: stepErrors }) => stepErrors));
+      const message = `Please complete the highlighted fields in step ${firstInvalid.step}.`;
+      setErrors({ ...allErrors, general: message });
+      moveToInvalidStep(firstInvalid.step);
+      showToastMessage({ type: "error", message, position: "top-right" });
       return;
     }
     if (!isOnboarding && googleSignUp && !googleIdToken) {
@@ -827,6 +852,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
       return;
     }
 
+    submitInFlightRef.current = true;
+    setErrors((prev) => ({ ...prev, general: "" }));
     setIsLoading(true);
     try {
       const normalizedPhone = parsePhoneValue({
@@ -948,16 +975,22 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             }
           }
           await refreshUser();
-          router.push("/dashboard");
+          router.replace("/dashboard/pending-approval");
         } else {
           setTimeout(() => {
-            router.push("/auth/register/success");
+            router.replace("/auth/register/success");
           }, 1500);
         }
       } else {
+        const errorMessage = String(response.data?.message || "Submission was not accepted. Please review your details and try again.");
+        submitInFlightRef.current = false;
         setIsLoading(false);
+        setErrors((prev) => ({ ...prev, general: errorMessage }));
+        showToastMessage({ type: "error", message: errorMessage, position: "top-right" });
+        play("danger");
       }
     } catch (error: any) {
+      submitInFlightRef.current = false;
       setIsLoading(false);
       const errorMessage = normalizeOnboardingError(error);
       setErrors((prev) => ({ ...prev, general: errorMessage }));
@@ -1022,6 +1055,8 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
         </div>
       ) : (
         <form
+          ref={formRef}
+          tabIndex={-1}
           className="w-full flex flex-col gap-5"
           onSubmit={(e) => e.preventDefault()}
           onKeyDown={(e) => {
@@ -1863,7 +1898,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
           )}
 
           {errors.general && (
-            <div className="p-3 rounded-lg bg-danger-500/10 border border-danger-500/20 text-danger text-sm text-center">
+            <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-danger-500/10 border border-danger-500/20 text-danger text-sm text-center">
               {errors.general}
             </div>
           )}

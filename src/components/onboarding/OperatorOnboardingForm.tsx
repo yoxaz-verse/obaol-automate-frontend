@@ -918,10 +918,10 @@ function OperatorRegisterForm({ mode = "auth" }: { mode?: "auth" | "onboarding" 
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
             <Button
               color="warning"
-              className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
+              className={`w-full h-12 rounded-xl font-black shadow-none transition-all duration-500
                 ${isSubmittingSuccess
-                  ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
-                  : "bg-gradient-to-r from-obaol-500 to-amber-600 shadow-obaol-500/20 hover:shadow-obaol-500/40"
+                  ? "bg-gradient-to-r from-success-500 to-green-600"
+                  : "bg-gradient-to-r from-obaol-500 to-amber-600 hover:shadow-none"
                 }`}
               isLoading={isLoading || isSubmittingSuccess}
               onPress={() => (currentStep === 3 ? handleSubmit() : handleNext())}

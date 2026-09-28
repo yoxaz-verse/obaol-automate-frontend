@@ -149,7 +149,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
             {!!leftPanel.guidanceSections?.length && (
                 <div className="grid gap-3">
                     {leftPanel.guidanceSections.map((section) => (
-                        <div key={section.title} className="rounded-lg border border-obaol-200/70 bg-white/75 p-3 text-left shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <div key={section.title} className={`rounded-lg border border-obaol-200/70 bg-white/75 p-3 text-left dark:border-white/10 dark:bg-white/[0.04] ${compact ? "" : "shadow-sm"}`}>
                             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-obaol-700 dark:text-obaol-300">
                                 {section.title}
                             </p>
@@ -207,7 +207,7 @@ const LeftPanelContentBlock = ({ leftPanel, roleIdentity, compact = false }: { l
                 {leftPanel.knowMoreLink && (
                     <Link
                         href={leftPanel.knowMoreLink}
-                        className="group inline-flex items-center justify-center gap-2 rounded-lg border border-obaol-200 bg-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.18em] shadow-sm transition-all hover:border-obaol-500/30 hover:bg-obaol-500/10 hover:text-obaol-700 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-obaol-500/20 dark:hover:text-obaol-300"
+                        className={`group inline-flex items-center justify-center gap-2 rounded-lg border border-obaol-200 bg-white px-5 py-2.5 text-[9px] font-bold uppercase tracking-[0.18em] transition-all hover:border-obaol-500/30 hover:bg-obaol-500/10 hover:text-obaol-700 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-obaol-500/20 dark:hover:text-obaol-300 ${compact ? "" : "shadow-sm"}`}
                     >
                         Learn about this role
                         <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -230,11 +230,11 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
                 {topContent && <div className="mb-4">{topContent}</div>}
                 <div className={leftPanel ? "grid w-full items-start gap-5 lg:grid-cols-[minmax(280px,0.75fr)_minmax(0,1.35fr)] xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]" : `w-full ${cardMaxWidthClass} mx-auto`}>
                     {leftPanel && (
-                        <div className="order-2 rounded-[1.5rem] border border-obaol-200/60 bg-white/80 p-5 shadow-xl shadow-obaol-900/5 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/80 lg:sticky lg:top-4 lg:order-1">
+                        <div className="order-2 rounded-[1.5rem] border border-obaol-200/60 bg-white/80 p-5 backdrop-blur-2xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/80 lg:sticky lg:top-4 lg:order-1">
                             <LeftPanelContentBlock leftPanel={leftPanel} roleIdentity={roleIdentity} compact />
                         </div>
                     )}
-                    <div className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 shadow-2xl backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
+                    <div className={`rounded-[2.5rem] border border-divider bg-content1/80 p-5 backdrop-blur-3xl sm:p-8 ${leftPanel ? "order-1 min-w-0 lg:order-2" : ""}`}>
                         <div className="mb-8 items-center flex flex-col text-center">
                             <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground">
                                 {title}
@@ -340,8 +340,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, topC
 
                             <div className="relative group">
                                 <motion.div
-                                    className="relative overflow-hidden rounded-[2.2rem] border border-obaol-200/60 bg-white/85 p-5 shadow-xl shadow-obaol-900/5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 dark:shadow-2xl dark:shadow-black/40 lg:rounded-[2.5rem] lg:p-7"
-                                    whileHover={{ boxShadow: "0 40px 120px -20px rgba(15, 23, 42, 0.08)" }}
+                                    className="relative overflow-hidden rounded-[2.2rem] border border-obaol-200/60 bg-white/85 p-5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 lg:rounded-[2.5rem] lg:p-7"
                                     transition={{ duration: 0.45, ease: "easeOut" }}
                                 >
                                     {/* Glass Accents */}

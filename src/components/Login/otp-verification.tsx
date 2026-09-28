@@ -90,7 +90,7 @@ export default function OtpVerification({ user }: IVerification) {
   };
 
   return (
-    <Card className="max-w-md w-full mx-auto bg-white/85 dark:bg-content1/50 backdrop-blur-3xl border border-divider shadow-xl dark:shadow-2xl rounded-[2rem] overflow-hidden shadow-slate-200/40 dark:shadow-black/40">
+    <Card className="max-w-md w-full mx-auto bg-white/85 dark:bg-content1/50 backdrop-blur-3xl border border-divider rounded-[2rem] overflow-hidden">
       <CardBody className="p-8 lg:p-10 flex flex-col items-center">
         <div className="relative mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-obaol-500/20 bg-obaol-500/10">
           <FiShield className="text-3xl text-obaol-600 dark:text-obaol-300" />

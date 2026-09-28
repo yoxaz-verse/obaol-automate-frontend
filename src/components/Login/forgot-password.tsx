@@ -88,7 +88,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-[440px] px-4"
         >
-            <Card className="relative w-full overflow-hidden rounded-[2.5rem] border border-obaol-200/60 bg-content1/80 p-2 shadow-xl shadow-obaol-900/5 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 dark:shadow-2xl dark:shadow-black/40 md:p-4">
+            <Card className="relative w-full overflow-hidden rounded-[2.5rem] border border-obaol-200/60 bg-content1/80 p-2 backdrop-blur-3xl dark:border-obaol-500/10 dark:bg-[#0E0D0A]/85 md:p-4">
                 <div className="pointer-events-none absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-obaol-500/10 blur-[60px]" />
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary-500/5 blur-[60px] rounded-full -ml-12 -mb-12 pointer-events-none" />
 

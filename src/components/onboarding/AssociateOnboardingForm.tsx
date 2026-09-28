@@ -1419,6 +1419,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                             label="Type of Entity"
                             labelPlacement="outside"
                             variant="bordered"
+                            popoverProps={{ classNames: { content: "shadow-none" } }}
                             placeholder="Select type"
                             selectedKeys={formData.companyType ? [formData.companyType] : []}
                             onSelectionChange={(keys) => {
@@ -1682,7 +1683,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                   transition={{ duration: 0.3 }}
                   className="flex flex-col gap-6"
                 >
-                  <div className="p-5 rounded-2xl bg-obaol-500/10 border-2 border-obaol-500/50 shadow-[0_0_20px_rgba(207,152,60,0.2)] text-center">
+                  <div className="p-5 rounded-2xl bg-obaol-500/10 border-2 border-obaol-500/50 text-center">
                     <h3 className="text-sm font-black uppercase tracking-widest text-obaol-500">
                       Select 1 to 6 main categories
                     </h3>
@@ -1737,7 +1738,7 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
                                 disabled={isDisabled}
                                 onClick={() => updateCompanyFunctionSelection(fnId)}
                                 className={`w-full text-left rounded-xl border p-3 transition-all duration-300 ${isSelected
-                                  ? "border-obaol-500 bg-obaol-500/10 shadow-lg shadow-obaol-500/5 ring-1 ring-obaol-500/20"
+                                  ? "border-obaol-500 bg-obaol-500/10 ring-1 ring-obaol-500/20"
                                   : isDisabled
                                     ? "border-default-100 bg-default-50/30 opacity-40 cursor-not-allowed"
                                     : "border-default-200 bg-content2/20 hover:border-obaol-500/50 hover:bg-content2/40"
@@ -1920,10 +1921,10 @@ export default function AssociateOnboardingForm({ mode = "auth" }: { mode?: "aut
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
               <Button
                 color="warning"
-                className={`w-full h-12 rounded-xl font-black shadow-xl transition-all duration-500
+                className={`w-full h-12 rounded-xl font-black shadow-none transition-all duration-500
                   ${isSubmittingSuccess
-                    ? "bg-gradient-to-r from-success-500 to-green-600 shadow-success-500/20"
-                    : "bg-gradient-to-r from-obaol-500 to-amber-600 shadow-obaol-500/20 hover:shadow-obaol-500/40"
+                    ? "bg-gradient-to-r from-success-500 to-green-600"
+                    : "bg-gradient-to-r from-obaol-500 to-amber-600 hover:shadow-none"
                   }`}
                 onPress={() => (currentStep === 4 ? handleSubmit() : handleNext())}
                 isLoading={isLoading || isSubmittingSuccess}

@@ -634,33 +634,33 @@ export default function ImportsPage() {
                   >
                     <Card className="rounded-[2.5rem] bg-white dark:bg-[#090806] border border-default-300 dark:border-white/20 shadow-none overflow-hidden group hover:border-obaol-500/30 transition-all duration-500 h-full">
                       <CardHeader className="flex flex-col gap-4 p-8 pb-4">
-                        <div className="flex items-start justify-between w-full">
-                          <div className="flex flex-col gap-1.5">
+                        <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                          <div className="flex min-w-0 flex-col gap-1.5">
                             <span className="text-[9px] font-bold uppercase tracking-wider text-obaol-500">Import Details</span>
-                            <h4 className="text-lg font-bold text-foreground uppercase tracking-tight line-clamp-2">
+                            <h4 className="line-clamp-2 break-words text-lg font-bold uppercase tracking-tight text-foreground">
                               {listing.commodityName}
                             </h4>
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-obaol-500/10 border border-obaol-500/20 shadow-sm">
-                                <div className="w-1.5 h-1.5 rounded-full bg-obaol-500" />
-                                <span className="text-[9px] font-bold text-warning-500 uppercase tracking-widest">{listing.status}</span>
+                          <div className="flex shrink-0 flex-col items-end gap-2">
+                             <div className="flex max-w-[9rem] items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3 py-1 shadow-sm">
+                                <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-obaol-500" />
+                                <span className="truncate text-[9px] font-bold uppercase tracking-widest text-warning-500">{listing.status}</span>
                                 <div className="h-2.5 w-px bg-obaol-500/30 mx-0.5" />
                                 <span className="text-[8px] font-black text-obaol-600 dark:text-obaol-500 uppercase tracking-tighter italic">IND</span>
                              </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-start gap-6 text-default-400">
-                           <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-foreground/[0.03] border border-foreground/5 shadow-sm">
-                             <LuMapPin size={12} className="text-obaol-500/50" />
-                             <span className="text-[9px] font-black uppercase tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
-                             <div className="w-1 h-1 rounded-full bg-obaol-500/30" />
-                             <span className="text-[8px] font-black text-obaol-600/60 uppercase tracking-tighter">IND</span>
+                        <div className="grid w-full grid-cols-1 gap-3 text-default-400 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                           <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-foreground/5 bg-foreground/[0.03] px-3 py-1.5 shadow-sm">
+                             <LuMapPin size={12} className="shrink-0 text-obaol-500/50" />
+                             <span className="min-w-0 flex-1 truncate text-[9px] font-black uppercase tracking-[0.2em]">{listing.portName || "Port TBD"}</span>
+                             <div className="h-1 w-1 shrink-0 rounded-full bg-obaol-500/30" />
+                             <span className="shrink-0 text-[8px] font-black uppercase tracking-tighter text-obaol-600/60">IND</span>
                            </div>
-                           <div className="flex items-center gap-2">
-                             <LuClock size={14} className="text-obaol-500/50" />
-                             <span className="text-[10px] font-bold uppercase tracking-widest">
+                           <div className="flex shrink-0 items-center gap-2">
+                             <LuClock size={14} className="shrink-0 text-obaol-500/50" />
+                             <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest">
                                 ETA {listing.expectedArrivalDate ? new Date(listing.expectedArrivalDate).toLocaleDateString() : "TBD"}
                              </span>
                            </div>
@@ -680,9 +680,9 @@ export default function ImportsPage() {
                              if (diffDays < 0) config = { color: "text-danger-500", bg: "bg-danger-500/5", border: "border-danger-500/20", label: "Arrived Post ETA" };
                              
                              return (
-                                <div className={`flex items-center justify-start gap-3 px-4 py-2 rounded-2xl ${config.bg} ${config.border} border w-fit`}>
-                                  <div className={`w-1.5 h-1.5 rounded-full ${config.color.replace('text', 'bg')}`} />
-                                  <span className={`text-[10px] font-bold uppercase tracking-widest ${config.color}`}>{config.label}</span>
+                                <div className={`relative z-10 flex max-w-full items-center justify-start gap-3 rounded-2xl border px-4 py-2 ${config.bg} ${config.border}`}>
+                                  <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${config.color.replace('text', 'bg')}`} />
+                                  <span className={`min-w-0 text-[10px] font-bold uppercase tracking-widest ${config.color}`}>{config.label}</span>
                                 </div>
                               );
                           })()}
@@ -713,9 +713,9 @@ export default function ImportsPage() {
                               <div className="w-10 h-10 rounded-xl bg-foreground/[0.03] border border-foreground/5 flex items-center justify-center">
                                 <FiBriefcase size={16} className="text-default-400" />
                               </div>
-                              <div className="flex-1">
+                              <div className="min-w-0 flex-1">
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-default-400 block mb-0.5">Importer</span>
-                                <p className="text-xs font-bold uppercase">{listing.importerCompanyId?.name || "Confidential"}</p>
+                                <p className="break-words text-xs font-bold uppercase">{listing.importerCompanyId?.name || "Confidential"}</p>
                               </div>
                             </div>
                           )}

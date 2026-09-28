@@ -199,7 +199,7 @@ function DashboardLayoutContent({
   }
 
   return (
-    <section className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
+    <section data-dashboard-shell className="w-full min-w-0 h-[100dvh] max-h-[100dvh] flex overflow-hidden db-bg relative">
       <PrivateRoute pathname={pathname}>
         <DashboardEnhancements />
         {!isWorkspaceLocked && (

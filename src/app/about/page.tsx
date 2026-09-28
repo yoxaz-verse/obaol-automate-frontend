@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import CTASection from "@/components/home/ctasection";
-import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import WhoCanUseObaol from "@/components/home/tradeoperatinglayer";
 import AboutExecutionFramework from "@/components/about/AboutExecutionFramework";
 
@@ -38,11 +37,11 @@ export default function AboutPage() {
       />
       <Header />
       <WhoCanUseObaol />
-      <ThemedContentWrapper className="public-reading-page">
+      <div className="bg-background text-foreground">
         <AboutSection key="about-section" />
         <StartedIn key="started-in-section" />
         <AboutExecutionFramework />
-      </ThemedContentWrapper>
+      </div>
       <CTASection />
       <Footer />
     </section>

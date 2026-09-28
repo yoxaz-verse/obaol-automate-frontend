@@ -153,7 +153,7 @@ export default function ApprovalsPage() {
           color="warning"
           classNames={{
             tabList: "gap-8 relative rounded-none p-0 border-b border-divider/40",
-            cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full shadow-[0_-1px_10px_rgba(207,152,60,0.25)]",
+            cursor: "bg-obaol-500 w-full h-[3px] rounded-t-full",
             tab: "max-w-fit px-4 h-14 transition-all duration-300 hover:opacity-100",
             tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-obaol-700 dark:group-data-[selected=true]:text-obaol-300 group-data-[selected=true]:scale-105 transition-all"
           }}
@@ -188,7 +188,7 @@ export default function ApprovalsPage() {
         </Tabs>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-foreground/[0.02] p-6 rounded-[2rem] border border-foreground/5 backdrop-blur-xl shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-foreground/[0.02] p-6 rounded-[2rem] border border-foreground/5 backdrop-blur-xl">
         <div className="md:col-span-4">
           <Input
             value={search}
@@ -253,7 +253,7 @@ export default function ApprovalsPage() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-foreground/5 bg-foreground/[0.01] backdrop-blur-3xl overflow-hidden shadow-2xl flex flex-col">
+      <div className="rounded-[2rem] border border-foreground/5 bg-foreground/[0.01] backdrop-blur-3xl overflow-hidden flex flex-col">
         {listQuery.isLoading ? (
           <div className="p-16 flex items-center justify-center">
             <Spinner color="warning" size="lg" />
@@ -371,7 +371,7 @@ export default function ApprovalsPage() {
                             <>
                               <Button
                                 size="sm"
-                                className="h-10 bg-success-500 text-white font-bold px-4 rounded-xl shadow-lg shadow-success-500/20"
+                                className="h-10 bg-success-500 text-white font-bold px-4 rounded-xl"
                                 startContent={<LuCheck size={16} />}
                                 isLoading={isRowApproving}
                                 isDisabled={actionMutation.isPending}

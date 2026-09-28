@@ -414,7 +414,7 @@ export default function SampleRequestDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 flex flex-col gap-8">
           {/* Main Info Card */}
-          <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-2xl overflow-hidden p-8">
+          <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-none overflow-hidden p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-4">
@@ -518,7 +518,7 @@ export default function SampleRequestDetailPage() {
                   return (
                     <div key={stage.key} className="relative pl-10 group">
                       <div className={`absolute top-0 -left-[11px] w-5 h-5 rounded-full border-2 bg-background flex items-center justify-center transition-all duration-300 ${
-                        isActive ? "border-warning text-warning scale-110 shadow-[0_0_15px_rgba(255,193,7,0.3)]" : "border-divider text-default-300"
+                        isActive ? "border-warning text-warning scale-110" : "border-divider text-default-300"
                       }`}>
                         {isActive ? <LuCheck size={12} strokeWidth={4} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
                       </div>
@@ -543,10 +543,10 @@ export default function SampleRequestDetailPage() {
 
         {/* Action Panel */}
         <div className="lg:col-span-4 sticky top-8">
-          <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-2xl overflow-hidden p-0">
+          <Card className="rounded-[2.5rem] bg-foreground/[0.02] backdrop-blur-3xl border border-foreground/5 dark:border-white/5 shadow-none overflow-hidden p-0">
             <div className="p-8 border-b border-foreground/5 bg-foreground/[0.01]">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-obaol-500/10 rounded-2xl text-obaol-500 shadow-inner group">
+                <div className="p-3 bg-obaol-500/10 rounded-2xl text-obaol-500 group">
                   <LuActivity className="group-hover:animate-pulse" size={20} />
                 </div>
                 <div>
@@ -567,7 +567,7 @@ export default function SampleRequestDetailPage() {
                      </div>
                      <Button 
                        fullWidth
-                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30px_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                       className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                        onPress={() => {
                          setSamplePaymentTerm(request?.samplePaymentTerm || "ADVANCE");
                          setQuoteModalOpen(true);
@@ -588,7 +588,7 @@ export default function SampleRequestDetailPage() {
                     </div>
                     <Button 
                       fullWidth
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 shadow-[0_10px_30px_rgba(34,197,94,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => decisionMutation.mutate("ACCEPT")}
                       startContent={<LuCheck size={18} />}
                     >
@@ -609,7 +609,7 @@ export default function SampleRequestDetailPage() {
                 {status === "ACCEPTED" && canBuyer && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 shadow-[0_10px_30px_rgba(0,112,243,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => {
                       setPaymentMode("");
                       setOnlinePaymentMethod("");
@@ -638,7 +638,7 @@ export default function SampleRequestDetailPage() {
                     </div>
                     <Button 
                       fullWidth
-                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30px_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                       onPress={() => packagingStartMutation.mutate()}
                       startContent={<LuPackageOpen size={18} />}
                     >
@@ -650,7 +650,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PREPARING_PACKAGING" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 shadow-[0_10px_30_rgba(207,152,60,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-black bg-obaol-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => packagedMutation.mutate()}
                     startContent={<LuPackage size={18} />}
                   >
@@ -661,7 +661,7 @@ export default function SampleRequestDetailPage() {
                 {status === "PACKAGED" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 shadow-[0_10px_30px_rgba(0,112,243,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-primary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setCourierModalOpen(true)}
                     startContent={<LuTruck size={18} />}
                   >
@@ -672,7 +672,7 @@ export default function SampleRequestDetailPage() {
                 {status === "COURIER_SUBMITTED" && canSupplier && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-secondary-500 shadow-[0_10px_30px_rgba(151,114,255,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-secondary-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => inTransitMutation.mutate()}
                     startContent={<LuMapPin size={18} />}
                   >
@@ -683,7 +683,7 @@ export default function SampleRequestDetailPage() {
                 {status === "IN_TRANSIT" && canBuyer && (
                   <Button 
                     fullWidth
-                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 shadow-[0_10px_30px_rgba(34,197,94,0.25)] hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] text-white bg-success-500 hover:scale-[1.02] active:scale-95 transition-all border-none"
                     onPress={() => setReceiptModalOpen(true)}
                     startContent={<LuCheck size={18} />}
                   >
@@ -718,7 +718,7 @@ export default function SampleRequestDetailPage() {
                 )}
 
                 {status === "RECEIPT_CONFIRMED" && (
-                  <div className="flex flex-col items-center gap-6 py-10 text-center bg-success-500/5 rounded-[2rem] border border-success-500/20 shadow-[0_0_50px_rgba(34,197,94,0.05)]">
+                  <div className="flex flex-col items-center gap-6 py-10 text-center bg-success-500/5 rounded-[2rem] border border-success-500/20">
                     <div className="w-16 h-16 rounded-2xl bg-success-500/10 flex items-center justify-center text-success-500">
                        <LuCheck size={32} />
                     </div>

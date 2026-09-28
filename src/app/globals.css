@@ -30,7 +30,7 @@
   --db-focus: rgba(207, 152, 60, 0.38);
   --db-overlay: rgba(15, 23, 42, 0.12);
   --db-overlay-soft: rgba(15, 23, 42, 0.06);
-  --db-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  --db-shadow: none;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -64,7 +64,7 @@
   --db-focus: rgba(207, 152, 60, 0.38);
   --db-overlay: rgba(15, 23, 42, 0.12);
   --db-overlay-soft: rgba(15, 23, 42, 0.06);
-  --db-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  --db-shadow: none;
 }
 
 .dark {
@@ -83,7 +83,7 @@
   --db-focus: rgba(207, 152, 60, 0.46);
   --db-overlay: rgba(9, 8, 6, 0.62);
   --db-overlay-soft: rgba(9, 8, 6, 0.38);
-  --db-shadow: 0 16px 42px rgba(0, 0, 0, 0.38);
+  --db-shadow: none;
 }
 
 body {
@@ -284,6 +284,23 @@ canvas {
 
   .db-focus {
     box-shadow: 0 0 0 2px var(--db-focus);
+  }
+
+  /* Dashboard surfaces use borders and tonal contrast instead of decorative
+     elevation. Portalled overlays sit outside this shell and keep their
+     functional shadow; printable canvases can opt out explicitly. */
+  [data-dashboard-shell]
+    :where([class*="shadow-"], [class*="hover:shadow-"]):not([data-shadow-preserve]) {
+    box-shadow: none !important;
+  }
+
+  [data-dashboard-shell]
+    :where([class*="drop-shadow-"]):not([data-shadow-preserve]) {
+    filter: none !important;
+  }
+
+  [data-dashboard-shell] :focus-visible {
+    box-shadow: 0 0 0 2px var(--db-focus) !important;
   }
 }
 

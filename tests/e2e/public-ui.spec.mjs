@@ -53,6 +53,33 @@ for (const route of ["/about", "/roles", "/procurement", "/methods", "/privacy-p
   });
 }
 
+test("About marketing sections use one responsive content container", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/about");
+
+    await expect(page.locator(".public-reading-page")).toHaveCount(0);
+
+    const aboutSection = page.locator("#about");
+    const sectionBox = await aboutSection.boundingBox();
+    expect(sectionBox.x).toBeLessThanOrEqual(1);
+    expect(sectionBox.width).toBeGreaterThanOrEqual(width - 1);
+
+    const headingBox = await page.getByRole("heading", { name: "Who We Are" }).boundingBox();
+    const imageBox = await page.getByRole("img", { name: "Jacob Alwin, Entrepreneur" }).boundingBox();
+
+    if (width >= 768) {
+      expect(imageBox.x).toBeGreaterThan(headingBox.x + headingBox.width);
+    } else {
+      expect(imageBox.y).toBeGreaterThan(headingBox.y + headingBox.height);
+    }
+
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 test("theme toggle remains interactive", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");

@@ -19,6 +19,7 @@ import { postData } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
+import { getPasswordResetRole } from "@/utils/authRoleRoutes";
 
 
 interface ILoginProps {
@@ -958,7 +959,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
             <button
               type="button"
               disabled={isPreparingSession}
-              onClick={() => router.push(`/auth/forgot-password?role=${roleLower === 'operator' || roleLower === 'team' ? 'Operator' : 'Associate'}`)}
+              onClick={() => router.push(`/auth/forgot-password?role=${getPasswordResetRole(role)}`)}
               className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 disabled:pointer-events-none disabled:opacity-50 dark:text-obaol-300 dark:hover:text-obaol-200"
             >
               Forgot password?

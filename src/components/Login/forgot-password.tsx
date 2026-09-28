@@ -8,6 +8,7 @@ import { showToastMessage } from "@/utils/utils";
 import { useRouter } from "next/navigation";
 import { InputOtp } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getSignInPathForRole } from "@/utils/authRoleRoutes";
 
 type ForgotPasswordStep = "REQUEST" | "VERIFY" | "RESET" | "SUCCESS";
 
@@ -101,7 +102,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 radius="full"
                                 size="sm"
                                 className="border border-divider bg-content2/50 backdrop-blur-sm transition-all hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300"
-                                onClick={() => step === "REQUEST" ? router.push("/auth") : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
+                                onClick={() => step === "REQUEST" ? router.push(getSignInPathForRole(role)) : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
                             >
                                 <IoArrowBack className="text-base" />
                             </Button>
@@ -286,11 +287,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                                 <Button
                                     color="warning"
                                     className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
-                                    onClick={() => {
-                                        const r = role.toLowerCase();
-                                        const target = r === 'operator' || r === 'team' ? '/auth/operator' : '/auth';
-                                        router.push(target);
-                                    }}
+                                    onClick={() => router.push(getSignInPathForRole(role))}
                                 >
                                     Back to Sign In
                                 </Button>

@@ -87,7 +87,7 @@ export default function CalculationsPage() {
 
   return (
     <section>
-      <Title title="Calculations" />
+      <Title title="Calculations" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-6">
         <div className="mb-5 rounded-2xl border border-default-200/60 bg-content1/95 p-5">

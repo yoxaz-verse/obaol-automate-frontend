@@ -166,7 +166,7 @@ export default function DocumentsPage() {
 
   return (
     <section className="">
-      <Title title="Documents" />
+      <Title title="Documents" visuallyHidden />
       {roleLower === "associate" && <div className="mx-4 md:mx-10 mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-xl font-semibold">Pure Documents</h2><p className="text-sm text-default-500">Create company quotations and invoices, manage customers, and share documents.</p></div><Link href="/dashboard/commercial-documents" className="rounded-xl bg-primary px-5 py-3 text-white font-semibold">Open workspace</Link></div>}
 
       <div className="mx-4 md:mx-10 mb-10 flex flex-col gap-8">

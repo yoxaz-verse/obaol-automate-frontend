@@ -13,24 +13,25 @@
 }
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 241, 244, 248;
+  --background-end-rgb: 241, 244, 248;
   --font-heading: var(--font-obaol);
   --font-body: var(--font-obaol);
-  --db-bg: #fcfaf6;
-  --db-shell: rgba(255, 255, 255, 0.97);
-  --db-panel: rgba(255, 255, 255, 0.99);
-  --db-subtle: rgba(255, 255, 255, 0.96);
-  --db-inset: rgba(248, 244, 236, 0.98);
-  --db-border-subtle: rgba(148, 163, 184, 0.2);
-  --db-border-strong: rgba(100, 116, 139, 0.32);
-  --db-muted: rgba(71, 85, 105, 0.78);
-  --db-muted-strong: rgba(51, 65, 85, 0.92);
-  --db-focus: rgba(207, 152, 60, 0.38);
-  --db-overlay: rgba(15, 23, 42, 0.12);
-  --db-overlay-soft: rgba(15, 23, 42, 0.06);
-  --db-shadow: none;
+  --db-bg: #f1f4f8;
+  --db-shell: #ffffff;
+  --db-panel: #ffffff;
+  --db-subtle: #ffffff;
+  --db-inset: #f8fafc;
+  --db-border-subtle: rgba(203, 213, 225, 0.95);
+  --db-border-strong: rgba(148, 163, 184, 0.6);
+  --db-muted: rgba(71, 85, 105, 0.85);
+  --db-muted-strong: rgba(30, 41, 59, 0.95);
+  --db-focus: rgba(207, 152, 60, 0.45);
+  --db-overlay: rgba(15, 23, 42, 0.08);
+  --db-overlay-soft: rgba(15, 23, 42, 0.04);
+  --db-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --db-shadow-card: 0 2px 8px -1px rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.03);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -43,47 +44,49 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-start-rgb: 9, 8, 6;
+    --background-end-rgb: 9, 8, 6;
   }
 }
 
 .light {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-  --db-bg: #fcfaf6;
-  --db-shell: rgba(255, 255, 255, 0.97);
-  --db-panel: rgba(255, 255, 255, 0.99);
-  --db-subtle: rgba(255, 255, 255, 0.96);
-  --db-inset: rgba(248, 244, 236, 0.98);
-  --db-border-subtle: rgba(148, 163, 184, 0.2);
-  --db-border-strong: rgba(100, 116, 139, 0.32);
-  --db-muted: rgba(71, 85, 105, 0.78);
-  --db-muted-strong: rgba(51, 65, 85, 0.92);
-  --db-focus: rgba(207, 152, 60, 0.38);
-  --db-overlay: rgba(15, 23, 42, 0.12);
-  --db-overlay-soft: rgba(15, 23, 42, 0.06);
-  --db-shadow: none;
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 241, 244, 248;
+  --background-end-rgb: 241, 244, 248;
+  --db-bg: #f1f4f8;
+  --db-shell: #ffffff;
+  --db-panel: #ffffff;
+  --db-subtle: #ffffff;
+  --db-inset: #f8fafc;
+  --db-border-subtle: rgba(203, 213, 225, 0.95);
+  --db-border-strong: rgba(148, 163, 184, 0.6);
+  --db-muted: rgba(71, 85, 105, 0.85);
+  --db-muted-strong: rgba(30, 41, 59, 0.95);
+  --db-focus: rgba(207, 152, 60, 0.45);
+  --db-overlay: rgba(15, 23, 42, 0.08);
+  --db-overlay-soft: rgba(15, 23, 42, 0.04);
+  --db-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --db-shadow-card: 0 2px 8px -1px rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.03);
 }
 
 .dark {
   --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 0, 0, 0;
+  --background-start-rgb: 9, 8, 6;
+  --background-end-rgb: 9, 8, 6;
   --db-bg: #090806;
-  --db-shell: rgba(14, 13, 10, 0.92);
-  --db-panel: rgba(12, 11, 9, 0.96);
-  --db-subtle: rgba(19, 17, 13, 0.88);
-  --db-inset: rgba(25, 22, 17, 0.78);
-  --db-border-subtle: rgba(255, 255, 255, 0.08);
-  --db-border-strong: rgba(255, 255, 255, 0.16);
+  --db-shell: rgba(14, 13, 10, 0.95);
+  --db-panel: rgba(18, 16, 12, 0.98);
+  --db-subtle: rgba(20, 18, 14, 0.92);
+  --db-inset: rgba(28, 25, 20, 0.85);
+  --db-border-subtle: rgba(255, 255, 255, 0.12);
+  --db-border-strong: rgba(255, 255, 255, 0.22);
   --db-muted: rgba(226, 232, 240, 0.66);
   --db-muted-strong: rgba(241, 245, 249, 0.9);
   --db-focus: rgba(207, 152, 60, 0.46);
   --db-overlay: rgba(9, 8, 6, 0.62);
   --db-overlay-soft: rgba(9, 8, 6, 0.38);
-  --db-shadow: none;
+  --db-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --db-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -458,6 +461,40 @@ a {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Catalog cards can be embedded in full pages or narrow dashboard panels.
+   Size them from their actual container instead of the browser viewport. */
+.catalog-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
+  gap: 1rem;
+}
+
+.catalog-grid-card {
+  container-name: catalog-card;
+  container-type: inline-size;
+}
+
+@container catalog-card (max-width: 15rem) {
+  .catalog-card-pricing {
+    align-items: flex-start;
+  }
+
+  .catalog-card-stock,
+  .catalog-card-standard-actions {
+    display: none;
+  }
+
+  .catalog-card-compact-actions {
+    display: flex;
+  }
+}
+
+@media (max-width: 639px) {
+  .catalog-responsive-grid {
+    gap: 0.75rem;
+  }
 }
 
 @media (max-width: 767px) {

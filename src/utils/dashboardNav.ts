@@ -1,6 +1,8 @@
 import {
+  getDashboardAdminGroups,
   getAccessibleDashboardRoutes,
   type DashboardSection,
+  type DashboardNavGroup,
   type TradeMode,
 } from "@/utils/dashboardAccess";
 
@@ -13,6 +15,7 @@ type SidebarOption = {
 export type DashboardNavSection = {
   label: DashboardSection;
   links: string[];
+  groups?: Array<{ label: DashboardNavGroup; links: string[] }>;
 };
 
 export const getRoleFilteredSidebarOptions = (
@@ -45,11 +48,15 @@ export const getDashboardSidebarSections = (
   ];
 
   return sectionOrder
-    .map((section) => ({
-      label: section,
-      links: accessibleRoutes
+    .map((section) => {
+      const sectionRoutes = accessibleRoutes
         .filter((route) => route.section === section && optionMap.has(route.path))
-        .map((route) => route.path),
-    }))
+      const links = sectionRoutes.map((route) => route.path);
+      const groups = section === "Operations/Admin"
+        ? getDashboardAdminGroups(sectionRoutes)
+        : undefined;
+
+      return { label: section, links, groups };
+    })
     .filter((section) => section.links.length > 0);
 };

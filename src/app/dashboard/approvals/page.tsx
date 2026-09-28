@@ -136,7 +136,7 @@ export default function ApprovalsPage() {
   return (
     <div className="w-full min-w-0 max-w-full p-6 md:p-10 space-y-8">
       <div className="flex flex-col gap-2">
-        <Title title="ApprovalsHub" />
+        <Title title="ApprovalsHub" visuallyHidden />
         <p className="text-[12px] font-bold text-default-400 uppercase tracking-[0.3em] opacity-70">
           Onboarding Verification & Entity Authorization Protocol
         </p>

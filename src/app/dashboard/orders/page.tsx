@@ -35,7 +35,7 @@ export default function OrdersPage() {
 
     return (
         <section className="">
-            <Title title="Orders & Logistics" />
+            <Title title="Orders & Logistics" visuallyHidden />
 
             <QueryComponent
                 api={apiRoutes.orders.getAll}

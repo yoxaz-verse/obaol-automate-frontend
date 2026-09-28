@@ -49,7 +49,7 @@ export default function DocumentationPreviewPage() {
 
   return (
     <section className="">
-      <Title title="Documentation Preview" />
+      <Title title="Documentation Preview" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-4 flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

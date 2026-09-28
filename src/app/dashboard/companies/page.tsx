@@ -1517,13 +1517,12 @@ export default function CompanyProductPage() {
         isDismissable={false}
       >
         <ModalContent>
-          <ModalHeader>Assign Operator</ModalHeader>
-          <ModalBody>
-            <div className="space-y-2">
-              <p className="text-sm text-default-600">
-                Company: <span className="font-semibold text-foreground">{selectedCompanyName}</span>
-              </p>
-              <p className="text-xs text-default-500">
+          <ModalHeader className="pb-1 text-lg font-bold">Assign Operator</ModalHeader>
+          <ModalBody className="py-4 space-y-4">
+            <div className="rounded-2xl border border-default-200/60 bg-default-50 p-3.5 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-default-400">Target Company</p>
+              <p className="text-sm font-bold text-foreground">{selectedCompanyName || "—"}</p>
+              <p className="text-[11px] text-default-500 mt-0.5">
                 Choose an approved active operator for this company.
               </p>
             </div>
@@ -1544,18 +1543,28 @@ export default function CompanyProductPage() {
               allowsCustomValue={false}
               popoverProps={{
                 placement: "bottom-start",
-                shouldFlip: false,
+                shouldFlip: true,
                 offset: 8,
+                classNames: {
+                  content: "p-2 bg-content1/95 backdrop-blur-xl border border-divider shadow-2xl rounded-2xl max-h-[300px]",
+                }
               }}
               listboxProps={{
                 emptyContent: "No operators found",
+                itemClasses: {
+                  base: "py-2.5 px-3.5 my-1 rounded-xl transition-all data-[hover=true]:bg-default-100 data-[selected=true]:bg-obaol-500/15 data-[selected=true]:text-obaol-700 dark:data-[selected=true]:text-obaol-300",
+                }
               }}
             >
               {filteredOperatorOptions.map((option) => (
-                <AutocompleteItem key={option.id} textValue={`${option.name} ${option.email}`}>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{option.name}</span>
-                    <span className="text-xs text-default-500">{option.email || "-"}</span>
+                <AutocompleteItem 
+                  key={option.id} 
+                  textValue={`${option.name} ${option.email}`}
+                  className="py-2.5 px-3.5 rounded-xl my-1 transition-colors hover:bg-default-100"
+                >
+                  <div className="flex flex-col gap-1 py-1">
+                    <span className="font-semibold text-sm text-foreground leading-snug">{option.name}</span>
+                    <span className="text-xs text-default-500 font-normal leading-normal">{option.email || "-"}</span>
                   </div>
                 </AutocompleteItem>
               ))}

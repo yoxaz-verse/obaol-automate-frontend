@@ -20,7 +20,7 @@ export default function PaymentsHubPage() {
 
   return (
     <section>
-      <Title title="Payment Rules" />
+      <Title title="Payment Rules" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-6">
         <div className="mb-4 rounded-2xl border border-default-200/60 bg-content1/95 p-5">

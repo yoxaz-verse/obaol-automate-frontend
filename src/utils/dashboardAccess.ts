@@ -8,12 +8,28 @@ export type DashboardSection =
   | "Organization"
   | "Operations/Admin";
 
+export type DashboardNavGroup =
+  | "Team & Users"
+  | "Governance"
+  | "Documentation & Templates"
+  | "Rules & Automation"
+  | "Platform Setup";
+
+export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
+  "Team & Users",
+  "Governance",
+  "Documentation & Templates",
+  "Rules & Automation",
+  "Platform Setup",
+];
+
 export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sample" | "execute" | "service" | "organize" | "administer";
 
 export type DashboardRouteDefinition = {
   path: string;
   label: string;
   section: DashboardSection;
+  navGroup?: DashboardNavGroup;
   roles: DashboardRole[];
   tradeModes?: TradeMode[];
   nav?: boolean;
@@ -72,26 +88,26 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
 
-  { path: "/dashboard/operator/hierarchy", label: "Hierarchy", section: "Operations/Admin", roles: ["admin", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/operator/team", label: "Team", section: "Operations/Admin", roles: ["admin", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/operator/earnings", label: "Earnings", section: "Operations/Admin", roles: ["admin", "operator", "team"], nav: true, searchable: true },
+  { path: "/dashboard/operator/hierarchy", label: "Hierarchy", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
+  { path: "/dashboard/operator/team", label: "Team", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
+  { path: "/dashboard/operator/earnings", label: "Earnings", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
 
-  { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/flow-rules", label: "Flow Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/order-rules", label: "Order Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/enquiry-rules", label: "Enquiry Rules", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/operators/overview", label: "Operator Overview", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/users", label: "Users", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/calculations", label: "Calculations", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/function-preview", label: "Function Preview", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/essentials", label: "Essentials", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
-  { path: "/dashboard/geosphere", label: "Geo Sphere", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/documentation-templates", label: "Documentation Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/email-templates", label: "Email Templates", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/flow-rules", label: "Flow Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/order-rules", label: "Order Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/enquiry-rules", label: "Enquiry Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/operators/overview", label: "Operator Overview", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/users", label: "Users", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/calculations", label: "Calculations", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/function-preview", label: "Function Preview", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/essentials", label: "Essentials", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/geosphere", label: "Geo Sphere", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/rates", label: "Rates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/bulk", label: "Bulk Operations", section: "Operations/Admin", roles: ["admin"] },
   { path: "/dashboard/news", label: "News", section: "Operations/Admin", roles: ["admin"] },
@@ -192,3 +208,13 @@ export const getAccessibleDashboardRoutes = ({
     return route.requiredInterests.some((interest) => normalizedInterests.has(interest));
   });
 };
+
+export const getDashboardAdminGroups = (routes: DashboardRouteDefinition[]) =>
+  DASHBOARD_ADMIN_GROUP_ORDER
+    .map((label) => ({
+      label,
+      links: routes
+        .filter((route) => route.section === "Operations/Admin" && route.navGroup === label)
+        .map((route) => route.path),
+    }))
+    .filter((group) => group.links.length > 0);

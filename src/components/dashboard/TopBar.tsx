@@ -22,7 +22,7 @@ import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
 import Image from "next/image";
-import { FiBell, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
 import { useQuery } from "@tanstack/react-query";
 import { getData } from "@/core/api/apiHandler";
@@ -35,6 +35,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMobileAdminGroup, setOpenMobileAdminGroup] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -139,6 +140,13 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
   const mobileSections = getDashboardSidebarSections(filteredOptions as any[]);
+  const activeMobileAdminGroup = mobileSections
+    .find((section) => section.label === "Operations/Admin")
+    ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
+
+  useEffect(() => {
+    if (activeMobileAdminGroup) setOpenMobileAdminGroup(activeMobileAdminGroup.label);
+  }, [activeMobileAdminGroup?.label]);
 
   return (
     <div
@@ -201,16 +209,46 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                            <div key={sec.label}>
                              <p className="text-[10px] font-black text-default-400 uppercase tracking-[0.2em] mb-3 px-3">{sec.label}</p>
                              <div className="space-y-1">
-                               {sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
-                                 <button
-                                   key={opt.name}
-                                   onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                   className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
-                                 >
-                                   <span className="text-lg">{opt.icon}</span>
-                                   <span className="text-sm">{opt.name}</span>
-                                 </button>
-                               ))}
+                               {sec.groups ? sec.groups.map((group) => {
+                                 const isOpen = openMobileAdminGroup === group.label;
+                                 const hasActiveLink = group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`));
+                                 return (
+                                   <div key={group.label} className="space-y-1">
+                                     <button
+                                       type="button"
+                                       aria-expanded={isOpen}
+                                       onClick={() => setOpenMobileAdminGroup(isOpen ? null : group.label)}
+                                       className={`w-full min-h-11 flex items-center justify-between px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.16em] transition-all ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300 bg-obaol-500/5" : "text-default-500 hover:db-inset"}`}
+                                     >
+                                       <span>{group.label}</span>
+                                       <FiChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                                     </button>
+                                     {isOpen && (
+                                       <div className="ml-3 pl-2 border-l border-default-200/70 dark:border-white/10 space-y-1">
+                                         {group.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
+                                           <button
+                                             key={opt.name}
+                                             onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
+                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link || pathname.startsWith(`${opt.link}/`) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                           >
+                                             <span className="text-lg">{opt.icon}</span>
+                                             <span className="text-sm">{opt.name}</span>
+                                           </button>
+                                         ))}
+                                       </div>
+                                     )}
+                                   </div>
+                                 );
+                               }) : sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
+                                   <button
+                                     key={opt.name}
+                                     onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
+                                     className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                   >
+                                     <span className="text-lg">{opt.icon}</span>
+                                     <span className="text-sm">{opt.name}</span>
+                                   </button>
+                                 ))}
                              </div>
                            </div>
                         ))}

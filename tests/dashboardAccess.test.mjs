@@ -5,7 +5,9 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   canAccessDashboardRoute,
+  DASHBOARD_ADMIN_GROUP_ORDER,
   getAccessibleDashboardRoutes,
+  getDashboardAdminGroups,
   getDashboardRoute,
   normalizeDashboardRole,
   normalizeTradeMode,
@@ -90,5 +92,39 @@ test("every dashboard route exposes complete experience metadata", () => {
     assert.ok(route.journeyStage, `${route.path} needs a journey stage`);
     assert.ok(route.helpId, `${route.path} needs a help id`);
     assert.ok(route.requiredApprovalStates.length > 0, `${route.path} needs approval policy`);
+  }
+});
+
+test("Operations/Admin navigation is grouped in the intended order", () => {
+  const routes = getAccessibleDashboardRoutes({ role: "Admin", tradeMode: "BOTH" });
+  const groups = getDashboardAdminGroups(routes);
+
+  assert.deepEqual(groups.map((group) => group.label), DASHBOARD_ADMIN_GROUP_ORDER);
+  assert.deepEqual(groups.find((group) => group.label === "Team & Users")?.links, [
+    "/dashboard/operator/hierarchy",
+    "/dashboard/operator/team",
+    "/dashboard/operator/earnings",
+    "/dashboard/operators/overview",
+    "/dashboard/users",
+  ]);
+  assert.deepEqual(groups.find((group) => group.label === "Rules & Automation")?.links, [
+    "/dashboard/payments",
+    "/dashboard/flow-rules",
+    "/dashboard/order-rules",
+    "/dashboard/enquiry-rules",
+    "/dashboard/calculations",
+  ]);
+});
+
+test("Operations/Admin groups omit inaccessible and empty groups", () => {
+  for (const role of ["Operator", "Team"]) {
+    const routes = getAccessibleDashboardRoutes({ role, tradeMode: "BOTH" });
+    const groups = getDashboardAdminGroups(routes);
+    assert.deepEqual(groups.map((group) => group.label), ["Team & Users"]);
+    assert.deepEqual(groups[0].links, [
+      "/dashboard/operator/hierarchy",
+      "/dashboard/operator/team",
+      "/dashboard/operator/earnings",
+    ]);
   }
 });

@@ -142,7 +142,7 @@ export default function EmailTemplatesPage() {
 
   return (
     <section>
-      <Title title="Email Templates" />
+      <Title title="Email Templates" visuallyHidden />
       <div className="mx-2 md:mx-6 mb-6">
         <Card className="mb-5 border border-default-200/60 bg-content1/95">
           <CardHeader className="flex items-center justify-between">

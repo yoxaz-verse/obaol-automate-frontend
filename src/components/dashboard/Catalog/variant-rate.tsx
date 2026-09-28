@@ -25,6 +25,9 @@ import {
   Autocomplete,
   AutocompleteItem,
   Pagination,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@nextui-org/react";
 import {
   FiMessageSquare,
@@ -42,6 +45,7 @@ import {
   FiShoppingBag,
   FiPlus,
   FiMenu,
+  FiMoreHorizontal,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -1656,7 +1660,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     <div
                       className={
                         viewMode === "grid"
-                          ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4"
+                          ? "catalog-responsive-grid"
                           : "flex flex-col gap-3"
                       }
                     >
@@ -1969,7 +1973,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               duration: 0.4,
                               ease: "easeOut",
                             }}
-                            className="group relative flex flex-col justify-between bg-white dark:bg-content1/60 border border-amber-100/80 dark:border-white/10 rounded-3xl overflow-hidden shadow-[0_4px_18px_rgba(95,65,25,0.05)] hover:border-amber-200 dark:hover:border-white/20 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] transition-all duration-300"
+                            className="catalog-grid-card group relative flex min-w-0 flex-col justify-between bg-white dark:bg-content1/60 border border-amber-100/80 dark:border-white/10 rounded-3xl overflow-hidden shadow-[0_4px_18px_rgba(95,65,25,0.05)] hover:border-amber-200 dark:hover:border-white/20 hover:shadow-[0_12px_28px_rgba(95,65,25,0.11)] transition-all duration-300"
                           >
                             {/* Top Accent Line */}
                             <div
@@ -2042,16 +2046,16 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <Divider className="my-1 bg-amber-100/80 dark:bg-white/10" />
 
                               {/* Price & Quantity Area */}
-                              <div className="flex justify-between items-end">
-                                <div className="flex flex-col gap-1">
+                              <div className="catalog-card-pricing flex min-w-0 justify-between items-end gap-3">
+                                <div className="flex min-w-0 flex-col gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
                                     Final Price
                                   </span>
-                                  <div className="text-base sm:text-xl font-black text-obaol-500 drop-shadow-md">
+                                  <div className="truncate text-base sm:text-xl font-black text-obaol-500 drop-shadow-md" title={formatRate(item.rawBasePrice)}>
                                     {formatRate(item.rawBasePrice)}
                                   </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-1">
+                                <div className="catalog-card-stock flex min-w-0 flex-col items-end gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
                                     Stock
                                   </span>
@@ -2081,10 +2085,81 @@ const VariantRate: React.FC<VariantRateProps> = ({
                             </div>
 
                             {/* Actions Footer */}
-                            <div className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-amber-950/20 dark:via-content2/50 dark:to-content1/40 border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto">
-                              <div className="flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                            <div
+                              className="p-2 sm:p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-white dark:from-amber-950/20 dark:via-content2/50 dark:to-content1/40 border-t border-amber-100/80 dark:border-white/10 flex flex-col gap-2 mt-auto"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <div className="catalog-card-standard-actions flex justify-between items-center w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
                                 {actionButtons}
                                 {secondaryActions}
+                              </div>
+                              <div className="catalog-card-compact-actions hidden items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  {canManageRow(item) ? (
+                                    <LiveToggle
+                                      variantRate={item}
+                                      refetchData={refetchData}
+                                      apiEndpoint={
+                                        rate === "catalogItem"
+                                          ? apiRoutes.catalog.update
+                                          : apiRoutesByRole[rate]
+                                      }
+                                    />
+                                  ) : (
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-default-400">
+                                      {isLive ? "Live" : "Offline"}
+                                    </span>
+                                  )}
+                                </div>
+                                <Popover placement="bottom-end" showArrow>
+                                  <PopoverTrigger>
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="flat"
+                                      aria-label={`More options for ${toDisplayText(item.productVariant, "listing")}`}
+                                      className="shrink-0"
+                                    >
+                                      <FiMoreHorizontal size={18} />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-[min(19rem,calc(100vw-2rem))] p-0">
+                                    <div className="w-full space-y-3 p-4">
+                                      <div className="grid grid-cols-2 gap-3 border-b border-divider pb-3">
+                                        <div className="min-w-0">
+                                          <p className="text-[9px] font-black uppercase tracking-widest text-default-400">Stock</p>
+                                          <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.inventoryQty || item.quantity, "—")}>
+                                            {item.inventoryQty || item.quantity || "—"}
+                                          </p>
+                                        </div>
+                                        <div className="min-w-0 text-right">
+                                          <p className="text-[9px] font-black uppercase tracking-widest text-default-400">Location</p>
+                                          <p className="truncate text-sm font-bold text-foreground" title={toDisplayText(item.location, "—")}>
+                                            {item.location && item.location !== "--" ? item.location : "—"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-wrap items-center justify-end gap-2">
+                                        {actionButtons}
+                                        {canAddInventory && (
+                                          <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="warning"
+                                            className="h-8 font-bold"
+                                            onPress={() => {
+                                              setSelectedInventoryRate(item);
+                                              setInventoryQty("");
+                                              setInventoryModalOpen(true);
+                                            }}
+                                          >
+                                            + Inventory
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
                               </div>
                             </div>
                           </motion.div>

@@ -560,7 +560,7 @@ export default function ImportsPage() {
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-3">
-                 <Title title="Import Listings" />
+                 <Title title="Import Listings" visuallyHidden />
               </div>
               <p className="text-default-500 text-xs font-semibold tracking-tight max-w-lg opacity-90 leading-relaxed mt-1">
                 Unified logistics portal for incoming shipments, inventory reserves, and network-wide trade synchronization for the Indian market.

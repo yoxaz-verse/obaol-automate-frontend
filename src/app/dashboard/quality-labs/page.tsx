@@ -432,7 +432,7 @@ export default function QualityLabsPage() {
               <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Quality_Network</span>
             </motion.div>
-            <Title title="Quality Testing Labs" />
+            <Title title="Quality Testing Labs" visuallyHidden />
             <p className="text-sm text-default-400 max-w-xl">
               Discover quality testing labs, review certificates/services, and directly contact labs for immediate coordination.
             </p>

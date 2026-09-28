@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardBody, CardHeader, Select, SelectItem, Spinner, Chip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Autocomplete, AutocompleteItem, Spinner, Chip } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import AuthContext from "@/context/AuthContext";
@@ -12,7 +12,7 @@ import {
   FiUser, FiCalendar, FiActivity, FiClock,
   FiBriefcase, FiBox, FiMessageSquare, FiShoppingCart,
   FiFolder, FiFolderMinus, FiFolderPlus,
-  FiCheckCircle, FiXCircle, FiInfo
+  FiCheckCircle, FiXCircle, FiInfo, FiSearch
 } from "react-icons/fi";
 
 const toId = (value: unknown) => String(value || "").trim();
@@ -26,13 +26,13 @@ const extractList = (response: any): any[] => {
 };
 
 const MetricCard = ({ title, value, icon: Icon, colorClass }: any) => (
-  <Card className="bg-content1/40 backdrop-blur-md border border-default-200/20 hover:border-default-300/50 transition-all shadow-sm group">
+  <Card className="bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md transition-all rounded-2xl group">
     <CardBody className="p-5 flex flex-row items-center justify-between gap-4">
       <div>
-        <p className="text-xs uppercase tracking-widest text-default-400 font-bold mb-1 group-hover:text-default-500 transition-colors">{title}</p>
-        <p className="text-3xl font-light text-foreground">{value}</p>
+        <p className="text-[11px] uppercase tracking-wider text-default-500 font-bold mb-1 group-hover:text-default-600 transition-colors">{title}</p>
+        <p className="text-3xl font-black text-foreground">{value}</p>
       </div>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-default-100/50 border border-default-200/30 ${colorClass}`}>
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-default-100/70 border border-slate-200/60 dark:border-white/10 ${colorClass}`}>
         <Icon size={22} />
       </div>
     </CardBody>
@@ -46,6 +46,7 @@ export default function OperatorOverviewPage() {
   const isAdmin = roleLower === "admin";
 
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
+  const [operatorSearchInput, setOperatorSearchInput] = useState("");
 
   const operatorsQuery = useQuery({
     queryKey: ["operator-overview", "operators"],
@@ -57,7 +58,11 @@ export default function OperatorOverviewPage() {
   const operatorOptions = useMemo(() => {
     const rows = extractList(operatorsQuery.data);
     return rows
-      .map((row: any) => ({ id: toId(row?._id || row?.id), name: String(row?.name || "").trim() }))
+      .map((row: any) => ({
+        id: toId(row?._id || row?.id),
+        name: String(row?.name || "").trim(),
+        email: String(row?.email || "").trim(),
+      }))
       .filter((row: any) => Boolean(row.id));
   }, [operatorsQuery.data]);
 
@@ -65,10 +70,16 @@ export default function OperatorOverviewPage() {
     if (!isAdmin) return;
     if (operatorOptions.length === 0) {
       setSelectedOperatorId("");
+      setOperatorSearchInput("");
       return;
     }
-    if (selectedOperatorId && operatorOptions.some((opt: any) => opt.id === selectedOperatorId)) return;
+    if (selectedOperatorId && operatorOptions.some((opt: any) => opt.id === selectedOperatorId)) {
+      const match = operatorOptions.find((opt: any) => opt.id === selectedOperatorId);
+      if (match && !operatorSearchInput) setOperatorSearchInput(match.name);
+      return;
+    }
     setSelectedOperatorId(operatorOptions[0].id);
+    setOperatorSearchInput(operatorOptions[0].name);
   }, [operatorOptions, selectedOperatorId, isAdmin]);
 
   const overviewQuery = useQuery({
@@ -116,28 +127,68 @@ export default function OperatorOverviewPage() {
             Monitor assigned companies and evaluate performance metrics for each operator in the network.
           </p>
         </div>
-        <div className="w-full md:w-80 relative z-10">
-          <Select
-            aria-label="Select Operator"
+        <div className="w-full md:w-80 relative z-20">
+          <Autocomplete
             label="Selected Operator"
             labelPlacement="outside"
-            placeholder="Choose an operator"
-            selectedKeys={selectedOperatorId ? [selectedOperatorId] : []}
-            onSelectionChange={(keys: any) => setSelectedOperatorId(Array.from(keys)[0] as string)}
-            classNames={{
-              trigger: "bg-content1/60 backdrop-blur-md border border-default-200/40 hover:border-primary/50 transition-colors shadow-sm",
+            placeholder="Search operator by name or email..."
+            selectedKey={selectedOperatorId || null}
+            inputValue={operatorSearchInput}
+            onInputChange={(val) => setOperatorSearchInput(val)}
+            onSelectionChange={(key) => {
+              const nextId = String(key || "");
+              if (nextId) {
+                setSelectedOperatorId(nextId);
+                const selected = operatorOptions.find((opt: any) => opt.id === nextId);
+                if (selected) setOperatorSearchInput(selected.name);
+              }
             }}
-            startContent={<FiUser className="text-primary mr-1" />}
+            startContent={<FiUser className="text-obaol-500 text-base mr-1 shrink-0" />}
+            allowsCustomValue={false}
+            classNames={{
+              base: "w-full",
+            }}
+            inputProps={{
+              classNames: {
+                inputWrapper: "bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:border-obaol-500/50 transition-all rounded-2xl h-11",
+              },
+            }}
+            popoverProps={{
+              placement: "bottom-end",
+              shouldFlip: true,
+              offset: 8,
+              classNames: {
+                content: "p-2 bg-content1/95 backdrop-blur-xl border border-divider shadow-2xl rounded-2xl max-h-[340px] min-w-[300px]",
+              },
+            }}
+            listboxProps={{
+              emptyContent: "No operators found matching your search",
+              itemClasses: {
+                base: "py-2.5 px-3.5 my-1 rounded-xl transition-all data-[hover=true]:bg-default-100 data-[selected=true]:bg-obaol-500/15 data-[selected=true]:text-obaol-700 dark:data-[selected=true]:text-obaol-300",
+              },
+            }}
           >
             {operatorOptions.map((opt: any) => (
-              <SelectItem key={opt.id} textValue={opt.name}>
-                <div className="flex flex-col py-1">
-                  <span className="text-sm font-medium">{opt.name}</span>
-                  <span className="text-tiny text-default-400">ID: {opt.id.slice(-8)}</span>
+              <AutocompleteItem
+                key={opt.id}
+                textValue={`${opt.name} ${opt.email || ""} ${opt.id}`}
+                className="py-2.5 px-3.5 rounded-xl my-1 transition-colors hover:bg-default-100 cursor-pointer"
+              >
+                <div className="flex items-center gap-3 py-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-obaol-500/10 border border-obaol-500/20 text-obaol-600 dark:text-obaol-300 flex items-center justify-center font-bold text-xs shrink-0">
+                    {(opt.name || "O").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <span className="font-semibold text-sm text-foreground leading-snug truncate">{opt.name}</span>
+                    <div className="flex items-center gap-2 text-xs text-default-500 font-normal leading-normal">
+                      <span className="truncate">{opt.email || "No email"}</span>
+                      <span className="text-[10px] text-default-400 font-mono shrink-0">ID: {opt.id.slice(-8)}</span>
+                    </div>
+                  </div>
                 </div>
-              </SelectItem>
+              </AutocompleteItem>
             ))}
-          </Select>
+          </Autocomplete>
         </div>
       </div>
 

@@ -1,6 +1,17 @@
-export default function Title({ title }: { title: string }) {
+type TitleProps = {
+  title: string;
+  visuallyHidden?: boolean;
+};
+
+export default function Title({ title, visuallyHidden = false }: TitleProps) {
   return (
-    <h1 className="font-bold text-[22px] md:text-[44px] text-foreground tracking-tight">
+    <h1
+      className={
+        visuallyHidden
+          ? "sr-only"
+          : "font-bold text-[22px] md:text-[44px] text-foreground tracking-tight"
+      }
+    >
       {title}
     </h1>
   );

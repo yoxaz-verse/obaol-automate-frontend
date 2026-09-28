@@ -366,7 +366,7 @@ export default function WarehouseRentPage() {
               <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(207,152,60,0.8)]" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Operations_Terminal</span>
             </motion.div>
-            <Title title="Warehouse Contact Directory" />
+            <Title title="Warehouse Contact Directory" visuallyHidden />
             <p className="text-sm text-default-400 max-w-xl">
               Contact warehouse operators directly for rental coordination. Booking automation remains visible as coming soon.
             </p>

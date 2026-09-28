@@ -15,20 +15,20 @@ interface InsightCardProps {
 
 const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, footer }) => {
     return (
-        <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-lg hover:db-panel transition-colors">
-            <CardBody className="gap-4 p-5">
+        <Card className="border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md bg-content1 backdrop-blur-lg transition-all rounded-2xl">
+            <CardBody className="gap-3.5 p-5">
                 <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-1">
-                        <span className="text-default-500 text-xs font-semibold uppercase tracking-wider">{title}</span>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold tracking-tight text-foreground">{metric}</span>
+                        <span className="text-default-500 text-[11px] font-bold uppercase tracking-wider">{title}</span>
+                        <div className="flex items-baseline gap-2 mt-0.5">
+                            <span className="text-3xl font-black tracking-tight text-foreground">{metric}</span>
                             {trend && (
                                 <Chip
                                     color={trend.isPositive ? "success" : "danger"}
                                     variant="flat"
                                     size="sm"
                                     classNames={{
-                                        base: "h-5 px-1",
+                                        base: "h-5 px-1.5 rounded-lg",
                                         content: "text-[10px] font-bold"
                                     }}
                                 >
@@ -38,13 +38,13 @@ const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, f
                         </div>
                     </div>
                     {icon && (
-                        <div className="p-2 db-inset rounded-lg text-default-500 border db-border-subtle">
+                        <div className="p-2.5 bg-obaol-500/10 text-obaol-600 dark:text-obaol-400 rounded-xl border border-obaol-500/20 shrink-0">
                             {icon}
                         </div>
                     )}
                 </div>
 
-                {footer && <div className="pt-2">{footer}</div>}
+                {footer && <div className="pt-2 border-t border-default-100 dark:border-white/5">{footer}</div>}
             </CardBody>
         </Card>
     );

@@ -481,7 +481,7 @@ export default function ExternalOrderCreatePage() {
 
   return (
     <section className="pb-20">
-      <Title title="Create External Order" />
+      <Title title="Create External Order" visuallyHidden />
       
       <div className="w-full px-4 md:w-[96%] max-w-[1400px] mx-auto flex flex-col gap-10">
         <motion.div 

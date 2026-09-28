@@ -39,7 +39,7 @@ export default function ExternalOrdersPage() {
 
     return (
         <section className="">
-            <Title title="External Orders" />
+            <Title title="External Orders" visuallyHidden />
 
             <QueryComponent
                 api={apiRoutes.orders.getAll}

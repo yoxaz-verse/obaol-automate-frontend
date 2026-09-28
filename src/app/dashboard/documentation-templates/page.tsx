@@ -218,7 +218,7 @@ export default function DocumentationTemplatesPage() {
 
   return (
     <section>
-      <Title title="Documentation Templates" />
+      <Title title="Documentation Templates" visuallyHidden />
       <div className="mx-2 md:mx-6 mb-6 flex flex-col gap-4">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-3">
           <div className="flex flex-wrap items-center gap-3">

@@ -41,7 +41,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                 }
             }}
         >
-            <Card className="h-full db-panel border db-border-subtle shadow-none overflow-hidden group rounded-[2rem] transition-all duration-500 hover:border-obaol-500/30">
+            <Card className="h-full bg-content1 border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md overflow-hidden group rounded-[2rem] transition-all duration-300 hover:border-obaol-500/40">
                 <CardHeader className="flex flex-col items-start px-6 pt-6 pb-2 gap-3">
                     <div className="flex flex-row justify-between w-full items-center gap-4">
                         <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full ${
@@ -95,7 +95,7 @@ const EnquiryCard: React.FC<EnquiryCardProps> = ({ data, canViewClientIdentity =
                     </div>}
 
                     {/* Financial Data Block - High Density */}
-                    <div className="db-inset border db-border-subtle rounded-2xl p-4 space-y-4">
+                    <div className="bg-default-100/70 dark:bg-white/[0.04] border border-slate-200/70 dark:border-white/10 rounded-2xl p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[8px] font-black uppercase tracking-widest db-muted">Target Rate</span>

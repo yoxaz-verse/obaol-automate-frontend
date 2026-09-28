@@ -31,18 +31,18 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ data }) => {
     };
 
     const StatCard = ({ title, value, icon, color, subtext }: any) => (
-        <Card className="border db-panel rounded-xl shadow-none">
-            <CardBody className="flex flex-row items-center justify-between p-3 sm:p-4 px-3 sm:px-5">
+        <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 rounded-2xl shadow-sm hover:shadow-md transition-all">
+            <CardBody className="flex flex-row items-center justify-between p-4 px-5">
                 <div className="min-w-0 flex-1">
-                    <p className="db-muted text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1 truncate">
+                    <p className="text-default-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">
                         {title}
                     </p>
-                    <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
-                        <h3 className="text-xl sm:text-2xl font-bold text-foreground">{value}</h3>
-                        {subtext && <span className="text-[10px] sm:text-xs text-success-500 font-medium truncate">{subtext}</span>}
+                    <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+                        <h3 className="text-xl sm:text-2xl font-black text-foreground">{value}</h3>
+                        {subtext && <span className="text-[10px] sm:text-xs text-success-600 dark:text-success-400 font-bold truncate">{subtext}</span>}
                     </div>
                 </div>
-                <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0 ml-2 ${toneByKey[color] || toneByKey.primary}`}>
+                <div className={`p-2.5 sm:p-3 rounded-xl flex-shrink-0 ml-2 border border-slate-200/50 dark:border-white/10 ${toneByKey[color] || toneByKey.primary}`}>
                     {icon}
                 </div>
             </CardBody>

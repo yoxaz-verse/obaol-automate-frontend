@@ -225,3 +225,15 @@ test("variant rate wizard Commodity Directory CTA opens Commodity Directory", ()
   assert.equal(wizard.includes('router.push("/dashboard/catalog")'), true);
   assert.equal(wizard.includes('onClick={() => router.push("/dashboard/product")}'), false);
 });
+
+test("catalog grid cards respond to their container without compressing controls", () => {
+  const variantRate = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const globals = read("../src/app/globals.css");
+
+  assert.equal(variantRate.includes('viewMode === "grid"\n                          ? "catalog-responsive-grid"'), true);
+  assert.equal(variantRate.includes("catalog-card-compact-actions"), true);
+  assert.equal(variantRate.includes("More options for"), true);
+  assert.equal(globals.includes("repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr))"), true);
+  assert.equal(globals.includes("@container catalog-card (max-width: 15rem)"), true);
+  assert.equal(globals.includes(".catalog-card-standard-actions"), true);
+});

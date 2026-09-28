@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState, useTransition } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
@@ -26,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const { user } = useContext(AuthContext);
     const [, startTransition] = useTransition();
     const [pendingLink, setPendingLink] = useState<string | null>(null);
+    const [openAdminGroup, setOpenAdminGroup] = useState<string | null>(null);
 
     const filteredOptions = getRoleFilteredSidebarOptions(
         sidebarOptions as any[],
@@ -35,6 +36,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     );
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
     const sidebarSections = getDashboardSidebarSections(filteredOptions as any[]);
+    const activeAdminGroup = sidebarSections
+        .find((section) => section.label === "Operations/Admin")
+        ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
 
     const { play } = useSoundEffect();
 
@@ -78,6 +82,52 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
             setPendingLink(null);
         }
     }, [pathname, pendingLink]);
+
+    React.useEffect(() => {
+        if (activeAdminGroup) setOpenAdminGroup(activeAdminGroup.label);
+    }, [activeAdminGroup?.label]);
+
+    const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
+        const isDash = opt.link === "/dashboard";
+        const isActive = isDash ? pathname === "/dashboard" : pathname.startsWith(opt.link);
+        const badgeCount = Number(dotMap[opt.link] || 0);
+
+        return (
+            <button
+                key={opt.name}
+                onClick={(e) => handleOptionClick(e, opt.link)}
+                className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
+                    isActive
+                    ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
+                    : "text-default-500 hover:text-foreground hover:db-inset"
+                } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
+                aria-disabled={isOnboardingLocked}
+            >
+                {isActive && (
+                    <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
+                )}
+                <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : "group-hover:scale-110 group-hover:text-obaol-500"}`}>
+                    {opt.icon}
+                </div>
+                {!isCollapsed && (
+                    <span className="text-[11px] tracking-[0.15em] uppercase font-black tabular-nums truncate">
+                        {opt.name}
+                    </span>
+                )}
+                {!isCollapsed && badgeCount > 0 && (
+                    <span className="ml-auto px-2 py-0.5 rounded-full bg-danger-500 text-white text-[9px] font-black tracking-widest">
+                        {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                )}
+                {isCollapsed && badgeCount > 0 && (
+                    <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                )}
+                {isCollapsed && isActive && (
+                    <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-500 shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
+                )}
+            </button>
+        );
+    };
 
     return (
         <div
@@ -142,47 +192,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                                 </div>
                             )}
                             <div className="space-y-0.5">
-                                {sectionOptions.map((opt) => {
-                                    const isDash = opt.link === "/dashboard";
-                                    const isActive = isDash ? pathname === "/dashboard" : pathname.startsWith(opt.link);
-                                    const badgeCount = Number(dotMap[opt.link] || 0);
-
+                                {!isCollapsed && section.groups ? section.groups.map((group) => {
+                                    const isOpen = openAdminGroup === group.label;
+                                    const hasActiveLink = group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`));
                                     return (
-                                        <button
-                                            key={opt.name}
-                                            onClick={(e) => handleOptionClick(e, opt.link)}
-                                            className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
-                                                isActive 
-                                                ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
-                                                : "text-default-500 hover:text-foreground hover:db-inset"
-                                            } ${isCollapsed ? "justify-center" : "px-3 gap-3"} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
-                                            aria-disabled={isOnboardingLocked}
-                                        >
-                                            {isActive && (
-                                                <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
+                                        <div key={group.label} className="space-y-0.5">
+                                            <button
+                                                type="button"
+                                                aria-expanded={isOpen}
+                                                onClick={() => setOpenAdminGroup(isOpen ? null : group.label)}
+                                                className={`w-full h-9 px-3 flex items-center justify-between rounded-xl text-[9px] font-black uppercase tracking-[0.18em] transition-colors ${hasActiveLink ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 hover:text-foreground hover:db-inset"}`}
+                                            >
+                                                <span className="truncate">{group.label}</span>
+                                                <FiChevronDown size={13} className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                                            </button>
+                                            {isOpen && (
+                                                <div className="space-y-0.5 border-l border-default-200/70 dark:border-white/10 ml-3 pl-1">
+                                                    {group.links.map((link) => optionMap.get(link)).filter(Boolean).map((opt) => renderOption(opt!, true))}
+                                                </div>
                                             )}
-                                            <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : "group-hover:scale-110 group-hover:text-obaol-500"}`}>
-                                                {opt.icon}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <span className="text-[11px] tracking-[0.15em] uppercase font-black tabular-nums truncate">
-                                                    {opt.name}
-                                                </span>
-                                            )}
-                                            {!isCollapsed && badgeCount > 0 && (
-                                               <span className="ml-auto px-2 py-0.5 rounded-full bg-danger-500 text-white text-[9px] font-black tracking-widest">
-                                                   {badgeCount > 99 ? "99+" : badgeCount}
-                                               </span>
-                                            )}
-                                            {isCollapsed && badgeCount > 0 && (
-                                               <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                                            )}
-                                            {isCollapsed && isActive && (
-                                               <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-500 shadow-[0_0_8px_rgba(207,152,60,0.6)]" />
-                                            )}
-                                        </button>
+                                        </div>
                                     );
-                                })}
+                                }) : sectionOptions.map((opt) => renderOption(opt))}
                             </div>
                         </div>
                     );

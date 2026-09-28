@@ -308,7 +308,7 @@ export default function WarehouseLocationPage() {
     <>
       <section className="w-full min-h-screen p-6 md:p-10 text-foreground">
       <div className="flex items-center justify-between mb-10 gap-4 flex-wrap">
-        <Title title="Warehouse Location" />
+        <Title title="Warehouse Location" visuallyHidden />
         <Button 
           variant="flat" 
           className="db-subtle text-foreground font-bold uppercase tracking-widest text-[10px] rounded-xl px-6 h-10 border db-border-subtle"

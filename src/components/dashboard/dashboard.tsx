@@ -334,7 +334,7 @@ const Dashboard: NextPage = () => {
   const executiveError = dashboardSummaryQuery.isError;
 
   const renderActionCenter = () => (
-    <Card className="lg:col-span-2 border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem]">
+    <Card className="lg:col-span-2 border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm rounded-[2rem]">
       <CardHeader className="px-8 pt-8">
         <div className="flex flex-col gap-1">
           <h4 className="font-bold text-foreground">Task Overview</h4>
@@ -426,7 +426,7 @@ const Dashboard: NextPage = () => {
   );
 
   const renderRecentActivity = () => (
-    <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem]">
+    <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm rounded-[2rem]">
       <CardHeader className="px-8 pt-8">
         <h4 className="font-bold text-foreground">Recent Activity</h4>
       </CardHeader>
@@ -995,7 +995,7 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-8">
-      <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2.5rem] overflow-hidden">
+      <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm rounded-[2.5rem] overflow-hidden">
         <CardBody className="p-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="space-y-4 flex-1">

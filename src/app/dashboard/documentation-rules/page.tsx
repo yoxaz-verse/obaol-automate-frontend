@@ -178,7 +178,7 @@ export default function DocumentationRulesPage() {
 
   return (
     <section className="">
-      <Title title="Documentation Rules" />
+      <Title title="Documentation Rules" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6">
         <div className="flex flex-col gap-4">

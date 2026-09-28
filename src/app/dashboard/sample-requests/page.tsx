@@ -84,7 +84,7 @@ export default function SampleRequestsPage() {
 
   return (
     <section className="pb-20">
-      <Title title="Sample Requests" />
+      <Title title="Sample Requests" visuallyHidden />
 
       <motion.div 
         initial={{ opacity: 0, y: -30 }}

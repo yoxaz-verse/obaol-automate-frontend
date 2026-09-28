@@ -54,7 +54,7 @@ export default function EnquiryPage() {
 
   return (
     <section className="text-foreground">
-      <Title title="Enquiry" />
+      <Title title="Enquiry" visuallyHidden />
 
 
 

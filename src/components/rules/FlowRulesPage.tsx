@@ -676,7 +676,7 @@ export default function FlowRulesPage({ defaultFlowType = "TRADE_ENQUIRY" }: { d
 
   return (
     <section className="">
-      <Title title="Flow Rules" />
+      <Title title="Flow Rules" visuallyHidden />
 
       <div className="mx-2 md:mx-6 mb-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
         <div className="flex flex-col gap-4">

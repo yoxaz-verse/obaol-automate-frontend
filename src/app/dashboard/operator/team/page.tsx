@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, CardBody, Input, Skeleton } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
@@ -8,6 +8,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { getData, postData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
+import AdminOperatorPicker from "@/components/dashboard/operator/AdminOperatorPicker";
 
 type TeamRow = {
   operatorId: string;
@@ -64,34 +65,6 @@ export default function OperatorTeamPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const operatorsQuery = useQuery({
-    queryKey: ["operator-team", "operators", isAdmin],
-    queryFn: async () => getData(apiRoutes.operator.getAll, { page: 1, limit: 200, sort: "name:asc" }),
-    enabled: isAdmin,
-    refetchOnWindowFocus: false,
-  });
-
-  const operatorOptions = useMemo(() => {
-    const rows = extractList(operatorsQuery.data);
-    return rows
-      .map((row: any) => ({
-        id: toId(row?._id || row?.id),
-        name: toName(row?.name),
-      }))
-      .filter((row: any) => Boolean(row.id));
-  }, [operatorsQuery.data]);
-
-  useEffect(() => {
-    if (!isAdmin) return;
-    const validIds = new Set(operatorOptions.map((option: any) => String(option.id)));
-    if (operatorOptions.length === 0) {
-      if (selectedOperatorId) setSelectedOperatorId("");
-      return;
-    }
-    if (selectedOperatorId && validIds.has(selectedOperatorId)) return;
-    setSelectedOperatorId(operatorOptions[0].id);
-  }, [operatorOptions, isAdmin, selfOperatorId, selectedOperatorId]);
 
   const operatorId = isAdmin ? selectedOperatorId : selfOperatorId;
 
@@ -277,7 +250,7 @@ export default function OperatorTeamPage() {
     );
   };
 
-  if ((isAdmin && operatorsQuery.isLoading) || teamQuery.isLoading) {
+  if (teamQuery.isLoading) {
     return (
       <div className="w-full p-4 md:p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -311,18 +284,6 @@ export default function OperatorTeamPage() {
     );
   }
 
-  if (!operatorId) {
-    return (
-      <div className="w-full p-4 md:p-6">
-        <div className="w-full rounded-xl border border-default-300/70 bg-content1 px-4 py-3 text-sm text-default-600">
-          {isAdmin && operatorOptions.length === 0
-            ? "No operators available to inspect."
-            : "Select an operator to view team data."}
-        </div>
-      </div>
-    );
-  }
-
   const isDealsLoading = dealQueries.some((query) => query.isFetching);
 
   return (
@@ -336,23 +297,21 @@ export default function OperatorTeamPage() {
         <Card className="border border-default-200/80">
           <CardBody className="gap-2">
             <p className="text-xs uppercase tracking-wide text-default-500">Select Operator</p>
-            <select
-              value={selectedOperatorId}
-              onChange={(event) => {
-                setSelectedOperatorId(String(event.target.value || ""));
+            <AdminOperatorPicker
+              selectedOperatorId={selectedOperatorId}
+              onSelectionChange={(operatorId) => {
+                setSelectedOperatorId(operatorId);
                 setPage(1);
               }}
-              className="h-10 rounded-lg border border-default-300 bg-content1 px-3 text-sm text-foreground"
-            >
-              {operatorOptions.length === 0 ? <option value="">No operators found</option> : null}
-              {operatorOptions.map((option: any) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+            />
           </CardBody>
         </Card>
+      ) : null}
+
+      {!operatorId ? (
+        <div className="w-full rounded-xl border border-default-300/70 bg-content1 px-4 py-3 text-sm text-default-600">
+          Select an operator to view team data.
+        </div>
       ) : null}
 
       <Card className="border border-default-200/80">

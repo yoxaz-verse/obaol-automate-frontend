@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Input, Card, CardBody, CardHeader } from "@nextui-org/react";
-import { IoArrowBack, IoMail, IoLockClosed, IoCheckmarkCircle } from "react-icons/io5";
+import { IoArrowBack, IoMail, IoLockClosed } from "react-icons/io5";
 import { postData } from "@/core/api/apiHandler";
 import { showToastMessage } from "@/utils/utils";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { InputOtp } from "@nextui-org/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSignInPathForRole } from "@/utils/authRoleRoutes";
 
-type ForgotPasswordStep = "REQUEST" | "VERIFY" | "RESET" | "SUCCESS";
+type ForgotPasswordStep = "REQUEST" | "VERIFY" | "RESET";
 
 interface IForgotPasswordProps {
     role: string;
@@ -64,7 +64,7 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                 newPassword
             }, {});
             showToastMessage({ type: "success", message: "Password reset successful", position: "top-right" });
-            setStep("SUCCESS");
+            router.replace(getSignInPathForRole(role));
         } catch (error: any) {
             showToastMessage({
                 type: "error",
@@ -95,18 +95,16 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
 
                 <CardHeader className="flex flex-col items-center pb-2 pt-8 relative z-10">
                     <div className="flex w-full justify-between items-center px-4 mb-4">
-                        {step !== "SUCCESS" && (
-                            <Button
-                                isIconOnly
-                                variant="flat"
-                                radius="full"
-                                size="sm"
-                                className="border border-divider bg-content2/50 backdrop-blur-sm transition-all hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300"
-                                onClick={() => step === "REQUEST" ? router.push(getSignInPathForRole(role)) : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
-                            >
-                                <IoArrowBack className="text-base" />
-                            </Button>
-                        )}
+                        <Button
+                            isIconOnly
+                            variant="flat"
+                            radius="full"
+                            size="sm"
+                            className="border border-divider bg-content2/50 backdrop-blur-sm transition-all hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300"
+                            onClick={() => step === "REQUEST" ? router.push(getSignInPathForRole(role)) : setStep(step === "VERIFY" ? "REQUEST" : "VERIFY")}
+                        >
+                            <IoArrowBack className="text-base" />
+                        </Button>
                         <div className="flex flex-col items-center flex-1">
                             <h4 className="text-xl font-bold uppercase tracking-tight text-foreground md:text-2xl">
                                 Forgot <span className="text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 dark:text-obaol-300">Password</span>
@@ -265,34 +263,6 @@ const ForgotPasswordComponent = ({ role }: IForgotPasswordProps) => {
                             </motion.form>
                         )}
 
-                        {step === "SUCCESS" && (
-                            <motion.div
-                                key="success"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="flex flex-col items-center py-6 space-y-8 text-center"
-                            >
-                                <div className="relative">
-                                   <div className="absolute inset-0 bg-success-500 blur-[30px] opacity-20 animate-pulse" />
-                                   <div className="w-24 h-24 bg-success-500/10 rounded-full flex items-center justify-center border-2 border-success-500/30 relative">
-                                       <IoCheckmarkCircle className="text-6xl text-success-500" />
-                                   </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <h4 className="text-2xl font-bold uppercase tracking-tight text-foreground">Password <span className="text-success-500">Reset</span></h4>
-                                    <p className="text-[11px] font-bold text-default-500 uppercase tracking-widest leading-relaxed">
-                                        Your password has been updated. <br/> You can sign in now.
-                                    </p>
-                                </div>
-                                <Button
-                                    color="warning"
-                                    className="h-12 w-full rounded-2xl bg-obaol-500 text-xs font-bold uppercase tracking-[0.2em] text-obaol-950 shadow-lg shadow-obaol-500/10 transition-all hover:scale-[1.02] hover:bg-obaol-400 active:scale-[0.98]"
-                                    onClick={() => router.push(getSignInPathForRole(role))}
-                                >
-                                    Back to Sign In
-                                </Button>
-                            </motion.div>
-                        )}
                     </AnimatePresence>
                 </CardBody>
                 

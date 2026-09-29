@@ -19,4 +19,6 @@ test("associate and unknown public roles use the Associate flow", () => {
   assert.equal(getPasswordResetRole("Associate"), "Associate");
   assert.equal(getPasswordResetRole("Customer"), "Associate");
   assert.equal(getSignInPathForRole("Associate"), "/auth/associate");
+  assert.equal(getSignInPathForRole("Customer"), "/auth/associate");
+  assert.equal(getSignInPathForRole("unexpected-role"), "/auth/associate");
 });

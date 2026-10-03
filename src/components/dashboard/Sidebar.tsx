@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import Image from "next/image";
 import { Button, Tooltip } from "@nextui-org/react";
 import { useSoundEffect } from "@/context/SoundContext";
@@ -35,7 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         user?.companyInterests || []
     );
     const optionMap = new Map(filteredOptions.map((option) => [option.link, option]));
-    const sidebarSections = getDashboardSidebarSections(filteredOptions as any[]);
+    const sidebarSections = getDashboardSidebarSections(
+        filteredOptions as any[],
+        String(user?.role || ""),
+        user?.tradeMode,
+        user?.companyInterests || []
+    );
     const activeAdminGroup = sidebarSections
         .find((section) => section.label === "Operations/Admin")
         ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
@@ -83,13 +89,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
         }
     }, [pathname, pendingLink]);
 
+    const activeAdminGroupLabel = activeAdminGroup?.label;
     React.useEffect(() => {
-        if (activeAdminGroup) setOpenAdminGroup(activeAdminGroup.label);
-    }, [activeAdminGroup?.label]);
+        if (activeAdminGroupLabel) setOpenAdminGroup(activeAdminGroupLabel);
+    }, [activeAdminGroupLabel]);
 
     const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
-        const isDash = opt.link === "/dashboard";
-        const isActive = isDash ? pathname === "/dashboard" : pathname.startsWith(opt.link);
+        const isActive = isDashboardRouteActive(pathname, opt.link);
         const badgeCount = Number(dotMap[opt.link] || 0);
 
         return (
@@ -102,6 +108,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                     : "text-default-500 hover:text-foreground hover:db-inset"
                 } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
                 aria-disabled={isOnboardingLocked}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={opt.name}
             >
                 {isActive && (
                     <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
@@ -132,6 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     return (
         <div
             data-sidebar
+            aria-label="Workspace navigation"
             className={`fixed left-0 top-0 h-full min-h-0 z-50 transition-all duration-500 ease-in-out db-shell border-r db-border-subtle hidden md:flex flex-col backdrop-blur-[22px] ${isCollapsed ? "w-[84px]" : "w-[280px]"}`}
         >
             {/* Structural Accents */}
@@ -194,7 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                             <div className="space-y-0.5">
                                 {!isCollapsed && section.groups ? section.groups.map((group) => {
                                     const isOpen = openAdminGroup === group.label;
-                                    const hasActiveLink = group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`));
+                                    const hasActiveLink = group.links.some((link) => isDashboardRouteActive(pathname, link));
                                     return (
                                         <div key={group.label} className="space-y-0.5">
                                             <button

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useContext } from "react";
+import dynamic from "next/dynamic";
 import { Input, Chip, Tab, Tabs, Pagination } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { FiSearch, FiX, FiFolder, FiPackage, FiLayers, FiChevronRight, FiGrid } from "react-icons/fi";
@@ -10,12 +11,13 @@ import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import CatalogBreadcrumbs from "@/components/dashboard/Catalog/catalog-breadcrumbs";
 import CategoryGrid from "@/components/dashboard/Catalog/category-grid";
 import AuthContext from "@/context/AuthContext";
-import AddModal from "@/components/CurdTable/add-model";
-import EditModal from "@/components/CurdTable/edit-model";
-import UserDeleteModal from "@/components/CurdTable/delete";
 import { motion, AnimatePresence } from "framer-motion";
 import { getClassificationOptions, getClassificationTheme, resolveActiveClassificationTheme } from "@/utils/classificationTheme";
 import { getData } from "@/core/api/apiHandler";
+
+const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
+const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
+const UserDeleteModal = dynamic(() => import("@/components/CurdTable/delete"), { ssr: false });
 
 const CATALOG_PAGE_SIZE = 24;
 const CATALOG_SEARCH_PAGE_SIZE = 12;

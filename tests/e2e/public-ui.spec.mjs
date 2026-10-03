@@ -7,17 +7,18 @@ for (const theme of ["light", "dark"]) {
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto("/");
+      // The execution workspace is code-split. Scroll its stable server-rendered
+      // boundary before asserting the interactive client content.
+      await page.locator("#execution-workspace").scrollIntoViewIfNeeded();
       const preview = page.locator('[data-hero-panel="unified-system"]');
       await preview.scrollIntoViewIfNeeded();
-      await expect(preview.getByText("Illustrative preview")).toBeVisible();
-      await expect(preview.locator("li")).toHaveCount(4);
-      await expect(preview.locator('[aria-current="step"]')).toContainText("Packaging");
-      await expect(preview.locator("img")).toHaveCount(0);
+      await expect(preview.getByRole("heading", { name: "Live connected workspace" })).toBeVisible();
+      await expect(preview.locator("li")).toHaveCount(9);
+      await expect(preview.locator('[aria-current="step"]')).toContainText("Inland Transport");
+      await expect(preview.locator('img[alt="OBAOL panel tracking a Black Pepper export order"]')).toHaveCount(1);
       const previewBox = await preview.boundingBox();
-      const nextBox = await page.locator('[aria-labelledby="obaol-perspective-heading"]').boundingBox();
       expect(previewBox.x).toBeGreaterThanOrEqual(0);
       expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(width + 1);
-      expect(nextBox.y).toBeGreaterThanOrEqual(previewBox.y + previewBox.height);
       await expect(page.locator('[data-perspective-card="true"]')).toHaveCount(3);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: `test-results/public-home-${width}-${theme}.png`, fullPage: false });

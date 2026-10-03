@@ -40,11 +40,13 @@ const emptyMetrics: FunctionMetrics = {
 export const useCompanyFunctionDashboard = ({
   companyId,
   isAdmin,
+  enabled = true,
 }: {
   companyId?: string;
   isAdmin: boolean;
+  enabled?: boolean;
 }) => {
-  const canLoad = Boolean(companyId);
+  const canLoad = enabled && Boolean(companyId);
 
   const companyQuery = useQuery({
     queryKey: normalizeQueryKey("company-function-dashboard-company", { companyId }),
@@ -57,6 +59,7 @@ export const useCompanyFunctionDashboard = ({
   const functionsQuery = useQuery({
     queryKey: normalizeQueryKey("company-function-dashboard-functions"),
     queryFn: () => getData(apiRoutes.companyFunction.getAll, { page: 1, limit: 200, sort: "orderIndex:asc" }),
+    enabled: canLoad,
     staleTime: DEFAULT_STALE_TIME,
     refetchOnWindowFocus: false,
   });

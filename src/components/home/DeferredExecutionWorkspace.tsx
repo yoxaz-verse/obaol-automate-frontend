@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useInViewport } from "@/hooks/useInViewport";
 
 const UnifiedExecutionWorkspace = dynamic(
   () => import("@/components/home/UnifiedExecutionWorkspace"),
@@ -18,14 +17,9 @@ const UnifiedExecutionWorkspace = dynamic(
 
 /** Keep the sizeable interactive workspace out of the initial route chunk. */
 export default function DeferredExecutionWorkspace() {
-  const [anchorRef, shouldLoad] = useInViewport<HTMLDivElement>({
-    rootMargin: "480px 0px",
-    once: true,
-  });
-
   return (
-    <div ref={anchorRef} className="min-h-[420px]">
-      {shouldLoad ? <UnifiedExecutionWorkspace /> : null}
+    <div id="execution-workspace" className="min-h-[420px]">
+      <UnifiedExecutionWorkspace />
     </div>
   );
 }

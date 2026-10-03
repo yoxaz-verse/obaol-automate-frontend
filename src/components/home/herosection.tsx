@@ -8,30 +8,10 @@ import { useRouter } from "next/navigation";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 import { FiArrowRight } from "react-icons/fi";
 import { useAdaptiveMotion } from "@/hooks/useAdaptiveMotion";
+import { usePageVisibility } from "@/hooks/usePageVisibility";
 
 /* ================= ANIMATION VARIANTS ================= */
 /* The execution story shares one active stage across copy, image, and controls. */
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
 
 const OBAOL_GOLD = "#CF983C";
 
@@ -319,6 +299,7 @@ export default function HeroSection() {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const shouldReduceMotion = prefersReducedMotion || adaptiveMotion.shouldReduceMotion;
   const allowDecorativeMotion = adaptiveMotion.allowDecorativeMotion;
+  const isPageVisible = usePageVisibility();
   const allowPointerEffects = adaptiveMotion.allowPointerEffects;
   const [isNavigating, setIsNavigating] = useState(false);
   const [isSystemActive, setIsSystemActive] = useState(false);
@@ -360,14 +341,14 @@ export default function HeroSection() {
   }, [allowPointerEffects, mouseX, mouseY]);
 
   useEffect(() => {
-    if (shouldReduceMotion || isStageControlActive) return;
+    if (shouldReduceMotion || isStageControlActive || !isPageVisible) return;
 
     const timeoutId = window.setTimeout(() => {
       setActiveStageIndex((current) => (current + 1) % HERO_STAGES.length);
     }, HERO_ROTATION_INTERVAL);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeStageIndex, isStageControlActive, shouldReduceMotion]);
+  }, [activeStageIndex, isPageVisible, isStageControlActive, shouldReduceMotion]);
 
   const activateSystem = () => {
     if (allowDecorativeMotion) setIsSystemActive(true);
@@ -409,7 +390,7 @@ export default function HeroSection() {
 
       {/* ================= SYSTEM / AGRO HUD OVERLAY ================= */}
       <AnimatePresence>
-        {allowDecorativeMotion && isSystemActive && (
+        {allowDecorativeMotion && isPageVisible && isSystemActive && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -443,7 +424,7 @@ export default function HeroSection() {
           </motion.div>
         )}
 
-        {allowDecorativeMotion && isAgroActive && (
+        {allowDecorativeMotion && isPageVisible && isAgroActive && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -469,14 +450,14 @@ export default function HeroSection() {
           <motion.path
             initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={allowDecorativeMotion ? { duration: 3, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
+            transition={allowDecorativeMotion && isPageVisible ? { duration: 3, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
             d="M 12% 15% Q 30% 35% 45% 45% T 88% 85%"
             stroke={OBAOL_GOLD} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
           />
           <motion.path
             initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={allowDecorativeMotion ? { duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
+            transition={allowDecorativeMotion && isPageVisible ? { duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" } : { duration: 0 }}
             d="M 88% 15% Q 70% 35% 55% 50% T 12% 85%"
             stroke={OBAOL_GOLD} strokeWidth={isAgroActive ? "1" : "0.5"} fill="none" strokeDasharray="4 4"
           />
@@ -487,31 +468,20 @@ export default function HeroSection() {
       {/* Removed absolute positioned nodes to consolidate them in the main content flow */}
 
       {/* ================= MAIN CONTENT ================= */}
-      <motion.div
+      <div
         className="public-layout-container relative z-30 container mx-auto flex w-full flex-col items-start px-6 py-12 text-left sm:px-12 md:py-16 lg:py-8"
       >
-        <motion.div
-          initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
-          variants={shouldReduceMotion ? undefined : containerVariants}
-          className="w-full max-w-6xl xl:max-w-7xl"
-        >
+        <div className="w-full max-w-6xl xl:max-w-7xl">
           <div className="w-full gap-8 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-4 xl:gap-6">
               <div
                 data-sticky-copy="true"
                 className="w-full space-y-6 lg:sticky lg:top-28 lg:self-start lg:space-y-5 lg:pr-3"
               >
-                <motion.p
-                  variants={itemVariants}
-                  className="mb-2 text-[8px] font-bold uppercase tracking-[0.45em] text-obaol-700 dark:text-obaol-300 sm:text-xs"
-                >
+                <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.45em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
                   The Agro Execution System for Agro Trade
-                </motion.p>
+                </p>
 
-                <motion.h1
-                  initial={shouldReduceMotion ? false : "hidden"}
-                  animate="visible"
-                  variants={shouldReduceMotion ? undefined : itemVariants}
+                <h1
                   className="inline-block w-max max-w-none overflow-visible pr-8 pb-1 text-4xl sm:text-5xl md:text-6xl lg:text-[clamp(3rem,5vw,4.5rem)] font-bold tracking-[-0.03em] leading-[1.08] text-slate-950 dark:text-[#F5F1E8] cursor-pointer select-none"
                   onMouseEnter={activateSystem}
                   onMouseLeave={deactivateSystem}
@@ -520,17 +490,14 @@ export default function HeroSection() {
                   <span className="-mb-[0.12em] inline-block bg-gradient-to-r from-obaol-700 via-obaol-600 to-obaol-500 bg-clip-text pr-[0.12em] pb-[0.12em] text-transparent dark:from-obaol-200 dark:via-obaol-400 dark:to-obaol-500">
                     Ecosystem
                   </span>
-                </motion.h1>
+                </h1>
 
-                <motion.div variants={itemVariants} className="flex items-center gap-3 opacity-30">
+                <div className="flex items-center gap-3 opacity-30">
                   <span className="text-xs md:text-lg font-medium italic">for</span>
                   <div className="h-[1px] w-20 md:w-28 bg-foreground" />
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={shouldReduceMotion ? false : "hidden"}
-                  animate="visible"
-                  variants={shouldReduceMotion ? undefined : itemVariants}
+                <div
                   className="w-full py-1"
                   onMouseEnter={activateAgro}
                   onMouseLeave={deactivateAgro}
@@ -544,12 +511,9 @@ export default function HeroSection() {
                       {activeStage.message}
                     </p>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  variants={itemVariants}
-                  className="pt-2 md:pt-5 max-w-3xl space-y-6 md:space-y-8"
-                >
+                <div className="pt-2 md:pt-5 max-w-3xl space-y-6 md:space-y-8">
                   <p className="text-base sm:text-lg md:text-xl text-foreground/70 font-medium leading-relaxed">
                     Plan procurement, manage logistics, run verification, and move orders in one agro execution system.
                     <span className="text-foreground font-bold"> Built for real B2B agro trade operations.</span>
@@ -584,14 +548,11 @@ export default function HeroSection() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               </div>
 
               {/* The original execution path stays in place; only one stage reveals its photo. */}
-              <motion.div
-                variants={itemVariants}
-                className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:pb-20"
-              >
+              <div className="relative mt-10 w-full sm:mt-14 lg:mt-0 lg:pb-20">
                 <div
                   data-hero-panel="execution-flow"
                   aria-label="OBAOL's ten-stage execution flow"
@@ -661,11 +622,11 @@ export default function HeroSection() {
                     })}
                   </div>
                 </div>
-              </motion.div>
+              </div>
           </div>
 
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Dynamic Cursor Light Overlay */}
       {allowPointerEffects && (

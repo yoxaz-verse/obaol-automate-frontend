@@ -1,11 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { FiArrowRight, FiCompass, FiGitBranch } from "react-icons/fi";
 import { FaShieldHalved, FaTruckFront, FaEarthAsia } from "react-icons/fa6";
 import Link from "next/link";
 import Header from "@/components/home/header";
-import HeroSection from "@/components/home/herosection";
+import HeroSection from "@/components/home/HeroSectionServer";
 import DeferredServiceShowcase from "@/components/home/DeferredServiceShowcase";
 import CTASection from "@/components/home/ctasection";
 import Footer from "@/components/home/footer";
@@ -110,12 +107,8 @@ export default function HomeContent() {
                                 color: "text-emerald-500"
                             }
                         ].map((feature, i) => (
-                            <motion.div
+                            <div
                                 key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
                                 className="group p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-content1 border border-default-200 hover:border-obaol-500/30 transition-all hover:shadow-2xl hover:shadow-obaol-500/5 public-surface-card"
                             >
                                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl ${feature.color.replace('text-', 'bg-')}/10 ${feature.color} flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500`}>
@@ -123,7 +116,7 @@ export default function HomeContent() {
                                 </div>
                                 <h3 className={`${homeTitleStyles.cardTitle} mb-3 md:mb-4`}>{feature.title}</h3>
                                 <p className="text-default-500 text-sm md:text-base leading-relaxed">{feature.desc}</p>
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -136,11 +129,8 @@ export default function HomeContent() {
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">
                     <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {intentCards.map((card, i) => (
-                            <motion.article
+                            <article
                                 key={card.href}
-                                initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
                                 className="relative group rounded-[1.75rem] md:rounded-[2.5rem] border border-default-200/80 bg-content1/90 overflow-hidden shadow-[0_24px_80px_-48px_rgba(0,0,0,0.65)] transition-all duration-500 hover:-translate-y-1 hover:border-obaol-400/50 hover:shadow-[0_28px_90px_-45px_rgba(207,152,60,0.42)] public-surface-card"
                             >
                                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-obaol-300/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -199,7 +189,7 @@ export default function HomeContent() {
                                         </span>
                                     </Link>
                                 </div>
-                            </motion.article>
+                            </article>
                         ))}
                     </div>
                 </div>

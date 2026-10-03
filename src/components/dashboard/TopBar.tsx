@@ -21,6 +21,7 @@ import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
 import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import Image from "next/image";
 import { FiBell, FiChevronDown, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
 import NotificationPanel from "./NotificationPanel";
@@ -39,6 +40,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   const [mounted, setMounted] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuReturnFocusRef = useRef<HTMLElement | null>(null);
   const { soundEnabled, setSoundEnabled } = useSoundEffect();
   const [currentTime, setCurrentTime] = useState("");
 
@@ -93,6 +96,47 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    const openNavigation = () => {
+      mobileMenuReturnFocusRef.current = document.activeElement as HTMLElement | null;
+      setIsMobileMenuOpen(true);
+    };
+    window.addEventListener("obaol:open-navigation", openNavigation);
+    return () => window.removeEventListener("obaol:open-navigation", openNavigation);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const drawer = mobileMenuRef.current;
+    const fallbackTrigger = mobileMenuTriggerRef.current;
+    const focusable = () => Array.from(drawer?.querySelectorAll<HTMLElement>("button:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])") || []);
+    focusable()[0]?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      (mobileMenuReturnFocusRef.current || fallbackTrigger)?.focus();
+      mobileMenuReturnFocusRef.current = null;
+    };
+  }, [isMobileMenuOpen]);
+
   // Swipe-to-open / swipe-to-close gesture (ChatGPT-style)
   useEffect(() => {
     let touchStartX = 0;
@@ -139,14 +183,20 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
   );
   const pathname = usePathname();
   const optionMap = new Map(filteredOptions.map((o) => [o.link, o]));
-  const mobileSections = getDashboardSidebarSections(filteredOptions as any[]);
+  const mobileSections = getDashboardSidebarSections(
+    filteredOptions as any[],
+    String(role || ""),
+    user?.tradeMode,
+    user?.companyInterests || []
+  );
   const activeMobileAdminGroup = mobileSections
     .find((section) => section.label === "Operations/Admin")
     ?.groups?.find((group) => group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`)));
 
+  const activeMobileAdminGroupLabel = activeMobileAdminGroup?.label;
   useEffect(() => {
-    if (activeMobileAdminGroup) setOpenMobileAdminGroup(activeMobileAdminGroup.label);
-  }, [activeMobileAdminGroup?.label]);
+    if (activeMobileAdminGroupLabel) setOpenMobileAdminGroup(activeMobileAdminGroupLabel);
+  }, [activeMobileAdminGroupLabel]);
 
   return (
     <div
@@ -163,9 +213,11 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           {/* Side Drawer - Mobile only */}
           <div className="md:hidden">
             <button
+              ref={mobileMenuTriggerRef}
               aria-label="Open Menu"
               onClick={() => {
                 if (isOnboardingLocked) return;
+                mobileMenuReturnFocusRef.current = mobileMenuTriggerRef.current;
                 setIsMobileMenuOpen(true);
               }}
               className={`group flex items-center justify-center w-10 h-10 rounded-xl bg-default-100/80 hover:bg-obaol-500/10 hover:text-obaol-700 dark:hover:text-obaol-300 transition-all active:scale-95 ${isOnboardingLocked ? "opacity-50 cursor-not-allowed hover:bg-default-100/80 hover:text-current" : ""}`}
@@ -178,6 +230,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 {isMobileMenuOpen && (
                   <div className="fixed inset-0 z-[999999]">
                     <motion.div
+                      ref={mobileMenuRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Workspace navigation"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -200,7 +256,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                             <p className="text-[9px] font-bold text-obaol-700 uppercase tracking-widest dark:text-obaol-300">Supreme</p>
                           </div>
                         </div>
-                        <button onClick={() => setIsMobileMenuOpen(false)} className="touch-target rounded-full bg-default-100 flex items-center justify-center">
+                        <button aria-label="Close Menu" onClick={() => setIsMobileMenuOpen(false)} className="touch-target rounded-full bg-default-100 flex items-center justify-center">
                           <FiX size={14} />
                         </button>
                       </div>
@@ -211,7 +267,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                              <div className="space-y-1">
                                {sec.groups ? sec.groups.map((group) => {
                                  const isOpen = openMobileAdminGroup === group.label;
-                                 const hasActiveLink = group.links.some((link) => pathname === link || pathname.startsWith(`${link}/`));
+                                 const hasActiveLink = group.links.some((link) => isDashboardRouteActive(pathname, link));
                                  return (
                                    <div key={group.label} className="space-y-1">
                                      <button
@@ -229,7 +285,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                            <button
                                              key={opt.name}
                                              onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${pathname === opt.link || pathname.startsWith(`${opt.link}/`) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                             aria-current={isDashboardRouteActive(pathname, opt.link) ? "page" : undefined}
+                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                            >
                                              <span className="text-lg">{opt.icon}</span>
                                              <span className="text-sm">{opt.name}</span>
@@ -243,7 +300,8 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                    <button
                                      key={opt.name}
                                      onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                     className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${(opt.link === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(opt.link)) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                     aria-current={isDashboardRouteActive(pathname, opt.link) ? "page" : undefined}
+                                     className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                    >
                                      <span className="text-lg">{opt.icon}</span>
                                      <span className="text-sm">{opt.name}</span>

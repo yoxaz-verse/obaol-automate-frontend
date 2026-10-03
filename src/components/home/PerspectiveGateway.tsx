@@ -39,7 +39,7 @@ export default function PerspectiveGateway() {
   return (
     <section aria-labelledby="obaol-perspective-heading" className="public-section public-perspective">
       <div className="public-perspective-art" aria-hidden="true">
-        <RevealImage src="/images/order-execution-laptop.png" alt="" fill sizes="100vw" className="object-cover object-center" />
+        <RevealImage src="/images/order-execution-laptop.webp" alt="" fill sizes="100vw" className="object-cover object-center" />
       </div>
       <PublicContainer className="relative z-10">
         <PublicSectionHeading id="obaol-perspective-heading" eyebrow="The OBAOL perspective" title="Trade is more than buying and selling.">

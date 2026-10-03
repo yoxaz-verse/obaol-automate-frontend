@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     Chip,
@@ -18,19 +19,20 @@ import {
 } from "@nextui-org/react";
 import { FiSend, FiEdit2, FiEyeOff } from "react-icons/fi";
 
-import AddModal from "@/components/CurdTable/add-model";
 import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
 import AuthContext from "@/context/AuthContext";
-import { apiRoutesByRole, generateColumns, initialTableConfig } from "@/utils/tableValues";
-import EditModal from "@/components/CurdTable/edit-model";
-import DeleteModal from "@/components/CurdTable/delete";
-import DynamicFilter from "@/components/CurdTable/dynamic-filtering";
+import { getInventoryColumns, inventoryApiEndpoint, inventoryTableFields } from "@/features/inventory/tableConfig";
 import TableFrame from "@/components/CurdTable/table-frame";
 import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler";
 import { apiRoutes, associateCompanyRoutes, associateRoutes, inventoryRoutes, variantRateRoutes, inventoryReservationRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
-import CompanySearch from "@/components/dashboard/Company/CompanySearch";
+
+const AddModal = dynamic(() => import("@/components/CurdTable/add-model"), { ssr: false });
+const EditModal = dynamic(() => import("@/components/CurdTable/edit-model"), { ssr: false });
+const DeleteModal = dynamic(() => import("@/components/CurdTable/delete"), { ssr: false });
+const DynamicFilter = dynamic(() => import("@/components/CurdTable/dynamic-filtering"), { ssr: false });
+const CompanySearch = dynamic(() => import("@/components/dashboard/Company/CompanySearch"), { ssr: false });
 
 const InventoryList: React.FC = () => {
     const queryClient = useQueryClient();
@@ -99,8 +101,8 @@ const InventoryList: React.FC = () => {
         return () => clearTimeout(timer);
     }, [search]);
 
-    const columns = generateColumns("inventories", initialTableConfig, user?.role);
-    const formFields = initialTableConfig["inventories"];
+    const columns = useMemo(() => getInventoryColumns(user?.role), [user?.role]);
+    const formFields = inventoryTableFields;
 
     // Filter form fields based on role if necessary
     const filteredFormFields = isAssociate
@@ -223,7 +225,7 @@ const InventoryList: React.FC = () => {
 
             {shouldFetchInventory && (
                 <QueryComponent
-                    api={apiRoutesByRole["inventories"]}
+                    api={inventoryApiEndpoint}
                     queryKey={[
                         "inventories",
                         filters,
@@ -661,7 +663,7 @@ const InventoryList: React.FC = () => {
                                                 buttonLabel="Add Stock"
                                                 currentTable="inventories"
                                                 formFields={filteredFormFields}
-                                                apiEndpoint={apiRoutesByRole["inventories"]}
+                                                apiEndpoint={inventoryApiEndpoint}
                                                 refetchData={refetch}
                                                 additionalVariable={{
                                                     ...(isAssociate && { associate: user?.id }),
@@ -685,7 +687,7 @@ const InventoryList: React.FC = () => {
                                                         initialData={item}
                                                         currentTable="inventories"
                                                         formFields={filteredFormFields}
-                                                        apiEndpoint={apiRoutesByRole["inventories"]}
+                                                        apiEndpoint={inventoryApiEndpoint}
                                                         refetchData={refetch}
                                                     />
                                                 )}
@@ -693,7 +695,7 @@ const InventoryList: React.FC = () => {
                                                     <DeleteModal
                                                         _id={item._id}
                                                         name={`${item.productVariant}`}
-                                                        deleteApiEndpoint={apiRoutesByRole["inventories"]}
+                                                        deleteApiEndpoint={inventoryApiEndpoint}
                                                         refetchData={refetch}
                                                     />
                                                 )}

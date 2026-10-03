@@ -4,17 +4,23 @@ import { gzipSync } from "node:zlib";
 const manifest = JSON.parse(readFileSync(".next/app-build-manifest.json", "utf8"));
 const budgets = {
   "/dashboard/page": 300,
-  "/page": 250,
+  "/page": 185,
   "/auth/page": 200,
   "/product/[slug]/page": 210,
   "/trade-directory/[slug]/page": 210,
   "/procurement/page": 220,
-  "/dashboard/inventory/page": 550,
+  "/dashboard/inventory/page": 450,
   "/dashboard/rates/page": 220,
   "/dashboard/users/page": 210,
   "/dashboard/essentials/page": 230,
   "/dashboard/payments/page": 210,
   "/dashboard/calculations/page": 240,
+  "/dashboard/catalog/page": 500,
+  "/dashboard/profile/page": 460,
+  "/dashboard/map/page": 385,
+  "/dashboard/enquiries/[id]/page": 380,
+  "/dashboard/orders/[id]/page": 360,
+  "/verification/page": 535,
 };
 
 let failed = false;

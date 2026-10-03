@@ -1,153 +1,72 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MdDashboard } from "react-icons/md";
-import { AiOutlineProduct } from "react-icons/ai";
-import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
-import { LuWarehouse } from "react-icons/lu";
-import { FiShoppingBag } from "react-icons/fi";
+import { FiMoreHorizontal } from "react-icons/fi";
 import AuthContext from "@/context/AuthContext";
-import { getAccessibleDashboardRoutes } from "@/utils/dashboardAccess";
+import { sidebarOptions } from "@/utils/utils";
+import { getDashboardBottomNavigation } from "@/utils/dashboardNav";
+import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 
 const BottomNav = ({ isOnboardingLocked = false }: { isOnboardingLocked?: boolean }) => {
-    const pathname = usePathname();
-    const { user } = useContext(AuthContext);
-    const [isVisible, setIsVisible] = useState(true);
+  const pathname = usePathname();
+  const { user } = useContext(AuthContext);
+  const optionsByPath = new Map(sidebarOptions.map((option) => [option.link, option]));
+  const routes = getDashboardBottomNavigation({
+    role: user?.role,
+    tradeMode: user?.tradeMode,
+    companyInterests: user?.companyInterests || [],
+  });
 
-    useEffect(() => {
-        if (typeof window === "undefined") return;
+  const openMore = () => {
+    if (isOnboardingLocked) return;
+    window.dispatchEvent(new Event("obaol:open-navigation"));
+  };
 
-        const scrollContainer = document.querySelector<HTMLElement>("[data-dashboard-scroll]");
-        if (!scrollContainer) return;
-        let lastScrollY = scrollContainer.scrollTop;
-        const deltaThreshold = 8;
-        const topSafeThreshold = 24;
-
-        const handleScroll = () => {
-            const currentScrollY = scrollContainer.scrollTop;
-            const delta = currentScrollY - lastScrollY;
-
-            if (currentScrollY <= topSafeThreshold) {
-                setIsVisible(true);
-                lastScrollY = currentScrollY;
-                return;
-            }
-
-            if (delta > deltaThreshold) {
-                setIsVisible(false);
-            } else if (delta < -deltaThreshold) {
-                setIsVisible(true);
-            }
-
-            lastScrollY = currentScrollY;
-        };
-
-        scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-        return () => scrollContainer.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    const navItems = [
-        {
-            name: "Dashboard",
-            icon: <MdDashboard size={24} />,
-            link: "/dashboard",
-        },
-        {
-            name: "Products",
-            icon: <AiOutlineProduct size={24} />,
-            link: "/dashboard/product",
-        },
-        {
-            name: "Trade Listings",
-            icon: <LuWarehouse size={24} />,
-            link: "/dashboard/marketplace",
-        },
-        {
-            name: "Enquiries",
-            icon: <RiFileAddLine size={24} />,
-            link: "/dashboard/enquiries",
-        },
-        {
-            name: "Orders",
-            icon: <FiShoppingBag size={24} />,
-            link: "/dashboard/orders",
-        },
-        {
-            name: "Profile",
-            icon: <RiUser2Fill size={24} />,
-            link: "/dashboard/profile",
-        },
-    ];
-
-    const mobileRoutes = getAccessibleDashboardRoutes({
-        role: user?.role,
-        tradeMode: user?.tradeMode,
-        companyInterests: user?.companyInterests || [],
-    })
-        .filter((route) => route.mobilePriority)
-        .sort((a, b) => Number(a.mobilePriority) - Number(b.mobilePriority))
-        .slice(0, 5);
-    const allowedMobileLinks = new Set(mobileRoutes.map((route) => route.path));
-    const filteredNavItems = navItems.filter((item) => allowedMobileLinks.has(item.link));
-
-    return (
-        <div
-            data-bottomnav
-            className={`fixed bottom-3 left-3 right-3 z-[100] h-16 db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden transition-all duration-300 ease-out ${
-                isVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-[calc(100%+1.5rem)] opacity-0 pointer-events-none"
-            }`}
-            style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+  return (
+    <nav
+      data-bottomnav
+      aria-label="Primary workspace navigation"
+      className="fixed bottom-3 left-3 right-3 z-[100] h-[4.5rem] db-shell backdrop-blur-2xl border db-border-subtle rounded-2xl md:hidden overflow-hidden"
+      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent" />
+      <div className="grid h-full grid-cols-5 px-1 max-w-lg mx-auto">
+        {routes.map((route) => {
+          if (!route) return null;
+          const option = optionsByPath.get(route.path);
+          if (!option) return null;
+          const isActive = isDashboardRouteActive(pathname, route.path);
+          return (
+            <Link
+              key={route.path}
+              href={route.path}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={route.label}
+              className={`relative min-w-0 min-h-11 flex flex-col items-center justify-center gap-1 rounded-xl px-1 transition-colors ${
+                isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-500 hover:text-foreground"
+              }`}
+            >
+              {isActive && <span aria-hidden="true" className="absolute top-0 w-8 h-0.5 rounded-full bg-obaol-500" />}
+              <span aria-hidden="true" className={isActive ? "scale-110" : "opacity-80"}>{React.cloneElement(option.icon as React.ReactElement, { size: 19 })}</span>
+              <span className="w-full truncate text-center text-[10px] font-bold leading-none">{route.label === "Dashboard" ? "Home" : route.label}</span>
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={openMore}
+          disabled={isOnboardingLocked}
+          aria-label="More workspace navigation"
+          className="min-w-0 min-h-11 flex flex-col items-center justify-center gap-1 rounded-xl px-1 text-default-500 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-obaol-500/20 to-transparent" />
-            <div className="flex justify-around items-center h-full px-2 max-w-lg mx-auto">
-                {filteredNavItems.map((item) => {
-                    const isActive = pathname === item.link;
-                    const isDisabled = isOnboardingLocked;
-                    return (
-                        isDisabled ? (
-                            <div
-                                key={item.name}
-                                className={`relative flex flex-col items-center justify-center min-w-[56px] min-h-11 h-full transition-all duration-300 opacity-40 cursor-not-allowed ${
-                                    isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400"
-                                }`}
-                                aria-disabled="true"
-                            >
-                                {isActive && (
-                                    <div className="absolute -top-[1px] w-8 h-[2px] bg-obaol-500 rounded-full shadow-[0_2px_10px_rgba(207,152,60,0.5)]" />
-                                )}
-                                <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
-                                    {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
-                                </div>
-                                <span className={`text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${isActive ? "opacity-100 -translate-y-0.5" : "opacity-0 translate-y-1 h-0"}`}>
-                                    {item.name.slice(0, 8)}
-                                </span>
-                            </div>
-                        ) : (
-                            <Link
-                                key={item.name}
-                                href={item.link}
-                                className={`relative flex flex-col items-center justify-center min-w-[56px] min-h-11 h-full transition-all duration-300 ${
-                                    isActive ? "text-obaol-700 dark:text-obaol-300" : "text-default-400 group-hover:text-foreground"
-                                }`}
-                            >
-                            {isActive && (
-                                <div className="absolute -top-[1px] w-8 h-[2px] bg-obaol-500 rounded-full shadow-[0_2px_10px_rgba(207,152,60,0.5)]" />
-                            )}
-                            <div className={`transition-all duration-500 ${isActive ? "scale-110 -translate-y-1 mb-1" : "opacity-70"}`}>
-                                {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
-                            </div>
-                            <span className={`text-[9px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${isActive ? "opacity-100 -translate-y-0.5" : "opacity-0 translate-y-1 h-0"}`}>
-                                {item.name.slice(0, 8)}
-                            </span>
-                            </Link>
-                        )
-                    );
-                })}
-            </div>
-        </div>
-    );
+          <FiMoreHorizontal aria-hidden="true" size={20} />
+          <span className="text-[10px] font-bold leading-none">More</span>
+        </button>
+      </div>
+    </nav>
+  );
 };
 
 export default BottomNav;

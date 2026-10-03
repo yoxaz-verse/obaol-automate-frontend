@@ -10,7 +10,6 @@ import {
   CardHeader,
   Chip,
   Divider,
-  Progress,
   Skeleton,
 } from "@nextui-org/react";
 import {
@@ -19,35 +18,20 @@ import {
   LuBox,
   LuCheck,
   LuClock,
-  LuLayers,
-  LuPackage,
-  LuSearch,
   LuShoppingBag,
-  LuAnchor,
-  LuSend,
-  LuShield,
-  LuTruck,
   LuTrendingUp,
   LuUsers,
   LuChevronRight,
-  LuPlus,
-  LuFileText,
-  LuSearch as LuSearchIcon,
-  LuZap,
-  LuInfo as LuAlertIcon,
-  LuHistory,
-  LuAirplay as LuRadioIcon
 } from "react-icons/lu";
 import InsightCard from "./InsightCard";
 import AuthContext from "@/context/AuthContext";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { getData } from "@/core/api/apiHandler";
 import { DEFAULT_STALE_TIME, extractList, useDashboardData } from "@/core/data";
-import { useCompanyFunctionDashboard } from "@/core/data/useCompanyFunctionDashboard";
-import { sidebarOptions } from "@/utils/utils";
 import { dashboardCopy } from "@/utils/dashboardCopy";
 import { normalizeTradeMode } from "@/utils/dashboardAccess";
-import { getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import AssociateDashboard from "./AssociateDashboard";
+import { getAssociateFocusStorageKey, normalizeAssociateFocus, type AssociateFocus } from "./associateDashboardModel";
 
 const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 const TrendChart = dynamic(() => import("./TrendChart"), {
@@ -56,10 +40,6 @@ const TrendChart = dynamic(() => import("./TrendChart"), {
 const EssentialTabContent = dynamic(() => import("./Essentials/essential-tab-content"), {
   loading: () => <Skeleton className="h-72 w-full rounded-2xl" />,
 });
-const CompanyFunctionComponent = dynamic(() => import("./CompanyFunctionComponent"), {
-  loading: () => <Skeleton className="h-48 w-full rounded-2xl" />,
-});
-
 const Dashboard: NextPage = () => {
   const isValidObjectId = (value: any) => /^[a-f0-9]{24}$/i.test(String(value || "").trim());
   const { user } = useContext(AuthContext);
@@ -73,7 +53,7 @@ const Dashboard: NextPage = () => {
   const isAssociate = roleLower === "associate" || roleLower === "customer";
   const isOperatorUser = roleLower === "operator" || roleLower === "team";
   const tradeMode = normalizeTradeMode(user?.tradeMode, user?.role);
-  const [workspaceFocus, setWorkspaceFocus] = useState<"BUY" | "SELL" | "BOTH">("BOTH");
+  const [workspaceFocus, setWorkspaceFocus] = useState<AssociateFocus>("BOTH");
   const effectiveTradeMode = tradeMode === "BOTH" ? workspaceFocus : tradeMode;
   const isBuyingMode = isAssociate && (effectiveTradeMode === "BUY" || effectiveTradeMode === "BOTH");
   const isSellingMode = isAssociate && (effectiveTradeMode === "SELL" || effectiveTradeMode === "BOTH");
@@ -137,10 +117,15 @@ const Dashboard: NextPage = () => {
     return () => window.clearTimeout(timer);
   }, [associateLookup]);
 
-  const companyFunctionDashboard = useCompanyFunctionDashboard({
-    companyId: associateCompanyId,
-    isAdmin: false,
-  });
+  useEffect(() => {
+    if (!isAssociate || tradeMode !== "BOTH" || !userId) return;
+    setWorkspaceFocus(normalizeAssociateFocus(window.localStorage.getItem(getAssociateFocusStorageKey(userId))));
+  }, [isAssociate, tradeMode, userId]);
+
+  const updateWorkspaceFocus = (focus: AssociateFocus) => {
+    setWorkspaceFocus(focus);
+    if (userId) window.localStorage.setItem(getAssociateFocusStorageKey(userId), focus);
+  };
 
   const companyDirectoryQuery = useQuery({
     queryKey: ["operatorCompanyDirectory", userId],
@@ -177,29 +162,6 @@ const Dashboard: NextPage = () => {
   const associateSellingCount = Number(summary?.associateSellingCount || 0);
   const associateActionRequired = Number(summary?.associateActionRequired || 0);
   const adminActionRequired = Number(summary?.adminActionRequired || 0);
-
-  const filteredOptions = getRoleFilteredSidebarOptions(
-    sidebarOptions as any[],
-    role,
-    tradeMode,
-    user?.companyInterests || []
-  );
-
-  const prioritizedLinks = useMemo(() => {
-    const priorityMap = isAdmin
-      ? ["/dashboard/approvals", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/users", "/dashboard/operator/team"]
-      : isAssociate
-        ? isBuyingMode && !isSellingMode
-          ? ["/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/profile"]
-          : ["/dashboard/product", "/dashboard/marketplace", "/dashboard/enquiries", "/dashboard/orders", "/dashboard/company", "/dashboard/profile"]
-        : isOperatorUser
-          ? ["/dashboard/product", "/dashboard/enquiries", "/dashboard/execution-enquiries", "/dashboard/orders", "/dashboard/operator/hierarchy"]
-          : ["/dashboard/enquiries", "/dashboard/orders", "/dashboard/product", "/dashboard/profile"];
-
-    return priorityMap
-      .map((link) => filteredOptions.find((option) => option.link === link))
-      .filter(Boolean) as typeof sidebarOptions;
-  }, [filteredOptions, isAdmin, isAssociate, isBuyingMode, isOperatorUser, isSellingMode]);
 
   const activityFeed = useMemo(() => {
     const summaryFeed = Array.isArray(summary?.recentActivity) ? summary.recentActivity : [];
@@ -366,22 +328,6 @@ const Dashboard: NextPage = () => {
              </Button>
            </div>
          ))}
-
-         {isAssociate && associateActionRequired > 0 && (
-            <div className="p-5 bg-danger/5 border border-danger/10 rounded-2xl animate-in slide-in-from-right duration-500">
-               <div className="flex items-center gap-2 mb-3">
-                  <LuAlertIcon className="text-danger" size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-danger">Urgent Action Required</span>
-               </div>
-               <div className="space-y-3">
-                  <div className="flex items-center justify-between text-[11px] font-bold">
-                     <span className="text-default-600">High Priority Enquiries</span>
-                     <span className="text-danger">{associateActionRequired} Action(s)</span>
-                  </div>
-                  <Progress value={100} size="sm" color="danger" className="opacity-20" />
-               </div>
-            </div>
-         )}
 
          <div className="border db-border-subtle rounded-2xl p-4 db-inset">
           <div className="flex items-center justify-between mb-2">
@@ -616,181 +562,22 @@ const Dashboard: NextPage = () => {
   );
 
   const renderAssociateDashboard = () => (
-    <>
-      {!user?.companyInterestsConfigured && (
-        <Card className="border border-obaol-500/30 bg-obaol-500/10">
-          <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <h4 className="font-semibold text-obaol-600 dark:text-obaol-300">
-                Configure your company responsibilities to unlock full panels.
-              </h4>
-              <p className="text-xs text-obaol-600/80 dark:text-obaol-200/80 mt-1">
-                Add your company functions so the dashboard can tailor execution and routing.
-              </p>
-            </div>
-            <Button
-              color="warning"
-              variant="flat"
-              onPress={() => router.push("/dashboard/company")}
-            >
-              Configure Now
-            </Button>
-          </CardBody>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <InsightCard
-          title="Action Required"
-          metric={associateActionRequired.toLocaleString()}
-          icon={<LuClock size={18} />}
-          footer={<span className="text-xs text-default-500">Pending your accept/confirm actions</span>}
-        />
-        {isBuyingMode && <InsightCard
-          title="Buying Enquiries"
-          metric={(Number(associateMetrics.totalInquiries || associateBuyingCount) || 0).toLocaleString()}
-          icon={<LuShoppingBag size={18} />}
-          footer={<span className="text-xs text-default-500">Enquiries where you are buyer-side</span>}
-        />}
-        {isSellingMode && <InsightCard
-          title="Selling Enquiries"
-          metric={associateSellingCount.toLocaleString()}
-          icon={<LuPackage size={18} />}
-          footer={<span className="text-xs text-default-500">Enquiries where you are supplier-side</span>}
-        />}
-        <InsightCard
-          title="Active Orders"
-          metric={activeOrders.toLocaleString()}
-          icon={<LuTrendingUp size={18} />}
-          footer={<span className="text-xs text-default-500">Orders currently active</span>}
-        />
-      </div>
-
-      {isBuyingMode && !isSellingMode && (
-        <Card className="border border-primary-500/20 bg-primary-500/5">
-          <CardBody className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h3 className="font-bold text-foreground">Next best action: discover a verified product</h3>
-              <p className="mt-1 text-xs text-default-500">Compare live listings, open a product, and create your buying enquiry.</p>
-            </div>
-            <Button color="primary" onPress={() => router.push("/dashboard/marketplace")}>Browse Trade Listings</Button>
-          </CardBody>
-        </Card>
-      )}
-
-      {isSellingMode && <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-default-400">Company Functions</h3>
-            <p className="text-xs text-default-500">Panels reflect your company priorities and capabilities.</p>
-          </div>
-        </div>
-
-        {companyFunctionDashboard.isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <Card key={idx} className="border db-border-subtle db-panel">
-                <CardBody className="space-y-3">
-                  <Skeleton className="h-5 w-1/3 rounded-lg" />
-                  <Skeleton className="h-4 w-2/3 rounded-lg" />
-                  <div className="grid grid-cols-3 gap-2">
-                    <Skeleton className="h-14 rounded-xl" />
-                    <Skeleton className="h-14 rounded-xl" />
-                    <Skeleton className="h-14 rounded-xl" />
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        ) : companyFunctionDashboard.isError ? (
-          <Card className="border border-danger-200 bg-danger-50/40">
-            <CardBody className="text-sm text-danger-600">
-              Unable to load company function panels right now.
-            </CardBody>
-          </Card>
-        ) : companyFunctionDashboard.orderedFunctions.length === 0 ? (
-          <Card className="border border-obaol-200 bg-obaol-50/60">
-            <CardBody className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
-                <h4 className="font-semibold text-obaol-700">No company functions configured yet.</h4>
-                <p className="text-xs text-obaol-600/80 mt-1">
-                  Add company priorities so this dashboard can personalize your workflow.
-                </p>
-              </div>
-              <Button color="warning" variant="flat" onPress={() => router.push("/dashboard/company")}>
-                Configure Company
-              </Button>
-            </CardBody>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {companyFunctionDashboard.orderedFunctions.map((fn: any) => (
-              <CompanyFunctionComponent
-                key={fn._id}
-                name={fn.name}
-                slug={fn.slug}
-                priorityRank={fn.priorityRank}
-                metrics={fn.metrics}
-                recentExecutionInquiries={fn.recentExecutionInquiries}
-                recentOrders={fn.recentOrders}
-              />
-            ))}
-          </div>
-        )}
-      </div>}
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1 space-y-6">
-           <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem] overflow-hidden">
-              <CardHeader className="px-8 pt-8">
-                 <div className="flex items-center gap-2">
-                    <LuRadioIcon className="text-primary animate-pulse" size={18} />
-                    <h4 className="font-black text-foreground uppercase tracking-widest text-[11px]">Market Updates</h4>
-                 </div>
-              </CardHeader>
-              <Divider className="my-4 mx-8 w-auto opacity-50" />
-              <CardBody className="px-8 pb-8 space-y-4">
-                 <div className="space-y-4">
-                    <div className="flex flex-col gap-1">
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">System Update</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">Trade listing update released successfully.</p>
-                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">2h ago</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-obaol-500">Market Insight</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">New logistics route opened for sea freight.</p>
-                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">5h ago</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-success-500">Engagement</span>
-                       <p className="text-xs font-bold text-foreground leading-snug">Enquiry volume has increased in your region.</p>
-                       <span className="text-[9px] text-default-400 font-medium uppercase tracking-widest">1d ago</span>
-                    </div>
-                 </div>
-              </CardBody>
-           </Card>
-
-           <Card className="border db-border-subtle shadow-none db-subtle backdrop-blur-3xl rounded-[2rem] overflow-hidden group cursor-pointer hover:db-inset transition-all border-dashed">
-              <CardBody className="p-8 flex items-center justify-between">
-                 <div className="flex flex-col gap-1">
-                    <h4 className="font-black text-foreground uppercase tracking-widest text-[10px]">History</h4>
-                    <p className="text-xs text-default-500 font-medium">Review your recent activity.</p>
-                 </div>
-                 <div className="w-10 h-10 rounded-full db-inset flex items-center justify-center text-foreground opacity-50 group-hover:opacity-100 transition-opacity">
-                    <LuHistory size={20} />
-                 </div>
-              </CardBody>
-           </Card>
-        </div>
-        <div className="lg:col-span-3 space-y-6">
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             {renderActionCenter()}
-             {renderRecentActivity()}
-           </div>
-        </div>
-      </div>
-    </>
+    <AssociateDashboard
+      tradeMode={tradeMode}
+      focus={workspaceFocus}
+      associateCompanyId={associateCompanyId}
+      companyInterestsConfigured={Boolean(user?.companyInterestsConfigured)}
+      metrics={associateMetrics}
+      pendingActions={pendingActionsList}
+      activity={activityFeed}
+      activeOrders={activeOrders}
+      actionRequired={associateActionRequired}
+      buyingCount={Number(associateMetrics.totalInquiries || associateBuyingCount) || 0}
+      sellingCount={associateSellingCount}
+      isLoading={dashboardSummaryQuery.isLoading}
+    />
   );
+
 
   const renderOperatorDashboard = () => {
     const totalAssignedProducts = Number(operatorMetrics.totalAssignedProducts || 0);
@@ -995,8 +782,8 @@ const Dashboard: NextPage = () => {
 
   return (
     <div className="w-full p-4 md:p-6 space-y-8">
-      <Card className="border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm rounded-[2.5rem] overflow-hidden">
-        <CardBody className="p-8">
+      <Card className={`border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden ${isAssociate ? "rounded-2xl" : "rounded-[2.5rem]"}`}>
+        <CardBody className={isAssociate ? "p-5 sm:p-6" : "p-8"}>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-3">
@@ -1018,7 +805,7 @@ const Dashboard: NextPage = () => {
               {isAssociate && tradeMode === "BOTH" && (
                 <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1">
                   {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
-                    <button key={focus} type="button" onClick={() => setWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-9 rounded-lg px-3 text-xs font-bold ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
+                    <button key={focus} type="button" onClick={() => updateWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-11 rounded-lg px-4 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
                       {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
                     </button>
                   ))}
@@ -1038,7 +825,7 @@ const Dashboard: NextPage = () => {
         </CardBody>
       </Card>
 
-      {executiveLoading ? (
+      {executiveLoading && !isAssociate ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, idx) => (
             <Card key={idx} className="border db-border-subtle db-panel">

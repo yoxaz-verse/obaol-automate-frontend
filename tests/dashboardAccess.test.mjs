@@ -9,6 +9,7 @@ import {
   getAccessibleDashboardRoutes,
   getDashboardAdminGroups,
   getDashboardRoute,
+  isDashboardRouteActive,
   normalizeDashboardRole,
   normalizeTradeMode,
 } from "../src/utils/dashboardAccess.ts";
@@ -29,6 +30,12 @@ test("legacy Customer is normalized to a buying Associate", () => {
   assert.equal(normalizeTradeMode(undefined, "Customer"), "BUY");
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/marketplace", role: "Customer" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/product", role: "Customer" }), false);
+});
+
+test("detail routes keep their parent navigation item active", () => {
+  assert.equal(isDashboardRouteActive("/dashboard/enquiries/507f1f77bcf86cd799439011", "/dashboard/enquiries"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard/orders"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
 });
 
 test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", () => {
@@ -92,6 +99,8 @@ test("every dashboard route exposes complete experience metadata", () => {
     assert.ok(route.journeyStage, `${route.path} needs a journey stage`);
     assert.ok(route.helpId, `${route.path} needs a help id`);
     assert.ok(route.requiredApprovalStates.length > 0, `${route.path} needs approval policy`);
+    assert.ok(route.navIcon, `${route.path} needs a navigation icon key`);
+    assert.ok(route.taskGroup, `${route.path} needs a task group`);
   }
 });
 

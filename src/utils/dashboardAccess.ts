@@ -24,6 +24,7 @@ export const DASHBOARD_ADMIN_GROUP_ORDER: DashboardNavGroup[] = [
 ];
 
 export type DashboardJourneyStage = "overview" | "discover" | "negotiate" | "sample" | "execute" | "service" | "organize" | "administer";
+export type DashboardTaskGroup = "Home" | "Discover" | "Buy" | "Sell" | "Execute" | "Services" | "Company & Account" | "Operations/Admin";
 
 export type DashboardRouteDefinition = {
   path: string;
@@ -35,6 +36,9 @@ export type DashboardRouteDefinition = {
   nav?: boolean;
   searchable?: boolean;
   mobilePriority?: number;
+  navIcon: string;
+  taskGroup: DashboardTaskGroup;
+  activeParent?: string;
   requiredInterests?: string[];
   description: string;
   breadcrumbParent?: string;
@@ -44,7 +48,7 @@ export type DashboardRouteDefinition = {
   helpId: string;
 };
 
-type DashboardRouteInput = Omit<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId"> & Partial<Pick<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId">>;
+type DashboardRouteInput = Omit<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup"> & Partial<Pick<DashboardRouteDefinition, "description" | "journeyStage" | "requiredApprovalStates" | "helpId" | "navIcon" | "taskGroup">>;
 
 const ALL_ASSOCIATE_MODES: TradeMode[] = ["BUY", "SELL", "BOTH", "SERVICE"];
 const SELLING_MODES: TradeMode[] = ["SELL", "BOTH"];
@@ -126,8 +130,46 @@ const journeyStageBySection: Record<DashboardSection, DashboardJourneyStage> = {
   "Operations/Admin": "administer",
 };
 
+const navIconByPath: Record<string, string> = {
+  "/dashboard": "home",
+  "/dashboard/marketplace": "marketplace",
+  "/dashboard/catalog": "catalog",
+  "/dashboard/product": "listings",
+  "/dashboard/enquiries": "enquiries",
+  "/dashboard/sample-requests": "samples",
+  "/dashboard/orders": "orders",
+  "/dashboard/documents": "documents",
+  "/dashboard/commercial-documents": "documents",
+  "/dashboard/inventory": "inventory",
+  "/dashboard/warehouses": "warehouse",
+  "/dashboard/execution-enquiries": "execution",
+  "/dashboard/imports": "imports",
+  "/dashboard/external-orders": "external-orders",
+  "/dashboard/warehouse-rent": "warehouse",
+  "/dashboard/quality-labs": "quality",
+  "/dashboard/company": "company",
+  "/dashboard/companies": "company",
+  "/dashboard/notifications": "notifications",
+  "/dashboard/guidance": "guidance",
+  "/dashboard/profile": "profile",
+  "/dashboard/shortcuts": "shortcuts",
+};
+
+const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {
+  if (route.path === "/dashboard") return "Home";
+  if (["/dashboard/marketplace", "/dashboard/catalog"].includes(route.path)) return "Discover";
+  if (["/dashboard/product", "/dashboard/inventory", "/dashboard/warehouses"].includes(route.path)) return "Sell";
+  if (["/dashboard/enquiries", "/dashboard/sample-requests", "/dashboard/orders", "/dashboard/documents", "/dashboard/commercial-documents"].includes(route.path)) return "Execute";
+  if (route.section === "Services") return "Services";
+  if (route.section === "Operations/Admin") return "Operations/Admin";
+  return "Company & Account";
+};
+
 export const DASHBOARD_ROUTE_MANIFEST: DashboardRouteDefinition[] = DASHBOARD_ROUTE_INPUTS.map((route) => ({
   ...route,
+  navIcon: route.navIcon || navIconByPath[route.path] || "default",
+  taskGroup: route.taskGroup || defaultTaskGroup(route),
+  activeParent: route.activeParent || route.breadcrumbParent,
   description: route.description || `Open ${route.label.toLowerCase()} and continue the work relevant to your role.`,
   journeyStage: route.journeyStage || journeyStageBySection[route.section],
   requiredApprovalStates: route.requiredApprovalStates || (
@@ -174,6 +216,13 @@ const routeMatches = (pattern: string, path: string) => {
 export const getDashboardRoute = (path: string) => {
   const normalized = normalizePath(path);
   return DASHBOARD_ROUTE_MANIFEST.find((route) => routeMatches(route.path, normalized)) || null;
+};
+
+export const isDashboardRouteActive = (pathname: string, routePath: string) => {
+  const current = getDashboardRoute(pathname);
+  if (!current) return false;
+  if (routePath === "/dashboard") return current.path === "/dashboard";
+  return current.path === routePath || current.activeParent === routePath || current.breadcrumbParent === routePath;
 };
 
 export const canAccessDashboardRoute = ({

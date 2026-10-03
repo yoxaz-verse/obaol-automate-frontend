@@ -792,7 +792,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               </Link>
             </div>
             <p className="mt-3 max-w-[58ch] text-xs font-semibold leading-5 text-foreground/70">
-              Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account. Operator accounts are for independent people coordinating trades.
+              Buyers, sellers, suppliers, importers, exporters, warehouses, labs, and logistics businesses should create an Associate company account. For independent people coordinating trades, not company registration.
             </p>
           </div>
         )}

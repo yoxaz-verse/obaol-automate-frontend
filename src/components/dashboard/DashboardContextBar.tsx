@@ -14,6 +14,7 @@ export default function DashboardContextBar() {
   const route = getDashboardRoute(pathname);
   const experience = deriveExperienceContext(user);
   if (!route || route.path === "/dashboard") return null;
+  const parentRoute = route.activeParent ? getDashboardRoute(route.activeParent) : null;
 
   const roleLabel = experience.role === "associate"
     ? tradeModeLabel(experience.tradeMode)
@@ -24,8 +25,17 @@ export default function DashboardContextBar() {
       <nav aria-label="Current dashboard location" className="flex min-w-0 items-center gap-2 db-muted">
         <Link href="/dashboard" className="font-semibold hover:text-foreground">Overview</Link>
         <span aria-hidden="true">/</span>
-        <span>{route.section}</span>
-        <span aria-hidden="true">/</span>
+        {parentRoute ? (
+          <>
+            <Link href={parentRoute.path} className="font-semibold hover:text-foreground">{parentRoute.label}</Link>
+            <span aria-hidden="true">/</span>
+          </>
+        ) : (
+          <>
+            <span>{route.taskGroup === "Home" ? route.section : route.taskGroup}</span>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
         <span className="truncate font-semibold text-foreground" aria-current="page">{route.label}</span>
       </nav>
       <div className="flex items-center gap-3">

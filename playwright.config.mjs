@@ -21,6 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-pwa-iphone",
+      testIgnore: /authenticated-flows\.spec\.mjs/,
       use: {
         ...devices["iPhone 13"],
         viewport: { width: 390, height: 844 },
@@ -29,13 +30,41 @@ export default defineConfig({
         deviceScaleFactor: 3,
       },
     },
+    {
+      name: "authenticated-mobile",
+      testMatch: /authenticated-flows\.spec\.mjs/,
+      use: {
+        ...devices["iPhone 13"],
+        baseURL: "http://localhost:3100",
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 3,
+      },
+    },
+    {
+      name: "authenticated-desktop",
+      testMatch: /authenticated-flows\.spec\.mjs/,
+      use: {
+        ...devices["Desktop Safari"],
+        baseURL: "http://localhost:3100",
+        viewport: { width: 1440, height: 900 },
+      },
+    },
   ],
   webServer: startLocalServer
-    ? {
+    ? [{
+        command: "npm --prefix ../obaol-automate-backend run e2e:server",
+        url: "http://127.0.0.1:5001/api/v1/web/registration-options",
+        reuseExistingServer: false,
+        timeout: 120_000,
+        stdout: "pipe",
+        stderr: "pipe",
+      }, {
         command: `next start -p ${port}`,
         url: baseURL,
         reuseExistingServer: true,
         timeout: 120_000,
-      }
+      }]
     : undefined,
 });

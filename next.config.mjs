@@ -44,6 +44,9 @@ const shouldUpgradeInsecureRequests = () => {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    optimizeCss: true,
+  },
   pageExtensions: ["ts", "tsx", "mdx"],
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
@@ -127,7 +130,6 @@ const nextConfig = {
         pathname: "/upload/**",
       },
     ],
-    domains: ["localhost"],
   },
   typescript: {
     ignoreBuildErrors: false,

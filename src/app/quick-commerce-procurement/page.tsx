@@ -42,7 +42,7 @@ export const metadata = buildMetadata({
     "India quick commerce supply chain",
   ],
   path: pagePath,
-  image: "/images/order-execution-laptop.png",
+  image: "/images/order-execution-laptop.webp",
   type: "article",
 });
 
@@ -217,7 +217,7 @@ export default function QuickCommerceProcurementPage() {
               <div className="absolute -inset-4 rounded-[2rem] bg-obaol-500/10 blur-2xl public-decoration" />
               <div className="relative overflow-hidden rounded-[2rem] border border-foreground/10 bg-content1 shadow-[0_28px_80px_-45px_rgba(0,0,0,0.7)] public-surface-card">
                 <RevealImage
-                  src="/images/order-execution-laptop.png"
+                  src="/images/order-execution-laptop.webp"
                   alt="OBAOL procurement execution workspace"
                   width={980}
                   height={720}

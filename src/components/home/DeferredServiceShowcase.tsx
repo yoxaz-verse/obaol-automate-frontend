@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useInViewport } from "@/hooks/useInViewport";
+import DeferredSection from "@/components/ui/DeferredSection";
 
 const ServiceShowcase = dynamic(() => import("@/components/home/ServiceShowcase"), {
   ssr: false,
@@ -24,15 +24,9 @@ const ServiceShowcase = dynamic(() => import("@/components/home/ServiceShowcase"
 });
 
 export default function DeferredServiceShowcase() {
-  const [anchorRef, shouldLoad] = useInViewport<HTMLDivElement>({
-    rootMargin: "640px 0px",
-    once: true,
-  });
-
   return (
-    <>
-      <div ref={anchorRef} aria-hidden="true" className="h-px w-full" />
-      {shouldLoad ? <ServiceShowcase /> : null}
-    </>
+    <DeferredSection rootMargin="640px 0px">
+      <ServiceShowcase />
+    </DeferredSection>
   );
 }

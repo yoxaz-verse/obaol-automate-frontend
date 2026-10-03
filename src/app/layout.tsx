@@ -14,7 +14,7 @@ const obaolFont = localFont({
   src: "./fonts/plus-jakarta-sans-latin.woff2",
   weight: "200 800",
   style: "normal",
-  display: "swap",
+  display: "optional",
   variable: "--font-obaol",
 });
 

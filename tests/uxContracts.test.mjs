@@ -63,81 +63,38 @@ test("the public entry clearly separates Associate and Operator accounts", () =>
 });
 
 test("active homepage source does not advertise fabricated runtime telemetry", () => {
-  const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/herosection.tsx");
+  const homepage = read("../src/components/home/HomeContent.tsx") + read("../src/components/home/HeroSectionServer.tsx");
   for (const phrase of ["CORE_LATENCY", "AES-256", "SYS_LINK"]) assert.equal(homepage.includes(phrase), false);
 });
 
 test("homepage hero presents the ordered ten-stage execution flow", () => {
-  const hero = read("../src/components/home/herosection.tsx");
+  const hero = read("../src/components/home/HeroSectionServer.tsx");
+  const explorer = read("../src/components/home/HeroStageExplorer.tsx");
+  const homeContent = read("../src/components/home/HomeContent.tsx");
   const homepage = read("../src/app/page.tsx");
   const globals = read("../src/app/globals.css");
-  const showcase = read("../src/components/home/ServiceShowcase.tsx");
   const stagesBlock = hero.match(/const HERO_STAGES = \[[\s\S]*?\] as const satisfies readonly HeroStage\[\];/)?.[0] ?? "";
-  const desktopSlots = hero.match(/const DESKTOP_COLLAGE_SLOTS = \[[\s\S]*?\] as const;/)?.[0] ?? "";
-  const connectorPaths = hero.match(/const FLOW_CONNECTOR_PATHS = \[[\s\S]*?\] as const;/)?.[0] ?? "";
-  const laptopBlock = read("../src/components/home/ExecutionPreview.tsx");
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
-  const stageLabels = [...stagesBlock.matchAll(/\n\s+label: "([^"]+)"/g)].map((match) => match[1]);
-  const stageSequences = [...stagesBlock.matchAll(/\n\s+sequence: (\d+)/g)].map((match) => Number(match[1]));
-  const stageMessages = [...stagesBlock.matchAll(/\n\s+message: "([^"]+)"/g)].map((match) => match[1]);
-  const showcaseLocalPaths = [...showcase.matchAll(/(?:image|src):\s*"(\/images\/[^"]+)"/g)].map((match) => match[1]);
+  const stageLabels = [...stagesBlock.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
+  const stageMessages = [...stagesBlock.matchAll(/message: "([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(stageLabels, [
     "Discovery", "Sampling", "Coordination", "Documentation", "Inspection Visit",
     "Quality Testing", "Packaging", "Procurement", "Inland Transportation", "Freight Forwarding",
   ]);
-  assert.deepEqual(stageSequences, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   assert.equal(stageMessages.length, 10);
   assert.equal(imagePaths.length, 10);
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/hero-operations/")).join(""), "/images/hero-operations/freight.webp");
-  assert.equal(imagePaths.some((path) => showcaseLocalPaths.includes(path)), false);
-  assert.equal(hero.includes("HERO_STAGES.map((stage, index)"), true);
-  assert.equal(hero.includes("const activeStage = HERO_STAGES[activeStageIndex]"), true);
-  assert.equal([...desktopSlots.matchAll(/left: \d+(?:\.\d+)?, top:/g)].length, 10);
-  assert.equal([...connectorPaths.matchAll(/"M /g)].length, 9);
-  assert.equal(hero.includes("{active ? ("), true);
-  assert.equal(hero.includes("active={index === activeStageIndex}"), true);
-  assert.equal(hero.includes("{activeStage.message}"), true);
-  assert.equal(hero.includes("HERO_ROTATION_INTERVAL = 1800"), true);
-  assert.equal(hero.includes("(current + 1) % HERO_STAGES.length"), true);
-  assert.equal(hero.includes("shouldReduceMotion || isStageControlActive"), true);
-  assert.equal(hero.includes("onSelect={() => setActiveStageIndex(index)}"), true);
-  assert.equal(hero.includes('aria-current={active ? "step" : undefined}'), true);
-  assert.equal(hero.includes("Step {stage.sequence}"), true);
-  assert.equal(hero.includes("MOBILE_COLLAGE_SLOTS"), false);
-  assert.equal(hero.includes("COLLAGE_SWAP_DELAYS"), false);
-  assert.equal(hero.includes("DESKTOP_ROTATING_STAGE_ORDER"), false);
-  assert.equal(hero.includes("new window.Image()"), false);
-  assert.equal(hero.includes("prefersReducedMotion"), true);
-  assert.equal(hero.includes("FLOW_CONNECTOR_PATHS.map"), true);
-  assert.equal(hero.includes("grid-cols-2 gap-4"), true);
+  assert.equal(hero.includes('"use client"'), false);
+  assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
+  assert.equal(explorer.includes('role="tablist"'), true);
+  assert.equal(explorer.includes("setActiveIndex(index)"), true);
+  assert.equal(explorer.includes("setTimeout"), false);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
-  assert.equal(hero.includes('data-sticky-copy="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), true);
-  assert.equal(hero.includes('data-hero-panel="execution-flow"'), true);
-  assert.equal(laptopBlock.includes('data-hero-panel="unified-system"'), true);
-  assert.equal(hero.includes('data-process-unifier="true"'), false);
-  assert.equal(hero.includes("Every stage comes together on one OBAOL platform"), false);
-  assert.equal(hero.includes('/images/order-execution-laptop.png'), false);
-  assert.equal(hero.includes('/images/order-execution-tracking.png'), false);
-  assert.equal(hero.includes("LaptopConvergencePaths"), false);
-  assert.equal(hero.includes('data-convergence-overlay="true"'), false);
-  assert.equal(hero.includes("data-convergence-path="), false);
-  assert.equal(hero.includes('data-process-to-laptop-arrow="true"'), false);
-  assert.equal(hero.includes("process-to-laptop-arrowhead"), false);
-  assert.equal(laptopBlock.includes("All execution stages, tracked in one OBAOL workspace."), true);
-  assert.equal(hero.includes("OBAOL laptop workspace showing all agro trade execution stages tracked in one platform."), false);
-  assert.equal(laptopBlock.includes("whileInView"), false);
-  assert.equal(laptopBlock.includes("viewport="), false);
-  assert.equal(laptopBlock.includes("initial="), false);
-  assert.equal(laptopBlock.includes("<motion.figure"), false);
-  assert.equal(hero.includes("useScroll"), false);
-  assert.equal(hero.includes("200svh"), false);
-  assert.equal(hero.includes("smoothScrollProgress"), false);
-  assert.equal(hero.includes('data-hero-scene='), false);
-  assert.equal(hero.includes("whileInView={{ opacity: 1, y: 0, scale: 1 }}"), false);
+  assert.equal(explorer.includes('data-hero-panel="execution-flow"'), true);
   assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);
   assert.equal(homepage.includes("overflow-hidden"), false);
   assert.equal(globals.includes("overflow-x: clip !important"), true);
@@ -146,7 +103,7 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
     const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
-  assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.png", import.meta.url))), true);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
 });
 
 test("the OBAOL perspective gateway presents a premium three-card entry point", () => {

@@ -66,7 +66,7 @@ export default function AssociateRolePage() {
       />
       <Header />
       <ThemedContentWrapper>
-        <div className="relative min-h-[80vh] flex items-center pt-24 pb-12 overflow-hidden">
+        <div className="public-hero relative flex items-center overflow-hidden">
           <motion.div
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.15 }}
@@ -86,13 +86,13 @@ export default function AssociateRolePage() {
           <div className="container mx-auto max-w-7xl px-4 relative z-10 public-layout-container">
             <Link
               href="/roles"
-              className="inline-flex items-center gap-2 text-sm font-bold text-orange-500/70 hover:text-orange-500 transition-all group px-4 py-2 rounded-full border border-orange-500/10 bg-orange-500/5 backdrop-blur-sm"
+              className="public-back-link group"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
               Back to Roles
             </Link>
 
-            <div className="max-w-5xl space-y-8 mt-8">
+            <div className="public-hero-content space-y-7">
               <div>
                 <div className="flex flex-wrap gap-3 mb-6">
                   <div className="w-12 h-12 rounded-xl bg-orange-600/20 border border-orange-600/30 flex items-center justify-center text-orange-500 shadow-inner">
@@ -105,13 +105,13 @@ export default function AssociateRolePage() {
                     Company Registration Mandatory
                   </div>
                 </div>
-                <h1 className="text-5xl md:text-7xl font-extrabold text-foreground tracking-tighter leading-[1.05]">
+                <h1 className="public-hero-title text-foreground">
                   Who Can Be an{" "}
                   <span className="inline-block px-1 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">
                     Associate?
                   </span>
                 </h1>
-                <p className="mt-8 text-xl md:text-2xl text-default-400 leading-relaxed max-w-4xl">
+                <p className="public-hero-description">
                   OBAOL Supreme is building a full trade-execution ecosystem. Beyond traders and warehouses, our network includes importers, exporters, inland transportation, freight forwarders, quality testing labs, agritech companies, and other execution-critical partners.
                 </p>
                 <div className="mt-6 max-w-4xl">
@@ -122,14 +122,14 @@ export default function AssociateRolePage() {
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link
                   href="/auth/register"
-                  className="px-8 py-4 rounded-2xl bg-orange-600 text-white font-bold text-lg shadow-[0_0_30px_-5px_rgba(234,88,12,0.5)] hover:bg-orange-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 group"
+                  className="public-button public-button--primary group"
                 >
                   Join as Associate
                   <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <button
                   onClick={() => document.getElementById("directory")?.scrollIntoView({ behavior: "smooth" })}
-                  className="px-8 py-4 rounded-2xl border border-default-200 bg-default-100/50 backdrop-blur-md text-foreground font-bold text-lg hover:bg-default-200/80 transition-all"
+                  className="public-button public-button--secondary"
                 >
                   Browse Role Directory
                 </button>
@@ -138,7 +138,7 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div id="directory" className="py-16 border-y border-default-100/50 bg-content1/30">
+        <div id="directory" className="public-standard-section border-y border-default-100/50 bg-content1/30">
           <div className="container mx-auto max-w-7xl px-4 public-layout-container">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Associate Role Directory</h2>
@@ -176,7 +176,7 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div className="py-16 bg-foreground/[0.02] border-t border-default-100">
+        <div className="public-standard-section bg-foreground/[0.02] border-t border-default-100">
           <div className="container mx-auto max-w-7xl px-4 public-layout-container">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">How Associates Work on OBAOL</h2>
@@ -204,12 +204,12 @@ export default function AssociateRolePage() {
           </div>
         </div>
 
-        <div className="py-16 md:py-20 flex flex-col items-center justify-center text-center px-4">
+        <div className="public-standard-section flex flex-col items-center justify-center text-center px-4">
           <div className="space-y-8 max-w-3xl">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-xs">
               Expand With The Ecosystem
             </div>
-            <h2 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight">
+            <h2 className="font-bold tracking-tight leading-tight">
               Build your role in global commodity execution.
             </h2>
             <p className="text-xl text-default-500 leading-relaxed">
@@ -218,7 +218,7 @@ export default function AssociateRolePage() {
             <div className="pt-4">
               <Link
                 href="/auth/register"
-                className="inline-flex items-center justify-center gap-4 px-12 py-5 rounded-[2rem] bg-orange-600 text-white font-black text-xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:bg-orange-700 hover:scale-[1.04] active:scale-[0.98] transition-all"
+                className="public-button public-button--primary"
               >
                 Register as Associate
                 <FiArrowRight size={22} />

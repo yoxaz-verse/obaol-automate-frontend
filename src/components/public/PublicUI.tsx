@@ -13,6 +13,22 @@ export function PublicSectionHeading({ id, eyebrow, title, children }: { id?: st
   </div>;
 }
 
+export function PublicHero({ className = "", ...props }: HTMLAttributes<HTMLElement>) {
+  return <section className={`public-hero ${className}`} {...props} />;
+}
+
+export function PublicHeroContent({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={`public-hero-content ${className}`} {...props} />;
+}
+
+export function PublicHeroTitle({ className = "", ...props }: HTMLAttributes<HTMLHeadingElement>) {
+  return <h1 className={`public-hero-title ${className}`} {...props} />;
+}
+
+export function PublicHeroDescription({ className = "", ...props }: HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={`public-hero-description ${className}`} {...props} />;
+}
+
 export function PublicCard({ className = "", ...props }: HTMLAttributes<HTMLElement>) {
   return <article className={`public-card ${className}`} {...props} />;
 }

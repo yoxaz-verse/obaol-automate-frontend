@@ -11,6 +11,12 @@
   background: var(--public-bg);
   color: var(--public-text);
   font-size: 16px;
+  --public-content-width: 1296px;
+  --public-reading-width: 760px;
+  --public-section-space: clamp(48px, 6vw, 80px);
+  --public-hero-title: clamp(36px, 4.2vw, 56px);
+  --public-section-title: clamp(28px, 3vw, 40px);
+  --public-card-radius: 16px;
 }
 .dark .obaol-public {
   --public-bg: #111412;
@@ -24,15 +30,21 @@
 }
 .obaol-public .public-container,
 .obaol-public .public-layout-container {
-  width: 100%; max-width: 1296px; margin-inline: auto; padding-inline: 20px;
+  width: 100%; max-width: var(--public-content-width); margin-inline: auto; padding-inline: 20px;
 }
-.obaol-public .public-section { padding-block: 56px; }
+.obaol-public .public-hero { padding-block: clamp(104px, 11vw, 136px) clamp(48px, 6vw, 80px); }
+.obaol-public .public-hero-content { max-width: 880px; }
+.obaol-public .public-back-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 28px; padding: 8px 14px; border: 1px solid var(--public-border); border-radius: 999px; background: color-mix(in srgb, var(--public-surface) 82%, transparent); color: var(--public-muted); font-size: 14px; font-weight: 650; }
+.obaol-public .public-back-link:hover { color: var(--public-accent); border-color: color-mix(in srgb, var(--public-accent) 45%, var(--public-border)); }
+.obaol-public .public-hero-title { max-width: 20ch; font-size: var(--public-hero-title); font-weight: 750; letter-spacing: -.04em; line-height: 1.08; text-wrap: balance; }
+.obaol-public .public-hero-description { max-width: 65ch; margin-top: 20px; color: var(--public-muted); font-size: clamp(16px, 1.5vw, 19px); line-height: 1.75; }
+.obaol-public .public-section { padding-block: var(--public-section-space); }
 .obaol-public .public-section-heading { max-width: 760px; }
 .obaol-public .public-eyebrow { color: var(--public-accent); font-size: 11px; line-height: 1.6; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.obaol-public .public-title { margin-top: 12px; font-size: clamp(32px, 3.6vw, 48px); font-weight: 650; letter-spacing: -.035em; line-height: 1.15; text-wrap: balance; }
+.obaol-public .public-title { margin-top: 12px; font-size: var(--public-section-title); font-weight: 700; letter-spacing: -.035em; line-height: 1.18; text-wrap: balance; }
 .obaol-public .public-description { margin-top: 20px; max-width: 65ch; color: var(--public-muted); font-size: 17px; line-height: 1.8; }
 .obaol-public .public-muted { color: var(--public-muted); }
-.obaol-public .public-card { padding: 28px; border: 1px solid var(--public-border); border-radius: 16px; background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
+.obaol-public .public-card { padding: clamp(20px, 2.5vw, 28px); border: 1px solid var(--public-border); border-radius: var(--public-card-radius); background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
 .obaol-public .public-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; color: var(--public-accent); background: var(--public-inset); }
 .obaol-public .public-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 18px; border: 1px solid transparent; border-radius: 10px; font-size: 14px; line-height: 1.5; font-weight: 650; transition: background .18s, border-color .18s; }
 .obaol-public .public-button--primary { background: #cf983c; color: #211b10; }
@@ -51,12 +63,16 @@
 .obaol-public .public-reading { max-width: 78ch; margin-inline: auto; }
 .obaol-public .public-content-wrapper { padding-top: 120px; padding-bottom: 56px; }
 .obaol-public .public-content-wrapper .public-content-wrapper { padding-block: 0; }
+.obaol-public .public-content-wrapper .public-hero { padding-top: 0; }
 .obaol-public .public-content-wrapper .prose { color: var(--public-muted); }
 .obaol-public .public-content-wrapper :is(h1,h2,h3,h4) { color: var(--public-text); }
-.obaol-public .public-content-wrapper h2,
-.obaol-public .public-standard-section h2 { font-size: clamp(32px, 3.6vw, 48px); line-height: 1.2; letter-spacing: -.03em; }
-.obaol-public .public-standard-section { padding-block: 56px; }
-.obaol-public .public-surface-card { border-radius: 16px; border-color: var(--public-border); background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
+.obaol-public :is(main, .public-content-wrapper) h1:not(.public-hero-title) { font-size: var(--public-hero-title) !important; line-height: 1.1 !important; letter-spacing: -.04em !important; text-wrap: balance; }
+.obaol-public :is(main, .public-content-wrapper) h2:is([class*="text-4xl"], [class*="text-5xl"], [class*="text-6xl"], [class*="text-7xl"], [class*="text-8xl"]),
+.obaol-public .public-standard-section h2 { font-size: var(--public-section-title) !important; line-height: 1.2 !important; letter-spacing: -.03em !important; text-wrap: balance; }
+.obaol-public .public-content-wrapper h3 { line-height: 1.3; }
+.obaol-public .public-content-wrapper p { overflow-wrap: anywhere; }
+.obaol-public .public-standard-section { padding-block: var(--public-section-space); }
+.obaol-public .public-surface-card { border-radius: var(--public-card-radius) !important; border-color: var(--public-border); background: var(--public-surface); box-shadow: 0 4px 16px #00000003; }
 .obaol-public .public-decoration { display: none; }
 .obaol-public .public-header-shell { background: var(--public-surface); border-color: var(--public-border); box-shadow: 0 4px 20px #00000005; }
 .obaol-public header nav a { min-height: 44px; display: inline-flex; align-items: center; }
@@ -93,7 +109,6 @@
 }
 @media (min-width: 1024px) {
   .obaol-public .public-container, .obaol-public .public-layout-container { padding-inline: 48px; }
-  .obaol-public .public-section, .obaol-public .public-standard-section { padding-block: 88px; }
   .execution-preview-body { grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr); }
   .execution-preview-summary, .execution-preview-progress { padding: 32px; }
 }
@@ -105,3 +120,8 @@
 /* Nested content shares its parent's gutters instead of adding another inset. */
 .obaol-public :is(.public-container, .public-layout-container) .public-layout-container { padding-inline: 0; }
 .obaol-public .public-content-wrapper > .public-container > .pt-24 { padding-top: 0; }
+@media (max-width: 639px) {
+  .obaol-public { --public-section-space: 48px; }
+  .obaol-public .public-hero { padding-top: 96px; }
+  .obaol-public .public-card { padding: 20px; }
+}

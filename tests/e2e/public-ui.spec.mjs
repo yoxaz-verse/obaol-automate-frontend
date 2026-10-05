@@ -54,6 +54,39 @@ for (const route of ["/about", "/roles", "/procurement", "/methods", "/privacy-p
   });
 }
 
+for (const route of ["/roles", "/roles/operator", "/roles/associate", "/roles/associate/traders"]) {
+  test(`role layout uses the shared compact scale on ${route}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    for (const width of [375, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(route);
+
+      const heading = page.locator("main h1, .public-content-wrapper h1").first();
+      await expect(heading).toBeVisible();
+      const geometry = await heading.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          fontSize: Number.parseFloat(getComputedStyle(element).fontSize),
+          left: rect.left,
+          right: rect.right,
+        };
+      });
+
+      expect(geometry.fontSize).toBeLessThanOrEqual(width < 640 ? 40 : 56);
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
+      expect(geometry.right).toBeLessThanOrEqual(width + 1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+      const contentContainer = page.locator(".public-layout-container").first();
+      if (await contentContainer.count()) {
+        const containerWidth = await contentContainer.evaluate((element) => element.getBoundingClientRect().width);
+        expect(containerWidth).toBeLessThanOrEqual(1296);
+      }
+    }
+  });
+}
+
 test("About marketing sections use one responsive content container", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 

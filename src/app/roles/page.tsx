@@ -42,7 +42,7 @@ export default function RolesPage() {
       <Header />
 
       <ThemedContentWrapper>
-        <div className="relative pt-24 pb-16 overflow-hidden">
+        <div className="public-hero relative overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full public-decoration" />
           <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full public-decoration" />
@@ -58,10 +58,10 @@ export default function RolesPage() {
                 <span className="inline-block px-4 py-1.5 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 text-xs font-bold tracking-widest uppercase mb-4">
                   Platform Roles
                 </span>
-                <h1 className="text-4xl md:text-6xl font-extrabold text-foreground tracking-tight leading-tight">
+                <h1 className="public-hero-title mx-auto text-foreground">
                   Choose Your <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">Identity</span>
                 </h1>
-                <p className="mt-6 text-lg md:text-xl text-default-500 max-w-2xl mx-auto leading-relaxed">
+                <p className="public-hero-description mx-auto">
                   OBAOL Supreme is built on collaboration. Whether you&apos;re executing trades or orchestrating the platform, your role defines the future of logistics.
                 </p>
               </motion.div>
@@ -214,7 +214,7 @@ export default function RolesPage() {
               </motion.div>
             </div>
 
-            <div className="mt-16 rounded-[2.5rem] border border-default-200/50 bg-content1/60 p-8 md:p-10 shadow-xl">
+            <div className="public-card mt-14 border-default-200/50 bg-content1/60">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 India-first roles with global execution expansion
               </h2>

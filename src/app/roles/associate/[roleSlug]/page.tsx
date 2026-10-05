@@ -124,31 +124,31 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
       
       <Header />
       
-      <main className="relative pt-24 pb-16">
+      <main className="public-hero relative">
         {/* Background glow effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-orange-500/5 blur-[120px] rounded-full pointer-events-none public-decoration" />
         
         <div className="container mx-auto max-w-6xl px-6 relative z-10 space-y-12 md:space-y-16 public-layout-container">
           
           {/* Header Section */}
-          <div className="space-y-8">
+          <div>
             <Link
               href="/roles/associate"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-foreground/50 hover:text-orange-500 transition-colors group px-4 py-2 rounded-full border border-divider bg-content1/30 backdrop-blur-sm"
+              className="public-back-link group"
             >
               <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
               Back to Associate Directory
             </Link>
 
-            <div className="space-y-6 max-w-4xl">
+            <div className="public-hero-content space-y-5">
               <div className={`inline-flex px-4 py-1.5 rounded-full border text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md ${badgeClass}`}>
                 Associate Ecosystem Role
               </div>
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
+              <h1 className="public-hero-title text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
                 {role.displayName} <br className="hidden md:block"/>
                 <span className="font-light italic truncate text-foreground/50">on OBAOL</span>
               </h1>
-              <p className="text-xl md:text-2xl text-foreground/60 leading-relaxed font-light">
+              <p className="public-hero-description">
                 {role.longDescription}
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
 
           {/* Value Proposition Grid */}
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="p-10 rounded-[2.5rem] border border-divider hover:border-orange-500/30 transition-colors bg-gradient-to-br from-content1/60 to-background shadow-lg group relative overflow-hidden">
+            <div className="public-card border-divider hover:border-orange-500/30 transition-colors bg-gradient-to-br from-content1/60 to-background group relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 text-foreground-[0.03] group-hover:text-orange-500/10 transition-colors pointer-events-none">
                  <FiTarget className="w-32 h-32" />
                </div>
@@ -176,7 +176,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
               </ul>
             </div>
 
-            <div className="p-10 rounded-[2.5rem] border border-divider hover:border-success/30 transition-colors bg-gradient-to-bl from-content1/60 to-background shadow-lg group relative overflow-hidden">
+            <div className="public-card border-divider hover:border-success/30 transition-colors bg-gradient-to-bl from-content1/60 to-background group relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 text-foreground-[0.03] group-hover:text-success/10 transition-colors pointer-events-none">
                  <FiShield className="w-32 h-32" />
                </div>
@@ -208,7 +208,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             
             <div className="grid md:grid-cols-2 gap-6">
               {role.faqs.map((faq) => (
-                <div key={faq.question} className="p-8 rounded-[2rem] border border-divider bg-content1/30 hover:bg-content1 transition-colors public-surface-card">
+                <div key={faq.question} className="public-card border-divider bg-content1/30 hover:bg-content1 transition-colors">
                   <h3 className="font-bold text-xl mb-3 leading-tight">{faq.question}</h3>
                   <p className="text-foreground/60 leading-relaxed">{faq.answer}</p>
                 </div>
@@ -246,7 +246,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             <h2 className="text-4xl font-bold mb-8">Execute With Precision</h2>
             <Link
               href="/auth/register"
-              className="inline-flex items-center gap-3 px-10 py-5 rounded-[2rem] bg-orange-600 text-white font-bold text-lg hover:bg-orange-700 hover:scale-[1.02] shadow-[0_10px_30px_-10px_rgba(234,88,12,0.5)] transition-all group"
+              className="public-button public-button--primary group"
             >
               Join as Associate
               <FiArrowRight className="group-hover:translate-x-1.5 transition-transform" />

@@ -17,6 +17,10 @@ for (const width of [375, 390, 1024, 1280, 1440]) {
       const mobile = width < 1024;
       const trigger = () => header.getByRole('button', { name: mobile ? /^(Open|Close) menu$/ : 'More', exact: !mobile });
       await expect(header.getByRole('link', { name: signedIn ? 'Open workspace' : 'Get Started', exact: true })).toBeVisible();
+      if (signedIn) {
+        await expect(header.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+        await expect(header.locator('a[href="/dashboard"]')).toHaveCount(1);
+      }
       await expect(page.locator('#public-page-directory')).toHaveCount(0);
       await trigger().focus();
       await page.keyboard.press('Enter');

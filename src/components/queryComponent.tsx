@@ -106,8 +106,12 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
     );
   };
 
-  if (isLoading && !data) {
-    return <div className="w-full">{renderLoading()}</div>;
+  if ((isLoading && !data) || (isFetching && isPlaceholderData)) {
+    return (
+      <div className="w-full min-h-[220px] flex flex-col justify-center animate-in fade-in duration-200">
+        {renderLoading()}
+      </div>
+    );
   }
 
   if (isError) {
@@ -123,12 +127,10 @@ function QueryComponent<T>(props: QueryComponentProps<T>) {
   }
 
   return (
-    <div className={`relative w-full min-w-0 max-w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-90" : "opacity-100"}`}>
-      {isFetching && !isLoading && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-end px-2 pt-2">
-          <div className="rounded-full border border-obaol-500/20 bg-background/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-500 shadow-sm backdrop-blur-sm">
-            {isPlaceholderData ? "Refreshing view" : "Syncing"}
-          </div>
+    <div className={`relative w-full min-w-0 max-w-full transition-all duration-300 ${isFetching ? "opacity-95" : "opacity-100"}`}>
+      {isFetching && (
+        <div className="pointer-events-none absolute inset-x-0 -top-2 z-20 flex flex-col items-center">
+          <div className="h-1 w-full bg-gradient-to-r from-transparent via-obaol-500 to-transparent animate-pulse rounded-full" />
         </div>
       )}
       {children(responseData as T, refetch, responseMeta)}

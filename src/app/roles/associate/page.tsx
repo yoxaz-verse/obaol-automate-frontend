@@ -12,7 +12,6 @@ import {
 } from "@/data/associateRoles";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import RevealImage from "@/components/ui/RevealImage";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -67,22 +66,6 @@ export default function AssociateRolePage() {
       <Header />
       <ThemedContentWrapper>
         <div className="public-hero relative flex items-center overflow-hidden">
-          <motion.div
-            initial={{ scale: 1.08, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.15 }}
-            transition={{ duration: 1.4 }}
-            className="absolute inset-0 z-0 pointer-events-none"
-          >
-            <RevealImage
-              src="/images/roles/associate/hero_bg.png"
-              alt="Associate ecosystem background"
-              fill
-              className="object-cover"
-              priority
-            />
-          </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-[1]" />
-
           <div className="container mx-auto max-w-7xl px-4 relative z-10 public-layout-container">
             <Link
               href="/roles"

@@ -145,11 +145,12 @@ test("public pages keep compact, uniform vertical spacing", async ({ page }) => 
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto("/commission-structure");
+    await page.waitForTimeout(700);
 
     const headerBottom = await page.locator(".public-header-shell").evaluate((element) => element.getBoundingClientRect().bottom);
     const eyebrowTop = await page.getByText("Commission Structure", { exact: true }).evaluate((element) => element.getBoundingClientRect().top);
     const heroBottom = await page.getByText(/Simple, step-by-step explanation/).evaluate((element) => element.getBoundingClientRect().bottom);
-    const firstPanelTop = await page.getByRole("heading", { name: "Commission Pool" }).evaluate((element) => element.closest('[data-slot="base"]')?.getBoundingClientRect().top ?? element.getBoundingClientRect().top);
+    const firstPanelTop = await page.locator(".public-layout-container > div.grid").first().evaluate((element) => element.getBoundingClientRect().top);
 
     expect(eyebrowTop - headerBottom).toBeGreaterThanOrEqual(16);
     expect(eyebrowTop - headerBottom).toBeLessThanOrEqual(72);

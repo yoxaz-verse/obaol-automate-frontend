@@ -127,9 +127,11 @@ export default function Header() {
             <div className="flex shrink-0 items-center gap-2 xl:gap-3">
               <div className="hidden xl:block"><ThemeSwitcher /></div>
               <div className="hidden sm:flex">{soundButton}</div>
-              <Link href={signedIn ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-11 items-center px-3 text-sm font-bold text-foreground/80 hover:text-obaol-600 dark:hover:text-obaol-300 transition-colors">
-                {signedIn ? "Dashboard" : "Sign In"}
-              </Link>
+              {!signedIn && (
+                <Link href="/auth?view=signin" className="hidden sm:inline-flex min-h-11 items-center px-3 text-sm font-bold text-foreground/80 hover:text-obaol-600 dark:hover:text-obaol-300 transition-colors">
+                  Sign In
+                </Link>
+              )}
               <Link href={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-obaol-500 to-amber-500 px-4 py-2.5 text-sm font-extrabold text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.35)] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_6px_22px_rgba(207,152,60,0.5)] active:scale-[0.97]">
                 {signedIn ? "Open workspace" : "Get Started"}
               </Link>
@@ -166,7 +168,7 @@ export default function Header() {
                 })}
               </nav>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3 border-t border-foreground/10 pt-4 lg:hidden">
-                <Link href={signedIn ? "/dashboard" : "/auth?view=signin"} onClick={() => closeMenu(true)} className="min-h-11 rounded-xl border border-foreground/10 px-4 py-3 text-sm font-semibold">{signedIn ? "Dashboard" : "Sign In"}</Link>
+                {!signedIn && <Link href="/auth?view=signin" onClick={() => closeMenu(true)} className="min-h-11 rounded-xl border border-foreground/10 px-4 py-3 text-sm font-semibold">Sign In</Link>}
                 <Link href={signedIn ? "/dashboard" : "/auth"} onClick={() => closeMenu(true)} className="min-h-11 rounded-xl bg-obaol-500 px-4 py-3 text-sm font-bold text-obaol-950">{signedIn ? "Open workspace" : "Get Started"}</Link>
                 {soundButton}
               </div>

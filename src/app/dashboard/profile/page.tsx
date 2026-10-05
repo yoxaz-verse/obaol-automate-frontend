@@ -29,6 +29,13 @@ import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/brow
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 
+const ASSOCIATE_ADMIN_CONTROLLED_FIELDS = new Set([
+  "isActive",
+  "isCompanyVerified",
+  "isEmailVerified",
+  "registrationStatus",
+]);
+
 function AdminDashboardPanel() {
   const { data: globalStats } = useQuery({
     queryKey: ["adminGlobalStats"],
@@ -494,7 +501,10 @@ export default function ProfilePage() {
       >
         {(response: any) => {
           const profile = response?.data || response;
-          const formFields = initialTableConfig[roleKey]?.filter((field: any) => field.key !== "password") || [];
+          const formFields = initialTableConfig[roleKey]?.filter((field: any) =>
+            field.key !== "password" &&
+            !(roleKey === "associate" && ASSOCIATE_ADMIN_CONTROLLED_FIELDS.has(field.key))
+          ) || [];
 
           return (
             <div className="flex flex-col gap-6">

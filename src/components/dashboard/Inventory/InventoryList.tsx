@@ -28,6 +28,7 @@ import { apiRoutesByRole } from "@/utils/tableValues";
 import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
 import AuthContext from "@/context/AuthContext";
+import SectionSkeleton from "@/components/ui/SectionSkeleton";
 import { getInventoryColumns, inventoryApiEndpoint, inventoryTableFields } from "@/features/inventory/tableConfig";
 import TableFrame from "@/components/CurdTable/table-frame";
 import { getData, postData, patchData, deleteData } from "@/core/api/apiHandler";
@@ -350,7 +351,7 @@ const InventoryList: React.FC = () => {
         enabled: shouldFetchInventory && Boolean(effectiveCompanyId),
     });
 
-    const { data: reservationData } = useQuery({
+    const { data: reservationData, isLoading: reservationLoading, isFetching: reservationFetching } = useQuery({
         queryKey: ["inventory-reservations", effectiveCompanyId, user?.id],
         queryFn: () =>
             getData(inventoryReservationRoutes.getAll, {
@@ -1006,7 +1007,9 @@ const InventoryList: React.FC = () => {
                                     </Tab>
                                     <Tab key="ordered" title="Ordered Inventory">
                                         <div className="rounded-xl border border-default-200/30 bg-content1 px-4 py-4">
-                                            {reservationRows.length === 0 ? (
+                                            {(reservationLoading || reservationFetching) && !reservationData ? (
+                                                <SectionSkeleton rows={3} className="py-2" />
+                                            ) : reservationRows.length === 0 ? (
                                                 <div className="text-sm text-default-500">No reserved inventory found.</div>
                                             ) : (
                                                 <div className="flex flex-col gap-3">

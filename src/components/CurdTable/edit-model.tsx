@@ -76,6 +76,13 @@ const PAYMENT_STAGE_KEYS = [
   "TRADE_CLOSED",
 ];
 
+const ASSOCIATE_ADMIN_CONTROLLED_FIELDS = [
+  "isActive",
+  "isCompanyVerified",
+  "isEmailVerified",
+  "registrationStatus",
+] as const;
+
 export default function EditModal({
   _id,
   currentTable,
@@ -257,6 +264,12 @@ export default function EditModal({
     setLoading(true);
     const basePayload = currentTable === "inventories" ? { ...formData, unit: "MT" } : formData;
     const payload = { ...basePayload };
+    if (currentTable === "associate") {
+      const editableFieldKeys = new Set(formFields.map((field) => field.key));
+      ASSOCIATE_ADMIN_CONTROLLED_FIELDS.forEach((field) => {
+        if (!editableFieldKeys.has(field)) delete payload[field];
+      });
+    }
     if (selectedUploadFile) {
       try {
         const uploadedFile = await uploadFormFile(selectedUploadFile, formData);

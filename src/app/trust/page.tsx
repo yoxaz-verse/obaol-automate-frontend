@@ -39,8 +39,8 @@ export default function TrustPage() {
               <h2 className="text-lg font-bold">Legal Entity</h2>
               <p className="mt-3 text-default-700">{BUSINESS_IDENTITY.legalName}</p>
               <p className="mt-4 text-sm text-default-600">
-                Registered / operational address: {BUSINESS_IDENTITY.address.streetAddress}, {BUSINESS_IDENTITY.address.addressLocality},{" "}
-                {BUSINESS_IDENTITY.address.addressRegion} {BUSINESS_IDENTITY.address.postalCode}, {BUSINESS_IDENTITY.address.addressCountry}
+                Registered address: {BUSINESS_IDENTITY.address.streetAddress}, {BUSINESS_IDENTITY.address.addressLocality},{" "}
+                {BUSINESS_IDENTITY.address.addressRegion}, {BUSINESS_IDENTITY.address.addressCountry}
               </p>
             </article>
 
@@ -48,9 +48,6 @@ export default function TrustPage() {
               <h2 className="text-lg font-bold">Official Contact</h2>
               <p className="mt-3 text-default-700">
                 Email: <a className="underline" href={`mailto:${BUSINESS_IDENTITY.email}`}>{BUSINESS_IDENTITY.email}</a>
-              </p>
-              <p className="mt-2 text-default-700">
-                Phone: <a className="underline" href={`tel:${BUSINESS_IDENTITY.phoneE164}`}>{BUSINESS_IDENTITY.phoneDisplay}</a>
               </p>
               <p className="mt-2 text-default-700">
                 LinkedIn: <a className="underline" href={BUSINESS_IDENTITY.linkedin} target="_blank" rel="noopener noreferrer">OBAOL Company Page</a>

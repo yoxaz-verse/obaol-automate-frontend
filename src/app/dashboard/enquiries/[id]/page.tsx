@@ -37,7 +37,6 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { FiPackage, FiTrendingUp, FiTrendingDown, FiAlertCircle, FiCheckCircle, FiPhone, FiExternalLink, FiPlus, FiList, FiSearch, FiTruck, FiAnchor, FiFileText, FiShield, FiPercent, FiClipboard, FiNavigation, FiEye, FiCheck, FiInfo, FiArrowRight, FiEdit3 } from "react-icons/fi";
 import { LuMail, LuPhone, LuPackage, LuTruck, LuAnchor, LuShieldCheck, LuClipboardCheck, LuFileCheck, LuGlobe, LuUser, LuTag, LuSearch, LuEye, LuCheck, LuMapPin, LuNavigation, LuChevronLeft, LuActivity, LuFileText, LuHistory, LuClock, LuStore } from "react-icons/lu";
-import { FaWhatsapp } from "react-icons/fa";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatLastSeen, getPresenceStatus, isOnline } from "@/utils/presence";
 import ResponsibilityEventForm from "@/components/dashboard/responsibilities/ResponsibilityEventForm";
@@ -2552,19 +2551,17 @@ export default function EnquiryDetailsPage() {
                                                                 `Seller: ${sellerLabel}`,
                                                             ].filter(Boolean);
                                                             const message = messageLines.join("\n");
-                                                            const whatsappUrl = `https://wa.me/919019351483?text=${encodeURIComponent(message)}`;
+                                                            const emailUrl = `mailto:info@support.obaol.com?subject=${encodeURIComponent(`OBAOL support request #${enquiryIdShort}`)}&body=${encodeURIComponent(message)}`;
                                                             return (
                                                                 <a
-                                                                    href={whatsappUrl}
-                                                            target="_blank"
+                                                                    href={emailUrl}
                                                             className="flex items-center gap-2 px-3 py-1.5 bg-success-500 text-white rounded-xl text-[10px] font-black border border-success-600/20 hover:bg-success-600 transition-all hover:scale-105 active:scale-95 no-underline"
                                                                 >
-                                                                    <FaWhatsapp size={13} />
-                                                                    WHATSAPP SUPPORT
+                                                                    <LuMail size={13} />
+                                                                    EMAIL SUPPORT
                                                                 </a>
                                                             );
                                                         })()}
-                                                        <span className="text-[9px] text-default-400 font-bold tracking-wider mt-0.5">+91 90193 51483</span>
                                                     </div>
                                                 </div>
                                             </div>

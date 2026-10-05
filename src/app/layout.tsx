@@ -203,13 +203,11 @@ export default function RootLayout({
               description: DEFAULT_DESCRIPTION,
               foundingDate: BUSINESS_IDENTITY.foundingDate,
               email: BUSINESS_IDENTITY.email,
-              telephone: BUSINESS_IDENTITY.phoneE164,
               contactPoint: [
                 {
                   "@type": "ContactPoint",
                   contactType: "customer support",
                   email: BUSINESS_IDENTITY.email,
-                  telephone: BUSINESS_IDENTITY.phoneE164,
                   areaServed: "IN",
                   availableLanguage: ["en"],
                 },

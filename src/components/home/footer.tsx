@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { MdEmail } from "react-icons/md";
-import { FaWhatsapp, FaLinkedin, FaArrowRight } from "react-icons/fa";
+import { FaLinkedin, FaArrowRight } from "react-icons/fa";
 import { FiArrowUp } from "react-icons/fi";
 import { BUSINESS_IDENTITY } from "@/utils/businessIdentity";
 
@@ -85,14 +85,6 @@ export default function Footer() {
               </div>
 
               <div className="flex items-center gap-6">
-                <a
-                  href={BUSINESS_IDENTITY.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-green-500/10 hover:border-green-500/20 hover:scale-110 transition-all duration-300 text-green-500"
-                >
-                  <FaWhatsapp className="text-xl" />
-                </a>
                 <a
                   href={BUSINESS_IDENTITY.linkedin}
                   target="_blank"

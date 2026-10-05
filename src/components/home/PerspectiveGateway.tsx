@@ -1,6 +1,5 @@
 import { FiArrowRight, FiCompass, FiShield, FiUsers } from "react-icons/fi";
 import Link from "next/link";
-import RevealImage from "@/components/ui/RevealImage";
 
 const perspectives = [
   {
@@ -38,11 +37,6 @@ const perspectives = [
 export default function PerspectiveGateway() {
   return (
     <section aria-labelledby="obaol-perspective-heading" className="relative overflow-hidden border-t border-default-200/60 bg-background py-16 md:py-24">
-      {/* Background artwork */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
-        <RevealImage src="/images/order-execution-laptop.webp" alt="" fill sizes="100vw" className="object-cover object-center" />
-      </div>
-
       <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
         <div className="max-w-3xl space-y-4 mb-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-obaol-700 dark:text-obaol-300">
@@ -62,6 +56,7 @@ export default function PerspectiveGateway() {
             return (
               <article
                 key={perspective.href}
+                data-perspective-card="true"
                 className="group relative flex flex-col justify-between rounded-3xl border border-default-200/80 bg-content1/80 p-8 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-obaol-500/50 hover:shadow-xl hover:shadow-obaol-500/10"
               >
                 {/* Gold Top Highlight Accent Line */}

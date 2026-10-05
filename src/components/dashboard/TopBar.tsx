@@ -321,32 +321,32 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           </div>
 
           {/* Desktop Identity */}
-          <div className="hidden md:flex flex-col gap-1 pr-8 border-r border-default-200/60 dark:border-white/10">
-            <div className="flex items-center gap-3">
+          <div className="hidden md:flex flex-col gap-0.5 shrink-0 px-4 xl:px-6">
+            <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-              <span className="text-sm font-semibold text-foreground">{username?.split('@')[0]}</span>
+              <span className="text-xs font-bold text-foreground truncate max-w-[140px]">{username?.split('@')[0]}</span>
             </div>
             <div className="flex items-center gap-2">
-               <span className="text-xs font-medium text-obaol-700 dark:text-obaol-300">{displayRole} · Online</span>
+               <span className="text-[11px] font-medium text-obaol-700 dark:text-obaol-300">{displayRole} · Online</span>
             </div>
           </div>
         </div>
 
         {/* Telemetry Group: Global Synchronization */}
-        <div className="hidden lg:flex items-center gap-12 pl-8 h-12">
-           <div className="flex flex-col border-l-2 border-obaol-500/20 pl-6 h-full justify-center">
-              <span className="text-[13px] font-black text-foreground tracking-[0.15em] tabular-nums flex items-center gap-2">
-                <span className="w-1 h-3 bg-obaol-500/40 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.25)]" />
+        <div className="hidden lg:flex items-center gap-6 xl:gap-8 shrink-0 h-12 pl-4 xl:pl-6 border-l border-default-200/60 dark:border-white/10">
+           <div className="flex flex-col justify-center">
+              <span className="text-[12px] font-black text-foreground tracking-[0.12em] tabular-nums flex items-center gap-1.5">
+                <span className="w-1 h-3 bg-obaol-500/50 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.25)]" />
                 {mounted ? (currentTime || "--:--:--") : "--:--:--"}
               </span>
-              <span className="mt-1 text-xs font-medium text-obaol-700/80 dark:text-obaol-300/80">Local time</span>
+              <span className="mt-0.5 text-[10px] font-medium text-obaol-700/80 dark:text-obaol-300/80">Local time</span>
            </div>
            
-           <div className="flex flex-col border-l border-default-200/60 dark:border-white/5 pl-8 h-full justify-center opacity-60 hover:opacity-100 transition-opacity">
-              <span className="text-[12px] font-bold text-default-600 dark:text-white/40 tracking-[0.15em] tabular-nums flex items-center gap-2">
+           <div className="hidden xl:flex flex-col justify-center border-l border-default-200/60 dark:border-white/10 pl-6 h-full opacity-60 hover:opacity-100 transition-opacity">
+              <span className="text-[11px] font-bold text-default-600 dark:text-white/40 tracking-[0.12em] tabular-nums">
                 {mounted ? (new Date().toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })) : "--:--:--"}
               </span>
-              <span className="mt-1 text-xs font-medium db-muted">UTC</span>
+              <span className="mt-0.5 text-[10px] font-medium db-muted">UTC</span>
            </div>
         </div>
       </div>

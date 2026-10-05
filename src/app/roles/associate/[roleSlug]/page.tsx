@@ -104,13 +104,13 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             </div>
           </section>
 
-          <section aria-labelledby="workflow-heading" className="public-standard-section border-y border-default-200/60 bg-foreground/[0.025]">
+          <section aria-labelledby="workflow-heading" className="public-standard-section border-y border-default-200/60 bg-background">
             <div className="container mx-auto max-w-6xl px-4 public-layout-container">
               <div className="mb-10 max-w-3xl">
                 <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Company journey</span>
                 <h2 id="workflow-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">How the workflow starts on OBAOL</h2>
               </div>
-              <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+              <ol className="m-0 grid list-none gap-5 p-0 md:grid-cols-2 lg:grid-cols-4">
                 {role.workflow.map((item, index) => (
                   <li key={item} className="public-surface-card rounded-3xl border border-default-200/70 bg-background p-6">
                     <span className="text-4xl font-black text-orange-500/25">{String(index + 1).padStart(2, "0")}</span>

@@ -77,14 +77,14 @@ export default function RolesPage() {
                 className="group relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[1.75rem]" />
-                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-xl overflow-hidden group-hover:-translate-y-2 public-surface-card">
+                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-white dark:bg-content1 border border-slate-200/80 dark:border-white/10 hover:border-obaol-500/40 transition-all duration-500 shadow-lg shadow-slate-200/50 dark:shadow-none overflow-hidden group-hover:-translate-y-2 public-surface-card">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+                    <div className="w-14 h-14 rounded-2xl bg-obaol-500 flex items-center justify-center text-white shadow-lg shadow-obaol-500/20">
                       <FiBriefcase size={28} />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-foreground tracking-tight">Associate</h2>
-                      <p className="text-orange-500 text-xs font-semibold tracking-wide uppercase">Business Role</p>
+                      <p className="text-obaol-600 dark:text-obaol-400 text-xs font-semibold tracking-wide uppercase">Business Role</p>
                     </div>
                   </div>
 
@@ -92,11 +92,11 @@ export default function RolesPage() {
                     Registered companies across the complete trade ecosystem can participate as Associates, including traders, suppliers, importers, exporters, logistics providers, warehouses, labs, finance partners, and other execution-critical businesses.
                   </p>
 
-                  <div className="mb-6 p-4 rounded-xl bg-default-100/50 border border-default-200/50">
+                  <div className="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
                     <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-2">Who can join?</p>
                     <div className="flex flex-wrap gap-1.5">
                       {["Traders", "Import/Exporters", "Suppliers", "Buyers", "Warehouse Managers", "Logistics", "Procurement", "Freight Forwarders", "Manufacturers", "Company Registration Mandatory"].map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 rounded-lg bg-background text-[10px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-orange-500/30">
+                        <span key={tag} className="px-2 py-0.5 rounded-lg bg-background text-[10px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-obaol-500/30">
                           {tag}
                         </span>
                       ))}
@@ -110,8 +110,8 @@ export default function RolesPage() {
                       { icon: <FiTrendingUp />, text: "Direct Market Execution" },
                       { icon: <FiShield />, text: "Enterprise-grade Compliance" },
                     ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 text-default-600 bg-white/50 dark:bg-default-100/30 p-3 rounded-xl border border-default-200/20">
-                        <span className="text-orange-500">{item.icon}</span>
+                      <div key={i} className="flex items-center gap-3 text-default-600 bg-slate-50/80 dark:bg-default-100/30 p-3 rounded-xl border border-slate-200/60 dark:border-default-200/20">
+                        <span className="text-obaol-500">{item.icon}</span>
                         <span className="text-sm font-medium">{item.text}</span>
                       </div>
                     ))}
@@ -119,8 +119,7 @@ export default function RolesPage() {
 
                   <div className="flex flex-col gap-3 mt-auto">
                     <Button
-                      color="warning"
-                      className="w-full h-12 rounded-xl bg-orange-600 text-white font-bold transition-all shadow-lg shadow-orange-600/20"
+                      className="w-full h-12 rounded-xl bg-slate-900 text-white dark:bg-obaol-500 dark:text-slate-950 font-bold transition-all shadow-lg shadow-slate-900/10 dark:shadow-obaol-500/20"
                       isLoading={isRegisterLoading}
                       onPress={handleRegister}
                     >
@@ -128,7 +127,7 @@ export default function RolesPage() {
                     </Button>
                     <Link
                       href="/roles/associate"
-                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
+                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white font-bold transition-all hover:bg-obaol-500 hover:text-white group/btn"
                     >
                       <span className="text-sm">Explore Associate Roles</span>
                       <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
@@ -147,15 +146,15 @@ export default function RolesPage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="group relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[1.75rem]" />
-                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-content1/50 backdrop-blur-md border border-default-200/50 hover:border-orange-500/30 transition-all duration-500 shadow-lg group-hover:shadow-xl overflow-hidden group-hover:-translate-y-2 public-surface-card">
+                <div className="absolute inset-0 bg-gradient-to-b from-obaol-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[1.75rem]" />
+                <div className="relative h-full flex flex-col p-6 md:p-8 rounded-[1.75rem] bg-white dark:bg-content1 border border-slate-200/80 dark:border-white/10 hover:border-obaol-500/40 transition-all duration-500 shadow-lg shadow-slate-200/50 dark:shadow-none group-hover:shadow-xl overflow-hidden group-hover:-translate-y-2 public-surface-card">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/20">
+                    <div className="w-14 h-14 rounded-2xl bg-obaol-600 flex items-center justify-center text-white shadow-lg shadow-obaol-600/20">
                       <FiUsers size={28} />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-foreground tracking-tight">Operator</h2>
-                      <p className="text-orange-600 text-[11px] font-semibold tracking-wide uppercase leading-tight">Supplier Portfolio Ownership</p>
+                      <p className="text-obaol-600 dark:text-obaol-400 text-[11px] font-semibold tracking-wide uppercase leading-tight">Supplier Portfolio Ownership</p>
                     </div>
                   </div>
 
@@ -163,11 +162,11 @@ export default function RolesPage() {
                     Digital agro traders who manage supplier relationships and build portfolios of 5-10+ companies to keep trade execution moving.
                   </p>
 
-                  <div className="mb-6 p-4 rounded-xl bg-default-100/50 border border-default-200/50">
+                  <div className="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
                     <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-2">Who can join?</p>
                     <div className="flex flex-wrap gap-1.5">
                       {["Individuals", "Portfolio Managers", "Digital Traders", "Business Developers", "Retired Custom Brokers", "Retired Professionals"].map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 rounded-lg bg-background text-[10px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-orange-500/30">
+                        <span key={tag} className="px-2 py-0.5 rounded-lg bg-background text-[10px] font-semibold text-foreground border border-default-200 shadow-sm transition-colors hover:border-obaol-500/30">
                           {tag}
                         </span>
                       ))}
@@ -182,8 +181,8 @@ export default function RolesPage() {
                       { icon: <FiUsers />, text: "Supplier Ownership" },
                       { icon: <FiTrendingUp />, text: "System Performance Tools" },
                     ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 text-default-600 bg-white/50 dark:bg-default-100/30 p-3 rounded-xl border border-default-200/20">
-                        <span className="text-orange-600">{item.icon}</span>
+                      <div key={i} className="flex items-center gap-3 text-default-600 bg-slate-50/80 dark:bg-default-100/30 p-3 rounded-xl border border-slate-200/60 dark:border-default-200/20">
+                        <span className="text-obaol-600">{item.icon}</span>
                         <span className="text-sm font-medium">{item.text}</span>
                       </div>
                     ))}
@@ -192,8 +191,7 @@ export default function RolesPage() {
 
                   <div className="flex flex-col gap-3 mt-auto">
                     <Button
-                      color="warning"
-                      className="w-full h-12 rounded-xl bg-orange-600 text-white font-bold transition-all shadow-lg shadow-orange-600/20"
+                      className="w-full h-12 rounded-xl bg-slate-900 text-white dark:bg-obaol-500 dark:text-slate-950 font-bold transition-all shadow-lg shadow-slate-900/10 dark:shadow-obaol-500/20"
                       isLoading={isJoinLoading}
                       onPress={handleJoin}
                     >
@@ -201,7 +199,7 @@ export default function RolesPage() {
                     </Button>
                     <Link
                       href="/roles/operator"
-                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-foreground text-background font-bold transition-all hover:bg-orange-600 hover:text-white group/btn"
+                      className="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white font-bold transition-all hover:bg-obaol-500 hover:text-white group/btn"
                     >
                       <span className="text-sm">More Details</span>
                       <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
@@ -214,7 +212,7 @@ export default function RolesPage() {
               </motion.div>
             </div>
 
-            <div className="public-card mt-14 border-default-200/50 bg-content1/60">
+            <div className="public-card mt-14 border-slate-200/80 dark:border-white/10 bg-white dark:bg-content1 shadow-md shadow-slate-200/50 dark:shadow-none">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 India-first roles with global execution expansion
               </h2>

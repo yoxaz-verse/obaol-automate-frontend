@@ -7,16 +7,11 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Divider,
-  Spacer as HeroSpacer,
-  Chip as HeroChip,
   Button,
   Input,
 } from "@nextui-org/react";
 
 const Avatar = HeroAvatar as any;
-const Chip = HeroChip as any;
-const Spacer = HeroSpacer as any;
 import QueryComponent from "@/components/queryComponent";
 import { apiRoutesByRole, initialTableConfig } from "@/utils/tableValues";
 import EditModal from "@/components/CurdTable/edit-model";
@@ -27,10 +22,12 @@ import AddModal from "@/components/CurdTable/add-model";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
-import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiUser, FiMoreVertical, FiKey, FiTrash2 } from "react-icons/fi";
+import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
+import PageHeader from "@/components/ui/PageHeader";
+import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
 
 function AdminDashboardPanel() {
   const { data: globalStats } = useQuery({
@@ -200,13 +197,13 @@ function OperatorDashboardPanel({ userId }: { userId: string }) {
 }
 
 const formatDate = (date: any) => {
-  if (!date) return "N/A";
+  if (!date) return "Not provided";
   const d = dayjs(date);
   return d.isValid() ? d.format("DD MMM YYYY") : "Invalid Date";
 };
 
 const formatWorkingHours = (hours: any[]) => {
-  if (!Array.isArray(hours)) return "—";
+  if (!Array.isArray(hours)) return "Not provided";
   return hours
     .map(
       (h) =>
@@ -223,23 +220,23 @@ const roleConfigs: Record<string, any> = {
   operator: {
     groups: [
       {
-        title: "Tactical Personnel Data",
+        title: "Personal information",
         fields: [
           { key: "name", label: "Operator Name" },
-          { key: "email", label: "Registry Login" },
-          { key: "phone", label: "Secure Contact" },
-          { key: "address", label: "Operational HQ" },
-          { key: "district.name", label: "Assigned District" },
-          { key: "state.name", label: "State Territory" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Phone" },
+          { key: "address", label: "Address" },
+          { key: "district.name", label: "District" },
+          { key: "state.name", label: "State" },
         ],
       },
       {
-        title: "Operational Status",
+        title: "Work details",
         fields: [
-          { key: "joiningDate", label: "Commission Date", format: (v: any) => formatDate(v) },
-          { key: "jobRole.name", label: "Functional Role" },
-          { key: "jobType.name", label: "Deployment Type" },
-          { key: "workingHours", label: "Duty Window", format: (v: any) => formatWorkingHours(v) },
+          { key: "joiningDate", label: "Joining date", format: (v: any) => formatDate(v) },
+          { key: "jobRole.name", label: "Role" },
+          { key: "jobType.name", label: "Employment type" },
+          { key: "workingHours", label: "Working hours", format: (v: any) => formatWorkingHours(v) },
         ],
       },
     ],
@@ -247,34 +244,34 @@ const roleConfigs: Record<string, any> = {
   associate: {
     groups: [
       {
-        title: "Market Identity Matrix",
+        title: "Company information",
         fields: [
-          { key: "associateCompany.name", label: "Trade Entity" },
-          { key: "associateCompany.companyType.name", label: "Market Segment" },
-          { key: "associateCompany.email", label: "Business Comm" },
-          { key: "associateCompany.phone", label: "Corporate Link" },
+          { key: "associateCompany.name", label: "Company" },
+          { key: "associateCompany.companyType.name", label: "Company type" },
+          { key: "associateCompany.email", label: "Business email" },
+          { key: "associateCompany.phone", label: "Business phone" },
         ],
       },
       {
-        title: "Geographic Footprint",
+        title: "Location",
         fields: [
-          { key: "associateCompany.state.name", label: "State HQ" },
-          { key: "associateCompany.district.name", label: "Zonal District" },
-          { key: "associateCompany.division.name", label: "Trade Division" },
-          { key: "associateCompany.pincodeEntry.pincode", label: "Regional Zip" },
+          { key: "associateCompany.state.name", label: "State" },
+          { key: "associateCompany.district.name", label: "District" },
+          { key: "associateCompany.division.name", label: "Division" },
+          { key: "associateCompany.pincodeEntry.pincode", label: "Postal code" },
         ],
       },
       {
-        title: "Clearance & Security",
+        title: "Verification",
         fields: [
-          { key: "isEmailVerified", label: "Digital Handshake", format: (v: any) => v ? "✅ VERIFIED" : "❌ PENDING" },
-          { key: "isPhoneVerified", label: "Comm Encryption", format: (v: any) => v ? "✅ VERIFIED" : "❌ PENDING" },
+          { key: "isEmailVerified", label: "Email", format: (v: any) => v ? "Verified" : "Pending" },
+          { key: "isPhoneVerified", label: "Phone", format: (v: any) => v ? "Verified" : "Pending" },
           {
             key: "isCompanyVerified",
-            label: "Integrity Audit",
+            label: "Company",
             format: (v: boolean, profile?: any) => {
-              if (!profile?.associateCompany) return "⚠️ REQUIRED";
-              return v ? "✅ CERTIFIED" : "⏳ AUDITING";
+              if (!profile?.associateCompany) return "Required";
+              return v ? "Verified" : "Under review";
             },
           },
         ],
@@ -284,18 +281,18 @@ const roleConfigs: Record<string, any> = {
   admin: {
     groups: [
       {
-        title: "Administrative Shell Access",
+        title: "Administrator information",
         fields: [
-          { key: "name", label: "Terminal Master" },
-          { key: "email", label: "Root Access Email" },
-          { key: "role", label: "Governance Tier" },
+          { key: "name", label: "Name" },
+          { key: "email", label: "Email" },
+          { key: "role", label: "Role" },
         ],
       },
       {
-        title: "System Integrity Logs",
+        title: "Account status",
         fields: [
-          { key: "isActive", label: "Node Healthstatus", format: (v: any) => v ? "🛡️ ALPHA_ACTIVE" : "⚠️ STANDBY" },
-          { key: "createdAt", label: "Registry Initialization", format: (v: any) => formatDate(v) },
+          { key: "isActive", label: "Status", format: (v: any) => v ? "Active" : "Inactive" },
+          { key: "createdAt", label: "Created" , format: (v: any) => formatDate(v) },
         ],
       },
     ],
@@ -485,7 +482,12 @@ export default function ProfilePage() {
   const config = roleConfigs[roleKey] || { groups: [] };
 
   return (
-    <div className="p-3 sm:p-8 md:p-14 w-full min-h-screen">
+    <DashboardPage className="py-3 sm:py-5">
+      <PageHeader
+        title="Profile"
+        description="Manage your account, company information, verification, and sign-in security."
+        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Profile" }]}
+      />
       <QueryComponent
         api={`${apiRoutesByRole[roleKey]}/${user?.id}`}
         queryKey={[roleKey, user?.id]}
@@ -495,55 +497,45 @@ export default function ProfilePage() {
           const formFields = initialTableConfig[roleKey]?.filter((field: any) => field.key !== "password") || [];
 
           return (
-            <div className="max-w-[1400px] mx-auto flex flex-col gap-6 sm:gap-14">
-              <div className="flex flex-col xl:flex-row gap-5 sm:gap-12 w-full">
-                {/* Left Node: Tactical Identity */}
-                <div className="xl:w-[420px] flex flex-col gap-4 sm:gap-8 shrink-0">
-                  <Card className="border db-border-subtle db-panel shadow-none backdrop-blur-3xl rounded-[1.5rem] sm:rounded-[3rem] overflow-hidden">
-                    <div className="h-28 sm:h-44 bg-obaol-500/[0.04] relative overflow-hidden border-b db-border-subtle">
-                      <div className="absolute top-3 right-3 sm:top-6 sm:right-6">
-                        <Chip
-                          color="warning"
-                          variant="flat"
-                          className="font-black uppercase text-[8px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.3em] h-6 sm:h-8 px-2.5 sm:px-4 bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 border border-obaol-500/20"
-                        >
-                          {displayRole}
-                        </Chip>
-                      </div>
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+                {/* Account summary */}
+                <div className="flex flex-col gap-4">
+                  <DashboardPanel className="overflow-hidden" feature>
+                    <div className="flex items-center justify-between border-b db-border-subtle bg-obaol-500/[0.04] px-5 py-4">
+                      <span className="dashboard-label">Account</span>
+                      <DashboardStatusBadge tone="brand">{displayRole}</DashboardStatusBadge>
                     </div>
 
-                    <CardBody className="relative flex flex-col items-center -mt-14 sm:-mt-24 pb-5 sm:pb-12 px-4 sm:px-10">
-                      <div className="relative p-1 sm:p-2 db-panel rounded-[1.5rem] sm:rounded-[3rem] border db-border-subtle mb-4 sm:mb-8">
+                    <div className="flex flex-col items-center px-5 py-6">
+                      <div className="relative mb-4 rounded-2xl border db-border-subtle db-panel p-1">
                         <Avatar
-                          className="w-20 h-20 sm:w-36 sm:h-36 text-xl sm:text-3xl border-2 border-foreground/5 rounded-[1.25rem] sm:rounded-[2.5rem]"
+                          className="h-24 w-24 rounded-xl border border-foreground/5 text-2xl"
                           showFallback
                           name={profile.name}
                           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || "User")}&background=18181b&color=eab308&size=256&bold=true&font-size=0.35`}
                         />
                       </div>
 
-                      <div className="text-center mb-4 sm:mb-10">
-                        <h2 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase leading-[0.9] sm:leading-[0.8] mb-2 sm:mb-4">
+                      <div className="mb-6 text-center">
+                        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                           {profile.name}
                         </h2>
-                        <div className="flex items-center justify-center gap-1.5 sm:gap-3">
-                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-success-500 animate-pulse" />
-                          <p className="text-[9px] sm:text-xs font-bold text-default-400 uppercase tracking-[0.1em] sm:tracking-[0.2em]">{profile.email}</p>
+                        <p className="mt-1 break-all text-sm db-muted">{profile.email}</p>
+                      </div>
+
+                      <div className="grid w-full grid-cols-2 gap-3">
+                        <div className="rounded-xl border db-border-subtle db-inset p-3 text-center">
+                          <p className="dashboard-label">Account status</p>
+                          <p className="mt-1 text-sm font-semibold text-success-600 dark:text-success-400">Verified</p>
+                        </div>
+                        <div className="rounded-xl border db-border-subtle db-inset p-3 text-center">
+                          <p className="dashboard-label">Membership</p>
+                          <p className="mt-1 text-sm font-semibold text-obaol-700 dark:text-obaol-300">Active</p>
                         </div>
                       </div>
 
-                      <div className="w-full grid grid-cols-2 gap-2.5 sm:gap-4">
-                        <div className="db-inset p-3 sm:p-5 rounded-[1rem] sm:rounded-[2rem] border db-border-subtle text-center">
-                          <p className="text-[8px] sm:text-[10px] font-black text-default-400 uppercase tracking-[0.1em] sm:tracking-widest mb-1 sm:mb-1.5 opacity-60 italic">Node Status</p>
-                          <p className="text-[10px] sm:text-xs font-black text-success-500 uppercase tracking-tight sm:tracking-tighter">Verified Active</p>
-                        </div>
-                        <div className="db-inset p-3 sm:p-5 rounded-[1rem] sm:rounded-[2rem] border db-border-subtle text-center">
-                          <p className="text-[8px] sm:text-[10px] font-black text-default-400 uppercase tracking-[0.1em] sm:tracking-widest mb-1 sm:mb-1.5 opacity-60 italic">System Rank</p>
-                          <p className="text-[10px] sm:text-xs font-black text-obaol-500 uppercase tracking-tight sm:tracking-tighter">Alpha Class</p>
-                        </div>
-                      </div>
-
-                      <div className="w-full mt-5 sm:mt-12">
+                      <div className="mt-5 w-full">
                         <EditModal
                           _id={profile._id}
                           initialData={profile}
@@ -553,42 +545,42 @@ export default function ProfilePage() {
                           refetchData={() => { }}
                         />
                       </div>
-                    </CardBody>
-                  </Card>
+                    </div>
+                  </DashboardPanel>
 
-                  <Card className="border border-obaol-500/15 bg-obaol-500/[0.02] sm:bg-obaol-500/[0.03] backdrop-blur-3xl shadow-none rounded-[1.2rem] sm:rounded-[2.5rem] p-3.5 sm:p-7 group cursor-pointer hover:border-obaol-500/30 hover:bg-obaol-500/[0.05] sm:hover:bg-obaol-500/[0.06] transition-colors">
+                  <DashboardPanel className="group cursor-pointer p-4 transition-colors hover:border-obaol-500/30 hover:bg-obaol-500/[0.04]">
                     <div className="flex items-center gap-3 sm:gap-6">
                       <div className="w-10 h-10 sm:w-16 sm:h-16 bg-obaol-500/8 sm:bg-obaol-500/10 rounded-lg sm:rounded-2xl flex items-center justify-center text-obaol-500 border border-obaol-500/15 sm:border-obaol-500/20">
                         <FiInfo size={22} className="sm:hidden" />
                         <FiInfo size={28} className="hidden sm:block" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-[15px] sm:text-lg font-black text-foreground uppercase tracking-tight italic">System Support</h4>
-                        <p className="text-[9px] sm:text-[11px] text-default-400 font-bold uppercase tracking-[0.16em] sm:tracking-widest mt-0.5 sm:mt-1">Direct Node Comms</p>
+                        <h4 className="text-base font-semibold text-foreground">Support</h4>
+                        <p className="mt-0.5 text-sm db-muted">Contact the OBAOL team</p>
                       </div>
                       <FiArrowRight size={18} className="text-default-300 group-hover:translate-x-1 transition-transform sm:hidden" />
                       <FiArrowRight size={20} className="text-default-300 group-hover:translate-x-1 transition-transform hidden sm:block" />
                     </div>
-                  </Card>
+                  </DashboardPanel>
 
                   <PasskeySecurityPanel />
                 </div>
 
-                {/* Right Matrix: Informative Hub */}
-                <div className="flex-1 flex flex-col gap-5 sm:gap-12">
+                {/* Profile details */}
+                <div className="flex min-w-0 flex-col gap-6">
                   {roleKey === "associate" && !profile?.associateCompany && (
-                    <Card className="border-2 border-dashed border-obaol-500/25 sm:border-obaol-500/30 bg-obaol-500/[0.02] sm:bg-obaol-500/[0.03] shadow-none rounded-[1.5rem] sm:rounded-[3.5rem] animate-in fade-in slide-in-from-top-6 duration-1000">
-                      <CardBody className="p-5 sm:p-16 flex flex-col items-center text-center gap-5 sm:gap-12">
+                    <Card className="dashboard-panel border-dashed bg-obaol-500/[0.03] shadow-none">
+                      <CardBody className="flex flex-col items-center gap-5 p-6 text-center sm:p-10">
                         <div className="relative">
-                          <div className="relative w-16 h-16 sm:w-28 sm:h-28 bg-obaol-500/8 sm:bg-obaol-500/10 rounded-[1.1rem] sm:rounded-[2.5rem] flex items-center justify-center border border-obaol-500/15 sm:border-obaol-500/20">
-                            <FiBriefcase className="text-obaol-500 w-7 h-7 sm:w-12 sm:h-12" />
+                          <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-obaol-500/20 bg-obaol-500/10">
+                            <FiBriefcase className="h-7 w-7 text-obaol-600 dark:text-obaol-300" />
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2.5 sm:gap-5">
-                          <h3 className="text-xl sm:text-4xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase italic leading-[0.95] sm:leading-[0.85]">
-                            Corporate Activation Required
+                        <div>
+                          <h3 className="dashboard-section-title">
+                            Complete your company profile
                           </h3>
-                          <p className="text-default-400 max-w-xl text-[13px] sm:text-base leading-relaxed font-medium">
+                          <p className="mt-2 max-w-xl text-sm leading-6 db-muted">
                             To publish trade listings, coordinate verified logistics, and manage rates, you must complete your company profile.
                           </p>
                         </div>
@@ -615,48 +607,29 @@ export default function ProfilePage() {
                     {config.groups
                       .filter((group: any) => {
                         if (roleKey === "associate" && !profile?.associateCompany) {
-                          return group.title !== "Market Identity Matrix" && group.title !== "Geographic Footprint";
+                          return group.title !== "Company information" && group.title !== "Location";
                         }
                         return true;
                       })
                       .map((group: any, idx: number) => (
-                        <Card
+                        <DashboardPanel
                           key={idx}
-                          className="border db-border-subtle db-panel backdrop-blur-2xl shadow-none rounded-[1.25rem] sm:rounded-[3rem] overflow-hidden"
+                          className="overflow-hidden"
                         >
-                          <CardHeader className="px-4 sm:px-12 pt-4 sm:pt-12 flex items-center justify-between gap-2.5 sm:gap-3">
-                            <div className="flex items-center gap-2.5 sm:gap-5">
-                              <div className="w-1 sm:w-2 h-6 sm:h-10 bg-obaol-500/80 sm:bg-obaol-500 rounded-full" />
-                              <h3 className="text-lg sm:text-3xl font-black text-foreground tracking-tight sm:tracking-tighter uppercase italic leading-[0.9] sm:leading-[0.8] pr-1 sm:pr-4">
-                                {group.title}
-                              </h3>
-                            </div>
-                            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full db-inset flex items-center justify-center opacity-30 border db-border-subtle shrink-0">
-                              <FiMoreVertical size={16} className="sm:hidden" />
-                              <FiMoreVertical size={20} className="hidden sm:block" />
-                            </div>
-                          </CardHeader>
-                          <CardBody className="px-4 sm:px-12 pb-5 sm:pb-12 pt-3 sm:pt-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 sm:gap-x-20 gap-y-5 sm:gap-y-12">
+                          <div className="border-b db-border-subtle px-5 py-4 sm:px-6">
+                            <DashboardSectionHeader title={group.title} />
+                          </div>
+                          <div className="p-5 sm:p-6">
+                            <dl className="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2">
                               {group.fields.map(({ key, label, format }: any) => {
                                 const value = getValue(profile, key);
                                 return (
-                                  <div key={key} className="flex flex-col gap-1 sm:gap-3 relative group/field">
-                                    <div className="absolute -left-2.5 sm:-left-6 top-0 bottom-0 w-1 bg-obaol-500/0 group-hover/field:bg-obaol-500/35 sm:group-hover/field:bg-obaol-500/50 transition-all rounded-full" />
-                                    <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.14em] sm:tracking-[0.4em] text-default-400 group-hover/field:translate-x-1 transition-transform inline-block">
-                                      {label}
-                                    </span>
-                                    <div className="flex items-center gap-1.5 sm:gap-3">
-                                      <span className="text-[15px] sm:text-xl font-black text-foreground tracking-tight group-hover/field:text-obaol-500 transition-colors uppercase">
-                                        {format ? format(value, profile) : value ?? "NODE_NUL"}
-                                      </span>
-                                    </div>
-                                  </div>
+                                  <DashboardField key={key} label={label} value={format ? format(value, profile) : value} />
                                 );
                               })}
-                            </div>
-                          </CardBody>
-                        </Card>
+                            </dl>
+                          </div>
+                        </DashboardPanel>
                       ))}
                   </div>
                 </div>
@@ -665,28 +638,28 @@ export default function ProfilePage() {
               <div className="animate-in fade-in slide-in-from-bottom-12 duration-[1500ms]">
               </div>
 
-              <div className="rounded-[1.2rem] sm:rounded-[2.5rem] border db-border-subtle db-panel shadow-none backdrop-blur-2xl p-3.5 sm:p-8 space-y-3.5 sm:space-y-6">
+              <DashboardPanel className="space-y-4 p-4 sm:p-6">
                 <div className="flex items-center gap-2.5 sm:gap-4">
                   <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary">
                     <FiInfo size={20} />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-xl font-black uppercase tracking-wide">Keyboard Shortcuts</h3>
-                    <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.3em] text-default-400">Open the shortcuts manager</p>
+                    <h3 className="text-base font-semibold sm:text-lg">Keyboard shortcuts</h3>
+                    <p className="text-sm db-muted">Customize quick navigation commands</p>
                   </div>
                 </div>
                 <Link
                   href="/dashboard/shortcuts"
-                  className="inline-flex items-center justify-between rounded-lg sm:rounded-2xl border db-border-subtle db-inset px-3.5 sm:px-6 py-2.5 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.3em] text-foreground hover:border-obaol-500/30 transition-colors"
+                  className="inline-flex min-h-11 items-center justify-between rounded-xl border db-border-subtle db-inset px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-obaol-500/30"
                 >
                   Manage Shortcuts
                   <FiArrowRight />
                 </Link>
-              </div>
+              </DashboardPanel>
             </div>
           );
         }}
       </QueryComponent>
-    </div>
+    </DashboardPage>
   );
 }

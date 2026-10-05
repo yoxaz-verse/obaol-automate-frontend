@@ -196,7 +196,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                         <div key={section.label || idx} className="space-y-2">
                             {!isCollapsed && section.label && (
                                 <div className="px-3 flex items-center gap-3">
-                                    <span className="text-[8px] font-black text-default-400 uppercase tracking-[0.3em] italic">{section.label}</span>
+                                    <span className="text-[10px] font-semibold text-default-500 uppercase tracking-[0.12em]">{section.label}</span>
                                     <div className="flex-1 h-[1px] bg-gradient-to-r from-default-200 dark:from-white/5 to-transparent" />
                                 </div>
                             )}

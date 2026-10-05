@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { DashboardPanel } from "@/components/dashboard/DashboardUI";
 
 export type PageHeaderProps = {
   title: string;
@@ -19,7 +20,7 @@ export default function PageHeader({
   secondaryAction,
 }: PageHeaderProps) {
   return (
-    <header className="mb-6 rounded-3xl border db-border-subtle db-panel p-5 md:p-7">
+    <DashboardPanel className="mb-6 p-5 md:p-7" feature>
       {breadcrumbs.length > 0 && (
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-xs db-muted">
           {breadcrumbs.map((item, index) => (
@@ -47,6 +48,6 @@ export default function PageHeader({
           </div>
         )}
       </div>
-    </header>
+    </DashboardPanel>
   );
 }

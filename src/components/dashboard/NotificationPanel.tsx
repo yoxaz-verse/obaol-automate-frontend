@@ -95,8 +95,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
              <FiBell size={20} className={notifications.filter(n => !n.isRead).length > 0 ? "animate-wiggle" : ""} />
           </div>
           <div className="flex flex-col">
-             <p className="text-sm font-black tracking-tight text-[#1F2937] dark:text-white uppercase leading-none">Command Hub</p>
-             <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mt-1">Operational Alerts</p>
+             <p className="text-sm font-semibold text-[#1F2937] dark:text-white">Notifications</p>
+             <p className="mt-1 text-xs db-muted">Workspace updates</p>
           </div>
         </div>
         <button
@@ -104,7 +104,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
           disabled={markAllMutation.isPending || notifications.every((x) => x.isRead)}
           className="text-[11px] font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 hover:opacity-70 transition-opacity disabled:opacity-30"
         >
-          Finalize All
+          Mark all read
         </button>
       </div>
 
@@ -112,14 +112,14 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Spinner size="md" color="warning" />
-            <span className="text-[10px] font-black text-default-400 uppercase tracking-[0.3em]">Syncing Protocols...</span>
+            <span className="text-sm db-muted">Loading notifications…</span>
           </div>
         ) : notifications.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center opacity-40">
              <div className="w-16 h-16 rounded-full border-2 border-dashed border-default-300 flex items-center justify-center mb-4">
                 <FiBell size={24} className="text-default-400" />
              </div>
-             <p className="text-sm font-black text-default-500 uppercase tracking-widest">Sky clear</p>
+             <p className="text-sm font-medium db-muted">You’re all caught up</p>
           </div>
         ) : (
           <div className="space-y-6 px-1">
@@ -150,7 +150,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
                            <p className={`text-sm font-black leading-snug tracking-tight transition-colors ${item.isRead ? "text-default-600" : "text-[#1F2937] dark:text-white"}`}>
                               {item.title}
                            </p>
-                           <p className="mt-1.5 text-xs font-medium text-default-500 line-clamp-2 leading-relaxed italic">
+                           <p className="mt-1.5 text-xs font-medium text-default-500 line-clamp-2 leading-relaxed">
                               {item.message}
                            </p>
                            <div className="mt-4 flex items-center justify-between">
@@ -181,7 +181,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose }) => {
           onClick={() => { router.push("/dashboard/notifications"); onClose?.(); }}
           className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1F2937] dark:text-white hover:text-obaol-700 dark:hover:text-obaol-300 transition-colors"
         >
-          Access History Archive
+          View all notifications
         </button>
         <button 
            onClick={onClose}

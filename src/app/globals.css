@@ -32,6 +32,13 @@
   --db-overlay-soft: rgba(15, 23, 42, 0.04);
   --db-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   --db-shadow-card: 0 2px 8px -1px rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+  --db-content-width: 1440px;
+  --db-page-gap: clamp(1rem, 2vw, 1.5rem);
+  --db-radius-control: 0.75rem;
+  --db-radius-card: 1rem;
+  --db-radius-panel: 1.5rem;
+  --db-title-size: clamp(1.5rem, 2.2vw, 1.875rem);
+  --db-section-title-size: clamp(1.125rem, 1.6vw, 1.5rem);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -289,6 +296,50 @@ canvas {
     box-shadow: 0 0 0 2px var(--db-focus);
   }
 
+  .dashboard-page {
+    width: 100%;
+    max-width: var(--db-content-width);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--db-page-gap);
+  }
+
+  .dashboard-panel {
+    border: 1px solid var(--db-border-subtle);
+    border-radius: var(--db-radius-card);
+    background: var(--db-panel);
+    box-shadow: var(--db-shadow-card);
+  }
+
+  .dashboard-feature-panel {
+    border-radius: var(--db-radius-panel);
+  }
+
+  .dashboard-section-title {
+    color: rgb(var(--foreground-rgb));
+    font-size: var(--db-section-title-size);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .dashboard-label {
+    color: var(--db-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+  }
+
+  .dashboard-value {
+    color: rgb(var(--foreground-rgb));
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
   /* Dashboard surfaces use borders and tonal contrast instead of decorative
      elevation. Portalled overlays sit outside this shell and keep their
      functional shadow; printable canvases can opt out explicitly. */
@@ -305,6 +356,42 @@ canvas {
   [data-dashboard-shell] :focus-visible {
     box-shadow: 0 0 0 2px var(--db-focus) !important;
   }
+}
+
+[data-dashboard-content] > * {
+  width: 100%;
+  max-width: var(--db-content-width);
+  margin-inline: auto;
+}
+
+[data-dashboard-content] :is(.db-panel, .db-subtle, .db-inset) {
+  border-radius: min(var(--db-radius-panel), 1.5rem) !important;
+}
+
+[data-dashboard-content] :is(h1, h2, h3, h4) {
+  font-style: normal !important;
+  text-transform: none !important;
+  text-wrap: balance;
+}
+
+[data-dashboard-content] h1 {
+  font-size: var(--db-title-size) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.03em !important;
+}
+
+[data-dashboard-content] h2:is([class*="text-4xl"], [class*="text-5xl"], [class*="text-6xl"], [class*="text-7xl"]) {
+  font-size: var(--db-title-size) !important;
+  line-height: 1.2 !important;
+}
+
+[data-dashboard-content] h3:is([class*="text-3xl"], [class*="text-4xl"], [class*="text-5xl"]) {
+  font-size: var(--db-section-title-size) !important;
+  line-height: 1.25 !important;
+}
+
+[data-dashboard-content] :is([class*="rounded-[2.5rem]"], [class*="rounded-[3rem]"], [class*="rounded-[3.5rem]"], [class*="rounded-[4rem]"]) {
+  border-radius: var(--db-radius-panel) !important;
 }
 
 

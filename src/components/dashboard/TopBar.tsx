@@ -324,10 +324,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
           <div className="hidden md:flex flex-col gap-1 pr-8 border-r border-default-200/60 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-              <span className="text-[11px] font-black text-foreground tracking-[0.25em] uppercase">{username?.split('@')[0]}</span>
+              <span className="text-sm font-semibold text-foreground">{username?.split('@')[0]}</span>
             </div>
             <div className="flex items-center gap-2">
-               <span className="text-[9px] font-bold text-obaol-700 dark:text-obaol-300 uppercase tracking-[0.2em] opacity-80">{displayRole} CORE ONLINE</span>
+               <span className="text-xs font-medium text-obaol-700 dark:text-obaol-300">{displayRole} · Online</span>
             </div>
           </div>
         </div>
@@ -339,14 +339,14 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 <span className="w-1 h-3 bg-obaol-500/40 rounded-full shadow-[0_0_8px_rgba(207,152,60,0.25)]" />
                 {mounted ? (currentTime || "--:--:--") : "--:--:--"}
               </span>
-              <span className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.4em] text-obaol-700/70 dark:text-obaol-300/70">Local Terminal</span>
+              <span className="mt-1 text-xs font-medium text-obaol-700/80 dark:text-obaol-300/80">Local time</span>
            </div>
            
            <div className="flex flex-col border-l border-default-200/60 dark:border-white/5 pl-8 h-full justify-center opacity-60 hover:opacity-100 transition-opacity">
               <span className="text-[12px] font-bold text-default-600 dark:text-white/40 tracking-[0.15em] tabular-nums flex items-center gap-2">
                 {mounted ? (new Date().toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })) : "--:--:--"}
               </span>
-              <span className="text-[9px] font-black text-default-500/50 uppercase tracking-[0.4em] mt-1.5 italic">UTC Control</span>
+              <span className="mt-1 text-xs font-medium db-muted">UTC</span>
            </div>
         </div>
       </div>

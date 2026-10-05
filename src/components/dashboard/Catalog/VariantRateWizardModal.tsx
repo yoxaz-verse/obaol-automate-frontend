@@ -23,6 +23,11 @@ import { fetchDependentOptions } from "@/utils/fetchDependentOptions";
 import { showToastMessage } from "@/utils/utils";
 import { associateCompanyRoutes, associateRoutes, productRoutes, productVariantRoutes, warehouseRoutes } from "@/core/api/apiRoutes";
 import { useCalculationConfig, DEFAULT_CALCULATION_CONFIG } from "@/hooks/useCalculationConfig";
+import {
+  applyProductionMethod,
+  resolveProductionMethod,
+  type ProductionMethod,
+} from "@/utils/productClassification";
 
 type WizardProps = {
   isOpen: boolean;
@@ -62,6 +67,13 @@ const ORGANIC_SCOPES = [
   { key: "NOP", value: "USDA NOP" },
   { key: "EU", value: "EU Organic" },
   { key: "Other", value: "Other" },
+];
+
+const PRODUCTION_METHODS: Array<{ key: ProductionMethod; label: string }> = [
+  { key: "conventional", label: "Conventional" },
+  { key: "natural", label: "Natural" },
+  { key: "organic", label: "Organic" },
+  { key: "ipm", label: "IPM" },
 ];
 
 const VariantRateWizardModal: React.FC<WizardProps> = ({
@@ -190,6 +202,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (!resolvedProductId) {
       setFormData((prev) => ({
         ...prev,
+        productionMethod: "conventional",
+        isConventional: true,
         isNatural: false,
         isOrganic: false,
         isIpmQuality: false,
@@ -214,8 +228,11 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       try {
         const res = await getData(`${productRoutes.getAll}/${resolvedProductId}`);
         const row = res?.data?.data || {};
+        const resolvedMethod = resolveProductionMethod(row);
         setFormData((prev) => ({
           ...prev,
+          productionMethod: resolvedMethod.method,
+          isConventional: Boolean(row?.isConventional) || (!row?.isNatural && !row?.isOrganic && !row?.isIpmQuality),
           isNatural: Boolean(row?.isNatural),
           isOrganic: Boolean(row?.isOrganic),
           isIpmQuality: Boolean(row?.isIpmQuality),
@@ -251,11 +268,15 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
           organicCertificateDocumentUrl: "",
           giName: "",
           giCertificateNumber: "",
-          classification: "",
+          classification: resolvedMethod.hasConflict
+            ? "Multiple farming methods are saved for this product. Select one method to resolve the conflict."
+            : "",
         }));
       } catch {
         setFormData((prev) => ({
           ...prev,
+          productionMethod: "conventional",
+          isConventional: true,
           isNatural: false,
           isOrganic: false,
           isIpmQuality: false,
@@ -432,6 +453,26 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  const setProductionMethod = (method: ProductionMethod) => {
+    setFormData((prev) => {
+      const next: Record<string, any> = applyProductionMethod(prev, method);
+      if (method !== "organic") {
+        next.isOrganicCertified = false;
+        next.organicCertificationBody = "";
+        next.organicCertificationBodyOther = "";
+        next.organicCertificateNumber = "";
+        next.organicCertificateValidFrom = "";
+        next.organicCertificateValidTo = "";
+        next.organicCertifiedQuantity = "";
+        next.organicCertifiedQuantityUnit = "KG";
+        next.organicCertificationScope = "NPOP";
+        next.organicCertificateDocumentUrl = "";
+      }
+      return next;
+    });
+    setErrors((prev) => ({ ...prev, classification: "" }));
+  };
+
   const validateStep = () => {
     const nextErrors: Record<string, string> = {};
     if (step === 1 && !fixedVariantId) {
@@ -439,6 +480,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.subCategory) nextErrors.subCategory = "Select a sub category.";
       if (!formData.product) nextErrors.product = "Select a product.";
       if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
+    }
+    if (step === 1 && !formData.productionMethod) {
+      nextErrors.classification = "Select one production / farming method.";
     }
     if (step === 1 && formData.isGiTagged) {
       if (!String(formData.giName || "").trim()) nextErrors.giName = "Enter GI name.";
@@ -619,16 +663,18 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     base: "rounded-xl text-foreground data-[hover=true]:bg-default-100 data-[selectable=true]:focus:bg-default-100 data-[selected=true]:text-obaol-400 font-black uppercase text-[10px] tracking-widest h-12 transition-all border border-transparent data-[hover=true]:border-default-200",
     title: "font-black uppercase tracking-widest text-[11px] text-foreground",
   };
-  const isNatural = Boolean(formData.isNatural);
-  const isOrganic = Boolean(formData.isOrganic);
-  const isIpmQuality = Boolean(formData.isIpmQuality);
+  const productionMethod = formData.productionMethod as ProductionMethod | null | undefined;
+  const isConventional = productionMethod === "conventional";
+  const isNatural = productionMethod === "natural";
+  const isOrganic = productionMethod === "organic";
+  const isIpmQuality = productionMethod === "ipm";
   const isGiTagged = Boolean(formData.isGiTagged);
-  const isConventional = !(isNatural || isOrganic || isIpmQuality);
   const isSubmitting = submitPhase !== "idle" || createMutation.isPending;
 
   const getStepForErrors = (keys: string[]): number => {
     const step1Keys = new Set([
       "category", "subCategory", "product", "productVariant",
+      "classification",
       "giName", "giCertificateNumber",
       "organicCertificationBody", "organicCertificationBodyOther",
       "organicCertificateNumber", "organicCertificateValidFrom", "organicCertificateValidTo",
@@ -650,6 +696,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
       if (!formData.product) nextErrors.product = "Select a product.";
       if (!formData.productVariant) nextErrors.productVariant = "Select a product variant.";
     }
+    if (!productionMethod) nextErrors.classification = "Select one production / farming method.";
     if (isGiTagged) {
       if (!String(formData.giName || "").trim()) nextErrors.giName = "Enter GI name.";
       if (!String(formData.giCertificateNumber || "").trim()) nextErrors.giCertificateNumber = "Enter GI certificate number.";
@@ -691,6 +738,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
   };
 
   const normalizeClassificationPayload = () => ({
+    isConventional: isConventional,
     isNatural: isNatural,
     isOrganic: isOrganic,
     isIpmQuality: isIpmQuality,
@@ -725,6 +773,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
     if (msg.includes("gi details")) {
       mapped.giName = "GI details are required.";
       mapped.giCertificateNumber = "GI details are required.";
+    }
+    if (msg.includes("production / farming method")) {
+      mapped.classification = "Select exactly one production / farming method.";
     }
     if (msg.includes("warehouse is required")) mapped.warehouseId = "Select a warehouse.";
     if (msg.includes("office address is required")) mapped.officeAddress = "Enter office address.";
@@ -867,64 +918,65 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       </div>
                     </div>
                     <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200 bg-content2 p-3 sm:p-4">
-                      <div className="mb-3">
-                        <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">Product Type & GI Tag</p>
-                        <p className="text-[11px] text-default-500 mt-1">
-                          Natural, Organic, and IPM are primary categories. GI Tag is an additional independent signal and can be combined.
-                        </p>
-                      </div>
-
                       {!resolvedProductId ? (
                         <div className="rounded-xl border border-default-200 bg-content1 px-4 py-3 text-xs text-default-500">
                           Select product first to configure classification.
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3">
-                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">Natural</span>
-                              <Switch isSelected={isNatural} onValueChange={(v) => setValue("isNatural", v)} color="warning" />
+                          <div className="rounded-xl border border-default-200 bg-content1 p-3 sm:p-4">
+                            <div className="mb-3">
+                              <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">
+                                Production / Farming Method
+                              </p>
+                              <p className="text-[11px] text-default-500 mt-1">
+                                Select the production method used for this product.
+                              </p>
                             </div>
-                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">Organic</span>
-                              <Switch isSelected={isOrganic} onValueChange={(v) => setValue("isOrganic", v)} color="warning" />
+                            <div role="radiogroup" aria-label="Production / Farming Method" className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                              {PRODUCTION_METHODS.map((method) => {
+                                const selected = productionMethod === method.key;
+                                return (
+                                  <button
+                                    key={method.key}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={selected}
+                                    onClick={() => setProductionMethod(method.key)}
+                                    className={`rounded-xl border px-3 sm:px-4 py-3 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-obaol-500 ${
+                                      selected
+                                        ? "border-obaol-500/60 bg-obaol-500/15 text-obaol-400 shadow-inner"
+                                        : "border-default-200 bg-content2 text-default-400 hover:border-default-300 hover:bg-content3"
+                                    }`}
+                                  >
+                                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                                      <span className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${selected ? "border-obaol-500" : "border-default-400"}`}>
+                                        {selected && <span className="h-2 w-2 rounded-full bg-obaol-500" />}
+                                      </span>
+                                      {method.label}
+                                    </span>
+                                  </button>
+                                );
+                              })}
                             </div>
-                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">IPM</span>
-                              <Switch isSelected={isIpmQuality} onValueChange={(v) => setValue("isIpmQuality", v)} color="warning" />
-                            </div>
-                            <div className="rounded-xl border border-default-200 bg-content1 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
-                              <Switch isSelected={isGiTagged} onValueChange={(v) => setValue("isGiTagged", v)} color="warning" />
-                            </div>
+                            {errors.classification && (
+                              <p className="mt-2 text-xs text-danger-400" role="alert">{errors.classification}</p>
+                            )}
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            {isConventional && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-default-300/40 bg-default-500/10 text-default-300">
-                                Conventional
-                              </span>
-                            )}
-                            {isNatural && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-amber-500/40 bg-amber-500/15 text-amber-400">
-                                Natural
-                              </span>
-                            )}
-                            {isOrganic && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
-                                Organic
-                              </span>
-                            )}
-                            {isIpmQuality && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-sky-400/40 bg-sky-500/15 text-sky-300">
-                                IPM
-                              </span>
-                            )}
-                            {isGiTagged && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-fuchsia-400/40 bg-fuchsia-500/15 text-fuchsia-300">
-                                GI Tag
-                              </span>
-                            )}
+                          <div className="rounded-xl border border-default-200 bg-content1 p-3 sm:p-4">
+                            <div className="mb-3">
+                              <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-default-400">
+                                Geographical Certification / Recognition
+                              </p>
+                              <p className="text-[11px] text-default-500 mt-1">
+                                Indicate whether this product has recognized geographical certification.
+                              </p>
+                            </div>
+                            <div className="rounded-xl border border-default-200 bg-content2 px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
+                              <span className="text-xs font-bold uppercase tracking-wider text-default-400">GI Tag</span>
+                              <Switch aria-label="GI Tag" isSelected={isGiTagged} onValueChange={(v) => setValue("isGiTagged", v)} color="warning" />
+                            </div>
                           </div>
 
                           {isOrganic && (

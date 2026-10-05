@@ -281,7 +281,7 @@ export default function ApprovalsPage() {
                   )}
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Protocol Status</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-center">Approval Timeline</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-right pr-10">Command Hub</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-default-400 uppercase tracking-widest text-right pr-10">Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -15,7 +15,7 @@ interface InsightCardProps {
 
 const InsightCard: React.FC<InsightCardProps> = ({ title, metric, trend, icon, footer }) => {
     return (
-        <Card className="border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md bg-content1 backdrop-blur-lg transition-all rounded-2xl">
+        <Card className="dashboard-panel shadow-none transition-colors hover:border-obaol-500/30">
             <CardBody className="gap-3.5 p-5">
                 <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-1">

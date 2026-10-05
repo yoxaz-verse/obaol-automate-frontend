@@ -104,6 +104,21 @@ test("BOTH associate focus persists across reloads", async ({ page }) => {
   await expect(page.getByText("Live listings", { exact: true })).toBeVisible();
 });
 
+test("profile uses the shared dashboard workspace styling", async ({ page }) => {
+  await login(page, accounts[2]);
+  await page.goto("/dashboard/profile");
+
+  await expect(page.getByRole("heading", { name: "Profile", exact: true })).toBeVisible();
+  await expect(page.getByText("Company information", { exact: true }).or(page.getByText("Complete your company profile", { exact: true }))).toBeVisible();
+  await expect(page.getByText("NODE_NUL", { exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+  const panels = page.locator(".dashboard-panel");
+  expect(await panels.count()).toBeGreaterThan(1);
+  const radii = await panels.evaluateAll((elements) => elements.map((element) => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius)));
+  expect(Math.max(...radii)).toBeLessThanOrEqual(24);
+});
+
 test("mobile navigation exposes stable labels and restores focus after Escape", async ({ page }) => {
   test.skip((page.viewportSize()?.width || 0) >= 768, "mobile navigation behavior");
   await login(page, accounts[0]);

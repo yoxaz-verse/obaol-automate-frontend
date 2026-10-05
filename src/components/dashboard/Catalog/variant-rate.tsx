@@ -46,6 +46,7 @@ import {
   FiPlus,
   FiMenu,
   FiMoreHorizontal,
+  FiSearch,
 } from "react-icons/fi";
 import { LuMessageSquare, LuBox } from "react-icons/lu";
 import { motion } from "framer-motion";
@@ -1251,9 +1252,33 @@ const VariantRate: React.FC<VariantRateProps> = ({
               )}
             <div className="h-5" />
             <section className="w-full">
-              {finalTableData.length === 0 &&
-              rate === "catalogItem" &&
-              isAssociateUser ? (
+              {finalTableData.length === 0 && Boolean(search?.trim()) ? (
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-inner my-4">
+                  <div className="relative mb-6">
+                    <div className="p-5 bg-content2/80 border border-divider rounded-[2rem] text-default-400 shadow-xl">
+                      <FiSearch size={40} strokeWidth={1.5} />
+                    </div>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight uppercase">
+                    No Matching Trade Listings
+                  </h3>
+                  <p className="text-default-500 max-w-[360px] mt-2 mb-6 text-xs sm:text-sm font-medium">
+                    No trade listings matched &quot;<span className="text-foreground font-semibold">{search}</span>&quot;. Try searching for another commodity or clear the search query.
+                  </p>
+                  <Button
+                    color="default"
+                    variant="flat"
+                    size="md"
+                    className="font-bold px-6 rounded-xl"
+                    onPress={() => setSearch("")}
+                    startContent={<FiX size={16} />}
+                  >
+                    Clear Search Filter
+                  </Button>
+                </div>
+              ) : finalTableData.length === 0 &&
+                rate === "catalogItem" &&
+                isAssociateUser ? (
                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-content1/30 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-inner">
                   <div className="relative mb-6">
                     <div className="absolute inset-0 bg-obaol-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
@@ -1335,6 +1360,103 @@ const VariantRate: React.FC<VariantRateProps> = ({
                     Switch to your general product list and toggle them live to
                     start trading.
                   </p>
+                </div>
+              ) : finalTableData.length === 0 ? (
+                <div className="relative w-full flex flex-col items-center justify-center py-16 sm:py-20 px-6 text-center bg-gradient-to-b from-content1/80 via-content1/40 to-content1/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 dark:border-white/5 shadow-2xl overflow-hidden my-2 group">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-obaol-500/10 dark:bg-obaol-500/15 blur-3xl rounded-full pointer-events-none scale-125 transition-all duration-700 group-hover:scale-150" />
+                  
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-obaol-500/20 blur-xl rounded-full scale-125 animate-pulse" />
+                    <div className="relative p-6 sm:p-7 bg-content2/80 border border-white/10 rounded-[2.5rem] text-obaol-500 shadow-2xl backdrop-blur-md">
+                      <FiPackage size={48} strokeWidth={1.5} className="sm:w-14 sm:h-14" />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 p-2.5 bg-gradient-to-tr from-obaol-500 to-amber-400 text-black rounded-full border-4 border-background shadow-lg">
+                      <FiPlus size={18} strokeWidth={3} />
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight uppercase max-w-md">
+                    List Your First Trade Product
+                  </h3>
+                  <p className="text-default-500 max-w-[420px] mt-2 mb-8 text-xs sm:text-sm leading-relaxed font-medium">
+                    {canAddOwnRate
+                      ? "Set up your commodity rates, manage available inventory, and make your products discoverable to global buyers."
+                      : "Link your company profile to start listing your commodity rates and showcasing products in the global trade network."}
+                  </p>
+
+                  {canAddOwnRate ? (
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <Button
+                        color="warning"
+                        variant="shadow"
+                        size="lg"
+                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm uppercase tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
+                        onPress={() => setWizardOpen(true)}
+                        startContent={<FiPlus size={20} strokeWidth={2.5} />}
+                      >
+                        List Your First Product
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <Button
+                        color="warning"
+                        variant="shadow"
+                        size="lg"
+                        className="font-black px-8 sm:px-10 rounded-2xl h-14 text-xs sm:text-sm uppercase tracking-widest shadow-obaol-500/30 shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all text-black bg-gradient-to-r from-amber-400 via-obaol-500 to-amber-500"
+                        onPress={() => router.push("/dashboard/profile")}
+                        startContent={<FiArrowRight size={20} strokeWidth={2.5} />}
+                      >
+                        Link Company to Start Listing
+                      </Button>
+                      <Button
+                        color="default"
+                        variant="flat"
+                        size="lg"
+                        className="font-bold px-6 rounded-2xl h-14 text-xs uppercase tracking-wider text-default-600"
+                        onPress={() => router.push("/dashboard/marketplace")}
+                        startContent={<FiShoppingBag size={18} />}
+                      >
+                        Explore Marketplace
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-default-400 text-[11px] font-semibold tracking-wide">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-content2/40 border border-white/5">
+                      <FiCheckCircle size={13} className="text-obaol-500" />
+                      <span>Instant Trade Publishing</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-content2/40 border border-white/5">
+                      <FiCheckCircle size={13} className="text-obaol-500" />
+                      <span>Inventory & Rate Control</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-content2/40 border border-white/5">
+                      <FiCheckCircle size={13} className="text-obaol-500" />
+                      <span>Global Network Visibility</span>
+                    </div>
+                  </div>
+
+                  {canAddOwnRate && (
+                    <VariantRateWizardModal
+                      isOpen={wizardOpen}
+                      onClose={() => setWizardOpen(false)}
+                      apiEndpoint={apiRoutesByRole[rate]}
+                      productVariantValue={productVariantValue}
+                      user={user}
+                      additionalVariable={{
+                        ...(productVariantValue && {
+                          productVariant: productVariantValue._id,
+                        }),
+                        ...(user?.role === "Associate" && {
+                          associate: user?.id,
+                        }),
+                      }}
+                      onSuccess={() => {
+                        refetchData();
+                      }}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">

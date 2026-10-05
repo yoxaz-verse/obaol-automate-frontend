@@ -530,10 +530,10 @@ export default function CommissionStructurePage() {
             <div className="bg-[#05070c] rounded-[1.4rem] p-8 md:p-10 text-center relative overflow-hidden text-white">
                 <div className="relative z-10">
                     <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8" />
-                    <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-foreground">
+                    <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-white">
                         Ready to <span className="text-obaol-500">Scale?</span>
                     </h2>
-                    <p className="text-sm text-foreground/70 max-w-xl mx-auto mb-10 font-medium leading-relaxed">
+                    <p className="text-sm text-white/80 max-w-xl mx-auto mb-10 font-medium leading-relaxed">
                         Join our elite network of operators and architects. Activate your organizational position to secure tiered yields.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">

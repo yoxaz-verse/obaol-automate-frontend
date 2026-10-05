@@ -1,214 +1,169 @@
 "use client";
 
+import Link from "next/link";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
-import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
-import { buildWebPageJsonLd } from "@/utils/seo";
 import {
-  associateRoleDefinitions,
+  associateRoleGroups,
   getAssociateRolePath,
+  getAssociateRolesByGroup,
   type AssociateRoleIconKey,
 } from "@/data/associateRoles";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { buildWebPageJsonLd } from "@/utils/seo";
 import {
-  FiArrowLeft,
-  FiArrowRight,
-  FiArchive,
-  FiBriefcase,
-  FiCheckCircle,
-  FiCpu,
-  FiDollarSign,
-  FiGlobe,
-  FiGrid,
-  FiHome,
-  FiLayers,
-  FiPackage,
-  FiSearch,
-  FiShield,
-  FiShoppingBag,
-  FiTarget,
-  FiTruck,
+  FiArchive, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheckCircle, FiCpu,
+  FiDollarSign, FiGlobe, FiGrid, FiHome, FiLayers, FiPackage, FiSearch,
+  FiShield, FiShoppingBag, FiTarget, FiTruck, FiUsers,
 } from "react-icons/fi";
 
 const webPageJsonLd = buildWebPageJsonLd({
-  title: "Associate Role Directory | OBAOL Supreme",
-  description:
-    "Explore every Associate category on OBAOL Supreme, including traders, importers, exporters, warehouse owners, logistics, labs, agritech, and more.",
+  title: "Associate Businesses on OBAOL | Who Can Join",
+  description: "See how verified companies join OBAOL to buy, sell, or provide the services that move commodity trades from enquiry to completion.",
   path: "/roles/associate",
 });
 
 const iconByRoleKey: Record<AssociateRoleIconKey, JSX.Element> = {
-  trader: <FiBriefcase />,
-  importer: <FiShoppingBag />,
-  exporter: <FiGlobe />,
-  warehouse: <FiHome />,
-  inlandTransport: <FiTruck />,
-  freightForwarder: <FiTarget />,
-  logistics: <FiLayers />,
-  supplier: <FiArchive />,
-  packaging: <FiPackage />,
-  qualityLab: <FiSearch />,
-  agritech: <FiCpu />,
-  customs: <FiShield />,
-  finance: <FiDollarSign />,
-  procurement: <FiGrid />,
+  trader: <FiBriefcase />, importer: <FiShoppingBag />, exporter: <FiGlobe />,
+  warehouse: <FiHome />, inlandTransport: <FiTruck />, freightForwarder: <FiTarget />,
+  logistics: <FiLayers />, supplier: <FiArchive />, packaging: <FiPackage />,
+  qualityLab: <FiSearch />, agritech: <FiCpu />, customs: <FiShield />,
+  finance: <FiDollarSign />, procurement: <FiGrid />,
 };
+
+const participationPaths = [
+  { key: "BUY", title: "Buy commodities", text: "Create requirements, evaluate supply, and follow buyer-side execution.", icon: <FiShoppingBag /> },
+  { key: "SELL", title: "Sell commodities", text: "Present credible supply, respond to demand, and coordinate fulfilment.", icon: <FiArchive /> },
+  { key: "BOTH", title: "Buy & sell", text: "Operate on both sides through one verified company profile.", icon: <FiBriefcase /> },
+  { key: "SERVICE", title: "Provide trade services", text: "Support storage, movement, quality, compliance, finance, or technology needs.", icon: <FiLayers /> },
+];
 
 export default function AssociateRolePage() {
   return (
-    <section className="min-h-screen bg-background selection:bg-orange-500/30">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
-      />
+    <section className="min-h-screen bg-background text-foreground selection:bg-orange-500/30">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       <Header />
       <ThemedContentWrapper>
-        <div className="public-hero relative flex items-center overflow-hidden">
-          <div className="container mx-auto max-w-7xl px-4 relative z-10 public-layout-container">
-            <Link
-              href="/roles"
-              className="public-back-link group"
-            >
-              <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Back to Roles
-            </Link>
-
-            <div className="public-hero-content space-y-7">
-              <div>
-                <div className="flex flex-wrap gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-orange-600/20 border border-orange-600/30 flex items-center justify-center text-orange-500 shadow-inner">
-                    <FiBriefcase size={24} />
-                  </div>
-                  <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-orange-500 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center">
-                    One-Stop Associate Ecosystem
-                  </div>
-                  <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 font-bold uppercase tracking-[0.1em] text-[10px] flex items-center">
-                    Company Registration Mandatory
-                  </div>
-                </div>
-                <h1 className="public-hero-title text-foreground">
-                  Who Can Be an{" "}
-                  <span className="inline-block px-1 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic">
-                    Associate?
-                  </span>
-                </h1>
-                <p className="public-hero-description">
-                  OBAOL Supreme is building a full trade-execution ecosystem. Beyond traders and warehouses, our network includes importers, exporters, inland transportation, freight forwarders, quality testing labs, agritech companies, and other execution-critical partners.
-                </p>
-                <div className="mt-6 max-w-4xl">
-                  <IndiaFirstNote />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-4 pt-2">
-                <Link
-                  href="/auth/register"
-                  className="public-button public-button--primary group"
-                >
-                  Join as Associate
-                  <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <button
-                  onClick={() => document.getElementById("directory")?.scrollIntoView({ behavior: "smooth" })}
-                  className="public-button public-button--secondary"
-                >
-                  Browse Role Directory
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="directory" className="public-standard-section border-y border-default-100/50 bg-content1/30">
-          <div className="container mx-auto max-w-7xl px-4 public-layout-container">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Associate Role Directory</h2>
-              <p className="text-default-500 max-w-3xl mx-auto">
-                Dedicated SEO-friendly role pages for every category in the trade workflow.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
-              {associateRoleDefinitions.map((role, index) => (
-                <motion.div
-                  key={role.slug}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.04 }}
-                >
-                  <Link
-                    href={getAssociateRolePath(role.slug)}
-                    className="group block h-full p-7 rounded-[2rem] bg-background border border-default-200/60 hover:border-orange-500/40 shadow-lg transition-all hover:-translate-y-1 public-surface-card"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-5 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                      {iconByRoleKey[role.iconKey]}
-                    </div>
-                    <h3 className="text-xl font-bold mb-3">{role.displayName}</h3>
-                    <p className="text-default-500 text-sm leading-relaxed">{role.shortDescription}</p>
-                    <div className="mt-6 text-orange-500 text-xs font-extrabold tracking-wider uppercase flex items-center gap-2">
-                      View dedicated page
-                      <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="public-standard-section bg-foreground/[0.02] border-t border-default-100">
-          <div className="container mx-auto max-w-7xl px-4 public-layout-container">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">How Associates Work on OBAOL</h2>
-              <p className="text-default-500 max-w-2xl mx-auto">
-                Structured onboarding, clear execution responsibilities, and role-based collaboration.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                { i: "01", icon: <FiLayers />, label: "Onboarding", text: "Register your company and get aligned to the right associate role in the ecosystem." },
-                { i: "02", icon: <FiTarget />, label: "Activation", text: "Connect your service layer, inventory, or trade capability to active execution workflows." },
-                { i: "03", icon: <FiCheckCircle />, label: "Execution", text: "Collaborate with other associates through role-specific subpages and shared execution visibility." },
-              ].map((item) => (
-                <div key={item.i} className="relative p-8 rounded-3xl bg-background border border-default-200/50 hover:border-orange-500/20 transition-all public-surface-card">
-                  <div className="absolute right-6 top-5 text-5xl font-black text-foreground/[0.03]">{item.i}</div>
-                  <div className="w-11 h-11 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center mb-5">
-                    {item.icon}
-                  </div>
-                  <h4 className="font-bold text-xl mb-3">{item.label}</h4>
-                  <p className="text-default-500 leading-relaxed">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="public-standard-section flex flex-col items-center justify-center text-center px-4">
-          <div className="space-y-8 max-w-3xl">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-xs">
-              Expand With The Ecosystem
-            </div>
-            <h2 className="font-bold tracking-tight leading-tight">
-              Build your role in global commodity execution.
-            </h2>
-            <p className="text-xl text-default-500 leading-relaxed">
-              Choose your associate category, explore the dedicated subpage, and onboard into a one-stop trade execution network.
-            </p>
-            <div className="pt-4">
-              <Link
-                href="/auth/register"
-                className="public-button public-button--primary"
-              >
-                Register as Associate
-                <FiArrowRight size={22} />
+        <main>
+          <section className="public-hero relative overflow-hidden">
+            <div className="absolute right-0 top-0 h-80 w-80 rounded-full bg-orange-500/10 blur-[110px] public-decoration" />
+            <div className="container mx-auto max-w-7xl px-4 public-layout-container relative z-10">
+              <Link href="/roles" className="public-back-link group">
+                <FiArrowLeft className="transition-transform group-hover:-translate-x-1" /> Back to Roles
               </Link>
+              <div className="public-hero-content max-w-4xl space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-orange-500">
+                  <FiShield /> Verified business accounts
+                </div>
+                <h1 className="public-hero-title">Your company&apos;s role in <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 italic">commodity execution.</span></h1>
+                <p className="public-hero-description max-w-3xl">
+                  Associates are registered businesses that use OBAOL to buy commodities, sell commodities, do both, or deliver the specialist services a trade needs from enquiry to completion.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Link href="/auth/register" className="public-button public-button--primary group">Register your company <FiArrowRight className="transition-transform group-hover:translate-x-1" /></Link>
+                  <a href="#choose-path" className="public-button public-button--secondary">Find your company&apos;s role</a>
+                </div>
+                <p className="max-w-3xl text-sm leading-6 text-foreground/60">
+                  Associate accounts belong to companies. If you are joining as an individual to build relationships and coordinate execution, explore the <Link href="/roles/operator" className="font-bold text-orange-500 underline underline-offset-4">Operator role</Link>.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
+
+          <section id="choose-path" aria-labelledby="participation-heading" className="public-standard-section border-y border-default-200/60 bg-content1/30 scroll-mt-24">
+            <div className="container mx-auto max-w-7xl px-4 public-layout-container">
+              <div className="mb-10 max-w-3xl">
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Start with your purpose</span>
+                <h2 id="participation-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">How will your company participate?</h2>
+                <p className="mt-4 text-lg leading-8 text-foreground/65">Choose the path that reflects what the registered business actually does. Service companies select their specific capabilities during onboarding.</p>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4" data-testid="associate-participation-paths">
+                {participationPaths.map((path, index) => (
+                  <div key={path.key} className="public-surface-card rounded-3xl border border-default-200/70 bg-background p-6">
+                    <div className="mb-5 flex items-center justify-between">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500">{path.icon}</div>
+                      <span className="text-xs font-black text-foreground/25">0{index + 1}</span>
+                    </div>
+                    <h3 className="text-xl font-bold">{path.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-foreground/60">{path.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="directory" aria-labelledby="directory-heading" className="public-standard-section">
+            <div className="container mx-auto max-w-7xl px-4 public-layout-container">
+              <div className="mb-14 max-w-3xl">
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Business categories</span>
+                <h2 id="directory-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Find the role that matches your business</h2>
+                <p className="mt-4 text-lg leading-8 text-foreground/65">Each page explains who qualifies, what the company is responsible for, how the workflow operates, and what is needed to register.</p>
+              </div>
+              <div className="space-y-16">
+                {associateRoleGroups.map((group) => {
+                  const groupRoles = getAssociateRolesByGroup(group.key);
+                  return (
+                    <section key={group.key} aria-labelledby={`group-${group.key}`} data-associate-group={group.key}>
+                      <div className="mb-7 border-l-4 border-orange-500 pl-5">
+                        <h3 id={`group-${group.key}`} className="text-2xl font-black md:text-3xl">{group.label}</h3>
+                        <p className="mt-2 max-w-3xl text-foreground/60">{group.description}</p>
+                      </div>
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {groupRoles.map((role) => (
+                          <Link key={role.slug} href={getAssociateRolePath(role.slug)} className="public-surface-card group flex h-full flex-col rounded-[1.75rem] border border-default-200/70 bg-content1/35 p-7 transition-all hover:-translate-y-1 hover:border-orange-500/40 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <div className="mb-6 flex items-start justify-between gap-4">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 transition-colors group-hover:bg-orange-500 group-hover:text-white">{iconByRoleKey[role.iconKey]}</div>
+                              <div className="flex flex-wrap justify-end gap-1.5">
+                                {role.participationModes.map((mode) => <span key={mode} className="rounded-full bg-default-100 px-2.5 py-1 text-[9px] font-black tracking-wider text-foreground/55">{mode === "SERVICE" ? "SERVICES" : mode}</span>)}
+                              </div>
+                            </div>
+                            <h4 className="text-xl font-bold">{role.displayName}</h4>
+                            <p className="mt-3 text-sm leading-6 text-foreground/65">{role.shortDescription}</p>
+                            <div className="mt-5 rounded-2xl bg-background/70 p-4">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-orange-500">Best for</p>
+                              <p className="mt-2 text-sm leading-6 text-foreground/70">{role.bestFor}</p>
+                            </div>
+                            <div className="mt-auto flex items-center gap-2 pt-6 text-xs font-black uppercase tracking-wider text-orange-500">See if your company qualifies <FiArrowRight className="transition-transform group-hover:translate-x-1" /></div>
+                          </Link>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="associate-or-operator" className="public-standard-section border-y border-default-200/60 bg-foreground/[0.025]">
+            <div className="container mx-auto grid max-w-6xl gap-6 px-4 public-layout-container md:grid-cols-2">
+              <div className="public-surface-card rounded-[2rem] border border-orange-500/25 bg-background p-8">
+                <FiBriefcase className="mb-5 text-3xl text-orange-500" />
+                <p className="text-xs font-black uppercase tracking-widest text-orange-500">Choose Associate</p>
+                <h2 id="associate-or-operator" className="mt-3 text-3xl font-black">You represent a registered company</h2>
+                <ul className="mt-6 space-y-3 text-sm text-foreground/70">
+                  {["The account belongs to the business", "You can provide company and legal details", "The company buys, sells, or provides trade services"].map((item) => <li key={item} className="flex gap-3"><FiCheckCircle className="mt-0.5 shrink-0 text-orange-500" />{item}</li>)}
+                </ul>
+                <Link href="/auth/register" className="public-button public-button--primary mt-8">Register an Associate company <FiArrowRight /></Link>
+              </div>
+              <div className="public-surface-card rounded-[2rem] border border-default-200/70 bg-background p-8">
+                <FiUsers className="mb-5 text-3xl text-foreground/50" />
+                <p className="text-xs font-black uppercase tracking-widest text-foreground/45">Choose Operator</p>
+                <h2 className="mt-3 text-3xl font-black">You are joining as an individual</h2>
+                <p className="mt-6 leading-7 text-foreground/65">Operators are individuals who build business relationships, manage supplier portfolios, and help keep execution moving. They do not register as the trading or service company.</p>
+                <Link href="/roles/operator" className="public-button public-button--secondary mt-8">Explore the Operator role <FiArrowRight /></Link>
+              </div>
+            </div>
+          </section>
+
+          <section className="public-standard-section text-center">
+            <div className="container mx-auto max-w-3xl px-4 public-layout-container">
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-2xl text-orange-500"><FiShield /></div>
+              <h2 className="text-3xl font-black md:text-5xl">Register the business behind the work.</h2>
+              <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-foreground/65">Tell us how your company participates, provide its legal and operating details, and select the capabilities that should shape its OBAOL workspace.</p>
+              <Link href="/auth/register" className="public-button public-button--primary mt-8">Start company registration <FiArrowRight /></Link>
+            </div>
+          </section>
+        </main>
       </ThemedContentWrapper>
       <Footer />
     </section>

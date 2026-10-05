@@ -784,35 +784,21 @@ const Dashboard: NextPage = () => {
     <div className="w-full p-4 md:p-6 space-y-8">
       <Card className={`border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden ${isAssociate ? "rounded-2xl" : "rounded-[2.5rem]"}`}>
         <CardBody className={isAssociate ? "p-5 sm:p-6" : "p-8"}>
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
-            <div className="space-y-3 min-w-0 max-w-2xl flex-1">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span className="text-[10px] font-black tracking-widest uppercase text-primary">Workspace ready</span>
-              </div>
-              <div className="space-y-1">
+          <div className="flex flex-col gap-6">
+            {/* Top Row: Workspace Status & Role Chips */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b db-border-subtle">
+              <div className="space-y-1.5 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black tracking-widest uppercase text-primary">Workspace ready</span>
+                </div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic">{hubTitle}</h1>
-                <p className="text-xs md:text-sm text-default-500 font-semibold tracking-tight leading-relaxed">
+                <p className="text-xs md:text-sm text-default-500 font-semibold tracking-tight">
                   Welcome, <span className="text-foreground">{welcomeName}</span>. {hubSubtitle}
                 </p>
               </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 shrink-0">
-              <div className="w-full sm:w-auto sm:min-w-[260px] md:min-w-[280px] lg:min-w-[320px]">
-                <GlobalSearch />
-              </div>
-              {isAssociate && tradeMode === "BOTH" && (
-                <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1">
-                  {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
-                    <button key={focus} type="button" onClick={() => updateWorkspaceFocus(focus)} aria-pressed={workspaceFocus === focus} className={`min-h-10 rounded-lg px-3.5 text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950" : "db-muted hover:text-foreground"}`}>
-                      {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="hidden sm:block h-6 w-px db-border-subtle border-l" />
-              <div className="flex items-center gap-2 shrink-0">
+              
+              <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
                 <Chip variant="flat" className="h-9 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-4 db-inset border db-border-subtle">
                   {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : tradeMode === "SERVICE" ? "Service Provider" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
                 </Chip>
@@ -820,6 +806,29 @@ const Dashboard: NextPage = () => {
                   {activeOrders} Active Orders
                 </Chip>
               </div>
+            </div>
+
+            {/* Bottom Row: Search & Focus Toggle */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="w-full sm:max-w-md sm:flex-1">
+                <GlobalSearch />
+              </div>
+
+              {isAssociate && tradeMode === "BOTH" && (
+                <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1 self-start sm:self-center shrink-0">
+                  {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
+                    <button
+                      key={focus}
+                      type="button"
+                      onClick={() => updateWorkspaceFocus(focus)}
+                      aria-pressed={workspaceFocus === focus}
+                      className={`min-h-10 rounded-lg px-4 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950 shadow-sm" : "db-muted hover:text-foreground"}`}
+                    >
+                      {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </CardBody>

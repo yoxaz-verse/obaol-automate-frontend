@@ -38,17 +38,30 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
 });
 
-test("settings owns profile and shortcut navigation", () => {
+test("settings owns company, notification, profile, and shortcut navigation", () => {
   const links = new Set(
     getAccessibleDashboardRoutes({ role: "Associate", tradeMode: "BOTH" }).map((route) => route.path)
   );
   assert.equal(links.has("/dashboard/settings"), true);
+  assert.equal(links.has("/dashboard/company"), false);
+  assert.equal(links.has("/dashboard/notifications"), false);
   assert.equal(links.has("/dashboard/profile"), false);
   assert.equal(links.has("/dashboard/shortcuts"), false);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/company", role: "Associate", tradeMode: "BOTH" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/notifications", role: "Associate", tradeMode: "BOTH" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/profile", role: "Associate", tradeMode: "BOTH" }), true);
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/shortcuts", role: "Associate", tradeMode: "BOTH" }), true);
+  assert.equal(isDashboardRouteActive("/dashboard/company", "/dashboard/settings"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/notifications", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/profile", "/dashboard/settings"), true);
   assert.equal(isDashboardRouteActive("/dashboard/shortcuts", "/dashboard/settings"), true);
+});
+
+test("non-Associate roles retain standalone notification navigation", () => {
+  for (const role of ["Admin", "Operator", "Team"]) {
+    const links = new Set(getAccessibleDashboardRoutes({ role, tradeMode: "BOTH" }).map((route) => route.path));
+    assert.equal(links.has("/dashboard/notifications"), true, `${role} should retain Notifications navigation`);
+  }
 });
 
 test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", () => {
@@ -61,18 +74,18 @@ test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", (
   assert.equal(linksFor("BOTH").has("/dashboard/product"), true);
   assert.equal(normalizeTradeMode("SERVICE", "Associate"), "SERVICE");
   assert.equal(linksFor("SERVICE").has("/dashboard"), true);
-  assert.equal(linksFor("SERVICE").has("/dashboard/company"), true);
+  assert.equal(linksFor("SERVICE").has("/dashboard/settings"), true);
   assert.equal(linksFor("SERVICE").has("/dashboard/product"), false);
 });
 
-test("SERVICE Associates receive only capability-relevant service navigation", () => {
+test("SERVICE Associates receive both contact-based service directories", () => {
   const links = new Set(getAccessibleDashboardRoutes({
     role: "Associate",
     tradeMode: "SERVICE",
     companyInterests: ["WAREHOUSING"],
   }).map((route) => route.path));
   assert.equal(links.has("/dashboard/warehouse-rent"), true);
-  assert.equal(links.has("/dashboard/quality-labs"), false);
+  assert.equal(links.has("/dashboard/quality-labs"), true);
 });
 
 test("Team receives Operator routes without Admin routes", () => {
@@ -81,14 +94,14 @@ test("Team receives Operator routes without Admin routes", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/approvals", role: "team" }), false);
 });
 
-test("Associate services are filtered by configured interests", () => {
+test("Associate service directories do not depend on configured interests", () => {
   const links = new Set(getAccessibleDashboardRoutes({
     role: "Associate",
     tradeMode: "BOTH",
     companyInterests: ["WAREHOUSING"],
   }).map((route) => route.path));
   assert.equal(links.has("/dashboard/warehouse-rent"), true);
-  assert.equal(links.has("/dashboard/quality-labs"), false);
+  assert.equal(links.has("/dashboard/quality-labs"), true);
 });
 
 test("every dashboard page has an explicit access policy", () => {

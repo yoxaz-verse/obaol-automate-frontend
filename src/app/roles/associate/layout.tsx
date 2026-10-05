@@ -1,11 +1,13 @@
 import { buildMetadata } from "@/utils/seo";
 
 export const metadata = buildMetadata({
-    title: "Associate Role Directory | OBAOL Supreme",
+    title: "Associate Businesses on OBAOL | Who Can Join",
     description:
-        "Starting in India, explore the full Associate role directory on OBAOL Supreme, including traders, importers, exporters, warehouses, inland transportation, freight forwarding, quality labs, agritech, and more.",
+        "See how verified companies join OBAOL to buy commodities, sell commodities, or provide services across trade execution.",
     keywords: [
-        "associate role directory",
+        "OBAOL associate businesses",
+        "verified commodity companies",
+        "buy and sell commodities",
         "warehouse companies on OBAOL",
         "trade execution platform roles",
         "logistics associate",

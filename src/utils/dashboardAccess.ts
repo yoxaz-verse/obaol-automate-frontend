@@ -40,6 +40,7 @@ export type DashboardRouteDefinition = {
   taskGroup: DashboardTaskGroup;
   activeParent?: string;
   requiredInterests?: string[];
+  hiddenFromAssociateNav?: boolean;
   description: string;
   breadcrumbParent?: string;
   primaryAction?: { label: string; href: string };
@@ -79,16 +80,16 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/external-orders/new", label: "New external order", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
-  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["WAREHOUSING"] },
-  { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["QUALITY_TESTING", "CERTIFICATION"] },
+  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
 
   { path: "/dashboard/inventory", label: "Inventory", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES, nav: true, searchable: true },
   { path: "/dashboard/warehouses", label: "Warehouses", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES, nav: true, searchable: true },
   { path: "/dashboard/warehouses/location", label: "Warehouse location", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: SELLING_MODES },
-  { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/company", label: "My Company", section: "Organization", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
-  { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, activeParent: "/dashboard/settings", hiddenFromAssociateNav: true },
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, searchable: true, activeParent: "/dashboard/settings" },
@@ -255,6 +256,7 @@ export const getAccessibleDashboardRoutes = ({
   const normalizedInterests = new Set(companyInterests.map((item) => String(item || "").toUpperCase()));
   return DASHBOARD_ROUTE_MANIFEST.filter((route) => {
     if (!route.nav || !canAccessDashboardRoute({ path: route.path, role, tradeMode })) return false;
+    if (route.hiddenFromAssociateNav && normalizeDashboardRole(role) === "associate") return false;
     if (!route.requiredInterests?.length || normalizeDashboardRole(role) !== "associate") return true;
     return route.requiredInterests.some((interest) => normalizedInterests.has(interest));
   });

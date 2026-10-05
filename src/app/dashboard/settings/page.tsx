@@ -1,24 +1,48 @@
+"use client";
+
+import { useContext } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiCommand, FiSettings, FiUser } from "react-icons/fi";
+import { FiArrowRight, FiBell, FiBriefcase, FiCommand, FiSettings, FiUser } from "react-icons/fi";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardPage, DashboardPanel, DashboardSectionHeader } from "@/components/dashboard/DashboardUI";
+import AuthContext from "@/context/AuthContext";
 
 const settingsLinks = [
   {
+    title: "My Company",
+    description: "Review and update your company profile, capabilities, verification, and service details.",
+    href: "/dashboard/company",
+    icon: FiBriefcase,
+    associateOnly: true,
+  },
+  {
+    title: "Notifications",
+    description: "View workspace alerts, updates, and activity that may need your attention.",
+    href: "/dashboard/notifications",
+    icon: FiBell,
+    associateOnly: false,
+  },
+  {
     title: "Profile",
-    description: "Manage your account details, company information, verification, and sign-in security.",
+    description: "Manage your personal account details and sign-in security.",
     href: "/dashboard/profile",
     icon: FiUser,
+    associateOnly: false,
   },
   {
     title: "Keyboard Shortcuts",
     description: "Customize the quick commands used to navigate your dashboard.",
     href: "/dashboard/shortcuts",
     icon: FiCommand,
+    associateOnly: false,
   },
 ];
 
 export default function SettingsPage() {
+  const { user } = useContext(AuthContext);
+  const isAssociate = String(user?.role || "").toLowerCase() === "associate";
+  const visibleSettingsLinks = settingsLinks.filter((item) => !item.associateOnly || isAssociate);
+
   return (
     <DashboardPage className="py-3 sm:py-5">
       <PageHeader
@@ -39,7 +63,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 p-5 sm:p-6 lg:grid-cols-2">
-          {settingsLinks.map((item) => {
+          {visibleSettingsLinks.map((item) => {
             const Icon = item.icon;
             return (
               <Link

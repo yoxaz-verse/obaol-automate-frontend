@@ -1,480 +1,254 @@
-export type AssociateRoleIconKey =
-  | "trader"
-  | "importer"
-  | "exporter"
-  | "warehouse"
-  | "inlandTransport"
-  | "freightForwarder"
-  | "logistics"
-  | "supplier"
-  | "packaging"
-  | "qualityLab"
-  | "agritech"
-  | "customs"
-  | "finance"
-  | "procurement";
+export type AssociateRoleIconKey = "trader" | "importer" | "exporter" | "warehouse" | "inlandTransport" | "freightForwarder" | "logistics" | "supplier" | "packaging" | "qualityLab" | "agritech" | "customs" | "finance" | "procurement";
+export type AssociateRoleGroup = "trade" | "supply-procurement" | "logistics-quality-compliance" | "finance-technology";
+export type AssociateParticipationMode = "BUY" | "SELL" | "BOTH" | "SERVICE";
 
-export interface AssociateRoleFaqItem {
-  question: string;
-  answer: string;
-}
-
+export interface AssociateRoleFaqItem { question: string; answer: string }
 export interface AssociateRoleDefinition {
   slug: string;
   displayName: string;
-  shortDescription: string;
-  longDescription: string;
-  roleScope: string[];
-  supportPoints: string[];
+  group: AssociateRoleGroup;
+  participationModes: AssociateParticipationMode[];
   iconKey: AssociateRoleIconKey;
-  seo: {
-    title: string;
-    description: string;
-    keywords: string[];
-  };
+  shortDescription: string;
+  bestFor: string;
+  longDescription: string;
+  eligibility: string[];
+  responsibilities: string[];
+  workflow: string[];
+  platformBenefits: string[];
+  prerequisites: string[];
+  ctaLabel: string;
+  registrationIntent: AssociateParticipationMode;
+  seo: { title: string; description: string; keywords: string[] };
   faqs: AssociateRoleFaqItem[];
   relatedRoles: string[];
 }
 
+export const associateRoleGroups: Array<{ key: AssociateRoleGroup; label: string; description: string }> = [
+  { key: "trade", label: "Trade", description: "Companies that buy, sell, import, or export commodities through structured trade workflows." },
+  { key: "supply-procurement", label: "Supply & Procurement", description: "Businesses that bring credible supply and organized demand into the marketplace." },
+  { key: "logistics-quality-compliance", label: "Logistics, Quality & Compliance", description: "Service companies that prepare, verify, store, clear, and move goods through execution." },
+  { key: "finance-technology", label: "Finance & Technology", description: "Specialist businesses that support funding, risk protection, and trade-enabling technology." },
+];
+
+const companyPrerequisites = ["Legal company name and business contact details", "Registered office and applicable tax or legal ID", "Accurate operating locations and capabilities", "An authorized representative who can act for the company"];
+const servicePrerequisites = ["Registered company and operating address", "Accurate service capabilities and operating locations", "Applicable licenses, registrations, or credentials", "Authorized commercial and operational contacts"];
+
 const roles: AssociateRoleDefinition[] = [
   {
-    slug: "traders",
-    displayName: "Traders",
-    shortDescription: "Execute commodity buy-sell contracts with verified counterparties.",
-    longDescription:
-      "Commodity traders use OBAOL Supreme to discover opportunities, coordinate execution, and close transactions with stronger verification and documentation control.",
-    roleScope: ["Spot and term commodity trading", "Counterparty coordination", "Rate and demand response"],
-    supportPoints: ["Verified network access", "Structured enquiry workflow", "Execution visibility from offer to closure"],
-    iconKey: "trader",
-    seo: {
-      title: "Commodity Traders on OBAOL | Associate Role",
-      description:
-        "Join OBAOL Supreme as a commodity trader to execute verified buy-sell contracts with stronger documentation, compliance, and trade coordination.",
-      keywords: ["commodity traders", "agri trade platform", "verified commodity trade", "trade execution system"],
-    },
-    faqs: [
-      {
-        question: "Who qualifies as a Trader Associate on OBAOL?",
-        answer: "Any registered business entity that actively buys and sells commodities can join as a Trader Associate.",
-      },
-      {
-        question: "Can traders coordinate cross-border deals on OBAOL?",
-        answer: "Yes. OBAOL supports domestic and international execution with structured workflow support.",
-      },
-    ],
-    relatedRoles: ["importers", "exporters", "logistics-providers"],
+    slug: "traders", displayName: "Traders", group: "trade", participationModes: ["BUY", "SELL", "BOTH"], iconKey: "trader",
+    shortDescription: "Buy and sell commodities through one accountable execution workflow.",
+    bestFor: "Registered commodity trading houses, merchant traders, and wholesale trading companies.",
+    longDescription: "Trader Associates are registered businesses that source, buy, and sell commodities. OBAOL gives the company one place to move an enquiry from commercial interest through documents, fulfilment, and closure.",
+    eligibility: ["A registered business entity", "An active commodity buying or selling operation", "A team able to support trade documents and decisions"],
+    responsibilities: ["Create or respond to genuine commodity demand", "Keep company and commodity information current", "Coordinate counterparty decisions and documents", "Remain accountable through trade completion"],
+    workflow: ["Choose Buy, Sell, or Buy & Sell", "Complete company and capability verification", "Create enquiries or respond to relevant opportunities", "Track documents and milestones through closure"],
+    platformBenefits: ["Role-aware buying and selling workflows", "Company and counterparty verification context", "Shared enquiry, order, and document progress", "Coordination with execution service companies"],
+    prerequisites: companyPrerequisites, ctaLabel: "Register your trading company", registrationIntent: "BOTH",
+    seo: { title: "Commodity Trading Companies on OBAOL | Associate Role", description: "Learn how registered commodity trading companies buy, sell, and coordinate trade execution as verified OBAOL Associates.", keywords: ["commodity trading company", "buy and sell commodities", "verified commodity trade"] },
+    faqs: [{ question: "Who should register as a Trader Associate?", answer: "A registered company that actively buys, sells, or does both in commodity markets. Individual professionals should explore the Operator role instead." }, { question: "Does registration guarantee a transaction?", answer: "No. Transactions depend on genuine demand, supply, verification, and commercial agreement." }],
+    relatedRoles: ["suppliers", "importers", "exporters"],
   },
   {
-    slug: "importers",
-    displayName: "Importers",
-    shortDescription: "Source commodities globally and execute imports through a controlled workflow.",
-    longDescription:
-      "Importers on OBAOL Supreme can coordinate suppliers, documents, and logistics through a single execution layer built for commodity movement into destination markets.",
-    roleScope: ["International sourcing", "Import documentation coordination", "Destination-side execution planning"],
-    supportPoints: ["Execution checkpoints", "Document and compliance alignment", "Integrated logistics collaboration"],
-    iconKey: "importer",
-    seo: {
-      title: "Importers on OBAOL | Associate Role",
-      description:
-        "Importers can use OBAOL Supreme to manage sourcing, documentation, and destination logistics through one structured trade execution platform.",
-      keywords: ["commodity importers", "import execution platform", "cross-border sourcing", "import workflow"],
-    },
-    faqs: [
-      {
-        question: "Is OBAOL suitable for first-time importers?",
-        answer: "Yes. The platform is designed to provide structure and visibility across the import execution lifecycle.",
-      },
-      {
-        question: "Do importers work with logistics partners on OBAOL?",
-        answer: "Yes. Importers can coordinate with freight, inland transport, and warehousing associates in one ecosystem.",
-      },
-    ],
+    slug: "importers", displayName: "Importers", group: "trade", participationModes: ["BUY", "BOTH"], iconKey: "importer",
+    shortDescription: "Source commodities across borders and coordinate destination-side execution.",
+    bestFor: "Registered import houses, processors, distributors, and buyers sourcing overseas.",
+    longDescription: "Importer Associates bring commodities into a destination market. Their OBAOL journey connects sourcing decisions with supplier coordination, documents, freight, customs, and receipt milestones.",
+    eligibility: ["A registered company permitted to conduct imports", "A genuine commodity sourcing requirement", "A team able to manage import documentation"],
+    responsibilities: ["Define product, quantity, destination, and delivery requirements", "Confirm supplier and commercial decisions", "Provide buyer-side documents on time", "Coordinate clearance, receipt, and settlement"],
+    workflow: ["Choose Buy or Buy & Sell", "Record company, market, and commodity capabilities", "Raise or manage a sourcing enquiry", "Coordinate supplier, freight, customs, and delivery milestones"],
+    platformBenefits: ["Structured sourcing and enquiry records", "Visibility across documents and order stages", "Coordination with freight, customs, warehouse, and transport companies", "A consistent trail from requirement to receipt"],
+    prerequisites: companyPrerequisites, ctaLabel: "Register your importing company", registrationIntent: "BUY",
+    seo: { title: "Commodity Importers on OBAOL | Associate Role", description: "See how registered commodity importers source supply and coordinate documents, freight, customs, and delivery on OBAOL.", keywords: ["commodity importer", "international sourcing", "import workflow"] },
+    faqs: [{ question: "Can a company that also sells register as an importer?", answer: "Yes. Choose Buy & Sell and record the company’s complete capabilities." }, { question: "Does OBAOL replace customs or freight providers?", answer: "No. OBAOL structures the workflow; qualified service companies perform their respective activities." }],
     relatedRoles: ["exporters", "freight-forwarders", "customs-clearance-agencies"],
   },
   {
-    slug: "exporters",
-    displayName: "Exporters",
-    shortDescription: "Move domestic commodity supply to global buyers with standardized execution.",
-    longDescription:
-      "Exporters can use OBAOL Supreme to manage buyer alignment, shipment coordination, and export compliance steps with better operational transparency.",
-    roleScope: ["Export-side supply readiness", "Buyer and shipment coordination", "Execution milestone tracking"],
-    supportPoints: ["Global buyer-side visibility", "Export workflow orchestration", "Role-based partner collaboration"],
-    iconKey: "exporter",
-    seo: {
-      title: "Exporters on OBAOL | Associate Role",
-      description:
-        "Exporters can onboard to OBAOL Supreme to coordinate global commodity shipments, documentation flow, and trade completion.",
-      keywords: ["commodity exporters", "export trade execution", "agri export platform", "export coordination"],
-    },
-    faqs: [
-      {
-        question: "Can exporters use OBAOL for recurring shipments?",
-        answer: "Yes. OBAOL supports repeat execution workflows and ongoing partner coordination.",
-      },
-      {
-        question: "Does OBAOL help exporters collaborate with labs and logistics?",
-        answer: "Yes. Exporters can work with testing labs, freight providers, and warehouse partners inside the ecosystem.",
-      },
-    ],
-    relatedRoles: ["traders", "quality-testing-labs", "freight-forwarders"],
+    slug: "exporters", displayName: "Exporters", group: "trade", participationModes: ["SELL", "BOTH"], iconKey: "exporter",
+    shortDescription: "Prepare domestic supply for overseas buyers and shipment execution.",
+    bestFor: "Registered exporters, producer-exporters, and trading companies serving global buyers.",
+    longDescription: "Exporter Associates sell commodities into international markets. OBAOL connects their supply response with quality, packaging, documents, logistics, and shipment milestones.",
+    eligibility: ["A registered company permitted to conduct exports", "Commodity supply or sourcing capability", "A team for buyer and shipment coordination"],
+    responsibilities: ["Present accurate product and supply information", "Respond to genuine buyer requirements", "Coordinate quality, packaging, and export documents", "Maintain shipment updates through completion"],
+    workflow: ["Choose Sell or Buy & Sell", "Complete company and supply capabilities", "Respond to buyer requirements and confirm terms", "Coordinate readiness, documents, shipment, and delivery"],
+    platformBenefits: ["Structured demand-response workflow", "Visibility across pre-shipment stages", "Coordination with labs, packaging, freight, and customs companies", "Centralized progress and document context"],
+    prerequisites: companyPrerequisites, ctaLabel: "Register your exporting company", registrationIntent: "SELL",
+    seo: { title: "Commodity Exporters on OBAOL | Associate Role", description: "Learn how registered commodity exporters coordinate supply, quality, documentation, and shipment execution through OBAOL.", keywords: ["commodity exporter", "agri export platform", "export execution"] },
+    faqs: [{ question: "Can producer-owned companies join as exporters?", answer: "Yes, when the registered business can meet the applicable export, product, quality, and documentation requirements." }, { question: "Can exporters also source commodities?", answer: "Yes. Companies that source and sell should choose Buy & Sell during registration." }],
+    relatedRoles: ["suppliers", "quality-testing-labs", "freight-forwarders"],
   },
   {
-    slug: "warehouse-owners",
-    displayName: "Warehouse Owners",
-    shortDescription: "Provide storage infrastructure integrated with execution workflows.",
-    longDescription:
-      "Warehouse operators can integrate capacity into OBAOL Supreme and support trade readiness through storage, handling, and dispatch coordination.",
-    roleScope: ["Storage and stock handling", "Dispatch readiness support", "Commodity movement coordination"],
-    supportPoints: ["Inventory-linked coordination", "Visibility across trade stages", "Structured handoff with transport partners"],
-    iconKey: "warehouse",
-    seo: {
-      title: "Warehouse Owners on OBAOL | Associate Role",
-      description:
-        "Warehouse and storage companies can join OBAOL Supreme to support commodity execution with integrated storage and dispatch coordination.",
-      keywords: ["commodity warehouse", "storage partners", "warehouse associate", "trade warehousing"],
-    },
-    faqs: [
-      {
-        question: "Can warehouse operators onboard as associates?",
-        answer: "Yes. Registered warehouse and storage entities can onboard as dedicated associates on OBAOL.",
-      },
-      {
-        question: "How do warehouses collaborate with inland transport?",
-        answer: "Warehouses can coordinate handoff points and movement milestones with transport associates through shared workflows.",
-      },
-    ],
+    slug: "suppliers", displayName: "Suppliers", group: "supply-procurement", participationModes: ["SELL", "BOTH"], iconKey: "supplier",
+    shortDescription: "Bring credible commodity supply into active buyer-led workflows.",
+    bestFor: "Registered producers, processors, aggregators, distributors, and supply companies.",
+    longDescription: "Supplier Associates can fulfil commodity requirements. OBAOL helps them present supply accurately, respond to enquiries, and coordinate the steps that make a confirmed lot ready for delivery.",
+    eligibility: ["A registered business with legitimate supply capability", "Traceable product, origin, and quantity information", "Ability to support quality, documentation, and fulfilment"],
+    responsibilities: ["Maintain accurate product information", "Respond only against supply the business can substantiate", "Support samples, quality checks, and documents", "Coordinate packing, dispatch, and settlement milestones"],
+    workflow: ["Choose Sell or Buy & Sell", "Add commodity and supply capabilities", "Respond to relevant buyer enquiries", "Move confirmed supply through quality, documents, and delivery"],
+    platformBenefits: ["Demand-linked enquiry participation", "A structured response and fulfilment record", "Coordination with packaging, testing, warehouse, and logistics services", "Visibility into the current stage and next action"],
+    prerequisites: companyPrerequisites, ctaLabel: "Register your supply company", registrationIntent: "SELL",
+    seo: { title: "Commodity Suppliers on OBAOL | Associate Role", description: "See how registered commodity suppliers respond to demand and coordinate quality, documents, and fulfilment on OBAOL.", keywords: ["commodity supplier", "agri supplier", "sell commodities"] },
+    faqs: [{ question: "Does a supplier need to be an exporter?", answer: "No. Domestic suppliers can participate in suitable domestic workflows." }, { question: "Can a supplier join without company details?", answer: "No. Associate accounts represent registered businesses and require company information for review." }],
+    relatedRoles: ["traders", "packaging-companies", "quality-testing-labs"],
+  },
+  {
+    slug: "procurement-partners", displayName: "Procurement Partners", group: "supply-procurement", participationModes: ["BUY", "BOTH", "SERVICE"], iconKey: "procurement",
+    shortDescription: "Translate organizational demand into controlled sourcing activity.",
+    bestFor: "Registered procurement firms, institutional sourcing teams, and managed-sourcing businesses.",
+    longDescription: "Procurement Partner Associates organize demand, supplier discovery, and sourcing follow-through. OBAOL provides a structured path from requirement definition to supplier response and execution readiness.",
+    eligibility: ["A registered organization with a procurement function", "Authority to represent genuine sourcing demand", "Clear commodity and delivery requirements"],
+    responsibilities: ["Create complete sourcing requirements", "Coordinate supplier evaluation", "Maintain decision and documentation status", "Work with execution providers after confirmation"],
+    workflow: ["Register the buying or service company", "Record procurement and commodity capabilities", "Create enquiries for approved requirements", "Coordinate responses, selection, and execution"],
+    platformBenefits: ["Consistent requirement capture", "Organized supplier-response workflow", "Shared procurement visibility", "Connection to quality, logistics, and compliance steps"],
+    prerequisites: companyPrerequisites, ctaLabel: "Register your procurement company", registrationIntent: "BUY",
+    seo: { title: "Commodity Procurement Partners on OBAOL | Associate Role", description: "Learn how registered procurement organizations structure demand and coordinate commodity sourcing through OBAOL.", keywords: ["commodity procurement", "strategic sourcing", "procurement company"] },
+    faqs: [{ question: "Is this role for an internal employee?", answer: "The account belongs to the registered organization. An authorized employee may operate it for the company." }, { question: "Can procurement firms provide managed sourcing?", answer: "Yes, where that is a genuine registered company capability." }],
+    relatedRoles: ["suppliers", "quality-testing-labs", "logistics-providers"],
+  },
+  {
+    slug: "warehouse-owners", displayName: "Warehouse Owners", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "warehouse",
+    shortDescription: "Provide accountable storage, handling, and dispatch support.",
+    bestFor: "Registered warehouse operators, storage companies, and commodity handling facilities.",
+    longDescription: "Warehouse Associates provide physical storage and handling at defined locations. OBAOL records their capabilities for relevant storage, stock-handling, and dispatch workflows.",
+    eligibility: ["A registered company operating storage facilities", "Verifiable facility locations and capabilities", "An operational contact for dispatch coordination"],
+    responsibilities: ["Keep facility information accurate", "Confirm capacity before commitment", "Coordinate receipt, storage, handling, and release", "Provide required service records"],
+    workflow: ["Choose Provide Trade Services", "Add facility locations and capabilities", "Review relevant storage requirements", "Coordinate receipt, storage, and dispatch milestones"],
+    platformBenefits: ["Capability-aware service visibility", "Coordination with traders and suppliers", "Handoffs to transport providers", "A shared execution-status record"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your warehouse business", registrationIntent: "SERVICE",
+    seo: { title: "Commodity Warehouse Companies on OBAOL | Associate Role", description: "Learn how registered warehouse businesses provide storage, handling, and dispatch services in OBAOL workflows.", keywords: ["commodity warehouse", "warehouse operator", "storage company"] },
+    faqs: [{ question: "Can a company register multiple warehouse locations?", answer: "Yes. Provide accurate operating locations and capabilities for the registered company." }, { question: "Does registration guarantee assignments?", answer: "No. Participation depends on capability fit, location, active requirements, verification, and acceptance." }],
     relatedRoles: ["inland-transportation", "logistics-providers", "suppliers"],
   },
   {
-    slug: "inland-transportation",
-    displayName: "Inland Transportation",
-    shortDescription: "Handle first-mile and last-mile commodity movement within domestic corridors.",
-    longDescription:
-      "Inland transportation partners can support commodity flow between farms, processing points, warehouses, ports, and buyers through coordinated execution tracks.",
-    roleScope: ["First-mile pickup", "Port-to-warehouse movement", "Domestic route execution"],
-    supportPoints: ["Execution-level route handoff", "Timeline visibility", "Structured coordination with warehousing and freight"],
-    iconKey: "inlandTransport",
-    seo: {
-      title: "Inland Transportation on OBAOL | Associate Role",
-      description:
-        "Inland transportation companies can join OBAOL Supreme to coordinate domestic commodity movement from origin points to warehouses and ports.",
-      keywords: ["inland transportation", "commodity trucking", "port to warehouse transport", "domestic logistics"],
-    },
-    faqs: [
-      {
-        question: "Who can join as an inland transport associate?",
-        answer: "Registered domestic transport providers handling commodity movement can onboard as associates.",
-      },
-      {
-        question: "Can inland transport partners work on export-bound cargo?",
-        answer: "Yes. Inland transport is a key execution layer for both import and export trade operations.",
-      },
-    ],
+    slug: "inland-transportation", displayName: "Inland Transportation", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "inlandTransport",
+    shortDescription: "Move commodities between origin, facility, port, and destination points.",
+    bestFor: "Registered road transporters, fleet operators, and first- or last-mile companies.",
+    longDescription: "Inland Transportation Associates carry commodities across domestic trade legs. OBAOL uses their location and capabilities to support movement requirements and milestone coordination.",
+    eligibility: ["A registered transportation business", "Operational coverage and vehicle or carrier capability", "A team able to coordinate pickups and deliveries"],
+    responsibilities: ["Confirm route, cargo, capacity, and timing", "Coordinate pickup and delivery handoffs", "Maintain movement and exception updates", "Support applicable transport documents"],
+    workflow: ["Choose Provide Trade Services", "Record coverage and transport capabilities", "Review relevant movement requirements", "Coordinate pickup, transit, and delivery milestones"],
+    platformBenefits: ["Location- and capability-aware participation", "Clear cargo and route context", "Coordination with warehouses and forwarders", "Milestone visibility"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your transport company", registrationIntent: "SERVICE",
+    seo: { title: "Inland Transportation Companies on OBAOL | Associate Role", description: "See how registered inland transport companies support commodity pickup, movement, handoffs, and delivery through OBAOL.", keywords: ["inland transportation", "commodity transport", "first mile logistics"] },
+    faqs: [{ question: "Can a transporter support export cargo?", answer: "Yes. Inland legs can support international shipments when route, cargo, and capability fit." }, { question: "How are requirements matched?", answer: "Company capability and location provide context; the provider must review each requirement and accept its terms." }],
     relatedRoles: ["warehouse-owners", "freight-forwarders", "logistics-providers"],
   },
   {
-    slug: "freight-forwarders",
-    displayName: "Freight Forwarders",
-    shortDescription: "Coordinate cross-border freight movement and shipment planning.",
-    longDescription:
-      "Freight forwarding partners on OBAOL Supreme can orchestrate carrier coordination, booking flows, and shipment movement for international commodity trades.",
-    roleScope: ["Shipment planning", "Carrier and route coordination", "Cross-border freight execution"],
-    supportPoints: ["Integrated partner coordination", "Milestone-led shipment visibility", "Execution continuity across trade participants"],
-    iconKey: "freightForwarder",
-    seo: {
-      title: "Freight Forwarders on OBAOL | Associate Role",
-      description:
-        "Freight forwarding firms can join OBAOL Supreme to coordinate international commodity shipments with integrated trade execution workflows.",
-      keywords: ["freight forwarders", "commodity freight", "cross-border logistics", "shipment coordination"],
-    },
-    faqs: [
-      {
-        question: "Can freight forwarders onboard independently?",
-        answer: "Yes. Freight forwarding entities can onboard as dedicated associate partners.",
-      },
-      {
-        question: "Do freight forwarders collaborate with customs associates?",
-        answer: "Yes. OBAOL enables cross-functional execution with customs and importer-exporter roles.",
-      },
-    ],
-    relatedRoles: ["customs-clearance-agencies", "importers", "exporters"],
+    slug: "freight-forwarders", displayName: "Freight Forwarders", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "freightForwarder",
+    shortDescription: "Coordinate international freight bookings, routes, and shipment handoffs.",
+    bestFor: "Registered freight forwarders and international cargo coordination companies.",
+    longDescription: "Freight Forwarder Associates coordinate international movement between exporters, importers, carriers, ports, and destination partners inside the wider execution record.",
+    eligibility: ["A registered forwarding business", "Relevant route, mode, and cargo capabilities", "An operations team for shipment coordination"],
+    responsibilities: ["Confirm route, mode, schedule, and cargo fit", "Coordinate booking and carrier activity", "Maintain shipment and document status", "Manage partner handoffs"],
+    workflow: ["Choose Provide Trade Services", "Record lanes, modes, and capabilities", "Review international freight requirements", "Coordinate booking, shipment, and handoffs"],
+    platformBenefits: ["Trade context alongside the freight request", "Structured shipper and consignee collaboration", "Shipment milestone visibility", "Coordination with customs and inland companies"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your forwarding company", registrationIntent: "SERVICE",
+    seo: { title: "Freight Forwarding Companies on OBAOL | Associate Role", description: "Learn how registered freight forwarders coordinate international commodity shipments and partner handoffs through OBAOL.", keywords: ["freight forwarder", "commodity freight", "international shipping"] },
+    faqs: [{ question: "Can a forwarder register selected lanes only?", answer: "Yes. Record the routes, modes, and capabilities the company actually supports." }, { question: "Does OBAOL act as the carrier?", answer: "No. Registered service companies and carriers perform transport; OBAOL supports the workflow." }],
+    relatedRoles: ["customs-clearance-agencies", "inland-transportation", "importers"],
   },
   {
-    slug: "logistics-providers",
-    displayName: "Logistics Providers",
-    shortDescription: "Deliver multimodal logistics support for end-to-end commodity execution.",
-    longDescription:
-      "Logistics providers can manage cargo movement, routing, and execution coordination in partnership with other associates across the OBAOL ecosystem.",
-    roleScope: ["Multimodal commodity movement", "Operational coordination", "Execution support across trade legs"],
-    supportPoints: ["Cross-role alignment", "Process visibility", "Reduced coordination friction"],
-    iconKey: "logistics",
-    seo: {
-      title: "Logistics Providers on OBAOL | Associate Role",
-      description:
-        "Logistics service providers can join OBAOL Supreme to support commodity movement and execution through integrated operational workflows.",
-      keywords: ["logistics providers", "commodity logistics", "trade movement partners", "logistics associate"],
-    },
-    faqs: [
-      {
-        question: "What kind of logistics firms can join?",
-        answer: "Companies handling transport execution, cargo operations, and movement coordination can onboard.",
-      },
-      {
-        question: "Can logistics providers support both domestic and global trades?",
-        answer: "Yes. OBAOL supports logistics collaboration across local and international execution stages.",
-      },
-    ],
+    slug: "logistics-providers", displayName: "Logistics Providers", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "logistics",
+    shortDescription: "Manage multi-leg cargo operations across the trade lifecycle.",
+    bestFor: "Registered 3PLs, integrated logistics firms, and multimodal service companies.",
+    longDescription: "Logistics Provider Associates support one or more operational legs of a commodity trade. Their capabilities define which transport, handling, and coordination requirements they can undertake.",
+    eligibility: ["A registered logistics company", "Documented service coverage and capabilities", "Operational ownership for services offered"],
+    responsibilities: ["Define actual services and geographies", "Review requirements before accepting work", "Coordinate service legs and handoffs", "Maintain milestone and exception information"],
+    workflow: ["Choose Provide Trade Services", "Add functions, sub-functions, and locations", "Review capability-relevant requirements", "Coordinate accepted work through completion"],
+    platformBenefits: ["Capability-based participation", "Context across multiple trade legs", "Shared handoff visibility", "Collaboration with specialist companies"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your logistics company", registrationIntent: "SERVICE",
+    seo: { title: "Logistics Service Companies on OBAOL | Associate Role", description: "See how registered logistics providers coordinate commodity movement and operational handoffs through OBAOL.", keywords: ["logistics provider", "commodity logistics", "3PL company"] },
+    faqs: [{ question: "How is this different from freight forwarding?", answer: "A logistics provider may cover several domestic or multimodal services; freight forwarding is presented separately for international shipment coordination." }, { question: "Can one company have several capabilities?", answer: "Yes. Record all genuine functions and sub-functions under the company profile." }],
     relatedRoles: ["inland-transportation", "freight-forwarders", "warehouse-owners"],
   },
   {
-    slug: "suppliers",
-    displayName: "Suppliers",
-    shortDescription: "Provide commodity supply streams to domestic and global demand channels.",
-    longDescription:
-      "Suppliers can use OBAOL Supreme to connect products to active demand while coordinating quality, packaging, and execution readiness through the platform.",
-    roleScope: ["Supply fulfillment", "Buyer-aligned coordination", "Execution-ready lot preparation"],
-    supportPoints: ["Demand-side access", "Execution coordination support", "Ecosystem partner collaboration"],
-    iconKey: "supplier",
-    seo: {
-      title: "Suppliers on OBAOL | Associate Role",
-      description:
-        "Commodity suppliers can onboard to OBAOL Supreme to participate in verified trade execution and connect with buyers through a structured platform.",
-      keywords: ["commodity suppliers", "agri supply network", "supplier onboarding", "trade supply partner"],
-    },
-    faqs: [
-      {
-        question: "Can supplier companies onboard directly?",
-        answer: "Yes. Registered supplier entities can onboard as associates and participate in platform-driven execution.",
-      },
-      {
-        question: "Do suppliers need supporting ecosystem partners?",
-        answer: "Typically yes, and OBAOL enables direct coordination with labs, packaging, logistics, and warehousing partners.",
-      },
-    ],
-    relatedRoles: ["packaging-companies", "quality-testing-labs", "traders"],
+    slug: "packaging-companies", displayName: "Packaging Companies", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "packaging",
+    shortDescription: "Prepare commodity lots for handling, compliance, and dispatch.",
+    bestFor: "Registered industrial packaging, bagging, repacking, and export-packaging businesses.",
+    longDescription: "Packaging Company Associates prepare commodity lots for storage and movement against confirmed requirements. OBAOL connects their work to readiness and documentation stages.",
+    eligibility: ["A registered packaging-services business", "Suitable facilities and materials", "Ability to work against defined product requirements"],
+    responsibilities: ["Confirm format, quantity, and timing", "Perform agreed packing services", "Coordinate with supply and quality teams", "Update readiness records"],
+    workflow: ["Choose Provide Trade Services", "Record packaging functions and locations", "Review product-specific requirements", "Coordinate completion and dispatch handoff"],
+    platformBenefits: ["Linkage to the underlying requirement", "Coordination with suppliers and labs", "Readiness milestone visibility", "Connected warehouse or transport handoff"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your packaging company", registrationIntent: "SERVICE",
+    seo: { title: "Commodity Packaging Companies on OBAOL | Associate Role", description: "Learn how registered packaging companies support commodity readiness and dispatch handoffs through OBAOL.", keywords: ["commodity packaging", "export packaging", "packing services"] },
+    faqs: [{ question: "Can a packaging company join without trading?", answer: "Yes. Choose Provide Trade Services and record packaging capabilities." }, { question: "Are packaging standards set by OBAOL?", answer: "Requirements come from the product, transaction, buyer, and regulatory context." }],
+    relatedRoles: ["suppliers", "quality-testing-labs", "warehouse-owners"],
   },
   {
-    slug: "packaging-companies",
-    displayName: "Packaging Companies",
-    shortDescription: "Support commodity preparation and packaging standards for market readiness.",
-    longDescription:
-      "Packaging partners can join OBAOL Supreme to deliver packaging operations aligned with trade requirements, buyer standards, and execution timelines.",
-    roleScope: ["Commodity packaging operations", "Dispatch readiness support", "Standard-driven packaging alignment"],
-    supportPoints: ["Integrated execution timing", "Collaboration with suppliers and labs", "Streamlined pre-dispatch coordination"],
-    iconKey: "packaging",
-    seo: {
-      title: "Packaging Companies on OBAOL | Associate Role",
-      description:
-        "Packaging companies can onboard to OBAOL Supreme to support commodity readiness with coordinated packaging execution for trade movement.",
-      keywords: ["commodity packaging", "packaging partners", "trade packaging services", "agri packaging company"],
-    },
-    faqs: [
-      {
-        question: "Can packaging firms onboard even if they do not trade directly?",
-        answer: "Yes. OBAOL supports service partners that are critical to execution quality and readiness.",
-      },
-      {
-        question: "How do packaging companies fit into the ecosystem?",
-        answer: "They work with suppliers, traders, and logistics teams to prepare goods for compliant dispatch.",
-      },
-    ],
-    relatedRoles: ["suppliers", "quality-testing-labs", "exporters"],
+    slug: "quality-testing-labs", displayName: "Quality Testing Labs", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "qualityLab",
+    shortDescription: "Test commodity parameters and return traceable quality evidence.",
+    bestFor: "Registered or accredited laboratories and commodity inspection businesses.",
+    longDescription: "Quality Testing Lab Associates provide inspection, sampling, or analytical services. Their results support informed acceptance and quality milestones attached to an order.",
+    eligibility: ["A registered laboratory or inspection business", "Relevant tests, certifications, and accepted items", "Contacts for sample and report coordination"],
+    responsibilities: ["Publish accurate tests and credentials", "Confirm sample and test suitability", "Perform agreed analysis", "Return reports and milestone updates"],
+    workflow: ["Choose Provide Trade Services", "Record tests, certifications, and locations", "Review relevant quality requirements", "Coordinate sampling, testing, and reports"],
+    platformBenefits: ["Detailed lab capability profiles", "Quality tasks linked to the trade", "Supplier and buyer coordination", "Report and milestone context"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your testing laboratory", registrationIntent: "SERVICE",
+    seo: { title: "Commodity Quality Testing Labs on OBAOL | Associate Role", description: "See how registered commodity laboratories coordinate samples, analysis, and quality reports on OBAOL.", keywords: ["commodity testing lab", "quality inspection", "agri laboratory"] },
+    faqs: [{ question: "Should a lab record its specific tests?", answer: "Yes. Tests, certifications, locations, and accepted items describe its genuine capabilities." }, { question: "Does OBAOL certify lab results?", answer: "No. The laboratory remains responsible for its credentials, methods, and reports." }],
+    relatedRoles: ["suppliers", "exporters", "packaging-companies"],
   },
   {
-    slug: "quality-testing-labs",
-    displayName: "Quality Testing Labs",
-    shortDescription: "Validate commodity quality parameters and strengthen execution trust.",
-    longDescription:
-      "Quality testing labs can join OBAOL Supreme as execution-critical associates to provide inspection and quality validation support across trade workflows.",
-    roleScope: ["Commodity quality testing", "Inspection and reporting support", "Quality assurance for execution stages"],
-    supportPoints: ["Quality confidence for counterparties", "Structured role in execution lifecycle", "Collaboration with suppliers, exporters, and buyers"],
-    iconKey: "qualityLab",
-    seo: {
-      title: "Quality Testing Labs on OBAOL | Associate Role",
-      description:
-        "Quality testing labs can onboard to OBAOL Supreme to provide commodity inspection and validation support for reliable trade execution.",
-      keywords: ["quality testing labs", "commodity inspection", "agri lab services", "quality verification in trade"],
-    },
-    faqs: [
-      {
-        question: "Can independent commodity labs join as associates?",
-        answer: "Yes. Registered testing labs can onboard and collaborate directly within the trade execution ecosystem.",
-      },
-      {
-        question: "Why are quality labs important for OBAOL trades?",
-        answer: "They improve trust, reduce disputes, and support standardized quality validation before movement and settlement.",
-      },
-    ],
-    relatedRoles: ["suppliers", "exporters", "agritech-companies"],
-  },
-  {
-    slug: "agritech-companies",
-    displayName: "Agritech Companies",
-    shortDescription: "Integrate technology capabilities that improve sourcing, quality, and execution.",
-    longDescription:
-      "Agritech companies can participate in the OBAOL ecosystem by enabling better traceability, operational intelligence, and execution support for commodity workflows.",
-    roleScope: ["Trade-tech enablement", "Execution intelligence support", "Integration-led ecosystem collaboration"],
-    supportPoints: ["One-stop ecosystem integration", "Operational visibility support", "Value-added capabilities for trade participants"],
-    iconKey: "agritech",
-    seo: {
-      title: "Agritech Companies on OBAOL | Associate Role",
-      description:
-        "Agritech companies can join OBAOL Supreme as associate partners to integrate technology capabilities across commodity sourcing and execution workflows.",
-      keywords: ["agritech companies", "agri technology platform", "commodity traceability", "trade tech integration"],
-    },
-    faqs: [
-      {
-        question: "Can agritech firms join even if they are service-led?",
-        answer: "Yes. Agritech companies are part of the expanded associate ecosystem and can collaborate across execution flows.",
-      },
-      {
-        question: "How does agritech improve trade execution on OBAOL?",
-        answer: "Agritech capabilities can enhance traceability, visibility, and data-driven decision support across the workflow.",
-      },
-    ],
-    relatedRoles: ["quality-testing-labs", "suppliers", "procurement-partners"],
-  },
-  {
-    slug: "customs-clearance-agencies",
-    displayName: "Customs Clearance Agencies",
-    shortDescription: "Support customs documentation and border compliance workflows.",
-    longDescription:
-      "Customs clearance agencies can onboard to OBAOL Supreme to support compliant border transitions and reduce delay risk in international commodity flows.",
-    roleScope: ["Customs process support", "Border documentation coordination", "Clearance milestone handling"],
-    supportPoints: ["Compliance-aligned execution", "Cross-role coordination", "Reduced border process friction"],
-    iconKey: "customs",
-    seo: {
-      title: "Customs Clearance Agencies on OBAOL | Associate Role",
-      description:
-        "Customs clearance agencies can join OBAOL Supreme to support documentation, compliance, and smooth border execution in global commodity trade.",
-      keywords: ["customs clearance", "trade compliance", "border documentation", "import export customs partner"],
-    },
-    faqs: [
-      {
-        question: "Can customs agencies work with both importers and exporters on OBAOL?",
-        answer: "Yes. Customs associates can collaborate across both inbound and outbound trade workflows.",
-      },
-      {
-        question: "Is customs support limited to one geography?",
-        answer: "No. The ecosystem is built for India-first operations with global expansion across key corridors.",
-      },
-    ],
+    slug: "customs-clearance-agencies", displayName: "Customs Clearance Agencies", group: "logistics-quality-compliance", participationModes: ["SERVICE"], iconKey: "customs",
+    shortDescription: "Coordinate border filings, clearance steps, and customs handoffs.",
+    bestFor: "Registered customs brokers, clearance agencies, and border-documentation companies.",
+    longDescription: "Customs Clearance Agency Associates support compliant border movement. OBAOL connects their clearance activity with the importer, exporter, freight, and shipment record.",
+    eligibility: ["A registered business authorized for its services", "Relevant port or market coverage", "Qualified customs coordination staff"],
+    responsibilities: ["Confirm shipment and jurisdiction requirements", "Coordinate filings and supporting documents", "Maintain clearance status", "Manage release handoffs"],
+    workflow: ["Choose Provide Trade Services", "Record clearance capabilities and locations", "Review international-trade requirements", "Coordinate documents, clearance, and release"],
+    platformBenefits: ["Context from the underlying trade", "Connected document milestones", "Importer, exporter, and forwarder coordination", "Authorized visibility of clearance progress"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your clearance agency", registrationIntent: "SERVICE",
+    seo: { title: "Customs Clearance Agencies on OBAOL | Associate Role", description: "Learn how registered customs agencies coordinate commodity documents, clearance, and handoffs through OBAOL.", keywords: ["customs clearance agency", "customs broker", "border documentation"] },
+    faqs: [{ question: "Can an agency support imports and exports?", answer: "Yes, when authorized and capable in the relevant jurisdictions." }, { question: "Does OBAOL provide customs approval?", answer: "No. Authorized companies and authorities remain responsible for regulated decisions." }],
     relatedRoles: ["importers", "exporters", "freight-forwarders"],
   },
   {
-    slug: "finance-partners",
-    displayName: "Finance Partners",
-    shortDescription: "Support trade-level funding continuity across active commodity execution flows.",
-    longDescription:
-      "Finance partners can participate in OBAOL Supreme by enabling trade-level funding support for active executions, including one-off trades and recurring contract cycles.",
-    roleScope: [
-      "Trade-level funding participation",
-      "Contract-cycle funding continuity",
-      "Execution-linked finance coordination",
-    ],
-    supportPoints: [
-      "Structured participation across active trade milestones",
-      "Alignment with procurement-to-settlement execution flow",
-      "Funding continuity support for genuine trade movement",
-    ],
-    iconKey: "finance",
-    seo: {
-      title: "Finance Partners on OBAOL | Associate Role",
-      description:
-        "Finance partners can join OBAOL Supreme to support trade-level and contract-cycle commodity funding with execution-linked coordination.",
-      keywords: [
-        "trade finance partners",
-        "commodity funding partners",
-        "contract cycle finance",
-        "trade-level investment support",
-      ],
-    },
-    faqs: [
-      {
-        question: "Can finance partners support individual trades instead of long-term commitments?",
-        answer: "Yes. Finance participation can be aligned to specific active trades as well as recurring contract cycles.",
-      },
-      {
-        question: "How do finance partners contribute on OBAOL?",
-        answer: "They support execution continuity by aligning funding participation to real trade milestones and contract structures.",
-      },
-    ],
-    relatedRoles: ["traders", "importers", "exporters"],
+    slug: "finance-partners", displayName: "Finance Partners", group: "finance-technology", participationModes: ["SERVICE"], iconKey: "finance",
+    shortDescription: "Evaluate and support eligible trade-finance requirements.",
+    bestFor: "Regulated lenders, trade-finance providers, and registered financial institutions.",
+    longDescription: "Finance Partner Associates may evaluate finance needs connected to genuine trade activity. Each provider retains its own eligibility, diligence, pricing, and approval process.",
+    eligibility: ["An appropriately authorized finance business", "A defined trade-finance capability", "Qualified representatives for diligence"],
+    responsibilities: ["State product requirements accurately", "Conduct independent diligence", "Coordinate authorized documents", "Maintain relevant finance status"],
+    workflow: ["Choose Provide Trade Services", "Record finance capabilities and markets", "Review eligible execution-linked requirements", "Complete provider-led diligence and decisions"],
+    platformBenefits: ["Underlying trade context", "Structured access to authorized documents", "Milestone coordination", "Clear provider ownership of approval"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your finance company", registrationIntent: "SERVICE",
+    seo: { title: "Trade Finance Partners on OBAOL | Associate Role", description: "See how authorized finance businesses evaluate eligible execution-linked trade requirements through OBAOL.", keywords: ["trade finance provider", "commodity finance", "finance company"] },
+    faqs: [{ question: "Does OBAOL guarantee finance approval?", answer: "No. Every provider applies its own eligibility, diligence, risk, pricing, and approval process." }, { question: "Is OBAOL the lender?", answer: "No. The finance company provides the financial service; OBAOL supports the connected workflow." }],
+    relatedRoles: ["traders", "importers", "insurance-partners"],
   },
   {
-    slug: "insurance-partners",
-    displayName: "Insurance Partners",
-    shortDescription: "Provide risk protection support for resilient commodity trade execution.",
-    longDescription:
-      "Insurance partners can join OBAOL Supreme to strengthen execution continuity by supporting commodity and cargo risk coverage alignment across trade workflows.",
-    roleScope: [
-      "Cargo and commodity risk cover alignment",
-      "Claims-readiness documentation support",
-      "Risk protection continuity across execution stages",
-    ],
-    supportPoints: [
-      "Risk-aware coordination with execution participants",
-      "Support for trade documentation and compliance readiness",
-      "Improved resilience during movement and settlement phases",
-    ],
-    iconKey: "customs",
-    seo: {
-      title: "Insurance Partners on OBAOL | Associate Role",
-      description:
-        "Insurance partners can onboard to OBAOL Supreme to support commodity and cargo risk protection with execution-linked documentation readiness.",
-      keywords: [
-        "commodity insurance partners",
-        "cargo risk coverage",
-        "trade insurance support",
-        "claims readiness in commodity trade",
-      ],
-    },
-    faqs: [
-      {
-        question: "Can insurance providers join without acting as traders?",
-        answer: "Yes. Insurance partners can participate as dedicated risk-protection associates within the execution ecosystem.",
-      },
-      {
-        question: "Where do insurance partners add value in OBAOL workflows?",
-        answer: "They support risk cover alignment and claims-readiness coordination across documentation, movement, and settlement stages.",
-      },
-    ],
-    relatedRoles: ["freight-forwarders", "customs-clearance-agencies", "exporters"],
+    slug: "insurance-partners", displayName: "Insurance Partners", group: "finance-technology", participationModes: ["SERVICE"], iconKey: "customs",
+    shortDescription: "Evaluate suitable cargo and trade-risk coverage requirements.",
+    bestFor: "Authorized insurers, brokers, and registered trade-risk service companies.",
+    longDescription: "Insurance Partner Associates support suitable risk-cover requirements. Coverage, pricing, issuance, and claims remain subject to the provider’s terms and authority.",
+    eligibility: ["An appropriately authorized insurance business", "Relevant cargo or trade-risk capability", "Qualified underwriting representatives"],
+    responsibilities: ["Define coverage accurately", "Conduct provider-led assessment", "Coordinate policy documents", "Support claims-readiness records"],
+    workflow: ["Choose Provide Trade Services", "Record insurance capabilities and markets", "Review suitable coverage requirements", "Complete provider-led assessment and documentation"],
+    platformBenefits: ["Coverage context linked to execution", "Structured document coordination", "Movement milestone visibility", "Provider ownership of underwriting"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your insurance company", registrationIntent: "SERVICE",
+    seo: { title: "Commodity Insurance Partners on OBAOL | Associate Role", description: "Learn how authorized insurance businesses coordinate suitable cargo and trade-risk coverage requirements through OBAOL.", keywords: ["cargo insurance", "commodity insurance", "trade risk"] },
+    faqs: [{ question: "Does OBAOL guarantee coverage?", answer: "No. Coverage is subject to provider assessment, terms, exclusions, pricing, and approval." }, { question: "Who handles claims?", answer: "The insurer or authorized provider handles claims under the applicable policy terms." }],
+    relatedRoles: ["finance-partners", "freight-forwarders", "exporters"],
   },
   {
-    slug: "procurement-partners",
-    displayName: "Procurement Partners",
-    shortDescription: "Drive sourcing alignment between market demand and supply capabilities.",
-    longDescription:
-      "Procurement partners can use OBAOL Supreme to align demand-side sourcing goals with supplier ecosystems and execution support across the trade lifecycle.",
-    roleScope: ["Demand-aligned sourcing", "Supplier network coordination", "Execution readiness management"],
-    supportPoints: ["Sourcing intelligence support", "Partner coordination across roles", "Integrated one-stop execution framework"],
-    iconKey: "procurement",
-    seo: {
-      title: "Procurement Partners on OBAOL | Associate Role",
-      description:
-        "Procurement partners can join OBAOL Supreme to coordinate sourcing and supplier alignment in a structured commodity trade execution environment.",
-      keywords: ["procurement partner", "commodity sourcing", "supplier coordination", "trade procurement platform"],
-    },
-    faqs: [
-      {
-        question: "Who should join as a procurement partner?",
-        answer: "Organizations focused on strategic sourcing and supplier coordination across commodity categories can onboard.",
-      },
-      {
-        question: "Can procurement partners collaborate with agritech and labs on OBAOL?",
-        answer: "Yes. The ecosystem is built for cross-role coordination, including technology and quality assurance support.",
-      },
-    ],
-    relatedRoles: ["suppliers", "agritech-companies", "traders"],
+    slug: "agritech-companies", displayName: "Agritech Companies", group: "finance-technology", participationModes: ["SERVICE"], iconKey: "agritech",
+    shortDescription: "Contribute verified technology capabilities to commodity execution.",
+    bestFor: "Registered agritech, traceability, inspection-tech, and trade-enablement companies.",
+    longDescription: "Agritech Company Associates provide technology or data-enabled services for sourcing, traceability, quality, or execution. The company registers a specific capability, not a generic listing.",
+    eligibility: ["A registered technology business", "A capability relevant to commodity trade", "An accountable delivery team"],
+    responsibilities: ["Describe capability limits accurately", "Confirm fit before accepting work", "Coordinate service delivery", "Maintain progress and handoffs"],
+    workflow: ["Choose Provide Trade Services", "Record technology functions and markets", "Review aligned requirements", "Coordinate agreed delivery within the trade workflow"],
+    platformBenefits: ["A role based on genuine capability", "Underlying commodity context", "Supply and quality collaboration", "Structured service progress"],
+    prerequisites: servicePrerequisites, ctaLabel: "Register your agritech company", registrationIntent: "SERVICE",
+    seo: { title: "Agritech Companies on OBAOL | Associate Role", description: "See how registered agritech companies contribute traceability, quality, sourcing, or execution capabilities through OBAOL.", keywords: ["agritech company", "commodity traceability", "trade technology"] },
+    faqs: [{ question: "Can any software company register?", answer: "The company should offer a defined capability relevant to commodity sourcing, quality, traceability, or execution." }, { question: "Does registration create an integration?", answer: "No. Integration depends on capability fit, review, scope, and an agreed implementation path." }],
+    relatedRoles: ["quality-testing-labs", "procurement-partners", "suppliers"],
   },
 ];
 
 export const associateRoleDefinitions: AssociateRoleDefinition[] = roles;
-
 export const associateRoleSlugs = associateRoleDefinitions.map((role) => role.slug);
-
 export const getAssociateRolePath = (slug: string) => `/roles/associate/${slug}`;
-
-export const getAssociateRoleBySlug = (slug: string) =>
-  associateRoleDefinitions.find((role) => role.slug === slug);
+export const getAssociateRoleBySlug = (slug: string) => associateRoleDefinitions.find((role) => role.slug === slug);
+export const getAssociateRolesByGroup = (group: AssociateRoleGroup) => associateRoleDefinitions.filter((role) => role.group === group);

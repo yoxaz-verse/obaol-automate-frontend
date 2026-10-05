@@ -87,6 +87,29 @@ for (const route of ["/roles", "/roles/operator", "/roles/associate", "/roles/as
   });
 }
 
+test("associate directory exposes participation paths, grouped roles, and role guidance", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/roles/associate");
+
+  const paths = page.locator('[data-testid="associate-participation-paths"]');
+  await expect(paths.getByRole("heading")).toHaveCount(4);
+  for (const label of ["Buy commodities", "Sell commodities", "Buy & sell", "Provide trade services"]) {
+    await expect(paths.getByRole("heading", { name: label, exact: true })).toBeVisible();
+  }
+  await expect(page.locator("[data-associate-group]")) .toHaveCount(4);
+  await expect(page.locator('a[href^="/roles/associate/"]')).toHaveCount(15);
+  await expect(page.getByRole("heading", { name: "You represent a registered company" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "You are joining as an individual" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Register an Associate company/ })).toHaveAttribute("href", "/auth/register");
+
+  await page.goto("/roles/associate/traders");
+  await expect(page.getByRole("heading", { name: "Is this your business?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What your company is responsible for" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How the workflow starts on OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What to prepare for registration" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Register your trading company/ }).first()).toHaveAttribute("href", /intent=BOTH/);
+});
+
 test("About marketing sections use one responsive content container", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 

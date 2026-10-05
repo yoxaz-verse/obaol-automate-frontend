@@ -23,11 +23,11 @@ export default function DashboardContextBar() {
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border db-border-subtle db-subtle px-3 py-2 text-xs">
       <nav aria-label="Current dashboard location" className="flex min-w-0 items-center gap-2 db-muted">
-        <Link href="/dashboard" className="font-semibold hover:text-foreground">Overview</Link>
+        <Link href="/dashboard" prefetch={false} className="font-semibold hover:text-foreground">Overview</Link>
         <span aria-hidden="true">/</span>
         {parentRoute ? (
           <>
-            <Link href={parentRoute.path} className="font-semibold hover:text-foreground">{parentRoute.label}</Link>
+            <Link href={parentRoute.path} prefetch={false} className="font-semibold hover:text-foreground">{parentRoute.label}</Link>
             <span aria-hidden="true">/</span>
           </>
         ) : (
@@ -40,7 +40,7 @@ export default function DashboardContextBar() {
       </nav>
       <div className="flex items-center gap-3">
         <span className="rounded-full bg-obaol-500/10 px-2.5 py-1 font-semibold text-obaol-700 dark:text-obaol-300">{roleLabel}</span>
-        <Link href={`/dashboard/guidance#${route.helpId}`} className="font-semibold db-muted hover:text-foreground">Help for this page</Link>
+        <Link href={`/dashboard/guidance#${route.helpId}`} prefetch={false} className="font-semibold db-muted hover:text-foreground">Help for this page</Link>
       </div>
     </div>
   );

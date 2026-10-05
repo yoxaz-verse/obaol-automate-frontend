@@ -38,7 +38,6 @@ const login = async (page, account) => {
   await page.getByRole("button", { name: /^Sign In$/ }).click();
   await expect(page).toHaveURL(/\/dashboard(?:[/?]|$)/, { timeout: 15_000 });
   await expect(page.locator("[data-dashboard-shell]")).toBeVisible();
-  await page.waitForLoadState("networkidle");
 };
 
 const navigateThroughVisibleUi = async (page, account) => {
@@ -49,16 +48,19 @@ const navigateThroughVisibleUi = async (page, account) => {
       await primary.click();
     } else {
       await page.getByRole("button", { name: "More workspace navigation" }).click();
-      await expect(page.getByRole("dialog", { name: "Workspace navigation" })).toBeVisible();
-      if (account.group) await page.getByRole("button", { name: new RegExp(account.group) }).click();
-      await page.getByRole("dialog", { name: "Workspace navigation" }).getByRole("button", { name: account.allowedLabel, exact: true }).click();
+      const dialog = page.getByRole("dialog", { name: "Workspace navigation" });
+      await expect(dialog).toBeVisible();
+      if (account.group) {
+        const group = dialog.getByRole("button", { name: new RegExp(account.group) });
+        if (await group.getAttribute("aria-expanded") !== "true") await group.click();
+      }
+      await dialog.getByRole("button", { name: account.allowedLabel, exact: true }).click();
     }
   } else {
     if (account.group) await page.locator("[data-sidebar]").getByRole("button", { name: new RegExp(account.group) }).click();
     await page.locator("[data-sidebar]").getByRole("button", { name: account.allowedLabel, exact: true }).click();
   }
   await expect(page).toHaveURL(new RegExp(`${account.allowed.replaceAll("/", "\\/")}$`));
-  await page.waitForLoadState("networkidle");
 };
 
 for (const account of accounts) {

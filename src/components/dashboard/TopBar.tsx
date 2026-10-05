@@ -230,10 +230,7 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                 {isMobileMenuOpen && (
                   <div className="fixed inset-0 z-[999999]">
                     <motion.div
-                      ref={mobileMenuRef}
-                      role="dialog"
-                      aria-modal="true"
-                      aria-label="Workspace navigation"
+                      aria-hidden="true"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -241,6 +238,10 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                       className="absolute inset-0 db-overlay backdrop-blur-md"
                     />
                     <motion.div
+                      ref={mobileMenuRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Workspace navigation"
                       initial={{ x: "-100%" }}
                       animate={{ x: 0 }}
                       exit={{ x: "-100%" }}

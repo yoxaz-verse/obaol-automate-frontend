@@ -107,32 +107,32 @@ export default function Header() {
         if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
       }} className={`fixed top-0 left-0 right-0 z-[100] safe-pt transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
         <PublicContainer className="relative">
-          <div className={`public-header-shell flex items-center justify-between gap-3 rounded-2xl px-4 md:px-6 border border-default-200/50 bg-background/95 shadow-[0_12px_34px_-28px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
+          <div className={`public-header-shell flex items-center justify-between gap-3 rounded-2xl px-4 md:px-6 border border-obaol-500/20 bg-background/85 shadow-[0_12px_40px_-20px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-all duration-300 ${scrolled ? "h-14 border-obaol-500/40 shadow-[0_12px_30px_-15px_rgba(207,152,60,0.2)]" : "h-16"}`}>
             <Link href="/" aria-label="OBAOL home" onClick={() => closeMenu()} className="relative flex-shrink-0">
               <Image src="/logo.png" alt="OBAOL" width={95} height={28} priority className="object-contain rounded-md" />
             </Link>
             <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-1">
               {primaryPublicLinks.map((link) => (
                 <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}
-                  onClick={() => closeMenu()} className="px-3 py-2 text-sm font-medium text-foreground/65 hover:text-foreground rounded-lg hover:bg-foreground/[0.06] aria-[current=page]:text-obaol-600 dark:aria-[current=page]:text-obaol-300">
+                  onClick={() => closeMenu()} className="px-3.5 py-2 text-sm font-semibold text-foreground/75 hover:text-foreground rounded-xl hover:bg-obaol-500/10 aria-[current=page]:text-obaol-600 dark:aria-[current=page]:text-obaol-300 aria-[current=page]:bg-obaol-500/10 transition-colors">
                   {link.label}
                 </Link>
               ))}
               <button ref={desktopTrigger} type="button" aria-expanded={open} aria-controls="public-page-directory"
                 onClick={() => setOpen((value) => !value)}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-foreground/75 hover:bg-obaol-500/10 aria-expanded:bg-obaol-500/10">
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold text-foreground/75 hover:bg-obaol-500/10 aria-expanded:bg-obaol-500/10 transition-colors">
                 More <FiChevronDown aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`} />
               </button>
             </nav>
             <div className="flex shrink-0 items-center gap-2 xl:gap-3">
               <div className="hidden xl:block"><ThemeSwitcher /></div>
               <div className="hidden sm:flex">{soundButton}</div>
-              <Link href={signedIn ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-11 items-center px-2 text-sm font-semibold text-foreground/70 hover:text-foreground">
+              <Link href={signedIn ? "/dashboard" : "/auth?view=signin"} className="hidden sm:inline-flex min-h-11 items-center px-3 text-sm font-bold text-foreground/80 hover:text-obaol-600 dark:hover:text-obaol-300 transition-colors">
                 {signedIn ? "Dashboard" : "Sign In"}
               </Link>
-              <PublicLinkButton href={signedIn ? "/dashboard" : "/auth"}>
+              <Link href={signedIn ? "/dashboard" : "/auth"} className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-obaol-500 to-amber-500 px-4 py-2.5 text-sm font-extrabold text-obaol-950 shadow-[0_4px_16px_rgba(207,152,60,0.35)] transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_6px_22px_rgba(207,152,60,0.5)] active:scale-[0.97]">
                 {signedIn ? "Open workspace" : "Get Started"}
-              </PublicLinkButton>
+              </Link>
               <button ref={mobileTrigger} type="button" onClick={() => setOpen((value) => !value)}
                 className="lg:hidden touch-target inline-flex items-center justify-center rounded-lg border border-foreground/10 bg-foreground/[0.04]"
                 aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="public-page-directory">

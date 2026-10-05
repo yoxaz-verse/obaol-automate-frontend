@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Card, CardBody, Button } from "@nextui-org/react";
 import Header from "@/components/home/header";
 import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
-import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -26,7 +28,8 @@ import {
   FiBookOpen,
   FiClock,
   FiStar,
-  FiGlobe
+  FiGlobe,
+  FiAward
 } from "react-icons/fi";
 import { buildWebPageJsonLd } from "@/utils/seo";
 
@@ -38,6 +41,8 @@ const webPageJsonLd = buildWebPageJsonLd({
 });
 
 export default function OperatorRolePage() {
+  const router = useRouter();
+
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
@@ -49,27 +54,25 @@ export default function OperatorRolePage() {
     { title: "Identify", desc: "Spot high-intent opportunities in the global agro market.", icon: <FiSearch /> },
     { title: "Verify", desc: "Use OBAOL's system to check counterparty and stock reality.", icon: <FiUserCheck /> },
     { title: "Coordinate", desc: "Manage the layers of logistics, packaging, and audit.", icon: <FiAnchor /> },
-    { title: "Complete", desc: "Stay involved until the final settlement is confirmed.", icon: <FiFlag /> }
+    { title: "Complete", desc: "Stay involved until the final settlement is confirmed.", icon: <FiTarget /> }
   ];
 
-  function FiFlag() { return <FiTarget />; } // Placeholder for Flag if needed, using Target
-
   return (
-    <section className="min-h-screen bg-background selection:bg-orange-500/30">
+    <section className="min-h-screen bg-background selection:bg-orange-500/30 text-foreground overflow-x-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
       <Header />
 
-      <ThemedContentWrapper>
+      <ThemedContentWrapper className="public-reading-page">
         {/* --- HERO SECTION --- */}
         <div className="relative pt-24 md:pt-32 pb-12 md:pb-20 overflow-hidden">
           {/* Background Ambient Effects */}
           <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-orange-500/10 blur-[150px] rounded-full pointer-events-none public-decoration" />
-          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none public-decoration" />
+          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-amber-500/5 blur-[120px] rounded-full pointer-events-none public-decoration" />
 
-          <div className="container mx-auto max-w-6xl px-4 relative z-10 public-layout-container">
+          <div className="container mx-auto max-w-6xl px-4 md:px-6 relative z-10 public-layout-container">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -77,7 +80,7 @@ export default function OperatorRolePage() {
             >
               <Link
                 href="/roles"
-                className="inline-flex items-center gap-2 text-sm font-bold text-orange-500/80 hover:text-orange-500 transition-all group px-4 py-2 rounded-full border border-orange-500/10 bg-orange-500/5 backdrop-blur-sm mb-12"
+                className="inline-flex items-center gap-2 text-sm font-bold text-foreground/60 hover:text-orange-500 transition-colors group px-4 py-2 rounded-full border border-default-200/50 bg-content1/50 backdrop-blur-md mb-8"
               >
                 <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
                 Back to Roles
@@ -88,73 +91,79 @@ export default function OperatorRolePage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 w-fit font-bold uppercase tracking-widest text-[10px]"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-content2/50 border border-default-200/50 text-orange-500 w-fit font-black uppercase tracking-[0.25em] text-[10px] shadow-sm"
                 >
-                  <FiStar className="fill-orange-500" /> Premium Execution Identity
+                  <FiStar className="fill-orange-500 text-orange-500 animate-pulse" size={12} />
+                  Premium Execution Identity
                 </motion.div>
 
-                <h1 className="text-4xl md:text-8xl font-black text-foreground tracking-tight leading-[0.95] mb-8">
+                <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tight leading-[0.98]">
                   The New Standard of <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-amber-600">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 italic">
                     Trade Operation.
                   </span>
                 </h1>
 
-                <p className="text-xl md:text-3xl text-foreground/70 max-w-4xl leading-relaxed font-medium">
-                  We don&apos;t need more brokers. We need <span className="text-foreground">Execution Specialists</span>.
-                  Operate in global trades from <span className="text-foreground underline decoration-orange-500/30">anywhere in the world</span> with <span className="text-foreground uppercase italic px-1">Zero Capital</span>.
+                <p className="text-lg md:text-2xl text-foreground/70 max-w-4xl leading-relaxed font-medium">
+                  We don&apos;t need more brokers. We need <span className="text-foreground font-bold">Execution Specialists</span>.
+                  Operate in global trades from <span className="text-foreground underline decoration-orange-500/30 font-semibold">anywhere in the world</span> with <span className="text-orange-500 uppercase italic font-black">Zero Capital</span>.
                 </p>
               </div>
             </motion.div>
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-16 md:mt-20">
               {[
-                { icon: <FiZap />, title: "Asset-Light", desc: "No capital required. No stock ownership. Focus purely on execution." },
-                { icon: <FiTarget />, title: "Result Driven", desc: "Earnings are generated by completion, not effort or negotiation." },
-                { icon: <FiLayers />, title: "System Backed", desc: "Leverage OBAOL's verification and audit trail for every trade." }
+                { icon: <FiZap size={24} />, title: "Asset-Light", desc: "No capital required. Enter the multi-billion dollar agro market with zero inventory." },
+                { icon: <FiTarget size={24} />, title: "Result Driven", desc: "Earnings are generated by completion, not effort or negotiation." },
+                { icon: <FiLayers size={24} />, title: "System Backed", desc: "Leverage OBAOL's verification and audit trail for every trade." }
               ].map((item, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                  className="p-8 md:p-10 rounded-[2.5rem] bg-content1/40 border border-default-200/50 backdrop-blur-xl hover:border-orange-500/30 transition-all group"
+                  transition={{ delay: 0.3 + i * 0.1 }}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 mb-8 font-bold group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-4 tracking-tight">{item.title}</h3>
-                  <p className="text-foreground/50 leading-relaxed font-medium text-lg">
-                    {item.title === "Asset-Light" ? "No capital required. Enter the multi-billion dollar agro market with zero inventory." : item.desc}
-                  </p>
+                  <Card className="h-full bg-content1/50 backdrop-blur-xl border border-default-200/50 hover:border-orange-500/30 transition-all shadow-xl rounded-[2.5rem] public-surface-card group">
+                    <CardBody className="p-8 md:p-10 flex flex-col justify-between">
+                      <div>
+                        <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-8 font-bold group-hover:bg-orange-500 group-hover:text-white transition-all duration-500 shadow-sm">
+                          {item.icon}
+                        </div>
+                        <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight">{item.title}</h3>
+                        <p className="text-foreground/60 leading-relaxed font-medium text-base">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </CardBody>
+                  </Card>
                 </motion.div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* --- GLOBAL ACCESS SECTION (NEW) --- */}
-        <div className="py-10 md:py-16 relative overflow-hidden bg-orange-500/[0.03] border-b border-default-100/50">
-          <div className="container mx-auto max-w-6xl px-4 text-center public-layout-container">
+        {/* --- GLOBAL ACCESS SECTION --- */}
+        <div className="py-12 md:py-20 relative overflow-hidden bg-content2/30 border-y border-default-200/50">
+          <div className="container mx-auto max-w-6xl px-4 md:px-6 text-center public-layout-container">
             <motion.div {...fadeIn} className="space-y-8">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 mb-6">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 shadow-sm">
                 <FiGlobe size={32} />
               </div>
               <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
-                Operate From <span className="text-orange-500 italic">Anywhere</span> in the World.
+                Operate From <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 italic">Anywhere</span> in the World.
               </h2>
-              <p className="text-xl text-foreground/60 max-w-3xl mx-auto leading-relaxed font-medium">
+              <p className="text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed font-medium">
                 The OBAOL ecosystem is location-independent. Whether you are in Dubai, Mumbai, Lagos, or London, you can orchestrate global agro-trades through our structured execution layer.
               </p>
-              <div className="flex flex-wrap justify-center gap-6 mt-12">
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4 mt-8">
                 {[
                   "No Geographical Boundaries",
                   "Global Settlement Sync",
                   "Remote Execution Tools",
                   "Cross-Border Compliance"
                 ].map((point, i) => (
-                  <div key={i} className="px-6 py-3 rounded-2xl bg-background border border-orange-500/20 text-foreground font-bold text-sm shadow-sm hover:border-orange-500 transition-all cursor-default translate-y-0 hover:-translate-y-1">
+                  <div key={i} className="px-5 py-2.5 rounded-2xl bg-content1/80 border border-default-200/60 text-foreground font-bold text-xs shadow-sm hover:border-orange-500/40 transition-all cursor-default hover:-translate-y-0.5 public-surface-card">
                     {point}
                   </div>
                 ))}
@@ -164,46 +173,49 @@ export default function OperatorRolePage() {
         </div>
 
         {/* --- IDENTITY & HERITAGE SECTION --- */}
-        <div className="py-12 md:py-20 bg-default-50/20 dark:bg-black/20 border-y border-default-100/50 relative overflow-hidden">
-          <div className="container mx-auto max-w-6xl px-4 public-layout-container">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-              <motion.div {...fadeIn} className="space-y-12">
+        <div className="py-16 md:py-24 relative overflow-hidden">
+          <div className="container mx-auto max-w-6xl px-4 md:px-6 public-layout-container">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-20 items-center">
+              <motion.div {...fadeIn} className="space-y-10">
                 <div className="space-y-4">
-                  <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight leading-[0.9] md:leading-tight">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Identity & Role</span>
+                  <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight leading-tight">
                     Who Is An <br />
-                    <span className="text-orange-500 italic">Operator?</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 italic">Operator?</span>
                   </h2>
-                  <p className="text-xl text-foreground/60 leading-relaxed font-medium">
+                  <p className="text-lg md:text-xl text-foreground/70 leading-relaxed font-medium">
                     This is a role for professionals who understand that trade is 10% discussion and 90% coordination.
                   </p>
                 </div>
 
                 {/* Legacy/Expertise Note */}
-                <div className="p-8 rounded-3xl bg-orange-500/[0.03] border border-orange-500/10 relative overflow-hidden group public-surface-card">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full public-decoration" />
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-4 flex items-center gap-3">
-                    <FiAward className="fill-orange-500/20" /> Professional Heritage
-                  </h3>
-                  <p className="text-foreground/80 font-semibold leading-relaxed mb-4">
-                    Specifically designed for <span className="text-foreground underline decoration-orange-500/30">Retired Custom Brokers</span>, <span className="text-foreground underline decoration-orange-500/30">Logistics Pros</span>, and <span className="text-foreground underline decoration-orange-500/30">Industry Veterans</span>.
-                  </p>
-                  <p className="text-sm text-foreground/50 leading-relaxed">
-                    Your years of experience in cross-border trade, compliance, and documentation are the most valuable assets in the OBAOL ecosystem.
-                  </p>
-                </div>
+                <Card className="bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-[2rem] public-surface-card shadow-lg">
+                  <CardBody className="p-8">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full pointer-events-none public-decoration" />
+                    <h3 className="text-xs font-black uppercase tracking-widest text-orange-500 mb-4 flex items-center gap-2">
+                      <FiAward size={16} /> Professional Heritage
+                    </h3>
+                    <p className="text-foreground/90 font-semibold leading-relaxed mb-3">
+                      Specifically designed for <span className="text-foreground font-bold underline decoration-orange-500/40">Retired Custom Brokers</span>, <span className="text-foreground font-bold underline decoration-orange-500/40">Logistics Pros</span>, and <span className="text-foreground font-bold underline decoration-orange-500/40">Industry Veterans</span>.
+                    </p>
+                    <p className="text-sm text-foreground/60 leading-relaxed font-medium">
+                      Your years of experience in cross-border trade, compliance, and documentation are the most valuable assets in the OBAOL ecosystem.
+                    </p>
+                  </CardBody>
+                </Card>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     "Opportunity Identifiers",
                     "Relationship Architects",
                     "Coordination Experts",
                     "Completion Specialists"
                   ].map((text, i) => (
-                    <div key={i} className="flex items-center gap-4 text-foreground/80 font-bold group">
-                      <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                        <FiCheckCircle size={18} />
+                    <div key={i} className="flex items-center gap-3 text-foreground/80 font-bold group p-3 rounded-xl bg-content2/30 border border-default-200/40">
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all shrink-0">
+                        <FiCheckCircle size={16} />
                       </div>
-                      {text}
+                      <span className="text-sm">{text}</span>
                     </div>
                   ))}
                 </div>
@@ -211,69 +223,64 @@ export default function OperatorRolePage() {
 
               {/* Visual Interactive Element */}
               <motion.div
-                initial={{ opacity: 0, x: 50, filter: 'blur(10px)' }}
-                whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="relative p-1 bg-gradient-to-br from-orange-500/20 to-transparent rounded-[4rem]"
+                className="relative"
               >
-                <div className="bg-background rounded-[3.8rem] p-8 md:p-16 border border-default-100 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full public-decoration" />
-
-                  <div className="space-y-12 relative z-10">
+                <Card className="bg-content1/60 backdrop-blur-xl border border-default-200/50 shadow-2xl rounded-[3rem] p-4 md:p-8 public-surface-card overflow-hidden">
+                  <CardBody className="p-6 md:p-8 space-y-8 relative z-10">
                     <div className="text-center space-y-2">
-                      <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-foreground/30">The Operator Pulse</span>
-                      <div className="h-1 w-24 bg-orange-500/30 mx-auto rounded-full" />
+                      <span className="text-[10px] font-black tracking-[0.4em] uppercase text-foreground/40">The Operator Pulse</span>
+                      <div className="h-1 w-16 bg-orange-500/40 mx-auto rounded-full" />
                     </div>
 
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-6 p-6 rounded-2xl bg-content2/50 border border-red-500/10 group grayscale hover:grayscale-0 transition-all duration-700">
-                        <FiXCircle className="text-red-500 text-3xl" />
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-5 p-5 rounded-2xl bg-content2/40 border border-danger-500/20 group opacity-75 hover:opacity-100 transition-all">
+                        <FiXCircle className="text-danger-500 text-3xl shrink-0" />
                         <div>
-                          <div className="font-bold text-foreground/40 group-hover:text-foreground/80 line-through">Passive Lead Forwarding</div>
-                          <div className="text-xs text-foreground/20 group-hover:text-red-500/50 uppercase font-black tracking-widest mt-1">Inefficient</div>
+                          <div className="font-bold text-foreground/50 line-through">Passive Lead Forwarding</div>
+                          <div className="text-[10px] text-danger-500 font-black uppercase tracking-widest mt-1">Inefficient Legacy Approach</div>
                         </div>
                       </div>
 
-                      <div className="w-full flex justify-center py-4">
+                      <div className="w-full flex justify-center py-2">
                         <motion.div
-                          animate={{ y: [0, 10, 0] }}
+                          animate={{ y: [0, 8, 0] }}
                           transition={{ repeat: Infinity, duration: 2 }}
-                          className="w-px h-12 bg-gradient-to-b from-orange-500/50 to-transparent"
+                          className="w-px h-10 bg-gradient-to-b from-orange-500/60 to-transparent"
                         />
                       </div>
 
-                      <div className="flex items-center gap-6 p-8 rounded-3xl bg-orange-500 shadow-[0_20px_50px_-10px_rgba(207,152,60,0.3)] border border-orange-400 group relative public-surface-card">
-                        <div className="absolute -inset-1 bg-white/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity public-decoration" />
-                        <FiZap className="text-white text-4xl animate-pulse" />
-                        <div className="relative z-10">
-                          <div className="font-black text-white text-xl tracking-tight leading-none">Active Execution</div>
-                          <div className="text-[10px] text-white/70 uppercase font-black tracking-[0.2em] mt-2">The OBAOL Standard</div>
+                      <div className="flex items-center gap-5 p-6 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-xl border border-orange-400 group relative">
+                        <FiZap className="text-white text-3xl shrink-0 animate-pulse" />
+                        <div>
+                          <div className="font-black text-white text-lg tracking-tight">Active Execution</div>
+                          <div className="text-[10px] text-white/80 uppercase font-black tracking-[0.2em] mt-1">The OBAOL System Standard</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </CardBody>
+                </Card>
               </motion.div>
             </div>
           </div>
         </div>
 
-        {/* --- PERFORMANCE ROADMAP (NEW) --- */}
-        <div className="py-12 md:py-20 container mx-auto max-w-7xl px-4 public-layout-container">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-16 md:mb-24">
-            <div className="max-w-2xl space-y-4 text-left">
-              <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">The <span className="text-orange-500">Execution</span> Roadmap.</h2>
-              <p className="text-xl text-foreground/50 font-medium leading-relaxed">How a single trade moves from identification to confirmed settlement within our system.</p>
+        {/* --- PERFORMANCE ROADMAP --- */}
+        <div className="py-16 md:py-24 container mx-auto max-w-6xl px-4 md:px-6 public-layout-container">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+            <div className="max-w-2xl space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Structured Process</span>
+              <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">The <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-600">Execution</span> Roadmap.</h2>
+              <p className="text-base md:text-lg text-foreground/60 font-medium leading-relaxed">How a single trade moves from identification to confirmed settlement within our system.</p>
             </div>
-            <div className="px-6 py-3 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-[10px]">
+            <div className="px-4 py-1.5 rounded-full border border-default-200/50 bg-content2/50 text-orange-500 font-black uppercase tracking-widest text-[10px] shadow-sm">
               4 Key Milestones
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 relative">
-            {/* Connection Line */}
-            <div className="hidden md:block absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-orange-500/0 via-orange-500/20 to-orange-500/0 z-0" />
-
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
             {workflowSteps.map((step, i) => (
               <motion.div
                 key={i}
@@ -281,194 +288,202 @@ export default function OperatorRolePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="relative z-10 space-y-6"
               >
-                <div className="w-14 h-14 rounded-full bg-background border-2 border-orange-500/30 flex items-center justify-center text-orange-500 text-xl font-bold shadow-2xl">
-                  {step.icon}
-                </div>
-                <h4 className="text-2xl font-bold text-foreground tracking-tight">{step.title}</h4>
-                <p className="text-foreground/50 leading-relaxed font-medium">{step.desc}</p>
+                <Card className="h-full bg-content1/50 backdrop-blur-xl border border-default-200/50 hover:border-orange-500/30 transition-all shadow-lg rounded-[2rem] public-surface-card">
+                  <CardBody className="p-6 md:p-8 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 text-xl font-bold">
+                        {step.icon}
+                      </div>
+                      <span className="text-2xl font-black text-foreground/20">0{i + 1}</span>
+                    </div>
+                    <h4 className="text-xl font-black text-foreground tracking-tight">{step.title}</h4>
+                    <p className="text-sm text-foreground/60 leading-relaxed font-medium">{step.desc}</p>
+                  </CardBody>
+                </Card>
               </motion.div>
             ))}
           </div>
         </div>
 
         {/* --- PERFORMANCE-BASED EARNINGS --- */}
-        <div className="py-12 md:py-20 bg-foreground dark:bg-neutral-900 rounded-[3rem] md:rounded-[5rem] mx-4 my-8 text-background dark:text-foreground relative overflow-hidden">
-          {/* Subtle patterns */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        <div className="py-16 md:py-24 container mx-auto max-w-6xl px-4 md:px-6 public-layout-container">
+          <Card className="bg-content1/60 backdrop-blur-xl border border-default-200/50 shadow-2xl rounded-[3rem] p-6 md:p-12 public-surface-card">
+            <CardBody className="p-0">
+              <div className="text-center mb-12 md:mb-16 space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Commission Governance</span>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">Controlled Clarity.</h2>
+                <p className="text-base md:text-lg text-foreground/60 max-w-2xl mx-auto font-medium leading-relaxed italic">
+                  Earnings are generated exclusively from completion. No completion, no commission.
+                </p>
+              </div>
 
-          <div className="container mx-auto max-w-6xl px-4 relative z-10 public-layout-container">
-            <div className="text-center mb-16 md:mb-24 space-y-6">
-              <h2 className="text-4xl md:text-7xl font-black tracking-tight leading-none text-white">Controlled Clarity.</h2>
-              <p className="text-xl text-white/50 max-w-2xl mx-auto font-medium tracking-wide italic">Earnings are generated exclusively from completion. No completion, no commission.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <motion.div {...fadeIn} className="p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl">
-                <h3 className="text-2xl md:text-3xl font-black text-white mb-8 md:mb-10 border-b border-white/10 pb-6 flex items-center gap-4">
-                  <FiPieChart className="text-orange-500" /> Revenue Source
-                </h3>
-                <div className="space-y-8">
-                  {[
-                    { label: "Deal Execution", sub: "Closing the final trade", val: "Major Pool Share" },
-                    { label: "Supplier Ownership", sub: "Managing verified sources", val: "Recurring Flow" },
-                    { label: "Handling", sub: "Managing successful orders & enquiries", val: "Rating Based" },
-                    { label: "Leadership", sub: "Mentoring & growing operators", val: "Tiered Share" }
-                  ].map((item, i) => (
-                    <div key={i} className="flex justify-between items-start group">
-                      <div>
-                        <div className="font-bold text-white text-xl mb-1">{item.label}</div>
-                        <div className="text-white/40 font-medium">{item.sub}</div>
-                      </div>
-                      <div className="px-4 py-1.5 rounded-full bg-orange-500 text-white font-black text-[10px] uppercase tracking-widest">{item.val}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-6 md:p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-black text-foreground mb-6 pb-4 border-b border-default-200/50 flex items-center gap-3">
+                      <FiPieChart className="text-orange-500" /> Revenue Source
+                    </h3>
+                    <div className="space-y-6">
+                      {[
+                        { label: "Deal Execution", sub: "Closing the final trade", val: "Major Pool Share" },
+                        { label: "Supplier Ownership", sub: "Managing verified sources", val: "Recurring Flow" },
+                        { label: "Handling", sub: "Managing successful orders & enquiries", val: "Rating Based" },
+                        { label: "Leadership", sub: "Mentoring & growing operators", val: "Tiered Share" }
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-start">
+                          <div>
+                            <div className="font-bold text-foreground text-base mb-0.5">{item.label}</div>
+                            <div className="text-xs text-foreground/50 font-medium">{item.sub}</div>
+                          </div>
+                          <span className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-500 font-black text-[10px] uppercase tracking-wider">{item.val}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div {...fadeIn} className="p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] bg-red-500/[0.02] border border-red-500/20 flex flex-col justify-between">
-                <div className="mb-8 md:mb-0">
-                  <h3 className="text-2xl md:text-3xl font-black text-white mb-8 md:mb-10 border-b border-red-500/20 pb-6 flex items-center gap-4">
-                    <FiXCircle className="text-red-500" /> Non-Earning
-                  </h3>
-                  <div className="space-y-6">
-                    {["Initial Enquiries", "Long Negotiations", "Partial Progress", "Static Lead Sharing"].map((item, i) => (
-                      <div key={i} className="flex items-center gap-4 text-white/30 line-through font-bold text-lg">
-                        <div className="w-2 h-2 rounded-full bg-red-500/30" />
-                        {item}
-                      </div>
-                    ))}
                   </div>
                 </div>
-                <div className="mt-12 p-8 rounded-3xl bg-red-500/5 text-red-500/80 text-base italic font-bold leading-relaxed border border-red-500/10 public-surface-card">
-                  &quot;Efficiency is rewarded. Effort is expected. Completion is what creates value.&quot;
-                </div>
-              </motion.div>
-            </div>
 
-            <div className="mt-20 text-center">
-              <Link
-                href="/commission-structure"
-                className="group inline-flex items-center gap-4 px-10 py-5 rounded-[2rem] bg-white/10 text-white font-black text-xl hover:bg-white/20 transition-all border border-white/10 shadow-2xl"
-              >
-                View Detailed Commission Structure
-                <FiArrowRight className="transition-transform group-hover:translate-x-3" />
-              </Link>
-            </div>
-          </div>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-danger-500/[0.03] border border-danger-500/20 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-black text-foreground mb-6 pb-4 border-b border-danger-500/20 flex items-center gap-3">
+                      <FiXCircle className="text-danger-500" /> Non-Earning
+                    </h3>
+                    <div className="space-y-4">
+                      {["Initial Enquiries", "Long Negotiations", "Partial Progress", "Static Lead Sharing"].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 text-foreground/40 line-through font-bold text-base">
+                          <div className="w-2 h-2 rounded-full bg-danger-500/40" />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-8 p-5 rounded-2xl bg-danger-500/5 text-danger-500 font-bold text-xs italic leading-relaxed border border-danger-500/10">
+                    &quot;Efficiency is rewarded. Effort is expected. Completion is what creates value.&quot;
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 text-center">
+                <Button
+                  as={Link}
+                  href="/commission-structure"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-orange-600/20 transition-all text-sm"
+                  endContent={<FiArrowRight size={16} />}
+                >
+                  View Detailed Commission Structure
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
         </div>
 
         {/* --- PATHWAYS --- */}
-        <div className="py-12 md:py-20 container mx-auto max-w-6xl px-4 public-layout-container">
-          <div className="text-center mb-16 md:mb-24 space-y-4">
-            <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">Two Pathways. One Goal.</h2>
-            <p className="text-xl text-foreground/50 font-medium">Choose how you want to integrate into the OBAOL ecosystem.</p>
+        <div className="py-16 md:py-24 container mx-auto max-w-6xl px-4 md:px-6 public-layout-container">
+          <div className="text-center mb-16 space-y-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Operating Models</span>
+            <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">Two Pathways. One Goal.</h2>
+            <p className="text-base md:text-lg text-foreground/60 font-medium">Choose how you want to integrate into the OBAOL ecosystem.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-            {/* Independent */}
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] bg-content1 shadow-sm border border-default-200 relative overflow-hidden group flex flex-col min-h-[400px] md:min-h-[500px]"
-            >
-              <div className="absolute top-0 right-0 p-8">
-                <div className="w-16 h-16 rounded-[2rem] bg-default-50 flex items-center justify-center text-default-400 font-bold group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
-                  <FiBriefcase size={32} />
-                </div>
-              </div>
-
-              <div className="mt-12 md:mt-20 flex-grow space-y-8 text-left">
-                <div className="space-y-4">
-                  <h3 className="text-3xl md:text-4xl font-black text-foreground leading-none">Independent <br /> Operator</h3>
-                  <p className="text-foreground/50 leading-relaxed font-bold text-base md:text-lg">For the self-starters and existing network owners.</p>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    "Maintain your own relationship network",
-                    "Self-driven trade coordination",
-                    "Use OBAOL for verification & audit",
-                    "Manage your own completion timeline"
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-sm font-bold text-foreground/70">
-                      <FiCheckCircle className="text-orange-500 shrink-0" />
-                      {item}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            {/* Independent Card */}
+            <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.3 }}>
+              <Card className="h-full bg-content1/50 backdrop-blur-xl border border-default-200/50 hover:border-orange-500/30 transition-all shadow-xl rounded-[2.5rem] public-surface-card">
+                <CardBody className="p-8 md:p-10 flex flex-col justify-between">
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-8 font-bold shadow-sm">
+                      <FiBriefcase size={28} />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="space-y-3 mb-6">
+                      <h3 className="text-3xl font-black text-foreground leading-tight">Independent <br /> Operator</h3>
+                      <p className="text-foreground/60 leading-relaxed font-semibold text-sm">For self-starters and existing network owners.</p>
+                    </div>
 
-              <div className="mt-12 pt-8 border-t border-default-100 flex items-baseline gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/60">Category</span>
-                <span className="text-foreground font-black tracking-tight italic">Industry Veteran / Experienced</span>
-              </div>
+                    <div className="space-y-3 mb-8">
+                      {[
+                        "Maintain your own relationship network",
+                        "Self-driven trade coordination",
+                        "Use OBAOL for verification & audit",
+                        "Manage your own completion timeline"
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 text-xs font-semibold text-foreground/80">
+                          <FiCheckCircle className="text-orange-500 shrink-0" size={16} />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-default-200/50 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">Category</span>
+                    <span className="text-foreground font-bold text-xs italic">Industry Veteran / Experienced</span>
+                  </div>
+                </CardBody>
+              </Card>
             </motion.div>
 
-            {/* Team-Based */}
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] bg-orange-500 text-white relative overflow-hidden group flex flex-col min-h-[400px] md:min-h-[500px] shadow-2xl shadow-orange-500/30 border border-orange-400"
-            >
-              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none public-decoration" />
-
-              <div className="absolute top-0 right-0 p-8">
-                <div className="w-16 h-16 rounded-[2rem] bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold group-hover:scale-110 group-hover:bg-white group-hover:text-orange-600 transition-all duration-500">
-                  <FiUsers size={32} />
-                </div>
-              </div>
-
-              <div className="mt-12 md:mt-20 flex-grow space-y-8 relative z-10 text-left">
-                <div className="space-y-4">
-                  <h3 className="text-3xl md:text-4xl font-black text-white leading-none">Team-Based <br /> Operator</h3>
-                  <p className="text-white/80 leading-relaxed font-bold text-base md:text-lg">For those building their legacy within a structure.</p>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    "Operate within internal workflow layers",
-                    "Collaborative execution with senior pros",
-                    "Direct capability building roadmap",
-                    "Focus on specific trade segments"
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-sm font-bold text-white">
-                      <FiCheckCircle className="text-white shrink-0" />
-                      {item}
+            {/* Team-Based Card */}
+            <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.3 }}>
+              <Card className="h-full bg-gradient-to-br from-orange-600 to-amber-700 text-white shadow-2xl rounded-[2.5rem] overflow-hidden border border-orange-400/40">
+                <CardBody className="p-8 md:p-10 flex flex-col justify-between relative z-10">
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white mb-8 font-bold shadow-md">
+                      <FiUsers size={28} />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="space-y-3 mb-6">
+                      <h3 className="text-3xl font-black text-white leading-tight">Team-Based <br /> Operator</h3>
+                      <p className="text-white/80 leading-relaxed font-semibold text-sm">For those building their legacy within a team structure.</p>
+                    </div>
 
-              <div className="mt-12 pt-8 border-t border-white/20 flex items-baseline gap-4 relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Category</span>
-                <span className="text-white font-black tracking-tight italic">Builder / Capability Focused</span>
-              </div>
+                    <div className="space-y-3 mb-8">
+                      {[
+                        "Operate within internal workflow layers",
+                        "Collaborative execution with senior pros",
+                        "Direct capability building roadmap",
+                        "Focus on specific trade segments"
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 text-xs font-semibold text-white">
+                          <FiCheckCircle className="text-white shrink-0" size={16} />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-white/20 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Category</span>
+                    <span className="text-white font-bold text-xs italic">Builder / Capability Focused</span>
+                  </div>
+                </CardBody>
+              </Card>
             </motion.div>
           </div>
         </div>
 
-        {/* --- THE EXECUTION TOOLKIT (NEW) --- */}
-        <div className="py-12 md:py-20 bg-default-50/10 relative overflow-hidden">
-          <div className="container mx-auto max-w-6xl px-4 text-center public-layout-container">
-            <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight mb-12 md:mb-20 text-left md:text-center">Tools of The Operator.</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        {/* --- THE EXECUTION TOOLKIT --- */}
+        <div className="py-16 md:py-24 bg-content2/30 border-y border-default-200/50">
+          <div className="container mx-auto max-w-6xl px-4 md:px-6 text-center public-layout-container">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 block mb-3">Platform Capabilities</span>
+            <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight mb-12">Tools of The Operator.</h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {[
-                { icon: <FiCpu />, label: "Verification Engine" },
-                { icon: <FiPieChart />, label: "Completion Tracking" },
-                { icon: <FiClock />, label: "Audit Timeline" },
-                { icon: <FiMap />, label: "Trade Topology" },
-                { icon: <FiBookOpen />, label: "Legacy Knowledge" },
-                { icon: <FiUsers />, label: "Counterparty Radar" },
-                { icon: <FiShield />, label: "Compliance Filter" },
-                { icon: <FiAnchor />, label: "Logistics Node" }
+                { icon: <FiCpu size={24} />, label: "Verification Engine" },
+                { icon: <FiPieChart size={24} />, label: "Completion Tracking" },
+                { icon: <FiClock size={24} />, label: "Audit Timeline" },
+                { icon: <FiMap size={24} />, label: "Trade Topology" },
+                { icon: <FiBookOpen size={24} />, label: "Legacy Knowledge" },
+                { icon: <FiUsers size={24} />, label: "Counterparty Radar" },
+                { icon: <FiShield size={24} />, label: "Compliance Filter" },
+                { icon: <FiAnchor size={24} />, label: "Logistics Node" }
               ].map((tool, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className="p-6 md:p-8 rounded-3xl bg-content1 border border-default-200 shadow-sm flex flex-col items-center gap-4 group hover:border-orange-500/30 transition-all public-surface-card"
-                >
-                  <div className="text-3xl text-orange-500/50 group-hover:text-orange-500 transition-colors">{tool.icon}</div>
-                  <span className="text-sm font-bold text-foreground/60 group-hover:text-foreground tracking-tight">{tool.label}</span>
+                <motion.div key={i} whileHover={{ y: -4 }}>
+                  <Card className="bg-content1/50 backdrop-blur-xl border border-default-200/50 hover:border-orange-500/30 transition-all shadow-sm rounded-2xl public-surface-card">
+                    <CardBody className="p-6 flex flex-col items-center gap-3 text-center">
+                      <div className="text-orange-500">{tool.icon}</div>
+                      <span className="text-xs font-bold text-foreground/80 tracking-tight">{tool.label}</span>
+                    </CardBody>
+                  </Card>
                 </motion.div>
               ))}
             </div>
@@ -476,53 +491,45 @@ export default function OperatorRolePage() {
         </div>
 
         {/* --- FINAL CTA --- */}
-        <div className="py-16 md:py-24 container mx-auto max-w-5xl px-4 text-center public-layout-container">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="p-10 md:p-32 rounded-[3.5rem] md:rounded-[5rem] bg-content1 border-2 border-orange-500/20 shadow-2xl relative overflow-hidden group"
-          >
-            {/* Ambient glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none group-hover:bg-orange-500/20 transition-all duration-1000 public-decoration" />
-
-            <div className="relative z-10 space-y-12">
-              <div className="space-y-6">
-                <h2 className="text-5xl md:text-8xl font-black text-foreground tracking-tight leading-[0.9]">Ready to Step Into <br /> Your Role?</h2>
-                <p className="text-xl md:text-2xl text-foreground/50 max-w-3xl mx-auto font-medium leading-relaxed italic">
+        <div className="py-20 md:py-28 container mx-auto max-w-5xl px-4 md:px-6 text-center public-layout-container">
+          <Card className="bg-content1/60 backdrop-blur-xl border-2 border-orange-500/20 shadow-2xl rounded-[3rem] p-8 md:p-16 public-surface-card overflow-hidden">
+            <CardBody className="p-0 relative z-10 space-y-8">
+              <div className="space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Get Started</span>
+                <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight leading-tight">
+                  Ready to Step Into <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 italic">Your Role?</span>
+                </h2>
+                <p className="text-base md:text-xl text-foreground/60 max-w-2xl mx-auto font-medium leading-relaxed italic">
                   Operator is not a position we assign. It is a role you define by the trades you complete within the system.
                 </p>
               </div>
 
-              <div className="flex flex-col md:flex-row justify-center gap-6 md:gap-8">
-                <Link
+              <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                <Button
+                  as={Link}
                   href="/auth/operator/register"
-                  className="group relative inline-flex justify-center items-center gap-4 md:gap-6 px-10 md:px-14 py-5 md:py-7 rounded-full bg-orange-500 text-white font-black text-xl shadow-[0_25px_80px_-15px_rgba(207,152,60,0.5)] hover:bg-orange-600 hover:scale-[1.05] active:scale-[0.98] transition-all"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-orange-600/20 transition-all text-sm"
+                  endContent={<FiArrowRight size={18} />}
                 >
                   Start Operator Entry
-                  <FiArrowRight size={24} className="transition-transform group-hover:translate-x-3" />
-                </Link>
+                </Button>
                 
-                <Link
+                <Button
+                  as={Link}
                   href="/commission-structure"
-                  className="group relative inline-flex justify-center items-center gap-4 px-10 py-5 rounded-full bg-content2 text-foreground font-black text-lg border-2 border-default-200 hover:border-orange-500/50 hover:bg-content3 hover:scale-[1.05] active:scale-[0.98] transition-all"
+                  variant="bordered"
+                  className="border-default-200 hover:border-orange-500/40 text-foreground font-bold h-12 px-8 rounded-xl transition-all text-sm"
+                  endContent={<FiArrowRight size={16} className="text-orange-500" />}
                 >
                   Commission Structure
-                  <FiArrowRight size={20} className="text-orange-500 transition-transform group-hover:translate-x-2" />
-                </Link>
+                </Button>
               </div>
-            </div>
-          </motion.div>
+            </CardBody>
+          </Card>
         </div>
       </ThemedContentWrapper>
       <Footer />
     </section>
   );
-}
-
-function FiAward({ className }: { className?: string }) {
-  return <FiShield className={className} />;
-}
-function FiFlag() {
-  return <FiTarget />;
 }

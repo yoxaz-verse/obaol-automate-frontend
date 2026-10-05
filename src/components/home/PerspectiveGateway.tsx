@@ -1,5 +1,5 @@
 import { FiArrowRight, FiCompass, FiShield, FiUsers } from "react-icons/fi";
-import { PublicContainer, PublicSectionHeading, PublicCard, PublicLinkButton } from "@/components/public/PublicUI";
+import Link from "next/link";
 import RevealImage from "@/components/ui/RevealImage";
 
 const perspectives = [
@@ -37,31 +37,64 @@ const perspectives = [
 
 export default function PerspectiveGateway() {
   return (
-    <section aria-labelledby="obaol-perspective-heading" className="public-section public-perspective">
-      <div className="public-perspective-art" aria-hidden="true">
+    <section aria-labelledby="obaol-perspective-heading" className="relative overflow-hidden border-t border-default-200/60 bg-background py-16 md:py-24">
+      {/* Background artwork */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
         <RevealImage src="/images/order-execution-laptop.webp" alt="" fill sizes="100vw" className="object-cover object-center" />
       </div>
-      <PublicContainer className="relative z-10">
-        <PublicSectionHeading id="obaol-perspective-heading" eyebrow="The OBAOL perspective" title="Trade is more than buying and selling.">
-          <p>OBAOL helps participants understand the market, act with verified confidence, and execute through trust—not merely complete transactions.</p>
-        </PublicSectionHeading>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {perspectives.map((perspective) => (
-            <PublicCard key={perspective.href} data-perspective-card="true" className="flex flex-col">
-              <div className="mb-7 flex items-center justify-between">
-                <span className="public-icon"><perspective.icon size={22} aria-hidden="true" /></span>
-                <span className="text-xs public-muted">{perspective.number}</span>
-              </div>
-              <p className="public-eyebrow">{perspective.signal}</p>
-              <h3 className="mt-3 text-xl font-semibold tracking-tight">{perspective.title}</h3>
-              <p className="mt-3 flex-1 public-muted leading-7">{perspective.description}</p>
-              <PublicLinkButton href={perspective.href} variant="secondary" className="mt-7 self-start">
-                {perspective.cta}<FiArrowRight aria-hidden="true" />
-              </PublicLinkButton>
-            </PublicCard>
-          ))}
+
+      <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
+        <div className="max-w-3xl space-y-4 mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/20 bg-obaol-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-obaol-700 dark:text-obaol-300">
+            The OBAOL Perspective
+          </div>
+          <h2 id="obaol-perspective-heading" className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+            Trade is more than buying and selling.
+          </h2>
+          <p className="text-base sm:text-lg text-foreground/75 font-medium leading-relaxed">
+            OBAOL helps participants understand the market, act with verified confidence, and execute through trust—not merely complete transactions.
+          </p>
         </div>
-      </PublicContainer>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {perspectives.map((perspective) => {
+            const Icon = perspective.icon;
+            return (
+              <article
+                key={perspective.href}
+                className="group relative flex flex-col justify-between rounded-3xl border border-default-200/80 bg-content1/80 p-8 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-obaol-500/50 hover:shadow-xl hover:shadow-obaol-500/10"
+              >
+                {/* Gold Top Highlight Accent Line */}
+                <div className="absolute inset-x-8 top-0 h-0.5 bg-gradient-to-r from-transparent via-obaol-500/0 to-transparent transition-all duration-500 group-hover:via-obaol-500/80" />
+
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-obaol-500/10 text-obaol-600 dark:text-obaol-300 transition-transform duration-300 group-hover:scale-110">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
+                    <span className="font-mono text-xs font-bold text-foreground/40">{perspective.number}</span>
+                  </div>
+
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-obaol-700 dark:text-obaol-300">
+                    {perspective.signal}
+                  </span>
+                  <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">{perspective.title}</h3>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-foreground/70">{perspective.description}</p>
+                </div>
+
+                <Link
+                  href={perspective.href}
+                  className="group/btn mt-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 hover:text-obaol-500 transition-colors"
+                >
+                  <span>{perspective.cta}</span>
+                  <FiArrowRight size={16} className="transition-transform duration-200 group-hover/btn:translate-x-1" />
+                </Link>
+              </article>
+            );
+          })}
+        </div>
+      </div>
     </section>
   );
 }
+

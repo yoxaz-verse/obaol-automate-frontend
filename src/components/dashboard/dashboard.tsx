@@ -785,12 +785,15 @@ const Dashboard: NextPage = () => {
       <Card className={`border border-slate-200/90 dark:border-white/10 bg-content1 shadow-sm overflow-hidden ${isAssociate ? "rounded-2xl" : "rounded-[2.5rem]"}`}>
         <CardBody className={isAssociate ? "p-5 sm:p-6" : "p-8"}>
           <div className="flex flex-col gap-6">
-            {/* Top Row: Workspace Status & Role Chips */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b db-border-subtle">
+            {/* Top Row: Workspace Status & Role Badges */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-default-200/60 dark:border-white/10">
               <div className="space-y-1.5 min-w-0 flex-1">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-[10px] font-black tracking-widest uppercase text-primary">Workspace ready</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-obaol-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-obaol-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black tracking-widest uppercase text-obaol-700 dark:text-obaol-400">Workspace ready</span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic">{hubTitle}</h1>
                 <p className="text-xs md:text-sm text-default-500 font-semibold tracking-tight">
@@ -798,31 +801,33 @@ const Dashboard: NextPage = () => {
                 </p>
               </div>
               
-              <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
-                <Chip variant="flat" className="h-9 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-4 db-inset border db-border-subtle">
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-center">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-default-200/80 dark:border-white/10 bg-default-100/50 dark:bg-white/5 text-[10px] font-black uppercase tracking-wider text-foreground/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-obaol-500" />
                   {isAssociate ? (tradeMode === "BUY" ? "Buyer" : tradeMode === "SELL" ? "Seller" : tradeMode === "SERVICE" ? "Service Provider" : "Buyer & Seller") : isOperatorUser ? "Operator" : "Admin"}
-                </Chip>
-                <Chip variant="flat" color="primary" className="h-9 rounded-full font-black uppercase tracking-[0.1em] text-[9px] px-4 border border-primary/20">
+                </div>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary-500/30 bg-primary-500/10 text-[10px] font-black uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
                   {activeOrders} Active Orders
-                </Chip>
+                </div>
               </div>
             </div>
 
-            {/* Bottom Row: Search & Focus Toggle */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-              <div className="w-full sm:max-w-md sm:flex-1">
+            {/* Bottom Row: Unified Command Bar */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+              <div className="w-full lg:max-w-xl flex-1">
                 <GlobalSearch />
               </div>
 
               {isAssociate && tradeMode === "BOTH" && (
-                <div aria-label="Workspace focus" className="flex rounded-xl border db-border-subtle db-inset p-1 self-start sm:self-center shrink-0">
+                <div aria-label="Workspace focus" className="inline-flex items-center rounded-2xl border border-default-200/80 dark:border-white/10 bg-default-100/60 dark:bg-white/5 p-1 self-start lg:self-center shrink-0">
                   {(["BUY", "SELL", "BOTH"] as const).map((focus) => (
                     <button
                       key={focus}
                       type="button"
                       onClick={() => updateWorkspaceFocus(focus)}
                       aria-pressed={workspaceFocus === focus}
-                      className={`min-h-10 rounded-lg px-4 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950 shadow-sm" : "db-muted hover:text-foreground"}`}
+                      className={`h-9 rounded-xl px-4 text-xs font-black uppercase tracking-wider transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${workspaceFocus === focus ? "bg-obaol-500 text-slate-950 font-black shadow-md shadow-obaol-500/20 scale-[1.02]" : "text-default-500 hover:text-foreground"}`}
                     >
                       {focus === "BUY" ? "Buying" : focus === "SELL" ? "Selling" : "All"}
                     </button>

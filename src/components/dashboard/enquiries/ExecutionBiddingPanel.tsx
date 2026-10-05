@@ -97,10 +97,30 @@ function ProviderBidForm({ item }: { item: ExecutionBidOpportunity }) {
   return (
     <div className="rounded-2xl border border-warning-200 bg-warning-50/40 p-4 dark:bg-warning-900/10">
       <h4 className="mb-3 text-sm font-bold">{item.ownBid ? "Update your bid" : "Submit your bid"}</h4>
-      <div className="grid gap-3 md:grid-cols-[minmax(160px,0.5fr)_1fr_auto] md:items-end">
-        <Input label="Bid amount" type="number" min="0.01" step="0.01" value={amount} onValueChange={setAmount} isInvalid={!!error && !(Number(amount) > 0)} />
-        <Textarea label="Note (optional)" maxLength={500} minRows={1} value={note} onValueChange={setNote} description={`${note.length}/500`} />
-        <Button color="warning" className="font-bold" isLoading={mutation.isPending} onPress={() => {
+      <div className="grid gap-3 md:grid-cols-[minmax(180px,0.5fr)_minmax(280px,1fr)_auto] md:items-start">
+        <Input
+          label="Bid amount"
+          labelPlacement="outside"
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={amount}
+          onValueChange={setAmount}
+          isInvalid={!!error && !(Number(amount) > 0)}
+          classNames={{ inputWrapper: "h-12 min-h-12" }}
+        />
+        <Textarea
+          label="Note (optional)"
+          labelPlacement="outside"
+          maxLength={500}
+          minRows={1}
+          maxRows={1}
+          value={note}
+          onValueChange={setNote}
+          description={`${note.length}/500`}
+          classNames={{ inputWrapper: "h-12 min-h-12", input: "min-h-6 resize-none" }}
+        />
+        <Button color="warning" className="h-12 w-full font-bold md:mt-6 md:w-auto" isLoading={mutation.isPending} onPress={() => {
           if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) return setError("Enter a valid amount greater than zero.");
           setError("");
           mutation.mutate();

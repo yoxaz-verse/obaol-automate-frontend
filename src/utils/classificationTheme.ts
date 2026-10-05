@@ -229,11 +229,13 @@ export const getClassificationOptions = (): { key: ClassificationKey; label: str
 
 export const getClassificationBadges = (product: any): { key: ClassificationKey; label: string }[] => {
   const badges: { key: ClassificationKey; label: string }[] = [];
-  const hasPrimary = Boolean(product?.isNatural || product?.isOrganic || product?.isIpmQuality);
-  if (!hasPrimary) badges.push({ key: "conventional", label: "Conventional" });
-  if (product?.isNatural) badges.push({ key: "natural", label: "Natural" });
-  if (product?.isOrganic) badges.push({ key: "organic", label: "Organic" });
+  // New writes enforce exactly one farming method, but older products may
+  // still have overlapping flags. Prefer the most specific method so an IPM
+  // listing is not presented as Natural as well.
   if (product?.isIpmQuality) badges.push({ key: "ipm", label: "IPM" });
+  else if (product?.isOrganic) badges.push({ key: "organic", label: "Organic" });
+  else if (product?.isNatural) badges.push({ key: "natural", label: "Natural" });
+  else badges.push({ key: "conventional", label: "Conventional" });
   if (product?.isGiTagged) badges.push({ key: "gi-tag", label: "GI Tag" });
   return badges;
 };

@@ -90,7 +90,8 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/companies", label: "Companies", section: "Organization", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/notifications", label: "Notifications", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/guidance", label: "Guidance", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
-  { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/settings", label: "Settings", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/profile", label: "Profile", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, searchable: true, activeParent: "/dashboard/settings" },
 
   { path: "/dashboard/operator/hierarchy", label: "Hierarchy", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
   { path: "/dashboard/operator/team", label: "Team", section: "Operations/Admin", navGroup: "Team & Users", roles: ["admin", "operator", "team"], nav: true, searchable: true },
@@ -118,7 +119,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/rsForm", label: "RS Form", section: "Operations/Admin", roles: ["admin"] },
   { path: "/dashboard/map", label: "Map", section: "Operations/Admin", roles: ["admin"] },
 
-  { path: "/dashboard/shortcuts", label: "Keyboard Shortcuts", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/shortcuts", label: "Keyboard Shortcuts", section: "Organization", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, searchable: true, activeParent: "/dashboard/settings" },
 ];
 
 const journeyStageBySection: Record<DashboardSection, DashboardJourneyStage> = {
@@ -151,6 +152,7 @@ const navIconByPath: Record<string, string> = {
   "/dashboard/companies": "company",
   "/dashboard/notifications": "notifications",
   "/dashboard/guidance": "guidance",
+  "/dashboard/settings": "settings",
   "/dashboard/profile": "profile",
   "/dashboard/shortcuts": "shortcuts",
 };

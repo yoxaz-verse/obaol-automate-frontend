@@ -38,6 +38,19 @@ test("detail routes keep their parent navigation item active", () => {
   assert.equal(isDashboardRouteActive("/dashboard/orders/507f1f77bcf86cd799439011", "/dashboard"), false);
 });
 
+test("settings owns profile and shortcut navigation", () => {
+  const links = new Set(
+    getAccessibleDashboardRoutes({ role: "Associate", tradeMode: "BOTH" }).map((route) => route.path)
+  );
+  assert.equal(links.has("/dashboard/settings"), true);
+  assert.equal(links.has("/dashboard/profile"), false);
+  assert.equal(links.has("/dashboard/shortcuts"), false);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/profile", role: "Associate", tradeMode: "BOTH" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/shortcuts", role: "Associate", tradeMode: "BOTH" }), true);
+  assert.equal(isDashboardRouteActive("/dashboard/profile", "/dashboard/settings"), true);
+  assert.equal(isDashboardRouteActive("/dashboard/shortcuts", "/dashboard/settings"), true);
+});
+
 test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", () => {
   const linksFor = (tradeMode) => new Set(
     getAccessibleDashboardRoutes({ role: "Associate", tradeMode }).map((route) => route.path)

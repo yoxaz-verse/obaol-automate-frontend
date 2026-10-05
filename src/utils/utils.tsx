@@ -3,7 +3,7 @@ import { emailRegex } from "./regex";
 import { ToastMessage } from "@/data/interface-data";
 import { toast } from "react-toastify";
 import { FiUsers } from "react-icons/fi";
-import { RiFileAddLine, RiUser2Fill } from "react-icons/ri";
+import { RiFileAddLine } from "react-icons/ri";
 import { MdDashboard, MdOutlinePriceChange, MdOutlineAccountTree } from "react-icons/md";
 import { AiOutlineProduct } from "react-icons/ai";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
@@ -19,7 +19,7 @@ import { TbBuildingWarehouse } from "react-icons/tb";
 import { BsBoxes } from "react-icons/bs";
 import { FiClipboard } from "react-icons/fi";
 import { FiCheckSquare } from "react-icons/fi";
-import { FiBell, FiFlag, FiFileText, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders } from "react-icons/fi";
+import { FiBell, FiFlag, FiFileText, FiLayers, FiEye, FiActivity, FiSearch, FiEdit3, FiBookOpen, FiSliders, FiSettings } from "react-icons/fi";
 import { LuBox, LuTruck, LuWallet, LuBuilding2, LuStore, LuPackage, LuFlaskConical } from "react-icons/lu";
 
 
@@ -226,9 +226,9 @@ export const sidebarOptions = [
   },
 
   {
-    name: "Profile", //Translate
-    icon: <RiUser2Fill />,
-    link: "/dashboard/profile",
+    name: "Settings",
+    icon: <FiSettings />,
+    link: "/dashboard/settings",
   },
   // {
   //   name: "Map", //Translate
@@ -249,11 +249,6 @@ export const sidebarOptions = [
     name: "Function Preview",
     icon: <FiLayers />,
     link: "/dashboard/function-preview",
-  },
-  {
-    name: "Keyboard Shortcuts",
-    icon: <FiLayers />,
-    link: "/dashboard/shortcuts",
   },
   {
     name: "Essentials", //Translate

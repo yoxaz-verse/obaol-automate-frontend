@@ -5,6 +5,8 @@ import AuthContext from "@/context/AuthContext";
 import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 import { FiInfo } from "react-icons/fi";
 import { ACTION_LABELS, DEFAULT_SHORTCUTS, loadShortcuts, saveShortcuts } from "@/utils/shortcutConfig";
+import PageHeader from "@/components/ui/PageHeader";
+import { DashboardPage } from "@/components/dashboard/DashboardUI";
 
 export default function ShortcutsPage() {
   const { user } = useContext(AuthContext);
@@ -14,7 +16,12 @@ export default function ShortcutsPage() {
   if (!user) return null;
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto p-6 md:p-10">
+    <DashboardPage className="py-3 sm:py-5">
+      <PageHeader
+        title="Keyboard Shortcuts"
+        description="Customize the quick commands used to navigate your dashboard."
+        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Keyboard Shortcuts" }]}
+      />
       <Card className="border border-default-200/60 bg-content1/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
         <CardHeader className="flex items-center gap-4 p-8">
           <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
@@ -87,6 +94,6 @@ export default function ShortcutsPage() {
           </div>
         </CardBody>
       </Card>
-    </div>
+    </DashboardPage>
   );
 }

@@ -24,7 +24,6 @@ import { extractCount, extractList } from "@/core/data/queryUtils";
 import InsightCard from "@/components/dashboard/InsightCard";
 import { FiClock, FiActivity, FiLayers, FiBriefcase, FiDatabase, FiCheckCircle, FiInfo, FiArrowRight, FiKey, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
 import PageHeader from "@/components/ui/PageHeader";
 import { DashboardField, DashboardPage, DashboardPanel, DashboardSectionHeader, DashboardStatusBadge } from "@/components/dashboard/DashboardUI";
@@ -493,7 +492,7 @@ export default function ProfilePage() {
       <PageHeader
         title="Profile"
         description="Manage your account, company information, verification, and sign-in security."
-        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Profile" }]}
+        breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Company & account" }, { label: "Settings", href: "/dashboard/settings" }, { label: "Profile" }]}
       />
       <QueryComponent
         api={`${apiRoutesByRole[roleKey]}/${user?.id}`}
@@ -647,25 +646,6 @@ export default function ProfilePage() {
 
               <div className="animate-in fade-in slide-in-from-bottom-12 duration-[1500ms]">
               </div>
-
-              <DashboardPanel className="space-y-4 p-4 sm:p-6">
-                <div className="flex items-center gap-2.5 sm:gap-4">
-                  <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary">
-                    <FiInfo size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold sm:text-lg">Keyboard shortcuts</h3>
-                    <p className="text-sm db-muted">Customize quick navigation commands</p>
-                  </div>
-                </div>
-                <Link
-                  href="/dashboard/shortcuts"
-                  className="inline-flex min-h-11 items-center justify-between rounded-xl border db-border-subtle db-inset px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-obaol-500/30"
-                >
-                  Manage Shortcuts
-                  <FiArrowRight />
-                </Link>
-              </DashboardPanel>
             </div>
           );
         }}

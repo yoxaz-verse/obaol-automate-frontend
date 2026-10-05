@@ -852,21 +852,21 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       <>
                         <Select variant="bordered" label="Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.category ? [formData.category] : []} onSelectionChange={(keys) => setValue("category", Array.from(keys)[0])} isInvalid={!!errors.category} errorMessage={errors.category}>
                           {categories.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
                         </Select>
                         <Select variant="bordered" label="Sub Category" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.subCategory ? [formData.subCategory] : []} onSelectionChange={(keys) => setValue("subCategory", Array.from(keys)[0])} isDisabled={!formData.category} isInvalid={!!errors.subCategory} errorMessage={errors.subCategory}>
                           {subCategories.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
                         </Select>
                         <Select variant="bordered" label="Product" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.product ? [formData.product] : []} onSelectionChange={(keys) => setValue("product", Array.from(keys)[0])} isDisabled={!formData.subCategory} isInvalid={!!errors.product} errorMessage={errors.product}>
                           {products.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
@@ -887,7 +887,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                           errorMessage={errors.productVariant}
                         >
                           {variants.map((item) => (
-                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                            <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
                               {getOptionLabel(item)}
                             </SelectItem>
                           ))}
@@ -895,7 +895,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       </>
                     )}
                     {fixedVariantId && (
-                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-white text-sm sm:text-base">
+                      <div className="md:col-span-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-foreground dark:text-white text-sm sm:text-base">
                         Variant preselected for this listing.
                       </div>
                     )}
@@ -996,7 +996,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   errorMessage={errors.organicCertificationBody}
                                 >
                                   {ORGANIC_CERT_BODIES.map((item) => (
-                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-white font-black">
+                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-foreground dark:text-white font-black">
                                       {item.value}
                                     </SelectItem>
                                   ))}
@@ -1061,9 +1061,9 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   isInvalid={!!errors.organicCertifiedQuantityUnit}
                                   errorMessage={errors.organicCertifiedQuantityUnit}
                                 >
-                                  <SelectItem key="KG" className="uppercase text-white font-black">KG</SelectItem>
-                                  <SelectItem key="MT" className="uppercase text-white font-black">Metric Ton (MT)</SelectItem>
-                                  <SelectItem key="Quintal" className="uppercase text-white font-black">Quintal</SelectItem>
+                                  <SelectItem key="KG" className="uppercase text-foreground dark:text-white font-black">KG</SelectItem>
+                                  <SelectItem key="MT" className="uppercase text-foreground dark:text-white font-black">Metric Ton (MT)</SelectItem>
+                                  <SelectItem key="Quintal" className="uppercase text-foreground dark:text-white font-black">Quintal</SelectItem>
                                 </Select>
                                 <Select
                                   variant="bordered"
@@ -1076,7 +1076,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                                   errorMessage={errors.organicCertificationScope}
                                 >
                                   {ORGANIC_SCOPES.map((item) => (
-                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-white font-black">
+                                    <SelectItem key={item.key} textValue={item.value} className="uppercase text-foreground dark:text-white font-black">
                                       {item.value}
                                     </SelectItem>
                                   ))}
@@ -1137,22 +1137,22 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                     {!isAssociateUser && (
                       <Select variant="bordered" label="Associate" classNames={themeField} listboxProps={{ itemClasses }} selectedKeys={formData.associate ? [formData.associate] : []} onSelectionChange={(keys) => setValue("associate", Array.from(keys)[0])} isInvalid={!!errors.associate} errorMessage={errors.associate}>
                         {associates.map((item) => (
-                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className="uppercase text-white font-black">
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item) || item.email} className="uppercase text-foreground dark:text-white font-black">
                             {getOptionLabel(item) || item.email}
                           </SelectItem>
                         ))}
                       </Select>
                     )}
-                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200/60 dark:border-white/10 bg-default-100/50 dark:bg-white/5 p-3 sm:p-4">
                       <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between text-sm text-white/70">
+                        <div className="flex items-center justify-between text-sm text-default-600 dark:text-white/70">
                           <span>Commission ({commissionPercent}%)</span>
-                          <span className="font-bold text-obaol-300">{computedCommission.toFixed(2)}</span>
+                          <span className="font-bold text-obaol-600 dark:text-obaol-300">{computedCommission.toFixed(2)}</span>
                         </div>
-                        <div className="h-[1px] w-full bg-white/10"></div>
-                        <div className="flex items-center justify-between text-sm font-medium text-white/90">
+                        <div className="h-[1px] w-full bg-default-200/60 dark:bg-white/10"></div>
+                        <div className="flex items-center justify-between text-sm font-medium text-foreground dark:text-white/90">
                           <span>Price after commission</span>
-                          <span className="font-bold text-success-400">{(rateValue + computedCommission).toFixed(2)}</span>
+                          <span className="font-bold text-success-600 dark:text-success-400">{(rateValue + computedCommission).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -1170,8 +1170,8 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                       isInvalid={!!errors.locationSource}
                       errorMessage={errors.locationSource}
                     >
-                      <SelectItem key="WAREHOUSE" className="uppercase text-white font-black">Warehouse</SelectItem>
-                      <SelectItem key="OFFICE_ADDRESS" className="uppercase text-white font-black">Office Address</SelectItem>
+                      <SelectItem key="WAREHOUSE" className="uppercase text-foreground dark:text-white font-black">Warehouse</SelectItem>
+                      <SelectItem key="OFFICE_ADDRESS" className="uppercase text-foreground dark:text-white font-black">Office Address</SelectItem>
                     </Select>
                     {formData.locationSource === "WAREHOUSE" ? (
                       <Select
@@ -1186,7 +1186,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         errorMessage={errors.warehouseId}
                       >
                         {warehouses.map((item) => (
-                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-white font-black">
+                          <SelectItem key={getOptionKey(item)} textValue={getOptionLabel(item)} className="uppercase text-foreground dark:text-white font-black">
                             {getOptionLabel(item)}
                           </SelectItem>
                         ))}
@@ -1211,7 +1211,7 @@ const VariantRateWizardModal: React.FC<WizardProps> = ({
                         isDisabled
                       />
                     )}
-                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 text-sm text-white/70 break-words">
+                    <div className="md:col-span-2 rounded-xl sm:rounded-2xl border border-default-200/60 dark:border-white/10 bg-default-100/50 dark:bg-white/5 p-3 sm:p-4 text-sm text-default-600 dark:text-white/70 break-words">
                       Location: {formData.locationSource === "WAREHOUSE"
                         ? (warehouses.find((w) => getOptionKey(w) === formData.warehouseId)?.address || "—")
                         : (formData.officeAddress || "—")}

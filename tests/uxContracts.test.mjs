@@ -80,7 +80,7 @@ test("homepage hero presents the ordered ten-stage execution flow", () => {
 
   assert.deepEqual(stageLabels, [
     "Discovery", "Sampling", "Coordination", "Documentation", "Inspection Visit",
-    "Quality Testing", "Packaging", "Procurement", "Inland Transportation", "Freight Forwarding",
+    "Quality Testing", "Packaging", "Procurement", "Inland Transport", "Freight Forwarding",
   ]);
   assert.equal(stageMessages.length, 10);
   assert.equal(imagePaths.length, 10);

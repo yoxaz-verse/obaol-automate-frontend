@@ -111,7 +111,7 @@ export default function CommissionStructurePage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-10 text-center max-w-3xl mx-auto relative z-10"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-obaol-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6 shadow-lg">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-obaol-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6">
               <LuChartPie size={12} className="animate-pulse" /> Commission Structure
             </div>
             <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 leading-tight uppercase italic text-foreground">
@@ -125,7 +125,7 @@ export default function CommissionStructurePage() {
 
           {/* 01. Layering Structure Hub */}
           <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden group border-r-4 border-r-obaol-500/20">
+            <Card shadow="none" className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-[2.5rem] overflow-hidden group border-r-4 border-r-obaol-500/20">
               <CardBody className="p-0">
                 <div className="flex flex-col lg:flex-row">
                   <div className="lg:w-1/2 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-default-200/50 flex flex-col justify-center">
@@ -138,7 +138,7 @@ export default function CommissionStructurePage() {
                     <p className="text-base text-foreground/70 leading-relaxed font-medium mb-10">
                       When a trade is fully completed and profit is confirmed, 50% of that profit becomes the total commission pool.
                     </p>
-                    <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white shadow-xl overflow-hidden group">
+                    <div className="relative p-8 rounded-[2rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white overflow-hidden group">
                       <div className="relative z-10 flex items-end gap-2">
                         <span className="text-5xl md:text-6xl font-black tracking-tighter leading-none">50%</span>
                         <div className="flex flex-col mb-1">
@@ -173,10 +173,10 @@ export default function CommissionStructurePage() {
 
           {/* 02. How The Commission Works */}
           <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
+            <Card shadow="none" className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-[3rem] overflow-hidden">
               <CardBody className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-12">
-                  <div className="h-14 w-14 rounded-[1.25rem] bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/30 shadow-inner">
+                  <div className="h-14 w-14 rounded-[1.25rem] bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/30">
                     <LuCircleCheck size={28} />
                   </div>
                   <div>
@@ -198,12 +198,12 @@ export default function CommissionStructurePage() {
                     <motion.div 
                         key={i} 
                         whileHover={{ y: -5, scale: 1.02 }}
-                        className="relative z-10 p-6 md:p-8 rounded-[2rem] bg-content1/80 backdrop-blur-xl border border-primary-500/20 shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)] hover:shadow-[0_0_40px_rgba(var(--primary-rgb),0.15)] hover:border-primary-500/40 transition-all duration-500 group flex flex-col items-start overflow-hidden public-surface-card"
+                        className="relative z-10 p-6 md:p-8 rounded-[2rem] bg-content1/80 backdrop-blur-xl border border-primary-500/20 hover:border-primary-500/40 transition-all duration-500 group flex flex-col items-start overflow-hidden public-surface-card"
                     >
                       <div className="absolute -bottom-4 -right-4 text-[120px] font-black text-foreground/[0.02] select-none pointer-events-none transition-all duration-700 group-hover:text-primary-500/[0.04]">
                         {i + 1}
                       </div>
-                      <div className="h-14 w-14 rounded-2xl bg-background border-2 border-primary-500/30 flex items-center justify-center text-primary-500 mb-6 shadow-xl group-hover:bg-primary-500 group-hover:text-white transition-colors duration-500">
+                      <div className="h-14 w-14 rounded-2xl bg-background border-2 border-primary-500/30 flex items-center justify-center text-primary-500 mb-6 group-hover:bg-primary-500 group-hover:text-white transition-colors duration-500">
                         <step.icon size={24} />
                       </div>
                       <div className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-500/70 mb-2">{`Step ${String(i + 1).padStart(2, "0")}`}</div>
@@ -218,10 +218,10 @@ export default function CommissionStructurePage() {
 
           {/* 03. Glossary */}
           <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-            <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
+            <Card shadow="none" className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-[3rem] overflow-hidden">
               <CardBody className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-12">
-                  <div className="h-14 w-14 rounded-[1.25rem] bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/30 shadow-inner">
+                  <div className="h-14 w-14 rounded-[1.25rem] bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/30">
                     <LuBookOpen size={28} />
                   </div>
                   <div>
@@ -238,10 +238,10 @@ export default function CommissionStructurePage() {
                     <motion.div 
                       key={i} 
                       whileHover={{ scale: 1.03 }}
-                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group shadow-sm hover:border-obaol-500/30 public-surface-card"
+                      className="p-8 rounded-[2rem] bg-content2/30 border border-default-200/50 hover:bg-content2/60 transition-all flex flex-col gap-5 group hover:border-obaol-500/30 public-surface-card"
                     >
                       <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-obaol-500 group-hover:border-obaol-500/30 transition-colors shadow-sm">
+                         <div className="h-10 w-10 rounded-xl bg-background border border-default-200 flex items-center justify-center text-foreground/50 group-hover:text-obaol-500 group-hover:border-obaol-500/30 transition-colors">
                            <item.icon size={18} />
                          </div>
                          <div className="text-[14px] font-black uppercase tracking-[0.1em] text-foreground/90">{item.term}</div>
@@ -256,10 +256,10 @@ export default function CommissionStructurePage() {
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="p-8 rounded-[2rem] bg-gradient-to-r from-obaol-500/10 to-transparent border border-obaol-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group shadow-inner"
+                    className="p-8 rounded-[2rem] bg-gradient-to-r from-obaol-500/10 to-transparent border border-obaol-500/30 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden group"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-obaol-500/10 blur-3xl rounded-full pointer-events-none public-decoration" />
-                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-obaol-500 text-white flex items-center justify-center shadow-lg shadow-obaol-500/30">
+                    <div className="h-14 w-14 shrink-0 rounded-2xl bg-obaol-500 text-white flex items-center justify-center">
                        <LuShieldCheck size={28} />
                     </div>
                     <div className="relative z-10">
@@ -280,7 +280,7 @@ export default function CommissionStructurePage() {
                 { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-obaol-500", tone: "bg-obaol-500/5", border: "border-obaol-500/20" },
                 { label: "Handler", share: "10%", icon: LuLayers, color: "text-secondary-500", tone: "bg-secondary-500/5", border: "border-secondary-500/20" },
               ].map((item, index) => (
-                <Card key={index} className={`bg-content1/50 backdrop-blur-xl ${item.border} shadow-lg rounded-[2rem]`}>
+                <Card key={index} shadow="none" className={`bg-content1/50 backdrop-blur-xl border ${item.border} rounded-[2rem]`}>
                   <CardBody className="p-8 flex items-center gap-5">
                     <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${item.tone} ${item.color} border border-current/10`}>
                       <item.icon size={20} />
@@ -310,7 +310,7 @@ export default function CommissionStructurePage() {
               </p>
             </div>
 
-            <Card className="max-w-5xl mx-auto bg-content1/50 backdrop-blur-3xl border-default-200/50 shadow-2xl rounded-[3rem] overflow-hidden">
+            <Card shadow="none" className="max-w-5xl mx-auto bg-content1/50 backdrop-blur-3xl border border-default-200/50 rounded-[3rem] overflow-hidden">
                 <CardBody className="p-6 md:p-8">
                     {/* Controller */}
                     <div className="flex flex-col items-center text-center space-y-8 border-b border-default-200/50 pb-12 mb-12">
@@ -331,24 +331,24 @@ export default function CommissionStructurePage() {
                                 classNames={{
                                     base: "max-w-md mx-auto",
                                     filler: "bg-obaol-500",
-                                    thumb: "bg-obaol-500 border-2 border-white shadow-lg h-6 w-6",
+                                    thumb: "bg-obaol-500 border-2 border-white h-6 w-6",
                                     track: "bg-default-200 h-2 rounded-full"
                                 }}
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                            <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white shadow-lg flex flex-col items-center justify-center">
+                            <div className="p-8 rounded-[1.5rem] bg-gradient-to-br from-obaol-500 to-orange-700 text-white flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Total Pool (50%)</span>
                                 <span className="text-3xl font-black tracking-tighter italic leading-none">{displayRate(shares.totalCommissionPool)}</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-3">Total commission created</span>
                             </div>
-                            <Card className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
+                            <Card shadow="none" className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase text-foreground/70 font-black tracking-widest mb-2">Procurement (10%)</span>
                                 <span className="text-2xl font-black text-foreground italic">{displayRate(shares.procurement)}</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3">Procurement share</span>
                             </Card>
-                            <Card className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
+                            <Card shadow="none" className="p-8 rounded-[1.5rem] bg-content2/30 border border-default-200/50 flex flex-col items-center justify-center">
                                 <span className="text-[11px] font-black uppercase text-foreground/70 font-black tracking-widest mb-2">Handler (10%)</span>
                                 <span className="text-2xl font-black text-foreground italic">{displayRate(shares.handler)}</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mt-3 text-center">
@@ -437,10 +437,10 @@ export default function CommissionStructurePage() {
               ].map((item, i) => (
                 <div key={i} className="group relative">
                   <div className="absolute -inset-2 bg-gradient-to-b from-content2/50 to-transparent rounded-[3rem] blur-xl opacity-0 group-hover:opacity-100 transition-all public-decoration" />
-                  <Card className="relative h-full bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-md rounded-[3rem] overflow-hidden hover:translate-y-[-10px] transition-all">
+                  <Card shadow="none" className="relative h-full bg-content1/50 backdrop-blur-xl border border-default-200/50 rounded-[3rem] overflow-hidden hover:translate-y-[-10px] transition-all">
                     <CardBody className="p-10">
                       <div className="text-[10px] font-black uppercase tracking-[0.5em] text-obaol-500 mb-6 font-bold">{item.step}</div>
-                      <div className={`h-14 w-14 rounded-2xl ${item.color.replace('text', 'bg')}/10 border border-current/20 flex items-center justify-center ${item.color} mb-8 shadow-inner`}>
+                      <div className={`h-14 w-14 rounded-2xl ${item.color.replace('text', 'bg')}/10 border border-current/20 flex items-center justify-center ${item.color} mb-8`}>
                         <item.icon size={28} />
                       </div>
                       <h4 className="text-xl font-black mb-4 text-foreground uppercase tracking-tight italic">{item.title}</h4>
@@ -463,7 +463,7 @@ export default function CommissionStructurePage() {
                 </p>
              </div>
 
-             <Card className="max-w-4xl mx-auto bg-content1/50 backdrop-blur-3xl border-default-200/50 rounded-[3.5rem] overflow-hidden shadow-2xl">
+             <Card shadow="none" className="max-w-4xl mx-auto bg-content1/50 backdrop-blur-3xl border border-default-200/50 rounded-[3.5rem] overflow-hidden">
                 <CardBody className="p-4 md:p-10 flex flex-col items-center">
                     <Tabs 
                         aria-label="Tier Analysis" 
@@ -489,7 +489,7 @@ export default function CommissionStructurePage() {
                                 key={activeTier}
                                 initial={{ scale: 0.8, opacity: 0, rotate: -15 }}
                                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                                className={`h-48 w-48 rounded-[3rem] ${tierData[activeTier as keyof typeof tierData].color.replace('text', 'bg')}/10 border-4 border-dashed border-current flex items-center justify-center ${tierData[activeTier as keyof typeof tierData].color} shadow-[0_0_50px_rgba(var(--primary-rgb),0.1)]`}
+                                className={`h-48 w-48 rounded-[3rem] ${tierData[activeTier as keyof typeof tierData].color.replace('text', 'bg')}/10 border-4 border-dashed border-current flex items-center justify-center ${tierData[activeTier as keyof typeof tierData].color}`}
                             >
                                 {React.createElement(tierData[activeTier as keyof typeof tierData].icon, { size: 80 })}
                             </motion.div>
@@ -525,11 +525,11 @@ export default function CommissionStructurePage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-12 p-1 rounded-3xl bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700 shadow-xl"
+            className="mt-12 p-1 rounded-3xl bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700"
           >
             <div className="bg-[#05070c] rounded-[1.4rem] p-8 md:p-10 text-center relative overflow-hidden text-white">
                 <div className="relative z-10">
-                    <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
+                    <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8" />
                     <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-foreground">
                         Ready to <span className="text-obaol-500">Scale?</span>
                     </h2>
@@ -541,7 +541,7 @@ export default function CommissionStructurePage() {
                         as="a"
                         href="/dashboard"
                         size="md"
-                        className="bg-obaol-500 text-black font-black px-8 h-12 rounded-2xl shadow-lg hover:scale-105 transition-all text-[10px] uppercase tracking-widest font-sans"
+                        className="bg-obaol-500 text-black font-black px-8 h-12 rounded-2xl hover:scale-105 transition-all text-[10px] uppercase tracking-widest font-sans"
                         endContent={<LuArrowRight size={14} />}
                         >
                         Go To Dashboard

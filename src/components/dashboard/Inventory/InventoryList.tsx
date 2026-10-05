@@ -12,12 +12,18 @@ import {
     ModalFooter,
     ModalHeader,
     Input,
+    Textarea,
+    Select,
+    SelectItem,
     Switch,
     Tooltip,
     Tabs,
     Tab,
 } from "@nextui-org/react";
-import { FiSend, FiEdit2, FiEyeOff } from "react-icons/fi";
+import { FiSend, FiEdit2, FiEyeOff, FiMessageSquare, FiInfo } from "react-icons/fi";
+import { LuMessageSquare } from "react-icons/lu";
+import { useRouter } from "next/navigation";
+import { apiRoutesByRole } from "@/utils/tableValues";
 
 import CommonTable from "@/components/CurdTable/common-table";
 import QueryComponent from "@/components/queryComponent";
@@ -37,6 +43,11 @@ const CompanySearch = dynamic(() => import("@/components/dashboard/Company/Compa
 const InventoryList: React.FC = () => {
     const queryClient = useQueryClient();
     const { user } = useContext(AuthContext);
+    const roleLower = String(user?.role || "").toLowerCase();
+    const isAdmin = roleLower === "admin";
+    const isOperatorUser = roleLower === "operator" || roleLower === "team";
+    const isAssociate = roleLower === "associate";
+    const canUseDemo = isAdmin || isOperatorUser;
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -56,15 +67,203 @@ const InventoryList: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>("inventory");
     const [demoLoading, setDemoLoading] = useState(false);
     const [demoClearing, setDemoClearing] = useState(false);
+    const router = useRouter();
     const [costModalOpen, setCostModalOpen] = useState(false);
     const [costInventory, setCostInventory] = useState<any>(null);
     const [customDays, setCustomDays] = useState("");
 
-    const roleLower = String(user?.role || "").toLowerCase();
-    const isAdmin = roleLower === "admin";
-    const isOperatorUser = roleLower === "operator" || roleLower === "team";
-    const isAssociate = roleLower === "associate";
-    const canUseDemo = isAdmin || isOperatorUser;
+    const [enquiryModalOpen, setEnquiryModalOpen] = useState(false);
+    const [selectedEnquiryInventory, setSelectedEnquiryInventory] = useState<any>(null);
+    const [enquiryQty, setEnquiryQty] = useState("");
+    const [enquiryIncotermId, setEnquiryIncotermId] = useState("");
+    const [enquiryNotes, setEnquiryNotes] = useState("");
+    const [enquiryBuyerAssociateId, setEnquiryBuyerAssociateId] = useState("");
+    const [enquiryContactName, setEnquiryContactName] = useState("");
+    const [enquiryContactPhone, setEnquiryContactPhone] = useState("");
+    const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+
+    const OBJECT_ID_REGEX = /^[a-fA-F0-9]{24}$/;
+    const normalizeObjectId = (value: any): string => {
+        const raw = typeof value === "string" ? value : typeof value === "object" && value !== null ? value._id || value.id || "" : "";
+        const normalized = String(raw || "").trim();
+        return OBJECT_ID_REGEX.test(normalized) ? normalized : "";
+    };
+
+    const openEnquiryModal = (item: any) => {
+        setSelectedEnquiryInventory(item);
+        setEnquiryQty(item.availableQty ? String(item.availableQty) : item.quantity ? String(item.quantity) : "1");
+        setEnquiryIncotermId("");
+        setEnquiryNotes("");
+        setEnquiryBuyerAssociateId("");
+        setEnquiryContactName((user as any)?.name || "");
+        setEnquiryContactPhone((user as any)?.phone || (user as any)?.phoneNumber || "");
+        setEnquiryModalOpen(true);
+    };
+
+    const closeEnquiryModal = () => {
+        setEnquiryModalOpen(false);
+        setSelectedEnquiryInventory(null);
+        setEnquiryQty("");
+        setEnquiryIncotermId("");
+        setEnquiryNotes("");
+        setEnquiryBuyerAssociateId("");
+        setEnquiryContactName("");
+        setEnquiryContactPhone("");
+        setSubmittingEnquiry(false);
+    };
+
+    const { data: incotermResponse } = useQuery({
+        queryKey: ["inventory-incoterms"],
+        queryFn: () => getData(apiRoutes.incoterm.getAll),
+        enabled: enquiryModalOpen,
+    });
+
+    const incotermOptions = useMemo(() => {
+        const raw = incotermResponse?.data;
+        if (Array.isArray(raw)) return raw;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw?.data?.data)) return raw.data.data;
+        return [];
+    }, [incotermResponse]);
+
+    const { data: buyersResponse } = useQuery({
+        queryKey: ["inventory-enquiry-buyers"],
+        queryFn: () => getData(apiRoutes.enquiry.buyerOptions, { limit: 500 }),
+        enabled: enquiryModalOpen && (isAdmin || isOperatorUser),
+    });
+
+    const buyerOptions = useMemo(() => {
+        const raw = buyersResponse;
+        let rows: any[] = [];
+        if (Array.isArray(raw?.data?.data?.data)) rows = raw.data.data.data;
+        else if (Array.isArray(raw?.data?.data?.docs)) rows = raw.data.data.docs;
+        else if (Array.isArray(raw?.data?.docs)) rows = raw.data.docs;
+        else if (Array.isArray(raw?.data?.data)) rows = raw.data.data;
+        else if (Array.isArray(raw?.data)) rows = raw.data;
+        else if (Array.isArray(raw)) rows = raw;
+        return rows.filter((item: any) => !item?.isDeleted);
+    }, [buyersResponse]);
+
+    const handleEnquirySubmit = async () => {
+        if (!selectedEnquiryInventory) return;
+
+        const qty = Number(enquiryQty);
+        if (!qty || Number.isNaN(qty) || qty <= 0) {
+            showToastMessage({
+                type: "error",
+                message: "Please enter a valid quantity in MT.",
+                position: "top-right",
+            });
+            return;
+        }
+
+        const rawProductId =
+            selectedEnquiryInventory.productId ||
+            selectedEnquiryInventory.product?._id ||
+            selectedEnquiryInventory.product;
+        const productId = normalizeObjectId(rawProductId);
+
+        const rawVariantId =
+            selectedEnquiryInventory.productVariantId ||
+            selectedEnquiryInventory.productVariant?._id ||
+            selectedEnquiryInventory.productVariant;
+        const productVariantId = normalizeObjectId(rawVariantId);
+
+        const rawSellerId =
+            selectedEnquiryInventory.associateCompanyId ||
+            selectedEnquiryInventory.associateCompany?._id ||
+            selectedEnquiryInventory.associateId ||
+            selectedEnquiryInventory.associate?._id ||
+            selectedEnquiryInventory.associate;
+        const sellerAssociateId = normalizeObjectId(rawSellerId);
+
+        const buyerAssociateId = (isAdmin || isOperatorUser)
+            ? normalizeObjectId(enquiryBuyerAssociateId)
+            : normalizeObjectId((user as any)?.associateId || user?.id);
+
+        if (!productId) {
+            showToastMessage({
+                type: "error",
+                message: "Product reference is missing for this inventory item.",
+                position: "top-right",
+            });
+            return;
+        }
+
+        if (!sellerAssociateId) {
+            showToastMessage({
+                type: "error",
+                message: "Seller company mapping is missing for this inventory item.",
+                position: "top-right",
+            });
+            return;
+        }
+
+        if ((isAdmin || isOperatorUser) && !buyerAssociateId) {
+            showToastMessage({
+                type: "error",
+                message: "Please select a buyer associate for this enquiry.",
+                position: "top-right",
+            });
+            return;
+        }
+
+        setSubmittingEnquiry(true);
+        try {
+            const baseSpec = `Inventory Batch: ${selectedEnquiryInventory.productVariant || "Standard"} (${selectedEnquiryInventory.warehouseName || "Warehouse"})`;
+            const finalSpec = enquiryNotes?.trim()
+                ? `${baseSpec}\n\nNotes: ${enquiryNotes.trim()}`
+                : baseSpec;
+
+            const payload: Record<string, any> = {
+                productId,
+                productVariantId: productVariantId || null,
+                quantity: qty,
+                specifications: finalSpec,
+                buyerAssociateId,
+                sellerAssociateId,
+                sourceInventory: selectedEnquiryInventory._id,
+                preferredIncoterm: normalizeObjectId(enquiryIncotermId) || null,
+                notes: `Enquiry from Inventory: ${selectedEnquiryInventory.product} - ${selectedEnquiryInventory.productVariant}`,
+                ...(isOperatorUser && user?.id ? { assignedOperatorId: user.id } : {}),
+                ...(enquiryContactName ? { name: enquiryContactName } : {}),
+                ...(enquiryContactPhone ? { phoneNumber: enquiryContactPhone } : {}),
+            };
+
+            if (selectedEnquiryInventory.linkedVariantRateId) {
+                payload.variantRateId = normalizeObjectId(selectedEnquiryInventory.linkedVariantRateId);
+            }
+
+            const endpoint = apiRoutesByRole["enquiry"] || apiRoutes.enquiry.getAll;
+            const response: any = await postData(endpoint, payload);
+            const createdId =
+                response?.data?.data?._id ||
+                response?.data?._id ||
+                response?._id ||
+                null;
+
+            showToastMessage({
+                type: "success",
+                message: "Trade enquiry created successfully.",
+                position: "top-right",
+            });
+
+            closeEnquiryModal();
+            queryClient.invalidateQueries();
+
+            if (createdId) {
+                router.push(`/dashboard/enquiries/${createdId}`);
+            }
+        } catch (error: any) {
+            console.error("Inventory enquiry creation failed:", error);
+            showToastMessage({
+                type: "error",
+                message: error?.response?.data?.message || "Failed to create trade enquiry. Please try again.",
+                position: "top-right",
+            });
+            setSubmittingEnquiry(false);
+        }
+    };
 
     useEffect(() => {
         patchData(apiRoutes.notifications.markSectionRead("inventory"), {})
@@ -775,6 +974,19 @@ const InventoryList: React.FC = () => {
                                                                 </div>
                                                             )}
 
+                                                            <Tooltip content="Fill Trade Enquiry" placement="top" size="sm">
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="primary"
+                                                                    variant="flat"
+                                                                    onPress={() => openEnquiryModal(item)}
+                                                                    startContent={<LuMessageSquare size={13} />}
+                                                                    className="font-semibold h-7 px-2.5 text-xs"
+                                                                >
+                                                                    Enquiry
+                                                                </Button>
+                                                            </Tooltip>
+
                                                             <Tooltip content="Storage cost" placement="top" size="sm">
                                                                 <Button
                                                                     size="sm"
@@ -1081,6 +1293,160 @@ const InventoryList: React.FC = () => {
                                             </Button>
                                             <Button color="warning" onPress={handleRateSubmit} isLoading={submittingRate}>
                                                 {selectedInventory?.linkedVariantRate ? "Update Rate" : "Publish Rate"}
+                                            </Button>
+                                        </ModalFooter>
+                                    </ModalContent>
+                                </Modal>
+
+                                <Modal
+                                    isOpen={enquiryModalOpen}
+                                    onOpenChange={(open) => {
+                                        if (!open) closeEnquiryModal();
+                                    }}
+                                    isDismissable={!submittingEnquiry}
+                                    size="lg"
+                                >
+                                    <ModalContent className="bg-gradient-to-br from-background to-content1 border border-divider">
+                                        <ModalHeader className="flex flex-col gap-1 border-b border-divider pb-4 px-6">
+                                            <div className="flex items-center gap-3 pt-2">
+                                                <div className="p-2.5 bg-primary/10 rounded-xl text-primary-500 shadow-sm shadow-primary/10">
+                                                    <FiMessageSquare size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-black tracking-tight text-foreground">
+                                                        New Trade Enquiry
+                                                    </h3>
+                                                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest mt-0.5">
+                                                        Direct Inventory Protocol
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </ModalHeader>
+                                        <ModalBody className="py-5 px-6 flex flex-col gap-4">
+                                            {selectedEnquiryInventory && (
+                                                <div className="p-3.5 bg-default-100/60 rounded-2xl border border-divider/30 flex items-center justify-between gap-3 shadow-sm">
+                                                    <div className="flex flex-col gap-1 min-w-0">
+                                                        <span className="text-[10px] font-black text-default-400 uppercase tracking-widest">
+                                                            Target Inventory Item
+                                                        </span>
+                                                        <span className="text-base font-black text-foreground truncate">
+                                                            {selectedEnquiryInventory.product}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 text-xs text-default-500 font-medium">
+                                                            <span>Warehouse: {selectedEnquiryInventory.warehouseName || "Private Location"}</span>
+                                                            <span>•</span>
+                                                            <span className="text-primary-500 font-bold">{selectedEnquiryInventory.availableQty ?? selectedEnquiryInventory.quantity} MT Available</span>
+                                                        </div>
+                                                    </div>
+                                                    <Chip size="sm" color="primary" variant="flat" className="font-bold shrink-0">
+                                                        {selectedEnquiryInventory.productVariant || "Standard"}
+                                                    </Chip>
+                                                </div>
+                                            )}
+
+                                            {(isAdmin || isOperatorUser) && (
+                                                <Select
+                                                    label="Buyer Associate"
+                                                    labelPlacement="outside"
+                                                    placeholder="Select buyer associate"
+                                                    selectedKeys={enquiryBuyerAssociateId ? [enquiryBuyerAssociateId] : []}
+                                                    onSelectionChange={(keys) => setEnquiryBuyerAssociateId(String(Array.from(keys)[0] || ""))}
+                                                    variant="bordered"
+                                                    description="Specify which associate is initiating this enquiry."
+                                                    classNames={{
+                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                    }}
+                                                >
+                                                    {buyerOptions.map((opt: any) => {
+                                                        const optId = String(opt._id || opt.id || "");
+                                                        const companyName = typeof opt.associateCompany === "object" ? opt.associateCompany?.name : "";
+                                                        const displayName = opt.name || opt.fullName || opt.user?.name || companyName || "Associate";
+                                                        return (
+                                                            <SelectItem key={optId} value={optId} textValue={displayName}>
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-bold text-sm">{displayName}</span>
+                                                                    {opt.email && <span className="text-xs text-default-400">{opt.email}</span>}
+                                                                </div>
+                                                            </SelectItem>
+                                                        );
+                                                    })}
+                                                </Select>
+                                            )}
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <Input
+                                                    label="Enquiry Quantity (MT)"
+                                                    labelPlacement="outside"
+                                                    type="number"
+                                                    value={enquiryQty}
+                                                    onChange={(e) => setEnquiryQty(e.target.value)}
+                                                    placeholder="e.g. 10"
+                                                    isDisabled={submittingEnquiry}
+                                                    variant="bordered"
+                                                    startContent={<span className="text-default-400 text-xs font-bold">MT</span>}
+                                                    classNames={{
+                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                    }}
+                                                />
+
+                                                <Select
+                                                    label="Preferred Incoterm"
+                                                    labelPlacement="outside"
+                                                    placeholder="Select incoterm (Optional)"
+                                                    selectedKeys={enquiryIncotermId ? [enquiryIncotermId] : []}
+                                                    onSelectionChange={(keys) => setEnquiryIncotermId(String(Array.from(keys)[0] || ""))}
+                                                    variant="bordered"
+                                                    classNames={{
+                                                        label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                    }}
+                                                >
+                                                    {incotermOptions.map((inco: any) => {
+                                                        const incoId = String(inco._id || inco.id || "");
+                                                        return (
+                                                            <SelectItem key={incoId} value={incoId} textValue={inco.name || inco.code || incoId}>
+                                                                <span className="font-bold text-sm">{inco.name || inco.code}</span>
+                                                            </SelectItem>
+                                                        );
+                                                    })}
+                                                </Select>
+                                            </div>
+
+                                            <Textarea
+                                                label="Trade Specifications / Requirements"
+                                                labelPlacement="outside"
+                                                value={enquiryNotes}
+                                                onChange={(e) => setEnquiryNotes(e.target.value)}
+                                                placeholder="Enter specific grade, packaging, target price, or delivery timeline..."
+                                                variant="bordered"
+                                                minRows={3}
+                                                classNames={{
+                                                    label: "text-xs font-bold text-default-500 uppercase tracking-wider",
+                                                }}
+                                            />
+
+                                            <div className="flex items-start gap-2 text-xs text-primary-600 dark:text-primary-400 bg-primary/10 px-3.5 py-2.5 rounded-xl border border-primary/20">
+                                                <FiInfo size={14} className="shrink-0 mt-0.5" />
+                                                <span>LOI will be automatically generated upon submitting this trade enquiry.</span>
+                                            </div>
+                                        </ModalBody>
+                                        <ModalFooter className="border-t border-divider px-6 py-4 gap-3">
+                                            <Button
+                                                variant="flat"
+                                                color="default"
+                                                onPress={closeEnquiryModal}
+                                                isDisabled={submittingEnquiry}
+                                                className="font-semibold"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                color="primary"
+                                                onPress={handleEnquirySubmit}
+                                                isLoading={submittingEnquiry}
+                                                className="font-bold px-6"
+                                                startContent={!submittingEnquiry ? <FiMessageSquare size={16} /> : undefined}
+                                            >
+                                                Submit Trade Enquiry
                                             </Button>
                                         </ModalFooter>
                                     </ModalContent>

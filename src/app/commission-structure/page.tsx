@@ -99,8 +99,8 @@ export default function CommissionStructurePage() {
   return (
     <section className="min-h-screen bg-background text-foreground selection:bg-obaol-500/30 overflow-x-hidden">
       <Header />
-      <ThemedContentWrapper className="public-reading-page">
-        <div className="mx-auto max-w-[1280px] px-6 pt-24 md:pt-32 pb-12 md:pb-20 relative public-layout-container">
+      <ThemedContentWrapper>
+        <div className="relative mx-auto public-layout-container">
           
           <div className="absolute top-0 right-[-10%] w-[400px] h-[400px] bg-obaol-500/5 blur-[100px] rounded-full pointer-events-none public-decoration" />
           <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] bg-primary-500/5 blur-[80px] rounded-full pointer-events-none public-decoration" />
@@ -109,7 +109,7 @@ export default function CommissionStructurePage() {
           <motion.div
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-16 text-center max-w-3xl mx-auto relative z-10"
+            className="mb-10 text-center max-w-3xl mx-auto relative z-10"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-content2/50 border border-default-200/50 text-obaol-500 text-[9px] font-black uppercase tracking-[0.3em] mb-6 shadow-lg">
               <LuChartPie size={12} className="animate-pulse" /> Commission Structure
@@ -124,11 +124,11 @@ export default function CommissionStructurePage() {
           </motion.div>
 
           {/* 01. Layering Structure Hub */}
-          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
+          <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 transition-all">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[2.5rem] overflow-hidden group border-r-4 border-r-obaol-500/20">
               <CardBody className="p-0">
                 <div className="flex flex-col lg:flex-row">
-                  <div className="lg:w-1/2 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-default-200/50 flex flex-col justify-center">
+                  <div className="lg:w-1/2 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-default-200/50 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="h-10 w-10 rounded-xl bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/20">
                         <LuNetwork size={20} />
@@ -148,7 +148,7 @@ export default function CommissionStructurePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="lg:w-1/2 p-8 md:p-12 bg-content2/20">
+                  <div className="lg:w-1/2 p-6 md:p-8 bg-content2/20">
                     <h3 className="text-xs font-black uppercase tracking-widest text-primary-500 mb-6 font-bold flex items-center gap-2">
                       <LuActivity size={12} /> When Commission Is Released
                     </h3>
@@ -172,9 +172,9 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 02. How The Commission Works */}
-          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
-              <CardBody className="p-8 md:p-12">
+              <CardBody className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-12">
                   <div className="h-14 w-14 rounded-[1.25rem] bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/30 shadow-inner">
                     <LuCircleCheck size={28} />
@@ -217,9 +217,9 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 03. Glossary */}
-          <div className="mb-12 md:mb-16 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
             <Card className="lg:col-span-12 bg-content1/50 backdrop-blur-xl border-default-200/50 shadow-xl rounded-[3rem] overflow-hidden">
-              <CardBody className="p-8 md:p-12">
+              <CardBody className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-12">
                   <div className="h-14 w-14 rounded-[1.25rem] bg-obaol-500/10 flex items-center justify-center text-obaol-500 border border-obaol-500/30 shadow-inner">
                     <LuBookOpen size={28} />
@@ -274,7 +274,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 04. Allocation Matrix */}
-          <div className="mb-12 md:mb-16 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
+          <div className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 text-white">
               {[
                 { label: "Core Pool", share: "30%", icon: LuCpu, color: "text-primary-500", tone: "bg-primary-500/5", border: "border-primary-500/20" },
                 { label: "Procurement", share: "10%", icon: LuNetwork, color: "text-obaol-500", tone: "bg-obaol-500/5", border: "border-obaol-500/20" },
@@ -311,7 +311,7 @@ export default function CommissionStructurePage() {
             </div>
 
             <Card className="max-w-5xl mx-auto bg-content1/50 backdrop-blur-3xl border-default-200/50 shadow-2xl rounded-[3rem] overflow-hidden">
-                <CardBody className="p-8 md:p-12">
+                <CardBody className="p-6 md:p-8">
                     {/* Controller */}
                     <div className="flex flex-col items-center text-center space-y-8 border-b border-default-200/50 pb-12 mb-12">
                         <div className="flex flex-col gap-4 w-full max-w-xl px-4">
@@ -395,7 +395,7 @@ export default function CommissionStructurePage() {
           </div>
 
           {/* 06. Handler Star Dependency */}
-          <div className="mb-12 md:mb-16 relative z-10">
+          <div className="mb-10 relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic text-foreground">
                 Handler <span className="text-obaol-500">Star Dependency</span>
@@ -525,9 +525,9 @@ export default function CommissionStructurePage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-20 p-1 rounded-[3rem] bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700 shadow-xl"
+            className="mt-12 p-1 rounded-3xl bg-gradient-to-r from-obaol-500 via-amber-600 to-orange-700 shadow-xl"
           >
-            <div className="bg-[#05070c] rounded-[2.9rem] p-12 md:p-16 text-center relative overflow-hidden text-white">
+            <div className="bg-[#05070c] rounded-[1.4rem] p-8 md:p-10 text-center relative overflow-hidden text-white">
                 <div className="relative z-10">
                     <LuShieldCheck size={50} className="text-obaol-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(207,152,60,0.4)]" />
                     <h2 className="text-3xl md:text-5xl font-black mb-6 leading-none uppercase italic tracking-tighter text-foreground">

@@ -13,7 +13,7 @@
   font-size: 16px;
   --public-content-width: 1296px;
   --public-reading-width: 760px;
-  --public-section-space: clamp(48px, 6vw, 80px);
+  --public-section-space: clamp(40px, 5vw, 64px);
   --public-hero-title: clamp(36px, 4.2vw, 56px);
   --public-section-title: clamp(28px, 3vw, 40px);
   --public-card-radius: 16px;
@@ -32,7 +32,7 @@
 .obaol-public .public-layout-container {
   width: 100%; max-width: var(--public-content-width); margin-inline: auto; padding-inline: 20px;
 }
-.obaol-public .public-hero { padding-block: clamp(104px, 11vw, 136px) clamp(48px, 6vw, 80px); }
+.obaol-public .public-hero { padding-block: clamp(96px, 9vw, 112px) clamp(40px, 5vw, 64px); }
 .obaol-public .public-hero-content { max-width: 880px; }
 .obaol-public .public-back-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 28px; padding: 8px 14px; border: 1px solid var(--public-border); border-radius: 999px; background: color-mix(in srgb, var(--public-surface) 82%, transparent); color: var(--public-muted); font-size: 14px; font-weight: 650; }
 .obaol-public .public-back-link:hover { color: var(--public-accent); border-color: color-mix(in srgb, var(--public-accent) 45%, var(--public-border)); }
@@ -61,7 +61,7 @@
 .obaol-public .public-perspective .public-section-heading { position: relative; padding: 24px 28px; margin: -24px -28px 0; border-radius: 16px; background: color-mix(in srgb, var(--public-bg) 88%, transparent); }
 @media (max-width: 639px) { .obaol-public .public-perspective-art { opacity: .11; } .obaol-public .public-perspective .public-section-heading { margin: -12px -16px 0; padding: 12px 16px; } }
 .obaol-public .public-reading { max-width: 78ch; margin-inline: auto; }
-.obaol-public .public-content-wrapper { padding-top: 120px; padding-bottom: 56px; }
+.obaol-public .public-content-wrapper { padding-top: 104px; padding-bottom: 48px; }
 .obaol-public .public-content-wrapper .public-content-wrapper { padding-block: 0; }
 .obaol-public .public-content-wrapper .public-hero { padding-top: 0; }
 .obaol-public .public-content-wrapper .prose { color: var(--public-muted); }
@@ -120,8 +120,13 @@
 /* Nested content shares its parent's gutters instead of adding another inset. */
 .obaol-public :is(.public-container, .public-layout-container) .public-layout-container { padding-inline: 0; }
 .obaol-public .public-content-wrapper > .public-container > .pt-24 { padding-top: 0; }
+.obaol-public .public-content-wrapper > .public-container > .public-layout-container:first-child {
+  padding-top: 0 !important;
+  padding-bottom: var(--public-section-space) !important;
+}
 @media (max-width: 639px) {
-  .obaol-public { --public-section-space: 48px; }
-  .obaol-public .public-hero { padding-top: 96px; }
+  .obaol-public { --public-section-space: 40px; }
+  .obaol-public .public-content-wrapper { padding-top: 108px; padding-bottom: 40px; }
+  .obaol-public .public-hero { padding-top: 88px; }
   .obaol-public .public-card { padding: 20px; }
 }

@@ -94,14 +94,33 @@ test("Team receives Operator routes without Admin routes", () => {
   assert.equal(canAccessDashboardRoute({ path: "/dashboard/approvals", role: "team" }), false);
 });
 
-test("Associate service directories do not depend on configured interests", () => {
-  const links = new Set(getAccessibleDashboardRoutes({
+test("Warehouse Booking is interest-gated for non-admin roles", () => {
+  const interestedLinks = new Set(getAccessibleDashboardRoutes({
     role: "Associate",
     tradeMode: "BOTH",
     companyInterests: ["WAREHOUSING"],
   }).map((route) => route.path));
-  assert.equal(links.has("/dashboard/warehouse-rent"), true);
-  assert.equal(links.has("/dashboard/quality-labs"), true);
+  const uninterestedLinks = new Set(getAccessibleDashboardRoutes({
+    role: "Associate",
+    tradeMode: "BOTH",
+    companyInterests: ["QUALITY_TESTING"],
+  }).map((route) => route.path));
+  const operatorWithoutInterest = new Set(getAccessibleDashboardRoutes({
+    role: "Operator",
+    tradeMode: "BOTH",
+    companyInterests: [],
+  }).map((route) => route.path));
+  const adminWithoutInterest = new Set(getAccessibleDashboardRoutes({
+    role: "Admin",
+    tradeMode: "BOTH",
+    companyInterests: [],
+  }).map((route) => route.path));
+
+  assert.equal(interestedLinks.has("/dashboard/warehouse-rent"), true);
+  assert.equal(uninterestedLinks.has("/dashboard/warehouse-rent"), false);
+  assert.equal(operatorWithoutInterest.has("/dashboard/warehouse-rent"), false);
+  assert.equal(adminWithoutInterest.has("/dashboard/warehouse-rent"), true);
+  assert.equal(uninterestedLinks.has("/dashboard/quality-labs"), true);
 });
 
 test("every dashboard page has an explicit access policy", () => {

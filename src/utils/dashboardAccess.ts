@@ -40,6 +40,7 @@ export type DashboardRouteDefinition = {
   taskGroup: DashboardTaskGroup;
   activeParent?: string;
   requiredInterests?: string[];
+  interestVisibility?: "associate" | "non-admin";
   hiddenFromAssociateNav?: boolean;
   description: string;
   breadcrumbParent?: string;
@@ -80,7 +81,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/external-orders/new", label: "New external order", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
-  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
+  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["WAREHOUSING"], interestVisibility: "non-admin" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
 
@@ -257,7 +258,12 @@ export const getAccessibleDashboardRoutes = ({
   return DASHBOARD_ROUTE_MANIFEST.filter((route) => {
     if (!route.nav || !canAccessDashboardRoute({ path: route.path, role, tradeMode })) return false;
     if (route.hiddenFromAssociateNav && normalizeDashboardRole(role) === "associate") return false;
-    if (!route.requiredInterests?.length || normalizeDashboardRole(role) !== "associate") return true;
+    if (!route.requiredInterests?.length) return true;
+    const normalizedRole = normalizeDashboardRole(role);
+    const shouldFilterByInterest = route.interestVisibility === "non-admin"
+      ? normalizedRole !== "admin"
+      : normalizedRole === "associate";
+    if (!shouldFilterByInterest) return true;
     return route.requiredInterests.some((interest) => normalizedInterests.has(interest));
   });
 };

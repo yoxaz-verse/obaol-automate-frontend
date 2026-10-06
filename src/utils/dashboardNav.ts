@@ -19,6 +19,7 @@ type SidebarOption = {
 const COMING_SOON_NAV_PATHS = new Set([
   "/dashboard/documents",
   "/dashboard/external-orders",
+  "/dashboard/warehouse-rent",
 ]);
 
 export const isComingSoonDashboardNavigation = (path: string, role: unknown) =>

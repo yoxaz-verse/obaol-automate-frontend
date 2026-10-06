@@ -2,11 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useContext } from "react";
-import { LuClock3, LuFileText, LuTruck } from "react-icons/lu";
+import { LuClock3, LuFileText, LuTruck, LuWarehouse } from "react-icons/lu";
 
 import AuthContext from "@/context/AuthContext";
 
-type ComingSoonFeature = "documents" | "external-orders";
+type ComingSoonFeature = "documents" | "external-orders" | "warehouse-booking";
 
 const featureContent: Record<
   ComingSoonFeature,
@@ -25,6 +25,13 @@ const featureContent: Record<
     description:
       "We are preparing the external order workspace for a smoother execution experience. This section will be available soon.",
     icon: LuTruck,
+  },
+  "warehouse-booking": {
+    eyebrow: "Storage services",
+    title: "Warehouse Booking is coming soon",
+    description:
+      "We are preparing the warehouse booking workspace for a smoother storage experience. This section will be available soon.",
+    icon: LuWarehouse,
   },
 };
 

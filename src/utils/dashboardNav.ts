@@ -16,6 +16,14 @@ type SidebarOption = {
   link: string;
 };
 
+const COMING_SOON_NAV_PATHS = new Set([
+  "/dashboard/documents",
+  "/dashboard/external-orders",
+]);
+
+export const isComingSoonDashboardNavigation = (path: string, role: unknown) =>
+  normalizeDashboardRole(role) !== "admin" && COMING_SOON_NAV_PATHS.has(path);
+
 export type DashboardNavSection = {
   label: DashboardSection | DashboardTaskGroup;
   links: string[];

@@ -20,7 +20,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
-import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import Image from "next/image";
 import { FiBell, FiChevronDown, FiSettings, FiVolume2, FiVolumeX, FiX, FiUser, FiGlobe, FiLogOut } from "react-icons/fi";
@@ -285,12 +285,17 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                          {group.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
                                            <button
                                              key={opt.name}
-                                             onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                             aria-current={isDashboardRouteActive(pathname, opt.link) ? "page" : undefined}
-                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                             onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                             disabled={isComingSoonDashboardNavigation(opt.link, role)}
+                                             aria-label={isComingSoonDashboardNavigation(opt.link, role) ? `${opt.name}, coming soon` : opt.name}
+                                             aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role) ? "page" : undefined}
+                                             className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
                                            >
                                              <span className="text-lg">{opt.icon}</span>
                                              <span className="text-sm">{opt.name}</span>
+                                             {isComingSoonDashboardNavigation(opt.link, role) && (
+                                               <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                                             )}
                                            </button>
                                          ))}
                                        </div>
@@ -298,15 +303,20 @@ const TopBar = ({ username, role, isOnboardingLocked = false }: TopbarProps) => 
                                    </div>
                                  );
                                }) : sec.links.map(l => optionMap.get(l)).filter(Boolean).map((opt: any) => (
-                                   <button
-                                     key={opt.name}
-                                     onClick={() => { router.push(opt.link); setIsMobileMenuOpen(false); }}
-                                     aria-current={isDashboardRouteActive(pathname, opt.link) ? "page" : undefined}
-                                     className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
-                                   >
-                                     <span className="text-lg">{opt.icon}</span>
-                                     <span className="text-sm">{opt.name}</span>
-                                   </button>
+                                 <button
+                                   key={opt.name}
+                                   onClick={() => { if (!isComingSoonDashboardNavigation(opt.link, role)) { router.push(opt.link); setIsMobileMenuOpen(false); } }}
+                                   disabled={isComingSoonDashboardNavigation(opt.link, role)}
+                                   aria-label={isComingSoonDashboardNavigation(opt.link, role) ? `${opt.name}, coming soon` : opt.name}
+                                   aria-current={isDashboardRouteActive(pathname, opt.link) && !isComingSoonDashboardNavigation(opt.link, role) ? "page" : undefined}
+                                   className={`w-full min-h-11 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isComingSoonDashboardNavigation(opt.link, role) ? "cursor-not-allowed text-default-400 opacity-55" : isDashboardRouteActive(pathname, opt.link) ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-300 font-bold" : "text-default-600 hover:db-inset"}`}
+                                 >
+                                   <span className="text-lg">{opt.icon}</span>
+                                   <span className="text-sm">{opt.name}</span>
+                                   {isComingSoonDashboardNavigation(opt.link, role) && (
+                                     <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">Coming soon</span>
+                                   )}
+                                 </button>
                                  ))}
                              </div>
                            </div>

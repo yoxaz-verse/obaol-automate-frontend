@@ -5,7 +5,7 @@ import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useRouter, usePathname } from "next/navigation";
 import AuthContext from "@/context/AuthContext";
 import { sidebarOptions } from "@/utils/utils";
-import { getDashboardSidebarSections, getRoleFilteredSidebarOptions } from "@/utils/dashboardNav";
+import { getDashboardSidebarSections, getRoleFilteredSidebarOptions, isComingSoonDashboardNavigation } from "@/utils/dashboardNav";
 import { isDashboardRouteActive } from "@/utils/dashboardAccess";
 import Image from "next/image";
 import { Button, Tooltip } from "@nextui-org/react";
@@ -73,6 +73,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     const handleOptionClick = (e: React.MouseEvent, optionLink: string) => {
         e.preventDefault();
         if (isOnboardingLocked) return;
+        if (isComingSoonDashboardNavigation(optionLink, user?.role)) return;
         if (pathname === optionLink) return;
 
         play("nav");
@@ -95,26 +96,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
     }, [activeAdminGroupLabel]);
 
     const renderOption = (opt: (typeof filteredOptions)[number], nested = false) => {
-        const isActive = isDashboardRouteActive(pathname, opt.link);
+        const isComingSoon = isComingSoonDashboardNavigation(opt.link, user?.role);
+        const isActive = !isComingSoon && isDashboardRouteActive(pathname, opt.link);
         const badgeCount = Number(dotMap[opt.link] || 0);
+        const isDisabled = isOnboardingLocked || isComingSoon;
 
         return (
             <button
                 key={opt.name}
                 onClick={(e) => handleOptionClick(e, opt.link)}
+                disabled={isDisabled}
+                title={isCollapsed && isComingSoon ? `${opt.name} — Coming soon` : undefined}
                 className={`w-full group relative flex items-center h-10 rounded-xl transition-all duration-300 ${
                     isActive
                     ? "bg-obaol-500/10 text-obaol-700 dark:text-obaol-200 font-bold shadow-sm"
                     : "text-default-500 hover:text-foreground hover:db-inset"
-                } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isOnboardingLocked ? "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-default-500" : ""}`}
-                aria-disabled={isOnboardingLocked}
+                } ${isCollapsed ? "justify-center" : `${nested ? "pl-6 pr-3" : "px-3"} gap-3`} ${isDisabled ? "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-default-500" : ""}`}
+                aria-disabled={isDisabled}
                 aria-current={isActive ? "page" : undefined}
-                aria-label={opt.name}
+                aria-label={isComingSoon ? `${opt.name}, coming soon` : opt.name}
             >
                 {isActive && (
                     <div className="absolute left-0 w-[2.5px] h-5 bg-obaol-500 rounded-r-full shadow-[0_0_10px_rgba(207,152,60,0.6)]" />
                 )}
-                <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : "group-hover:scale-110 group-hover:text-obaol-500"}`}>
+                <div className={`text-[18px] transition-all duration-500 ${isActive ? "text-obaol-700 dark:text-obaol-300 scale-110" : !isDisabled ? "group-hover:scale-110 group-hover:text-obaol-500" : ""}`}>
                     {opt.icon}
                 </div>
                 {!isCollapsed && (
@@ -122,13 +127,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, isOnboar
                         {opt.name}
                     </span>
                 )}
-                {!isCollapsed && badgeCount > 0 && (
+                {!isCollapsed && isComingSoon && (
+                    <span className="ml-auto shrink-0 rounded-full border border-obaol-500/25 bg-obaol-500/10 px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-obaol-700 dark:text-obaol-300">
+                        Coming soon
+                    </span>
+                )}
+                {!isCollapsed && !isComingSoon && badgeCount > 0 && (
                     <span className="ml-auto px-2 py-0.5 rounded-full bg-danger-500 text-white text-[9px] font-black tracking-widest">
                         {badgeCount > 99 ? "99+" : badgeCount}
                     </span>
                 )}
-                {isCollapsed && badgeCount > 0 && (
+                {isCollapsed && !isComingSoon && badgeCount > 0 && (
                     <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-danger-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                )}
+                {isCollapsed && isComingSoon && (
+                    <span aria-hidden="true" className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-obaol-500" />
                 )}
                 {isCollapsed && isActive && (
                     <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-obaol-500 shadow-[0_0_8px_rgba(207,152,60,0.6)]" />

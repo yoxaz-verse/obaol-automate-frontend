@@ -37,7 +37,7 @@ export default function WhoCanUseObaol() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 px-4 sm:px-6 bg-background border-t border-white/5 overflow-hidden public-standard-section"
+      className="relative pt-28 pb-16 sm:pt-32 sm:pb-24 md:pt-36 md:pb-28 bg-background overflow-hidden public-standard-section"
     >
       {/* Deep ambient background glows */}
       <div className="absolute inset-0 pointer-events-none">
@@ -45,9 +45,9 @@ export default function WhoCanUseObaol() {
         <div className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] bg-orange-400/5 blur-[150px] public-decoration" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="relative z-10 public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* SECTION HEADER – SEO + POSITIONING */}
-        <header className="max-w-4xl mb-24 md:mb-32">
+        <header className="max-w-4xl mb-12 md:mb-16">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

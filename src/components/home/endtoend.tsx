@@ -44,7 +44,7 @@ export default function EndToEndSection() {
   return (
 
     <section
-      className="relative py-32 md:py-48 px-6 border-t border-white/5 bg-background overflow-hidden public-standard-section"
+      className="relative pt-28 pb-16 sm:pt-32 sm:pb-24 md:pt-36 md:pb-28 border-t border-white/5 bg-background overflow-hidden public-standard-section"
     >
       {/* Deep Space Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
@@ -53,7 +53,7 @@ export default function EndToEndSection() {
         <div className="absolute top-1/2 left-1/2 w-[1000px] h-[500px] bg-indigo-500/5 blur-[150px] -translate-x-1/2 -translate-y-1/2 public-decoration" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

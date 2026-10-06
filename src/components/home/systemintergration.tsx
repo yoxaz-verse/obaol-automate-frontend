@@ -33,9 +33,9 @@ const referenceRows = [
 
 export default function SystemIntergrationSection() {
   return (
-    <section className="relative overflow-hidden border-t border-default-200 bg-background px-6 py-20 md:py-28 public-standard-section">
+    <section className="relative overflow-hidden border-t border-default-200 bg-background py-16 sm:py-24 public-standard-section">
       <div className="absolute inset-0 pointer-events-none opacity-[0.035] dark:opacity-[0.055] bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:44px_44px] public-decoration" />
-      <div className="mx-auto max-w-6xl relative z-10">
+      <div className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -23,7 +23,7 @@ export default function StartedIn() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 px-6 min-h-[720px] bg-background border-t border-white/5 overflow-hidden public-standard-section"
+      className="relative py-16 sm:py-24 bg-background border-t border-white/5 overflow-hidden public-standard-section"
     >
       {/* RIGHT-SIDE IMAGE LAYER */}
       <div
@@ -52,7 +52,7 @@ export default function StartedIn() {
 
       {/* CONTENT (ANIMATED ONLY) */}
       <div
-        className="relative z-10 max-w-6xl mx-auto"
+        className="relative z-10 public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12"
       >
         {/* Heading */}
         <motion.div

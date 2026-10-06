@@ -25,7 +25,7 @@ export default function WhyObaolPremiumLogic() {
     return (
         <div className="space-y-32 py-20 pb-40">
             {/* SECTION 1: THE EXECUTION LAYER DIFFERENCE */}
-            <section className="container mx-auto max-w-6xl px-4 public-layout-container">
+            <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                 <motion.div {...fadeIn} className="max-w-4xl space-y-8 mb-20">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-orange-500/20 bg-orange-500/5 text-orange-500 font-bold uppercase tracking-widest text-[10px]">
                         The Real Bottleneck
@@ -80,7 +80,7 @@ export default function WhyObaolPremiumLogic() {
 
             {/* SECTION 2: THE 4 PILLARS FOR SERIOUS TRADERS */}
             <section className="bg-default-50/50 dark:bg-black/20 py-32 border-y border-default-100/50 public-standard-section">
-                <div className="container mx-auto max-w-6xl px-4 public-layout-container">
+                <div className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                     <motion.div {...fadeIn} className="text-left md:text-center mb-24 space-y-4">
                         <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">Why Serious Traders Involve OBAOL.</h2>
                         <p className="text-xl text-foreground/50 max-w-2xl mx-auto font-medium leading-relaxed italic">
@@ -129,7 +129,7 @@ export default function WhyObaolPremiumLogic() {
             </section>
 
             {/* SECTION 3: SYSTEM LEVEL SHIFT */}
-            <section className="container mx-auto max-w-6xl px-4 public-layout-container">
+            <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                 <div className="p-12 md:p-24 rounded-[5rem] bg-foreground text-background dark:bg-neutral-900 shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-orange-500/5 blur-[150px] rounded-full pointer-events-none public-decoration" />
 
@@ -176,7 +176,7 @@ export default function WhyObaolPremiumLogic() {
             </section>
 
             {/* SECTION 4: ACCESSIBILITY WITHOUT DILUTION */}
-            <section className="container mx-auto max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center public-layout-container">
+            <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div className="space-y-8">
                     <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tight leading-tight">Standards <br /> <span className="text-orange-500 italic">Within Reach</span>.</h2>
                     <p className="text-xl text-foreground/50 font-medium leading-relaxed">
@@ -209,7 +209,7 @@ export default function WhyObaolPremiumLogic() {
             </section>
 
             {/* SECTION 5: FINAL QUOTE */}
-            <section className="container mx-auto max-w-5xl px-4 text-center public-layout-container">
+            <section className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
                 <motion.div
                     {...fadeIn}
                     className="relative inline-block"

@@ -80,7 +80,7 @@ export default function ProcurementSpecialistSection() {
   return (
 
     <section
-      className="relative py-20 md:py-40 px-4 sm:px-6 border-t border-white/5 bg-background overflow-hidden public-standard-section"
+      className="relative py-16 sm:py-24 border-t border-white/5 bg-background overflow-hidden public-standard-section"
     >
       {/* Cinematic Background Ambient Glows & Grid */}
       <div className="absolute inset-0 pointer-events-none">
@@ -103,7 +103,7 @@ export default function ProcurementSpecialistSection() {
         />
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="public-layout-container max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -6,7 +6,7 @@ import Footer from "@/components/home/footer";
 import ThemedContentWrapper from "@/components/layout/ThemedContentWrapper";
 import { buildMetadata, buildWebPageJsonLd } from "@/utils/seo";
 import { associateRoleGroups, associateRoleSlugs, getAssociateRoleBySlug, getAssociateRolePath } from "@/data/associateRoles";
-import { FiArrowLeft, FiArrowRight, FiBriefcase, FiCheckCircle, FiClipboard, FiClock, FiHelpCircle, FiShield, FiUsers, FiZap } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiBriefcase, FiCheckCircle, FiClock, FiHelpCircle, FiShield, FiUsers, FiZap } from "react-icons/fi";
 
 type Params = { roleSlug: string };
 
@@ -76,87 +76,52 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
             </div>
           </section>
 
-          <section id="qualification" aria-labelledby="qualification-heading" className="public-standard-section border-y border-default-200/60 bg-content1/30 scroll-mt-24">
+          <section aria-labelledby="capability-status-heading" className="public-standard-section border-y border-default-200/60 bg-content1/30">
+            <div className="container mx-auto max-w-6xl px-4 public-layout-container">
+              <div className="mb-10 max-w-3xl">
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Clear capability status</span>
+                <h2 id="capability-status-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Features for {role.displayName}</h2>
+              </div>
+              <div className="space-y-5" data-testid="associate-capability-sections">
+                <article className="public-surface-card grid gap-7 rounded-[2rem] border border-success/25 bg-gradient-to-br from-success/5 to-background p-7 md:p-9 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                  <div>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 text-success"><FiCheckCircle /></div>
+                    <p className="text-xs font-black uppercase tracking-widest text-success">Available now</p>
+                    <h3 className="mt-2 text-2xl font-black">Working OBAOL capabilities</h3>
+                    <p className="mt-3 text-sm leading-6 text-foreground/60">Features registered companies can use today.</p>
+                  </div>
+                  <StepList items={role.availableNow} tone="green" />
+                </article>
+                <article className="public-surface-card grid gap-7 rounded-[2rem] border border-orange-500/25 bg-gradient-to-br from-orange-500/5 to-background p-7 md:p-9 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                  <div>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500"><FiClock /></div>
+                    <p className="text-xs font-black uppercase tracking-widest text-orange-500">Coming next</p>
+                    <h3 className="mt-2 text-2xl font-black">Planned improvements</h3>
+                    <p className="mt-3 text-sm leading-6 text-foreground/60">Planned or partial capabilities—not live-feature promises.</p>
+                  </div>
+                  {role.comingNext.length > 0 ? <StepList items={role.comingNext} /> : <p className="leading-7 text-foreground/65">No role-specific roadmap item is being announced at this time.</p>}
+                </article>
+                <article className="public-surface-card grid gap-7 rounded-[2rem] border border-secondary/25 bg-gradient-to-br from-secondary/5 to-background p-7 md:p-9 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                  <div>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10 text-secondary"><FiZap /></div>
+                    <p className="text-xs font-black uppercase tracking-widest text-secondary">Collaborate with OBAOL</p>
+                    <h3 className="mt-2 text-2xl font-black">Build the next workflow together</h3>
+                    <p className="mt-3 text-sm leading-6 text-foreground/60">Partnerships begin with capability review and discussion.</p>
+                  </div>
+                  <div><StepList items={role.collaborationOpportunities} /><Link href={registrationHref} className="public-button public-button--primary mt-7">Register and discuss collaboration <FiArrowRight /></Link></div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section id="qualification" aria-labelledby="qualification-heading" className="public-standard-section scroll-mt-24">
             <div className="container mx-auto grid max-w-6xl gap-8 px-4 public-layout-container lg:grid-cols-[0.9fr_1.1fr]">
               <div>
                 <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Qualification</span>
                 <h2 id="qualification-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Is this your business?</h2>
-                <p className="mt-5 text-lg leading-8 text-foreground/65">Associate accounts represent verified businesses. This role fits when the company—not only the person registering—meets these conditions.</p>
+                <p className="mt-5 text-lg leading-8 text-foreground/65">This role fits when the registered company—not only the person applying—meets these conditions.</p>
               </div>
               <div className="public-surface-card rounded-[2rem] border border-default-200/70 bg-background p-7 md:p-9"><StepList items={role.eligibility} /></div>
-            </div>
-          </section>
-
-          <section aria-labelledby="responsibilities-heading" className="public-standard-section">
-            <div className="container mx-auto max-w-6xl px-4 public-layout-container">
-              <div className="mb-10 max-w-3xl">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Role in execution</span>
-                <h2 id="responsibilities-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">What your company is responsible for</h2>
-              </div>
-              <div className="grid gap-5 md:grid-cols-2">
-                {role.responsibilities.map((item, index) => (
-                  <div key={item} className="public-surface-card flex gap-5 rounded-3xl border border-default-200/70 bg-content1/35 p-6">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-xs font-black text-orange-500">0{index + 1}</span>
-                    <p className="pt-1 font-semibold leading-7 text-foreground/75">{item}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section aria-labelledby="workflow-heading" className="public-standard-section border-y border-default-200/60 bg-background">
-            <div className="container mx-auto max-w-6xl px-4 public-layout-container">
-              <div className="mb-10 max-w-3xl">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Company journey</span>
-                <h2 id="workflow-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">How the workflow starts on OBAOL</h2>
-              </div>
-              <ol className="m-0 grid list-none gap-5 p-0 md:grid-cols-2 lg:grid-cols-4">
-                {role.workflow.map((item, index) => (
-                  <li key={item} className="public-surface-card rounded-3xl border border-default-200/70 bg-background p-6">
-                    <span className="text-4xl font-black text-orange-500/25">{String(index + 1).padStart(2, "0")}</span>
-                    <p className="mt-5 font-semibold leading-7 text-foreground/75">{item}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-
-          <section aria-labelledby="capability-status-heading" className="public-standard-section">
-            <div className="container mx-auto max-w-6xl px-4 public-layout-container">
-              <div className="mb-10 max-w-3xl">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Clear capability status</span>
-                <h2 id="capability-status-heading" className="mt-3 text-3xl font-black tracking-tight md:text-5xl">What you can use now—and what comes next</h2>
-                <p className="mt-4 text-lg leading-8 text-foreground/65">Live tools, planned improvements, and partnership opportunities are separated so your company knows exactly what each statement means.</p>
-              </div>
-              <div className="grid gap-6 lg:grid-cols-3">
-                <article className="public-surface-card rounded-[2rem] border border-success/25 bg-gradient-to-br from-success/5 to-background p-8">
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 text-success"><FiCheckCircle /></div>
-                  <p className="text-xs font-black uppercase tracking-widest text-success">Available now</p>
-                  <h3 className="mt-2 text-2xl font-black">Working OBAOL capabilities</h3>
-                  <p className="mt-3 text-sm leading-6 text-foreground/60">These workflows are available for registered companies to use today.</p>
-                  <div className="mt-6"><StepList items={role.availableNow} tone="green" /></div>
-                </article>
-                <article className="public-surface-card rounded-[2rem] border border-orange-500/25 bg-gradient-to-br from-orange-500/5 to-background p-8">
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500"><FiClock /></div>
-                  <p className="text-xs font-black uppercase tracking-widest text-orange-500">Coming next</p>
-                  <h3 className="mt-2 text-2xl font-black">Planned improvements</h3>
-                  <p className="mt-3 text-sm leading-6 text-foreground/60">These capabilities are planned or partially available and are not presented as live features.</p>
-                  {role.comingNext.length > 0 ? <div className="mt-6"><StepList items={role.comingNext} /></div> : <p className="mt-6 leading-7 text-foreground/65">No role-specific roadmap item is being announced at this time.</p>}
-                </article>
-                <article className="public-surface-card rounded-[2rem] border border-secondary/25 bg-gradient-to-br from-secondary/5 to-background p-8">
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10 text-secondary"><FiZap /></div>
-                  <p className="text-xs font-black uppercase tracking-widest text-secondary">Collaborate with OBAOL</p>
-                  <h3 className="mt-2 text-2xl font-black">Build the next workflow together</h3>
-                  <p className="mt-3 text-sm leading-6 text-foreground/60">These opportunities begin with capability review and discussion; registration does not guarantee work or integration.</p>
-                  <div className="mt-6"><StepList items={role.collaborationOpportunities} /></div>
-                  <Link href={registrationHref} className="public-button public-button--primary mt-7">Register and discuss collaboration <FiArrowRight /></Link>
-                </article>
-              </div>
-              <div className="public-surface-card mt-8 rounded-[2rem] border border-default-200/70 bg-content1/35 p-8">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 text-success"><FiClipboard /></div>
-                <h2 className="text-3xl font-black">What to prepare for registration</h2>
-                <div className="mt-7 grid gap-x-10 gap-y-4 md:grid-cols-2"><StepList items={role.prerequisites} tone="green" /></div>
-              </div>
             </div>
           </section>
 
@@ -167,6 +132,7 @@ export default function AssociateRoleDetailPage({ params }: { params: Params }) 
                   <FiBriefcase className="mb-5 text-3xl text-orange-500" />
                   <h2 id="business-account-heading" className="text-2xl font-black">Register as an Associate</h2>
                   <p className="mt-4 leading-7 text-foreground/65">Choose this route when you are authorized to register the company and can provide its legal and operating details.</p>
+                  <Link href={registrationHref} className="public-button public-button--primary mt-6">Register as an Associate <FiArrowRight /></Link>
                 </div>
                 <div className="rounded-[2rem] border border-default-200/70 bg-background p-8">
                   <FiUsers className="mb-5 text-3xl text-foreground/50" />

@@ -1,6 +1,25 @@
 # Service Showcase Image Sources
 
-These images are real photography sourced from Wikimedia Commons or Government of India open data sources, then converted locally to `.webp` for the OBAOL homepage service showcase.
+The active `*-trade-v2.webp` homepage images are purpose-built project imagery generated with OpenAI's built-in image generation workflow on 2026-10-07. They depict a coherent sequence of professional Indian agro-trade operations and do not use third-party stock photography.
+
+Each source image was generated at a 4:5 portrait ratio, visually reviewed for operational credibility and safe working practices, then converted locally to WebP at 1120 × 1400. The compositions reserve clear areas for the service story's top status badge and bottom outcome panel.
+
+## Active generated set
+
+- `sourcing-trade-v2.webp` — commercial crop-lot inspection and tablet specification capture
+- `documentation-trade-v2.webp` — purchase-order, compliance, and shipment planning in a modern operations office
+- `procurement-trade-v2.webp` — weighed commodity-lot verification with an organized supplier
+- `quality-trade-v2.webp` — professional food laboratory testing with PPE and controlled samples
+- `packaging-trade-v2.webp` — hygienic sealing, weighing, packing, and pallet preparation
+- `logistics-trade-v2.webp` — controlled truck, forklift, and dispatch activity between warehouse and port
+- `warehouse-trade-v2.webp` — scanned inventory, palletized stock, marked aisles, and forklift handling
+- `freight-trade-v2.webp` — container-terminal coordination, vessel loading, and international movement
+
+The generated imagery intentionally contains no readable document text, brands, trademarks, or watermarks.
+
+## Legacy licensed files
+
+The older `*-india.webp` files remain in the repository for non-destructive history. Their original source records follow.
 
 ## Files
 

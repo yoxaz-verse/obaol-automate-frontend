@@ -43,6 +43,9 @@ test("every associate role satisfies the public content contract", () => {
       assert.ok(role[field].length >= 1, `${role.slug}: missing ${field}`);
       assert.ok(role[field].every((item) => item.trim().length > 12), `${role.slug}: weak ${field} item`);
     }
+    assert.equal(role.cardFeatures.length, 2, `${role.slug}: directory card must have exactly two features`);
+    assert.equal(new Set(role.cardFeatures).size, 2, `${role.slug}: directory card features must be unique`);
+    assert.ok(role.cardFeatures.every((item) => item.trim().length > 8), `${role.slug}: weak directory card feature`);
     assert.ok(Array.isArray(role.comingNext), `${role.slug}: missing comingNext`);
     const liveCapabilities = new Set(role.availableNow.map((item) => item.trim().toLowerCase()));
     assert.ok(role.comingNext.every((item) => !liveCapabilities.has(item.trim().toLowerCase())), `${role.slug}: capability cannot be both available and upcoming`);

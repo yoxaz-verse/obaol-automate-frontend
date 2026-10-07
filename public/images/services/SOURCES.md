@@ -1,6 +1,6 @@
-# Execution service photo sources
+# Legacy execution service photo sources
 
-All eight photographs are used under the [Pexels license](https://www.pexels.com/legal-pages/license). They were resized and compressed for the website; the original photographs remain available at the source pages below.
+These photographs are no longer used by the homepage service story. They remain available as legacy project assets under the [Pexels license](https://www.pexels.com/legal-pages/license); the original photographs remain available at the source pages below. The active generated image set is documented in `README.md`.
 
 | Service | Photographer | Source |
 | --- | --- | --- |

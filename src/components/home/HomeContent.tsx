@@ -10,6 +10,7 @@ import IndiaFirstNote from "@/components/seo/IndiaFirstNote";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
 import PerspectiveGateway from "@/components/home/PerspectiveGateway";
 import DeferredExecutionWorkspace from "@/components/home/DeferredExecutionWorkspace";
+import RecognitionStrip from "@/components/home/RecognitionStrip";
 
 const intentCards = [
     {
@@ -35,6 +36,7 @@ export default function HomeContent() {
         <>
             <Header />
             <HeroSection />
+            <RecognitionStrip />
             <DeferredServiceShowcase />
             <section id="capability-explorer" className="relative scroll-mt-28 py-12 md:scroll-mt-36 md:py-16 public-standard-section">
                 <div className="container mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-12 public-layout-container">

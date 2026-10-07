@@ -141,19 +141,33 @@ test("associate directory exposes participation paths, grouped roles, and role g
   }
   await expect(page.locator("[data-associate-group]")) .toHaveCount(4);
   await expect(page.locator('a[href^="/roles/associate/"]')).toHaveCount(15);
+  await expect(page.getByTestId("associate-role-card")).toHaveCount(15);
+  for (const card of await page.getByTestId("associate-role-card").all()) {
+    await expect(card.getByTestId("associate-card-features").locator("li")).toHaveCount(2);
+  }
+  await expect(page.getByTestId("associate-role-card").first().getByText("Available now", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "You represent a registered company" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "You are joining as an individual" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Register an Associate company/ })).toHaveAttribute("href", "/auth/register");
 
   await page.goto("/roles/associate/traders");
   await expect(page.getByRole("heading", { name: "Is this your business?" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "What your company is responsible for" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "How the workflow starts on OBAOL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What your company is responsible for" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "How the workflow starts on OBAOL" })).toHaveCount(0);
   await expect(page.getByText("Available now", { exact: true })).toBeVisible();
   await expect(page.getByText("Coming next", { exact: true })).toBeVisible();
   await expect(page.getByText("Collaborate with OBAOL", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "What to prepare for registration" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What to prepare for registration" })).toHaveCount(0);
+  const capabilitySections = page.getByTestId("associate-capability-sections").locator("article");
+  await expect(capabilitySections).toHaveCount(3);
+  await expect(capabilitySections.nth(0)).toContainText("Available now");
+  await expect(capabilitySections.nth(1)).toContainText("Coming next");
+  await expect(capabilitySections.nth(2)).toContainText("Collaborate with OBAOL");
+  const capabilityBox = await page.getByRole("heading", { name: "Features for Traders" }).boundingBox();
+  const qualificationBox = await page.getByRole("heading", { name: "Is this your business?" }).boundingBox();
+  expect(capabilityBox.y).toBeLessThan(qualificationBox.y);
   await expect(page.getByRole("link", { name: /Register and discuss collaboration/ })).toHaveAttribute("href", /intent=BOTH/);
+  await expect(page.getByRole("link", { name: "Register as an Associate" })).toHaveAttribute("href", /intent=BOTH.*prefill=Traders/);
   await expect(page.getByRole("link", { name: /Register your trading company/ }).first()).toHaveAttribute("href", /intent=BOTH/);
 });
 

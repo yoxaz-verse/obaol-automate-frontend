@@ -110,7 +110,7 @@ export default function AssociateRolePage() {
                       </div>
                       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {groupRoles.map((role) => (
-                          <Link key={role.slug} href={getAssociateRolePath(role.slug)} className="public-surface-card group flex h-full flex-col rounded-[1.75rem] border border-default-200/70 bg-content1/35 p-7 transition-all hover:-translate-y-1 hover:border-orange-500/40 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                          <Link key={role.slug} href={getAssociateRolePath(role.slug)} data-testid="associate-role-card" className="public-surface-card group flex h-full flex-col rounded-[1.75rem] border border-default-200/70 bg-content1/35 p-7 transition-all hover:-translate-y-1 hover:border-orange-500/40 focus:outline-none focus:ring-2 focus:ring-orange-500">
                             <div className="mb-6 flex items-start justify-between gap-4">
                               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 transition-colors group-hover:bg-orange-500 group-hover:text-white">{iconByRoleKey[role.iconKey]}</div>
                               <div className="flex flex-wrap justify-end gap-1.5">
@@ -119,17 +119,14 @@ export default function AssociateRolePage() {
                             </div>
                             <h4 className="text-xl font-bold">{role.displayName}</h4>
                             <p className="mt-3 text-sm leading-6 text-foreground/65">{role.shortDescription}</p>
-                            <div className="mt-4 flex flex-wrap gap-2" aria-label={`${role.displayName} capability status`}>
-                              <span className="rounded-full bg-success/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-success">Available now</span>
-                              {role.comingNext.length > 0 && <span className="rounded-full bg-orange-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-orange-500">Coming next</span>}
-                              {role.collaborationOpportunities.length > 0 && <span className="rounded-full bg-secondary/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-secondary">Collaboration</span>}
-                            </div>
-                            <p className="mt-3 text-xs leading-5 text-foreground/55">Available now: {role.availableNow[0]}</p>
+                            <ul className="mt-5 space-y-2" data-testid="associate-card-features" aria-label={`${role.displayName} features`}>
+                              {role.cardFeatures.map((feature) => <li key={feature} className="flex items-start gap-2 text-sm leading-6 text-foreground/70"><FiCheckCircle className="mt-1 shrink-0 text-success" />{feature}</li>)}
+                            </ul>
                             <div className="mt-5 rounded-2xl bg-background/70 p-4">
                               <p className="text-[10px] font-black uppercase tracking-widest text-orange-500">Best for</p>
                               <p className="mt-2 text-sm leading-6 text-foreground/70">{role.bestFor}</p>
                             </div>
-                            <div className="mt-auto flex items-center gap-2 pt-6 text-xs font-black uppercase tracking-wider text-orange-500">See if your company qualifies <FiArrowRight className="transition-transform group-hover:translate-x-1" /></div>
+                            <div className="mt-auto flex items-center gap-2 pt-6 text-xs font-black uppercase tracking-wider text-orange-500">View features for {role.displayName} <FiArrowRight className="transition-transform group-hover:translate-x-1" /></div>
                           </Link>
                         ))}
                       </div>

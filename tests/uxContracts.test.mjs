@@ -119,6 +119,8 @@ test("homepage services use an eight-chapter scroll story without autoplay", () 
   const services = read("../src/components/home/ServiceShowcase.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const chapterIds = [...services.matchAll(/\{ id: "([^"]+)", title:/g)].map((match) => match[1]);
+  const imagePaths = [...services.matchAll(/image: "([^"]+-trade-v2\.webp)"/g)].map((match) => match[1]);
+  const imageAlts = [...services.matchAll(/imageAlt: "([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(chapterIds, [
     "sourcing", "documentation", "procurement", "quality",
@@ -138,6 +140,15 @@ test("homepage services use an eight-chapter scroll story without autoplay", () 
   assert.equal(services.includes("onActivate"), false);
   assert.equal(services.includes("setInterval"), false);
   assert.equal(services.includes("images.pexels.com"), false);
+  assert.equal(imagePaths.length, 8);
+  assert.equal(new Set(imagePaths).size, 8);
+  assert.equal(imagePaths.every((imagePath) => imagePath.startsWith("/images/services/")), true);
+  assert.equal(imageAlts.length, 8);
+  assert.equal(imageAlts.every((alt) => alt.length >= 60), true);
+  for (const imagePath of imagePaths) {
+    const assetUrl = new URL(`../public${imagePath}`, import.meta.url);
+    assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
+  }
   assert.equal(homeContent.indexOf("<DeferredServiceShowcase />") < homeContent.indexOf('<section id="capability-explorer"'), true);
   assert.equal(homeContent.indexOf('<section id="capability-explorer"') < homeContent.indexOf("<PerspectiveGateway />"), true);
 });

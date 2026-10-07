@@ -39,11 +39,29 @@ test("every associate role satisfies the public content contract", () => {
       assert.ok(role[field].length >= 3, `${role.slug}: incomplete ${field}`);
       assert.ok(role[field].every((item) => item.trim().length > 8), `${role.slug}: weak ${field} item`);
     }
+    for (const field of ["availableNow", "collaborationOpportunities"]) {
+      assert.ok(role[field].length >= 1, `${role.slug}: missing ${field}`);
+      assert.ok(role[field].every((item) => item.trim().length > 12), `${role.slug}: weak ${field} item`);
+    }
+    assert.ok(Array.isArray(role.comingNext), `${role.slug}: missing comingNext`);
+    const liveCapabilities = new Set(role.availableNow.map((item) => item.trim().toLowerCase()));
+    assert.ok(role.comingNext.every((item) => !liveCapabilities.has(item.trim().toLowerCase())), `${role.slug}: capability cannot be both available and upcoming`);
     assert.ok(role.faqs.length >= 2, `${role.slug}: missing FAQs`);
     assert.ok(role.seo.title && role.seo.description && role.seo.keywords.length >= 3, `${role.slug}: incomplete SEO`);
     assert.ok(role.relatedRoles.length >= 3, `${role.slug}: missing related roles`);
     assert.ok(role.relatedRoles.every((slug) => slug !== role.slug && getAssociateRoleBySlug(slug)), `${role.slug}: invalid related role`);
   }
+});
+
+test("associate capability statuses identify representative live, upcoming, and collaborative work", () => {
+  assert.match(getAssociateRoleBySlug("traders").availableNow.join(" "), /catalogue|enquir/i);
+  assert.match(getAssociateRoleBySlug("importers").comingNext.join(" "), /booking|reservation/i);
+  assert.match(getAssociateRoleBySlug("warehouse-owners").comingNext.join(" "), /automated warehouse|booking/i);
+  assert.match(getAssociateRoleBySlug("inland-transportation").availableNow.join(" "), /bid/i);
+  assert.match(getAssociateRoleBySlug("quality-testing-labs").availableNow.join(" "), /sample|testing/i);
+  assert.match(getAssociateRoleBySlug("finance-partners").collaborationOpportunities.join(" "), /diligence|approval/i);
+  assert.match(getAssociateRoleBySlug("insurance-partners").collaborationOpportunities.join(" "), /underwriting|policy/i);
+  assert.match(getAssociateRoleBySlug("agritech-companies").collaborationOpportunities.join(" "), /pre-trade|traceability|technology/i);
 });
 
 test("functional groups contain every role exactly once in the intended order", () => {

@@ -119,6 +119,12 @@ export default function AssociateRolePage() {
                             </div>
                             <h4 className="text-xl font-bold">{role.displayName}</h4>
                             <p className="mt-3 text-sm leading-6 text-foreground/65">{role.shortDescription}</p>
+                            <div className="mt-4 flex flex-wrap gap-2" aria-label={`${role.displayName} capability status`}>
+                              <span className="rounded-full bg-success/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-success">Available now</span>
+                              {role.comingNext.length > 0 && <span className="rounded-full bg-orange-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-orange-500">Coming next</span>}
+                              {role.collaborationOpportunities.length > 0 && <span className="rounded-full bg-secondary/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-secondary">Collaboration</span>}
+                            </div>
+                            <p className="mt-3 text-xs leading-5 text-foreground/55">Available now: {role.availableNow[0]}</p>
                             <div className="mt-5 rounded-2xl bg-background/70 p-4">
                               <p className="text-[10px] font-black uppercase tracking-widest text-orange-500">Best for</p>
                               <p className="mt-2 text-sm leading-6 text-foreground/70">{role.bestFor}</p>

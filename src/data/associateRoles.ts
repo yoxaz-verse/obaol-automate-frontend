@@ -16,6 +16,9 @@ export interface AssociateRoleDefinition {
   responsibilities: string[];
   workflow: string[];
   platformBenefits: string[];
+  availableNow: string[];
+  comingNext: string[];
+  collaborationOpportunities: string[];
   prerequisites: string[];
   ctaLabel: string;
   registrationIntent: AssociateParticipationMode;
@@ -34,7 +37,9 @@ export const associateRoleGroups: Array<{ key: AssociateRoleGroup; label: string
 const companyPrerequisites = ["Legal company name and business contact details", "Registered office and applicable tax or legal ID", "Accurate operating locations and capabilities", "An authorized representative who can act for the company"];
 const servicePrerequisites = ["Registered company and operating address", "Accurate service capabilities and operating locations", "Applicable licenses, registrations, or credentials", "Authorized commercial and operational contacts"];
 
-const roles: AssociateRoleDefinition[] = [
+type AssociateRoleBase = Omit<AssociateRoleDefinition, "availableNow" | "comingNext" | "collaborationOpportunities">;
+
+const roles: AssociateRoleBase[] = [
   {
     slug: "traders", displayName: "Traders", group: "trade", participationModes: ["BUY", "SELL", "BOTH"], iconKey: "trader",
     shortDescription: "Buy and sell commodities through one accountable execution workflow.",
@@ -247,7 +252,88 @@ const roles: AssociateRoleDefinition[] = [
   },
 ];
 
-export const associateRoleDefinitions: AssociateRoleDefinition[] = roles;
+const capabilityStatusBySlug: Record<string, Pick<AssociateRoleDefinition, "availableNow" | "comingNext" | "collaborationOpportunities">> = {
+  traders: {
+    availableNow: ["Browse the product catalogue and use suitable listed products in your own buyer or supplier conversations", "Raise buying enquiries or respond to selling opportunities while keeping the trade linked to your company", "Request samples and coordinate the selected trade through its execution milestones"],
+    comingNext: ["Broader automation for matching trader demand with suitable verified supply"],
+    collaborationOpportunities: ["Work with OBAOL operators on buyer discovery, supplier coordination, and repeat trading programmes"],
+  },
+  importers: {
+    availableNow: ["Use the importer workspace to record incoming products, shipment details, and expected arrival context", "Create sourcing enquiries, review catalogue supply, and request samples before confirming a purchase", "Coordinate freight, customs, warehouse, and destination-side milestones in the connected workflow"],
+    comingNext: ["Automated advance booking and reservation against incoming inventory"],
+    collaborationOpportunities: ["Discuss recurring import programmes, destination distribution, and new importer-service workflows with OBAOL"],
+  },
+  exporters: {
+    availableNow: ["Browse export-suitable commodity listings, including organic and other differentiated products", "Respond to genuine buyer enquiries and request or coordinate samples before commercial confirmation", "Track quality, packaging, documents, freight, and shipment activity around the trade"],
+    comingNext: ["Expanded international buyer matching and export-market discovery automation"],
+    collaborationOpportunities: ["Work with OBAOL on buyer discovery and export programmes for products that meet the required quality and documentation standards"],
+  },
+  suppliers: {
+    availableNow: ["List products and maintain the product, origin, quantity, and company information buyers need", "Respond to relevant enquiries and manage sample requests linked to interested buyers", "Coordinate quality, packaging, dispatch, and other fulfilment milestones after confirmation"],
+    comingNext: ["More automated promotion of qualified supply to matching buyer requirements"],
+    collaborationOpportunities: ["Ask OBAOL to review differentiated supply for buyer-discovery and managed selling initiatives"],
+  },
+  "procurement-partners": {
+    availableNow: ["Record the company’s sourcing capabilities and create structured procurement enquiries", "Review supplier responses, samples, and supporting product information", "Coordinate selected supply with quality, packaging, logistics, and other execution providers"],
+    comingNext: ["Location-aware assignment of suitable on-ground procurement work"],
+    collaborationOpportunities: ["Build managed procurement programmes with OBAOL for specific commodities, origins, or recurring requirements"],
+  },
+  "warehouse-owners": {
+    availableNow: ["List warehouse locations, facility details, storage capabilities, and contact information", "Become discoverable to companies looking for storage near an origin, port, or destination", "Coordinate rental requirements directly with interested businesses"],
+    comingNext: ["Automated warehouse availability, pricing, and in-platform booking"],
+    collaborationOpportunities: ["Work with OBAOL to onboard facility data and design connected storage and handling workflows"],
+  },
+  "inland-transportation": {
+    availableNow: ["Register route coverage, vehicle capabilities, and operating locations", "Review matched execution opportunities and submit service bids", "Coordinate awarded pickup, transit, delivery, and exception milestones"],
+    comingNext: ["Richer live movement tracking and automated route-capacity matching"],
+    collaborationOpportunities: ["Discuss recurring first-mile, port, warehouse, and last-mile transport programmes with OBAOL"],
+  },
+  "freight-forwarders": {
+    availableNow: ["Publish supported lanes, transport modes, cargo capabilities, and service locations", "Review matched international freight requirements and submit bids through the execution panel", "Coordinate bookings, shipment milestones, documents, and partner handoffs for awarded work"],
+    comingNext: ["Deeper carrier schedule, rate, and shipment-tracking integrations"],
+    collaborationOpportunities: ["Partner with OBAOL on priority lanes, recurring shipments, and connected freight operations"],
+  },
+  "logistics-providers": {
+    availableNow: ["Register the company’s genuine logistics functions, service areas, and operating locations", "Review capability-matched execution requirements and submit bids", "Manage accepted multi-leg work, handoffs, milestones, and exceptions"],
+    comingNext: ["Expanded orchestration and tracking across multi-provider logistics plans"],
+    collaborationOpportunities: ["Design integrated logistics programmes with OBAOL for repeat commodity movements"],
+  },
+  "packaging-companies": {
+    availableNow: ["Register packaging formats, materials, facilities, and operating locations", "Review packaging requirements linked to active execution and submit a service bid", "Coordinate accepted packing, readiness, and warehouse or transport handoffs"],
+    comingNext: ["More detailed packaging specification templates and capacity matching"],
+    collaborationOpportunities: ["Work with OBAOL on commodity-specific, export-ready, or sustainable packaging programmes"],
+  },
+  "quality-testing-labs": {
+    availableNow: ["List laboratory locations, supported tests, accreditations, and accepted commodities", "Review matched sampling or quality requirements through the execution workflow", "Coordinate sample receipt, testing progress, reports, and quality milestones"],
+    comingNext: ["Expanded structured result exchange and laboratory-system integrations"],
+    collaborationOpportunities: ["Collaborate with OBAOL on testing panels, new quality protocols, and digitally connected reports"],
+  },
+  "customs-clearance-agencies": {
+    availableNow: ["Register supported ports, jurisdictions, clearance services, and company credentials", "Review matched clearance requirements and participate through execution bidding", "Coordinate filings, document status, customs progress, and release handoffs for awarded work"],
+    comingNext: ["Deeper customs-status automation and structured filing integrations"],
+    collaborationOpportunities: ["Work with OBAOL on repeat import or export clearance programmes and port-specific operating flows"],
+  },
+  "finance-partners": {
+    availableNow: ["Register the finance company, supported markets, and trade-finance capabilities", "Review eligible execution-linked requirements with the available trade context", "Coordinate authorized documents and provider-led diligence around a potential transaction"],
+    comingNext: ["Broader finance-opportunity routing and structured decision-status workflows"],
+    collaborationOpportunities: ["Develop trade-specific finance programmes with OBAOL, subject to independent diligence, pricing, and approval"],
+  },
+  "insurance-partners": {
+    availableNow: ["Register supported insurance products, markets, and cargo or trade-risk capabilities", "Review suitable coverage requirements in the context of an active trade or shipment", "Coordinate assessment and policy documentation under the provider’s own process"],
+    comingNext: ["Broader automated routing of eligible trades to suitable coverage providers"],
+    collaborationOpportunities: ["Develop cargo or trade-risk coverage programmes with OBAOL, subject to underwriting and policy terms"],
+  },
+  "agritech-companies": {
+    availableNow: ["Register a specific agritech capability and the commodities, markets, and locations it supports", "Present relevant preparation, testing, traceability, quality, or execution services", "Review aligned service requirements and coordinate agreed delivery within a trade workflow"],
+    comingNext: ["Deeper data exchange and platform integrations for approved agritech capabilities"],
+    collaborationOpportunities: ["Pilot pre-trade, in-trade, or post-trade technology with OBAOL to improve preparation, quality, traceability, or execution"],
+  },
+};
+
+export const associateRoleDefinitions: AssociateRoleDefinition[] = roles.map((role) => ({
+  ...role,
+  ...capabilityStatusBySlug[role.slug],
+}));
 export const associateRoleSlugs = associateRoleDefinitions.map((role) => role.slug);
 export const getAssociateRolePath = (slug: string) => `/roles/associate/${slug}`;
 export const getAssociateRoleBySlug = (slug: string) => associateRoleDefinitions.find((role) => role.slug === slug);

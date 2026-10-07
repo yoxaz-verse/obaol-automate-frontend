@@ -149,7 +149,11 @@ test("associate directory exposes participation paths, grouped roles, and role g
   await expect(page.getByRole("heading", { name: "Is this your business?" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What your company is responsible for" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How the workflow starts on OBAOL" })).toBeVisible();
+  await expect(page.getByText("Available now", { exact: true })).toBeVisible();
+  await expect(page.getByText("Coming next", { exact: true })).toBeVisible();
+  await expect(page.getByText("Collaborate with OBAOL", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What to prepare for registration" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Register and discuss collaboration/ })).toHaveAttribute("href", /intent=BOTH/);
   await expect(page.getByRole("link", { name: /Register your trading company/ }).first()).toHaveAttribute("href", /intent=BOTH/);
 });
 

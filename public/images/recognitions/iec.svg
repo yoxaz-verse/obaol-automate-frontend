@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 60" fill="none">
+  <!-- Global Trade & DGFT Emblem -->
+  <g transform="translate(6, 6)">
+    <circle cx="24" cy="24" r="20" fill="none" stroke="#002B49" stroke-width="2.5"/>
+    <ellipse cx="24" cy="24" rx="20" ry="9" fill="none" stroke="#00AEEF" stroke-width="1.5"/>
+    <ellipse cx="24" cy="24" rx="9" ry="20" fill="none" stroke="#00AEEF" stroke-width="1.5"/>
+    <line x1="4" y1="24" x2="44" y2="24" stroke="#002B49" stroke-width="2"/>
+    <line x1="24" y1="4" x2="24" y2="44" stroke="#002B49" stroke-width="2"/>
+    <path d="M38 12 L44 12 L44 18 M44 12 L30 26" stroke="#FF9933" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10 36 L4 36 L4 30 M4 36 L18 22" stroke="#138808" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- IEC Typography -->
+  <g transform="translate(58, 0)">
+    <text x="0" y="30" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" letter-spacing="0.5" fill="#002B49">IEC</text>
+    <text x="0" y="46" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.4" fill="#64748B">IMPORT EXPORT CODE | DGFT INDIA</text>
+  </g>
+</svg>

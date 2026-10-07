@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  <!-- KSUM Origami Blocks Mark -->
+  <g transform="translate(4, 8)">
+    <path d="M22 6 L34 13 L34 27 L22 20 Z" fill="#00AEEF"/>
+    <path d="M22 20 L34 27 L22 34 L10 27 Z" fill="#0072BC"/>
+    <path d="M10 13 L22 20 L10 27 L-2 20 Z" fill="#2B3990" transform="translate(6, 0)"/>
+    <path d="M22 34 L34 27 L34 41 L22 48 Z" fill="#00AEEF"/>
+    <path d="M10 27 L22 34 L22 48 L10 41 Z" fill="#005B94"/>
+    <path d="M22 6 L10 13 L22 20 L34 13 Z" fill="#39B54A"/>
+  </g>
+  <!-- KSUM Typography -->
+  <g transform="translate(54, 0)">
+    <text x="0" y="29" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="-0.5" fill="#00AEEF">kerala<tspan fill="#0072BC"> startup</tspan></text>
+    <text x="0" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="10" letter-spacing="2" fill="#64748B">MISSION</text>
+  </g>
+</svg>

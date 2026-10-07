@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <!-- Startup India Dynamic Tricolor Wings -->
+  <g transform="translate(4, 6)">
+    <path d="M6 16 C14 4, 30 0, 42 4 C32 10, 22 13, 13 23 Z" fill="#FF9933"/>
+    <path d="M3 25 C12 14, 32 9, 46 14 C35 19, 22 23, 11 32 Z" fill="#002B49"/>
+    <path d="M0 34 C9 23, 31 18, 48 24 C36 28, 20 32, 7 43 Z" fill="#138808"/>
+  </g>
+  <!-- Startup India Typography -->
+  <g transform="translate(56, 0)">
+    <text x="0" y="30" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="-0.5" fill="#002B49">Startup<tspan fill="#FF9933"> </tspan><tspan fill="#138808">India</tspan></text>
+    <text x="0" y="46" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="8.5" letter-spacing="1.2" fill="#64748B">#STARTUPINDIA | DPIIT RECOGNIZED</text>
+  </g>
+</svg>

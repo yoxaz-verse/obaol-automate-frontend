@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 60" fill="none">
+  <!-- GeM Tricolor Ribbon Icon -->
+  <g transform="translate(6, 8)">
+    <rect x="0" y="8" width="36" height="28" rx="6" fill="#0B2545"/>
+    <path d="M10 22 L16 28 L27 15" fill="none" stroke="#F26522" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="27" cy="15" r="2.5" fill="#138808"/>
+  </g>
+  <!-- GeM Typography -->
+  <g transform="translate(52, 0)">
+    <text x="0" y="32" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-0.5">
+      <tspan fill="#0B2545">G</tspan>
+      <tspan fill="#F26522">e</tspan>
+      <tspan fill="#0B2545">M</tspan>
+    </text>
+    <text x="0" y="46" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.5" fill="#64748B">GOVERNMENT e MARKETPLACE</text>
+  </g>
+</svg>

@@ -97,10 +97,12 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
-  assert.equal(explorer.includes('data-execution-route="true"'), true);
+  assert.equal(explorer.includes('data-execution-route="stepped"'), true);
+  assert.equal(explorer.includes('M55 310 H245 L315 230 H515 L635 150 H835 L915 70 H955'), true);
   assert.equal(explorer.includes("crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery"), true);
-  assert.equal(explorer.includes("dark:sm:border-obaol-300/55"), true);
-  assert.equal(explorer.includes("dark:xl:border-white/20"), true);
+  assert.equal(explorer.includes("animate-ping"), false);
+  assert.equal(explorer.includes("group-hover:scale"), false);
+  assert.equal(explorer.includes("dark:text-white"), true);
   assert.equal(explorer.includes('xl:w-[calc(100%+((100vw-80rem)/2)+3rem)]'), true);
   assert.equal(explorer.includes('aria-label="OBAOL\'s ten-stage execution flow"'), true);
   assert.equal(explorer.includes('role="tablist"'), false);

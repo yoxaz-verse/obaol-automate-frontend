@@ -1,6 +1,6 @@
 "use client";
 
-import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity } from "react-icons/lu";
+import { LuUser, LuPlus, LuLayoutDashboard, LuUsers, LuBuilding, LuActivity, LuCheck, LuChevronUp, LuChevronDown, LuGlobe, LuMapPin, LuMail, LuPhone, LuPackage, LuClipboardList, LuArrowUpRight } from "react-icons/lu";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,26 +25,13 @@ import { apiRoutes } from "@/core/api/apiRoutes";
 import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
 import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
+import { fetchRegisterOptions } from "@/utils/registerOptions";
 
 
-const INTEREST_OPTIONS = [
-  "PROCUREMENT",
-  "CERTIFICATION",
-  "TRANSPORTATION",
-  "SHIPPING",
-  "PACKAGING",
-  "QUALITY_TESTING",
-  "OCEAN_FREIGHT",
-  "AIR_FREIGHT",
-  "INLAND_TRANSPORTATION",
-  "SEA_FREIGHT_FORWARDING",
-  "AIR_FREIGHT_FORWARDING",
-  "CUSTOMS_CLEARANCE",
-  "INLAND_TRANSPORT",
-  "WAREHOUSING",
-  "CONSOLIDATION_LCL",
-  "PROJECT_CARGO",
-];
+const MAIN_CATEGORY_SLUGS = new Set([
+  "sourcing", "packaging", "testing", "warehouse-storage", "finance-risk",
+  "importing-distribution", "freight-forwarding", "inland-logistics",
+]);
 
 const REPORT_REASONS = [
   { key: "INACTIVE_MEMBER", label: "Inactive Member" },
@@ -105,7 +92,8 @@ export default function CompanyWorkspacePage() {
   const [reasonCode, setReasonCode] = useState("INACTIVE_MEMBER");
   const [description, setDescription] = useState("");
   const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
-  const [requestedInterests, setRequestedInterests] = useState<string[]>([]);
+  const [requestedFunctionIds, setRequestedFunctionIds] = useState<string[]>([]);
+  const [requestedFunctionPriorities, setRequestedFunctionPriorities] = useState<string[]>([]);
   const [interestNote, setInterestNote] = useState("");
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [recentInterestSubmission, setRecentInterestSubmission] = useState<{
@@ -159,6 +147,22 @@ export default function CompanyWorkspacePage() {
     queryFn: async () => {
       const response = await getData("/auth/company-interests/status");
       return response?.data?.data || null;
+    },
+    enabled: isAssociate && Boolean(associateCompanyId),
+  });
+
+  const registerOptionsQuery = useQuery({
+    queryKey: ["company-workspace-capability-options"],
+    queryFn: fetchRegisterOptions,
+    enabled: isAssociate,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const companyStatsQuery = useQuery({
+    queryKey: ["company-workspace-stats", associateCompanyId],
+    queryFn: async () => {
+      const response = await getData(`/api/v1/web/associate-companies/${associateCompanyId}/stats`);
+      return response?.data?.meta?.company || {};
     },
     enabled: isAssociate && Boolean(associateCompanyId),
   });
@@ -262,13 +266,15 @@ export default function CompanyWorkspacePage() {
 
   const interestRequestMutation = useMutation({
     mutationFn: async () => {
-      if (!requestedInterests.length) throw new Error("Select at least one interest.");
+      if (!requestedFunctionIds.length) throw new Error("Select at least one company category.");
       const response = await postData(apiRoutes.organizationReports.create, {
         targetAssociateId: user?.id,
         reasonCode: "COMPANY_INTEREST_UPDATE",
         description: interestNote.trim() || "Company interest update request from My Company.",
         payload: {
-          requestedInterests,
+          requestedCompanyFunctionIds: requestedFunctionIds,
+          requestedCompanyFunctionPriorities: requestedFunctionPriorities,
+          note: interestNote.trim(),
         },
       });
       if (!response?.data?.success) {
@@ -277,23 +283,24 @@ export default function CompanyWorkspacePage() {
       return response?.data?.data || null;
     },
     onSuccess: (createdReport: any) => {
-      const submittedInterests = [...requestedInterests];
+      const submittedInterests = [...requestedFunctionIds];
       showToastMessage({
         type: "success",
         message:
-          "Interest update request submitted. Previous pending/under-review requests were auto-cancelled.",
+          "Company capability update submitted for admin approval.",
         position: "top-right",
       });
       setRecentInterestSubmission({
         requestedInterests:
-          Array.isArray(createdReport?.payload?.requestedInterests) && createdReport.payload.requestedInterests.length
-            ? createdReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase())
+          Array.isArray(createdReport?.payload?.requestedCompanyFunctionIds) && createdReport.payload.requestedCompanyFunctionIds.length
+            ? createdReport.payload.requestedCompanyFunctionIds.map((value: any) => String(value || ""))
             : submittedInterests,
         createdAt: String(createdReport?.createdAt || new Date().toISOString()),
         syncing: !Boolean(createdReport?._id),
       });
       setIsInterestModalOpen(false);
-      setRequestedInterests([]);
+      setRequestedFunctionIds([]);
+      setRequestedFunctionPriorities([]);
       setInterestNote("");
       queryClient.invalidateQueries({ queryKey: ["company-workspace-reports"] });
     },
@@ -340,12 +347,32 @@ export default function CompanyWorkspacePage() {
     [obaolCompanyDirectoryQuery.data]
   );
   const interestsFromStatus = Array.isArray(interestsQuery.data?.companyInterests)
-    ? interestsQuery.data.companyInterests.map((value: any) => String(value || "").toUpperCase())
+    ? interestsQuery.data.companyInterests.map((value: any) => String(value || ""))
     : [];
   const interestsFromCompany = Array.isArray((company as any)?.serviceCapabilities)
     ? (company as any).serviceCapabilities.map((value: any) => String(value || "").toUpperCase())
     : [];
   const companyInterests = interestsFromStatus.length ? interestsFromStatus : interestsFromCompany;
+  const capabilityOptions = useMemo(
+    () => (Array.isArray(registerOptionsQuery.data?.companyFunctions) ? registerOptionsQuery.data.companyFunctions : [])
+      .filter((item: any) => MAIN_CATEGORY_SLUGS.has(String(item?.slug || "")))
+      .sort((a: any, b: any) => Number(a?.orderIndex || 0) - Number(b?.orderIndex || 0)),
+    [registerOptionsQuery.data]
+  );
+  const capabilityById = useMemo(
+    () => new Map(capabilityOptions.map((item: any) => [String(item?._id || ""), item])),
+    [capabilityOptions]
+  );
+  const capabilityBySlug = useMemo(
+    () => new Map(capabilityOptions.map((item: any) => [String(item?.slug || "").toLowerCase(), item])),
+    [capabilityOptions]
+  );
+  const approvedFunctionIds = Array.isArray(interestsQuery.data?.approvedCompanyFunctionIds)
+    ? interestsQuery.data.approvedCompanyFunctionIds.map((value: any) => String(value))
+    : companyInterests.map((slug: string) => String(capabilityBySlug.get(String(slug).toLowerCase())?._id || "")).filter(Boolean);
+  const approvedPriorityIds = Array.isArray(interestsQuery.data?.approvedCompanyFunctionPriorities)
+    ? interestsQuery.data.approvedCompanyFunctionPriorities.map((value: any) => String(value))
+    : [];
   const interestReports = useMemo(
     () => reports.filter((row: any) => String(row?.reasonCode || "").toUpperCase() === "COMPANY_INTEREST_UPDATE"),
     [reports]
@@ -418,6 +445,45 @@ export default function CompanyWorkspacePage() {
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
+  const stats = companyStatsQuery.data || {};
+  const profileChecks = [
+    { label: "Company identity", complete: Boolean(company?.name && company?.companyType) },
+    { label: "Contact details", complete: Boolean(company?.email && company?.phone) },
+    { label: "Location", complete: Boolean(company?.address || company?.location?.label) },
+    { label: "Company story", complete: Boolean(company?.description || company?.aboutUs) },
+    { label: "Brand assets", complete: Boolean(company?.logo || company?.banner) },
+    { label: "Website", complete: Boolean(company?.website || previewUrl) },
+    { label: "Capabilities", complete: approvedFunctionIds.length > 0 },
+    { label: "Team", complete: members.length > 0 },
+  ];
+  const profileCompleteness = Math.round((profileChecks.filter((item) => item.complete).length / profileChecks.length) * 100);
+  const openCapabilityEditor = () => {
+    setRequestedFunctionIds(approvedFunctionIds);
+    setRequestedFunctionPriorities(approvedPriorityIds.filter((id: string) => approvedFunctionIds.includes(id)).slice(0, 3));
+    setInterestNote("");
+    setIsInterestModalOpen(true);
+  };
+  const toggleRequestedFunction = (id: string) => {
+    setRequestedFunctionIds((current) => {
+      if (current.includes(id)) {
+        setRequestedFunctionPriorities((priorities) => priorities.filter((item) => item !== id));
+        return current.filter((item) => item !== id);
+      }
+      if (current.length >= 6) return current;
+      setRequestedFunctionPriorities((priorities) => priorities.length < 3 ? [...priorities, id] : priorities);
+      return [...current, id];
+    });
+  };
+  const moveRequestedPriority = (id: string, direction: -1 | 1) => {
+    setRequestedFunctionPriorities((current) => {
+      const index = current.indexOf(id);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
   const operatorAssignedCompanies = useMemo(
     () => (Array.isArray(operatorAssignedCompaniesQuery.data) ? operatorAssignedCompaniesQuery.data : []),
     [operatorAssignedCompaniesQuery.data]

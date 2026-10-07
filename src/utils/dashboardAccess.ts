@@ -77,11 +77,11 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/commercial-documents/new", label: "New quotation or invoice", section: "Trade", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
   { path: "/dashboard/commercial-documents/:id", label: "Quotation or invoice", section: "Trade", roles: ["associate"], tradeModes: ALL_ASSOCIATE_MODES, breadcrumbParent: "/dashboard/commercial-documents", journeyStage: "execute", requiredApprovalStates: ["APPROVED"] },
 
-  { path: "/dashboard/imports", label: "Imports", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["PROCUREMENT", "IMPORTING_DISTRIBUTION"] },
+  { path: "/dashboard/imports", label: "Imports", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["SOURCING", "IMPORTING_DISTRIBUTION"] },
   { path: "/dashboard/external-orders", label: "External Orders", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/external-orders/new", label: "New external order", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
   { path: "/dashboard/execution-enquiries", label: "Execution Panel", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
-  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["WAREHOUSING"], interestVisibility: "non-admin" },
+  { path: "/dashboard/warehouse-rent", label: "Warehouse Booking", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, requiredInterests: ["WAREHOUSE_STORAGE"], interestVisibility: "non-admin" },
   { path: "/dashboard/quality-labs", label: "Quality Labs", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true },
   { path: "/dashboard/quality-labs/location", label: "Quality lab location", section: "Services", roles: ["admin", "associate", "operator", "team"], tradeModes: ALL_ASSOCIATE_MODES },
 
@@ -256,7 +256,13 @@ export const getAccessibleDashboardRoutes = ({
   tradeMode?: unknown;
   companyInterests?: string[];
 }) => {
-  const normalizedInterests = new Set(companyInterests.map((item) => String(item || "").toUpperCase()));
+  const normalizeInterest = (item: unknown) => {
+    const token = String(item || "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+    if (["WAREHOUSING", "WAREHOUSE"].includes(token)) return "WAREHOUSE_STORAGE";
+    if (["PROCUREMENT", "PROCUREMENT_PARTNER"].includes(token)) return "SOURCING";
+    return token;
+  };
+  const normalizedInterests = new Set(companyInterests.map(normalizeInterest));
   return DASHBOARD_ROUTE_MANIFEST.filter((route) => {
     if (!route.nav || !canAccessDashboardRoute({ path: route.path, role, tradeMode })) return false;
     if (route.hiddenFromAssociateNav && normalizeDashboardRole(role) === "associate") return false;

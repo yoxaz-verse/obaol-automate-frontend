@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type RefCallback } from "react";
 import { FiCheckCircle, FiFileText, FiPackage, FiShoppingBag, FiTarget, FiTruck } from "react-icons/fi";
 import { FaShip, FaWarehouse } from "react-icons/fa6";
 import { homeTitleStyles } from "@/components/home/homeTitleStyles";
@@ -32,22 +31,11 @@ const services: readonly ServiceChapter[] = [
   { id: "freight", title: "Freight Forwarding", role: "International movement", description: "Freight forwarders coordinate customs, vessel planning, port documents, and shipment milestones through closing.", outcome: "Cargo cleared and moving to buyer", image: "/images/services/freight-india.webp", imageAlt: "Cargo containers being handled at an international port", imagePosition: "center 42%", icon: FaShip, accent: "#84cc16" },
 ] as const;
 
-function Chapter({ service, index, active, showInlineMedia, onActivate }: { service: ServiceChapter; index: number; active: boolean; showInlineMedia: boolean; onActivate: () => void }) {
-  const ref = useRef<HTMLElement>(null);
+function Chapter({ service, index, active, showInlineMedia, chapterRef }: { service: ServiceChapter; index: number; active: boolean; showInlineMedia: boolean; chapterRef: RefCallback<HTMLElement> }) {
   const Icon = service.icon;
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) onActivate();
-    }, { rootMargin: "-35% 0px -45%", threshold: 0 });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [onActivate]);
-
   return (
-    <article ref={ref} data-service-chapter={service.id} className={`relative ${showInlineMedia ? "" : "lg:flex lg:min-h-[62vh] lg:items-center"}`}>
+    <article ref={chapterRef} data-service-chapter={service.id} className={`relative ${showInlineMedia ? "" : "lg:flex lg:min-h-[72svh] lg:items-center"}`}>
       <div className={`relative border-l pl-7 transition-colors duration-500 lg:py-16 ${active ? "border-obaol-400" : "border-default-200"}`}>
         <span className={`absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full border-4 border-background transition-colors lg:top-[4.25rem] ${active ? "bg-obaol-400 shadow-[0_0_18px_rgba(207,152,60,0.75)]" : "bg-default-300"}`} />
         <div className="flex items-center gap-3">
@@ -74,11 +62,88 @@ function Chapter({ service, index, active, showInlineMedia, onActivate }: { serv
 export default function ServiceShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
   const adaptiveMotion = useAdaptiveMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const chapterNodesRef = useRef<Array<HTMLElement | null>>([]);
+  const chapterRefSetters = useMemo(
+    () => services.map((_, index): RefCallback<HTMLElement> => (node) => {
+      chapterNodesRef.current[index] = node;
+    }),
+    [],
+  );
   const active = services[activeIndex];
   const ActiveIcon = active.icon;
 
+  useEffect(() => {
+    if (adaptiveMotion.shouldReduceMotion) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let frameId = 0;
+    let isTracking = false;
+
+    const updateActiveChapter = () => {
+      frameId = 0;
+      const nodes = chapterNodesRef.current.filter((node): node is HTMLElement => node !== null);
+      if (nodes.length !== services.length) return;
+
+      const activationLine = window.innerHeight * 0.45;
+      const sectionRect = section.getBoundingClientRect();
+      let nextIndex = 0;
+
+      if (sectionRect.bottom <= activationLine) {
+        nextIndex = services.length - 1;
+      } else if (sectionRect.top < activationLine) {
+        let nearestDistance = Number.POSITIVE_INFINITY;
+        nodes.forEach((node, index) => {
+          const rect = node.getBoundingClientRect();
+          const distance = Math.abs(rect.top + rect.height / 2 - activationLine);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nextIndex = index;
+          }
+        });
+      }
+
+      setActiveIndex((current) => current === nextIndex ? current : nextIndex);
+    };
+
+    const scheduleUpdate = () => {
+      if (!isTracking || frameId) return;
+      frameId = window.requestAnimationFrame(updateActiveChapter);
+    };
+
+    const startTracking = () => {
+      if (isTracking) return;
+      isTracking = true;
+      window.addEventListener("scroll", scheduleUpdate, { passive: true });
+      window.addEventListener("resize", scheduleUpdate);
+      scheduleUpdate();
+    };
+
+    const stopTracking = () => {
+      if (!isTracking) return;
+      isTracking = false;
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (frameId) window.cancelAnimationFrame(frameId);
+      frameId = 0;
+    };
+
+    const sectionObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) startTracking();
+      else stopTracking();
+    }, { rootMargin: "100px 0px" });
+
+    sectionObserver.observe(section);
+    return () => {
+      sectionObserver.disconnect();
+      stopTracking();
+    };
+  }, [adaptiveMotion.shouldReduceMotion]);
+
   return (
-    <section data-service-story="true" aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
+    <section ref={sectionRef} data-service-story="true" aria-labelledby="service-story-title" className="relative overflow-clip border-y border-default-200/60 bg-background py-16 md:py-24 public-standard-section">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(207,152,60,0.12),transparent_28%)]" />
       <div className="container relative z-10 mx-auto max-w-6xl px-6 sm:px-12 xl:max-w-7xl public-layout-container">
         <div className={`grid gap-12 lg:gap-16 ${adaptiveMotion.shouldReduceMotion ? "" : "lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"}`}>
@@ -90,24 +155,27 @@ export default function ServiceShowcase() {
             </div>
             <div className="space-y-12 lg:space-y-0">
               {services.map((service, index) => (
-                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} showInlineMedia={adaptiveMotion.shouldReduceMotion} onActivate={() => setActiveIndex(index)} />
+                <Chapter key={service.id} service={service} index={index} active={index === activeIndex} showInlineMedia={adaptiveMotion.shouldReduceMotion} chapterRef={chapterRefSetters[index]} />
               ))}
             </div>
           </div>
 
           <div className={`relative ${adaptiveMotion.shouldReduceMotion ? "hidden" : "hidden lg:block"}`}>
-            <div className="sticky top-28 h-[calc(100vh-9rem)] min-h-[540px] max-h-[760px] overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-black shadow-[0_30px_90px_-45px_rgba(207,152,60,0.5)]">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={active.id} className="absolute inset-0" initial={adaptiveMotion.shouldReduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={adaptiveMotion.shouldReduceMotion ? undefined : { opacity: 0 }} transition={{ duration: adaptiveMotion.shouldReduceMotion ? 0 : 0.45 }}>
-                  <Image src={active.image} alt={active.imageAlt} fill sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: active.imagePosition }} />
+            <div data-active-service={active.id} className="sticky top-28 h-[calc(100svh-9rem)] min-h-[520px] max-h-[760px] overflow-hidden rounded-[2rem] border border-obaol-500/20 bg-black shadow-[0_30px_90px_-45px_rgba(207,152,60,0.5)]">
+              {services.map((service, index) => {
+                const isActive = index === activeIndex;
+                return (
+                <div key={service.id} aria-hidden={!isActive} className={`absolute inset-0 transition-opacity ease-out ${adaptiveMotion.shouldReduceMotion ? "duration-0" : "duration-200"} ${isActive ? "z-[1] opacity-100" : "z-0 opacity-0"}`}>
+                  <Image src={service.image} alt={isActive ? service.imageAlt : ""} aria-hidden={!isActive} fill priority={index === 0} sizes="(max-width: 1023px) 1px, 52vw" className="object-cover" style={{ objectPosition: service.imagePosition }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/15" />
-                </motion.div>
-              </AnimatePresence>
-              <div className="absolute inset-x-0 top-0 flex items-center justify-between p-7">
+                </div>
+                );
+              })}
+              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-7">
                 <span className="rounded-full border border-white/15 bg-black/55 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-md">Indian origin operations</span>
                 <span className="font-mono text-xs font-black text-white/60">{String(activeIndex + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
               </div>
-              <div className="absolute inset-x-7 bottom-7 rounded-[1.5rem] border border-white/12 bg-black/62 p-6 text-white backdrop-blur-lg">
+              <div className="absolute inset-x-7 bottom-7 z-10 rounded-[1.5rem] border border-white/12 bg-black/62 p-6 text-white backdrop-blur-lg">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-black" style={{ backgroundColor: active.accent }}><ActiveIcon size={20} /></span>
                   <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/45">Active chapter</p><p className="mt-1 text-2xl font-black">{active.title}</p></div>

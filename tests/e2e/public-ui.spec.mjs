@@ -26,6 +26,49 @@ for (const theme of ["light", "dark"]) {
   }
 }
 
+test("service scroll story keeps every chapter synchronized in both directions", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: (query) => {
+        if (query.includes("hover: none") || query.includes("pointer: coarse") || query.includes("update: slow")) {
+          return {
+            matches: false,
+            media: query,
+            onchange: null,
+            addEventListener() {},
+            removeEventListener() {},
+            addListener() {},
+            removeListener() {},
+            dispatchEvent() { return true; },
+          };
+        }
+        return nativeMatchMedia(query);
+      },
+    });
+  });
+  await page.goto("/");
+
+  const story = page.locator('[data-service-story="true"]');
+  await story.scrollIntoViewIfNeeded();
+  const panel = story.locator("[data-active-service]");
+  await expect(panel).toBeVisible();
+
+  const chapterIds = ["sourcing", "documentation", "procurement", "quality", "packaging", "logistics", "warehouse", "freight"];
+  const assertChapter = async (id) => {
+    await story.locator(`[data-service-chapter="${id}"]`).evaluate((element) => element.scrollIntoView({ block: "center" }));
+    await expect(panel).toHaveAttribute("data-active-service", id);
+  };
+
+  for (const id of chapterIds) await assertChapter(id);
+  for (const id of [...chapterIds].reverse()) await assertChapter(id);
+  await assertChapter("warehouse");
+  await assertChapter("documentation");
+});
+
 test("public navigation supports keyboard dismissal and private styling stays isolated", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 900 });
   await page.goto("/");

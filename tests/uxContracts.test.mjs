@@ -77,12 +77,14 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   const imagePaths = [...stagesBlock.matchAll(/src: "(\/images\/[^"]+)"/g)].map((match) => match[1]);
   const stageLabels = [...stagesBlock.matchAll(/label: "([^"]+)"/g)].map((match) => match[1]);
   const stageMessages = [...stagesBlock.matchAll(/message: "([^"]+)"/g)].map((match) => match[1]);
+  const stagePhases = [...stagesBlock.matchAll(/phase: "([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(stageLabels, [
     "Discovery", "Sampling", "Coordination", "Documentation", "Inspection Visit",
     "Quality Testing", "Packaging", "Procurement", "Inland Transport", "Freight Forwarding",
   ]);
   assert.equal(stageMessages.length, 10);
+  assert.deepEqual([...new Set(stagePhases)], ["Plan", "Verify", "Move", "Close"]);
   assert.equal(imagePaths.length, 10);
   assert.equal(new Set(imagePaths).size, 10);
   assert.equal(imagePaths.filter((path) => path.startsWith("/images/execution-flow/")).length, 9);
@@ -91,6 +93,9 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
+  assert.equal(explorer.includes("data-execution-phase={phase.name.toLowerCase()}"), true);
+  assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), true);
+  assert.equal(explorer.includes('xl:w-[calc(100%+((100vw-80rem)/2)+3rem)]'), true);
   assert.equal(explorer.includes('aria-label="OBAOL\'s ten-stage execution flow"'), true);
   assert.equal(explorer.includes('role="tablist"'), false);
   assert.equal(explorer.includes("setActiveIndex"), false);
@@ -107,6 +112,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-operations/port-operations-stock.webp", import.meta.url))), true);
 });
 
 test("homepage services use an eight-chapter scroll story without autoplay", () => {
@@ -120,8 +126,16 @@ test("homepage services use an eight-chapter scroll story without autoplay", () 
   ]);
   assert.equal(services.includes('data-service-story="true"'), true);
   assert.equal(services.includes("data-service-chapter={service.id}"), true);
+  assert.equal(services.includes("data-active-service={active.id}"), true);
   assert.equal(services.includes("sticky top-28"), true);
   assert.equal(services.includes("IntersectionObserver"), true);
+  assert.equal(services.includes("requestAnimationFrame"), true);
+  assert.equal(services.includes("window.innerHeight * 0.45"), true);
+  assert.equal(services.includes("lg:min-h-[72svh]"), true);
+  assert.equal(services.includes("duration-200"), true);
+  assert.equal(services.includes("AnimatePresence"), false);
+  assert.equal(services.includes('mode="wait"'), false);
+  assert.equal(services.includes("onActivate"), false);
   assert.equal(services.includes("setInterval"), false);
   assert.equal(services.includes("images.pexels.com"), false);
   assert.equal(homeContent.indexOf("<DeferredServiceShowcase />") < homeContent.indexOf('<section id="capability-explorer"'), true);

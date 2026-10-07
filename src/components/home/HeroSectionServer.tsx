@@ -25,7 +25,7 @@ export default function HeroSectionServer() {
       </div>
 
       <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-center xl:gap-14">
+        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)] lg:items-center xl:gap-8">
           <div className="space-y-6 lg:py-4">
             {/* Status / Kicker Pill */}
             <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-4 py-1.5 backdrop-blur-md shadow-sm">

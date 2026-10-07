@@ -97,6 +97,8 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
   assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
   assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
+  assert.equal(explorer.includes('data-hero-ink-fade="true"'), true);
+  assert.equal(explorer.includes("radial-gradient(ellipse_96%_90%_at_55%_48%"), true);
   assert.equal(explorer.includes('data-execution-route="stepped"'), true);
   assert.equal(explorer.includes('M55 310 H245 L315 230 H515 L635 150 H835 L915 70 H955'), true);
   assert.equal(explorer.includes("crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery"), true);

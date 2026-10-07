@@ -44,17 +44,18 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
     <div data-hero-panel="execution-map" aria-labelledby="execution-map-title" className="relative w-full text-foreground xl:w-[calc(100%+((100vw-80rem)/2)+3rem)]">
       <h2 id="execution-map-title" className="sr-only">OBAOL&apos;s ten-stage execution journey</h2>
 
-      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/65 bg-background/35 shadow-[0_24px_70px_-46px_rgba(15,23,42,0.45)] dark:border-white/10 dark:bg-slate-950/45">
-        <div className="pointer-events-none absolute inset-x-[7%] -top-10 h-24 rounded-full bg-obaol-400/12 blur-3xl" />
+      <div data-hero-ink-fade="true" className="relative overflow-visible">
+        <div className="pointer-events-none absolute inset-x-[2%] inset-y-[4%] bg-[radial-gradient(ellipse_at_center,rgba(207,152,60,0.14),transparent_68%)] blur-3xl dark:bg-[radial-gradient(ellipse_at_center,rgba(207,152,60,0.11),transparent_70%)]" />
 
-        <div data-hero-lifecycle-visual="true" className="relative h-[220px] overflow-hidden sm:h-[260px] xl:absolute xl:inset-0 xl:h-auto [mask-image:linear-gradient(to_bottom,transparent_0%,black_9%,black_82%,transparent_100%)] xl:[mask-image:radial-gradient(ellipse_92%_88%_at_54%_50%,black_62%,transparent_100%)]">
+        <div data-hero-lifecycle-visual="true" className="relative -mx-3 h-[220px] overflow-hidden sm:-mx-5 sm:h-[260px] xl:absolute xl:-inset-x-[4%] xl:-inset-y-[3%] xl:h-auto [mask-image:radial-gradient(ellipse_94%_88%_at_54%_48%,black_52%,transparent_100%)] xl:[mask-image:radial-gradient(ellipse_96%_90%_at_55%_48%,black_58%,transparent_100%)]">
           <Image src="/images/hero-agro-execution-v2.webp" alt="Indian agro-trade execution from crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery" fill priority sizes="(max-width: 1023px) 100vw, 62vw" className="object-cover object-center opacity-80 saturate-[0.9] contrast-[0.98] dark:opacity-58 dark:saturate-[0.72]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-transparent to-background/75 dark:from-slate-950/20 dark:via-slate-950/12 dark:to-slate-950/82" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/52 via-transparent to-background/10 dark:from-slate-950/58 dark:via-transparent dark:to-slate-950/16" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/8 via-transparent to-background/60 dark:from-slate-950/12 dark:via-transparent dark:to-slate-950/72" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/42 via-transparent to-background/6 dark:from-slate-950/48 dark:via-transparent dark:to-slate-950/10" />
+          <div className="absolute inset-0 opacity-30 mix-blend-multiply [background-image:radial-gradient(circle_at_35%_42%,rgba(153,102,31,0.18),transparent_34%),radial-gradient(circle_at_72%_58%,rgba(153,102,31,0.12),transparent_38%)] dark:mix-blend-screen" />
         </div>
 
         <div className="relative px-5 pb-6 sm:px-7 sm:pb-7 xl:h-[550px] xl:p-0">
-          <div className="absolute right-6 top-5 z-30 hidden items-center gap-2 rounded-full border border-obaol-600/28 bg-white/88 px-3.5 py-2 text-slate-950 shadow-sm backdrop-blur-lg dark:border-obaol-300/25 dark:bg-slate-950/88 dark:text-white xl:flex">
+          <div className="absolute right-[4%] top-5 z-30 hidden items-center gap-2 border-b border-obaol-700/35 bg-background/58 px-2 py-2 text-slate-950 backdrop-blur-sm dark:border-obaol-300/30 dark:bg-slate-950/48 dark:text-white xl:flex">
             <FiMapPin className="text-obaol-600 dark:text-obaol-300" aria-hidden="true" />
             <span className="text-[9px] font-black uppercase tracking-[0.16em]">Requirement to delivery · 10 verified stages</span>
           </div>
@@ -80,7 +81,7 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
                 return (
                   <li key={stage.id} data-execution-stage={stage.id} style={position} className="absolute left-[var(--stage-x)] top-[var(--stage-y)] -translate-x-1/2 -translate-y-1/2 last:-translate-x-full">
                     <span className="relative z-20 block h-5 w-5 rounded-full border-[5px] border-white bg-obaol-600 shadow-[0_0_0_1px_rgba(154,100,22,0.42)] dark:border-slate-950 dark:bg-obaol-300" aria-hidden="true" />
-                    <div className={`absolute ${labelPosition} flex min-w-max items-center gap-2 rounded-xl border border-slate-300/90 bg-white/95 px-2.5 py-2 text-slate-950 shadow-md backdrop-blur-lg dark:border-white/20 dark:bg-slate-950/95 dark:text-white`}><StageContent stage={stage} index={index} /></div>
+                    <div className={`absolute ${labelPosition} flex min-w-max items-center gap-2 rounded-md border-l-2 border-obaol-700/55 bg-[#fffaf2]/82 px-2.5 py-1.5 text-slate-950 backdrop-blur-md dark:border-obaol-300/55 dark:bg-slate-950/78 dark:text-white`}><StageContent stage={stage} index={index} /></div>
                   </li>
                 );
               })}
@@ -92,7 +93,7 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
               {phaseGroups.map((phase) => <div key={phase.name} data-execution-phase={phase.name.toLowerCase()} className="flex items-center gap-1.5 text-obaol-800 dark:text-obaol-200"><span className="text-[9px] font-black uppercase tracking-[0.16em]">{phase.name}</span><span className="font-mono text-[8px] font-bold opacity-60">{phase.range}</span></div>)}
             </div>
             <ol data-execution-route="stepped" className="grid grid-cols-5 gap-2" aria-label="OBAOL's ten-stage execution flow">
-              {stages.map((stage, index) => <li key={stage.id} data-execution-stage={stage.id} className="relative min-w-0 rounded-xl border border-slate-300/75 bg-white/90 p-2.5 text-slate-950 shadow-sm backdrop-blur-md dark:border-white/15 dark:bg-slate-950/88 dark:text-white"><div className="flex items-center gap-1.5"><StageContent stage={stage} index={index} /></div></li>)}
+              {stages.map((stage, index) => <li key={stage.id} data-execution-stage={stage.id} className="relative min-w-0 rounded-md border-l-2 border-obaol-700/50 bg-[#fffaf2]/80 p-2.5 text-slate-950 backdrop-blur-md dark:border-obaol-300/50 dark:bg-slate-950/76 dark:text-white"><div className="flex items-center gap-1.5"><StageContent stage={stage} index={index} /></div></li>)}
             </ol>
           </div>
 

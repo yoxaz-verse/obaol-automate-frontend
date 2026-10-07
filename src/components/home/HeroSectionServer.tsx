@@ -1,5 +1,5 @@
 import HeroCTA from "@/components/home/HeroCTA";
-import HeroStageExplorer, { type HeroStage } from "@/components/home/HeroStageExplorer";
+import HeroStageExplorer, { HeroStageBand, type HeroStage } from "@/components/home/HeroStageExplorer";
 
 const HERO_STAGES = [
   { id: "discovery", label: "Discovery", message: "Discover verified products and reliable origin suppliers.", src: "/images/execution-flow/01-discovery.webp", deliverable: "Product Coverage & Origin Sourcing", phase: "Plan" },
@@ -19,18 +19,17 @@ export default function HeroSectionServer() {
     <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-12 pt-16 lg:pb-16 lg:pt-20">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/15 blur-[120px] dark:bg-obaol-500/20" />
-        <div className="absolute top-1/3 right-10 h-[400px] w-[400px] rounded-full bg-amber-500/10 blur-[100px] dark:bg-amber-500/15" />
-        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
+        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/10 blur-[120px] dark:bg-obaol-500/14" />
+        <div className="absolute top-1/3 right-10 h-[400px] w-[400px] rounded-full bg-amber-500/[0.06] blur-[100px] dark:bg-amber-500/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
       </div>
 
       <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-center xl:gap-14">
+        <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center xl:gap-20">
           <div className="space-y-5 lg:py-2">
             {/* Status / Kicker Pill */}
             <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-4 py-1.5 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-obaol-400 opacity-75"></span>
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-obaol-500"></span>
               </span>
               <span className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-obaol-700 dark:text-obaol-300 sm:text-xs">
@@ -46,9 +45,8 @@ export default function HeroSectionServer() {
                   Ecosystem
                 </span>
               </h1>
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center gap-2.5 pt-1">
                 <span className="text-xs font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">for</span>
-                <span className="h-px w-16 bg-gradient-to-r from-obaol-500/40 to-transparent" />
                 <span className="text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-[2rem] xl:text-[2.2rem]">
                   B2B Agro Trade.
                 </span>
@@ -64,7 +62,11 @@ export default function HeroSectionServer() {
             <HeroCTA />
           </div>
 
-          <HeroStageExplorer stages={HERO_STAGES} />
+          <HeroStageExplorer />
+        </div>
+
+        <div className="mx-auto w-full max-w-7xl">
+          <HeroStageBand stages={HERO_STAGES} />
         </div>
       </div>
     </section>

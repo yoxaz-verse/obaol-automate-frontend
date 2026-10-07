@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiArrowRight, FiShoppingBag, FiTag, FiTruck, FiShield, FiCheckCircle, FiGlobe } from "react-icons/fi";
+import { FiArrowRight, FiShield, FiCheckCircle, FiGlobe } from "react-icons/fi";
 import { usePublicAuthStatus } from "@/hooks/usePublicAuthStatus";
 
 export default function HeroCTA() {
@@ -9,7 +9,7 @@ export default function HeroCTA() {
   const href = !loading && isAuthenticated ? "/dashboard" : "/auth";
 
   return (
-    <div className="flex w-full max-w-2xl flex-col items-start gap-6 pt-2">
+    <div className="flex w-full max-w-xl flex-col items-start gap-5 pt-2">
       {/* Primary Action Button */}
       <Link
         href={href}
@@ -24,38 +24,8 @@ export default function HeroCTA() {
         <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-white/0 via-white/25 to-white/0 transition-transform duration-1000 ease-in-out group-hover:translate-x-full" />
       </Link>
 
-      {/* Role Navigation Chips */}
-      {!loading && !isAuthenticated && (
-        <div className="w-full space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-foreground/50">I want to:</span>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-            <Link
-              href="/auth/register?intent=BUY"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-default-200 bg-background/80 px-3 py-2 text-center text-xs font-bold leading-tight text-foreground/80 backdrop-blur-sm transition-all duration-200 hover:border-obaol-500/50 hover:bg-obaol-500/10 hover:text-obaol-700 hover:shadow-sm dark:hover:text-obaol-300"
-            >
-              <FiShoppingBag className="text-obaol-500" size={14} />
-              <span>Start Buying</span>
-            </Link>
-            <Link
-              href="/auth/register?intent=SELL"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-default-200 bg-background/80 px-3 py-2 text-center text-xs font-bold leading-tight text-foreground/80 backdrop-blur-sm transition-all duration-200 hover:border-obaol-500/50 hover:bg-obaol-500/10 hover:text-obaol-700 hover:shadow-sm dark:hover:text-obaol-300"
-            >
-              <FiTag className="text-obaol-500" size={14} />
-              <span>Start Selling</span>
-            </Link>
-            <Link
-              href="/auth/operator/register"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-default-200 bg-background/80 px-3 py-2 text-center text-xs font-bold leading-tight text-foreground/80 backdrop-blur-sm transition-all duration-200 hover:border-obaol-500/50 hover:bg-obaol-500/10 hover:text-obaol-700 hover:shadow-sm dark:hover:text-obaol-300"
-            >
-              <FiTruck className="text-obaol-500" size={14} />
-              <span>Work in Operations</span>
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Trust Highlights Strip */}
-      <div className="grid w-full grid-cols-1 gap-3 border-t border-default-200/60 pt-5 text-xs font-semibold leading-tight text-foreground/60 sm:grid-cols-3 sm:gap-4">
+      <div className="flex w-full flex-wrap gap-x-5 gap-y-2 text-[11px] font-semibold leading-tight text-foreground/60">
         <span className="flex items-start gap-2">
           <FiShield className="mt-0.5 shrink-0 text-obaol-500" size={15} />
           <span>Verified Counterparties</span>

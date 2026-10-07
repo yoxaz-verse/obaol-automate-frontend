@@ -70,6 +70,7 @@ test("active homepage source does not advertise fabricated runtime telemetry", (
 test("homepage hero presents the complete static ten-stage execution map", () => {
   const hero = read("../src/components/home/HeroSectionServer.tsx");
   const explorer = read("../src/components/home/HeroStageExplorer.tsx");
+  const heroCta = read("../src/components/home/HeroCTA.tsx");
   const homeContent = read("../src/components/home/HomeContent.tsx");
   const homepage = read("../src/app/page.tsx");
   const globals = read("../src/app/globals.css");
@@ -93,6 +94,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(homeContent.includes('from "@/components/home/HeroSectionServer"'), true);
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
+  assert.equal(explorer.includes('data-execution-stage-band="true"'), true);
   assert.equal(explorer.includes("data-execution-phase={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes("data-execution-stage-group={phase.phase.toLowerCase()}"), true);
   assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
@@ -112,6 +114,11 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes("setActiveIndex"), false);
   assert.equal(explorer.includes("setInterval"), false);
   assert.equal(explorer.includes("setTimeout"), false);
+  assert.equal(heroCta.match(/<Link/g)?.length, 1);
+  assert.equal(heroCta.includes("Start Buying"), false);
+  assert.equal(heroCta.includes("Start Selling"), false);
+  assert.equal(heroCta.includes("Work in Operations"), false);
+  assert.equal(hero.includes("animate-ping"), false);
   assert.equal(hero.includes('data-natural-scroll-hero="true"'), true);
   assert.equal(hero.includes('lg:sticky lg:top-28'), false);
   assert.equal(homepage.includes('className="obaol-home bg-background text-foreground"'), true);

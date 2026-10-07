@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { FiMapPin } from "react-icons/fi";
 
 export type HeroStage = {
   id: string;
@@ -17,7 +16,7 @@ const phaseGroups: Array<{ name: string; range: string; phase: HeroStage["phase"
   { name: "Close", range: "10", phase: "Close" },
 ];
 
-export default function HeroStageExplorer({ stages }: { stages: readonly HeroStage[] }) {
+export default function HeroStageExplorer() {
   return (
     <div data-hero-panel="execution-map" className="relative min-w-0 lg:pt-1">
       <h2 className="sr-only">Ten-stage agro trade execution journey</h2>
@@ -36,9 +35,8 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/55 to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent" />
 
-          <p className="absolute right-6 top-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground sm:right-8 sm:top-8 sm:text-[11px]">
-            <FiMapPin aria-hidden="true" className="text-obaol-600 dark:text-obaol-300" />
-            Requirement to delivery · 10 verified stages
+          <p className="absolute right-6 top-6 text-[9px] font-semibold uppercase tracking-[0.18em] text-foreground/65 sm:right-8 sm:top-8 sm:text-[10px]">
+            One connected agro execution system
           </p>
 
           <div data-execution-route="phase-rail" aria-label="Execution phases: Plan, Verify, Move, and Close" className="absolute inset-x-6 bottom-8 sm:inset-x-9 sm:bottom-10">
@@ -48,36 +46,50 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
                 <div key={phase.phase} data-execution-phase={phase.phase.toLowerCase()} className={index === phaseGroups.length - 1 ? "text-right" : ""}>
                   <span className={`mb-3 block size-[15px] rounded-full border-[3px] border-background bg-obaol-500 shadow-[0_0_0_1px_rgba(180,119,18,0.75)] ${index === phaseGroups.length - 1 ? "ml-auto" : ""}`} />
                   <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-foreground sm:text-[11px]">{phase.name}</span>
-                  <span className="mt-0.5 block font-mono text-[9px] text-muted-foreground sm:text-[10px]">{phase.range}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div aria-label="All ten execution stages grouped by phase" className="mt-4 grid gap-x-7 gap-y-5 sm:grid-cols-2 xl:grid-cols-[3fr_3fr_3fr_1.25fr]">
-          {phaseGroups.map((phase) => {
-            const phaseStages = stages.filter((stage) => stage.phase === phase.phase);
-            return (
-              <section key={phase.phase} data-execution-stage-group={phase.phase.toLowerCase()} className="border-t border-obaol-500/30 pt-3" aria-labelledby={`hero-phase-${phase.phase.toLowerCase()}`}>
-                <div className="mb-2 flex items-baseline justify-between gap-2">
-                  <h3 id={`hero-phase-${phase.phase.toLowerCase()}`} className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{phase.name}</h3>
-                  <span className="font-mono text-[9px] text-muted-foreground">{phase.range}</span>
-                </div>
-                <ol className="space-y-1.5">
-                  {phaseStages.map((stage) => (
-                    <li key={stage.id} data-execution-stage={stage.id} className="flex items-baseline gap-2 text-[12px] leading-5 text-foreground">
-                      <span className="w-5 shrink-0 font-mono text-[9px] font-bold text-obaol-700 dark:text-obaol-300">{String(stages.indexOf(stage) + 1).padStart(2, "0")}</span>
-                      <span className="font-semibold">{stage.label}</span>
-                      <span className="sr-only">{stage.message}. {stage.deliverable ? `Output: ${stage.deliverable}.` : ""}</span>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            );
-          })}
-        </div>
       </div>
     </div>
+  );
+}
+
+export function HeroStageBand({ stages }: { stages: readonly HeroStage[] }) {
+  return (
+    <section data-execution-stage-band="true" aria-labelledby="execution-stage-band-title" className="mt-12 border-y border-default-200/70 py-7 lg:mt-14 lg:py-8">
+      <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-obaol-700 dark:text-obaol-300">One accountable execution path</p>
+          <h2 id="execution-stage-band-title" className="mt-1 text-lg font-bold tracking-tight text-foreground sm:text-xl">From requirement to delivery</h2>
+        </div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">10 verified stages</p>
+      </div>
+
+      <div aria-label="All ten execution stages grouped by phase" className="grid gap-x-10 gap-y-7 sm:grid-cols-2 xl:grid-cols-[3fr_3fr_3fr_1.2fr]">
+        {phaseGroups.map((phase) => {
+          const phaseStages = stages.filter((stage) => stage.phase === phase.phase);
+          return (
+            <section key={phase.phase} data-execution-stage-group={phase.phase.toLowerCase()} className="border-t border-obaol-500/35 pt-3" aria-labelledby={`hero-phase-${phase.phase.toLowerCase()}`}>
+              <div className="mb-3 flex items-baseline justify-between gap-3">
+                <h3 id={`hero-phase-${phase.phase.toLowerCase()}`} className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">{phase.name}</h3>
+                <span className="font-mono text-[9px] text-muted-foreground">{phase.range}</span>
+              </div>
+              <ol className="space-y-2">
+                {phaseStages.map((stage) => (
+                  <li key={stage.id} data-execution-stage={stage.id} className="flex items-baseline gap-2.5 text-[13px] leading-5 text-foreground">
+                    <span className="w-5 shrink-0 font-mono text-[9px] font-bold text-obaol-700 dark:text-obaol-300">{String(stages.indexOf(stage) + 1).padStart(2, "0")}</span>
+                    <span className="font-semibold">{stage.label}</span>
+                    <span className="sr-only">{stage.message}. {stage.deliverable ? `Output: ${stage.deliverable}.` : ""}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          );
+        })}
+      </div>
+    </section>
   );
 }

@@ -94,7 +94,13 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
   assert.equal(explorer.includes('data-hero-panel="execution-map"'), true);
   assert.equal(explorer.includes("data-execution-stage={stage.id}"), true);
   assert.equal(explorer.includes("data-execution-phase={phase.name.toLowerCase()}"), true);
-  assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), true);
+  assert.equal(explorer.includes('/images/hero-agro-execution-v2.webp'), true);
+  assert.equal(explorer.includes('/images/hero-operations/port-operations-stock.webp'), false);
+  assert.equal(explorer.includes('data-hero-lifecycle-visual="true"'), true);
+  assert.equal(explorer.includes('data-execution-route="true"'), true);
+  assert.equal(explorer.includes("crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery"), true);
+  assert.equal(explorer.includes("dark:sm:border-obaol-300/55"), true);
+  assert.equal(explorer.includes("dark:xl:border-white/20"), true);
   assert.equal(explorer.includes('xl:w-[calc(100%+((100vw-80rem)/2)+3rem)]'), true);
   assert.equal(explorer.includes('aria-label="OBAOL\'s ten-stage execution flow"'), true);
   assert.equal(explorer.includes('role="tablist"'), false);
@@ -112,7 +118,7 @@ test("homepage hero presents the complete static ten-stage execution map", () =>
     assert.equal(existsSync(fileURLToPath(assetUrl)), true, `${imagePath} should exist`);
   }
   assert.equal(existsSync(fileURLToPath(new URL("../public/images/order-execution-laptop.webp", import.meta.url))), true);
-  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-operations/port-operations-stock.webp", import.meta.url))), true);
+  assert.equal(existsSync(fileURLToPath(new URL("../public/images/hero-agro-execution-v2.webp", import.meta.url))), true);
 });
 
 test("homepage services use an eight-chapter scroll story without autoplay", () => {

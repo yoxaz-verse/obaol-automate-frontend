@@ -12,8 +12,8 @@ export type HeroStage = {
 };
 
 const stagePositions = [
-  [3, 69], [13.5, 58], [24, 66], [34.5, 54], [45, 62],
-  [55.5, 49], [66, 57], [76.5, 44], [87, 52], [97, 38],
+  [4, 71], [14, 62], [24, 68], [34, 57], [44, 63],
+  [54, 52], [64, 58], [74, 47], [84, 53], [96, 42],
 ] as const;
 
 const phaseGroups = [
@@ -32,50 +32,47 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
     >
       <h2 id="execution-map-title" className="sr-only">OBAOL&apos;s ten-stage execution journey</h2>
 
-      <div className="pointer-events-none absolute -inset-y-12 left-[-12%] right-[-5%] bg-[radial-gradient(circle_at_62%_46%,rgba(207,152,60,0.22),transparent_42%)] blur-2xl dark:bg-[radial-gradient(circle_at_62%_46%,rgba(207,152,60,0.18),transparent_44%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[330px] overflow-hidden sm:h-[390px] lg:h-full [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_100%)]">
+      <div className="pointer-events-none absolute -inset-y-12 left-[-12%] right-[-5%] bg-[radial-gradient(circle_at_60%_48%,rgba(207,152,60,0.2),transparent_48%)] blur-2xl dark:bg-[radial-gradient(circle_at_60%_48%,rgba(207,152,60,0.16),transparent_50%)]" />
+      <div
+        data-hero-lifecycle-visual="true"
+        className="pointer-events-none absolute inset-x-[-2%] -top-8 h-[370px] overflow-hidden sm:h-[430px] lg:-bottom-8 lg:h-auto [mask-image:radial-gradient(ellipse_88%_78%_at_62%_48%,black_48%,transparent_100%)]"
+      >
         <Image
-          src="/images/hero-operations/port-operations-stock.webp"
-          alt="Container handling and freight operations at an international port"
+          src="/images/hero-agro-execution-v2.webp"
+          alt="Indian agro-trade execution from crop sourcing and documentation through quality testing, packaging, warehousing, inland transport, and port delivery"
           fill
           priority
           sizes="(max-width: 1023px) 100vw, 62vw"
-          className="object-cover object-center opacity-80 saturate-[0.8] dark:opacity-55 dark:saturate-[0.65]"
+          className="object-cover object-center opacity-68 saturate-[0.78] contrast-[0.92] dark:opacity-52 dark:saturate-[0.68] dark:contrast-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/20 to-background/80 dark:from-black/5 dark:via-black/25 dark:to-background/90" />
-        <div className="absolute inset-0 bg-[linear-gradient(112deg,rgba(207,152,60,0.22),transparent_42%,rgba(0,0,0,0.12))] mix-blend-multiply dark:mix-blend-screen" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/45 via-background/10 to-background/85 dark:from-background/40 dark:via-black/20 dark:to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/18 to-background/5 dark:from-background dark:via-background/28 dark:to-black/5" />
+        <div className="absolute inset-0 bg-[linear-gradient(112deg,rgba(207,152,60,0.16),transparent_45%,rgba(15,23,42,0.08))] mix-blend-multiply dark:mix-blend-screen" />
       </div>
 
-      <div className="absolute right-2 top-4 z-10 max-w-[240px] rounded-2xl border border-obaol-500/25 bg-background/78 px-4 py-3 shadow-xl shadow-obaol-950/10 backdrop-blur-md sm:right-6 sm:top-8 lg:right-[7%] lg:top-[11%]">
-        <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-obaol-700 dark:text-obaol-300">
-          <FiMapPin aria-hidden="true" /> Connected execution
-        </div>
-        <p className="mt-1.5 text-sm font-black leading-snug sm:text-base">Requirement to delivery</p>
-        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground/50">10 verified stages</p>
-      </div>
-
-      <div className="absolute left-0 right-0 top-[300px] z-10 grid grid-cols-4 gap-2 sm:top-[350px] xl:left-[4%] xl:right-[6%] xl:top-[20%]" aria-label="Execution phases">
+      <div className="absolute left-0 right-0 top-[300px] z-30 grid grid-cols-4 gap-1.5 sm:top-[350px] xl:left-[5%] xl:right-[5%] xl:top-[13%]" aria-label="Execution phases">
         {phaseGroups.map((phase) => (
-          <div key={phase.name} data-execution-phase={phase.name.toLowerCase()} className="flex items-center gap-2 border-t border-obaol-500/45 bg-background/45 px-2 pt-2 backdrop-blur-[2px]">
+          <div key={phase.name} data-execution-phase={phase.name.toLowerCase()} className="flex items-center gap-2 rounded-full border border-obaol-600/35 bg-background/90 px-3 py-2 shadow-sm backdrop-blur-md dark:border-obaol-300/30 dark:bg-black/72">
             <span className="text-[9px] font-black uppercase tracking-[0.18em] text-obaol-800 dark:text-obaol-200">{phase.name}</span>
-            <span className="hidden font-mono text-[8px] font-bold text-foreground/55 sm:inline">{phase.range}</span>
+            <span className="hidden font-mono text-[8px] font-bold text-foreground/60 sm:inline">{phase.range}</span>
           </div>
         ))}
       </div>
 
-      <svg className="pointer-events-none absolute inset-x-[2%] top-[27%] z-[1] hidden h-[52%] w-[96%] overflow-visible xl:block" viewBox="0 0 1000 360" preserveAspectRatio="none" aria-hidden="true">
+      <svg data-execution-route="true" className="pointer-events-none absolute inset-[0_2%] z-10 hidden h-full w-[96%] overflow-visible xl:block" viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="execution-route-gradient" x1="0" x2="1">
-            <stop offset="0" stopColor="#CF983C" stopOpacity="0.2" />
-            <stop offset="0.48" stopColor="#F5B942" stopOpacity="0.95" />
-            <stop offset="1" stopColor="#CF983C" stopOpacity="0.34" />
+            <stop offset="0" stopColor="#9A6416" />
+            <stop offset="0.5" stopColor="#D99B2B" />
+            <stop offset="1" stopColor="#F0B33F" />
           </linearGradient>
           <filter id="execution-route-glow" x="-20%" y="-40%" width="140%" height="180%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
-        <path d="M30 245 C80 245 92 208 135 208 S195 238 240 238 S300 194 345 194 S405 224 450 224 S510 176 555 176 S615 205 660 205 S720 158 765 158 S825 187 870 187 S930 137 970 137" fill="none" stroke="url(#execution-route-gradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 9" filter="url(#execution-route-glow)" className="motion-safe:animate-pulse" />
+        <path d="M40 483 C85 483 100 422 140 422 S200 462 240 462 S300 388 340 388 S400 428 440 428 S500 354 540 354 S600 394 640 394 S700 320 740 320 S800 360 840 360 S920 286 960 286" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="8" strokeLinecap="round" className="dark:stroke-black/55" />
+        <path d="M40 483 C85 483 100 422 140 422 S200 462 240 462 S300 388 340 388 S400 428 440 428 S500 354 540 354 S600 394 640 394 S700 320 740 320 S800 360 840 360 S920 286 960 286" fill="none" stroke="url(#execution-route-gradient)" strokeWidth="4.5" strokeLinecap="round" filter="url(#execution-route-glow)" />
       </svg>
 
       <ol className="absolute inset-x-0 top-[350px] z-20 space-y-0 pl-2 sm:top-[405px] sm:grid sm:grid-cols-5 sm:gap-x-3 sm:gap-y-5 sm:pl-0 xl:inset-0 xl:block" aria-label="OBAOL's ten-stage execution flow">
@@ -87,15 +84,15 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
               key={stage.id}
               data-execution-stage={stage.id}
               style={position}
-              className="group relative flex min-h-[42px] items-center gap-3 border-l border-obaol-500/25 py-2 pl-5 sm:min-h-[72px] sm:flex-col sm:items-start sm:justify-start sm:rounded-xl sm:border sm:border-default-200/70 sm:bg-background/72 sm:p-3 sm:shadow-sm sm:backdrop-blur-md xl:absolute xl:left-[var(--stage-x)] xl:top-[var(--stage-y)] xl:min-h-0 xl:w-[104px] xl:-translate-x-1/2 xl:-translate-y-1/2 xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none xl:backdrop-blur-none last:xl:-translate-x-full"
+              className="group relative flex min-h-[42px] items-center gap-3 border-l-2 border-obaol-600/45 py-2 pl-5 sm:min-h-[72px] sm:flex-col sm:items-start sm:justify-start sm:rounded-xl sm:border sm:border-default-300/90 sm:bg-background/90 sm:p-3 sm:shadow-md sm:backdrop-blur-lg xl:absolute xl:left-[var(--stage-x)] xl:top-[var(--stage-y)] xl:min-h-0 xl:w-[126px] xl:-translate-x-1/2 xl:-translate-y-1/2 xl:border-0 xl:bg-transparent xl:p-0 xl:shadow-none xl:backdrop-blur-none last:xl:-translate-x-full dark:sm:border-white/20 dark:sm:bg-black/78"
             >
-              <span className="absolute -left-[5px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border-2 border-background bg-obaol-500 shadow-[0_0_14px_rgba(207,152,60,0.75)] sm:static sm:h-7 sm:w-7 sm:translate-y-0 sm:flex sm:items-center sm:justify-center sm:border sm:border-obaol-400/40 sm:bg-background sm:font-mono sm:text-[9px] sm:font-black sm:text-obaol-700 xl:h-8 xl:w-8 dark:sm:text-obaol-300"
+              <span className="absolute -left-[6px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-2 border-background bg-obaol-600 shadow-[0_0_14px_rgba(207,152,60,0.7)] sm:static sm:h-8 sm:w-8 sm:translate-y-0 sm:flex sm:items-center sm:justify-center sm:border-2 sm:border-obaol-700/55 sm:bg-background sm:font-mono sm:text-[10px] sm:font-black sm:text-obaol-800 xl:h-10 xl:w-10 dark:sm:border-obaol-300/55 dark:sm:bg-slate-950 dark:sm:text-obaol-200"
               >
                 <span className="hidden sm:inline">{String(index + 1).padStart(2, "0")}</span>
               </span>
-              <div className="min-w-0 rounded-xl xl:bg-background/82 xl:px-2.5 xl:py-2 xl:shadow-lg xl:shadow-black/10 xl:backdrop-blur-md">
+              <div className="min-w-0 rounded-xl xl:border xl:border-default-300/90 xl:bg-background/95 xl:px-3 xl:py-2.5 xl:shadow-lg xl:shadow-black/15 xl:backdrop-blur-lg dark:xl:border-white/20 dark:xl:bg-slate-950/90">
                 <span className="font-mono text-[9px] font-black text-obaol-700 sm:hidden dark:text-obaol-300">{String(index + 1).padStart(2, "0")} </span>
-                <span className="text-xs font-black leading-tight text-foreground xl:text-[11px]">{stage.label}</span>
+                <span className="text-xs font-black leading-tight text-foreground xl:text-xs">{stage.label}</span>
                 <span className="sr-only">. {stage.message} {stage.deliverable ? `Output: ${stage.deliverable}.` : ""}</span>
               </div>
               {index < stages.length - 1 && <FiArrowDown className="absolute -bottom-2 left-[-8px] text-obaol-500 sm:hidden" size={14} aria-hidden="true" />}
@@ -103,6 +100,12 @@ export default function HeroStageExplorer({ stages }: { stages: readonly HeroSta
           );
         })}
       </ol>
+
+      <div className="absolute right-[4%] top-[23%] z-30 hidden max-w-[210px] rounded-2xl border border-obaol-600/35 bg-background/94 px-4 py-3 shadow-xl shadow-black/15 backdrop-blur-lg xl:block dark:border-obaol-300/30 dark:bg-slate-950/90">
+        <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-obaol-800 dark:text-obaol-200"><FiMapPin aria-hidden="true" /> Connected execution</div>
+        <p className="mt-1.5 text-sm font-black leading-snug">Requirement to delivery</p>
+        <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.12em] text-foreground/55">10 verified stages</p>
+      </div>
 
       <div className="absolute bottom-0 left-0 right-0 z-10 hidden items-center justify-between border-t border-default-200/70 pt-4 text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/45 xl:flex xl:left-[4%] xl:right-[6%]">
         <span>Origin intelligence</span>

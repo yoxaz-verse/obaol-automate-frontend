@@ -17,7 +17,6 @@ import {
   SelectItem,
   Spinner,
   Textarea,
-  Progress,
 } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
 import { getData, postData, putData } from "@/core/api/apiHandler";
@@ -26,6 +25,7 @@ import { extractList } from "@/core/data/queryUtils";
 import { showToastMessage } from "@/utils/utils";
 import OnboardingModal from "@/components/dashboard/Company/OnboardingModal";
 import { fetchRegisterOptions } from "@/utils/registerOptions";
+import { CompanyMetricCard, CompanyProfileReadiness } from "@/components/dashboard/Company/CompanyOverviewCards";
 
 
 const MAIN_CATEGORY_SLUGS = new Set([
@@ -162,7 +162,7 @@ export default function CompanyWorkspacePage() {
     queryKey: ["company-workspace-stats", associateCompanyId],
     queryFn: async () => {
       const response = await getData(`/api/v1/web/associate-companies/${associateCompanyId}/stats`);
-      return response?.data?.meta?.company || {};
+      return { meta: response?.data?.meta?.company || {}, team: Array.isArray(response?.data?.data) ? response.data.data : [] };
     },
     enabled: isAssociate && Boolean(associateCompanyId),
   });
@@ -432,8 +432,11 @@ export default function CompanyWorkspacePage() {
 
 
   const pendingBannerRequestedInterests = useMemo(() => {
+    if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedCompanyFunctionIds)) {
+      return latestPendingLikeReport.payload.requestedCompanyFunctionIds.map((value: any) => String(value || ""));
+    }
     if (latestPendingLikeReport && Array.isArray(latestPendingLikeReport?.payload?.requestedInterests)) {
-      return latestPendingLikeReport.payload.requestedInterests.map((value: any) => String(value || "").toUpperCase());
+      return latestPendingLikeReport.payload.requestedInterests.map((value: any) => String(value || ""));
     }
     if (recentInterestSubmission?.requestedInterests?.length) {
       return recentInterestSubmission.requestedInterests.map((value) => String(value || "").toUpperCase());
@@ -445,7 +448,10 @@ export default function CompanyWorkspacePage() {
 
   const supervisorId = String(company?.supervisor?._id || company?.supervisor || "");
   const isSupervisor = Boolean(user?.id && supervisorId && user?.id === supervisorId);
-  const stats = companyStatsQuery.data || {};
+  const stats = companyStatsQuery.data?.meta || {};
+  const teamPerformance = Array.isArray(companyStatsQuery.data?.team) ? companyStatsQuery.data.team : [];
+  const enquiryCount = teamPerformance.reduce((sum: number, item: any) => sum + Number(item?.performance?.enquiriesHandled || 0), 0);
+  const completedOrderCount = teamPerformance.reduce((sum: number, item: any) => sum + Number(item?.performance?.ordersCompleted || 0), 0);
   const profileChecks = [
     { label: "Company identity", complete: Boolean(company?.name && company?.companyType) },
     { label: "Contact details", complete: Boolean(company?.email && company?.phone) },
@@ -729,78 +735,80 @@ export default function CompanyWorkspacePage() {
 
       {isAssociate && (
         <>
-      <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Company Participation</h2>
-            <p className="text-sm text-default-600">Choose whether your company buys, sells, uses both workflows, or provides trade services.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-          {(["BUY", "SELL", "BOTH", "SERVICE"] as const).map((mode) => (
-              <Button
-                key={mode}
-                size="sm"
-                color={String(user?.tradeMode || "BOTH") === mode ? "warning" : "default"}
-                variant={String(user?.tradeMode || "BOTH") === mode ? "solid" : "flat"}
-                isLoading={tradeModeMutation.isPending && tradeModeMutation.variables === mode}
-                onPress={() => tradeModeMutation.mutate(mode)}
-              >
-                {mode === "BUY" ? "Buy" : mode === "SELL" ? "Sell" : mode === "SERVICE" ? "Service Provider" : "Buy & Sell"}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
+      <section className="relative overflow-hidden rounded-[2rem] border border-default-200 bg-content1 p-5 shadow-sm md:p-8">
+        {company?.banner ? <div className="absolute inset-x-0 top-0 h-28 bg-cover bg-center opacity-15" style={{ backgroundImage: `url(${company.banner})` }} /> : null}
         {companyQuery.isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Spinner />
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">{company?.name || "My Company"}</h1>
-              {isSupervisor ? (
-                <Chip color="warning" variant="flat" size="sm">
-                  Supervisor
-                </Chip>
-              ) : null}
-              </div>
-              {previewUrl ? (
-                <div className="flex items-center gap-2">
-                  {!isWebsiteLive && (
-                    <Chip size="sm" variant="flat" color="warning">
-                      Preview
-                    </Chip>
-                  )}
-                  <Button
-                    size="sm"
-                    color="primary"
-                    variant="flat"
-                    onPress={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}
-                  >
-                    View Website
-                  </Button>
+          <div className="relative space-y-6">
+            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+              <div className="flex items-start gap-4">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-default-200 bg-default-100 text-xl font-black text-obaol-600">
+                  {company?.logo ? <div role="img" aria-label={`${company?.name || "Company"} logo`} className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${company.logo})` }} /> : String(company?.name || "C").slice(0, 2).toUpperCase()}
                 </div>
-              ) : null}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl">{company?.name || "My Company"}</h1>
+                    <Chip color={String(company?.registrationStatus || "").toUpperCase() === "APPROVED" ? "success" : "warning"} variant="flat" size="sm">
+                      {String(company?.registrationStatus || "PENDING_REVIEW").replace(/_/g, " ")}
+                    </Chip>
+                    {isSupervisor ? <Chip color="warning" variant="flat" size="sm">Supervisor</Chip> : null}
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm text-default-500">{company?.description || company?.aboutUs || "Add a company description to help your team and trading partners understand the business."}</p>
+                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-default-500">
+                    <span className="inline-flex items-center gap-1.5"><LuMail />{company?.email || "Email not added"}</span>
+                    <span className="inline-flex items-center gap-1.5"><LuPhone />{company?.phone || "Phone not added"}</span>
+                    <span className="inline-flex items-center gap-1.5"><LuMapPin />{company?.address || company?.location?.label || "Location not added"}</span>
+                    <span className="inline-flex items-center gap-1.5"><LuBuilding />{company?.companyType?.name || company?.companyTypeName || "Company type not added"}</span>
+                    <span>Joined {formatDate(company?.createdAt)}</span>
+                    <span>Supervisor: {company?.supervisor?.name || (isSupervisor ? user?.name : "Not assigned")}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {previewUrl ? <Button color="warning" variant="flat" endContent={<LuArrowUpRight />} onPress={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}>{isWebsiteLive ? "View Website" : "Preview Website"}</Button> : null}
+                <Button variant="flat" onPress={() => router.push("/dashboard/settings")}>Company Settings</Button>
+              </div>
             </div>
-            <p className="text-default-600 text-sm">{company?.email || "-"} • {company?.phone || "-"}</p>
-            <p className="text-default-500 text-sm">{company?.address || "No address available."}</p>
+            <div className="flex flex-col gap-3 border-t border-default-200 pt-5 lg:flex-row lg:items-center lg:justify-between">
+              <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Company participation</p><p className="mt-1 text-xs text-default-500">Controls the primary workspace focus.</p></div>
+              <div className="flex flex-wrap gap-2">{(["BUY", "SELL", "BOTH", "SERVICE"] as const).map((mode) => <Button key={mode} size="sm" color={String(user?.tradeMode || "BOTH") === mode ? "warning" : "default"} variant={String(user?.tradeMode || "BOTH") === mode ? "solid" : "flat"} isLoading={tradeModeMutation.isPending && tradeModeMutation.variables === mode} onPress={() => tradeModeMutation.mutate(mode)}>{mode === "BUY" ? "Buy" : mode === "SELL" ? "Sell" : mode === "SERVICE" ? "Service Provider" : "Buy & Sell"}</Button>)}</div>
+            </div>
           </div>
         )}
-      </div>
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        {[
+          { label: "Profile complete", value: `${profileCompleteness}%`, icon: <LuCheck /> },
+          { label: "Company members", value: String(members.length || stats.associateCount || 0), icon: <LuUsers /> },
+          { label: "Live listings", value: String(stats.liveProductCount || 0), icon: <LuPackage /> },
+          { label: "Enquiries handled", value: String(enquiryCount), icon: <LuActivity /> },
+          { label: "Orders completed", value: String(completedOrderCount), icon: <LuLayoutDashboard /> },
+          { label: "Pending requests", value: String(interestStatusSummary.pending + interestStatusSummary.underReview), icon: <LuClipboardList /> },
+        ].map((item) => <CompanyMetricCard key={item.label} {...item} />)}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
+        <CompanyProfileReadiness percentage={profileCompleteness} checks={profileChecks} />
+        <div className="rounded-2xl border border-default-200 bg-content1 p-5 md:p-6"><h2 className="text-lg font-bold">Quick actions</h2><p className="mb-4 text-sm text-default-500">Continue common company tasks.</p><div className="grid gap-2">{[
+          ["Open commodity directory", "/dashboard/catalog", <LuGlobe key="globe" />], ["Manage trade listings", "/dashboard/product", <LuPackage key="package" />], ["Account settings", "/dashboard/settings", <LuBuilding key="building" />], ["Customer support", "/dashboard/customer-support", <LuUser key="user" />],
+        ].map(([label, href, icon]: any) => <Button key={href} variant="flat" className="justify-start" startContent={icon} endContent={<LuArrowUpRight className="ml-auto" />} onPress={() => router.push(href)}>{label}</Button>)}</div></div>
+      </section>
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Company Interests</h2>
+            <h2 className="text-xl font-semibold text-foreground">Company Capabilities</h2>
             <p className="text-sm text-default-600">
-              Execution opportunities are matched using approved company interests.
+              Approved onboarding categories shape the company workspace. Priority capabilities appear first.
             </p>
+            {interestsQuery.data?.updatedAt ? <p className="mt-1 text-xs text-default-400">Last updated {formatDate(interestsQuery.data.updatedAt)}</p> : null}
           </div>
-          <Button color="primary" variant="flat" onPress={() => setIsInterestModalOpen(true)}>
-            Request Interest Update
+          <Button color="primary" variant="flat" isDisabled={Boolean(latestPendingLikeReport)} onPress={openCapabilityEditor}>
+            {latestPendingLikeReport ? "Request Pending" : "Change Capabilities"}
           </Button>
         </div>
         <div className="mb-3">
@@ -828,18 +836,18 @@ export default function CompanyWorkspacePage() {
               {latestPendingLikeReport ? "Request sent and pending admin approval." : "Submitting request (syncing status...)"} 
             </div>
             <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
-              Previous pending/under-review requests were auto-cancelled. Latest request is now active.
+              Another request cannot be submitted until this request is reviewed.
             </div>
             <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
               Approval is completed by Admin from Dashboard &gt; Reports.
             </div>
             <div className="mt-1 text-xs text-obaol-700/90 dark:text-obaol-200/90">
-              Services requested:
+              Categories requested:
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               {pendingBannerRequestedInterests.map((interest) => (
                 <Chip key={`pending-interest-${interest}`} size="sm" color="warning" variant="flat">
-                  {interest.replace(/_/g, " ")}
+                  {capabilityById.get(interest)?.name || String(interest).replace(/[_-]/g, " ")}
                 </Chip>
               ))}
             </div>
@@ -848,17 +856,20 @@ export default function CompanyWorkspacePage() {
             </div>
           </div>
         )}
-        {companyInterests.length ? (
-          <div className="flex flex-wrap gap-2">
-            {companyInterests.map((interest: string) => (
-              <Chip key={interest} size="sm" color="primary" variant="flat">
-                {interest.replace(/_/g, " ")}
-              </Chip>
-            ))}
+        {approvedFunctionIds.length ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[...approvedFunctionIds].sort((a, b) => {
+              const ai = approvedPriorityIds.indexOf(a); const bi = approvedPriorityIds.indexOf(b);
+              return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+            }).map((id: string) => {
+              const capability = capabilityById.get(id);
+              const priority = approvedPriorityIds.indexOf(id);
+              return <div key={id} className="rounded-xl border border-default-200 bg-default-50/50 p-3"><div className="flex items-start justify-between gap-2"><p className="text-sm font-bold">{capability?.name || "Company category"}</p>{priority >= 0 ? <Chip size="sm" color="warning" variant="flat">Priority {priority + 1}</Chip> : null}</div><p className="mt-1 text-xs text-default-500">{capability?.description || "Approved company capability"}</p></div>;
+            })}
           </div>
         ) : (
           <p className="text-sm text-default-500">
-            No approved interests available yet. Submit an update request for admin approval in Dashboard &gt; Reports.
+            No approved capabilities available yet. Submit a change request for admin approval.
           </p>
         )}
       </div>
@@ -872,6 +883,8 @@ export default function CompanyWorkspacePage() {
           <div className="flex items-center justify-center py-8">
             <Spinner />
           </div>
+        ) : membersQuery.isError ? (
+          <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">Company members could not be loaded. Refresh the page to try again.</div>
         ) : members.length === 0 ? (
           <div className="py-6 text-default-500">No members found in your company.</div>
         ) : (
@@ -880,6 +893,7 @@ export default function CompanyWorkspacePage() {
               <thead className="bg-default-100/70">
                 <tr>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Name</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Designation</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Email</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Phone</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
@@ -894,7 +908,8 @@ export default function CompanyWorkspacePage() {
                       key={member?._id || idx}
                       className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
                     >
-                      <td className="px-3 py-2">{member?.name || "-"}</td>
+                      <td className="px-3 py-2"><div className="flex items-center gap-2"><span>{member?.name || "-"}</span>{String(member?._id || "") === supervisorId ? <Chip size="sm" color="warning" variant="flat">Supervisor</Chip> : null}</div></td>
+                      <td className="px-3 py-2 text-default-600">{member?.designationName || member?.designation?.name || "Associate"}</td>
                       <td className="px-3 py-2 text-default-600">{member?.email || "-"}</td>
                       <td className="px-3 py-2 text-default-600">{member?.phone || "-"}</td>
                       <td className="px-3 py-2">
@@ -924,24 +939,25 @@ export default function CompanyWorkspacePage() {
 
       <div className="rounded-xl border border-default-200 bg-content1 p-4 md:p-6">
         <div className="mb-4">
-          <h2 className="text-xl font-semibold text-foreground">Interest Update Requests</h2>
-          <p className="text-sm text-default-600">Track company interest change requests and their admin status.</p>
+          <h2 className="text-xl font-semibold text-foreground">Capability Request Tracking</h2>
+          <p className="text-sm text-default-600">See what was requested, who submitted it, and the admin decision.</p>
         </div>
         {reportsQuery.isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Spinner />
           </div>
         ) : interestReports.length === 0 ? (
-          <div className="py-6 text-default-500">No interest update requests submitted yet.</div>
+          <div className="py-6 text-default-500">No capability update requests submitted yet.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-sm">
               <thead className="bg-default-100/70">
                 <tr>
-                  <th className="text-left px-3 py-2 font-semibold text-default-700">Requested Interests</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Requested Categories</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Submitted By</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Status</th>
                   <th className="text-left px-3 py-2 font-semibold text-default-700">Admin Notes</th>
-                  <th className="text-left px-3 py-2 font-semibold text-default-700">Created</th>
+                  <th className="text-left px-3 py-2 font-semibold text-default-700">Timeline</th>
                 </tr>
               </thead>
               <tbody>
@@ -952,22 +968,24 @@ export default function CompanyWorkspacePage() {
                   >
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-1">
-                        {Array.isArray(report?.payload?.requestedInterests) && report.payload.requestedInterests.length > 0
-                          ? report.payload.requestedInterests.map((interest: string) => (
-                              <Chip key={`${report?._id}-${interest}`} size="sm" color="primary" variant="flat">
-                                {String(interest || "").replace(/_/g, " ")}
-                              </Chip>
-                            ))
+                        {Array.isArray(report?.payload?.requestedCompanyFunctionIds) && report.payload.requestedCompanyFunctionIds.length > 0
+                          ? report.payload.requestedCompanyFunctionIds.map((id: string) => {
+                              const priority = (report?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
+                              return <Chip key={`${report?._id}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityById.get(String(id))?.name || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>;
+                            })
+                          : Array.isArray(report?.payload?.requestedInterests) && report.payload.requestedInterests.length > 0
+                            ? report.payload.requestedInterests.map((interest: string) => <Chip key={`${report?._id}-${interest}`} size="sm" color="default" variant="flat">{String(interest || "").replace(/_/g, " ")}</Chip>)
                           : "-"}
                       </div>
                     </td>
+                    <td className="px-3 py-2 text-default-600">{report?.reporterAssociateId?.name || "Company member"}</td>
                     <td className="px-3 py-2">
                       <Chip size="sm" variant="flat" color={statusColor(report?.status) as any}>
                         {report?.status || "PENDING_REVIEW"}
                       </Chip>
                     </td>
                     <td className="px-3 py-2 text-default-600">{report?.adminNotes || "-"}</td>
-                    <td className="px-3 py-2 text-default-600">{formatDate(report?.createdAt)}</td>
+                    <td className="px-3 py-2 text-default-600"><div>Submitted {formatDate(report?.createdAt)}</div>{report?.reviewedAt ? <div className="mt-1 text-xs">Reviewed {formatDate(report.reviewedAt)}{report?.reviewedBy?.name ? ` by ${report.reviewedBy.name}` : ""}</div> : null}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1091,34 +1109,30 @@ export default function CompanyWorkspacePage() {
         onOpenChange={(open) => {
           if (!open) {
             setIsInterestModalOpen(false);
-            setRequestedInterests([]);
+            setRequestedFunctionIds([]);
+            setRequestedFunctionPriorities([]);
             setInterestNote("");
           }
         }}
         isDismissable={false}
         isKeyboardDismissDisabled
       >
-        <ModalContent>
-          <ModalHeader>Request Company Interest Update</ModalHeader>
-          <ModalBody>
-            <Select
-              label="Requested Interests"
-              labelPlacement="outside"
-              selectionMode="multiple"
-              selectedKeys={new Set(requestedInterests)}
-              onSelectionChange={(keys) =>
-                setRequestedInterests(Array.from(keys as Set<string>).map((value) => String(value)))
-              }
-            >
-              {INTEREST_OPTIONS.map((interest) => (
-                <SelectItem key={interest} value={interest}>
-                  {interest.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </Select>
-            <p className="text-xs text-default-500">
-              Select one or more interests. Submit to admin for approval.
-            </p>
+        <ModalContent className="max-w-3xl">
+          <ModalHeader className="flex flex-col items-start gap-1"><span>Change Company Capabilities</span><span className="text-xs font-normal text-default-500">Select 1–6 onboarding categories and rank up to three priorities.</span></ModalHeader>
+          <ModalBody className="max-h-[70vh] overflow-y-auto">
+            {registerOptionsQuery.isLoading ? <div className="flex justify-center py-10"><Spinner /></div> : registerOptionsQuery.isError ? <div className="rounded-xl bg-danger-50 p-4 text-sm text-danger-700">Capability options could not be loaded. Try again.</div> : <div className="grid gap-2 sm:grid-cols-2">
+              {capabilityOptions.map((capability: any) => {
+                const id = String(capability?._id || "");
+                const selected = requestedFunctionIds.includes(id);
+                const priority = requestedFunctionPriorities.indexOf(id);
+                const disabled = !selected && requestedFunctionIds.length >= 6;
+                return <div key={id} role="button" tabIndex={disabled ? -1 : 0} aria-pressed={selected} onClick={() => !disabled && toggleRequestedFunction(id)} onKeyDown={(event) => { if (!disabled && (event.key === "Enter" || event.key === " ")) toggleRequestedFunction(id); }} className={`cursor-pointer rounded-xl border p-3 transition ${selected ? "border-obaol-500 bg-obaol-500/10" : disabled ? "cursor-not-allowed border-default-100 opacity-40" : "border-default-200 hover:border-obaol-500/50"}`}>
+                  <div className="flex items-start justify-between gap-3"><div className="flex gap-2"><span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${selected ? "border-obaol-500 bg-obaol-500 text-black" : "border-default-300"}`}>{selected ? <LuCheck size={12} /> : null}</span><div><p className="text-sm font-bold">{capability?.name}</p><p className="mt-1 text-xs text-default-500">{capability?.description || "Company capability"}</p></div></div>{priority >= 0 ? <Chip size="sm" color="warning" variant="flat">P{priority + 1}</Chip> : null}</div>
+                  {selected && priority < 0 && <button type="button" className="mt-2 text-xs font-semibold text-obaol-600" onClick={(event) => { event.stopPropagation(); setRequestedFunctionPriorities((current) => [...current.slice(0, 2), id]); }}>Set as priority</button>}
+                </div>;
+              })}
+            </div>}
+            <div className="rounded-xl border border-default-200 bg-default-50/50 p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-default-400">Priority order (1–3)</p>{requestedFunctionPriorities.length ? <div className="mt-3 space-y-2">{requestedFunctionPriorities.map((id, index) => <div key={id} className="flex items-center justify-between rounded-lg bg-content1 px-3 py-2"><div className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-obaol-500 text-xs font-black text-black">{index + 1}</span><span className="text-sm font-semibold">{capabilityById.get(id)?.name || "Selected category"}</span></div><div className="flex gap-1"><Button isIconOnly size="sm" variant="light" isDisabled={index === 0} onPress={() => moveRequestedPriority(id, -1)} aria-label="Move priority up"><LuChevronUp /></Button><Button isIconOnly size="sm" variant="light" isDisabled={index === requestedFunctionPriorities.length - 1} onPress={() => moveRequestedPriority(id, 1)} aria-label="Move priority down"><LuChevronDown /></Button></div></div>)}</div> : <p className="mt-2 text-xs text-default-500">Selected categories are automatically added here until all three priority slots are filled.</p>}</div>
             <Textarea
               label="Note (Optional)"
               labelPlacement="outside"
@@ -1135,7 +1149,7 @@ export default function CompanyWorkspacePage() {
             <Button
               color="primary"
               isLoading={interestRequestMutation.isPending}
-              isDisabled={requestedInterests.length === 0}
+              isDisabled={requestedFunctionIds.length === 0 || Boolean(latestPendingLikeReport)}
               onPress={() => interestRequestMutation.mutate()}
             >
               Submit Request

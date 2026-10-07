@@ -19,6 +19,7 @@ import {
 import { getData, patchData } from "@/core/api/apiHandler";
 import { apiRoutes } from "@/core/api/apiRoutes";
 import { showToastMessage } from "@/utils/utils";
+import { fetchRegisterOptions } from "@/utils/registerOptions";
 
 const STATUS_OPTIONS = [
   "ALL",
@@ -74,6 +75,14 @@ export default function ReportsPage() {
       return response?.data?.data?.data || [];
     },
   });
+  const capabilityOptionsQuery = useQuery({
+    queryKey: ["reports-company-capability-options"],
+    queryFn: fetchRegisterOptions,
+    staleTime: 5 * 60 * 1000,
+  });
+  const capabilityNameById = useMemo(() => new Map(
+    (capabilityOptionsQuery.data?.companyFunctions || []).map((item: any) => [String(item?._id || ""), String(item?.name || "Company category")])
+  ), [capabilityOptionsQuery.data]);
 
   const reportsQuery = useQuery({
     queryKey: ["admin-reports", status, search, companyId, page, limit],
@@ -272,7 +281,12 @@ export default function ReportsPage() {
                     <td className="px-3 py-2">{row?.reporterAssociateId?.name || "-"}</td>
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-1">
-                        {Array.isArray(row?.payload?.requestedInterests) && row.payload.requestedInterests.length > 0 ? (
+                        {Array.isArray(row?.payload?.requestedCompanyFunctionIds) && row.payload.requestedCompanyFunctionIds.length > 0 ? (
+                          row.payload.requestedCompanyFunctionIds.map((id: string) => {
+                            const priority = (row?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
+                            return <Chip key={`${row?._id}-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityNameById.get(String(id)) || "Company category"}{priority >= 0 ? ` · P${priority + 1}` : ""}</Chip>;
+                          })
+                        ) : Array.isArray(row?.payload?.requestedInterests) && row.payload.requestedInterests.length > 0 ? (
                           row.payload.requestedInterests.map((interest: string) => (
                             <Chip key={`${row?._id}-${interest}`} size="sm" color="primary" variant="flat">
                               {String(interest || "").replace(/_/g, " ")}
@@ -425,7 +439,12 @@ export default function ReportsPage() {
               <div>
                 <div className="text-sm font-medium text-default-700 mb-2">Requested Interests</div>
                 <div className="flex flex-wrap gap-2">
-                  {Array.isArray(activeReport?.payload?.requestedInterests) && activeReport.payload.requestedInterests.length > 0 ? (
+                  {Array.isArray(activeReport?.payload?.requestedCompanyFunctionIds) && activeReport.payload.requestedCompanyFunctionIds.length > 0 ? (
+                    activeReport.payload.requestedCompanyFunctionIds.map((id: string) => {
+                      const priority = (activeReport?.payload?.requestedCompanyFunctionPriorities || []).map(String).indexOf(String(id));
+                      return <Chip key={`function-${id}`} size="sm" color={priority >= 0 ? "warning" : "primary"} variant="flat">{capabilityNameById.get(String(id)) || "Company category"}{priority >= 0 ? ` · Priority ${priority + 1}` : ""}</Chip>;
+                    })
+                  ) : Array.isArray(activeReport?.payload?.requestedInterests) && activeReport.payload.requestedInterests.length > 0 ? (
                     activeReport.payload.requestedInterests.map((interest: string) => (
                       <Chip key={`interest-${interest}`} size="sm" color="primary" variant="flat">
                         {String(interest || "").replace(/_/g, " ")}

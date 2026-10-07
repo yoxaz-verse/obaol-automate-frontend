@@ -246,6 +246,18 @@ test("dashboard discovery uses Trade Listings terminology", () => {
   assert.equal(access.includes('label: "Commodity Directory"'), true);
   assert.equal(discovery.includes("Trade Listing Discovery"), true);
   assert.equal(discovery.includes('aria-label="Trade listing status"'), true);
+  assert.equal(discovery.includes('title="Today’s Live"'), true);
+});
+
+test("marketplace rates are revealed explicitly and past enquiries warn buyers", () => {
+  const rates = read("../src/components/dashboard/Catalog/variant-rate.tsx");
+  const access = read("../src/utils/dashboardAccess.ts");
+  assert.equal(rates.includes("Reveal Rate"), true);
+  assert.equal(rates.includes("Previous listed price"), true);
+  assert.equal(rates.includes("This is an older listing"), true);
+  assert.equal(rates.includes("Continue with Enquiry"), true);
+  assert.equal(rates.includes("The seller has been asked to confirm the latest price and product availability."), true);
+  assert.equal(access.includes('path: "/dashboard/rate-interest"'), true);
 });
 
 test("variant rate wizard Commodity Directory CTA opens Commodity Directory", () => {

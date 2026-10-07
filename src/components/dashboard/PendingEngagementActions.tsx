@@ -171,10 +171,9 @@ export default function PendingEngagementActions({ user }: Props) {
               {marketplaceRates.map((row: any) => {
                 const productName = String(row?.productVariantId?.product?.name || "Product");
                 const variantName = String(row?.productVariantId?.name || "Variant");
-                const price = Number(row?.rate || 0);
                 return (
                   <SelectItem key={String(row?._id || "")} textValue={`${productName} ${variantName}`}>
-                    {`${productName} - ${variantName} (Base INR ${price})`}
+                    {`${productName} - ${variantName}`}
                   </SelectItem>
                 );
               })}

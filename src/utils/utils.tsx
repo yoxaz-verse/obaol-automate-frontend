@@ -80,6 +80,11 @@ export const sidebarOptions = [
     link: "/dashboard/marketplace",
   },
   {
+    name: "Rate Interest",
+    icon: <FiActivity />,
+    link: "/dashboard/rate-interest",
+  },
+  {
     name: "Imports",
     icon: <LuShip />,
     link: "/dashboard/imports",

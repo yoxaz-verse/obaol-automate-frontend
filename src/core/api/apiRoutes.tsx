@@ -94,7 +94,7 @@ const createCRUDRoutes = (basePath: string) => ({
 // Helper function to add custom routes to the standard CRUD routes
 const addCustomRoutes = (
   crudRoutes: Record<string, string>,
-  customRoutes: Record<string, string>
+  customRoutes: Record<string, any>
 ) => ({
   ...crudRoutes,
   ...customRoutes,
@@ -235,6 +235,8 @@ export const variantRateRoutes = addCustomRoutes(
   {
     count: `${BASE_PATHS.VARIANT_RATE}/associateCompany`,
     marketplaceStats: `${BASE_PATHS.VARIANT_RATE}/marketplace-stats`,
+    reveal: (id: string) => `${BASE_PATHS.VARIANT_RATE}/${id}/reveal`,
+    rateInterestAnalytics: `${BASE_PATHS.VARIANT_RATE}/rate-interest/analytics`,
   }
 );
 export const displayedRateRoutes = createCRUDRoutes(BASE_PATHS.DISPLAYED_RATE);

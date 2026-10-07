@@ -20,6 +20,7 @@ type Props = {
   state: MarketplaceFilterState;
   onStateChange: (next: MarketplaceFilterState) => void;
   activeTheme?: ClassificationTheme;
+  hideLocation?: boolean;
 };
 
 const MarketplaceFilterBar: React.FC<Props> = ({
@@ -27,6 +28,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
   state,
   onStateChange,
   activeTheme,
+  hideLocation = false,
 }) => {
   const resolvedTheme = activeTheme || resolveActiveClassificationTheme([]);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -57,7 +59,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
         <div className="w-full">
           <Input
             size="sm"
-            placeholder={`Search ${activeTab === "marketplace-live" ? "current trade listings" : "past trade listings"}...`}
+            placeholder={`Search ${activeTab === "marketplace-live" ? "today’s live listings" : "past trade listings"}...`}
             startContent={<FiSearch className="text-default-400" />}
             value={state.search || ""}
             onValueChange={setSearch}
@@ -70,7 +72,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
           />
         </div>
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <div className="w-full">
+          {!hideLocation && <div className="w-full">
             <Input
               size="sm"
               placeholder="Filter by location..."
@@ -81,7 +83,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
                 inputWrapper: "bg-default-100/60",
               }}
             />
-          </div>
+          </div>}
           <div className="flex justify-end">
           <Button size="sm" variant="light" color="danger" onPress={clearCurrentTab}>
             Clear
@@ -94,7 +96,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
           <div className="flex-1 min-w-0">
             <Input
               size="sm"
-              placeholder={`Search ${activeTab === "marketplace-live" ? "current trade listings" : "past trade listings"}...`}
+              placeholder={`Search ${activeTab === "marketplace-live" ? "today’s live listings" : "past trade listings"}...`}
               startContent={<FiSearch className="text-default-400" />}
               value={state.search || ""}
               onValueChange={setSearch}
@@ -128,7 +130,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
             <>
               <ModalHeader className="pb-2 text-base font-bold">Filters</ModalHeader>
               <ModalBody className="gap-3 pb-5">
-                <Input
+                {!hideLocation && <Input
                   size="sm"
                   placeholder="Filter by location..."
                   value={String(state?.filters?.location || "")}
@@ -137,7 +139,7 @@ const MarketplaceFilterBar: React.FC<Props> = ({
                   classNames={{
                     inputWrapper: "bg-default-100/60",
                   }}
-                />
+                />}
                 <Button
                   size="sm"
                   variant="light"

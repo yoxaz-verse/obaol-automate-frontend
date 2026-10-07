@@ -322,6 +322,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   type ViewMode = "grid" | "list" | "table" | "compact";
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [revealedPrices, setRevealedPrices] = useState<Record<string, number>>({});
+  const [revealingRateId, setRevealingRateId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const limit = isMarketplaceView ? 24 : 24;
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
@@ -381,6 +383,63 @@ const VariantRate: React.FC<VariantRateProps> = ({
     const timer = window.setTimeout(() => setInventoryStatusReady(true), 350);
     return () => window.clearTimeout(timer);
   }, [showInventoryStatus, inventoryCompanyId, user?.id]);
+
+  useEffect(() => {
+    if (!isMarketplaceView || typeof window === "undefined") return;
+    try {
+      setRevealedPrices(JSON.parse(sessionStorage.getItem("obaol:revealed-rates") || "{}"));
+    } catch {
+      setRevealedPrices({});
+    }
+  }, [isMarketplaceView]);
+
+  const getRevealSessionId = () => {
+    const key = "obaol:rate-reveal-session";
+    let id = sessionStorage.getItem(key);
+    if (!id) {
+      id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      sessionStorage.setItem(key, id);
+    }
+    return id;
+  };
+
+  const revealMarketplaceRate = async (item: any) => {
+    const id = String(item?._id || "");
+    if (!id || revealingRateId) return;
+    setRevealingRateId(id);
+    try {
+      const response: any = await postData(variantRateRoutes.reveal(id), { sessionId: getRevealSessionId() });
+      const finalPrice = Number(response?.data?.data?.finalPrice ?? response?.data?.finalPrice);
+      if (!Number.isFinite(finalPrice)) throw new Error("The rate could not be loaded.");
+      setRevealedPrices((current) => {
+        const next = { ...current, [id]: finalPrice };
+        sessionStorage.setItem("obaol:revealed-rates", JSON.stringify(next));
+        return next;
+      });
+    } catch (error: any) {
+      showToastMessage({ type: "error", message: error?.response?.data?.message || error?.message || "Unable to reveal this rate." });
+    } finally {
+      setRevealingRateId(null);
+    }
+  };
+
+  const marketplacePrice = (item: any, compact = false) => {
+    const id = String(item?._id || "");
+    const isGated = isMarketplaceView && isAssociateUser;
+    const price = isGated ? revealedPrices[id] : item.rawBasePrice;
+    if (isGated && price === undefined) {
+      return (
+        <Button size="sm" color="warning" variant="flat" className="font-bold" isLoading={revealingRateId === id} onPress={() => revealMarketplaceRate(item)}>
+          Reveal Rate
+        </Button>
+      );
+    }
+    return (
+      <div className={compact ? "text-sm font-bold text-obaol-500" : "text-base sm:text-xl font-black text-obaol-500 drop-shadow-md"}>
+        {formatRate(price)}
+      </div>
+    );
+  };
 
   const { data: variantResponse } = useQuery({
     queryKey: ["displayedRate", user?.id],
@@ -800,11 +859,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                 isOwner && !isMarketplace ? supplierRate : totalRate;
 
               const productVariantLabel = String(
-                (
-                  (item.productVariant?.product?.name || "") +
-                  " " +
-                  (item.productVariant?.name || item.productVariantName || "")
-                ).trim() || "N/A",
+                item.productVariant?.name || item.productVariantName || "Standard",
               );
               const productClassifications = extractClassifications(
                 item.productVariant?.product,
@@ -1532,8 +1587,8 @@ const VariantRate: React.FC<VariantRateProps> = ({
                           <tr className="border-b border-white/5 bg-black/20 text-[10px] text-default-500 font-bold uppercase tracking-widest">
                             <th className="py-4 px-6 w-32">Status / Class</th>
                             <th className="py-4 px-6">Product & Variant</th>
-                            <th className="py-4 px-6">Final Price</th>
-                            <th className="py-4 px-6">Stock / Loc</th>
+                            <th className="py-4 px-6">Rate</th>
+                            <th className="py-4 px-6">{isAssociateUser && isMarketplaceView ? "Stock" : "Stock / Loc"}</th>
                             <th className="py-4 px-6 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -1698,17 +1753,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 </td>
                                 <td className="py-4 px-6 align-top">
                                   <div className="flex flex-col gap-1 min-w-0">
-                                    <p
-                                      className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                    <h4
+                                      className="text-sm sm:text-lg font-black text-foreground leading-tight truncate"
                                       title={toDisplayText(
                                         item.product,
                                         "Product",
                                       )}
                                     >
                                       {toDisplayText(item.product, "Product")}
-                                    </p>
-                                    <h4
-                                      className="text-sm font-black text-foreground leading-tight truncate"
+                                    </h4>
+                                    <p
+                                      className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                       title={toDisplayText(
                                         item.productVariant,
                                         "Variant",
@@ -1718,7 +1773,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                         item.productVariant,
                                         "Variant",
                                       )}
-                                    </h4>
+                                    </p>
                                     {shouldShowAssociateDetails && (
                                       <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                                         <FiUser
@@ -1739,9 +1794,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   </div>
                                 </td>
                                 <td className="py-4 px-6 align-top whitespace-nowrap">
-                                  <div className="text-base font-black text-obaol-500 drop-shadow-md">
-                                    {formatRate(item.rawBasePrice)}
-                                  </div>
+                                  {marketplacePrice(item)}
                                 </td>
                                 <td className="py-4 px-6 align-top">
                                   <div className="flex flex-col gap-1">
@@ -1955,17 +2008,17 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 />
 
                                 <div className="flex-1 flex flex-col gap-1 min-w-0">
-                                  <p
-                                    className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                  <h4
+                                    className="text-sm sm:text-lg font-black text-foreground leading-tight truncate"
                                     title={toDisplayText(
                                       item.product,
                                       "Product",
                                     )}
                                   >
                                     {toDisplayText(item.product, "Product")}
-                                  </p>
-                                  <h4
-                                    className="text-sm sm:text-lg font-black text-foreground leading-tight truncate"
+                                  </h4>
+                                  <p
+                                    className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                     title={toDisplayText(
                                       item.productVariant,
                                       "Variant",
@@ -1975,7 +2028,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                       item.productVariant,
                                       "Variant",
                                     )}
-                                  </h4>
+                                  </p>
                                   {shouldShowAssociateDetails && (
                                     <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                                       <FiUser
@@ -2002,11 +2055,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                 <div className="flex items-center gap-6">
                                   <div className="flex flex-col gap-1">
                                     <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
-                                      Final Price
+                                      {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
                                     </span>
-                                    <div className="text-base sm:text-xl font-black text-obaol-500 drop-shadow-md">
-                                      {formatRate(item.rawBasePrice)}
-                                    </div>
+                                    {marketplacePrice(item)}
                                   </div>
 
                                   <div className="flex flex-col items-end gap-1 shrink-0 w-20">
@@ -2059,11 +2110,11 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className={`shrink-0 w-2 h-2 rounded-full ${isLive ? "bg-success-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]" : "bg-default-300"}`} />
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
-                                  <span className="text-[10px] font-bold text-obaol-500 uppercase tracking-widest truncate w-24 sm:w-auto">
+                                  <span className="text-xs sm:text-sm font-black text-foreground truncate w-32 sm:w-auto">
                                     {toDisplayText(item.product, "Product")}
                                   </span>
                                   <span className="hidden sm:inline text-default-500 text-xs">/</span>
-                                  <span className="text-xs sm:text-sm font-black text-foreground truncate max-w-[200px]">
+                                  <span className="text-[10px] font-semibold text-obaol-500 uppercase tracking-widest truncate max-w-[200px]">
                                     {toDisplayText(item.productVariant, "Variant")}
                                   </span>
                                 </div>
@@ -2073,9 +2124,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                   <span className="text-[10px] text-default-400 w-12 text-right">
                                     {item.inventoryQty || item.quantity || "-"}
                                   </span>
-                                  <span className="text-sm font-bold text-obaol-400 w-24 text-right tabular-nums">
-                                    {formatRate(item.rawBasePrice)}
-                                  </span>
+                                  <span className="min-w-24 text-right">{marketplacePrice(item, true)}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   {actionButtons}
@@ -2128,14 +2177,14 @@ const VariantRate: React.FC<VariantRateProps> = ({
 
                               {/* Product Details */}
                               <div className="flex flex-col gap-1 mt-1">
-                                <p
-                                  className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
+                                <h4
+                                  className="text-sm sm:text-lg font-black text-foreground leading-tight line-clamp-2"
                                   title={toDisplayText(item.product, "Product")}
                                 >
                                   {toDisplayText(item.product, "Product")}
-                                </p>
-                                <h4
-                                  className="text-sm sm:text-lg font-black text-foreground leading-tight line-clamp-2"
+                                </h4>
+                                <p
+                                  className="text-[10px] sm:text-xs font-semibold text-obaol-500 uppercase tracking-widest truncate"
                                   title={toDisplayText(
                                     item.productVariant,
                                     "Variant",
@@ -2145,7 +2194,7 @@ const VariantRate: React.FC<VariantRateProps> = ({
                                     item.productVariant,
                                     "Variant",
                                   )}
-                                </h4>
+                                </p>
                                 {shouldShowAssociateDetails && (
                                   <div className="flex items-center gap-1.5 mt-2 overflow-hidden">
                                     <FiUser
@@ -2171,11 +2220,9 @@ const VariantRate: React.FC<VariantRateProps> = ({
                               <div className="catalog-card-pricing flex min-w-0 justify-between items-end gap-3">
                                 <div className="flex min-w-0 flex-col gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
-                                    Final Price
+                                    {isMarketplaceView && !isLive ? "Previous listed price" : "Final Price"}
                                   </span>
-                                  <div className="truncate text-base sm:text-xl font-black text-obaol-500 drop-shadow-md" title={formatRate(item.rawBasePrice)}>
-                                    {formatRate(item.rawBasePrice)}
-                                  </div>
+                                  {marketplacePrice(item)}
                                 </div>
                                 <div className="catalog-card-stock flex min-w-0 flex-col items-end gap-1">
                                   <span className="text-[8px] sm:text-[10px] font-bold text-default-400 uppercase tracking-widest">
@@ -3426,26 +3473,41 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
   productVariant,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const staleWarning = useDisclosure();
+  const beginEnquiry = () => variantRate?.isLive ? onOpen() : staleWarning.onOpen();
 
   return (
     <div className="flex flex-col items-center gap-2 ">
-      <Tooltip
-        content={
-          <span className="text-[10px] font-black uppercase tracking-widest px-1">
-            Initialize Enquiry Protocol
-          </span>
-        }
-        closeDelay={0}
-        className="bg-[#0E0D0A] border border-white/10 rounded-lg shadow-2xl"
+      <Button
+        size="sm"
+        color="primary"
+        variant="flat"
+        className="font-bold"
+        startContent={<LuMessageSquare size={16} />}
+        onPress={beginEnquiry}
       >
-        <span
-          onClick={onOpen}
-          className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 cursor-pointer active:scale-90 transition-all duration-300"
-        >
-          <LuMessageSquare size={22} className="text-primary-600/80" />
-          <div className="h-[2px]" />
-        </span>
-      </Tooltip>
+        Enquire
+      </Button>
+      <Modal isOpen={staleWarning.isOpen} onOpenChange={staleWarning.onOpenChange} placement="center" backdrop="blur">
+        <ModalContent>
+          {(closeWarning) => (
+            <>
+              <ModalHeader>This is an older listing</ModalHeader>
+              <ModalBody>
+                <p className="text-sm text-default-600">
+                  The displayed price is from a past listing and may no longer be valid. If you continue, the seller will be notified and asked to confirm the latest price and product availability.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={closeWarning}>Cancel</Button>
+                <Button color="warning" className="font-bold" onPress={() => { closeWarning(); onOpen(); }}>
+                  Continue with Enquiry
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
       {/* @ts-ignore */}
       <Modal
         placement="center"
@@ -3819,9 +3881,9 @@ const AddEnquiryForm: React.FC<AddEnquiryFormProps> = ({
             Enquiry Created
           </h3>
           <p className="text-default-500 max-w-[360px] text-sm leading-relaxed">
-            Your enquiry for {variantRate.product} was created successfully.
-            Continue to enquiry details to proceed with responses, negotiation,
-            and execution.
+            {variantRate?.isLive
+              ? `Your enquiry for ${variantRate.product} was created successfully. Continue to enquiry details to proceed with responses, negotiation, and execution.`
+              : `Your enquiry for ${variantRate.product} was created successfully. The seller has been asked to confirm the latest price and product availability.`}
           </p>
         </div>
         <div className="w-full max-w-[420px] rounded-2xl border border-primary-300/35 bg-primary-500/10 px-4 py-3 text-left">

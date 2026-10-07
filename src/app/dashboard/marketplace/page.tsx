@@ -142,7 +142,7 @@ export default function MarketplacePage() {
                 {isAdmin && (
                         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                         <StatCard label="Total Listings" value={displayCount(totalCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
-                        <StatCard label="Current Listings" value={displayCount(liveCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
+                        <StatCard label="Today’s Live" value={displayCount(liveCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
                         <div className="hidden sm:block">
                             <StatCard label="Past Listings" value={displayCount(offlineCount)} themeClass={activeTheme.shellClass} borderClass={activeTheme.shellBorderClass} />
                         </div>
@@ -156,6 +156,7 @@ export default function MarketplacePage() {
                             state={activeState}
                             onStateChange={setActiveState}
                             activeTheme={activeTheme}
+                            hideLocation={isAssociateUser}
                         />
                         <div className="mb-4 overflow-x-auto">
                             <TabsAny
@@ -232,7 +233,7 @@ export default function MarketplacePage() {
                                         tabContent: "font-semibold uppercase tracking-wider text-[11px] text-default-400 group-data-[selected=true]:text-primary group-data-[selected=true]:scale-105 transition-transform"
                                     }}
                                 >
-                                    <TabAny key={"marketplace-live"} title="Current Listings">
+                                    <TabAny key={"marketplace-live"} title="Today’s Live">
                                         {/* @ts-ignore */}
                                         <Spacer y={4} />
                                         {loadedTabs["marketplace-live"] && (

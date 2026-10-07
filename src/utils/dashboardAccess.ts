@@ -101,6 +101,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
 
   { path: "/dashboard/approvals", label: "Approvals", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/reports", label: "Reports", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/rate-interest", label: "Rate Interest", section: "Operations/Admin", navGroup: "Governance", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/payments", label: "Payment Rules", section: "Operations/Admin", navGroup: "Rules & Automation", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-rules", label: "Documentation Rules", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/documentation-preview", label: "Documentation Preview", section: "Operations/Admin", navGroup: "Documentation & Templates", roles: ["admin"], nav: true, searchable: true },

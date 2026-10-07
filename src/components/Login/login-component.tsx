@@ -8,14 +8,14 @@ import {
   Input,
 } from "@nextui-org/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { FiAlertCircle, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiUsers } from "react-icons/fi";
+import { FiAlertCircle, FiArrowLeft, FiArrowRight, FiBriefcase, FiCheck, FiInfo, FiKey, FiMail, FiUsers } from "react-icons/fi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import AuthContext from "@/context/AuthContext";
 import AuthLayout from "../Auth/AuthLayout";
 import BrandedLoader from "@/components/ui/BrandedLoader";
 import { useSoundEffect } from "@/context/SoundContext";
-import { postData } from "@/core/api/apiHandler";
+import { getData, postData } from "@/core/api/apiHandler";
 import { baseUrl } from "@/core/api/axiosInstance";
 import { clearGoogleButton, loadGoogleGsi, renderGoogleButton } from "@/utils/googleGsi";
 import { browserSupportsWebAuthn, startAuthentication } from "@simplewebauthn/browser";
@@ -61,6 +61,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const [passwordCooldown, setPasswordCooldown] = useState<LoginCooldownState | null>(null);
   const [passkeySupport, setPasskeySupport] = useState<"checking" | "supported" | "unsupported">("checking");
   const [passkeyLoginStatus, setPasskeyLoginStatus] = useState<"idle" | "loading">("idle");
+  const [loginStep, setLoginStep] = useState<"email" | "credentials">("email");
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
+  const [mismatchedRole, setMismatchedRole] = useState<"Associate" | "Operator" | "">("");
 
   const normalizeSignupError = (message: string) => {
     const raw = String(message || "");
@@ -88,6 +91,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   const { play } = useSoundEffect();
   const roleLower = String(role || "").toLowerCase();
   const authMode = mode;
+  const isTwoStepLogin = authMode === "login" && ["associate", "operator", "team"].includes(roleLower);
 
   const inputClasses = {
     label: "text-[10px] font-black uppercase tracking-[0.2em] text-default-400 mb-2 ml-1",
@@ -113,7 +117,6 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   }, []);
 
   useEffect(() => {
-    if (authMode !== "login") return;
     const prefill = String(searchParams?.get("prefill") || "").trim();
     if (!prefill) return;
     setEmail((prev) => (prev ? prev : prefill));
@@ -256,6 +259,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
   useEffect(() => {
     if (!googleReady) return;
     if (roleLower !== "associate" && roleLower !== "operator" && roleLower !== "team") return;
+    if (isTwoStepLogin && loginStep !== "email") return;
     const containerId = authMode === "signup" ? `google-signup-${roleLower}` : `google-login-${roleLower}`;
 
     let mounted = true;
@@ -289,7 +293,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       window.removeEventListener("pageshow", onPageShow);
       clearGoogleButton(containerId);
     };
-  }, [googleReady, role, googleClientId, authMode, roleLower, handleGoogleCredential]);
+  }, [googleReady, role, googleClientId, authMode, roleLower, handleGoogleCredential, isTwoStepLogin, loginStep]);
 
   const handleGoogleReload = async () => {
     const containerId = authMode === "signup" ? `google-signup-${roleLower}` : `google-login-${roleLower}`;
@@ -316,9 +320,81 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
+  const resetLoginMethodState = () => {
+    setPassword("");
+    setOtp("");
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpAttempted(false);
+    setOtpExpiresAt(null);
+    setResendAvailableAt(null);
+    setPasswordCooldown(null);
+    setLoginMethod("password");
+    setLoginStatus("idle");
+    setErrorMessage("");
+  };
+
+  const returnToEmailStep = () => {
+    resetLoginMethodState();
+    setLoginStep("email");
+    setMismatchedRole("");
+    setShowNotFoundCta(false);
+    setNotFoundEmail("");
+  };
+
+  const handleEmailContinue = async () => {
+    if (!email.trim()) {
+      setErrorMessage("Email is required.");
+      return;
+    }
+    if (!isInvalidEmail) {
+      setErrorMessage("Enter a valid email address.");
+      return;
+    }
+    setIsLoading(true);
+    setErrorMessage("");
+    setMismatchedRole("");
+    setShowNotFoundCta(false);
+    try {
+      const response = await getData("/auth/email-status", { email: email.trim() }, { cacheMode: "bypass" });
+      const accountRole = String(response?.data?.role || "");
+      const expectedRole = roleLower === "operator" || roleLower === "team" ? "Operator" : "Associate";
+      if (!response?.data?.exists) {
+        setNotFoundEmail(email.trim());
+        setShowNotFoundCta(true);
+        setErrorMessage(`No ${expectedRole.toLowerCase()} account was found for this email.`);
+        return;
+      }
+      if (accountRole !== expectedRole) {
+        if (accountRole === "Associate" || accountRole === "Operator") {
+          setMismatchedRole(accountRole);
+          setErrorMessage(`This email belongs to an ${accountRole} account.`);
+        } else {
+          setErrorMessage("This email belongs to a staff account. Use the appropriate staff sign-in page.");
+        }
+        return;
+      }
+      resetLoginMethodState();
+      setLoginStep("credentials");
+    } catch (error: any) {
+      const backendData = error?.response?.data;
+      const message = backendData?.status === "blocked"
+        ? BLOCKED_ACCOUNT_COPY
+        : backendData?.message || "Unable to verify this email. Please try again.";
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
+    if (isTwoStepLogin && loginStep === "email") {
+      await handleEmailContinue();
+      return;
+    }
+    if (isTwoStepLogin && loginMethod === "otp") return;
     if (passwordCooldown && passwordCooldown.lockedUntil > Date.now()) {
       setErrorMessage(`Too many incorrect password attempts. Try again in ${formatCountdown(passwordCooldown.lockedUntil - Date.now())}.`);
       return;
@@ -430,7 +506,12 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
       ? "/auth/operator/register"
       : "/auth/register";
     const intent = String(searchParams?.get("intent") || "").toUpperCase();
-    router.push(intent && target === "/auth/register" ? `${target}?intent=${encodeURIComponent(intent)}` : target);
+    const params = new URLSearchParams();
+    if (intent && target === "/auth/register") params.set("intent", intent);
+    const targetEmail = (notFoundEmail || email).trim();
+    if (targetEmail) params.set("prefill", targetEmail);
+    const query = params.toString();
+    router.push(query ? `${target}?${query}` : target);
   };
 
   const handlePasskeyLogin = async () => {
@@ -487,6 +568,21 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     setIsSendingOtp(true);
     try {
       setErrorMessage("");
+      if (authMode === "login") {
+        await postData("/verification/send-otp-existing", {
+          method: "email",
+          email: email.trim(),
+          role: roleLower === "operator" || roleLower === "team" ? "Operator" : "Associate",
+        });
+        showToastMessage({ type: "success", message: "OTP sent to your email.", position: "top-right" });
+        setOtpSent(true);
+        setOtp("");
+        setOtpVerified(false);
+        const now = Date.now();
+        setOtpExpiresAt(now + 3 * 60 * 1000);
+        setResendAvailableAt(now + 2 * 60 * 1000);
+        return;
+      }
       if (!hasOnboardingSession) {
         try {
           const payload = {
@@ -546,6 +642,26 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
     }
     setIsVerifyingOtp(true);
     try {
+      if (authMode === "login") {
+        await postData("/verification/verify-otp-existing", {
+          code: otp,
+          method: "email",
+          email: email.trim(),
+          role: roleLower === "operator" || roleLower === "team" ? "Operator" : "Associate",
+          rememberMe,
+        });
+        const refreshed = await refreshUser();
+        if (!refreshed) throw new Error("Session cookie blocked. Allow cookies for obaol.com/api.obaol.com and retry.");
+        if (rememberMe) {
+          localStorage.setItem("rememberMeTime", JSON.stringify(Date.now() + 24 * 60 * 60 * 1000));
+        }
+        setOtpVerified(true);
+        setLoginStatus("success");
+        setIsRedirecting(true);
+        play("success");
+        showToastMessage({ type: "success", message: "OTP sign-in successful.", position: "top-right" });
+        return;
+      }
       await postData("/verification/verify-otp", { code: otp, method: "email", email: email.trim() }, {});
       setOtpVerified(true);
       showToastMessage({ type: "success", message: "Email verified.", position: "top-right" });
@@ -860,6 +976,22 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               </div>
             )}
 
+            {mismatchedRole && authMode === "login" && (
+              <div className="flex items-center gap-3 pl-11">
+                <Button
+                  size="sm"
+                  radius="lg"
+                  className="bg-warning-500 text-black font-black uppercase text-[10px] tracking-widest px-6 h-8"
+                  onPress={() => {
+                    const target = mismatchedRole === "Operator" ? "/auth/operator" : "/auth/associate";
+                    router.push(`${target}?prefill=${encodeURIComponent(email.trim())}`);
+                  }}
+                >
+                  Sign in as {mismatchedRole}
+                </Button>
+              </div>
+            )}
+
             {/* Ambient Background Pulse */}
             <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] rounded-full opacity-10 -mr-16 -mt-16 animate-pulse ${
                errorMessage.toLowerCase().includes("already exist") ? "bg-warning-500" : "bg-danger-500"
@@ -867,43 +999,60 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           </motion.div>
         )}
 
-        <Input
-          value={email}
-          className="w-full"
-          type="email"
-          autoComplete="username webauthn"
-          variant="bordered"
-          label="Email Address"
-          labelPlacement="outside"
-          isDisabled={isPreparingSession || (authMode === "signup" && otpSent)}
-          isInvalid={authMode === "signup"
-            ? (otpAttempted && (!email.trim() || !isInvalidEmail))
-            : (!isInvalidEmail && email.length > 0)}
-          errorMessage={authMode === "signup"
-            ? (otpAttempted && !email.trim()
-              ? "Email is required"
-              : otpAttempted && !isInvalidEmail
-                ? "Enter a valid email address"
-                : "")
-            : (!isInvalidEmail && email.length > 0 ? "Enter a valid email address" : "")}
-          isRequired
-          placeholder="name@example.com"
-          onValueChange={(val) => {
-            setEmail(val);
-            setNotFoundEmail("");
-            setShowNotFoundCta(false);
-            setHasOnboardingSession(false);
-            setOtpSent(false);
-            setOtpVerified(false);
-            setOtp("");
-            setPasswordCooldown(null);
-            if (errorMessage) setErrorMessage("");
-            if (loginStatus !== "idle") setLoginStatus("idle");
-          }}
-          classNames={inputClasses}
-        />
+        {(authMode === "signup" || !isTwoStepLogin || loginStep === "email") ? (
+          <Input
+            value={email}
+            className="w-full"
+            type="email"
+            autoComplete="username webauthn"
+            variant="bordered"
+            label="Email Address"
+            labelPlacement="outside"
+            isDisabled={isPreparingSession || (authMode === "signup" && otpSent)}
+            isInvalid={authMode === "signup"
+              ? (otpAttempted && (!email.trim() || !isInvalidEmail))
+              : (!isInvalidEmail && email.length > 0)}
+            errorMessage={authMode === "signup"
+              ? (otpAttempted && !email.trim()
+                ? "Email is required"
+                : otpAttempted && !isInvalidEmail
+                  ? "Enter a valid email address"
+                  : "")
+              : (!isInvalidEmail && email.length > 0 ? "Enter a valid email address" : "")}
+            isRequired
+            placeholder="name@example.com"
+            onValueChange={(val) => {
+              setEmail(val);
+              setNotFoundEmail("");
+              setShowNotFoundCta(false);
+              setMismatchedRole("");
+              setHasOnboardingSession(false);
+              setOtpSent(false);
+              setOtpVerified(false);
+              setOtp("");
+              setPasswordCooldown(null);
+              if (errorMessage) setErrorMessage("");
+              if (loginStatus !== "idle") setLoginStatus("idle");
+            }}
+            classNames={inputClasses}
+          />
+        ) : (
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-divider bg-content1/70 px-4 py-3 shadow-sm dark:bg-white/[0.03]">
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-default-400">Signing in as</p>
+              <p className="truncate text-sm font-bold text-foreground">{email}</p>
+            </div>
+            <button
+              type="button"
+              onClick={returnToEmailStep}
+              className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-obaol-700 transition-colors hover:text-obaol-600 dark:text-obaol-300"
+            >
+              <FiArrowLeft /> Change email
+            </button>
+          </div>
+        )}
 
-        {authMode === "login" && (
+        {authMode === "login" && (!isTwoStepLogin || (loginStep === "credentials" && loginMethod === "password")) && (
           <Input
             value={password}
             className="w-full"
@@ -934,7 +1083,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           />
         )}
 
-        {authMode === "login" && (
+        {authMode === "login" && (!isTwoStepLogin || loginStep === "credentials") && (
           <div className="flex w-full flex-wrap items-center justify-between gap-3 px-2">
             <label className="group inline-flex cursor-pointer items-center gap-3 rounded-xl py-1 pr-2">
               <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
@@ -956,20 +1105,22 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
                 Remember me
               </span>
             </label>
-            <button
-              type="button"
-              disabled={isPreparingSession}
-              onClick={() => router.push(`/auth/forgot-password?role=${getPasswordResetRole(role)}`)}
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 disabled:pointer-events-none disabled:opacity-50 dark:text-obaol-300 dark:hover:text-obaol-200"
-            >
-              Forgot password?
-            </button>
+            {(!isTwoStepLogin || loginMethod === "password") && (
+              <button
+                type="button"
+                disabled={isPreparingSession}
+                onClick={() => router.push(`/auth/forgot-password?role=${getPasswordResetRole(role)}`)}
+                className="text-[10px] font-bold uppercase tracking-[0.2em] text-obaol-700 underline decoration-obaol-500/20 underline-offset-4 transition-all hover:scale-105 hover:text-obaol-600 disabled:pointer-events-none disabled:opacity-50 dark:text-obaol-300 dark:hover:text-obaol-200"
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
         )}
 
 
 
-        {authMode === "login" && (
+        {authMode === "login" && (!isTwoStepLogin || loginStep === "email" || loginMethod === "password") && (
           <motion.div
             className="mt-2"
             whileHover={{ scale: 1.02 }}
@@ -990,7 +1141,9 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
               isLoading={isLoading || isPreparingSession}
               isDisabled={isPreparingSession || isPasswordCooldownActive}
             >
-              {loginStatus === "success"
+              {isTwoStepLogin && loginStep === "email"
+                ? (isLoading ? "Checking..." : "Sign In")
+                : loginStatus === "success"
                 ? "Signed In"
                 : isPasswordCooldownActive
                   ? `Retry in ${formatCountdown(passwordCooldownRemaining)}`
@@ -1005,19 +1158,97 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           </motion.div>
         )}
 
-        {authMode === "login" && (
-          <Button
-            type="button"
-            variant="flat"
-            radius="lg"
-            className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
-            startContent={<FiKey />}
-            isLoading={passkeyLoginStatus === "loading"}
-            isDisabled={passkeySupport !== "supported" || isPreparingSession || passkeyLoginStatus === "loading"}
-            onPress={handlePasskeyLogin}
-          >
-            Sign in with passkey
-          </Button>
+        {authMode === "login" && (!isTwoStepLogin || loginStep === "credentials") && (
+          <div className="flex w-full flex-col gap-3">
+            <Button
+              type="button"
+              variant="flat"
+              radius="lg"
+              className="h-12 w-full rounded-2xl border border-obaol-500/20 bg-obaol-500/10 text-xs font-black uppercase tracking-[0.16em] text-obaol-700 dark:text-obaol-300"
+              startContent={<FiKey />}
+              isLoading={passkeyLoginStatus === "loading"}
+              isDisabled={passkeySupport !== "supported" || isPreparingSession || passkeyLoginStatus === "loading"}
+              onPress={handlePasskeyLogin}
+            >
+              Sign in with passkey
+            </Button>
+            {isTwoStepLogin && loginMethod === "password" && (
+              <Button
+                type="button"
+                variant="bordered"
+                radius="lg"
+                className="h-12 w-full rounded-2xl border-divider text-xs font-black uppercase tracking-[0.16em]"
+                startContent={<FiMail />}
+                onPress={() => {
+                  setLoginMethod("otp");
+                  setErrorMessage("");
+                  if (!otpSent) void handleSendOtp();
+                }}
+              >
+                Sign in with email OTP
+              </Button>
+            )}
+          </div>
+        )}
+
+        {isTwoStepLogin && loginStep === "credentials" && loginMethod === "otp" && (
+          <div className="w-full flex flex-col gap-4">
+            {!otpSent ? (
+              <Button
+                className="h-12 w-full rounded-2xl bg-obaol-500 font-bold uppercase tracking-[0.2em] text-obaol-950"
+                color="warning"
+                radius="lg"
+                isLoading={isSendingOtp}
+                onPress={handleSendOtp}
+              >
+                Send email OTP
+              </Button>
+            ) : (
+              <>
+                <Input
+                  value={otp}
+                  type="text"
+                  inputMode="numeric"
+                  variant="bordered"
+                  label="Email OTP"
+                  labelPlacement="outside"
+                  placeholder="000 000"
+                  onValueChange={(val) => setOtp(val.replace(/\D/g, "").slice(0, 6))}
+                  classNames={inputClasses}
+                />
+                <div className="flex items-center justify-between px-1 text-[11px] font-semibold text-foreground/60">
+                  <span>Code expires in {formatCountdown(otpExpiryRemaining)}</span>
+                  {resendRemaining <= 0 && (
+                    <button type="button" onClick={handleResendOtp} className="text-obaol-700 dark:text-obaol-300">
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
+                <Button
+                  className="h-12 w-full rounded-2xl bg-gradient-to-r from-obaol-400 to-obaol-600 font-bold uppercase tracking-[0.2em] text-obaol-950"
+                  color="warning"
+                  radius="lg"
+                  isLoading={isVerifyingOtp}
+                  isDisabled={otp.length !== 6 || otpExpiryRemaining <= 0}
+                  onPress={handleVerifyOtp}
+                >
+                  Verify and sign in
+                </Button>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMethod("password");
+                setOtp("");
+                setOtpSent(false);
+                setErrorMessage("");
+              }}
+              className="text-xs font-bold text-foreground/50 transition-colors hover:text-obaol-700"
+            >
+              Use password instead
+            </button>
+          </div>
         )}
 
         {authMode === "signup" && (
@@ -1119,7 +1350,7 @@ const LoginComponent = ({ role, mode = "login" }: ILoginProps) => {
           </div>
         )}
 
-        {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "login" && (
+        {(roleLower === "associate" || roleLower === "operator" || roleLower === "team") && authMode === "login" && loginStep === "email" && (
           <div className="mt-3 flex flex-col items-center gap-2">
             <div className="relative flex items-center w-full px-1">
               <div className="flex-grow border-t border-default-200/50 dark:border-default-100/10 h-[1px]"></div>

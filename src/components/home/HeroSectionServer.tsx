@@ -16,7 +16,7 @@ const HERO_STAGES = [
 
 export default function HeroSectionServer() {
   return (
-    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-14 pt-20 lg:pb-20 lg:pt-24">
+    <section data-natural-scroll-hero="true" className="relative overflow-hidden bg-background pb-12 pt-16 lg:pb-16 lg:pt-20">
       {/* Ambient background glow & grid mesh */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-obaol-500/15 blur-[120px] dark:bg-obaol-500/20" />
@@ -25,8 +25,8 @@ export default function HeroSectionServer() {
       </div>
 
       <div className="public-layout-container relative z-10 container mx-auto px-6 sm:px-12">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)] lg:items-center xl:gap-8">
-          <div className="space-y-6 lg:py-4">
+        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-center xl:gap-14">
+          <div className="space-y-5 lg:py-2">
             {/* Status / Kicker Pill */}
             <div className="inline-flex items-center gap-2.5 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-4 py-1.5 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2.5 w-2.5">
@@ -40,7 +40,7 @@ export default function HeroSectionServer() {
 
             {/* Main Title */}
             <div className="space-y-2">
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-[3.75rem]">
+              <h1 className="text-4xl font-black leading-[1.04] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-[3.4rem] lg:text-[3.25rem] xl:text-[3.5rem]">
                 The Execution{" "}
                 <span className="bg-gradient-to-r from-obaol-600 via-amber-500 to-obaol-400 bg-clip-text text-transparent drop-shadow-sm">
                   Ecosystem
@@ -49,14 +49,14 @@ export default function HeroSectionServer() {
               <div className="flex items-center gap-3 pt-1">
                 <span className="text-xs font-black uppercase tracking-widest text-obaol-700 dark:text-obaol-300">for</span>
                 <span className="h-px w-16 bg-gradient-to-r from-obaol-500/40 to-transparent" />
-                <span className="text-2xl font-black tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                <span className="text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-[2rem] xl:text-[2.2rem]">
                   B2B Agro Trade.
                 </span>
               </div>
             </div>
 
             {/* Subheading */}
-            <p className="max-w-2xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg md:text-xl">
+            <p className="max-w-xl text-base font-medium leading-relaxed text-foreground/80 sm:text-lg lg:text-[1.05rem]">
               Plan procurement, manage logistics, run verification, and move orders in one connected agro execution system.
               <span className="font-bold text-foreground block sm:inline mt-1 sm:mt-0"> Built for real B2B agro trade operations.</span>
             </p>

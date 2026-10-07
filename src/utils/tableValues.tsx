@@ -284,7 +284,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -293,7 +292,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -458,7 +456,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -467,7 +464,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -529,7 +525,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -538,7 +533,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -679,7 +673,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Last Login",
@@ -688,7 +681,6 @@ export const initialTableConfig: Record<
       inForm: false,
       inEdit: false,
       inTable: true,
-      emptyValue: "Never",
     },
     {
       label: "Password",

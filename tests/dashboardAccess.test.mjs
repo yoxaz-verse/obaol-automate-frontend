@@ -76,6 +76,16 @@ test("BUY, SELL, BOTH, and SERVICE receive the intended Associate navigation", (
   assert.equal(linksFor("SERVICE").has("/dashboard"), true);
   assert.equal(linksFor("SERVICE").has("/dashboard/settings"), true);
   assert.equal(linksFor("SERVICE").has("/dashboard/product"), false);
+  for (const mode of ["BUY", "SELL", "BOTH", "SERVICE"]) {
+    assert.equal(linksFor(mode).has("/dashboard/customer-support"), true);
+  }
+});
+
+test("Customer Support is limited to Associates and Admins", () => {
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Associate", tradeMode: "BUY" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Admin" }), true);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Operator" }), false);
+  assert.equal(canAccessDashboardRoute({ path: "/dashboard/customer-support", role: "Team" }), false);
 });
 
 test("SERVICE Associates receive both contact-based service directories", () => {

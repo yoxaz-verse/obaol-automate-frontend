@@ -115,6 +115,7 @@ const DASHBOARD_ROUTE_INPUTS: DashboardRouteInput[] = [
   { path: "/dashboard/function-preview", label: "Function Preview", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/essentials", label: "Essentials", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/geosphere", label: "Geo Sphere", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin"], nav: true, searchable: true },
+  { path: "/dashboard/customer-support", label: "Customer Support", section: "Operations/Admin", navGroup: "Platform Setup", roles: ["admin", "associate"], tradeModes: ALL_ASSOCIATE_MODES, nav: true, searchable: true, taskGroup: "Company & Account", description: "Contact OBAOL support or manage the support contacts available to associates.", navIcon: "support" },
   { path: "/dashboard/rates", label: "Rates", section: "Operations/Admin", roles: ["admin"], nav: true, searchable: true },
   { path: "/dashboard/bulk", label: "Bulk Operations", section: "Operations/Admin", roles: ["admin"] },
   { path: "/dashboard/news", label: "News", section: "Operations/Admin", roles: ["admin"] },
@@ -157,6 +158,7 @@ const navIconByPath: Record<string, string> = {
   "/dashboard/settings": "settings",
   "/dashboard/profile": "profile",
   "/dashboard/shortcuts": "shortcuts",
+  "/dashboard/customer-support": "support",
 };
 
 const defaultTaskGroup = (route: DashboardRouteInput): DashboardTaskGroup => {

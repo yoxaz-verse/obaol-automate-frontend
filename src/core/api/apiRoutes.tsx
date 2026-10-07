@@ -320,6 +320,12 @@ export const presenceRoutes = {
   ping: "/presence/ping",
 };
 
+export const supportContactRoutes = {
+  list: "/support-contacts",
+  create: "/support-contacts",
+  update: (id: string) => `/support-contacts/${id}`,
+};
+
 export const catalogRoutes = {
   add: "/catalog/add",
   update: "/catalog", // + /:id
@@ -358,6 +364,7 @@ export const apiRoutes = {
   approvals: approvalRoutes,
   notifications: notificationRoutes,
   presence: presenceRoutes,
+  supportContacts: supportContactRoutes,
   brand: brandPublicRoutes,
   account: accountRoutes,
   user: userRoutes,

@@ -34,3 +34,13 @@ test("mobile primary navigation keeps labels visible and exposes the complete me
   assert.equal(bottomNav.includes("opacity-0 translate-y-1 h-0"), false);
   assert.equal(bottomNav.includes("isDashboardRouteActive"), true);
 });
+
+test("customer support exposes normalized call and WhatsApp actions", () => {
+  const page = read("../src/app/dashboard/customer-support/page.tsx");
+  const links = read("../src/core/api/supportContacts.ts");
+  assert.equal(page.includes("Call Now"), true);
+  assert.equal(page.includes("Chat on WhatsApp"), true);
+  assert.equal(page.includes("Customer support is currently unavailable."), true);
+  assert.equal(links.includes("tel:${e164}"), true);
+  assert.equal(links.includes("https://wa.me/"), true);
+});

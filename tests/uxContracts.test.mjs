@@ -255,6 +255,8 @@ test("marketplace rates are revealed explicitly and past enquiries warn buyers",
   assert.equal(rates.includes("Reveal Rate"), true);
   assert.equal(rates.includes("Previous listed price"), true);
   assert.equal(rates.includes("This is an older listing"), true);
+  assert.equal(rates.includes("Price and stock require confirmation"), true);
+  assert.equal(rates.includes('className="flex-col-reverse sm:flex-row sm:justify-end"'), true);
   assert.equal(rates.includes("Continue with Enquiry"), true);
   assert.equal(rates.includes("The seller has been asked to confirm the latest price and product availability."), true);
   assert.equal(access.includes('path: "/dashboard/rate-interest"'), true);
@@ -265,6 +267,20 @@ test("marketplace enquiry is visible to every associate and remains outside comp
   assert.equal(rates.includes("item.isMarketplaceView &&\n                          (isAssociateUser || isAdminUser)"), true);
   assert.equal(rates.includes('{variantRate?.isLive ? "Enquire" : "Check Current Price"}'), true);
   assert.equal(rates.includes("{primaryMarketplaceEnquiry}\n                                <Popover"), true);
+});
+
+test("rate interest links viewers to highlighted company associates with contact actions", () => {
+  const interest = read("../src/app/dashboard/rate-interest/page.tsx");
+  const companies = read("../src/app/dashboard/companies/page.tsx");
+  assert.equal(interest.includes("companyId=${encodeURIComponent(companyId)}&associateId=${encodeURIComponent(viewerId)}"), true);
+  assert.equal(interest.includes("companyId=${encodeURIComponent(companyId)}`"), true);
+  assert.equal(interest.includes("mailto:${row.viewerEmail}"), true);
+  assert.equal(interest.includes("tel:${phoneHref(row.viewerPhone)}"), true);
+  assert.equal(companies.includes('searchParams.get("associateId")'), true);
+  assert.equal(companies.includes('scrollIntoView({ behavior: "smooth", block: "center" })'), true);
+  assert.equal(companies.includes("Rate viewer"), true);
+  assert.equal(companies.includes("mailto:${associateEmail}"), true);
+  assert.equal(companies.includes("tel:${associatePhone.replace"), true);
 });
 
 test("variant rate wizard Commodity Directory CTA opens Commodity Directory", () => {

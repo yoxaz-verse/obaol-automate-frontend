@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -42,6 +42,9 @@ export default function CompanyProductPage() {
   const [directoryPage, setDirectoryPage] = useState(1);
   const [selectedObaolCompanyId, setSelectedObaolCompanyId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [focusedAssociateId, setFocusedAssociateId] = useState("");
+  const focusedAssociateRowRef = useRef<HTMLTableRowElement | null>(null);
+  const lastFocusedAssociateRef = useRef("");
   const [activeDetailTab, setActiveDetailTab] = useState("catalog");
   const [isConfigExpanded, setIsConfigExpanded] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -300,10 +303,12 @@ export default function CompanyProductPage() {
 
   useEffect(() => {
     const preselectedCompanyId = String(searchParams.get("companyId") || "").trim();
+    const preselectedAssociateId = String(searchParams.get("associateId") || "").trim();
     const preselectedTab = String(searchParams.get("tab") || "").trim().toLowerCase();
     if (preselectedCompanyId) {
       setSelectedCompanyId(preselectedCompanyId);
     }
+    setFocusedAssociateId(preselectedAssociateId);
     if (preselectedTab && ["catalog", "associates", "interests", "enquiries", "orders", "activity"].includes(preselectedTab)) {
       setActiveDetailTab(preselectedTab);
     }
@@ -527,6 +532,20 @@ export default function CompanyProductPage() {
     () => extractList(selectedCompanyAssociatesQuery.data?.data),
     [selectedCompanyAssociatesQuery.data]
   );
+  useEffect(() => {
+    if (!focusedAssociateId || !selectedCompanyId) return;
+    const hasFocusedAssociate = associates.some(
+      (item: any) => String(item?._id || item?.id || "") === focusedAssociateId
+    );
+    const focusKey = `${selectedCompanyId}:${focusedAssociateId}`;
+    if (!hasFocusedAssociate || lastFocusedAssociateRef.current === focusKey) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      focusedAssociateRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      lastFocusedAssociateRef.current = focusKey;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [associates, focusedAssociateId, selectedCompanyId]);
   const associatesTotal =
     selectedCompanyAssociatesQuery.data?.data?.totalCount ||
     selectedCompanyAssociatesQuery.data?.data?.data?.totalCount ||
@@ -1221,11 +1240,25 @@ export default function CompanyProductPage() {
                         <div className="space-y-5">
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Email</span>
-                            <p className="text-sm font-black text-foreground break-all tracking-tight">{selectedCompanyEmail}</p>
+                            {selectedCompanyEmail !== "Not available" ? (
+                              <a href={`mailto:${selectedCompanyEmail}`} className="inline-flex items-center gap-2 text-sm font-black text-foreground break-all tracking-tight hover:text-obaol-500 hover:underline">
+                                <LuMail size={14} className="shrink-0" />
+                                {selectedCompanyEmail}
+                              </a>
+                            ) : (
+                              <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyEmail}</p>
+                            )}
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Phone</span>
-                            <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyPhone}</p>
+                            {selectedCompanyPhone !== "Not available" ? (
+                              <a href={`tel:${selectedCompanyPhone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-2 text-sm font-black text-foreground tracking-tight hover:text-obaol-500 hover:underline">
+                                <LuPhone size={14} className="shrink-0" />
+                                {selectedCompanyPhone}
+                              </a>
+                            ) : (
+                              <p className="text-sm font-black text-foreground tracking-tight">{selectedCompanyPhone}</p>
+                            )}
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[9px] font-black uppercase text-default-500 tracking-[0.2em] mb-1 opacity-60">Address</span>
@@ -1382,21 +1415,41 @@ export default function CompanyProductPage() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {associates.map((item: any, idx: number) => (
+                                {associates.map((item: any, idx: number) => {
+                                  const associateId = String(item?._id || item?.id || "");
+                                  const isFocusedAssociate = Boolean(focusedAssociateId) && associateId === focusedAssociateId;
+                                  const associateEmail = toText(item?.email, "-");
+                                  const associatePhone = toText(item?.phone, "-");
+                                  return (
                                   <tr
-                                    key={item?._id || idx}
-                                    className={`border-t border-default-200/70 ${idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""}`}
+                                    key={associateId || idx}
+                                    ref={isFocusedAssociate ? focusedAssociateRowRef : undefined}
+                                    className={`border-t border-default-200/70 transition-colors ${
+                                      isFocusedAssociate
+                                        ? "bg-obaol-100/80 dark:bg-obaol-500/15 ring-2 ring-inset ring-obaol-400"
+                                        : idx % 2 ? "bg-default-50/30 dark:bg-default-100/5" : ""
+                                    }`}
                                   >
-                                    <td className="px-3 py-2 font-medium text-foreground">{toName(item?.name, "-")}</td>
-                                    <td className="px-3 py-2 text-default-600">{toText(item?.email, "-")}</td>
-                                    <td className="px-3 py-2 text-default-600">{toText(item?.phone, "-")}</td>
+                                    <td className="px-3 py-2 font-medium text-foreground">
+                                      <div className="flex items-center gap-2">
+                                        {toName(item?.name, "-")}
+                                        {isFocusedAssociate && <Chip size="sm" color="warning" variant="flat">Rate viewer</Chip>}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-default-600">
+                                      {associateEmail !== "-" ? <a href={`mailto:${associateEmail}`} className="inline-flex items-center gap-1 hover:text-obaol-500 hover:underline"><LuMail size={13} />{associateEmail}</a> : "-"}
+                                    </td>
+                                    <td className="px-3 py-2 text-default-600">
+                                      {associatePhone !== "-" ? <a href={`tel:${associatePhone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1 hover:text-obaol-500 hover:underline"><LuPhone size={13} />{associatePhone}</a> : "-"}
+                                    </td>
                                     <td className="px-3 py-2">
                                       <Chip size="sm" variant="flat" color={String(item?.registrationStatus || "").toUpperCase() === "APPROVED" ? "success" : "warning"}>
                                         {toText(item?.registrationStatus, "PENDING_REVIEW")}
                                       </Chip>
                                     </td>
                                   </tr>
-                                ))}
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>

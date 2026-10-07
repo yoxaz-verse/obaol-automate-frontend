@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardBody, Input, Pagination, Select, SelectItem, Spinner } from "@nextui-org/react";
-import { FiActivity, FiEye, FiPackage, FiSearch, FiUsers } from "react-icons/fi";
+import { FiActivity, FiExternalLink, FiEye, FiMail, FiPackage, FiPhone, FiSearch, FiUsers } from "react-icons/fi";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { getData } from "@/core/api/apiHandler";
 import { variantRateRoutes } from "@/core/api/apiRoutes";
 
 const formatDateTime = (value: string) => value ? new Date(value).toLocaleString() : "—";
+const cleanId = (value: unknown) => String(value || "").trim();
+const phoneHref = (value: unknown) => String(value || "").replace(/[^\d+]/g, "");
 
 export default function RateInterestPage() {
   const [page, setPage] = useState(1);
@@ -40,7 +43,24 @@ export default function RateInterestPage() {
           <Card className="border border-divider"><CardBody className="p-5"><h2 className="mb-4 font-bold">Top listings</h2><div className="space-y-3">{(data.topListings || []).map((row: any) => <div key={row._id} className="flex justify-between gap-3 text-sm"><span className="truncate" title={`${row.product || "Product"} · ${row.variant || "Variant"}`}>{row.product || "Product"} · {row.variant || "Variant"}</span><span className="font-black text-obaol-500">{row.count}</span></div>)}{!data.topListings?.length && <p className="text-sm text-default-400">No reveal activity yet.</p>}</div></CardBody></Card>
         </div>
         <Card className="border border-divider"><CardBody className="p-0"><div className="flex flex-col gap-3 border-b border-divider p-4 sm:flex-row"><Input value={search} onValueChange={(v) => { setSearch(v); setPage(1); }} startContent={<FiSearch />} placeholder="Search viewer, company, product, or variant" /><Select selectedKeys={[status]} onSelectionChange={(keys) => { setStatus(String(Array.from(keys)[0] || "all")); setPage(1); }} className="sm:max-w-48" aria-label="Listing status"><SelectItem key="all">All listings</SelectItem><SelectItem key="live">Today’s Live</SelectItem><SelectItem key="past">Past listings</SelectItem></Select></div>
-          {query.isLoading ? <div className="flex h-48 items-center justify-center"><Spinner /></div> : query.isError ? <p className="p-6 text-danger">Unable to load rate-interest analytics.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[950px] text-left text-sm"><thead className="bg-default-100 text-[10px] uppercase tracking-widest text-default-500"><tr><th className="p-4">Viewer</th><th className="p-4">Company</th><th className="p-4">Product</th><th className="p-4">Variant</th><th className="p-4">Status</th><th className="p-4">Revealed</th></tr></thead><tbody>{(data.rows || []).map((row: any) => <tr key={row._id} className="border-t border-divider"><td className="p-4"><div className="font-bold">{row.viewerName || "Unknown"}</div><div className="text-xs text-default-500">{row.viewerEmail || row.viewerPhone || "—"} · {row.viewerRole}</div></td><td className="p-4">{row.companyName || "—"}</td><td className="p-4 font-semibold">{row.product || "—"}</td><td className="p-4">{row.variant || "—"}</td><td className="p-4">{row.listingWasLive ? "Live" : "Past"}</td><td className="p-4">{formatDateTime(row.revealedAt)}</td></tr>)}</tbody></table></div>}
+          {query.isLoading ? <div className="flex h-48 items-center justify-center"><Spinner /></div> : query.isError ? <p className="p-6 text-danger">Unable to load rate-interest analytics.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[950px] text-left text-sm"><thead className="bg-default-100 text-[10px] uppercase tracking-widest text-default-500"><tr><th className="p-4">Viewer</th><th className="p-4">Company</th><th className="p-4">Product</th><th className="p-4">Variant</th><th className="p-4">Status</th><th className="p-4">Revealed</th></tr></thead><tbody>{(data.rows || []).map((row: any) => {
+            const companyId = cleanId(row.companyId);
+            const viewerId = cleanId(row.viewerId);
+            const viewerHref = companyId && viewerId ? `/dashboard/companies?companyId=${encodeURIComponent(companyId)}&associateId=${encodeURIComponent(viewerId)}` : "";
+            const companyHref = companyId ? `/dashboard/companies?companyId=${encodeURIComponent(companyId)}` : "";
+            return <tr key={row._id} className="border-t border-divider">
+              <td className="p-4">
+                {viewerHref ? <Link href={viewerHref} className="inline-flex items-center gap-1 font-bold text-foreground hover:text-obaol-600 hover:underline">{row.viewerName || "Unknown"}<FiExternalLink size={13} aria-hidden /></Link> : <div className="font-bold">{row.viewerName || "Unknown"}</div>}
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-default-500">
+                  {row.viewerEmail ? <a href={`mailto:${row.viewerEmail}`} className="inline-flex items-center gap-1 hover:text-obaol-600 hover:underline"><FiMail size={12} aria-hidden />{row.viewerEmail}</a> : !row.viewerPhone ? <span>—</span> : null}
+                  {row.viewerPhone && <a href={`tel:${phoneHref(row.viewerPhone)}`} className="inline-flex items-center gap-1 hover:text-obaol-600 hover:underline"><FiPhone size={12} aria-hidden />{row.viewerPhone}</a>}
+                  <span>· {row.viewerRole}</span>
+                </div>
+              </td>
+              <td className="p-4">{companyHref && row.companyName ? <Link href={companyHref} className="inline-flex items-center gap-1 font-medium hover:text-obaol-600 hover:underline">{row.companyName}<FiExternalLink size={12} aria-hidden /></Link> : row.companyName || "—"}</td>
+              <td className="p-4 font-semibold">{row.product || "—"}</td><td className="p-4">{row.variant || "—"}</td><td className="p-4">{row.listingWasLive ? "Live" : "Past"}</td><td className="p-4">{formatDateTime(row.revealedAt)}</td>
+            </tr>;
+          })}</tbody></table></div>}
           <div className="flex justify-end p-4"><Pagination page={Number(data.meta?.page || page)} total={Number(data.meta?.pages || 1)} onChange={setPage} /></div>
         </CardBody></Card>
       </div>

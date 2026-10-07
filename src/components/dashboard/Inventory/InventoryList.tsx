@@ -21,7 +21,8 @@ import {
     Tab,
 } from "@nextui-org/react";
 import { FiSend, FiEdit2, FiEyeOff, FiMessageSquare, FiInfo } from "react-icons/fi";
-import { LuMessageSquare } from "react-icons/lu";
+import { LuMessageSquare, LuBoxes, LuPackageCheck, LuTags, LuWarehouse, LuSearch, LuX } from "react-icons/lu";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiRoutesByRole } from "@/utils/tableValues";
 
@@ -881,6 +882,123 @@ const InventoryList: React.FC = () => {
                                                 totalPages={meta?.totalPages || 1}
                                                 rowsPerPage={limit}
                                                 onPageChange={(nextPage) => setPage(nextPage)}
+                                                emptyContent={(
+                                                    (() => {
+                                                        const isFiltered = Boolean(debouncedSearch || (filtersKey && filtersKey !== "{}"));
+                                                        if (isFiltered) {
+                                                            return (
+                                                                <div className="flex flex-col items-center justify-center rounded-3xl border border-default-200/50 bg-content1/60 py-12 px-6 text-center shadow-sm">
+                                                                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-default-200 bg-background/80 text-default-400">
+                                                                        <LuSearch size={28} />
+                                                                    </div>
+                                                                    <h4 className="text-lg font-bold text-foreground">No Matching Inventory Found</h4>
+                                                                    <p className="mt-1 text-sm text-default-500 max-w-md leading-relaxed">
+                                                                        No stock records match your search or active filters. Try clearing your search or resetting filters.
+                                                                    </p>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        color="warning"
+                                                                        variant="flat"
+                                                                        className="mt-5 font-bold rounded-xl px-5"
+                                                                        startContent={<LuX size={16} />}
+                                                                        onPress={() => {
+                                                                            setSearch("");
+                                                                            handleFiltersUpdate({});
+                                                                        }}
+                                                                    >
+                                                                        Clear Search & Filters
+                                                                    </Button>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <div className="relative overflow-hidden rounded-3xl border border-default-200/60 bg-content1/90 p-6 sm:p-10 md:p-12 shadow-md backdrop-blur-xl">
+                                                                <div className="absolute -top-20 -left-20 h-56 w-56 rounded-full bg-obaol-500/10 blur-3xl pointer-events-none" />
+                                                                <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+                                                                <div className="relative z-10 flex flex-col items-center text-center max-w-3xl mx-auto">
+                                                                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-obaol-500/30 bg-obaol-500/10 text-obaol-500 shadow-inner">
+                                                                        <LuBoxes size={34} />
+                                                                    </div>
+
+                                                                    <div className="inline-flex items-center gap-2 rounded-full border border-obaol-500/30 bg-obaol-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-obaol-700 dark:text-obaol-300 mb-3">
+                                                                        <span className="h-2 w-2 rounded-full bg-obaol-500 animate-pulse" />
+                                                                        Physical Stock Management
+                                                                    </div>
+
+                                                                    <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl md:text-4xl">
+                                                                        Start Tracking Your Physical Inventory
+                                                                    </h3>
+
+                                                                    <p className="mt-3 text-sm md:text-base text-default-500 leading-relaxed max-w-2xl font-medium">
+                                                                        Inventory tracking connects your physical warehouse stock with live trade listings, buyer enquiries, and trade execution contracts across the OBAOL network.
+                                                                    </p>
+
+                                                                    <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left w-full">
+                                                                        <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                                <LuPackageCheck size={16} className="shrink-0" /> Stock Visibility
+                                                                            </div>
+                                                                            <p className="text-xs text-default-500 leading-relaxed font-normal">
+                                                                                Log batch quantities (in Metric Tons), harvest lot details, and storage conditions across licensed warehouses.
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                                <LuTags size={16} className="shrink-0" /> Trade Integration
+                                                                            </div>
+                                                                            <p className="text-xs text-default-500 leading-relaxed font-normal">
+                                                                                Link physical stock directly to Trade Listings so verified buyers view real-time supply availability.
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="group rounded-2xl border border-default-200/60 bg-background/60 p-4 transition-all duration-200 hover:border-obaol-500/40 hover:shadow-md">
+                                                                            <div className="flex items-center gap-2 text-obaol-600 dark:text-obaol-400 font-bold text-xs uppercase tracking-wider mb-1.5">
+                                                                                <LuWarehouse size={16} className="shrink-0" /> Order Allocation
+                                                                            </div>
+                                                                            <p className="text-xs text-default-500 leading-relaxed font-normal">
+                                                                                Reserve and allocate stored stock seamlessly when trade enquiries move into active contract execution.
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 w-full sm:w-auto">
+                                                                        <AddModal
+                                                                            buttonLabel="Record New Stock"
+                                                                            currentTable="inventories"
+                                                                            formFields={filteredFormFields}
+                                                                            apiEndpoint={inventoryApiEndpoint}
+                                                                            refetchData={refetch}
+                                                                            additionalVariable={{
+                                                                                ...(isAssociate && { associate: user?.id }),
+                                                                                ...(effectiveCompanyId && { associateCompany: effectiveCompanyId }),
+                                                                            }}
+                                                                        />
+                                                                        <Button
+                                                                            as={Link}
+                                                                            href="/dashboard/warehouses"
+                                                                            variant="bordered"
+                                                                            className="font-bold tracking-tight h-9 rounded-xl border-default-300 hover:border-obaol-500 px-4 text-xs sm:text-sm"
+                                                                            startContent={<LuWarehouse size={16} />}
+                                                                        >
+                                                                            Explore Warehouses
+                                                                        </Button>
+                                                                        <Button
+                                                                            as={Link}
+                                                                            href="/dashboard/catalog"
+                                                                            variant="flat"
+                                                                            color="default"
+                                                                            className="font-bold tracking-tight h-9 rounded-xl px-4 text-xs sm:text-sm"
+                                                                        >
+                                                                            Commodity Directory
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()
+                                                )}
                                                 editModal={(item: any) => (
                                                     <EditModal
                                                         _id={item._id}

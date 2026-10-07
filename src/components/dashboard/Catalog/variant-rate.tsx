@@ -3507,19 +3507,44 @@ const CreateEnquiryButton: React.FC<CreateEnquiryButtonProps> = ({
       >
         {variantRate?.isLive ? "Enquire" : "Check Current Price"}
       </Button>
-      <Modal isOpen={staleWarning.isOpen} onOpenChange={staleWarning.onOpenChange} placement="center" backdrop="blur">
+      <Modal
+        isOpen={staleWarning.isOpen}
+        onOpenChange={staleWarning.onOpenChange}
+        placement="center"
+        backdrop="blur"
+        size="md"
+        scrollBehavior="inside"
+        classNames={{
+          base: "mx-4 rounded-3xl border border-warning-300/70 shadow-2xl",
+          header: "px-6 pb-2 pt-6 sm:px-8 sm:pt-8",
+          body: "px-6 py-4 sm:px-8",
+          footer: "gap-3 px-6 pb-6 pt-3 sm:px-8 sm:pb-8",
+          closeButton: "right-4 top-4 text-default-500 hover:bg-default-100",
+        }}
+      >
         <ModalContent>
           {(closeWarning) => (
             <>
-              <ModalHeader>This is an older listing</ModalHeader>
+              <ModalHeader className="flex items-start gap-4">
+                <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-warning-100 text-warning-700 dark:bg-warning-500/20 dark:text-warning-300">
+                  <FiInfo size={22} aria-hidden />
+                </span>
+                <span className="pr-8">
+                  <span className="block text-xl font-black leading-tight text-foreground">This is an older listing</span>
+                  <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-warning-700 dark:text-warning-300">Price and stock require confirmation</span>
+                </span>
+              </ModalHeader>
               <ModalBody>
-                <p className="text-sm text-default-600">
-                  The displayed price is from a past listing and may no longer be valid. If you continue, the seller will be notified and asked to confirm the latest price and product availability.
-                </p>
+                <div className="space-y-4 text-sm leading-6 text-default-600 sm:text-base sm:leading-7">
+                  <p>The displayed amount is a previous listed price and may no longer be valid.</p>
+                  <div className="rounded-2xl border border-warning-200 bg-warning-50/70 p-4 text-default-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-default-300">
+                    If you continue, the seller will be notified and asked to confirm the <strong className="font-bold text-foreground">current price</strong> and <strong className="font-bold text-foreground">product availability</strong> before the enquiry moves forward.
+                  </div>
+                </div>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={closeWarning}>Cancel</Button>
-                <Button color="warning" className="font-bold" onPress={() => { closeWarning(); onOpen(); }}>
+              <ModalFooter className="flex-col-reverse sm:flex-row sm:justify-end">
+                <Button variant="bordered" className="w-full font-semibold sm:w-auto" onPress={closeWarning}>Cancel</Button>
+                <Button color="warning" className="w-full px-6 font-bold sm:w-auto" startContent={<LuMessageSquare size={16} />} onPress={() => { closeWarning(); onOpen(); }}>
                   Continue with Enquiry
                 </Button>
               </ModalFooter>

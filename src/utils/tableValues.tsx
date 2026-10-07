@@ -70,11 +70,25 @@ export const generateColumns = (currentTable: string, tableConfig: any, userRole
       name: field.label.toUpperCase(),
       uid: field.key,
       type: field.type,
+      emptyValue: field.emptyValue,
     }));
 
   if (currentTable === "associate") {
     nonActionColumns.push({ name: "COMPANY", uid: "associateCompany" });
     nonActionColumns.push({ name: "DESIGNATION", uid: "designation" });
+  }
+
+  if (["admin", "inventoryManager", "associate", "operator"].includes(currentTable)) {
+    const trailingOrder = currentTable === "associate"
+      ? ["associateCompany", "lastSeenAt", "lastLoginAt", "createdAt"]
+      : ["lastSeenAt", "lastLoginAt", "createdAt"];
+    const trailing = trailingOrder
+      .map((uid) => nonActionColumns.find((column: any) => column.uid === uid))
+      .filter(Boolean);
+    nonActionColumns = [
+      ...nonActionColumns.filter((column: any) => !trailingOrder.includes(column.uid)),
+      ...trailing,
+    ];
   }
   if (currentTable === "associateCompany") {
     nonActionColumns.push({ name: "LOCATION", uid: "location" });
@@ -264,6 +278,24 @@ export const initialTableConfig: Record<
       required: true,
     },
     {
+      label: "Last Seen",
+      type: "dateTime",
+      key: "lastSeenAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Last Login",
+      type: "dateTime",
+      key: "lastLoginAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
+    },
+    {
       label: "Created At",
       type: "dateTime",
       key: "createdAt",
@@ -421,11 +453,21 @@ export const initialTableConfig: Record<
     },
     {
       label: "Last Seen",
-      type: "text",
+      type: "dateTime",
       key: "lastSeenAt",
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Last Login",
+      type: "dateTime",
+      key: "lastLoginAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -479,6 +521,24 @@ export const initialTableConfig: Record<
       inForm: true,
       inTable: false,
       required: true,
+    },
+    {
+      label: "Last Seen",
+      type: "dateTime",
+      key: "lastSeenAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Last Login",
+      type: "dateTime",
+      key: "lastLoginAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Created At",
@@ -614,11 +674,21 @@ export const initialTableConfig: Record<
     },
     {
       label: "Last Seen",
-      type: "text",
+      type: "dateTime",
       key: "lastSeenAt",
       inForm: false,
       inEdit: false,
       inTable: true,
+      emptyValue: "Never",
+    },
+    {
+      label: "Last Login",
+      type: "dateTime",
+      key: "lastLoginAt",
+      inForm: false,
+      inEdit: false,
+      inTable: true,
+      emptyValue: "Never",
     },
     {
       label: "Password",

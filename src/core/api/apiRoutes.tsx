@@ -72,6 +72,7 @@ const BASE_PATHS = {
   IMPORT_RESERVATION: "/import-reservations",
   WAREHOUSES: "/warehouses",
   DEMO: "/demo",
+  USER_EXPORT: "/users/export",
 };
 
 // Define account-related routes separately
@@ -102,6 +103,7 @@ const addCustomRoutes = (
 
 // Define resource-specific routes using the CRUD generator
 export const userRoutes = createCRUDRoutes(BASE_PATHS.USER);
+export const userExportRoute = BASE_PATHS.USER_EXPORT;
 export const adminRoutes = createCRUDRoutes(BASE_PATHS.ADMIN);
 export const operatorRoutes = createCRUDRoutes(BASE_PATHS.OPERATOR);
 export const statusHistoryRoutes = createCRUDRoutes(BASE_PATHS.STATUS_HISTORY);

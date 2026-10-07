@@ -235,4 +235,5 @@ export interface FormField {
     equals: string | boolean | number | null | Array<string | boolean | number | null>;
   };
   clearWhenHidden?: boolean;
+  emptyValue?: string;
 }
